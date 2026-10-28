@@ -1,0 +1,390 @@
+{
+  "revision": 6,
+  "validated_images": 143,
+  "validated_samples": 69,
+  "camera_positions_unchanged": true,
+  "cases": [
+    {
+      "case": "evening_A",
+      "views": {
+        "01_corridor": {
+          "fps": 318.841,
+          "gpu_frame_ms": 3.093,
+          "gpu_frame_p95_ms": 3.669,
+          "draw_calls_median": 1250.0,
+          "draw_shadow_median": 797.0,
+          "shadow_sources_frustum": 44,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 7,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 5,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 348.366,
+          "gpu_frame_ms": 2.827,
+          "gpu_frame_p95_ms": 3.353,
+          "draw_calls_median": 474.0,
+          "draw_shadow_median": 388.0,
+          "shadow_sources_frustum": 14,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 4,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 2,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    },
+    {
+      "case": "evening_B",
+      "views": {
+        "01_corridor": {
+          "fps": 334.844,
+          "gpu_frame_ms": 2.943,
+          "gpu_frame_p95_ms": 3.51,
+          "draw_calls_median": 1250.0,
+          "draw_shadow_median": 797.0,
+          "shadow_sources_frustum": 44,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 7,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 5,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 377.522,
+          "gpu_frame_ms": 2.606,
+          "gpu_frame_p95_ms": 3.134,
+          "draw_calls_median": 474.0,
+          "draw_shadow_median": 388.0,
+          "shadow_sources_frustum": 14,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 4,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 2,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    },
+    {
+      "case": "night_A",
+      "views": {
+        "01_corridor": {
+          "fps": 486.182,
+          "gpu_frame_ms": 2.011,
+          "gpu_frame_p95_ms": 2.49,
+          "draw_calls_median": 453.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 22,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 549.192,
+          "gpu_frame_ms": 1.774,
+          "gpu_frame_p95_ms": 2.212,
+          "draw_calls_median": 86.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 7,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    },
+    {
+      "case": "overcast_A",
+      "views": {
+        "01_corridor": {
+          "fps": 390.571,
+          "gpu_frame_ms": 2.517,
+          "gpu_frame_p95_ms": 3.065,
+          "draw_calls_median": 453.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 44,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 7,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 5,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 427.826,
+          "gpu_frame_ms": 2.292,
+          "gpu_frame_p95_ms": 2.788,
+          "draw_calls_median": 86.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 14,
+          "shadow_sources_origin_visible": 2,
+          "shadow_sources_visible_receivers": 4,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 2,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    },
+    {
+      "case": "night_B",
+      "views": {
+        "01_corridor": {
+          "fps": 515.43,
+          "gpu_frame_ms": 1.895,
+          "gpu_frame_p95_ms": 2.412,
+          "draw_calls_median": 453.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 22,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 608.435,
+          "gpu_frame_ms": 1.597,
+          "gpu_frame_p95_ms": 2.025,
+          "draw_calls_median": 86.0,
+          "draw_shadow_median": 0.0,
+          "shadow_sources_frustum": 7,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    },
+    {
+      "case": "evening_B_no_windows",
+      "views": {
+        "01_corridor": {
+          "fps": 388.19,
+          "gpu_frame_ms": 2.532,
+          "gpu_frame_p95_ms": 3.047,
+          "draw_calls_median": 1250.0,
+          "draw_shadow_median": 797.0,
+          "shadow_sources_frustum": 22,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        },
+        "09_lounge": {
+          "fps": 451.377,
+          "gpu_frame_ms": 2.171,
+          "gpu_frame_p95_ms": 2.642,
+          "draw_calls_median": 474.0,
+          "draw_shadow_median": 388.0,
+          "shadow_sources_frustum": 7,
+          "shadow_sources_origin_visible": 1,
+          "shadow_sources_visible_receivers": 2,
+          "shadow_lamps_visible_receivers": 2,
+          "shadow_windows_visible_receivers": 0,
+          "sun_visible_receiver_samples": 0
+        }
+      }
+    }
+  ],
+  "effects": [
+    {
+      "case": "evening_A",
+      "view": "01_corridor",
+      "effect": "effects_repeat",
+      "mean_absolute_pixel_difference_0_255": 0.28,
+      "gpu_frame_ms": null
+    },
+    {
+      "case": "evening_A",
+      "view": "01_corridor",
+      "effect": "ssil_on",
+      "mean_absolute_pixel_difference_0_255": 0.534,
+      "gpu_frame_ms": 3.312
+    },
+    {
+      "case": "evening_A",
+      "view": "01_corridor",
+      "effect": "ssil_strong",
+      "mean_absolute_pixel_difference_0_255": 2.451,
+      "gpu_frame_ms": 3.344
+    },
+    {
+      "case": "evening_A",
+      "view": "01_corridor",
+      "effect": "fog_off",
+      "mean_absolute_pixel_difference_0_255": 2.998,
+      "gpu_frame_ms": 3.066
+    },
+    {
+      "case": "evening_A",
+      "view": "01_corridor",
+      "effect": "post_off",
+      "mean_absolute_pixel_difference_0_255": 12.784,
+      "gpu_frame_ms": 3.026
+    },
+    {
+      "case": "evening_A",
+      "view": "02_room",
+      "effect": "effects_repeat",
+      "mean_absolute_pixel_difference_0_255": 0.346,
+      "gpu_frame_ms": null
+    },
+    {
+      "case": "evening_A",
+      "view": "02_room",
+      "effect": "ssil_on",
+      "mean_absolute_pixel_difference_0_255": 1.154,
+      "gpu_frame_ms": 2.643
+    },
+    {
+      "case": "evening_A",
+      "view": "02_room",
+      "effect": "ssil_strong",
+      "mean_absolute_pixel_difference_0_255": 5.813,
+      "gpu_frame_ms": 2.634
+    },
+    {
+      "case": "evening_A",
+      "view": "02_room",
+      "effect": "fog_off",
+      "mean_absolute_pixel_difference_0_255": 14.289,
+      "gpu_frame_ms": 2.348
+    },
+    {
+      "case": "evening_A",
+      "view": "02_room",
+      "effect": "post_off",
+      "mean_absolute_pixel_difference_0_255": 14.454,
+      "gpu_frame_ms": 2.235
+    },
+    {
+      "case": "evening_B",
+      "view": "01_corridor",
+      "effect": "effects_repeat",
+      "mean_absolute_pixel_difference_0_255": 3.52,
+      "gpu_frame_ms": null
+    },
+    {
+      "case": "evening_B",
+      "view": "01_corridor",
+      "effect": "ssil_on",
+      "mean_absolute_pixel_difference_0_255": 3.764,
+      "gpu_frame_ms": 3.145
+    },
+    {
+      "case": "evening_B",
+      "view": "01_corridor",
+      "effect": "ssil_strong",
+      "mean_absolute_pixel_difference_0_255": 5.325,
+      "gpu_frame_ms": 3.198
+    },
+    {
+      "case": "evening_B",
+      "view": "01_corridor",
+      "effect": "fog_off",
+      "mean_absolute_pixel_difference_0_255": 8.207,
+      "gpu_frame_ms": 2.899
+    },
+    {
+      "case": "evening_B",
+      "view": "01_corridor",
+      "effect": "post_off",
+      "mean_absolute_pixel_difference_0_255": 13.417,
+      "gpu_frame_ms": 2.806
+    },
+    {
+      "case": "evening_B",
+      "view": "02_room",
+      "effect": "effects_repeat",
+      "mean_absolute_pixel_difference_0_255": 0.385,
+      "gpu_frame_ms": null
+    },
+    {
+      "case": "evening_B",
+      "view": "02_room",
+      "effect": "ssil_on",
+      "mean_absolute_pixel_difference_0_255": 0.995,
+      "gpu_frame_ms": 2.326
+    },
+    {
+      "case": "evening_B",
+      "view": "02_room",
+      "effect": "ssil_strong",
+      "mean_absolute_pixel_difference_0_255": 4.38,
+      "gpu_frame_ms": 2.32
+    },
+    {
+      "case": "evening_B",
+      "view": "02_room",
+      "effect": "fog_off",
+      "mean_absolute_pixel_difference_0_255": 15.52,
+      "gpu_frame_ms": 2.047
+    },
+    {
+      "case": "evening_B",
+      "view": "02_room",
+      "effect": "post_off",
+      "mean_absolute_pixel_difference_0_255": 14.028,
+      "gpu_frame_ms": 1.927
+    }
+  ],
+  "calibration": {
+    "A": {
+      "wall_left": {
+        "rgb": [
+          76.305,
+          60.626,
+          33.806
+        ],
+        "luma_display_0_255": 62.023
+      },
+      "wall_right": {
+        "rgb": [
+          65.213,
+          54.536,
+          33.117
+        ],
+        "luma_display_0_255": 55.26
+      },
+      "ceiling": {
+        "rgb": [
+          73.618,
+          68.205,
+          58.741
+        ],
+        "luma_display_0_255": 68.672
+      }
+    },
+    "B": {
+      "wall_left": {
+        "rgb": [
+          68.989,
+          60.644,
+          44.465
+        ],
+        "luma_display_0_255": 61.25
+      },
+      "wall_right": {
+        "rgb": [
+          60.536,
+          54.786,
+          40.668
+        ],
+        "luma_display_0_255": 54.989
+      },
+      "ceiling": {
+        "rgb": [
+          37.597,
+          40.929,
+          43.6
+        ],
+        "luma_display_0_255": 40.413
+      }
+    }
+  }
+}

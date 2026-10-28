@@ -1,0 +1,6294 @@
+{
+	"bake": {
+		"bake_sha256": "98e31a689a99bef6a0eedc92213dc81d531b71a0476810d20df73486490c177a",
+		"diffuse_proxy": "dorm_finish_diffuse_proxy_1",
+		"engine": "4.7.2-stable (steam)",
+		"floors": [
+			{
+				"bytes": 847806.0,
+				"data_bytes": 2628848.0,
+				"id": "floor_1",
+				"octree_size": "(256.0, 32.0, 128.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_1.res",
+				"seconds": 0.707,
+				"size": "(43.85, 3.801, 18.2)",
+				"subdiv": 2.0
+			},
+			{
+				"bytes": 614414.0,
+				"data_bytes": 2123056.0,
+				"id": "annex_1",
+				"octree_size": "(128.0, 64.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/annex_1.res",
+				"seconds": 0.544,
+				"size": "(9.95, 3.801, 30.14)",
+				"subdiv": 2.0
+			},
+			{
+				"bytes": 772104.0,
+				"data_bytes": 2355568.0,
+				"id": "floor_2",
+				"octree_size": "(256.0, 32.0, 128.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_2.res",
+				"seconds": 0.605,
+				"size": "(43.85, 3.101, 18.2)",
+				"subdiv": 2.0
+			},
+			{
+				"bytes": 536670.0,
+				"data_bytes": 1897520.0,
+				"id": "annex_2",
+				"octree_size": "(128.0, 32.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/annex_2.res",
+				"seconds": 0.524,
+				"size": "(9.95, 3.101, 30.14)",
+				"subdiv": 2.0
+			},
+			{
+				"bytes": 774020.0,
+				"data_bytes": 2360064.0,
+				"id": "floor_3",
+				"octree_size": "(256.0, 32.0, 128.0)",
+				"path": "res://data/blockouts/dorm_voxel/floor_3.res",
+				"seconds": 0.656,
+				"size": "(43.85, 3.101, 18.2)",
+				"subdiv": 2.0
+			},
+			{
+				"bytes": 536670.0,
+				"data_bytes": 1897520.0,
+				"id": "annex_3",
+				"octree_size": "(128.0, 32.0, 256.0)",
+				"path": "res://data/blockouts/dorm_voxel/annex_3.res",
+				"seconds": 0.532,
+				"size": "(9.95, 3.101, 30.14)",
+				"subdiv": 2.0
+			}
+		],
+		"geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
+		"lighting": "BAKE_DYNAMIC; no LightmapGI",
+		"total_sec": 3.568
+	},
+	"cpu": "AMD Ryzen 7 7700 8-Core Processor",
+	"draw_method": "1200 warm-up frames after case/moon switch, 360 after camera change; >=120 frames and >=2 seconds per sample; cached shadows; V-Sync off",
+	"engine": "4.7.2-stable (steam)",
+	"gpu": "NVIDIA GeForce RTX 5070 Ti",
+	"lighting_settings": {
+		"active_reflection_limit": 32.0,
+		"author": "dorm_r6_independent",
+		"cases": [
+			{
+				"gi": "A",
+				"id": "evening_A",
+				"label": "Вечер А · SDFGI",
+				"time": "evening"
+			},
+			{
+				"gi": "B",
+				"id": "evening_B",
+				"label": "Вечер Б · VoxelGI",
+				"time": "evening"
+			},
+			{
+				"gi": "A",
+				"id": "night_A",
+				"label": "Ночь А · SDFGI",
+				"time": "night"
+			},
+			{
+				"gi": "A",
+				"id": "overcast_A",
+				"label": "Пасмурно А · SDFGI",
+				"time": "overcast"
+			},
+			{
+				"gi": "B",
+				"id": "night_B",
+				"label": "Ночь Б · VoxelGI",
+				"time": "night"
+			},
+			{
+				"gi": "B",
+				"id": "evening_B_no_windows",
+				"label": "Б без оконных источников",
+				"time": "evening",
+				"windows": false
+			}
+		],
+		"cool_corridors": {
+			"color": "ffdcb8",
+			"default": false,
+			"kelvin": 4400.0
+		},
+		"default": "evening_B",
+		"effects": {
+			"dust_density": 0.025,
+			"dust_volumes": [
+				{
+					"at": [
+						21.705,
+						2.33,
+						0.0
+					],
+					"id": "dust_main_1",
+					"size": [
+						43.4,
+						3.6,
+						17.75
+					]
+				},
+				{
+					"at": [
+						38.655,
+						2.33,
+						-24.26
+					],
+					"id": "dust_annex_1",
+					"size": [
+						9.5,
+						3.6,
+						29.47
+					]
+				},
+				{
+					"at": [
+						21.705,
+						5.92,
+						0.0
+					],
+					"id": "dust_main_2",
+					"size": [
+						43.4,
+						2.9,
+						17.75
+					]
+				},
+				{
+					"at": [
+						38.655,
+						5.92,
+						-24.26
+					],
+					"id": "dust_annex_2",
+					"size": [
+						9.5,
+						2.9,
+						29.47
+					]
+				},
+				{
+					"at": [
+						21.705,
+						9.16,
+						0.0
+					],
+					"id": "dust_main_3",
+					"size": [
+						43.4,
+						2.9,
+						17.75
+					]
+				},
+				{
+					"at": [
+						38.655,
+						9.16,
+						-24.26
+					],
+					"id": "dust_annex_3",
+					"size": [
+						9.5,
+						2.9,
+						29.47
+					]
+				}
+			],
+			"fog": true,
+			"fog_anisotropy": 0.15,
+			"fog_density": 0.0,
+			"fog_length": 32.0,
+			"grain": 0.003,
+			"lut": [
+				[
+					0.0,
+					0.0,
+					0.0
+				],
+				[
+					0.15,
+					0.175,
+					0.2
+				],
+				[
+					0.46,
+					0.485,
+					0.5
+				],
+				[
+					0.8,
+					0.81,
+					0.79
+				],
+				[
+					1.0,
+					0.99,
+					0.965
+				]
+			],
+			"post": true,
+			"saturation": 0.88,
+			"sharpen": 0.5,
+			"ssao": true,
+			"ssao_intensity": 1.5,
+			"ssao_radius": 1.2,
+			"ssil": false,
+			"ssil_intensity": 0.6,
+			"ssil_radius": 2.0,
+			"sun_fog_energy": 8.0,
+			"tonemap_mode": 2.0,
+			"tonemap_name": "Filmic",
+			"vignette": 0.15
+		},
+		"geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
+		"lighting_revision": "6.1",
+		"night_exterior": {
+			"color": "abc4e6",
+			"default": false,
+			"energy": 0.08,
+			"rotation": [
+				-35.0,
+				-35.0,
+				0.0
+			],
+			"shadow_distance": 50.0
+		},
+		"notes": "Свои настройки стенда. LightmapGI нет; неподвижная воксельная геометрия, динамические источники.",
+		"sdfgi": {
+			"bounce_feedback": 0.65,
+			"cascades": 4.0,
+			"energy": 2.4,
+			"min_cell_size": 0.12,
+			"normal_bias": 1.0,
+			"probe_bias": 1.0
+		},
+		"shadow_atlas": 4096.0,
+		"shadow_quadrants": [
+			16.0,
+			16.0,
+			16.0,
+			16.0
+		],
+		"sun_shadows": {
+			"cascades": 4.0,
+			"distance": 90.0
+		},
+		"times": {
+			"evening": {
+				"ambient": 0.14,
+				"background_energy": 0.9,
+				"exposure": 1.15,
+				"label": "Вечер · около 20:00",
+				"sky_horizon": "b0bdc5",
+				"sky_top": "385570",
+				"sun_color": "ffd4a0",
+				"sun_energy": 3.2,
+				"sun_rotation": [
+					-12.0,
+					145.0,
+					0.0
+				],
+				"window_energy": 0.32
+			},
+			"night": {
+				"ambient": 0.0,
+				"background_energy": 0.0,
+				"exposure": 1.55,
+				"label": "Ночь · только лампы",
+				"sky_horizon": "000000",
+				"sky_top": "000000",
+				"sun_color": "ffd4a0",
+				"sun_energy": 0.0,
+				"sun_rotation": [
+					-12.0,
+					145.0,
+					0.0
+				],
+				"window_energy": 0.0
+			},
+			"overcast": {
+				"ambient": 0.22,
+				"background_energy": 0.85,
+				"exposure": 1.25,
+				"label": "Пасмурный день",
+				"sky_horizon": "c1c7c9",
+				"sky_top": "748695",
+				"sun_color": "ffffff",
+				"sun_energy": 0.0,
+				"sun_rotation": [
+					-40.0,
+					145.0,
+					0.0
+				],
+				"window_energy": 1.15
+			}
+		},
+		"voxel": {
+			"bias": 0.3,
+			"diffuse_proxy": true,
+			"energy": 1.05,
+			"interior": false,
+			"normal_bias": 0.5,
+			"subdiv": 2.0,
+			"volumes": [
+				{
+					"at": [
+						21.705,
+						2.3795,
+						0.0
+					],
+					"cache": "res://data/blockouts/dorm_voxel/floor_1.res",
+					"id": "floor_1",
+					"size": [
+						43.85,
+						3.801,
+						18.2
+					]
+				},
+				{
+					"at": [
+						38.655,
+						2.3795,
+						-24.15
+					],
+					"cache": "res://data/blockouts/dorm_voxel/annex_1.res",
+					"id": "annex_1",
+					"size": [
+						9.95,
+						3.801,
+						30.14
+					]
+				},
+				{
+					"at": [
+						21.705,
+						5.9695,
+						0.0
+					],
+					"cache": "res://data/blockouts/dorm_voxel/floor_2.res",
+					"id": "floor_2",
+					"size": [
+						43.85,
+						3.101,
+						18.2
+					]
+				},
+				{
+					"at": [
+						38.655,
+						5.9695,
+						-24.15
+					],
+					"cache": "res://data/blockouts/dorm_voxel/annex_2.res",
+					"id": "annex_2",
+					"size": [
+						9.95,
+						3.101,
+						30.14
+					]
+				},
+				{
+					"at": [
+						21.705,
+						9.2095,
+						0.0
+					],
+					"cache": "res://data/blockouts/dorm_voxel/floor_3.res",
+					"id": "floor_3",
+					"size": [
+						43.85,
+						3.101,
+						18.2
+					]
+				},
+				{
+					"at": [
+						38.655,
+						9.2095,
+						-24.15
+					],
+					"cache": "res://data/blockouts/dorm_voxel/annex_3.res",
+					"id": "annex_3",
+					"size": [
+						9.95,
+						3.101,
+						30.14
+					]
+				}
+			]
+		}
+	},
+	"revision": 6.1,
+	"samples": [
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 1.13470727790006,
+			"directional_shadow_sources": 1,
+			"draw_calls": 1250.0,
+			"draw_calls_max": 1250.0,
+			"draw_calls_mean": 1250.0,
+			"draw_calls_median": 1250.0,
+			"draw_calls_min": 1250.0,
+			"draw_calls_p95": 1250.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 797.0,
+			"draw_shadow_median": 797.0,
+			"draw_shadow_min": 797.0,
+			"draw_visible_median": 451.0,
+			"fps": 315.732101312037,
+			"frames": 632,
+			"gpu_frame_ms": 3.1098791251981,
+			"gpu_frame_p95_ms": 3.463488,
+			"gpu_viewport_ms": 3.10691613487051,
+			"gpu_viewport_p95_ms": 3.46099996566772,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001697,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 44,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 7,
+			"shadow_windows_frustum": 22,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 5,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_069",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_070",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_071",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_072",
+					"lit_screen_samples": 34,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 5,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_074",
+					"lit_screen_samples": 3,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_076",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_077",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_079",
+					"lit_screen_samples": 5,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_081",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_082",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_083",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_084",
+					"lit_screen_samples": 0,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 4,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.494130908539801,
+			"directional_shadow_sources": 1,
+			"draw_calls": 153.0,
+			"draw_calls_max": 153.0,
+			"draw_calls_mean": 153.0,
+			"draw_calls_median": 153.0,
+			"draw_calls_min": 153.0,
+			"draw_calls_p95": 153.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 100.0,
+			"draw_shadow_median": 100.0,
+			"draw_shadow_min": 100.0,
+			"draw_visible_median": 51.0,
+			"fps": 412.378760644371,
+			"frames": 825,
+			"gpu_frame_ms": 2.3914051262136,
+			"gpu_frame_p95_ms": 2.672256,
+			"gpu_viewport_ms": 2.38884121172356,
+			"gpu_viewport_p95_ms": 2.66899991035461,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000588,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 9,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 9,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 47,
+			"view": "02_room",
+			"visibility_details": [
+				{
+					"id": "window_sky_069",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_071",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 708,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.571563105945834,
+			"directional_shadow_sources": 1,
+			"draw_calls": 283.0,
+			"draw_calls_max": 283.0,
+			"draw_calls_mean": 283.0,
+			"draw_calls_median": 283.0,
+			"draw_calls_min": 283.0,
+			"draw_calls_p95": 283.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 183.0,
+			"draw_shadow_median": 183.0,
+			"draw_shadow_min": 183.0,
+			"draw_visible_median": 98.0,
+			"fps": 308.806995627733,
+			"frames": 618,
+			"gpu_frame_ms": 3.20862552998379,
+			"gpu_frame_p95_ms": 3.565344,
+			"gpu_viewport_ms": 3.2056245884849,
+			"gpu_viewport_p95_ms": 3.56299996376038,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.00125,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 12,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 5,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "04_wash",
+			"visibility_details": [
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 1194,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 1262,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.614459708510176,
+			"directional_shadow_sources": 1,
+			"draw_calls": 427.0,
+			"draw_calls_max": 427.0,
+			"draw_calls_mean": 427.0,
+			"draw_calls_median": 427.0,
+			"draw_calls_min": 427.0,
+			"draw_calls_p95": 427.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 277.0,
+			"draw_shadow_median": 277.0,
+			"draw_shadow_min": 277.0,
+			"draw_visible_median": 148.0,
+			"fps": 377.965934135067,
+			"frames": 757,
+			"gpu_frame_ms": 2.61260973544973,
+			"gpu_frame_p95_ms": 2.913024,
+			"gpu_viewport_ms": 2.6099735808656,
+			"gpu_viewport_p95_ms": 2.91000008583069,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.002826,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 5,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 15,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "05_stairs_bottom",
+			"visibility_details": [
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_063",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_065",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 1014,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 706,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_104",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_105",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.619226442191504,
+			"directional_shadow_sources": 1,
+			"draw_calls": 264.0,
+			"draw_calls_max": 264.0,
+			"draw_calls_mean": 264.0,
+			"draw_calls_median": 264.0,
+			"draw_calls_min": 264.0,
+			"draw_calls_p95": 264.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 190.0,
+			"draw_shadow_median": 190.0,
+			"draw_shadow_min": 190.0,
+			"draw_visible_median": 72.0,
+			"fps": 355.21210059247,
+			"frames": 711,
+			"gpu_frame_ms": 2.78395123380282,
+			"gpu_frame_p95_ms": 3.14032,
+			"gpu_viewport_ms": 2.78099015158105,
+			"gpu_viewport_p95_ms": 3.13800001144409,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001621,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 4,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 14,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 3,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 36,
+			"view": "06_stairs_top",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 198,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 878,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 169,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 1.21513059378535,
+			"directional_shadow_sources": 1,
+			"draw_calls": 1819.0,
+			"draw_calls_max": 1819.0,
+			"draw_calls_mean": 1819.0,
+			"draw_calls_median": 1819.0,
+			"draw_calls_min": 1819.0,
+			"draw_calls_p95": 1819.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 1258.0,
+			"draw_shadow_median": 1258.0,
+			"draw_shadow_min": 1258.0,
+			"draw_visible_median": 559.0,
+			"fps": 413.084849726025,
+			"frames": 827,
+			"gpu_frame_ms": 2.32821276513317,
+			"gpu_frame_p95_ms": 2.55648,
+			"gpu_viewport_ms": 2.3255259996458,
+			"gpu_viewport_p95_ms": 2.55399990081787,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.00201,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 40,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 3,
+			"shadow_windows_frustum": 18,
+			"shadow_windows_origin_visible": 2,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 9,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_055",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_057",
+					"lit_screen_samples": 2,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_059",
+					"lit_screen_samples": 0,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_061",
+					"lit_screen_samples": 1,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_062",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_063",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_064",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_065",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_066",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_067",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_068",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_104",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_105",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.672790896799283,
+			"directional_shadow_sources": 1,
+			"draw_calls": 474.0,
+			"draw_calls_max": 474.0,
+			"draw_calls_mean": 474.0,
+			"draw_calls_median": 474.0,
+			"draw_calls_min": 474.0,
+			"draw_calls_p95": 474.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 388.0,
+			"draw_shadow_median": 388.0,
+			"draw_shadow_min": 388.0,
+			"draw_visible_median": 84.0,
+			"fps": 351.176040103005,
+			"frames": 703,
+			"gpu_frame_ms": 2.81658452421653,
+			"gpu_frame_p95_ms": 3.168224,
+			"gpu_viewport_ms": 2.81361308782911,
+			"gpu_viewport_p95_ms": 3.16499996185303,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001845,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 14,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 4,
+			"shadow_windows_frustum": 7,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "09_lounge",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 33,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 229,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "window_sky_076",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_077",
+					"lit_screen_samples": 32,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_079",
+					"lit_screen_samples": 599,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_081",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_082",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_083",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_084",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_A",
+			"cpu_render_ms": 0.467055222638944,
+			"directional_shadow_sources": 1,
+			"draw_calls": 193.0,
+			"draw_calls_max": 193.0,
+			"draw_calls_mean": 193.0,
+			"draw_calls_median": 193.0,
+			"draw_calls_min": 193.0,
+			"draw_calls_p95": 193.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 119.0,
+			"draw_shadow_median": 119.0,
+			"draw_shadow_min": 119.0,
+			"draw_visible_median": 72.0,
+			"fps": 416.453149020735,
+			"frames": 833,
+			"gpu_frame_ms": 2.36779461538462,
+			"gpu_frame_p95_ms": 2.59088,
+			"gpu_viewport_ms": 2.3649195706,
+			"gpu_viewport_p95_ms": 2.58800005912781,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000225,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 1,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 8,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 7,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 75,
+			"view": "14_toilets",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_055",
+					"lit_screen_samples": 809,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.96050591758017,
+			"directional_shadow_sources": 1,
+			"draw_calls": 1250.0,
+			"draw_calls_max": 1250.0,
+			"draw_calls_mean": 1250.0,
+			"draw_calls_median": 1250.0,
+			"draw_calls_min": 1250.0,
+			"draw_calls_p95": 1250.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 797.0,
+			"draw_shadow_median": 797.0,
+			"draw_shadow_min": 797.0,
+			"draw_visible_median": 451.0,
+			"fps": 337.534371334744,
+			"frames": 676,
+			"gpu_frame_ms": 2.92933418666667,
+			"gpu_frame_p95_ms": 3.262496,
+			"gpu_viewport_ms": 2.92619822399151,
+			"gpu_viewport_p95_ms": 3.2590000629425,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.002759,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 44,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 7,
+			"shadow_windows_frustum": 22,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 5,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_069",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_070",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_071",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_072",
+					"lit_screen_samples": 34,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 5,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_074",
+					"lit_screen_samples": 3,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_076",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_077",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_079",
+					"lit_screen_samples": 5,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_081",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_082",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_083",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_084",
+					"lit_screen_samples": 0,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 4,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.434689030765345,
+			"directional_shadow_sources": 1,
+			"draw_calls": 153.0,
+			"draw_calls_max": 153.0,
+			"draw_calls_mean": 153.0,
+			"draw_calls_median": 153.0,
+			"draw_calls_min": 153.0,
+			"draw_calls_p95": 153.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 100.0,
+			"draw_shadow_median": 100.0,
+			"draw_shadow_min": 100.0,
+			"draw_visible_median": 51.0,
+			"fps": 469.058850151433,
+			"frames": 939,
+			"gpu_frame_ms": 2.09638608102345,
+			"gpu_frame_p95_ms": 2.311744,
+			"gpu_viewport_ms": 2.09290735333111,
+			"gpu_viewport_p95_ms": 2.30800008773804,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001881,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 9,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 9,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 47,
+			"view": "02_room",
+			"visibility_details": [
+				{
+					"id": "window_sky_069",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_071",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 708,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.532449920387829,
+			"directional_shadow_sources": 1,
+			"draw_calls": 283.0,
+			"draw_calls_max": 283.0,
+			"draw_calls_mean": 283.0,
+			"draw_calls_median": 283.0,
+			"draw_calls_min": 283.0,
+			"draw_calls_p95": 283.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 183.0,
+			"draw_shadow_median": 183.0,
+			"draw_shadow_min": 183.0,
+			"draw_visible_median": 98.0,
+			"fps": 314.207158927879,
+			"frames": 629,
+			"gpu_frame_ms": 3.15179301910828,
+			"gpu_frame_p95_ms": 3.512192,
+			"gpu_viewport_ms": 3.14828775834961,
+			"gpu_viewport_p95_ms": 3.50799989700317,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001864,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 12,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 5,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "04_wash",
+			"visibility_details": [
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 1194,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 1262,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.62346627162053,
+			"directional_shadow_sources": 1,
+			"draw_calls": 427.0,
+			"draw_calls_max": 427.0,
+			"draw_calls_mean": 427.0,
+			"draw_calls_median": 427.0,
+			"draw_calls_min": 427.0,
+			"draw_calls_p95": 427.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 277.0,
+			"draw_shadow_median": 277.0,
+			"draw_shadow_min": 277.0,
+			"draw_visible_median": 148.0,
+			"fps": 422.290965971844,
+			"frames": 845,
+			"gpu_frame_ms": 2.33323522274881,
+			"gpu_frame_p95_ms": 2.556288,
+			"gpu_viewport_ms": 2.32948638955517,
+			"gpu_viewport_p95_ms": 2.55299997329712,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.00099,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 5,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 15,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "05_stairs_bottom",
+			"visibility_details": [
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_063",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_065",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 1014,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 706,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_104",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_105",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.6012030648089,
+			"directional_shadow_sources": 1,
+			"draw_calls": 264.0,
+			"draw_calls_max": 264.0,
+			"draw_calls_mean": 264.0,
+			"draw_calls_median": 264.0,
+			"draw_calls_min": 264.0,
+			"draw_calls_p95": 264.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 190.0,
+			"draw_shadow_median": 190.0,
+			"draw_shadow_min": 190.0,
+			"draw_visible_median": 72.0,
+			"fps": 391.288117484382,
+			"frames": 783,
+			"gpu_frame_ms": 2.5213498516624,
+			"gpu_frame_p95_ms": 2.819232,
+			"gpu_viewport_ms": 2.51782887192065,
+			"gpu_viewport_p95_ms": 2.81599998474121,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001083,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 4,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 14,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 3,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 36,
+			"view": "06_stairs_top",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 198,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 878,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 169,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 1.11933196574205,
+			"directional_shadow_sources": 1,
+			"draw_calls": 1819.0,
+			"draw_calls_max": 1819.0,
+			"draw_calls_mean": 1819.0,
+			"draw_calls_median": 1819.0,
+			"draw_calls_min": 1819.0,
+			"draw_calls_p95": 1819.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 1258.0,
+			"draw_shadow_median": 1258.0,
+			"draw_shadow_min": 1258.0,
+			"draw_visible_median": 559.0,
+			"fps": 487.512487512488,
+			"frames": 976,
+			"gpu_frame_ms": 1.85673760820513,
+			"gpu_frame_p95_ms": 2.072032,
+			"gpu_viewport_ms": 1.85319774353602,
+			"gpu_viewport_p95_ms": 2.06800007820129,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.002,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 40,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 3,
+			"shadow_windows_frustum": 18,
+			"shadow_windows_origin_visible": 2,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 9,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_055",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_057",
+					"lit_screen_samples": 2,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_059",
+					"lit_screen_samples": 0,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_061",
+					"lit_screen_samples": 1,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_062",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_063",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_064",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_065",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_066",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_067",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_068",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_104",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_105",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.609056728496401,
+			"directional_shadow_sources": 1,
+			"draw_calls": 474.0,
+			"draw_calls_max": 474.0,
+			"draw_calls_mean": 474.0,
+			"draw_calls_median": 474.0,
+			"draw_calls_min": 474.0,
+			"draw_calls_p95": 474.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 388.0,
+			"draw_shadow_median": 388.0,
+			"draw_shadow_min": 388.0,
+			"draw_visible_median": 84.0,
+			"fps": 378.832934675808,
+			"frames": 758,
+			"gpu_frame_ms": 2.60486678996037,
+			"gpu_frame_p95_ms": 2.922592,
+			"gpu_viewport_ms": 2.60102902050069,
+			"gpu_viewport_p95_ms": 2.91899991035461,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000882,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 14,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 4,
+			"shadow_windows_frustum": 7,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "09_lounge",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 33,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 229,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "window_sky_076",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_077",
+					"lit_screen_samples": 32,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_079",
+					"lit_screen_samples": 599,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_081",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_082",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_083",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_084",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B",
+			"cpu_render_ms": 0.457080698487803,
+			"directional_shadow_sources": 1,
+			"draw_calls": 193.0,
+			"draw_calls_max": 193.0,
+			"draw_calls_mean": 193.0,
+			"draw_calls_median": 193.0,
+			"draw_calls_min": 193.0,
+			"draw_calls_p95": 193.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 119.0,
+			"draw_shadow_median": 119.0,
+			"draw_shadow_min": 119.0,
+			"draw_visible_median": 72.0,
+			"fps": 458.046305134764,
+			"frames": 917,
+			"gpu_frame_ms": 2.14718609606987,
+			"gpu_frame_p95_ms": 2.378848,
+			"gpu_viewport_ms": 2.14360959241278,
+			"gpu_viewport_p95_ms": 2.37599992752075,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001981,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 1,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 8,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 7,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 75,
+			"view": "14_toilets",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_055",
+					"lit_screen_samples": 809,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "overcast_A",
+			"cpu_render_ms": 0.434911894159345,
+			"directional_shadow_sources": 0,
+			"draw_calls": 100.0,
+			"draw_calls_max": 100.0,
+			"draw_calls_mean": 100.0,
+			"draw_calls_median": 100.0,
+			"draw_calls_min": 100.0,
+			"draw_calls_p95": 100.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 98.0,
+			"fps": 340.103269536086,
+			"frames": 681,
+			"gpu_frame_ms": 2.90909628235294,
+			"gpu_frame_p95_ms": 3.2304,
+			"gpu_viewport_ms": 2.90612041232519,
+			"gpu_viewport_p95_ms": 3.22300004959106,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.002333,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 12,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 5,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "04_wash",
+			"visibility_details": [
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 1194,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 1262,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "overcast_A",
+			"cpu_render_ms": 0.518228735492147,
+			"directional_shadow_sources": 0,
+			"draw_calls": 150.0,
+			"draw_calls_max": 150.0,
+			"draw_calls_mean": 150.0,
+			"draw_calls_median": 150.0,
+			"draw_calls_min": 150.0,
+			"draw_calls_p95": 150.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 148.0,
+			"fps": 434.887364172679,
+			"frames": 870,
+			"gpu_frame_ms": 2.26541930494822,
+			"gpu_frame_p95_ms": 2.503584,
+			"gpu_viewport_ms": 2.26228850847003,
+			"gpu_viewport_p95_ms": 2.5,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000518,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 5,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 15,
+			"shadow_sources_origin_visible": 2,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "05_stairs_bottom",
+			"visibility_details": [
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_063",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_065",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 1014,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 706,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_104",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_105",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "overcast_A",
+			"cpu_render_ms": 0.422045622631889,
+			"directional_shadow_sources": 0,
+			"draw_calls": 74.0,
+			"draw_calls_max": 74.0,
+			"draw_calls_mean": 74.0,
+			"draw_calls_median": 74.0,
+			"draw_calls_min": 74.0,
+			"draw_calls_p95": 74.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 72.0,
+			"fps": 405.233356451455,
+			"frames": 811,
+			"gpu_frame_ms": 2.43390660740741,
+			"gpu_frame_p95_ms": 2.687744,
+			"gpu_viewport_ms": 2.43131812197947,
+			"gpu_viewport_p95_ms": 2.68499994277954,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001316,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 4,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 14,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 3,
+			"shadow_windows_frustum": 10,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 2,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "06_stairs_top",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_073",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_075",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_078",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_080",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 198,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 878,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_102",
+					"lit_screen_samples": 169,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_108",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_109",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_110",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_111",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "overcast_A",
+			"cpu_render_ms": 0.387823839699417,
+			"directional_shadow_sources": 0,
+			"draw_calls": 74.0,
+			"draw_calls_max": 74.0,
+			"draw_calls_mean": 74.0,
+			"draw_calls_median": 74.0,
+			"draw_calls_min": 74.0,
+			"draw_calls_p95": 74.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 72.0,
+			"fps": 473.751043826469,
+			"frames": 948,
+			"gpu_frame_ms": 2.07455972967265,
+			"gpu_frame_p95_ms": 2.289632,
+			"gpu_viewport_ms": 2.07164451643384,
+			"gpu_viewport_p95_ms": 2.28699994087219,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001051,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 1,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 8,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 7,
+			"shadow_windows_origin_visible": 1,
+			"shadow_windows_visible_receivers": 1,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "14_toilets",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "window_sky_055",
+					"lit_screen_samples": 809,
+					"origin_visible": true,
+					"window": true
+				},
+				{
+					"id": "window_sky_056",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_058",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_060",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_101",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_106",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				},
+				{
+					"id": "window_sky_107",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": true
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B_no_windows",
+			"cpu_render_ms": 0.451196104597736,
+			"directional_shadow_sources": 1,
+			"draw_calls": 283.0,
+			"draw_calls_max": 283.0,
+			"draw_calls_mean": 283.0,
+			"draw_calls_median": 283.0,
+			"draw_calls_min": 283.0,
+			"draw_calls_p95": 283.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 183.0,
+			"draw_shadow_median": 183.0,
+			"draw_shadow_min": 183.0,
+			"draw_visible_median": 98.0,
+			"fps": 384.521463039248,
+			"frames": 770,
+			"gpu_frame_ms": 2.56733478283485,
+			"gpu_frame_p95_ms": 2.904672,
+			"gpu_viewport_ms": 2.5636480520298,
+			"gpu_viewport_p95_ms": 2.90100002288818,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.002489,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 7,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 7,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "04_wash",
+			"visibility_details": [
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 1194,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B_no_windows",
+			"cpu_render_ms": 0.513988461345434,
+			"directional_shadow_sources": 1,
+			"draw_calls": 427.0,
+			"draw_calls_max": 427.0,
+			"draw_calls_mean": 427.0,
+			"draw_calls_median": 427.0,
+			"draw_calls_min": 427.0,
+			"draw_calls_p95": 427.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 277.0,
+			"draw_shadow_median": 277.0,
+			"draw_shadow_min": 277.0,
+			"draw_visible_median": 148.0,
+			"fps": 519.91733314403,
+			"frames": 1040,
+			"gpu_frame_ms": 1.88514103561116,
+			"gpu_frame_p95_ms": 2.105664,
+			"gpu_viewport_ms": 1.88144903996816,
+			"gpu_viewport_p95_ms": 2.10199999809265,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000318,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 5,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 5,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "05_stairs_bottom",
+			"visibility_details": [
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 1014,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B_no_windows",
+			"cpu_render_ms": 0.464449604892212,
+			"directional_shadow_sources": 1,
+			"draw_calls": 264.0,
+			"draw_calls_max": 264.0,
+			"draw_calls_mean": 264.0,
+			"draw_calls_median": 264.0,
+			"draw_calls_min": 264.0,
+			"draw_calls_p95": 264.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 190.0,
+			"draw_shadow_median": 190.0,
+			"draw_shadow_min": 190.0,
+			"draw_visible_median": 72.0,
+			"fps": 505.761280675521,
+			"frames": 1012,
+			"gpu_frame_ms": 1.9407350504451,
+			"gpu_frame_p95_ms": 2.15888,
+			"gpu_viewport_ms": 1.93696145825235,
+			"gpu_viewport_p95_ms": 2.15499997138977,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000944,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 4,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 4,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 36,
+			"view": "06_stairs_top",
+			"visibility_details": [
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 198,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "evening_B_no_windows",
+			"cpu_render_ms": 0.412148916165184,
+			"directional_shadow_sources": 1,
+			"draw_calls": 193.0,
+			"draw_calls_max": 193.0,
+			"draw_calls_mean": 193.0,
+			"draw_calls_median": 193.0,
+			"draw_calls_min": 193.0,
+			"draw_calls_p95": 193.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 119.0,
+			"draw_shadow_median": 119.0,
+			"draw_shadow_min": 119.0,
+			"draw_visible_median": 72.0,
+			"fps": 530.034894380181,
+			"frames": 1061,
+			"gpu_frame_ms": 1.85010339622642,
+			"gpu_frame_p95_ms": 2.069472,
+			"gpu_viewport_ms": 1.84668520146333,
+			"gpu_viewport_p95_ms": 2.06399989128113,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001755,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 1,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 1,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 0,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 75,
+			"view": "14_toilets",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A",
+			"cpu_render_ms": 0.653630235678572,
+			"directional_shadow_sources": 0,
+			"draw_calls": 453.0,
+			"draw_calls_max": 453.0,
+			"draw_calls_mean": 453.0,
+			"draw_calls_median": 453.0,
+			"draw_calls_min": 453.0,
+			"draw_calls_p95": 453.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 451.0,
+			"fps": 489.351481825266,
+			"frames": 979,
+			"gpu_frame_ms": 2.00545007770961,
+			"gpu_frame_p95_ms": 2.22384,
+			"gpu_viewport_ms": 2.0028631231758,
+			"gpu_viewport_p95_ms": 2.22099995613098,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000607,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A",
+			"cpu_render_ms": 0.339618933656051,
+			"directional_shadow_sources": 0,
+			"draw_calls": 53.0,
+			"draw_calls_max": 53.0,
+			"draw_calls_mean": 53.0,
+			"draw_calls_median": 53.0,
+			"draw_calls_min": 53.0,
+			"draw_calls_p95": 53.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 51.0,
+			"fps": 628.237396768151,
+			"frames": 1257,
+			"gpu_frame_ms": 1.55456066242038,
+			"gpu_frame_p95_ms": 1.774944,
+			"gpu_viewport_ms": 1.55166905269608,
+			"gpu_viewport_p95_ms": 1.77199995517731,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000836,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 0,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 0,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "02_room",
+			"visibility_details": [],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A",
+			"cpu_render_ms": 0.646275038574069,
+			"directional_shadow_sources": 0,
+			"draw_calls": 561.0,
+			"draw_calls_max": 561.0,
+			"draw_calls_mean": 561.0,
+			"draw_calls_median": 561.0,
+			"draw_calls_min": 561.0,
+			"draw_calls_p95": 561.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 559.0,
+			"fps": 648.94256858268,
+			"frames": 1298,
+			"gpu_frame_ms": 1.5014313153431,
+			"gpu_frame_p95_ms": 1.724736,
+			"gpu_viewport_ms": 1.49854391280602,
+			"gpu_viewport_p95_ms": 1.72200000286102,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000177,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B",
+			"cpu_render_ms": 0.605509578525107,
+			"directional_shadow_sources": 0,
+			"draw_calls": 453.0,
+			"draw_calls_max": 453.0,
+			"draw_calls_mean": 453.0,
+			"draw_calls_median": 453.0,
+			"draw_calls_min": 453.0,
+			"draw_calls_p95": 453.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 451.0,
+			"fps": 521.706800777963,
+			"frames": 1044,
+			"gpu_frame_ms": 1.88004411888782,
+			"gpu_frame_p95_ms": 2.102016,
+			"gpu_viewport_ms": 1.87644636299875,
+			"gpu_viewport_p95_ms": 2.09800004959106,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.001124,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B",
+			"cpu_render_ms": 0.309035148407409,
+			"directional_shadow_sources": 0,
+			"draw_calls": 53.0,
+			"draw_calls_max": 53.0,
+			"draw_calls_mean": 53.0,
+			"draw_calls_median": 53.0,
+			"draw_calls_min": 53.0,
+			"draw_calls_p95": 53.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 51.0,
+			"fps": 725.368708263804,
+			"frames": 1451,
+			"gpu_frame_ms": 1.34121425655173,
+			"gpu_frame_p95_ms": 1.563136,
+			"gpu_viewport_ms": 1.33760647499339,
+			"gpu_viewport_p95_ms": 1.55900001525879,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.000362,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 0,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 0,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "02_room",
+			"visibility_details": [],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B",
+			"cpu_render_ms": 0.744428267025135,
+			"directional_shadow_sources": 0,
+			"draw_calls": 561.0,
+			"draw_calls_max": 561.0,
+			"draw_calls_mean": 561.0,
+			"draw_calls_median": 561.0,
+			"draw_calls_min": 561.0,
+			"draw_calls_p95": 561.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 0.0,
+			"draw_shadow_median": 0.0,
+			"draw_shadow_min": 0.0,
+			"draw_visible_median": 559.0,
+			"fps": 702.705265548227,
+			"frames": 1408,
+			"gpu_frame_ms": 1.07256535607676,
+			"gpu_frame_p95_ms": 1.224736,
+			"gpu_viewport_ms": 1.06898863198744,
+			"gpu_viewport_p95_ms": 1.22099995613098,
+			"night_exterior": false,
+			"revision": 6.1,
+			"seconds": 2.003685,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A_moon",
+			"cpu_render_ms": 0.867424478599181,
+			"directional_shadow_sources": 1,
+			"draw_calls": 898.0,
+			"draw_calls_max": 898.0,
+			"draw_calls_mean": 898.0,
+			"draw_calls_median": 898.0,
+			"draw_calls_min": 898.0,
+			"draw_calls_p95": 898.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 445.0,
+			"draw_shadow_median": 445.0,
+			"draw_shadow_min": 445.0,
+			"draw_visible_median": 451.0,
+			"fps": 383.93146823292,
+			"frames": 768,
+			"gpu_frame_ms": 2.56979371056063,
+			"gpu_frame_p95_ms": 2.907712,
+			"gpu_viewport_ms": 2.56682030980786,
+			"gpu_viewport_p95_ms": 2.90499997138977,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.000357,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A_moon",
+			"cpu_render_ms": 0.493289966501764,
+			"directional_shadow_sources": 1,
+			"draw_calls": 302.0,
+			"draw_calls_max": 302.0,
+			"draw_calls_mean": 302.0,
+			"draw_calls_median": 302.0,
+			"draw_calls_min": 302.0,
+			"draw_calls_p95": 302.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 249.0,
+			"draw_shadow_median": 249.0,
+			"draw_shadow_min": 249.0,
+			"draw_visible_median": 51.0,
+			"fps": 453.078636867713,
+			"frames": 907,
+			"gpu_frame_ms": 2.17073426931567,
+			"gpu_frame_p95_ms": 2.380832,
+			"gpu_viewport_ms": 2.16793714705218,
+			"gpu_viewport_p95_ms": 2.37800002098084,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.00186,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 0,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 0,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "02_room",
+			"visibility_details": [],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_A_moon",
+			"cpu_render_ms": 0.799131331815058,
+			"directional_shadow_sources": 1,
+			"draw_calls": 868.0,
+			"draw_calls_max": 868.0,
+			"draw_calls_mean": 868.0,
+			"draw_calls_median": 868.0,
+			"draw_calls_min": 868.0,
+			"draw_calls_p95": 868.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 307.0,
+			"draw_shadow_median": 307.0,
+			"draw_shadow_min": 307.0,
+			"draw_visible_median": 559.0,
+			"fps": 532.87104520706,
+			"frames": 1066,
+			"gpu_frame_ms": 1.82673871924883,
+			"gpu_frame_p95_ms": 2.044864,
+			"gpu_viewport_ms": 1.82383958875127,
+			"gpu_viewport_p95_ms": 2.04200005531311,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.000484,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 958,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": []
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B_moon",
+			"cpu_render_ms": 0.814171003364719,
+			"directional_shadow_sources": 1,
+			"draw_calls": 898.0,
+			"draw_calls_max": 898.0,
+			"draw_calls_mean": 898.0,
+			"draw_calls_median": 898.0,
+			"draw_calls_min": 898.0,
+			"draw_calls_p95": 898.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 445.0,
+			"draw_shadow_median": 445.0,
+			"draw_shadow_min": 445.0,
+			"draw_visible_median": 451.0,
+			"fps": 403.06448881983,
+			"frames": 807,
+			"gpu_frame_ms": 2.44490592555831,
+			"gpu_frame_p95_ms": 2.79136,
+			"gpu_viewport_ms": 2.44140148665087,
+			"gpu_viewport_p95_ms": 2.78800010681152,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.002161,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 1,
+			"shadow_lamps_visible_receivers": 2,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 1,
+			"shadow_sources_visible_receivers": 2,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "01_corridor",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 32,
+					"origin_visible": true,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 7,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B_moon",
+			"cpu_render_ms": 0.446207305197655,
+			"directional_shadow_sources": 1,
+			"draw_calls": 302.0,
+			"draw_calls_max": 302.0,
+			"draw_calls_mean": 302.0,
+			"draw_calls_median": 302.0,
+			"draw_calls_min": 302.0,
+			"draw_calls_p95": 302.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 249.0,
+			"draw_shadow_median": 249.0,
+			"draw_shadow_min": 249.0,
+			"draw_visible_median": 51.0,
+			"fps": 506.340249651235,
+			"frames": 1013,
+			"gpu_frame_ms": 1.93794017391304,
+			"gpu_frame_p95_ms": 2.148832,
+			"gpu_viewport_ms": 1.93419644498401,
+			"gpu_viewport_p95_ms": 2.14499998092651,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.000631,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 0,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 0,
+			"shadow_sources_frustum": 0,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 0,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 0,
+			"view": "02_room",
+			"visibility_details": [],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		},
+		{
+			"atlas_quadrants": [
+				3,
+				3,
+				3,
+				3
+			],
+			"case": "night_B_moon",
+			"cpu_render_ms": 0.717926118978814,
+			"directional_shadow_sources": 1,
+			"draw_calls": 868.0,
+			"draw_calls_max": 868.0,
+			"draw_calls_mean": 868.0,
+			"draw_calls_median": 868.0,
+			"draw_calls_min": 868.0,
+			"draw_calls_p95": 868.0,
+			"draw_canvas_median": 2.0,
+			"draw_shadow_max": 307.0,
+			"draw_shadow_median": 307.0,
+			"draw_shadow_min": 307.0,
+			"draw_visible_median": 559.0,
+			"fps": 669.956452830566,
+			"frames": 1340,
+			"gpu_frame_ms": 1.42738834353996,
+			"gpu_frame_p95_ms": 1.65008,
+			"gpu_viewport_ms": 1.4238201504323,
+			"gpu_viewport_p95_ms": 1.64699995517731,
+			"night_exterior": true,
+			"revision": 6.1,
+			"seconds": 2.00013,
+			"shadow_atlas": 4096,
+			"shadow_lamps_frustum": 22,
+			"shadow_lamps_origin_visible": 0,
+			"shadow_lamps_visible_receivers": 1,
+			"shadow_sources_frustum": 22,
+			"shadow_sources_origin_visible": 0,
+			"shadow_sources_visible_receivers": 1,
+			"shadow_windows_frustum": 0,
+			"shadow_windows_origin_visible": 0,
+			"shadow_windows_visible_receivers": 0,
+			"sun_shadow_actual": {
+				"distance": 90.0,
+				"mode": 2
+			},
+			"sun_visible_receiver_samples": 958,
+			"view": "08_street",
+			"visibility_details": [
+				{
+					"id": "main_corridor_000",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_002",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_003",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_030",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "watch_054",
+					"lit_screen_samples": 11,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_009",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_010",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_036",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_016",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_017",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "main_corridor_019",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "lounge_041",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "stairs_007",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_005",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_006",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_012",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_013",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_020",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "annex_corridor_022",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_043",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_047",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				},
+				{
+					"id": "wet_rooms_051",
+					"lit_screen_samples": 0,
+					"origin_visible": false,
+					"window": false
+				}
+			],
+			"visibility_grid": [
+				48,
+				27
+			],
+			"visibility_method": "Origin: inside frustum plus unobstructed camera ray. Receivers: 48x27 screen-surface rays, normal/range/spot cone and source-to-surface visibility. Opaque level collision layer 1; transparent window collisions are skipped. Receiver count is sampled, not the engine shadow-pass count.",
+			"voxel_light_candidates": [
+				{
+					"id": "floor_1",
+					"local_aabb_candidates": 10,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_1",
+					"local_aabb_candidates": 6,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_2",
+					"local_aabb_candidates": 14,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_2",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "floor_3",
+					"local_aabb_candidates": 11,
+					"voxel_limit_including_sun": 32
+				},
+				{
+					"id": "annex_3",
+					"local_aabb_candidates": 9,
+					"voxel_limit_including_sun": 32
+				}
+			]
+		}
+	],
+	"shadow_count_method": "Occlusion-tested emitter origins and 48x27 visible receiver rays; sampled count, GPU shadow draws measured separately",
+	"viewport": "(1920.0, 1080.0)",
+	"vsync": 0
+}

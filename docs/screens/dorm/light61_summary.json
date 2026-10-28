@@ -1,0 +1,86 @@
+{
+  "revision": 6.1,
+  "validated_images": 149,
+  "updated_images": 48,
+  "validated_samples": 83,
+  "updated_samples": 36,
+  "camera_positions_unchanged": true,
+  "calibration": {
+    "A": {
+      "wall_left": {
+        "before": {
+          "rgb": [
+            76.305,
+            60.626,
+            33.806
+          ],
+          "luma_display_0_255": 62.023
+        },
+        "after": {
+          "rgb": [
+            76.301,
+            60.627,
+            33.802
+          ],
+          "luma_display_0_255": 62.023
+        }
+      },
+      "wall_right": {
+        "before": {
+          "rgb": [
+            65.213,
+            54.536,
+            33.117
+          ],
+          "luma_display_0_255": 55.26
+        },
+        "after": {
+          "rgb": [
+            65.214,
+            54.538,
+            33.098
+          ],
+          "luma_display_0_255": 55.26
+        }
+      }
+    },
+    "B": {
+      "wall_left": {
+        "before": {
+          "rgb": [
+            68.989,
+            60.644,
+            44.465
+          ],
+          "luma_display_0_255": 61.25
+        },
+        "after": {
+          "rgb": [
+            68.987,
+            60.642,
+            44.462
+          ],
+          "luma_display_0_255": 61.248
+        }
+      },
+      "wall_right": {
+        "before": {
+          "rgb": [
+            60.536,
+            54.786,
+            40.668
+          ],
+          "luma_display_0_255": 54.989
+        },
+        "after": {
+          "rgb": [
+            60.535,
+            54.784,
+            40.665
+          ],
+          "luma_display_0_255": 54.987
+        }
+      }
+    }
+  }
+}

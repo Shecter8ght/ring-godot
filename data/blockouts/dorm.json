@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "stage": 1,
   "greybox": true,
   "north": "-Z",
@@ -7768,19 +7768,22 @@
           "id": "watch_054",
           "group": "watch",
           "at": [
-            0.85,
-            1.65,
-            4.4
+            1.15,
+            2.35,
+            4.5
           ],
-          "energy": 1.3,
-          "range": 3.3,
+          "energy": 0.6,
+          "range": 4.2,
           "shadow": true,
           "on": true,
           "type": "omni",
           "color": "ffbd80",
           "kelvin": 2850,
           "angle": 68.0,
-          "attenuation": 1.7
+          "attenuation": 1.7,
+          "source_size": 0.0,
+          "shadow_blur": 3.0,
+          "falloff": 1.0
         },
         {
           "id": "window_sky_055",
@@ -7797,15 +7800,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_056",
@@ -7822,15 +7828,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_057",
@@ -7847,15 +7856,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_058",
@@ -7872,15 +7884,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_059",
@@ -7897,15 +7912,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_060",
@@ -7922,15 +7940,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_061",
@@ -7947,15 +7968,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_062",
@@ -7972,15 +7996,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_063",
@@ -7997,15 +8024,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_064",
@@ -8022,15 +8052,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_065",
@@ -8047,15 +8080,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_066",
@@ -8072,15 +8108,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_067",
@@ -8097,15 +8136,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_068",
@@ -8122,15 +8164,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         }
       ],
       "probes": [
@@ -25857,15 +25902,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_070",
@@ -25882,15 +25930,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_071",
@@ -25907,15 +25958,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_072",
@@ -25932,15 +25986,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_073",
@@ -25957,15 +26014,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_074",
@@ -25982,15 +26042,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_075",
@@ -26007,15 +26070,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_076",
@@ -26032,15 +26098,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_077",
@@ -26057,15 +26126,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_078",
@@ -26082,15 +26154,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_079",
@@ -26107,15 +26182,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_080",
@@ -26132,15 +26210,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_081",
@@ -26157,15 +26238,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_082",
@@ -26182,15 +26266,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_083",
@@ -26207,15 +26294,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_084",
@@ -26232,15 +26322,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         }
       ],
       "probes": [
@@ -43851,15 +43944,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_086",
@@ -43876,15 +43972,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_087",
@@ -43901,15 +44000,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_088",
@@ -43926,15 +44028,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_089",
@@ -43951,15 +44056,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_090",
@@ -43976,15 +44084,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_091",
@@ -44001,15 +44112,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_092",
@@ -44026,15 +44140,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_093",
@@ -44051,15 +44168,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_094",
@@ -44076,15 +44196,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_095",
@@ -44101,15 +44224,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_096",
@@ -44126,15 +44252,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_097",
@@ -44151,15 +44280,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_098",
@@ -44176,15 +44308,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_099",
@@ -44201,15 +44336,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             0,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_100",
@@ -44226,15 +44364,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         }
       ],
       "probes": [
@@ -90099,7 +90240,7 @@
             2.78,
             -5.1
           ],
-          "energy": 0.9,
+          "energy": 0.35,
           "range": 4.1,
           "shadow": true,
           "on": true,
@@ -90117,7 +90258,7 @@
             6.72,
             -5.1
           ],
-          "energy": 0.9,
+          "energy": 0.35,
           "range": 4.1,
           "shadow": false,
           "on": true,
@@ -90135,7 +90276,7 @@
             9.96,
             -5.1
           ],
-          "energy": 0.9,
+          "energy": 0.35,
           "range": 4.1,
           "shadow": false,
           "on": true,
@@ -90160,15 +90301,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_102",
@@ -90185,15 +90329,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_103",
@@ -90210,15 +90357,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             180,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         }
       ],
       "probes": [],
@@ -100949,15 +101099,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_105",
@@ -100974,15 +101127,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_106",
@@ -100999,15 +101155,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_107",
@@ -101024,15 +101183,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 1
+          "floor": 1,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_108",
@@ -101049,15 +101211,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_109",
@@ -101074,15 +101239,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_110",
@@ -101099,15 +101267,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_111",
@@ -101124,15 +101295,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 2
+          "floor": 2,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_112",
@@ -101149,15 +101323,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_113",
@@ -101174,15 +101351,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_114",
@@ -101199,15 +101379,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         },
         {
           "id": "window_sky_115",
@@ -101224,15 +101407,18 @@
           "type": "spot",
           "color": "dce8f2",
           "kelvin": 4500,
-          "angle": 78.0,
+          "angle": 82.0,
           "attenuation": 1.2,
           "rotation": [
             0,
             -90,
             0
           ],
+          "angle_attenuation": 2.0,
+          "specular": 0.0,
           "sky_fill": true,
-          "floor": 3
+          "floor": 3,
+          "shadow_bias": 0.1
         }
       ],
       "probes": [
@@ -125918,19 +126104,22 @@
         "id": "watch_054",
         "group": "watch",
         "at": [
-          0.85,
-          1.65,
-          4.4
+          1.15,
+          2.35,
+          4.5
         ],
-        "energy": 1.3,
-        "range": 3.3,
+        "energy": 0.6,
+        "range": 4.2,
         "shadow": true,
         "on": true,
         "type": "omni",
         "color": "ffbd80",
         "kelvin": 2850,
         "angle": 68.0,
-        "attenuation": 1.7
+        "attenuation": 1.7,
+        "source_size": 0.0,
+        "shadow_blur": 3.0,
+        "falloff": 1.0
       }
     ],
     "stairs": [
@@ -125942,7 +126131,7 @@
           2.78,
           -5.1
         ],
-        "energy": 0.9,
+        "energy": 0.35,
         "range": 4.1,
         "shadow": true,
         "on": true,
@@ -125960,7 +126149,7 @@
           6.72,
           -5.1
         ],
-        "energy": 0.9,
+        "energy": 0.35,
         "range": 4.1,
         "shadow": false,
         "on": true,
@@ -125978,7 +126167,7 @@
           9.96,
           -5.1
         ],
-        "energy": 0.9,
+        "energy": 0.35,
         "range": 4.1,
         "shadow": false,
         "on": true,
@@ -126005,15 +126194,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_056",
@@ -126030,15 +126222,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_057",
@@ -126055,15 +126250,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_058",
@@ -126080,15 +126278,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_059",
@@ -126105,15 +126306,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_060",
@@ -126130,15 +126334,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_061",
@@ -126155,15 +126362,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_062",
@@ -126180,15 +126390,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_063",
@@ -126205,15 +126418,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_064",
@@ -126230,15 +126446,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_065",
@@ -126255,15 +126474,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_066",
@@ -126280,15 +126502,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_067",
@@ -126305,15 +126530,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_068",
@@ -126330,15 +126558,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_069",
@@ -126355,15 +126586,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_070",
@@ -126380,15 +126614,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_071",
@@ -126405,15 +126642,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_072",
@@ -126430,15 +126670,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_073",
@@ -126455,15 +126698,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_074",
@@ -126480,15 +126726,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_075",
@@ -126505,15 +126754,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_076",
@@ -126530,15 +126782,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_077",
@@ -126555,15 +126810,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_078",
@@ -126580,15 +126838,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_079",
@@ -126605,15 +126866,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_080",
@@ -126630,15 +126894,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_081",
@@ -126655,15 +126922,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_082",
@@ -126680,15 +126950,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_083",
@@ -126705,15 +126978,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_084",
@@ -126730,15 +127006,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_085",
@@ -126755,15 +127034,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_086",
@@ -126780,15 +127062,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_087",
@@ -126805,15 +127090,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_088",
@@ -126830,15 +127118,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_089",
@@ -126855,15 +127146,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_090",
@@ -126880,15 +127174,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_091",
@@ -126905,15 +127202,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_092",
@@ -126930,15 +127230,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_093",
@@ -126955,15 +127258,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_094",
@@ -126980,15 +127286,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_095",
@@ -127005,15 +127314,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_096",
@@ -127030,15 +127342,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_097",
@@ -127055,15 +127370,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_098",
@@ -127080,15 +127398,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_099",
@@ -127105,15 +127426,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           0,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_100",
@@ -127130,15 +127454,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_101",
@@ -127155,15 +127482,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_102",
@@ -127180,15 +127510,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_103",
@@ -127205,15 +127538,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           180,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_104",
@@ -127230,15 +127566,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_105",
@@ -127255,15 +127594,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_106",
@@ -127280,15 +127622,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_107",
@@ -127305,15 +127650,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 1
+        "floor": 1,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_108",
@@ -127330,15 +127678,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_109",
@@ -127355,15 +127706,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_110",
@@ -127380,15 +127734,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_111",
@@ -127405,15 +127762,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 2
+        "floor": 2,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_112",
@@ -127430,15 +127790,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_113",
@@ -127455,15 +127818,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_114",
@@ -127480,15 +127846,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       },
       {
         "id": "window_sky_115",
@@ -127505,15 +127874,18 @@
         "type": "spot",
         "color": "dce8f2",
         "kelvin": 4500,
-        "angle": 78.0,
+        "angle": 82.0,
         "attenuation": 1.2,
         "rotation": [
           0,
           -90,
           0
         ],
+        "angle_attenuation": 2.0,
+        "specular": 0.0,
         "sky_fill": true,
-        "floor": 3
+        "floor": 3,
+        "shadow_bias": 0.1
       }
     ]
   },
@@ -129144,9 +129516,25 @@
     ]
   },
   "environment": {
-    "author": "dorm_r5_independent",
-    "default": "evening_A",
+    "author": "dorm_r6_independent",
+    "lighting_revision": "6.1",
+    "default": "evening_B",
     "geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
+    "sun_shadows": {
+      "distance": 90.0,
+      "cascades": 4
+    },
+    "night_exterior": {
+      "default": false,
+      "energy": 0.08,
+      "color": "abc4e6",
+      "rotation": [
+        -35,
+        -35,
+        0
+      ],
+      "shadow_distance": 50.0
+    },
     "cases": [
       {
         "id": "evening_A",
@@ -129171,6 +129559,19 @@
         "time": "overcast",
         "gi": "A",
         "label": "Пасмурно А · SDFGI"
+      },
+      {
+        "id": "night_B",
+        "time": "night",
+        "gi": "B",
+        "label": "Ночь Б · VoxelGI"
+      },
+      {
+        "id": "evening_B_no_windows",
+        "time": "evening",
+        "gi": "B",
+        "windows": false,
+        "label": "Б без оконных источников"
       }
     ],
     "times": {
@@ -129233,53 +129634,102 @@
     },
     "voxel": {
       "subdiv": 2,
-      "energy": 1.0,
+      "energy": 1.05,
       "bias": 0.3,
       "normal_bias": 0.5,
+      "interior": false,
+      "diffuse_proxy": true,
       "volumes": [
         {
           "id": "floor_1",
           "at": [
-            21.7,
-            2.33,
-            -15.0
+            21.705,
+            2.3795,
+            0
           ],
           "size": [
-            46,
-            4.3,
-            51
+            43.85,
+            3.801,
+            18.2
           ],
           "cache": "res://data/blockouts/dorm_voxel/floor_1.res"
         },
         {
-          "id": "floor_2",
+          "id": "annex_1",
           "at": [
-            21.7,
-            5.92,
-            -15.0
+            38.655,
+            2.3795,
+            -24.15
           ],
           "size": [
-            46,
-            3.6,
-            51
+            9.95,
+            3.801,
+            30.14
+          ],
+          "cache": "res://data/blockouts/dorm_voxel/annex_1.res"
+        },
+        {
+          "id": "floor_2",
+          "at": [
+            21.705,
+            5.9695,
+            0
+          ],
+          "size": [
+            43.85,
+            3.101,
+            18.2
           ],
           "cache": "res://data/blockouts/dorm_voxel/floor_2.res"
         },
         {
-          "id": "floor_3",
+          "id": "annex_2",
           "at": [
-            21.7,
-            9.16,
-            -15.0
+            38.655,
+            5.9695,
+            -24.15
           ],
           "size": [
-            46,
-            3.6,
-            51
+            9.95,
+            3.101,
+            30.14
+          ],
+          "cache": "res://data/blockouts/dorm_voxel/annex_2.res"
+        },
+        {
+          "id": "floor_3",
+          "at": [
+            21.705,
+            9.2095,
+            0
+          ],
+          "size": [
+            43.85,
+            3.101,
+            18.2
           ],
           "cache": "res://data/blockouts/dorm_voxel/floor_3.res"
+        },
+        {
+          "id": "annex_3",
+          "at": [
+            38.655,
+            9.2095,
+            -24.15
+          ],
+          "size": [
+            9.95,
+            3.101,
+            30.14
+          ],
+          "cache": "res://data/blockouts/dorm_voxel/annex_3.res"
         }
       ]
+    },
+    "cool_corridors": {
+      "kelvin": 4400,
+      "color": "ffdcb8",
+      "default": false
     },
     "effects": {
       "ssao": true,
@@ -129289,15 +129739,98 @@
       "ssil_radius": 2.0,
       "ssil_intensity": 0.6,
       "fog": true,
-      "fog_density": 0.006,
-      "fog_length": 38.0,
+      "fog_density": 0.0,
+      "fog_length": 32.0,
+      "fog_anisotropy": 0.15,
+      "sun_fog_energy": 8.0,
+      "dust_density": 0.025,
+      "dust_volumes": [
+        {
+          "id": "dust_main_1",
+          "at": [
+            21.705,
+            2.33,
+            0
+          ],
+          "size": [
+            43.4,
+            3.6,
+            17.75
+          ]
+        },
+        {
+          "id": "dust_annex_1",
+          "at": [
+            38.655,
+            2.33,
+            -24.26
+          ],
+          "size": [
+            9.5,
+            3.6,
+            29.47
+          ]
+        },
+        {
+          "id": "dust_main_2",
+          "at": [
+            21.705,
+            5.92,
+            0
+          ],
+          "size": [
+            43.4,
+            2.9,
+            17.75
+          ]
+        },
+        {
+          "id": "dust_annex_2",
+          "at": [
+            38.655,
+            5.92,
+            -24.26
+          ],
+          "size": [
+            9.5,
+            2.9,
+            29.47
+          ]
+        },
+        {
+          "id": "dust_main_3",
+          "at": [
+            21.705,
+            9.16,
+            0
+          ],
+          "size": [
+            43.4,
+            2.9,
+            17.75
+          ]
+        },
+        {
+          "id": "dust_annex_3",
+          "at": [
+            38.655,
+            9.16,
+            -24.26
+          ],
+          "size": [
+            9.5,
+            2.9,
+            29.47
+          ]
+        }
+      ],
       "post": true,
       "tonemap_mode": 2,
       "tonemap_name": "Filmic",
-      "saturation": 0.91,
-      "sharpen": 0.65,
-      "grain": 0.005,
-      "vignette": 0.08,
+      "saturation": 0.88,
+      "sharpen": 0.5,
+      "grain": 0.003,
+      "vignette": 0.15,
       "lut": [
         [
           0,
@@ -129305,28 +129838,34 @@
           0
         ],
         [
-          0.19,
-          0.205,
-          0.22
+          0.15,
+          0.175,
+          0.2
         ],
         [
-          0.475,
-          0.495,
-          0.51
+          0.46,
+          0.485,
+          0.5
         ],
         [
-          0.75,
-          0.755,
-          0.75
+          0.8,
+          0.81,
+          0.79
         ],
         [
           1.0,
           0.99,
-          0.97
+          0.965
         ]
       ]
     },
     "shadow_atlas": 4096,
+    "shadow_quadrants": [
+      16,
+      16,
+      16,
+      16
+    ],
     "active_reflection_limit": 32,
     "notes": "Свои настройки стенда. LightmapGI нет; неподвижная воксельная геометрия, динамические источники."
   }

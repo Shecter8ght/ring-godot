@@ -1,0 +1,21 @@
+{
+	"pass": true,
+	"variants": [
+		{
+			"collision_sha256": "d248bb8020969bba57e303db1cfcae15efb13be0d5bc03918612a500cf039ee3",
+			"collision_shapes": 6286,
+			"meshes": 316,
+			"split_gi_batches": false,
+			"triangle_attributes_sha256": "8256f05566b6071d5cbdd7321343fa571990b01726f223d2e67d660d6d43573b",
+			"triangles": 92460
+		},
+		{
+			"collision_sha256": "d248bb8020969bba57e303db1cfcae15efb13be0d5bc03918612a500cf039ee3",
+			"collision_shapes": 6286,
+			"meshes": 459,
+			"split_gi_batches": true,
+			"triangle_attributes_sha256": "8256f05566b6071d5cbdd7321343fa571990b01726f223d2e67d660d6d43573b",
+			"triangles": 92460
+		}
+	]
+}

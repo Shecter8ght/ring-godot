@@ -1,0 +1,190 @@
+{
+  "revision": 6,
+  "base_commit": "c374f0dc",
+  "material_audit": {
+    "engine": "4.7.2-stable (steam)",
+    "shader_colors_identical_in_bake": true,
+    "signatures": {
+      "shader_green": {
+        "bytes": 57616,
+        "sha256": "1454488246c90e21d255772939e34f80f3a7777bb37dafdba126b30ec0a0b8e9"
+      },
+      "shader_white": {
+        "bytes": 57616,
+        "sha256": "1454488246c90e21d255772939e34f80f3a7777bb37dafdba126b30ec0a0b8e9"
+      },
+      "standard_green": {
+        "bytes": 57616,
+        "sha256": "caad3783a6ccadc1e29490de6f3ce29c51144d254edcc1adfcaf8a6c8a2ee1ea"
+      }
+    },
+    "standard_differs": true
+  },
+  "atlas_ablation_before_exterior_split": [
+    {
+      "trial": "A_default",
+      "override": {},
+      "atlas_quadrants": [
+        2,
+        2,
+        3,
+        4
+      ],
+      "draw_calls_median": 2897.0,
+      "draw_shadow_median": 2475.0,
+      "draw_visible_median": 420.0,
+      "gpu_frame_ms": 3.05799556386293
+    },
+    {
+      "trial": "B_default",
+      "override": {},
+      "atlas_quadrants": [
+        2,
+        2,
+        3,
+        4
+      ],
+      "draw_calls_median": 3990.0,
+      "draw_shadow_median": 3568.0,
+      "draw_visible_median": 420.0,
+      "gpu_frame_ms": 2.90837783515393
+    },
+    {
+      "trial": "B_no_probes",
+      "override": {
+        "probes": false
+      },
+      "atlas_quadrants": [
+        2,
+        2,
+        3,
+        4
+      ],
+      "draw_calls_median": 3991.0,
+      "draw_shadow_median": 3569.0,
+      "draw_visible_median": 420.0,
+      "gpu_frame_ms": 2.92754893718844
+    },
+    {
+      "trial": "B_atlas_mixed",
+      "override": {
+        "atlas_quadrants": [
+          2.0,
+          3.0,
+          3.0,
+          4.0
+        ]
+      },
+      "atlas_quadrants": [
+        2,
+        3,
+        3,
+        4
+      ],
+      "draw_calls_median": 3456.0,
+      "draw_shadow_median": 3034.0,
+      "draw_visible_median": 420.0,
+      "gpu_frame_ms": 2.942202528
+    },
+    {
+      "trial": "B_atlas_equal",
+      "override": {
+        "atlas_quadrants": [
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ]
+      },
+      "atlas_quadrants": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "draw_calls_median": 1136.0,
+      "draw_shadow_median": 714.0,
+      "draw_visible_median": 420.0,
+      "gpu_frame_ms": 2.75550096732026
+    }
+  ],
+  "optical_sun_paths": [
+    {
+      "trial": "A_selected",
+      "view": "01_corridor",
+      "override": {
+        "fog": false,
+        "post": false
+      },
+      "sun_visible_receiver_samples": 0,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "A_selected",
+      "view": "02_room",
+      "override": {
+        "fog": false,
+        "post": false
+      },
+      "sun_visible_receiver_samples": 47,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "A_selected",
+      "view": "04_wash",
+      "override": {
+        "fog": false,
+        "post": false
+      },
+      "sun_visible_receiver_samples": 0,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "B_selected",
+      "view": "02_room",
+      "override": {
+        "fog": false,
+        "post": false
+      },
+      "sun_visible_receiver_samples": 47,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "B_selected",
+      "view": "04_wash",
+      "override": {
+        "fog": false,
+        "post": false
+      },
+      "sun_visible_receiver_samples": 0,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "A_dust_selected",
+      "view": "02_room",
+      "override": {},
+      "sun_visible_receiver_samples": 47,
+      "directional_shadow_sources": 1
+    },
+    {
+      "trial": "A_pcss_ray_check",
+      "view": "01_corridor",
+      "override": {
+        "sun_angular_distance": 0.65
+      },
+      "sun_visible_receiver_samples": 0,
+      "directional_shadow_sources": 1
+    }
+  ],
+  "interpretation": {
+    "geometry": "same triangle/collision hashes; 316 to 459 draw packets",
+    "atlas": "default 4/4/16/64 slots -> equal 16/16/16/16; same 4096 atlas; cached local shadows stable",
+    "limitations": [
+      "B facade remains darker than A",
+      "No physical direct solar path to corridor 204 at authored sun/door poses",
+      "SSIL differences include settling noise; repeat controls retained"
+    ],
+    "selected_voxel_energy": 1.05,
+    "selected_voxel_interior": false
+  }
+}

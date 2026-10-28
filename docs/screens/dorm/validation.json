@@ -1,10 +1,10 @@
 {
 	"checks": [
 		{
-			"check": "Собственный свет редакции 5 загружен, четыре варианта",
+			"check": "Собственный свет редакции 6.1 загружен, шесть вариантов",
 			"details": {
-				"author": "dorm_r5_independent",
-				"default": "evening_A"
+				"author": "dorm_r6_independent",
+				"default": "evening_B"
 			},
 			"pass": true
 		},
@@ -1038,10 +1038,11 @@
 			"pass": true
 		}
 	],
-	"duration_sec": 20.097,
+	"duration_sec": 19.65,
 	"engine": "4.7.2-stable (steam)",
 	"fails": 0,
-	"revision": 5.0,
+	"geometry_revision": 6.0,
+	"revision": 6.1,
 	"scale": {
 		"ceiling_clear": [
 			3.7,

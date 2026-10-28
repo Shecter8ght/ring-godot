@@ -1,0 +1,8270 @@
+[
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_A_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_09_lounge.png",
+		"fog": true,
+		"foot": [
+			20.73,
+			4.42,
+			3.4
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "09_lounge",
+		"look": [
+			27.53,
+			6.04,
+			8.5
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 0.319999992847443,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "overcast_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_overcast_A_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "overcast_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_overcast_A_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "overcast_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_overcast_A_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "overcast_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_overcast_A_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_069",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_070",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_071",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_072",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_073",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_074",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_075",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_076",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_077",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_078",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_079",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_080",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_081",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_082",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 6.095, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_083",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(43.38, 6.095, 0.0)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_084",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 7.715, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_102",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -11.795)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_108",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -16.095)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_109",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -20.395)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_110",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 6.095, -24.695)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_111",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "overcast_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_overcast_A_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 1.0, 1.0, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-40.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": [
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(1.95, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_055",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_056",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(6.0, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_057",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_058",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(10.635, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_059",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_060",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(16.05, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_061",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_062",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_063",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(25.605, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_064",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_065",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(31.215, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_066",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(35.85, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_067",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(40.68, 2.155, 8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_068",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(20.73, 4.125, -8.85)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_101",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -11.795)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_104",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -16.095)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_105",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -20.395)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_106",
+				"specular": 0.0
+			},
+			{
+				"angle": 82.0,
+				"angle_attenuation": 2.0,
+				"at": "(33.93, 2.155, -24.695)",
+				"energy": 1.14999997615814,
+				"id": "window_sky_107",
+				"specular": 0.0
+			}
+		]
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_04_wash.png",
+		"fog": true,
+		"foot": [
+			35.965,
+			4.42,
+			-14.995
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "04_wash",
+		"look": [
+			36.765,
+			5.97,
+			-17.995
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "evening_B_no_windows_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_fov95_05_stairs_bottom.png",
+		"fog": true,
+		"foot": [
+			19.83,
+			0.48,
+			-3.13
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "05_stairs_bottom",
+		"look": [
+			19.83,
+			3.18,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_06_stairs_top.png",
+		"fog": true,
+		"foot": [
+			21.63,
+			4.42,
+			-3.13
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "06_stairs_top",
+		"look": [
+			21.63,
+			2.88,
+			-7.08
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "evening_B_no_windows",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_evening_B_no_windows_14_toilets.png",
+		"fog": true,
+		"foot": [
+			2.0,
+			0.48,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "14_toilets",
+		"look": [
+			2.7,
+			2.03,
+			-7.2
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 3.20000004768372,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_fov95_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B_fov95",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_fov95_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 95.0,
+		"fov_v": 63.0882835388184,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": false
+		},
+		"night_exterior": false,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_moon_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_moon_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_A_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_A_moon_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": true,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": false
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": false
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_moon_01_corridor.png",
+		"fog": true,
+		"foot": [
+			1.95,
+			4.42,
+			0.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "01_corridor",
+		"look": [
+			42.41,
+			6.04,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_moon_02_room.png",
+		"fog": true,
+		"foot": [
+			10.635,
+			4.42,
+			-3.3
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "02_room",
+		"look": [
+			10.635,
+			6.04,
+			-8.88
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	},
+	{
+		"case": "night_B_moon",
+		"cool_corridors": false,
+		"eye_height": 1.62,
+		"file": "light_night_B_moon_08_street.png",
+		"fog": true,
+		"foot": [
+			-7.0,
+			0.0,
+			23.0
+		],
+		"fov_h": 80.0,
+		"fov_v": 50.5340156555176,
+		"id": "08_street",
+		"look": [
+			13.0,
+			5.5,
+			0.0
+		],
+		"moon": {
+			"color": "(0.6706, 0.7686, 0.902, 1.0)",
+			"energy": 0.0799999982118607,
+			"rotation": "(-35.0, -35.0, 0.0)",
+			"visible": true
+		},
+		"night_exterior": true,
+		"post": true,
+		"quality_setting": "high",
+		"revision": 6.1,
+		"sdfgi_actual": false,
+		"shadow_atlas": 4096,
+		"shadow_tiles_per_quadrant": [
+			16,
+			16,
+			16,
+			16
+		],
+		"ssil": false,
+		"sun": {
+			"color": "(1.0, 0.8314, 0.6275, 1.0)",
+			"energy": 0.0,
+			"pcss_angle": 0.0,
+			"rotation": "(-12.0, 145.0, 0.0)",
+			"shadow_distance": 90.0,
+			"shadow_mode": 2
+		},
+		"tonemap": "Filmic",
+		"voxel_actual": [
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_1",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_2",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "floor_3",
+				"interior": false,
+				"visible": true
+			},
+			{
+				"energy": 1.04999995231628,
+				"id": "annex_3",
+				"interior": false,
+				"visible": true
+			}
+		],
+		"window_sources": []
+	}
+]

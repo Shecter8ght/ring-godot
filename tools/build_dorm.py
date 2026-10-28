@@ -50,7 +50,7 @@ def rounded(v):
 
 
 def make_plan():
-    p = {"version": 5, "stage": 1, "greybox": True, "north": "-Z",
+    p = {"version": 6, "stage": 1, "greybox": True, "north": "-Z",
          "purpose": "Общежитие: проверка планировки, масштаба, центральной лестницы и базовой раскраски",
          "bounds": [-11, -46, LENGTH + 13, 24],
          "main_rect": [0,-FACADE,LENGTH,FACADE],

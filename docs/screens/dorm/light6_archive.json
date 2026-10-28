@@ -1,0 +1,577 @@
+{
+  "base_commit": "a34dbea7",
+  "captures": [
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "01_corridor",
+      "fov": 80,
+      "source": "light_evening_A_01_corridor.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A_fov95",
+      "view": "01_corridor",
+      "fov": 95,
+      "source": "light_evening_A_fov95_01_corridor.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "02_room",
+      "fov": 80,
+      "source": "light_evening_A_02_room.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A_fov95",
+      "view": "02_room",
+      "fov": 95,
+      "source": "light_evening_A_fov95_02_room.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "04_wash",
+      "fov": 80,
+      "source": "light_evening_A_04_wash.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "05_stairs_bottom",
+      "fov": 80,
+      "source": "light_evening_A_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A_fov95",
+      "view": "05_stairs_bottom",
+      "fov": 95,
+      "source": "light_evening_A_fov95_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "06_stairs_top",
+      "fov": 80,
+      "source": "light_evening_A_06_stairs_top.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "08_street",
+      "fov": 80,
+      "source": "light_evening_A_08_street.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "09_lounge",
+      "fov": 80,
+      "source": "light_evening_A_09_lounge.png"
+    },
+    {
+      "case": "evening_A",
+      "tag": "evening_A",
+      "view": "14_toilets",
+      "fov": 80,
+      "source": "light_evening_A_14_toilets.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "01_corridor",
+      "fov": 80,
+      "source": "light_evening_B_01_corridor.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B_fov95",
+      "view": "01_corridor",
+      "fov": 95,
+      "source": "light_evening_B_fov95_01_corridor.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "02_room",
+      "fov": 80,
+      "source": "light_evening_B_02_room.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B_fov95",
+      "view": "02_room",
+      "fov": 95,
+      "source": "light_evening_B_fov95_02_room.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "04_wash",
+      "fov": 80,
+      "source": "light_evening_B_04_wash.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "05_stairs_bottom",
+      "fov": 80,
+      "source": "light_evening_B_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B_fov95",
+      "view": "05_stairs_bottom",
+      "fov": 95,
+      "source": "light_evening_B_fov95_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "06_stairs_top",
+      "fov": 80,
+      "source": "light_evening_B_06_stairs_top.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "08_street",
+      "fov": 80,
+      "source": "light_evening_B_08_street.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "09_lounge",
+      "fov": 80,
+      "source": "light_evening_B_09_lounge.png"
+    },
+    {
+      "case": "evening_B",
+      "tag": "evening_B",
+      "view": "14_toilets",
+      "fov": 80,
+      "source": "light_evening_B_14_toilets.png"
+    },
+    {
+      "case": "overcast_A",
+      "tag": "overcast_A",
+      "view": "04_wash",
+      "fov": 80,
+      "source": "light_overcast_A_04_wash.png"
+    },
+    {
+      "case": "overcast_A",
+      "tag": "overcast_A",
+      "view": "05_stairs_bottom",
+      "fov": 80,
+      "source": "light_overcast_A_05_stairs_bottom.png"
+    },
+    {
+      "case": "overcast_A",
+      "tag": "overcast_A_fov95",
+      "view": "05_stairs_bottom",
+      "fov": 95,
+      "source": "light_overcast_A_fov95_05_stairs_bottom.png"
+    },
+    {
+      "case": "overcast_A",
+      "tag": "overcast_A",
+      "view": "06_stairs_top",
+      "fov": 80,
+      "source": "light_overcast_A_06_stairs_top.png"
+    },
+    {
+      "case": "overcast_A",
+      "tag": "overcast_A",
+      "view": "14_toilets",
+      "fov": 80,
+      "source": "light_overcast_A_14_toilets.png"
+    },
+    {
+      "case": "evening_B_no_windows",
+      "tag": "evening_B_no_windows",
+      "view": "04_wash",
+      "fov": 80,
+      "source": "light_evening_B_no_windows_04_wash.png"
+    },
+    {
+      "case": "evening_B_no_windows",
+      "tag": "evening_B_no_windows",
+      "view": "05_stairs_bottom",
+      "fov": 80,
+      "source": "light_evening_B_no_windows_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_B_no_windows",
+      "tag": "evening_B_no_windows_fov95",
+      "view": "05_stairs_bottom",
+      "fov": 95,
+      "source": "light_evening_B_no_windows_fov95_05_stairs_bottom.png"
+    },
+    {
+      "case": "evening_B_no_windows",
+      "tag": "evening_B_no_windows",
+      "view": "06_stairs_top",
+      "fov": 80,
+      "source": "light_evening_B_no_windows_06_stairs_top.png"
+    },
+    {
+      "case": "evening_B_no_windows",
+      "tag": "evening_B_no_windows",
+      "view": "14_toilets",
+      "fov": 80,
+      "source": "light_evening_B_no_windows_14_toilets.png"
+    },
+    {
+      "case": "night_A",
+      "tag": "night_A",
+      "view": "01_corridor",
+      "fov": 80,
+      "source": "light_night_A_01_corridor.png"
+    },
+    {
+      "case": "night_A",
+      "tag": "night_A_fov95",
+      "view": "01_corridor",
+      "fov": 95,
+      "source": "light_night_A_fov95_01_corridor.png"
+    },
+    {
+      "case": "night_A",
+      "tag": "night_A",
+      "view": "02_room",
+      "fov": 80,
+      "source": "light_night_A_02_room.png"
+    },
+    {
+      "case": "night_A",
+      "tag": "night_A_fov95",
+      "view": "02_room",
+      "fov": 95,
+      "source": "light_night_A_fov95_02_room.png"
+    },
+    {
+      "case": "night_A",
+      "tag": "night_A",
+      "view": "08_street",
+      "fov": 80,
+      "source": "light_night_A_08_street.png"
+    },
+    {
+      "case": "night_B",
+      "tag": "night_B",
+      "view": "01_corridor",
+      "fov": 80,
+      "source": "light_night_B_01_corridor.png"
+    },
+    {
+      "case": "night_B",
+      "tag": "night_B_fov95",
+      "view": "01_corridor",
+      "fov": 95,
+      "source": "light_night_B_fov95_01_corridor.png"
+    },
+    {
+      "case": "night_B",
+      "tag": "night_B",
+      "view": "02_room",
+      "fov": 80,
+      "source": "light_night_B_02_room.png"
+    },
+    {
+      "case": "night_B",
+      "tag": "night_B_fov95",
+      "view": "02_room",
+      "fov": 95,
+      "source": "light_night_B_fov95_02_room.png"
+    },
+    {
+      "case": "night_B",
+      "tag": "night_B",
+      "view": "08_street",
+      "fov": 80,
+      "source": "light_night_B_08_street.png"
+    }
+  ],
+  "files": [
+    {
+      "source": "light_evening_A_01_corridor.png",
+      "before": "light6_evening_A_01_corridor.png",
+      "sha256": "3684f48c3f93000bbfb8efd8318cccd82ce3de88ed203b189214744b36b1610f",
+      "bytes": 1294319
+    },
+    {
+      "source": "light_evening_A_fov95_01_corridor.png",
+      "before": "light6_evening_A_fov95_01_corridor.png",
+      "sha256": "bd85da798f1d709c2db786343a3a1ba195a22ddabba5a19276935d08c46de076",
+      "bytes": 1284048
+    },
+    {
+      "source": "light_evening_A_02_room.png",
+      "before": "light6_evening_A_02_room.png",
+      "sha256": "4a16e2c26419038132b203b10b5897d57dab844417fb06c1de12c73bbef51233",
+      "bytes": 1525314
+    },
+    {
+      "source": "light_evening_A_fov95_02_room.png",
+      "before": "light6_evening_A_fov95_02_room.png",
+      "sha256": "f960d2496d67f8f6dad87bb12c7e1fb1281f736db981437b0c67e2fed999f2aa",
+      "bytes": 1593183
+    },
+    {
+      "source": "light_evening_A_04_wash.png",
+      "before": "light6_evening_A_04_wash.png",
+      "sha256": "1c6440671bf238dc2907a5da018cdafa02b8a9b2f3107b33b29c209ce6150262",
+      "bytes": 1644249
+    },
+    {
+      "source": "light_evening_A_05_stairs_bottom.png",
+      "before": "light6_evening_A_05_stairs_bottom.png",
+      "sha256": "edeca5e500296b0fdd8bf4b15fd8837bb1efbb1fa13e7e08612b5754f527696b",
+      "bytes": 1454188
+    },
+    {
+      "source": "light_evening_A_fov95_05_stairs_bottom.png",
+      "before": "light6_evening_A_fov95_05_stairs_bottom.png",
+      "sha256": "16d67982f6c4f13a3af4a8aede14978c2a5c94c296612d60ab7ac3840837290f",
+      "bytes": 1477631
+    },
+    {
+      "source": "light_evening_A_06_stairs_top.png",
+      "before": "light6_evening_A_06_stairs_top.png",
+      "sha256": "5205271ab3b7033451580cd8cd5bff2ed8565d2af2d0391b7267faa5b072d8ea",
+      "bytes": 1474065
+    },
+    {
+      "source": "light_evening_A_08_street.png",
+      "before": "light6_evening_A_08_street.png",
+      "sha256": "73676b6a3c1519057f22110b0a0372dc3475bc6fd3bc588e23a7575164cdefae",
+      "bytes": 1661462
+    },
+    {
+      "source": "light_evening_A_09_lounge.png",
+      "before": "light6_evening_A_09_lounge.png",
+      "sha256": "aea666e8945eca1b39e5d58bbbe1ce7e517ee4deca3ada6f0d178abeed6a2930",
+      "bytes": 1175157
+    },
+    {
+      "source": "light_evening_A_14_toilets.png",
+      "before": "light6_evening_A_14_toilets.png",
+      "sha256": "e806111ecff93dfe8de14440d154e658431765bcb5f4013b560873a14b970ae1",
+      "bytes": 1678362
+    },
+    {
+      "source": "light_evening_B_01_corridor.png",
+      "before": "light6_evening_B_01_corridor.png",
+      "sha256": "77e02966220f5478d84d1a24146264c8db8c052a61a0b06f0ccd79f552a20aad",
+      "bytes": 1383088
+    },
+    {
+      "source": "light_evening_B_fov95_01_corridor.png",
+      "before": "light6_evening_B_fov95_01_corridor.png",
+      "sha256": "5c382670e7073b77681d1a2d3d1098851d0316ba74064bb2965c3ff400e57e69",
+      "bytes": 1385614
+    },
+    {
+      "source": "light_evening_B_02_room.png",
+      "before": "light6_evening_B_02_room.png",
+      "sha256": "f5f7dac47aac96cb4100dbdf3688e3d04623ee5e8fb594a36b34d82997d54690",
+      "bytes": 1489304
+    },
+    {
+      "source": "light_evening_B_fov95_02_room.png",
+      "before": "light6_evening_B_fov95_02_room.png",
+      "sha256": "e61637b0fa03328a8f032be3406efc1992206255b7361e3677e03dc5e1609fe9",
+      "bytes": 1604032
+    },
+    {
+      "source": "light_evening_B_04_wash.png",
+      "before": "light6_evening_B_04_wash.png",
+      "sha256": "353c5b48eab17be8ac9ad706aee2b0003f13e6cb5d974cc3d15c9ea048a800df",
+      "bytes": 1645667
+    },
+    {
+      "source": "light_evening_B_05_stairs_bottom.png",
+      "before": "light6_evening_B_05_stairs_bottom.png",
+      "sha256": "fe92b0f31683df4f253a3b14b3ca0ffbab5c41f899807b90cb4f0b5180a913e6",
+      "bytes": 1516482
+    },
+    {
+      "source": "light_evening_B_fov95_05_stairs_bottom.png",
+      "before": "light6_evening_B_fov95_05_stairs_bottom.png",
+      "sha256": "b8428da1b3241eea93d1e8921f3e7004d518d0e2cb4ffdebd64fa1af271b3358",
+      "bytes": 1525940
+    },
+    {
+      "source": "light_evening_B_06_stairs_top.png",
+      "before": "light6_evening_B_06_stairs_top.png",
+      "sha256": "58e6d6ef47024a3d4c046ed0b58f8c4a7ac9dde856db04494fbcb8aa47149d6e",
+      "bytes": 1568546
+    },
+    {
+      "source": "light_evening_B_08_street.png",
+      "before": "light6_evening_B_08_street.png",
+      "sha256": "114dfcdd1fa3c9d124a5cf903f65fe33e2c766818b547fb6514904b03d37f941",
+      "bytes": 1573870
+    },
+    {
+      "source": "light_evening_B_09_lounge.png",
+      "before": "light6_evening_B_09_lounge.png",
+      "sha256": "47426762b3cffc8aa843396f6a3106c56c644f9a614a94cc30c9e9e84b1cea39",
+      "bytes": 1201303
+    },
+    {
+      "source": "light_evening_B_14_toilets.png",
+      "before": "light6_evening_B_14_toilets.png",
+      "sha256": "4fbed5f8f836ea4d1475cb4587d0cbb1882b60b326af23f5c138562bd326bfd5",
+      "bytes": 1841712
+    },
+    {
+      "source": "light_overcast_A_04_wash.png",
+      "before": "light6_overcast_A_04_wash.png",
+      "sha256": "6255b0bef8ce37aa10276a7e6ded084dcdbe79f43ca42bd8895c574827a6c2d9",
+      "bytes": 1714339
+    },
+    {
+      "source": "light_overcast_A_05_stairs_bottom.png",
+      "before": "light6_overcast_A_05_stairs_bottom.png",
+      "sha256": "6efb8b939e786020edfb64bd90d7693be3386b98642cbf9779917807057df58c",
+      "bytes": 1683079
+    },
+    {
+      "source": "light_overcast_A_fov95_05_stairs_bottom.png",
+      "before": "light6_overcast_A_fov95_05_stairs_bottom.png",
+      "sha256": "b43d634ac655d20083c1a285b48df045646e5cc17c698c46b28f5fc7c3a3146a",
+      "bytes": 1740935
+    },
+    {
+      "source": "light_overcast_A_06_stairs_top.png",
+      "before": "light6_overcast_A_06_stairs_top.png",
+      "sha256": "73eda61c7b6a34ec1c50682f90f1067fa608db7b57c0d010949ed6ce8fc9710f",
+      "bytes": 1898210
+    },
+    {
+      "source": "light_overcast_A_14_toilets.png",
+      "before": "light6_overcast_A_14_toilets.png",
+      "sha256": "aa1a50a6fc725e27539542c0a2b429cb014f1d75f8f21ba60b9a20a7234ee290",
+      "bytes": 1790442
+    },
+    {
+      "source": "light_evening_B_no_windows_04_wash.png",
+      "before": "light6_evening_B_no_windows_04_wash.png",
+      "sha256": "7c5632bcdde7079272f88cd534906701a9dc621a68d5da29f874da1ca8274f9d",
+      "bytes": 1643732
+    },
+    {
+      "source": "light_evening_B_no_windows_05_stairs_bottom.png",
+      "before": "light6_evening_B_no_windows_05_stairs_bottom.png",
+      "sha256": "910db312fe0a357d20fa4fa6103c98c9ad686aea90b64b40eaa21f7e926d971f",
+      "bytes": 1337715
+    },
+    {
+      "source": "light_evening_B_no_windows_fov95_05_stairs_bottom.png",
+      "before": "light6_evening_B_no_windows_fov95_05_stairs_bottom.png",
+      "sha256": "cb4e55e67a36a06528870fdb12c79a823212eaf282aa38032ff401b59a109324",
+      "bytes": 1327430
+    },
+    {
+      "source": "light_evening_B_no_windows_06_stairs_top.png",
+      "before": "light6_evening_B_no_windows_06_stairs_top.png",
+      "sha256": "a60d11434aa7fe2dd38aa1939951e4c3a8bb93b5bf12f6e40bbf9c9e571802e8",
+      "bytes": 1261646
+    },
+    {
+      "source": "light_evening_B_no_windows_14_toilets.png",
+      "before": "light6_evening_B_no_windows_14_toilets.png",
+      "sha256": "2f854c84e0ef9436a626a9a946c75b9cd8d62f703fa351b62676f9800478d466",
+      "bytes": 1653793
+    },
+    {
+      "source": "light_night_A_01_corridor.png",
+      "before": "light6_night_A_01_corridor.png",
+      "sha256": "60f93b7adbe881c9412453cd78d836ca14f82790db7687feb35e125394d02009",
+      "bytes": 1325458
+    },
+    {
+      "source": "light_night_A_fov95_01_corridor.png",
+      "before": "light6_night_A_fov95_01_corridor.png",
+      "sha256": "4795718730730cd47014583a70a98868adfde904775a2d64b2ddadfc2abef7f3",
+      "bytes": 1290225
+    },
+    {
+      "source": "light_night_A_02_room.png",
+      "before": "light6_night_A_02_room.png",
+      "sha256": "38a25c445615660154f3157f7c3bc69ad90ce454d5c4913fec24a1fbba77439b",
+      "bytes": 128969
+    },
+    {
+      "source": "light_night_A_fov95_02_room.png",
+      "before": "light6_night_A_fov95_02_room.png",
+      "sha256": "037925b7bed372bafb27c4e85b7882386abe5494684a94ee246fe2e225ab722e",
+      "bytes": 107880
+    },
+    {
+      "source": "light_night_A_08_street.png",
+      "before": "light6_night_A_08_street.png",
+      "sha256": "08e516488c61ff22b5700ac6e63e7df99ff7e203a98bdd815bdf5267d8e09645",
+      "bytes": 278706
+    },
+    {
+      "source": "light_night_B_01_corridor.png",
+      "before": "light6_night_B_01_corridor.png",
+      "sha256": "6dc93fd23645b091cd10231a44b40b50fa4095108163b6c5aae54302165b2330",
+      "bytes": 1347458
+    },
+    {
+      "source": "light_night_B_fov95_01_corridor.png",
+      "before": "light6_night_B_fov95_01_corridor.png",
+      "sha256": "e691d6dbb9e1709746a771e9b7248ff0a49dbd793d3d461eaa6c86f20216dbdf",
+      "bytes": 1324132
+    },
+    {
+      "source": "light_night_B_02_room.png",
+      "before": "light6_night_B_02_room.png",
+      "sha256": "bb0aabbdfa2001f293eff871312825f376b967c7b4e2bc359011fcd4435cfd6f",
+      "bytes": 864346
+    },
+    {
+      "source": "light_night_B_fov95_02_room.png",
+      "before": "light6_night_B_fov95_02_room.png",
+      "sha256": "37c294fe76140f36c3b41cf7e39f20e222dd89ded9d0ec8d5e96530b84054554",
+      "bytes": 829007
+    },
+    {
+      "source": "light_night_B_08_street.png",
+      "before": "light6_night_B_08_street.png",
+      "sha256": "3b480804ea2ab3fa62537a4ae5fa01babea6559f8da086ba4df8c452fa2ec4ae",
+      "bytes": 324966
+    },
+    {
+      "source": "light_views.json",
+      "before": "light6_views.json",
+      "sha256": "d49b1d96aea116e6f61d4fd96c8f8b6fbd234cf9f8031c801317b9d9e1703600",
+      "bytes": 167866
+    },
+    {
+      "source": "light_performance.json",
+      "before": "light6_performance.json",
+      "sha256": "1e7c14ead15d74639b132d07662af7e24ac60a52cb2d7b8f1209d8f6a06753c3",
+      "bytes": 299614
+    },
+    {
+      "source": "r6_calibration/A_02_room.png",
+      "before": "light6_calibration_A_02_room.png",
+      "sha256": "940fc05d449cea1e84637f69ea88c04861b60fbdddad374d353f03e25b750095",
+      "bytes": 757674
+    },
+    {
+      "source": "r6_calibration/B_02_room.png",
+      "before": "light6_calibration_B_02_room.png",
+      "sha256": "5da49b6771fdebdd4436c063062ad6d56d76a92d3645a2d43b458fe26004f108",
+      "bytes": 786644
+    }
+  ]
+}
