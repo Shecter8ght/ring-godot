@@ -236,11 +236,43 @@ def weight_layer(bm):
     return bm.edges.layers.float.get("bevel_weight_edge") or bm.edges.layers.float.new("bevel_weight_edge")
 
 
+def uv_metric(bm) -> None:
+    """Развёртка в метрах: грань проецируется по своей главной оси; у каждой связной детали ось U —
+    вдоль её длинной стороны (волокна дерева вдоль бруска, если она лежит в плоскости грани)."""
+    uv = bm.loops.layers.uv.verify()
+    bm.normal_update()
+    seen = set()
+    for start in bm.faces:
+        if start in seen:
+            continue
+        comp, stack = [], [start]
+        seen.add(start)
+        while stack:
+            f = stack.pop()
+            comp.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g not in seen:
+                        seen.add(g)
+                        stack.append(g)
+        verts = {v for f in comp for v in f.verts}
+        dims = [max(v.co[i] for v in verts) - min(v.co[i] for v in verts) for i in range(3)]
+        grain = max(range(3), key=lambda i: dims[i])
+        for f in comp:
+            ax = max(range(3), key=lambda i: abs(f.normal[i]))
+            plane = [i for i in range(3) if i != ax]
+            u_ax = grain if grain in plane else plane[0]
+            v_ax = plane[1] if u_ax == plane[0] else plane[0]
+            for loop in f.loops:
+                loop[uv].uv = (loop.vert.co[u_ax], loop.vert.co[v_ax])
+
+
 def finish_bm(bm, name: str, coll, mat, parent=None, bevel: float = 0.0, segs: int = 2,
               angle: float = 35.0, by_weight: bool = False, smooth_angle: float = 35.0) -> bpy.types.Object:
-    """bmesh → объект: нормали наружу, гладкое затенение по углу, фаска модификатором."""
+    """bmesh → объект: нормали наружу, развёртка в метрах, гладкое затенение по углу, фаска модификатором."""
     # Касающиеся бруски не склеиваем: общие вершины сделали бы рёбра неразделимыми (non-manifold).
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    uv_metric(bm)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()

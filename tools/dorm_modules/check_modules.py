@@ -31,6 +31,11 @@ VIEWS = {
     "stair_core": ((14.8, -11.6, 2.9), (12.0, -7.3, 1.3), 22),
     "stair_rail": ((10.9, -5.5, 3.0), (12.0, -6.95, 2.5), 28),
     "ceiling_seam": ((2.6, -8.9, 1.7), (2.2, -7.6, 3.0), 24),
+    "wall_close": ((0.4, -8.4, 1.3), (-0.3, -9.7, 1.2), 28),
+    "wall_upper": ((3.9, -7.6, 1.7), (4.6, -6.3, 2.5), 30),
+    "floor_close": ((1.0, -7.4, 1.4), (2.0, -8.3, 0.0), 30),
+    "shower": ((42.3, -7.6, 1.6), (40.4, -5.6, 1.0), 22),
+    "shower_floor": ((41.6, -7.0, 1.2), (41.0, -5.9, 0.0), 30),
     "flight_side": ((16.0, 2.5, 1.2), (17.0, -0.5, 0.9), 28),
 }
 
@@ -57,10 +62,12 @@ def audit() -> dict:
     return report
 
 
-def render(out_dir: str, names: list) -> None:
+def render(out_dir: str, names: list, eevee: bool = False) -> None:
+    """Workbench — для формы; eevee — с материалами и светом студии файла (кадры tex_*)."""
     sc = bpy.context.scene
-    sc.render.engine = "BLENDER_WORKBENCH"
+    sc.render.engine = "BLENDER_EEVEE" if eevee else "BLENDER_WORKBENCH"
     sc.render.resolution_x, sc.render.resolution_y = 1280, 800
+    prefix = "tex_" if eevee else "check_"
     sh = sc.display.shading
     sh.light = "STUDIO"
     sh.color_type = "MATERIAL"
@@ -79,12 +86,14 @@ def render(out_dir: str, names: list) -> None:
         cam.location = eye
         cam.rotation_euler = (Vector(target) - Vector(eye)).to_track_quat("-Z", "Y").to_euler()
         cam.data.lens = lens
-        sc.render.filepath = os.path.join(out_dir, f"check_{name}.png")
+        sc.render.filepath = os.path.join(out_dir, f"{prefix}{name}.png")
         bpy.ops.render.render(write_still=True)
 
 
 if __name__ == "__main__":
     argv = sys.argv[sys.argv.index("--") + 1:]
+    eevee = "--eevee" in argv
+    argv = [a for a in argv if a != "--eevee"]
     out_dir = argv[0]
     os.makedirs(out_dir, exist_ok=True)
     rep = audit()
@@ -92,4 +101,4 @@ if __name__ == "__main__":
         json.dump(rep, f, ensure_ascii=False, indent=1)
     bad = {k: v["open_edges"] for k, v in rep.items() if v["open_edges"]}
     print("objects", len(rep), "tris", sum(v["tris"] for v in rep.values()), "open", json.dumps(bad, ensure_ascii=False))
-    render(out_dir, argv[1:] or list(VIEWS))
+    render(out_dir, argv[1:] or list(VIEWS), eevee)
