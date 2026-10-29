@@ -970,8 +970,8 @@ static func _approach_angle(from: float, to: float, delta: float, sec: float) ->
 
 
 ## Смерть: клип по обстоятельствам — выстрел в голову, со стороны, в приседе, лёжа, взрыв
-## (Player / Marauder выбирают death_clip и зовут один раз). Модель остаётся лежать в последнем
-## кадре — это тот же персонаж, без манекена.
+## (Player выбирает death_clip и зовёт один раз; враги используют ragdoll). Модель остаётся лежать
+## в последнем кадре — это тот же персонаж, без манекена.
 func die(clip: String) -> void:
 	if _tree == null:
 		return

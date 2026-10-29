@@ -90,8 +90,36 @@ func _ready() -> void:
 			m._crate.items = []
 	await _measure("разобрали ящики", 120)
 	await _measure("лежат 8 с", 480)
+	await _fallback_death(level, (bots[0] as Marauder).global_position + Vector3(0.0, 0.0, 3.0))
 	print("ragdoll_test: %s, провалов %d" % ["OK" if _fails == 0 else "FAIL", _fails])
 	get_tree().quit(1 if _fails > 0 else 0)
+
+
+## Несовместимый скелет раньше включал клип смерти: теперь и здесь тело падает только физикой.
+func _fallback_death(level: Node3D, at: Vector3) -> void:
+	var m := (load("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder
+	m.name = "FallbackDeath"
+	level.get_node("Marauders").add_child(m)
+	m.global_position = at
+	var anim := m.get_node("CharacterAnimator") as CharacterAnimator
+	var source_model := anim._model
+	# Отдельный скелет без скина: несовместимые имена не ломают привязку сеток исходной модели.
+	var model := Node3D.new()
+	var sk := Skeleton3D.new()
+	sk.add_bone("unsupported_Hips")
+	model.add_child(sk)
+	m._body.add_child(model)
+	anim._model = model
+	await _kill(m, at + Vector3(8.0, 1.5, 2.0), 10000.0, "head")
+	_check("несовместимый скелет: смерть без клипа, запасной регдолл", m.state == Marauder.State.DEAD
+		and is_instance_valid(m._ragdoll) and m._ragdoll.is_in_group("ragdolls") and not m._body.visible
+		and not anim._pose.begins_with("death"))
+	# Повторная обработка синхронизированной смерти не создаёт второе тело.
+	var body := m._ragdoll
+	m._process(0.016)
+	_check("повторная обработка смерти: тот же регдолл", m._ragdoll == body and is_instance_valid(body))
+	anim._model = source_model
+	model.queue_free()
 
 
 func _kill(m: Marauder, from: Vector3, dmg: float, zone: String, down_only: bool = false) -> void:

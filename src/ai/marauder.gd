@@ -208,7 +208,7 @@ var dragged_by: Marauder = null
 var _main_gun: Node3D
 var _help_t: float = 0.0
 var _shown_down: bool = false
-## Смерть уже показана клипом (регдолла нет — CharacterAnimator.die).
+## На модели уже запущен SkinRagdoll — отдельный манекен не нужен.
 var _died_shown: bool = false
 var _torch: SpotLight3D
 var _torch_t: float = 0.0
@@ -2853,15 +2853,14 @@ func _process(delta: float) -> void:
 			_main_gun.visible = not _shown_down
 		# у клиентов пули ищут тело своей физикой — коллизия лежащего тоже низкая
 		_apply_shape()
-	if not _health.alive and _ragdoll == null:
+	if not _health.alive and _ragdoll == null and not _died_shown:
 		collision_layer = 0
 		collision_mask = 0
 		_spawn_ragdoll()
 
 
-## Смерть: капсула прячется, модель падает клипом смерти по обстоятельствам (откуда стреляли,
-## в голову, в приседе, раненым, взрыв) и остаётся лежать — тот же персонаж, не манекен. Без модели
-## Persona — прежний регдолл, толкнутый от стрелявшего.
+## Смерть сразу отдаёт текущую позу модели физике. Если модель или её скелет недоступны —
+## запасной регдолл; анимации смерти у врагов не используются.
 func _spawn_ragdoll() -> void:
 	if _ragdoll != null or _died_shown:
 		return
@@ -2871,27 +2870,26 @@ func _spawn_ragdoll() -> void:
 		slung.clear()
 	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
 	if anim and anim.has_model():
-		_died_shown = true
 		# корпус ровно; масштаб — как у типа (присед сжимал тело по высоте — физике нужен ровный)
 		_body.rotation.x = 0.0
 		_body.scale = _base_scale
 		# умер — умер: тело падает регдоллом той же модели (поза — с последнего кадра), толчок — от
-		# стрелявшего (у клиента направления нет — падает само); нет физкостей — клип смерти
+		# стрелявшего (у клиента направления нет — падает само)
 		var away := global_position - _last_hit_from if _last_hit_from != Vector3.ZERO else Vector3.ZERO
 		away.y = 0.0
 		var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
 		var imp := away.normalized() * (float(push.base) + float(push.per_damage) * _last_damage) if away.length() > 0.01 else Vector3.ZERO
-		if not anim.ragdoll(velocity, imp * 4.0, global_position + Vector3.UP * 1.2):
-			anim.die(anim.death_clip(_last_hit_from, _health.last_zone, crouched, false))
-		# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
-		if _main_gun:
-			_main_gun.visible = false
-		velocity = Vector3.ZERO
-		if _say_label:
-			_say_label.visible = false
-		Audio.play("death", global_position + Vector3.UP * 1.5)
-		Audio.play("fall", global_position, -4.0)
-		return
+		if anim.ragdoll(velocity, imp * 4.0, global_position + Vector3.UP * 1.2):
+			_died_shown = true
+			# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
+			if _main_gun:
+				_main_gun.visible = false
+			velocity = Vector3.ZERO
+			if _say_label:
+				_say_label.visible = false
+			Audio.play("death", global_position + Vector3.UP * 1.5)
+			Audio.play("fall", global_position, -4.0)
+			return
 	var mat := (_body.get_node("Torso") as MeshInstance3D).get_surface_override_material(0)
 	var away := global_position - _last_hit_from
 	away.y = 0.0
