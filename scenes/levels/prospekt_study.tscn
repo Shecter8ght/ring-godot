@@ -926,19 +926,19 @@ label = "ЖК «Вершина» · стилобат: офисы, фитнес (
 
 [node name="Vershina_T1" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 36.0, 9.3, -66.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 40.0, 9.3, -72.0)
 
 script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(22.0, 22.0)
+footprint = Vector2(40.0, 24.0)
 
-floors = 42
+floors = 44
 
 story_height = 3.3
 
-label = "ЖК «Вершина», башня 1 — 42 этажа"
+label = "ЖК «Вершина», башня 1 — пластина, 44 этажа"
 
 open_floors = 0
 
@@ -950,19 +950,19 @@ metadata/lift = 9.3
 
 [node name="Vershina_T2" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 76.0, 9.3, -66.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 80.0, 9.3, -62.0)
 
 script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(20.0, 20.0)
+footprint = Vector2(30.0, 30.0)
 
-floors = 34
+floors = 58
 
 story_height = 3.3
 
-label = "ЖК «Вершина», башня 2 — 34 этажа"
+label = "ЖК «Вершина», башня 2 — 58 этажей"
 
 open_floors = 0
 
@@ -974,19 +974,19 @@ metadata/lift = 9.3
 
 [node name="Vershina_T3" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 128.0, 0.0, -78.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 130.0, 0.0, -71.0)
 
 script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(24.0, 24.0)
+footprint = Vector2(28.0, 32.0)
 
-floors = 48
+floors = 52
 
 story_height = 3.3
 
-label = "ЖК «Вершина», башня 3 — 48 этажей"
+label = "ЖК «Вершина», башня 3 — 52 этажа"
 
 open_floors = 0
 
@@ -996,19 +996,19 @@ glass_bands = true
 
 [node name="Vershina_T4" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 130.0, 0.0, -30.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 128.0, 0.0, -30.0)
 
 script = ExtResource("flats")
 
 kind = "mass"
 
-footprint = Vector2(20.0, 20.0)
+footprint = Vector2(42.0, 24.0)
 
-floors = 30
+floors = 36
 
 story_height = 3.3
 
-label = "ЖК «Вершина», башня 4 — 30 этажей"
+label = "ЖК «Вершина», башня 4 — широкая, 36 этажей"
 
 open_floors = 0
 

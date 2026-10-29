@@ -240,8 +240,13 @@ func _draw_map() -> void:
 		if ep == null:
 			continue
 		var s := _to_screen(Vector2(ep.global_position.x, ep.global_position.z))
-		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -11), s + Vector2(10, 7), s + Vector2(-10, 7)]), Color(0.2, 0.75, 0.35))
-		_label(s + Vector2(0, 20), ep.display_name, 13, Color(0.55, 1.0, 0.65))
+		# закрыт в этом рейде — серый с пометкой; с условием (рубильник, ключ, без рюкзака) — жёлтый; открыт — зелёный
+		var shut := Raid.current != null and Raid.current.closed_exits.has(String(ep.name))
+		var cond := ep.required_switch != "" or ep.required_key != "" or ep.no_backpack
+		var fill := Color(0.45, 0.45, 0.45) if shut else (Color(0.95, 0.75, 0.2) if cond else Color(0.2, 0.75, 0.35))
+		var text_col := Color(0.6, 0.6, 0.6) if shut else (Color(1.0, 0.85, 0.45) if cond else Color(0.55, 1.0, 0.65))
+		_canvas.draw_colored_polygon(PackedVector2Array([s + Vector2(0, -11), s + Vector2(10, 7), s + Vector2(-10, 7)]), fill)
+		_label(s + Vector2(0, 20), ep.display_name + (" · закрыт" if shut else ""), 13, text_col)
 	# свет ТЦ: главный рубильник и генератор — ромб (генератор встал — красный)
 	var power_labels: Array[Rect2] = []
 	for n in get_tree().get_nodes_in_group("power_points"):

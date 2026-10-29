@@ -1278,7 +1278,7 @@ func _pick_loot() -> bool:
 	var best_s := INF
 	for n in get_tree().get_nodes_in_group("loot_containers"):
 		var c := n as LootContainer
-		if c == null or (c.rolled and c.items.is_empty()) or _visited.has(c.get_instance_id()):
+		if c == null or (c.rolled and c.items.is_empty()) or not c.ai_may_search() or _visited.has(c.get_instance_id()):
 			continue
 		var claim: Array = _loot_claims.get(c.get_instance_id(), [])
 		if not claim.is_empty() and is_instance_valid(claim[0]) and claim[0] != self and now - int(claim[1]) < int(Balance.AI_LOOT_CLAIM_SEC * 1000.0):

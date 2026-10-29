@@ -18,6 +18,12 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 @export var search_s: float = 2.0
 ## У авторской мебели точка стоит перед фасадом: стену соседней комнаты обыском не пройти.
 @export var require_line_of_sight: bool = false
+## Заперт: открыть может тот, у кого в рюкзаке ключ с этим id (data/items.json); пусто — не заперт.
+@export var required_key: String = ""
+## Электрозамок: открывается только при включённом рубильнике с этим id (PowerSwitch); пусто — питание не нужно.
+@export var required_switch: String = ""
+## Схрон: в рейде открыта случайная часть схронов карты (Raid.roll_stashes), остальные пусты и не видны.
+@export var stash: bool = false
 ## Как выглядит (у контейнеров на пропсах — NONE: вид даёт сам проп).
 @export var look: Look = Look.NONE:
 	set(v):
@@ -31,6 +37,14 @@ var items: Array = []:
 		items = value
 		_contents_changed()
 var rolled: bool = false
+## Открыт ключом / при питании — дальше открыт для всех (хост, синхронизируется).
+var unlocked: bool = false
+## Схрон в этом рейде закрыт: пуст и не виден (бросает хост при старте).
+var stash_off: bool = false:
+	set(v):
+		stash_off = v
+		if not Engine.is_editor_hint():
+			visible = not v
 ## Сетка ящика: Balance.LOOT_GRID_W × рядов по виду (бросок не влез — рядов больше). Задаётся, когда
 ## появляется содержимое (place_all); у всех peer одинаково.
 var grid: Vector2i = Vector2i.ZERO
@@ -53,7 +67,7 @@ func _ready() -> void:
 			var sync := MultiplayerSynchronizer.new()
 			sync.name = "Sync"
 			var config := SceneReplicationConfig.new()
-			for prop in [".:items", ".:rolled", ".:grid"]:
+			for prop in [".:items", ".:rolled", ".:grid", ".:unlocked", ".:stash_off"]:
 				var path := NodePath(prop)
 				config.add_property(path)
 				config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -77,11 +91,29 @@ func _toss() -> void:
 
 
 func can_use() -> bool:
-	return not (rolled and items.is_empty())
+	return not stash_off and not (rolled and items.is_empty())
 
 
 func prompt() -> String:
+	if not unlocked and required_key != "" and Raid.current != null:
+		return "открыть и обыскать: %s (ключ: %s)" % [display_name, Raid.current.key_name(required_key)]
 	return "обыскать: " + display_name
+
+
+## Почему этот игрок не может открыть (пусто — может): нет питания электрозамка, нет ключа.
+func lock_reason(pl: Player) -> String:
+	if unlocked or (required_key == "" and required_switch == ""):
+		return ""
+	if required_switch != "" and (Raid.current == null or not bool(Raid.current.switches.get(required_switch, false))):
+		return "%s: нет питания — электрозамок" % display_name
+	if required_key != "" and (pl == null or not pl.inventory.has(required_key)):
+		return "%s: заперто — нужен %s" % [display_name, Raid.current.key_name(required_key) if Raid.current else required_key]
+	return ""
+
+
+## Мародёры и чужие отряды не лезут в запертое и в закрытые схроны.
+func ai_may_search() -> bool:
+	return not stash_off and (unlocked or (required_key == "" and required_switch == ""))
 
 
 func reachable_from(player: Player) -> bool:
@@ -98,8 +130,15 @@ func reachable_from(player: Player) -> bool:
 
 ## F у контейнера: начать обыск (окно откроет InventoryUI, когда пройдёт search_s).
 func _use(_peer_id: int) -> void:
+	if stash_off:
+		return
 	if require_line_of_sight and (Raid.current == null or not reachable_from(Raid.current.player_of(_peer_id))):
 		return
+	if Raid.current != null and lock_reason(Raid.current.player_of(_peer_id)) != "":
+		return
+	if not unlocked and (required_key != "" or required_switch != ""):
+		unlocked = true
+		Audio.play("door_unlock", global_position, 0.0, 0.0, self)
 	roll()
 
 

@@ -20,6 +20,12 @@ extends Marker3D
 @export var required_switch: String = ""
 ## Открыта, только когда у группы есть ключ с этим id (KeyPickup.key_id); пусто — не нужен.
 @export var required_key: String = ""
+## Вместо рубильника: ключ с этим id у кого-то в зоне открывает и без питания (брелок ворот); пусто — нет.
+@export var alt_key: String = ""
+## В какой доле рейдов открыта (1 — всегда); бросает хост при старте рейда.
+@export_range(0.0, 1.0, 0.05) var chance: float = 1.0
+## Только без рюкзака (лаз, труба): с надетым рюкзаком игрок в зоне не считается.
+@export var no_backpack: bool = false
 
 var _vis: Node3D
 var _disc_mat: StandardMaterial3D

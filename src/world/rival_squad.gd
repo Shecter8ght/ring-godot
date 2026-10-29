@@ -246,7 +246,7 @@ func _start_sweep(living: Array[Marauder]) -> void:
 	var bodies: Array = []
 	for n: Node in lead.get_tree().get_nodes_in_group("loot_containers"):
 		var c: LootContainer = n as LootContainer
-		if c == null or c.look != LootContainer.Look.CRATE or (c.rolled and c.items.is_empty()):
+		if c == null or c.look != LootContainer.Look.CRATE or (c.rolled and c.items.is_empty()) or not c.ai_may_search():
 			continue
 		if c.global_position.distance_to(_fight_at) <= float(cfg.sweep_m):
 			bodies.append(c)

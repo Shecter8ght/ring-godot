@@ -31,7 +31,8 @@ EMB_TOP = 6.3                                                   # верх ба�
 ENTRY_Y = {"station": 0.12}
 entries = [(s["label"], s["at"][0], ENTRY_Y.get(s["id"], 0.08), s["at"][1]) for s in plan["spawns"] if s["id"] != "cordon"]
 EXIT_Y = {"По путям на запад": EMB_TOP}
-exits = [(e["label"], e["at"][0], EXIT_Y.get(e["label"], 0.08), e["at"][1], 6.0 if "Тоннель" in e["label"] else 4.5) for e in plan["exits"]]
+exits = [(e["label"], e["at"][0], e.get("y", EXIT_Y.get(e["label"], 0.08)), e["at"][1],
+          e.get("radius", 6.0 if "Тоннель" in e["label"] else 4.5), e) for e in plan["exits"]]
 
 # ---------------------------------------------------------------- население
 # (имя, x, y, z, радиус, группа (от, до), тип, обязателен с N игроков, вес, метка взаимоисключения)
@@ -52,7 +53,12 @@ POSTS = [
     ("Vershina_Plaza", 50.0, 0.1, -12.0, 16.0, (2, 3), "", 0, 1.5, ""),
     ("Yard_ZhK", -150.0, 0.05, -100.0, 16.0, (2, 3), "", 0, 1.0, ""),
     ("House7_Yard", -190.0, 0.05, 85.0, 14.0, (2, 3), "", 0, 1.0, ""),
+    # главарь в банке с охраной — не каждый рейд (владелец 2026-10-29: «делай всё», prospekt_eft_mechanics.md §3.5);
+    # занят — другие посты банка в этом рейде пустуют (метка bank)
+    ("Bank_Boss", -21.0, 0.12, -46.0, 14.0, (3, 4), "bank_guard", 1, 0.0, "bank"),
 ]
+# пост «не каждый рейд» и тип ведущего: имя → (шанс, тип ведущего)
+POST_EXTRA = {"Bank_Boss": (0.3, "bank_boss")}
 ROUTES = [
     ("Route_Avenue", "Проспект: тротуары от перехода до поворота", False,
      [(-140.0, 0.15, 13.0), (-100.0, 0.15, 13.0), (-60.0, 0.15, 13.5), (-30.0, 0.15, -13.0), (10.0, 0.15, -14.0)]),
@@ -101,6 +107,8 @@ sector = {
     "light": LIGHT.LIGHT_KEYS,
     "depth_fog": LIGHT.DEPTH_FOG,
     "look": LIGHT.LOOK,
+    # у группы закрыты выходы ближе Balance.EXIT_RULES.near_spawn_m к её заходу (prospekt_eft_mechanics.md §3.1)
+    "exits_by_side": True,
     "events": {"off": ["power"], "at": {"drop": [-14.0, 0.1, 100.0], "pmc": [-60.0, 0.1, 205.0]},
                "drop_text": "Вертолёт над сквером — что-то сбросили",
                "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."},
@@ -127,6 +135,8 @@ lines = [
     '[ext_resource type="PackedScene" path="res://scenes/world/ai_nest.tscn" id="10"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="11"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="12"]',
+    '[ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="13"]',
+    '[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="14"]',
     '',
     '[node name="Prospekt" type="Node3D"]',
     'script = ExtResource("1")',
@@ -146,9 +156,29 @@ lines = [
 for i, (label, x, y, z) in enumerate(entries):
     lines += ['', '[node name="Entry_%d" parent="Gameplay" instance=ExtResource("4")]' % i, 'position = ' + v3(x, y, z),
               'display_name = "%s"' % label, 'entry = true']
-for i, (label, x, y, z, r) in enumerate(exits):
+for i, (label, x, y, z, r, e) in enumerate(exits):
     lines += ['', '[node name="Extraction_%d" parent="Gameplay" instance=ExtResource("5")]' % i, 'position = ' + v3(x, y, z),
               'display_name = "%s"' % label, 'radius = %g' % r]
+    if e.get("chance", 1.0) < 1.0:
+        lines.append('chance = %g' % e["chance"])
+    if e.get("switch"):
+        lines.append('required_switch = "%s"' % e["switch"])
+    if e.get("alt_key"):
+        lines.append('alt_key = "%s"' % e["alt_key"])
+    if e.get("no_backpack"):
+        lines.append('no_backpack = true')
+# рубильники (подстанция) и двери с замком (решётка хранилища) — из плана блокаута
+for sw in plan.get("switches", []):
+    c, s_ = round(math.cos(math.radians(sw["yaw"])), 6), round(math.sin(math.radians(sw["yaw"])), 6)
+    lines += ['', '[node name="Switch_%s" parent="Gameplay" instance=ExtResource("13")]' % sw["id"],
+              'transform = Transform3D(%g, 0, %g, 0, 1, 0, %g, 0, %g, %g, %g, %g)' % (c, -s_, s_, c, *sw["at"]),
+              'switch_id = "%s"' % sw["id"], 'display_name = "%s"' % sw["label"]]
+for d in plan.get("doors", []):
+    c, s_ = round(math.cos(math.radians(d["yaw"])), 6), round(math.sin(math.radians(d["yaw"])), 6)
+    lines += ['', '[node name="%s" parent="Gameplay" instance=ExtResource("14")]' % d["name"],
+              'transform = Transform3D(%g, 0, %g, 0, 1, 0, %g, 0, %g, %g, %g, %g)' % (c, -s_, s_, c, *d["at"]),
+              'width = %g' % d["width"], 'height = %g' % d["height"], 'thickness = 0.12',
+              'required_key = "%s"' % d.get("key", ""), 'required_switch = "%s"' % d.get("switch", "")]
 lines += ['', '[node name="Population" type="Node3D" parent="Gameplay"]', '', '[node name="Posts" type="Node3D" parent="Gameplay/Population"]']
 for (name, x, y, z, r, size, arch, always, weight, excl) in POSTS:
     lines += ['', '[node name="%s" parent="Gameplay/Population/Posts" instance=ExtResource("8")]' % name, 'position = ' + v3(x, y, z),
@@ -159,6 +189,8 @@ for (name, x, y, z, r, size, arch, always, weight, excl) in POSTS:
         lines.append('always_from = %d' % always)
     if excl:
         lines.append('exclusive = "%s"' % excl)
+    if name in POST_EXTRA:
+        lines += ['chance = %g' % POST_EXTRA[name][0], 'lead_arch = "%s"' % POST_EXTRA[name][1]]
 lines += ['', '[node name="Routes" type="Node3D" parent="Gameplay/Population"]']
 for (name, title, loop, pts) in ROUTES:
     lines += ['', '[node name="%s" parent="Gameplay/Population/Routes" instance=ExtResource("9")]' % name, 'title = "%s"' % title]
@@ -184,8 +216,19 @@ SEARCH = {"crate": 3.0, "backpack": 2.5, "suitcase": 2.5, "body": 4.0, "car": 3.
           "loose": 1.5, "cells": 5.0, "weapon": 3.0, "med": 2.0}
 
 
+# приёмы EFT (prospekt_eft_mechanics.md §3.3–3.4): места по пометке → своя таблица (ключи — добавкой), замок, схрон
+TABLE_BY_NOTE = {"сейф директора (ключ)": "prospekt_director_safe", "склад «Яруса»": "prospekt_yarus_staff",
+                 "стойка консьержа": "prospekt_concierge"}
+KEY_BY_NOTE = {"кабинет администратора: сейф": "key_yarus_office", "ломбард «Золото»: сейф с золотом": "key_pawnshop"}
+
+
 def loot_table(kind: str, tier: str, note: str) -> str:
     n = note.lower()
+    for k, t in TABLE_BY_NOTE.items():
+        if k in note:
+            return t
+    if "тайник" in n or "схрон" in n:
+        return "stash"
     if tier == "med" or kind == "med":
         return "pharmacy"
     if kind == "safe" or kind == "cells":
@@ -197,7 +240,7 @@ def loot_table(kind: str, tier: str, note: str) -> str:
     if tier == "weapon":
         return "pmc" if ("чвк" in n or "бойц" in n) else "security"
     if kind == "body":
-        return "pmc" if "чвк" in n else "marauder"
+        return "pmc" if "чвк" in n else "prospekt_body"
     if kind == "register":
         return "register"
     if tier == "good":
@@ -224,6 +267,12 @@ for i, l in enumerate(plan.get("loot", [])):
               'position = ' + v3(x, y + 0.6, z), 'display_name = "%s"' % title,
               'table = "%s"' % loot_table(l["kind"], l["tier"], l["note"]), 'search_s = %g' % SEARCH[l["kind"]],
               'look = %d' % LOOK[l["kind"]]]
+    note_l = l["note"].lower()
+    if "тайник" in note_l or "схрон" in note_l:
+        lines.append('stash = true')
+    for k, key in KEY_BY_NOTE.items():
+        if k in l["note"]:
+            lines.append('required_key = "%s"' % key)
 lines += ['', '[node name="AI_Spawns" type="Node3D" parent="Gameplay"]']
 for (name, x, y, z, *_rest) in POSTS:
     if _rest[2] == "pmc":

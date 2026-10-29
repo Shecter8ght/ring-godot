@@ -70,6 +70,7 @@
   "adapt_up": 2.0,
   "adapt_up_indoor": 2.5
  },
+ "exits_by_side": true,
  "events": {
   "off": [
    "power"

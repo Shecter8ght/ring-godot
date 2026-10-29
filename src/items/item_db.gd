@@ -222,6 +222,10 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 					else:
 						_merge(out, WeaponDb.canonical(id), n)
 				break
+	# добавки поверх бросков: [id, шанс, [от, до]] — ключи у главаря, ключ-карта в сейфе директора
+	for e in table.get("extra", []):
+		if rng.randf() < float(e[1]):
+			_merge(out, WeaponDb.canonical(String(e[0])), rng.randi_range(int(e[2][0]), int(e[2][1])))
 	# найдено в рейде: сдать Михалычу по заданию можно только такое (купленное — нет)
 	if rng.randf() < float(Balance.VALUABLE_LOOT_CHANCE.get(table_id, 0.0)):
 		var valuable: String = valuable_item(table_id, rng)

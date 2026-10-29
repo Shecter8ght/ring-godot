@@ -9,6 +9,9 @@ extends Node3D
 ## Заперта для тех, у кого в рюкзаке нет этого ключа (data/items.json); пусто — обычная дверь.
 ## Мародёры открывают любые двери — у них свои ключи; чужим отрядам (RivalRaids) нужен тот же ключ.
 @export var required_key: String = ""
+## Электрозамок: без включённого рубильника с этим id (PowerSwitch) не открыть никому — ни с ключом, ни
+## мародёрам; пусто — питание не нужно. Решётка хранилища банка «Проспекта» — ключ-карта и питание КТП.
+@export var required_switch: String = ""
 
 var is_open: bool = false
 var _target_angle: float = 0.0
@@ -72,7 +75,7 @@ func _on_body_entered(body: Node3D) -> void:
 		# Мародёр открывает дверь сам — и это слышно. Тело мародёра реплицировано на всех peer,
 		# поэтому Area3D сработает у каждого; открывает только хост (он авторитет двери).
 		# Чужим отрядам запертая на ключ дверь без ключа не открывается — как игрокам.
-		if not RivalRaids.may_open(body as Marauder, required_key):
+		if not RivalRaids.may_open(body as Marauder, required_key) or not _powered():
 			return
 		toggle(body.global_position)
 		NoiseBus.emit(global_position, 10.0, "door")
@@ -89,7 +92,7 @@ func _process(delta: float) -> void:
 		if who:
 			if not _can_open(who):
 				Audio.play("door_locked", global_position, 0.0, 0.0, self)
-				Raid.current.notify("Заперто: нужен " + Raid.current.key_name(required_key))
+				Raid.current.notify("Нет питания — электрозамок" if not _powered() else "Заперто: нужен " + Raid.current.key_name(required_key))
 				return
 			if required_key != "" and not is_open:
 				Audio.play("door_unlock", global_position, 0.0, 0.0, self)
@@ -110,9 +113,18 @@ func _local_near() -> Player:
 
 ## Ключ — предмет в рюкзаке того, кто открывает (закрыть открытую можно всегда).
 func _can_open(who: Player) -> bool:
-	if required_key == "" or is_open:
+	if is_open:
+		return true
+	if not _powered():
+		return false
+	if required_key == "":
 		return true
 	return who != null and who.inventory.has(required_key)
+
+
+## Электрозамок под питанием (или питание не нужно).
+func _powered() -> bool:
+	return required_switch == "" or (Raid.current != null and bool(Raid.current.switches.get(required_switch, false)))
 
 
 ## Открыть от того, кто открывает: сторона выбирается по знаку локального Z подошедшего.

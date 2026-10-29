@@ -920,6 +920,284 @@
   },
   "workshop": {
    "balance": "civilian"
+  },
+  "bank_boss": {
+   "rolls": [
+    1,
+    2
+   ],
+   "entries": [
+    [
+     "cash",
+     4,
+     [
+      3,
+      8
+     ]
+    ],
+    [
+     "gold_chain",
+     1,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "watch",
+     1,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "documents",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "extra": [
+    [
+     "key_bank_vault",
+     1.0,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
+  },
+  "prospekt_body": {
+   "rolls": [
+    1,
+    1
+   ],
+   "entries": [
+    [
+     "table:marauder",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "extra": [
+    [
+     "key_pawnshop",
+     0.08,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "key_yarus_office",
+     0.08,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "key_parking_fob",
+     0.12,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
+  },
+  "prospekt_yarus_staff": {
+   "rolls": [
+    1,
+    1
+   ],
+   "entries": [
+    [
+     "table:storage",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "extra": [
+    [
+     "key_yarus_office",
+     0.25,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
+  },
+  "prospekt_concierge": {
+   "rolls": [
+    1,
+    1
+   ],
+   "entries": [
+    [
+     "table:office",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "extra": [
+    [
+     "key_pawnshop",
+     0.3,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "key_parking_fob",
+     0.3,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
+  },
+  "prospekt_director_safe": {
+   "rolls": [
+    1,
+    1
+   ],
+   "entries": [
+    [
+     "table:bank",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ],
+   "extra": [
+    [
+     "key_bank_vault",
+     0.2,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
+  },
+  "stash": {
+   "rolls": [
+    3,
+    5
+   ],
+   "entries": [
+    [
+     "cash",
+     4,
+     [
+      2,
+      6
+     ]
+    ],
+    [
+     "pick:kind=ammo;tags=SCAV;tier=3",
+     4,
+     [
+      20,
+      60
+     ]
+    ],
+    [
+     "pick:kind=mag;tags=SCAV;tier=3",
+     1.5,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "preset:HG_02_BASE",
+     0.5,
+     [
+      1,
+      1
+     ],
+     {
+      "dur": [
+       60,
+       95
+      ]
+     }
+    ],
+    [
+     "medkit",
+     2,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "painkillers",
+     2,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "grenade",
+     1.5,
+     [
+      1,
+      2
+     ]
+    ],
+    [
+     "pick:kind=plate;tags=SCAV;tier=3",
+     0.6,
+     [
+      1,
+      1
+     ],
+     {
+      "wear": [
+       0.0,
+       0.3
+      ]
+     }
+    ],
+    [
+     "gold_chain",
+     1,
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "documents",
+     1,
+     [
+      1,
+      1
+     ]
+    ]
+   ]
   }
  }
 }

@@ -213,6 +213,11 @@ const KITS: Dictionary = {
 		["box", Vector3(-0.55, 1.05, 1.01), Vector3(0.9, 2.0, 0.02), "steel"], ["box", Vector3(0.55, 1.05, 1.01), Vector3(0.9, 2.0, 0.02), "steel"],
 		["box", Vector3(0, 2.2, 1.03), Vector3(0.4, 0.3, 0.01), "paint_yellow"]],
 		"solid": [[Vector3(0, 1.3, 0), Vector3(2.5, 2.6, 2.0)]], "range": 420.0},
+	# КТП с распахнутыми дверями (подстанция «Проспекта»: рубильник питания внутри)
+	"ktp_open": {"parts": [["box", Vector3(0, 1.3, 0), Vector3(2.5, 2.6, 2.0), "wall"], ["box", Vector3(0, 2.68, 0), Vector3(2.8, 0.16, 2.3), "slab"],
+		["box", Vector3(0, 1.05, 1.0), Vector3(1.8, 2.0, 0.02), "dark"], ["box", Vector3(-1.0, 1.05, 1.46), Vector3(0.02, 2.0, 0.9), "steel"],
+		["box", Vector3(1.0, 1.05, 1.46), Vector3(0.02, 2.0, 0.9), "steel"], ["box", Vector3(0, 2.2, 1.03), Vector3(0.4, 0.3, 0.01), "paint_yellow"]],
+		"solid": [[Vector3(0, 1.3, 0), Vector3(2.5, 2.6, 2.0)]], "range": 420.0},
 	"bags": {"parts": [["dome", Vector3(0, 0.25, 0), Vector3(0.7, 0.5, 0.6), "black"], ["dome", Vector3(0.45, 0.2, 0.3), Vector3(0.6, 0.4, 0.5), "dark"]],
 		"range": 110.0, "shadow": false},
 	"log_pile": {"parts": [["cyl", Vector3(-0.7, 0.2, 0), Vector3(0.4, 5.0, 0.4), "wood", Vector3(90, 0, 0)], ["cyl", Vector3(-0.25, 0.2, 0), Vector3(0.4, 5.0, 0.4), "wood", Vector3(90, 0, 0)],

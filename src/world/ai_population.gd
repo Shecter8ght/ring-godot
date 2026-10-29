@@ -156,6 +156,8 @@ func _spawn_posts(want: int) -> int:
 	var party := party_size()
 	var chosen: Array[AIPost] = []
 	var tags: Dictionary = {}
+	# пост «не каждый рейд» (главарь): не выпал — в этом рейде его нет вовсе
+	all = all.filter(func(p: AIPost) -> bool: return p.chance >= 1.0 or _rng.randf() < p.chance)
 	for p: AIPost in all:
 		if p.always_from > 0 and party >= p.always_from and _post_ok(p, tags):
 			chosen.append(p)
@@ -181,6 +183,8 @@ func _spawn_posts(want: int) -> int:
 		var opts := {"home": at, "home_r": p.radius}
 		if p.arch != "":
 			opts["arch"] = p.arch
+		if p.lead_arch != "":
+			opts["lead_arch"] = p.lead_arch
 		var squad := _spawn_group(at, _rng.randi_range(size.x, size.y), opts)
 		for m in squad.members:
 			m.home_points = points
@@ -358,6 +362,8 @@ func _spawn_group(at: Vector3, n: int, opts: Dictionary) -> Squad:
 		var arch := lead
 		if opts.has("arch"):
 			arch = String(opts.arch)                            # пост одного типа (кордон ЧВК)
+		if k == 0 and opts.has("lead_arch"):
+			arch = String(opts.lead_arch)                       # главарь ведёт свою охрану
 		while not opts.has("arch") and k > 0 and (arch == lead and _rng.randf() < 0.4 or bool(Balance.AI_ARCHETYPES[arch].holds)):
 			arch = Marauder.pick_archetype(_rng)
 		var m: Marauder = level.call("spawn_marauder", p, arch, opts) as Marauder

@@ -28,6 +28,17 @@ const CARRIED_SUFFIX := " (вынесли раненым)"
 var participants: Dictionary = {}
 ## Включённые рубильники: switch_id -> true.
 var switches: Dictionary = {}
+## Выходы, закрытые в этом рейде (сторона захода, «не каждый рейд»): имя узла ExtractionPoint -> почему.
+## Бросает хост при старте (roll_exits), остальным — синхронизатором.
+var closed_exits: Dictionary = {}
+## Список выходов рейда текстом — показывается при старте; у гостя — когда пришёл от хоста.
+var exits_note: String = "":
+	set(v):
+		var changed := v != exits_note
+		exits_note = v
+		if changed and v != "" and is_inside_tree():
+			notify_long.call_deferred(RaidConditions.title() + "
+" + v, Balance.EXIT_NOTE_SEC)
 ## Эвакуированные: peer_id -> имя точки.
 var extracted: Dictionary = {}
 ## Сколько вынес (₽): peer_id -> ценность рюкзака в момент эвакуации.
@@ -150,7 +161,7 @@ func _setup_sync() -> void:
 	sync.name = "Sync"
 	sync.replication_interval = 0.1
 	var config := SceneReplicationConfig.new()
-	for prop in [".:participants", ".:switches", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state", ".:gone", ".:trades"]:
+	for prop in [".:participants", ".:switches", ".:closed_exits", ".:exits_note", ".:extracted", ".:loot_value", ".:dead", ".:over", ".:channel", ".:drags", ".:evac_left", ".:evac_wait", ".:stranded", ".:supply_state", ".:gone", ".:trades"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
@@ -220,20 +231,96 @@ func mark_dead(peer_id: int) -> void:
 	_check_over()
 
 
+## Хост, старт рейда: какие выходы в этом рейде закрыты. near_m > 0 — у группы закрыты выходы ближе этого
+## к её заходу (Balance.EXIT_RULES); у точки с chance < 1 — бросок. Итог — список текстом всем.
+func roll_exits(spawn: Vector3, near_m: float, rng: RandomNumberGenerator) -> void:
+	# карта без этих правил — как раньше: все выходы открыты, списка нет
+	var rules := near_m > 0.0
+	for node in get_tree().get_nodes_in_group("extractions"):
+		rules = rules or (node is ExtractionPoint and (node as ExtractionPoint).chance < 1.0)
+	if not rules:
+		return
+	var closed := {}
+	var open_names: Array[String] = []
+	var closed_names: Array[String] = []
+	for node in get_tree().get_nodes_in_group("extractions"):
+		var ext := node as ExtractionPoint
+		if ext == null:
+			continue
+		var d := Vector2(ext.global_position.x - spawn.x, ext.global_position.z - spawn.z).length()
+		if near_m > 0.0 and d < near_m:
+			closed[String(ext.name)] = "рядом с вашим заходом — в этом рейде закрыт"
+		elif ext.chance < 1.0 and rng.randf() >= ext.chance:
+			closed[String(ext.name)] = "в этом рейде закрыт"
+		if closed.has(String(ext.name)):
+			closed_names.append(ext.display_name)
+		else:
+			open_names.append(ext.display_name + (" (условие)" if ext.required_switch != "" or ext.required_key != "" or ext.no_backpack else ""))
+	closed_exits = closed
+	var note := "Выходы: " + (", ".join(open_names) if not open_names.is_empty() else "нет")
+	if not closed_names.is_empty():
+		note += " · закрыты: " + ", ".join(closed_names)
+	exits_note = note
+
+
+## Хост, старт рейда: из схронов карты (LootContainer.stash) открыта случайная часть (Balance.STASHES).
+func roll_stashes(rng: RandomNumberGenerator) -> void:
+	var pool: Array = get_tree().get_nodes_in_group("loot_containers").filter(
+		func(n: Node) -> bool: return n is LootContainer and (n as LootContainer).stash)
+	if pool.is_empty():
+		return
+	for i in range(pool.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var t: Variant = pool[i]
+		pool[i] = pool[j]
+		pool[j] = t
+	var keep := rng.randi_range(int(Balance.STASHES.active[0]), int(Balance.STASHES.active[1]))
+	for i in range(pool.size()):
+		(pool[i] as LootContainer).stash_off = i >= keep
+
+
 ## Открыта ли точка и, если нет, почему (для подсказки у зоны). Ключ должен быть у кого-то
 ## из живых в зоне — группа проходит вместе с тем, у кого карта.
 func extraction_block_reason(ext: ExtractionPoint) -> String:
+	if closed_exits.has(String(ext.name)):
+		return String(closed_exits[String(ext.name)])
 	if ext.required_switch != "" and not bool(switches.get(ext.required_switch, false)):
-		return "нет питания — включи рубильник"
+		if ext.alt_key != "" and _key_in_zone(ext, ext.alt_key):
+			return ""
+		return "нет питания — включи рубильник" + (" или найди: " + key_name(ext.alt_key) if ext.alt_key != "" else "")
 	if ext.required_switch != "" and String(RaidConditions.current.get("power", "on")) == "off":
 		return "в ТЦ нет электричества — ворота не открыть"
 	if ext.required_key != "":
-		for node in get_tree().get_nodes_in_group("players"):
-			var pl := node as Player
-			if pl and pl.is_alive() and ext.contains(pl.global_position) and pl.inventory.has(ext.required_key):
-				return ""
+		if _key_in_zone(ext, ext.required_key):
+			return ""
 		return "нужен предмет: " + key_name(ext.required_key)
 	return ""
+
+
+## Ключ key_id у кого-то из живых в зоне точки.
+func _key_in_zone(ext: ExtractionPoint, key_id: String) -> bool:
+	for node in get_tree().get_nodes_in_group("players"):
+		var pl := node as Player
+		if pl and pl.is_alive() and ext.contains(pl.global_position) and pl.inventory.has(key_id):
+			return true
+	return false
+
+
+## То же для конкретного игрока: лаз «без рюкзака» не пускает того, на ком рюкзак.
+func extraction_block_reason_for(ext: ExtractionPoint, pl: Player) -> String:
+	var reason := extraction_block_reason(ext)
+	if reason == "" and ext.no_backpack and pl != null and not (pl.inventory.equipment.get("backpack", {}) as Dictionary).is_empty():
+		return "с рюкзаком не пролезть — сними рюкзак"
+	return reason
+
+
+## Открытая для этого игрока зона, в которой он стоит.
+func open_zone_for(pl: Player) -> ExtractionPoint:
+	for e in get_tree().get_nodes_in_group("extractions"):
+		var ext := e as ExtractionPoint
+		if ext and ext.contains(pl.global_position) and extraction_block_reason_for(ext, pl) == "":
+			return ext
+	return null
 
 
 func _physics_process(delta: float) -> void:
@@ -493,7 +580,7 @@ func _update_evac(delta: float) -> void:
 		var pl := node as Player
 		if pl == null or not pl.is_alive() or has_left(pl.peer_id) or gone.has(pl.peer_id) or pl.is_queued_for_deletion():
 			continue
-		var ext := open_zone_at(pl.global_position)
+		var ext := open_zone_for(pl)
 		# раненый сам не эвакуируется — только если его дотащили или он лежит в зоне рядом со своими
 		if ext and not pl.is_downed():
 			inside[pl.peer_id] = ext
@@ -513,7 +600,7 @@ func _update_evac(delta: float) -> void:
 	var carried := {}
 	var wait: Array = []
 	for pl in others:
-		var ext := open_zone_at(pl.global_position)
+		var ext := open_zone_for(pl)
 		var dragger := dragger_of(pl.peer_id)
 		if pl.is_downed() and ext and used.has(ext):
 			carried[pl.peer_id] = ext
@@ -2375,6 +2462,12 @@ func ui_open() -> bool:
 func notify(text: String) -> void:
 	_toast.text = text
 	_toast_t = 2.5
+
+
+## Сообщение, которое висит дольше обычного (список выходов рейда при старте).
+func notify_long(text: String, sec: float) -> void:
+	notify(text)
+	_toast_t = sec
 	Audio.play_ui("ui_notify", -5.0)
 
 
@@ -2389,7 +2482,7 @@ func _update_channel_hud(me: Player) -> void:
 		if e is ExtractionPoint and (e as ExtractionPoint).contains(me.global_position):
 			here = e
 			break
-	var reason := extraction_block_reason(here) if here else ""
+	var reason := extraction_block_reason_for(here, me) if here else ""
 	var cur: Array = channel.get(me.peer_id, [])
 	# я не в зоне (или она закрыта), а группа у выхода — успеть
 	if cur.is_empty() and evac_left >= 0.0:
@@ -2519,6 +2612,10 @@ func _update_prompt(me: Player) -> void:
 	_prompt.visible = true
 	_prompt.text = PauseMenu.key_name("interact") + " — " + best.prompt()
 	if Input.is_action_just_pressed("interact"):
+		if best is LootContainer and (best as LootContainer).lock_reason(me) != "":
+			Audio.play("door_locked", best.global_position, 0.0, 0.0, best)
+			notify((best as LootContainer).lock_reason(me))
+			return
 		if best is LootContainer and not best is LooseLoot:
 			ui.start_search(best as LootContainer)
 		best.request_use()

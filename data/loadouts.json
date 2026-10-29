@@ -974,6 +974,107 @@
      0.3
     ]
    ]
+  },
+  "bank_boss": {
+   "name": "Главарь в банке",
+   "primary": [
+    [
+     "AR_02_BASE",
+     0.4
+    ],
+    [
+     "SG_02_TAC",
+     0.25
+    ],
+    [
+     "AR_04_TAC",
+     0.2
+    ],
+    [
+     "AR_03_RD",
+     0.1
+    ],
+    [
+     "AR_05_TAC",
+     0.05
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_03_TAC",
+     1
+    ]
+   ],
+   "spare_mags": [
+    4,
+    5
+   ],
+   "armor": [
+    [
+     "armor_top",
+     1.0
+    ]
+   ],
+   "plates": [
+    [
+     "plate_military",
+     0.6
+    ],
+    [
+     "plate_composite",
+     0.4
+    ]
+   ],
+   "helmet": [
+    [
+     "helmet_top",
+     1.0
+    ]
+   ],
+   "headset": [
+    [
+     "headset_active",
+     0.7
+    ],
+    [
+     "headset_tactical",
+     0.3
+    ]
+   ],
+   "meds": [
+    [
+     "medkit",
+     1.0,
+     [
+      2,
+      3
+     ]
+    ],
+    [
+     "painkillers",
+     1.0,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "bank_boss",
+   "dur": [
+    75,
+    98
+   ],
+   "skill": 1.4,
+   "backpack": [
+    [
+     "bp_tourist",
+     0.4
+    ],
+    [
+     "bp_raid",
+     0.6
+    ]
+   ]
   }
  },
  "pmc_squad": [

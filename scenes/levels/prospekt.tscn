@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://scenes/world/ai_nest.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/world/ai_arrival.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="14"]
 
 [node name="Prospekt" type="Node3D"]
 script = ExtResource("1")
@@ -71,6 +73,33 @@ radius = 4.5
 position = Vector3(-147, 6.3, 268.7)
 display_name = "По путям на запад"
 radius = 4.5
+chance = 0.6
+
+[node name="Extraction_4" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-208.5, -3.12, -60)
+display_name = "Паркинг −1, выезд в город"
+radius = 4.5
+required_switch = "prospekt_ktp"
+alt_key = "key_parking_fob"
+
+[node name="Extraction_5" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(-64, 0.08, 242.4)
+display_name = "Водопропускная труба"
+radius = 3
+no_backpack = true
+
+[node name="Switch_prospekt_ktp" parent="Gameplay" instance=ExtResource("13")]
+transform = Transform3D(-1, 0, -0, 0, 1, 0, 0, 0, -1, -156, 0.05, -88.7)
+switch_id = "prospekt_ktp"
+display_name = "Рубильник подстанции (КТП)"
+
+[node name="VaultGrille" parent="Gameplay" instance=ExtResource("14")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -24, -3.2, -47.3)
+width = 2.6
+height = 2.6
+thickness = 0.12
+required_key = "key_bank_vault"
+required_switch = "prospekt_ktp"
 
 [node name="Population" type="Node3D" parent="Gameplay"]
 
@@ -176,6 +205,17 @@ position = Vector3(-190, 0.05, 85)
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
+
+[node name="Bank_Boss" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-21, 0.12, -46)
+radius = 14
+group_size = Vector2i(3, 4)
+weight = 0
+arch = "bank_guard"
+always_from = 1
+exclusive = "bank"
+chance = 0.3
+lead_arch = "bank_boss"
 
 [node name="Routes" type="Node3D" parent="Gameplay/Population"]
 
@@ -369,9 +409,10 @@ look = 0
 [node name="Loot_9" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-158, 8.63, -22)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_10" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-153, 8.63, -26.8)
@@ -404,9 +445,10 @@ look = 0
 [node name="Loot_14" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-141, 8.63, -22)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_15" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-133, 8.63, -26.8)
@@ -439,9 +481,10 @@ look = 0
 [node name="Loot_19" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-106, 8.63, -22)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_20" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-101, 8.63, -26.8)
@@ -1104,7 +1147,7 @@ look = 0
 [node name="Loot_114" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-12, 0.6, -36)
 display_name = "Тело мародёра у входа"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1132,7 +1175,7 @@ look = 1
 [node name="Loot_118" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-4, 9, -61)
 display_name = "Сейф директора (ключ)"
-table = "office"
+table = "prospekt_director_safe"
 search_s = 6
 look = 1
 
@@ -1160,9 +1203,10 @@ look = 2
 [node name="Loot_122" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-12, 12.9, -50)
 display_name = "Тайник у кондиционеров"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_123" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-33, -2.6, -45.1)
@@ -1209,7 +1253,7 @@ look = 2
 [node name="Loot_129" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-30, -2.6, -61)
 display_name = "Тело копателя в коридоре"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1251,9 +1295,10 @@ look = 0
 [node name="Loot_135" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-166, 8.63, 21.5)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_136" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-170, 8.63, 25.8)
@@ -1377,14 +1422,14 @@ look = 0
 [node name="Loot_153" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-112, 0.6, 84)
 display_name = "Склад «Яруса»"
-table = "storage"
+table = "prospekt_yarus_staff"
 search_s = 3
 look = 5
 
 [node name="Loot_154" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-92, 0.6, 84)
 display_name = "Склад «Яруса»"
-table = "storage"
+table = "prospekt_yarus_staff"
 search_s = 3
 look = 5
 
@@ -1401,11 +1446,12 @@ display_name = "Сейф"
 table = "office"
 search_s = 6
 look = 1
+required_key = "key_yarus_office"
 
 [node name="Loot_157" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-112, 0.6, 60)
 display_name = "Тело мародёра в зале"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1461,7 +1507,7 @@ look = 0
 [node name="Loot_165" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-113, -3.4, 181)
 display_name = "Утонувший мародёр"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1552,9 +1598,10 @@ look = 0
 [node name="Loot_178" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-120, 13.6, 230)
 display_name = "Тайник"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_179" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-125, 8.2, 260.5)
@@ -1657,7 +1704,7 @@ look = 0
 [node name="Loot_193" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(9.12, 0.72, 29.2)
 display_name = "Стойка консьержа"
-table = "shelf"
+table = "prospekt_concierge"
 search_s = 1.5
 look = 0
 
@@ -1695,6 +1742,7 @@ display_name = "Сейф с золотом"
 table = "jewelry_safe"
 search_s = 6
 look = 1
+required_key = "key_pawnshop"
 
 [node name="Loot_199" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(27, 0.72, 77.62)
@@ -1734,9 +1782,10 @@ look = 0
 [node name="Loot_204" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-32, 5.25, 23)
 display_name = "Тайник у лёжки на проспект"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_205" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(32, 5.25, 62)
@@ -1797,9 +1846,10 @@ look = 0
 [node name="Loot_213" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-43, 8.63, 126.5)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_214" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-38, 8.63, 122.7)
@@ -1825,7 +1875,7 @@ look = 5
 [node name="Loot_217" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-8, 0.6, 230.5)
 display_name = "Тело мародёра под вагоном"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1951,7 +2001,7 @@ look = 5
 [node name="Loot_235" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-6, 0.6, 241)
 display_name = "Тело мародёра у вагона"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -1979,9 +2029,10 @@ look = 0
 [node name="Loot_239" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(31.5, 8.63, 134)
 display_name = "Тайник на крыше"
-table = "electronics"
+table = "stash"
 search_s = 3
 look = 5
+stash = true
 
 [node name="Loot_240" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(27.2, 8.63, 128)
@@ -1993,7 +2044,7 @@ look = 4
 [node name="Loot_241" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(50.5, 0.6, 172.5)
 display_name = "Тело у контейнера"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -2091,7 +2142,7 @@ look = 4
 [node name="Loot_255" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-80, 0.6, -1)
 display_name = "Тело у перевёрнутого автобуса"
-table = "marauder"
+table = "prospekt_body"
 search_s = 4
 look = 3
 
@@ -2326,6 +2377,30 @@ table = "storage"
 search_s = 3
 look = 5
 
+[node name="Loot_289" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(-176, 0.6, 80.2)
+display_name = "В мусорном баке двора дома 7"
+table = "stash"
+search_s = 2.5
+look = 4
+stash = true
+
+[node name="Loot_290" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(62, 0.6, -89.2)
+display_name = "За щитом КТП у хозяйственного проезда"
+table = "stash"
+search_s = 2.5
+look = 4
+stash = true
+
+[node name="Loot_291" parent="Gameplay/Loot" instance=ExtResource("12")]
+position = Vector3(126.4, 0.6, 161.6)
+display_name = "Под плитой у гаражей корпуса 3"
+table = "stash"
+search_s = 2.5
+look = 4
+stash = true
+
 [node name="AI_Spawns" type="Node3D" parent="Gameplay"]
 
 [node name="AI_Bank_Hall" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
@@ -2369,6 +2444,9 @@ position = Vector3(-150, 0.05, -100)
 
 [node name="AI_House7_Yard" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
 position = Vector3(-190, 0.05, 85)
+
+[node name="AI_Bank_Boss" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
+position = Vector3(-21, 0.12, -46)
 
 [node name="Navigation" type="Node3D" parent="."]
 

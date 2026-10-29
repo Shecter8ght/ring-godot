@@ -195,7 +195,9 @@ python -X utf8 tools/build_prospekt_raid.py                   # рейдовая
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
 tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «Проспекта»: навигация, население слоями, кордон ЧВК, точки на навигации,
-                                                              # от каждого захода до всех выходов, места лута
+                                                              # от каждого захода до всех выходов, места лута; приёмы EFT — выходы по стороне захода
+                                                              # и «не каждый рейд», ворота паркинга (КТП / брелок), труба без рюкзака, решётка
+                                                              # хранилища, сейфы под ключ, схроны, главарь банка
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде глазами игрока (привыкание глаза,
                                                               # «объектив»): день, закат, ночь, пасмурно, дождь с трёх точек → user://prospekt_raid_shots
                                                               # (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night; PROSPEKT_CLEAN=1 — своей камерой, чистый свет сцены)

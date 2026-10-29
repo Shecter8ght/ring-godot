@@ -171,16 +171,22 @@ static func build(id: String) -> Node3D:
 			_box(root, Vector3.ZERO, Vector3(0.22, 0.012, 0.31), _m(Color(0.8, 0.7, 0.45), 0.8))
 			_box(root, Vector3(0.01, 0.007, -0.01), Vector3(0.2, 0.002, 0.28), _m(Color(0.95, 0.95, 0.92), 0.8))
 			_box(root, Vector3(0.0, 0.0085, 0.06), Vector3(0.12, 0.001, 0.02), _m(Color(0.7, 0.1, 0.1), 0.8))
-		"key_server", "key_jewelry":
-			var metal := _m(Color(0.75, 0.68, 0.45) if id == "key_jewelry" else Color(0.7, 0.72, 0.75), 0.3, 0.95)
+		"key_server", "key_jewelry", "key_yarus_office", "key_pawnshop":
+			var metal := _m(Color(0.75, 0.68, 0.45) if id in ["key_jewelry", "key_pawnshop"] else Color(0.7, 0.72, 0.75), 0.3, 0.95)
 			_torus(root, Vector3(-0.03, 0, 0), 0.009, 0.016, metal)
 			_box(root, Vector3(0.012, 0, 0), Vector3(0.05, 0.003, 0.007), metal)
 			for i in range(3):
 				_box(root, Vector3(0.02 + i * 0.01, 0, 0.006), Vector3(0.005, 0.003, 0.006 + (i % 2) * 0.004), metal)
-		"keycard_security":
-			_cbox(root, Vector3.ZERO, Vector3(0.086, 0.002, 0.054), _m(Color(0.92, 0.92, 0.9), 0.5), 0.0008)
+		"keycard_security", "key_bank_vault":
+			_cbox(root, Vector3.ZERO, Vector3(0.086, 0.002, 0.054), _m(Color(0.12, 0.13, 0.16) if id == "key_bank_vault" else Color(0.92, 0.92, 0.9), 0.5), 0.0008)
 			_box(root, Vector3(0, 0.0011, -0.015), Vector3(0.086, 0.001, 0.012), _m(Color(0.1, 0.2, 0.55), 0.5))
 			_box(root, Vector3(-0.025, 0.0011, 0.012), Vector3(0.02, 0.001, 0.015), _m(Color(0.8, 0.65, 0.3), 0.3, 0.9))
+		"key_parking_fob":
+			# брелок ворот: чёрный корпус с двумя кнопками на кольце
+			_cbox(root, Vector3.ZERO, Vector3(0.032, 0.012, 0.055), _m(Color(0.08, 0.08, 0.09), 0.6), 0.004)
+			for z in [-0.008, 0.012]:
+				_box(root, Vector3(0, 0.0065, z), Vector3(0.016, 0.002, 0.012), _m(Color(0.25, 0.25, 0.27), 0.7))
+			_torus(root, Vector3(0, 0, -0.038), 0.006, 0.012, _m(Color(0.7, 0.72, 0.75), 0.3, 0.95))
 		_:
 			if String(it.get("cat", "")) == "ammo":
 				_ammo_box(root, id)

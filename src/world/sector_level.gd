@@ -170,6 +170,13 @@ func _ready() -> void:
 	_raid = Raid.new()
 	_raid.name = "Raid"
 	add_child(_raid)
+	# выходы этого рейда (сторона захода, «не каждый рейд») и открытые схроны — бросает хост
+	if not Net.is_networked() or multiplayer.is_server():
+		var roll := RandomNumberGenerator.new()
+		roll.randomize()
+		var near_m := float(Balance.EXIT_RULES.near_spawn_m) if bool(_sector_def.get("exits_by_side", false)) else 0.0
+		_raid.roll_exits(_spawn, near_m, roll)
+		_raid.roll_stashes(roll)
 
 	if Loading.active:
 		await Loading.stage("Подготовка игроков", float(Balance.LOADING_PROGRESS.player))
