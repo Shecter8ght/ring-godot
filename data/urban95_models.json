@@ -2448,7 +2448,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck.gltf",
+     "end": 25.0,
+     "triangles": 34201
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9150
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4454
+    }
+   ],
+   "lod_fade": false
   },
   "PV_sedan_open": {
    "id": "PV_sedan_open",
@@ -2487,7 +2505,25 @@
      ]
     ]
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_open.gltf",
+     "end": 25.0,
+     "triangles": 34892
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_open_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9419
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4466
+    }
+   ],
+   "lod_fade": false
   },
   "PV_sedan_burnt": {
    "id": "PV_sedan_burnt",
@@ -2512,7 +2548,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt.gltf",
+     "end": 25.0,
+     "triangles": 21076
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt_lod1.gltf",
+     "end": 60.0,
+     "triangles": 5453
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt_lod2.gltf",
+     "end": 520.0,
+     "triangles": 2593
+    }
+   ],
+   "lod_fade": false
   },
   "PV_sedan": {
    "id": "PV_sedan",
@@ -2537,7 +2591,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan.gltf",
+     "end": 25.0,
+     "triangles": 34892
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9419
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_sedan_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4092
+    }
+   ],
+   "lod_fade": false
   },
   "PV_car": {
    "id": "PV_car",
@@ -2694,7 +2766,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck.gltf",
+     "end": 25.0,
+     "triangles": 35136
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9399
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4252
+    }
+   ],
+   "lod_fade": false
   },
   "PV_hatch_open": {
    "id": "PV_hatch_open",
@@ -2733,7 +2823,25 @@
      ]
     ]
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_open.gltf",
+     "end": 25.3,
+     "triangles": 35795
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_open_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9663
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4263
+    }
+   ],
+   "lod_fade": false
   },
   "PV_hatch_burnt": {
    "id": "PV_hatch_burnt",
@@ -2758,7 +2866,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt.gltf",
+     "end": 25.0,
+     "triangles": 23533
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt_lod1.gltf",
+     "end": 60.0,
+     "triangles": 6109
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt_lod2.gltf",
+     "end": 520.0,
+     "triangles": 2761
+    }
+   ],
+   "lod_fade": false
   },
   "PV_hatch": {
    "id": "PV_hatch",
@@ -2783,7 +2909,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch.gltf",
+     "end": 25.0,
+     "triangles": 35795
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9663
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_hatch_lod2.gltf",
+     "end": 520.0,
+     "triangles": 3927
+    }
+   ],
+   "lod_fade": false
   },
   "PV_wagon_wreck": {
    "id": "PV_wagon_wreck",
@@ -2808,7 +2952,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck.gltf",
+     "end": 25.3,
+     "triangles": 36757
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck_lod1.gltf",
+     "end": 60.0,
+     "triangles": 9835
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4713
+    }
+   ],
+   "lod_fade": false
   },
   "PV_wagon_open": {
    "id": "PV_wagon_open",
@@ -2847,7 +3009,25 @@
      ]
     ]
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_open.gltf",
+     "end": 28.8,
+     "triangles": 37378
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_open_lod1.gltf",
+     "end": 68.0,
+     "triangles": 10092
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4731
+    }
+   ],
+   "lod_fade": false
   },
   "PV_wagon_burnt": {
    "id": "PV_wagon_burnt",
@@ -2872,7 +3052,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt.gltf",
+     "end": 25.5,
+     "triangles": 22207
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt_lod1.gltf",
+     "end": 60.2,
+     "triangles": 5758
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt_lod2.gltf",
+     "end": 520.0,
+     "triangles": 2716
+    }
+   ],
+   "lod_fade": false
   },
   "PV_wagon": {
    "id": "PV_wagon",
@@ -2897,7 +3095,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon.gltf",
+     "end": 25.9,
+     "triangles": 37378
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_lod1.gltf",
+     "end": 61.2,
+     "triangles": 10092
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_wagon_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4372
+    }
+   ],
+   "lod_fade": false
   },
   "PV_suv_wreck": {
    "id": "PV_suv_wreck",
@@ -2922,7 +3138,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck.gltf",
+     "end": 26.3,
+     "triangles": 38765
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck_lod1.gltf",
+     "end": 62.1,
+     "triangles": 10359
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4628
+    }
+   ],
+   "lod_fade": false
   },
   "PV_suv_open": {
    "id": "PV_suv_open",
@@ -2961,7 +3195,25 @@
      ]
     ]
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_open.gltf",
+     "end": 33.1,
+     "triangles": 39266
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_open_lod1.gltf",
+     "end": 78.2,
+     "triangles": 10600
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4592
+    }
+   ],
+   "lod_fade": false
   },
   "PV_suv_burnt": {
    "id": "PV_suv_burnt",
@@ -2986,7 +3238,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt.gltf",
+     "end": 26.8,
+     "triangles": 23955
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt_lod1.gltf",
+     "end": 63.4,
+     "triangles": 6223
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt_lod2.gltf",
+     "end": 520.0,
+     "triangles": 2829
+    }
+   ],
+   "lod_fade": false
   },
   "PV_suv": {
    "id": "PV_suv",
@@ -3011,7 +3281,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv.gltf",
+     "end": 26.9,
+     "triangles": 39266
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_lod1.gltf",
+     "end": 63.6,
+     "triangles": 10599
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_suv_lod2.gltf",
+     "end": 520.0,
+     "triangles": 4287
+    }
+   ],
+   "lod_fade": false
   },
   "PV_gazel_open": {
    "id": "PV_gazel_open",
@@ -3036,7 +3324,7 @@
     0,
     0
    ],
-   "cell": 24.0,
+   "cell": 12.0,
    "solids": [
     [
      [
@@ -3050,7 +3338,25 @@
       5.704
      ]
     ]
-   ]
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel_open.gltf",
+     "end": 35.5,
+     "triangles": 37699
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel_open_lod1.gltf",
+     "end": 83.8,
+     "triangles": 12581
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 9497
+    }
+   ],
+   "lod_fade": false
   },
   "PV_gazel": {
    "id": "PV_gazel",
@@ -3075,7 +3381,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel.gltf",
+     "end": 31.4,
+     "triangles": 37699
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel_lod1.gltf",
+     "end": 74.2,
+     "triangles": 12581
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_gazel_lod2.gltf",
+     "end": 520.0,
+     "triangles": 8130
+    }
+   ],
+   "lod_fade": false
   },
   "PV_paz_open": {
    "id": "PV_paz_open",
@@ -3100,7 +3424,7 @@
     0,
     0
    ],
-   "cell": 24.0,
+   "cell": 12.0,
    "solids": [
     [
      [
@@ -3114,7 +3438,25 @@
       7.518
      ]
     ]
-   ]
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz_open.gltf",
+     "end": 41.3,
+     "triangles": 43785
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz_open_lod1.gltf",
+     "end": 97.7,
+     "triangles": 13959
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 9853
+    }
+   ],
+   "lod_fade": false
   },
   "PV_paz": {
    "id": "PV_paz",
@@ -3139,7 +3481,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz.gltf",
+     "end": 41.3,
+     "triangles": 43785
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz_lod1.gltf",
+     "end": 97.7,
+     "triangles": 13959
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_paz_lod2.gltf",
+     "end": 520.0,
+     "triangles": 9728
+    }
+   ],
+   "lod_fade": false
   },
   "PV_bus12_open": {
    "id": "PV_bus12_open",
@@ -3164,7 +3524,7 @@
     0,
     0
    ],
-   "cell": 24.0,
+   "cell": 12.0,
    "solids": [
     [
      [
@@ -3178,7 +3538,25 @@
       12.9282
      ]
     ]
-   ]
+   ],
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12_open.gltf",
+     "end": 45.0,
+     "triangles": 55410
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12_open_lod1.gltf",
+     "end": 120.0,
+     "triangles": 16752
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12_open_lod2.gltf",
+     "end": 520.0,
+     "triangles": 11974
+    }
+   ],
+   "lod_fade": false
   },
   "PV_bus12": {
    "id": "PV_bus12",
@@ -3203,7 +3581,25 @@
     0,
     0
    ],
-   "cell": 24.0
+   "cell": 12.0,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12.gltf",
+     "end": 45.0,
+     "triangles": 55410
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12_lod1.gltf",
+     "end": 120.0,
+     "triangles": 16752
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_bus12_lod2.gltf",
+     "end": 520.0,
+     "triangles": 11760
+    }
+   ],
+   "lod_fade": false
   },
   "PV_bus_city": {
    "id": "PV_bus_city",

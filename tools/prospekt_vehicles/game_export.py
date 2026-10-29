@@ -192,6 +192,10 @@ def main() -> None:
     fresh = json.loads(INDEX.read_text(encoding="utf-8"))
     for k, v in index["models"].items():
         if k.startswith("PV_"):
+            # свои дальние уровни (game_lods.py) остаются; после новой выгрузки LOD0 их пересобрать тем скриптом
+            for key in ("lods", "cell", "lod_fade"):
+                if key in fresh["models"].get(k, {}) and "lods" in fresh["models"][k]:
+                    v[key] = fresh["models"][k][key]
             fresh["models"][k] = v
     INDEX.write_text(json.dumps(fresh, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 

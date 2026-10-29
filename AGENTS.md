@@ -216,8 +216,12 @@ bash tools/prospekt_vehicles/sp_family.sh <папка> <Имя> <класс> <с
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_export.py -- [класс …]
                                                               # транспорт в игру: assets/models/prospekt_vehicles/PV_*.gltf, карты WebP ≤ 2K, записи PV_* и группы вперемешку
                                                               # в data/urban95_models.json; --import, python -X utf8 tools/prospekt_vehicles/game_imports.py, --import
-tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod] # кадры в секунду у транспорта «Проспекта»
-                                                              # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/game_lods.py -- [класс …]
+                                                              # свои дальние LOD транспорта (после game_export.py): LOD1 ≈ ¼ треугольников, атлас 1K запечён с LOD0 +
+                                                              # прозрачные окна, LOD2 — одна поверхность; «lods» у PV_* (легковые 25 / 60 м); --import, game_imports.py, --import
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
+                                                              # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
+                                                              # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_plants/<этап>.py -- [вид …] [preview]
                                                               # растения «Проспекта» (берёза, липа, тополь, сирень, изгородь): build_forms (форма) → python -X utf8
                                                               # tools/prospekt_plants/textures.py (листья, гладкая кора) → build_pbr (UCUPaint) → game.py -- atlas|meshes|preview

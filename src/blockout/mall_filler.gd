@@ -1377,9 +1377,13 @@ func _batch_model(model_id: String, transforms: Array) -> void:
 
 ## Модель с уровнями детализации (lods: [{file, end}] от ближнего к дальнему): на каждый — свой MultiMesh пачки,
 ## видимый от конца предыдущего до своего конца (по центру клетки, края с переходом). Нет файла уровня — уровень
-## пропускается; нет ни одного — серая коробка по габариту.
+## пропускается; нет ни одного — серая коробка по габариту. lod_fade: false — смена уровня без плавного перехода
+## (поля остаются как запас от мигания): пачка в полосе перехода рисуется прозрачной, и у машин «Проспекта» это
+## съедало весь выигрыш уровней (tools/prospekt_vehicles_perf.tscn).
 func _batch_model_lods(model_id: String, transforms: Array) -> void:
 	var entry: Dictionary = _model_index[model_id]
+	var fade: GeometryInstance3D.VisibilityRangeFadeMode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF \
+		if bool(entry.get("lod_fade", true)) else GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 	var center: Vector3 = Vector3.ZERO
 	for t: Transform3D in transforms:
 		center += t.origin
@@ -1407,7 +1411,7 @@ func _batch_model_lods(model_id: String, transforms: Array) -> void:
 		visual.visibility_range_begin_margin = 4.0 if begin > 0.0 else 0.0
 		visual.visibility_range_end = end
 		visual.visibility_range_end_margin = 4.0
-		visual.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		visual.visibility_range_fade_mode = fade
 		generated.add_child(visual)
 		stats.batches = int(stats.batches) + 1
 		begin = end

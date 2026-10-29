@@ -3,8 +3,10 @@ extends Node3D
 ## стоянки, поворот проспекта, вид сверху. Камера в точке, кадры прогреваются, затем среднее время кадра и 1 % худших.
 ## «off» — пачки машин (MultiMesh «model_PV_*») скрыты: сравнение «без машин / с машинами» в одной сборке.
 ## «lod» — снимки одной машины с 4, 10, 20, 40 и 80 м (поле зрения игрока) в docs/screens/prospekt_vehicles/lod_*.png:
-## видно ли переключение уровней детализации, которые Godot строит при импорте.
-##   tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod]
+## видно ли переключение уровней детализации.
+## «lodcmp» — свои уровни детализации (tools/prospekt_vehicles/game_lods.py) рядом: LOD0, LOD1, LOD2 одного варианта бок
+## о бок на сером поле вне карты, в свете карты, без дальностей; снимки с LODCMP_DIST → lodcmp_<вариант>_<м>.png.
+##   tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp]
 
 const LEVEL: String = "res://scenes/levels/prospekt_study.tscn"
 const WARM: int = 120
@@ -23,6 +25,10 @@ const VIEWS: Array = [
 const LOD_TARGET: Vector3 = Vector3(-36.0, 0.7, 53.0)
 const LOD_DIR: Vector3 = Vector3(0.55, 0.22, -0.8)
 const LOD_DIST: Array = [4.0, 10.0, 20.0, 40.0, 80.0]
+const LODCMP: Array = ["PV_sedan", "PV_hatch_wreck", "PV_suv_open", "PV_wagon_burnt", "PV_bus12", "PV_gazel_open"]
+const LODCMP_DIST: Array = [8.0, 15.0, 30.0, 60.0]
+const LODCMP_SPOT: Vector3 = Vector3(260.0, 0.0, 320.0)
+const INDEX: String = "res://data/urban95_models.json"
 
 var camera: Camera3D
 
@@ -45,6 +51,10 @@ func _ready() -> void:
 		(hud as CanvasItem).hide()
 	if args.has("lod"):
 		await _lod_shots()
+		get_tree().quit()
+		return
+	if args.has("lodcmp"):
+		await _lodcmp_shots(world)
 		get_tree().quit()
 		return
 	var cars_off: bool = args.has("off")
@@ -103,3 +113,46 @@ func _lod_shots() -> void:
 		var image: Image = get_viewport().get_texture().get_image()
 		var path: String = out.path_join("lod_%02d.png" % int(d))
 		print("prospekt_vehicles_perf: снимок ", path, " ошибка=", image.save_png(path))
+
+
+## Уровни детализации варианта рядом (слева LOD0, в середине LOD1, справа LOD2) с нескольких расстояний.
+func _lodcmp_shots(world: Node3D) -> void:
+	for node: Node in world.find_children("model_PV_*", "MultiMeshInstance3D", true, false):
+		(node as Node3D).visible = false
+	var out: String = ProjectSettings.globalize_path("res://docs/screens/prospekt_vehicles")
+	DirAccess.make_dir_recursive_absolute(out)
+	var ground: MeshInstance3D = MeshInstance3D.new()
+	var plane: PlaneMesh = PlaneMesh.new()
+	plane.size = Vector2(200, 200)
+	ground.mesh = plane
+	var grey: StandardMaterial3D = StandardMaterial3D.new()
+	grey.albedo_color = Color(0.36, 0.36, 0.35)
+	grey.roughness = 0.9
+	ground.material_override = grey
+	ground.position = LODCMP_SPOT
+	add_child(ground)
+	var index: Dictionary = (JSON.parse_string(FileAccess.get_file_as_string(INDEX)) as Dictionary).models
+	for model_id: String in LODCMP:
+		var lods: Array = (index[model_id] as Dictionary).get("lods", []) as Array
+		var size: Array = (index[model_id] as Dictionary).aabb.size
+		var step: float = float(size[0]) + 1.2
+		var row: Array[Node3D] = []
+		for i: int in range(lods.size()):
+			var scene: PackedScene = load(String((lods[i] as Dictionary).file)) as PackedScene
+			var car: Node3D = scene.instantiate() as Node3D
+			car.position = LODCMP_SPOT + Vector3((float(i) - 1.0) * step, 0.0, 0.0)
+			add_child(car)
+			row.append(car)
+		var aim: Vector3 = LODCMP_SPOT + Vector3(0.0, float(size[1]) * 0.45, 0.0)
+		for d: float in LODCMP_DIST:
+			var dist: float = d * maxf(1.0, float(size[2]) / 4.6)
+			camera.global_position = aim + Vector3(0.35, 0.18, 0.92).normalized() * dist
+			camera.look_at(aim, Vector3.UP)
+			for i: int in range(30):
+				await get_tree().process_frame
+			await RenderingServer.frame_post_draw
+			var image: Image = get_viewport().get_texture().get_image()
+			var path: String = out.path_join("lodcmp_%s_%02d.png" % [model_id.substr(3), int(d)])
+			print("prospekt_vehicles_perf: снимок ", path, " ошибка=", image.save_png(path))
+		for car: Node3D in row:
+			car.queue_free()
