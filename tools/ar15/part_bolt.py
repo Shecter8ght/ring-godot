@@ -32,16 +32,20 @@ def build(ctx):
     # снизу — паз под курок (курок проходит к головке ударника)
     boolean(car, box("cut_ham_slot", FP_HEAD - 14.0, FP_HEAD + 8.0, -5.2, 5.2, -CARRIER_R - 2, -1.5, B))
     boolean(car, box("cut_ham_face", FP_HEAD - 14.0, FP_HEAD + 0.6, -4.2, 4.2, -CARRIER_R - 2, 3.6, B))
+    # газоотводные окна на правом боку рамы (выход газа из камеры за затвором)
+    for xv in (-66.0, -59.0):
+        boolean(car, cyl(f"cut_vent{xv}", -CARRIER_R - 3, -2.0, 1.5, B, seg=20, cy=xv, cz=2.6, axis="Y"))
     # спереди снизу выемка над магазином: по губкам и верхнему патрону идёт только затвор
     boolean(car, box("cut_mag_relief", -58.0, CARRIER_FRONT + 2, -12.8, 12.8, -CARRIER_R - 2, -5.0, B))
     # задняя часть снизу срезана (рама скользит по курку и взводит его)
     boolean(car, box("cut_tail_flat", CARRIER_REAR - 2, FP_HEAD - 12.0, -20, 20, -CARRIER_R - 2, -CARRIER_R + 1.4, B))
     # правая сторона: плоскость окна выброса и насечки (у «гладкого» ресивера насечки остаются на раме)
     boolean(car, box("cut_port_face", -74.0, CARRIER_FRONT - 2.0, -CARRIER_R - 2, -CARRIER_R + 1.6, -6.0, 8.5, B))
+    # насечки досылателя — точно под его собачкой (её кончик при нажатии в x ≈ −140, 49.5° от верха к правому боку)
     for k in range(9):
-        xx = -139.0 + k * 3.2
-        c = box(f"cut_fa_ser{k}", xx - 0.8, xx + 0.8, -3.4, 3.4, CARRIER_R - 1.1, CARRIER_R + 2.0, B)
-        c.rotation_euler = (math.radians(38.0), 0, 0)
+        xx = -151.9 + k * 3.2
+        c = box(f"cut_fa_ser{k}", xx - 0.9, xx + 0.9, -3.4, 3.4, CARRIER_R - 1.1, CARRIER_R + 2.0, B)
+        c.rotation_euler = (math.radians(49.5), 0, 0)
         apply_transform(c)
         boolean(car, c)
     # кулачковый паз сверху: криволинейная прорезь (поворот затвора на 22.5°)

@@ -125,6 +125,9 @@ def rear_sight(C):
     for k in range(4):
         xx = hx - 2.4 + k * 1.6
         boolean(leaf, box(f"cut_rear_ser{k}", xx - 0.3, xx + 0.3, -12, 12, top - 0.5, top + 1, C))
+    # облегчающее окно в стойке под диоптром
+    boolean(leaf, prism_yz("cut_rear_window", fillet([(-2.8, hz + 8.2), (2.8, hz + 8.2), (2.8, hz + 12.4), (-2.8, hz + 12.4)], 1.2, 4),
+                           hx - 5.0, hx + 5.0, C))
     finish(leaf, w=0.25, seg=2, angle=35)
     set_origin(leaf, (hx, 0.0, hz))
     set_parent(leaf, base)
@@ -154,6 +157,17 @@ def rear_sight(C):
     drum = prism_xz("Rear_sight_drum", _knurl_xz(hx, dz, 4.2, 3.7, 24), -13.6, -9.95, C, "Steel_black")
     boolean(drum, cyl("cut_drum_face", -14, -13.2, 2.6, C, seg=24, cy=hx, cz=dz, axis="Y"))
     boolean(drum, box("cut_drum_slot", hx - 0.35, hx + 0.35, -14, -13.0, dz - 2.2, dz + 2.2, C))
+    # риски щелчков на торце барабана (12 штук по окружности)
+    ticks = []
+    for k in range(12):
+        t = box(f"cut_drum_tick{k}", -0.22, 0.22, -14.0, -13.35, 2.9, 3.6, C)
+        t.rotation_euler = (0, 2 * math.pi * k / 12, 0)
+        apply_transform(t)
+        t.location = (hx * MM, 0, dz * MM)
+        apply_transform(t)
+        ticks.append(t)
+    from lib import join as _join
+    boolean(drum, _join(ticks, "cut_drum_ticks"))
     finish(drum, w=0.15, seg=2, angle=35)
     set_origin(drum, (hx, -11.8, dz))
     set_parent(drum, leaf)
@@ -178,7 +192,10 @@ def front_sight(C):
     boolean(leaf, cyl("cut_front_knuckle", -10, 10, 1.25, C, seg=20, cy=hx, cz=hz, axis="Y"))
     # отверстие под резьбовой стебель мушки в перемычке
     boolean(leaf, cyl("cut_post_stem", hz + 4.0, bridge + 1, 1.6, C, seg=20, cy=hx, cz=0.0, axis="Z"))
-    # окно облегчения в кулаке спереди
+    # облегчающее окно между кулаком и перемычкой (сквозь него виден стебель мушки)
+    boolean(leaf, prism_yz("cut_front_window", fillet([(-2.5, hz + 5.0), (2.5, hz + 5.0), (2.5, hz + 8.3), (-2.5, hz + 8.3)], 1.0, 4),
+                           hx - 5.0, hx + 5.0, C))
+    # рифление на верхних торцах «ушей»
     for k in range(4):
         xx = hx - 2.4 + k * 1.6
         boolean(leaf, box(f"cut_front_ser{k}", xx - 0.3, xx + 0.3, -12, 12, top - 0.5, top + 1, C))
@@ -190,6 +207,18 @@ def front_sight(C):
     d0, d1 = bridge + 0.1, bridge + 3.3
     drum = prism_xy("Front_sight_drum", [(hx + x, y) for x, y in _knurl_xz(0.0, 0.0, 4.4, 3.9, 28)], d0, d1, C, "Steel_black")
     boolean(drum, cyl("cut_fdrum_bore", d0 - 1, d1 + 1, 1.55, C, seg=20, cy=hx, cz=0.0, axis="Z"))
+    # риски щелчков на верхнем торце барабана
+    ticks = []
+    for k in range(14):
+        a = 2 * math.pi * k / 14
+        t = box(f"cut_fdrum_tick{k}", 2.6, 3.4, -0.2, 0.2, d1 - 0.25, d1 + 1, C)
+        t.rotation_euler = (0, 0, a)
+        apply_transform(t)
+        t.location = (hx * MM, 0, 0)
+        apply_transform(t)
+        ticks.append(t)
+    from lib import join as _join
+    boolean(drum, _join(ticks, "cut_fdrum_ticks"))
     finish(drum, w=0.15, seg=2, angle=35)
     set_origin(drum, (hx, 0.0, (d0 + d1) / 2))
     set_parent(drum, leaf)

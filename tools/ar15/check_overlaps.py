@@ -18,8 +18,8 @@ PAIRS = [
     ("Mag_catch", "Magazine_body"), ("Mag_catch", "Lower_receiver"), ("Selector", "Trigger"), ("Dust_cover", "Upper_receiver"),
     ("Dust_cover", "Lower_receiver"), ("Upper_receiver", "Lower_receiver"), ("Takedown_pin", "Upper_receiver"),
     ("Pivot_pin", "Upper_receiver"), ("Disconnector", "Hammer"), ("Buffer_retainer", "Upper_receiver"),
-    ("Buffer_retainer", "Buffer_tube"), ("Stock_lock_pin", "Buffer_tube"), ("Rear_sight_leaf", "Rear_sight_base"),
-    ("Front_sight_leaf", "Front_sight_base"), ("Bolt_carrier", "Hammer"), ("Extractor", "Barrel_extension"),
+    ("Buffer_retainer", "Buffer_tube"), ("Stock_lock_pin", "Buffer_tube"), ("Stock_latch", "Buffer_tube"), ("Stock_body", "Buffer_tube"), ("Suppressor_body", "Handguard"), ("Suppressor_body", "Magazine_body"), ("Rear_sight_leaf", "Rear_sight_base"),
+    ("Front_sight_leaf", "Front_sight_base"), ("Bolt_carrier", "Hammer"), ("Extractor", "Barrel_extension"), ("Hammer_spring_L", "Hammer"), ("Hammer_spring_R", "Hammer"), ("Hammer_spring_L", "Trigger"), ("Hammer_spring_R", "Trigger"), ("Trigger_spring_L", "Trigger"), ("Trigger_spring_R", "Trigger"), ("Trigger_spring_L", "Lower_receiver"), ("Trigger_spring_R", "Lower_receiver"), ("Hammer_spring_L", "Lower_receiver"), ("Hammer_spring_R", "Lower_receiver"), ("Hammer_spring_L", "Disconnector"), ("Trigger_spring_L", "Hammer"),
 ]
 import sys as _sys
 _ONLY = (_sys.argv[_sys.argv.index("--") + 1].split(",") if "--" in _sys.argv else None)
@@ -35,6 +35,8 @@ STATES = {
     "sights_down": {"rear_sight": 0.0, "front_sight": 0.0},
     "fired": {"hammer": 0.0, "trigger": 1.0},
     "fa_pressed": {"forward_assist": 1.0},
+    "stock_latch_pressed": {"stock_latch": 1.0, "stock": 0.4},
+    "suppressor_on": {"suppressor_on": 1.0},
 }
 
 

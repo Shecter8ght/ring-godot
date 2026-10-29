@@ -11,13 +11,13 @@ HDRI = os.path.join(os.path.dirname(bpy.app.binary_path), f"{bpy.app.version[0]}
 # имя → (камера мм, цель мм, фокусное, положения управления)
 VIEWS = {
     "01_full_right": ((540, -1020, 270), (35, 0, -40), 50, {}),
-    "02_full_left": ((-430, 1020, 230), (45, 0, -40), 50, {}, 180),
+    "02_full_left": ((-430, 1020, 230), (45, 0, -40), 50, {"suppressor_on": 1.0}, 180),
     "03_receiver_right": ((-15, -330, 95), (-92, 0, -12), 55, {}),
     "04_receiver_left": ((-175, 320, 70), (-78, 0, -22), 55, {}, 180),
     "05_port_bolt_back": ((-5, -175, 55), (-42, 0, 4), 60, {"charging_handle": 0.75}),
     "06_trigger_grip": ((-55, -210, -85), (-128, 0, -62), 55, {}),
     "07_front_end": ((385, -245, 95), (245, 0, 0), 55, {}),
-    "08_brake_suppressor": ((520, 175, 65), (360, 0, 0), 55, {}, 180),
+    "08_brake_suppressor": ((520, 175, 65), (360, 0, 0), 55, {"suppressor_on": 1.0}, 180),
     "09_stock": ((-235, -250, 45), (-300, 0, -32), 50, {}),
     "10_opened": ((-35, -265, 150), (-110, 0, -2), 45, {"upper_open": 1.0, "takedown_pin": 1.0}),
 }
@@ -27,6 +27,9 @@ def world():
     w = bpy.data.worlds.new("Preview_world")
     bpy.context.scene.world = w
     w.use_nodes = True
+    # как в Material Preview: свет окружения без извлечённого «солнца» с картой теней — иначе рваная тень на гладком
+    if hasattr(w, "use_sun_shadow"):
+        w.use_sun_shadow = False
     nt = w.node_tree
     nt.nodes.clear()
     out = nt.nodes.new("ShaderNodeOutputWorld")
@@ -86,6 +89,14 @@ def main():
         if o is not None:
             o.hide_render = True
     ctrl = bpy.data.objects.get("AR15_Controls")
+    # снятый глушитель лежит в стороне под цевьём — на снимках без него его не показываем
+    sup = []
+    root = bpy.data.objects.get("Suppressor_body")
+    stack = [root] if root is not None else []
+    while stack:
+        o = stack.pop()
+        sup.append(o)
+        stack += list(o.children)
     base = {k: ctrl[k] for k in ctrl.keys() if not k.startswith("_")} if ctrl else {}
     for n in names:
         eye, tgt, lens, state = VIEWS[n][:4]
@@ -100,6 +111,9 @@ def main():
             ctrl.update_tag()
         sc.frame_set(1)
         bpy.context.view_layer.update()
+        on = float(ctrl["suppressor_on"]) if ctrl and "suppressor_on" in ctrl.keys() else 0.0
+        for o in sup:
+            o.hide_render = on < 0.5
         cam.location = Vector(eye) * 0.001
         look(cam, Vector(eye) * 0.001, Vector(tgt) * 0.001)
         cd.lens = lens

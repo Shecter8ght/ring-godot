@@ -11,7 +11,8 @@
 #   ch_latch        — защёлки рукоятки заряжания нажаты
 #   pivot_pin, takedown_pin — оси выдвинуты вправо; upper_open — верхний ресивер откинут на оси сборки
 #   stock           — приклад выдвинут (6 положений через 0.2); stock_latch — рычаг фиксатора нажат
-#   suppressor_off  — глушитель снят вперёд (собачка сначала поднимается с храповика муфты)
+#   suppressor_on   — глушитель (отдельный покупной предмет) установлен: 0 — лежит под цевьём, 0…0.5 — подводится
+#                     соосно к дулу, 0.5…1 — надвигается на тормоз (собачка на ходу приподнята)
 #   rear_sight, front_sight — прицелы подняты (1) / сложены (0); rear_aperture — диоптр перекинут на большое отверстие
 # Затвор: свободный ход рамы BOLT_FREE, поворот на BOLT_ROT за BOLT_UNLOCK, дальше идёт с рамой.
 import math
@@ -24,14 +25,16 @@ from part_lower import BOLT_CATCH_PIVOT
 from part_bolt import CH_REAR
 
 PROPS = ["forward_assist", "charging_handle", "bolt_carrier", "hammer", "trigger", "selector", "dust_cover", "mag_catch", "mag_out",
-         "bolt_catch", "ch_latch", "pivot_pin", "takedown_pin", "upper_open", "stock", "stock_latch", "suppressor_off",
+         "bolt_catch", "ch_latch", "pivot_pin", "takedown_pin", "upper_open", "stock", "stock_latch", "suppressor_on",
          "rear_sight", "front_sight", "rear_aperture"]
 DEFAULTS = {"hammer": 1.0, "selector": 0.5, "rear_sight": 1.0, "front_sight": 1.0}
 TRAVEL = f"(max(charging_handle, bolt_carrier)*{CARRIER_TRAVEL})"
 HAMMER_COCK_DEG = 54.0
 SPRING_LEN = 120.5          # возвратная пружина при запертом затворе
-STOCK_LATCH_SIGN = 1.0
+STOCK_LATCH_SIGN = -1.0           # хвост рычага опускается вместе со штифтом
 UPPER_OPEN_DEG = 32.0
+SUP_AWAY = (-110.0, 0.0, -112.0)   # снятый глушитель — под цевьём
+SUP_PRE = 60.0                     # перед установкой — соосно, на 60 мм впереди тормоза
 
 
 def add_driver(obj, path, index, expr, ctrl, props):
@@ -123,11 +126,15 @@ def build(ctx):
         for o in coll_roots(cname):
             set_parent(o, upper_g)
     sup = empty("Suppressor_mover", (0, 0, 0), R, upper_g, size=0.01)
-    add_driver(sup, "location", 0, f"suppressor_off*220.0*{MM}", ctrl, ["suppressor_off"])
+    # сначала родитель (пустышка в нуле), потом драйверы — иначе обратная матрица запомнит сдвиг драйвера
     for o in coll_roots("Suppressor"):
         set_parent(o, sup)
+    a_, b_ = "min(1.0,suppressor_on*2.0)", "max(0.0,suppressor_on*2.0-1.0)"
+    add_driver(sup, "location", 0, f"({SUP_AWAY[0]}+({SUP_PRE}-{SUP_AWAY[0]})*{a_}-{SUP_PRE}*{b_})*{MM}", ctrl, ["suppressor_on"])
+    add_driver(sup, "location", 2, f"({SUP_AWAY[2]}-{SUP_AWAY[2]}*{a_})*{MM}", ctrl, ["suppressor_on"])
     if ob("Suppressor_latch"):
-        add_driver(ob("Suppressor_latch"), "rotation_euler", 1, "radians(7.0)*min(1.0,suppressor_off*12.0)", ctrl, ["suppressor_off"])
+        add_driver(ob("Suppressor_latch"), "rotation_euler", 1, "radians(7.0)*(1.0 if 0.5<suppressor_on<0.97 else 0.0)", ctrl,
+                   ["suppressor_on"])
     # складные прицелы: стойки на своих шарнирах (начала координат на осях)
     if ob("Rear_sight_leaf"):
         add_driver(ob("Rear_sight_leaf"), "rotation_euler", 1, "radians(90.0)*(1.0-rear_sight)", ctrl, ["rear_sight"])

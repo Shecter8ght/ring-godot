@@ -2,6 +2,9 @@
 # сзади, рифлёные панели хвата спереди, раструб-«плечо» под шахтой), съёмное донце с фиксатором, подаватель со
 # ступенькой под затворную задержку, пружина-«змейка», 30 патронов в шахматном порядке (связанные копии одной сетки).
 # Отдельно, в стороне от оружия, — целый патрон 5.56×45 и стреляная гильза.
+# Маркировки вымышленные: «ГРАНЬ» и «5,56×45 · 30» на верхней части стенок, на донце; у окон — цифры остатка; на донце
+# гильзы — клеймо «ГР 24». Владелец (2026-10-29): надписи делаются на этапе текстур — в геометрии они только при
+# lib.MARKINGS_GEOMETRY = True (по умолчанию нет), места под них ровные. Сетки замкнутые.
 # Магазин строится в собственной системе «вдоль хребта»: s — вниз по магазину от верха губок, u — вперёд, w = Y.
 # Верх прямой (в шахте), ниже — дуга R вперёд: изгиб под конусность гильзы (головки сзади, пули спереди).
 import math
@@ -9,7 +12,7 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 from lib import (MM, MAG_TOP_Z, MAG_X, MAG_HALF_W, MAG_CATCH_SLOT, v, fillet, prism_xz, prism_yz, lathe, boolean, finish,
-                 join, auto_sharp, material, set_parent, set_origin, box)
+                 join, auto_sharp, material, set_parent, set_origin, box, renormal)
 from part_lower import BOLT_CATCH_PIVOT
 
 Z0 = MAG_TOP_Z
@@ -26,6 +29,9 @@ U_HEAD = -L2 + WALL + 0.9                 # донце гильзы у задн�
 ROUND_D = 9.62
 ROUND_STEP = 4.84                         # шаг рядов по донцам гильз
 COL_W = 4.75                              # центры колонн от середины
+MARK_NAME = "ГРАНЬ"
+MARK_CAL = "5,56×45 · 30"
+HEADSTAMP = ("ГР", "24")
 
 
 # ---------- хребет ----------
@@ -144,6 +150,87 @@ def stations(s0, s1, step, extra=()):
     return sorted(ss)
 
 
+# ---------- текст рельефом ----------
+
+FONT_FILE = "DejaVuSansMono.woff2"       # шрифт Blender (лицензия DejaVu/Bitstream Vera — свободная), контуры без перекрытий
+
+
+def _font():
+    f = bpy.data.fonts.get("MagFont")
+    if f is None:
+        import os
+        path = os.path.join(os.path.dirname(bpy.app.binary_path), f"{bpy.app.version[0]}.{bpy.app.version[1]}",
+                            "datafiles", "fonts", FONT_FILE)
+        try:
+            f = bpy.data.fonts.load(path)
+            f.name = "MagFont"
+        except Exception:
+            f = None
+    return f
+
+
+def text_obj(text, size, half_depth, coll):
+    """Замкнутая сетка текста в плоскости XY, выдавленная на ±half_depth (мм): контуры шрифта → своя заливка
+    с отверстиями → выдавливание (заливка самого Blender у букв с внутренними контурами даёт Т-стыки)."""
+    cu = bpy.data.curves.new("_txt", "FONT")
+    cu.body = text
+    f = _font()
+    if f is not None:
+        cu.font = f
+    cu.size = size * MM
+    cu.align_x = "CENTER"
+    cu.align_y = "CENTER"
+    cu.fill_mode = "NONE"
+    cu.resolution_u = 3
+    o = bpy.data.objects.new("_txt", cu)
+    coll.objects.link(o)
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(o.evaluated_get(dg), depsgraph=dg)
+    bpy.data.objects.remove(o, do_unlink=True)
+    bpy.data.curves.remove(cu)
+    bm = bmesh.new(); bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
+    for vv in bm.verts:
+        vv.co.z = -half_depth * MM
+    bmesh.ops.triangle_fill(bm, use_beauty=True, use_dissolve=False, edges=bm.edges[:])
+    ext = bmesh.ops.extrude_face_region(bm, geom=bm.faces[:])
+    vs = [g for g in ext["geom"] if isinstance(g, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=vs, vec=Vector((0.0, 0.0, 2.0 * half_depth * MM)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new("_txtm", me)
+    coll.objects.link(ob)
+    return ob
+
+
+def place_text(ob, center, normal, up, lift):
+    """Плоскость текста — поперёк normal (наружу), вверх — up; center — точка поверхности (мм)."""
+    n = Vector(normal).normalized()
+    u = (Vector(up) - n * Vector(up).dot(n)).normalized()
+    r = u.cross(n)
+    m = Matrix((r, u, n)).transposed().to_4x4()
+    m.translation = (Vector(center) + n * lift) * MM
+    ob.data.transform(m)
+    return ob
+
+
+def markings_on():
+    import lib
+    return getattr(lib, "MARKINGS_GEOMETRY", False)
+
+
+def engrave(target, text, size, depth, center, normal, up, coll):
+    t = text_obj(text, size, depth, coll)
+    place_text(t, center, normal, up, 0.0)
+    boolean(target, t)
+
+
+def emboss(target, text, size, height, center, normal, up, coll, embed=0.2):
+    t = text_obj(text, size, (height + embed) / 2.0, coll)
+    place_text(t, center, normal, up, (height - embed) / 2.0)
+    boolean(target, t, "UNION")
+
+
 # ---------- корпус ----------
 
 def body(C):
@@ -154,8 +241,8 @@ def body(C):
              for s in stations(-20.0, S_BOTTOM + 12.0, 2.5, brk)]
     boolean(b, loft("cut_mag_cavity", rings, C))
     # верх: губки сзади на уровне MAG_TOP_Z, спереди опущен под гайку/ресивер (пули поднимаются по рампе)
-    top = prism_xz("cut_mag_top", fillet([(-90.0, Z0), (-10.0, Z0), (-4.0, -17.6), (5.0, -17.6), (7.4, -23.2), (40.0, -23.2),
-                                          (40.0, 30.0), (-90.0, 30.0)], [0, 3.0, 3.0, 1.5, 1.5, 0, 0, 0], 4), -30.0, 30.0, C)
+    top = prism_xz("cut_mag_top", fillet([(-90.0, Z0), (-10.0, Z0), (-3.0, -16.0), (40.0, -16.0), (40.0, 30.0), (-90.0, 30.0)],
+                                         [0, 3.0, 3.0, 0, 0, 0], 4), -30.0, 30.0, C)
     boolean(b, top)
     # губки — продолжение стенок, загнуты внутрь над верхним патроном
     for s in (1, -1):
@@ -165,6 +252,10 @@ def body(C):
             prof = list(reversed(prof))
         lip = prism_yz("mag_lip", prof, MAG_X[0] + WALL - 0.3, -10.5, C, "Polymer")
         boolean(b, lip, "UNION")
+        y0, y1 = (TOP_HW - 0.35, TOP_HW + 0.25) if s > 0 else (-TOP_HW - 0.25, -TOP_HW + 0.35)
+        bead = prism_yz("mag_lip_bead", fillet([(y0, Z0 - 3.4), (y1, Z0 - 3.4), (y1, Z0 - 1.1), (y0, Z0 - 1.1)], [0, 0.2, 0.2, 0], 2),
+                        MAG_X[0] + 1.2, -11.5, C, "Polymer")
+        boolean(b, bead, "UNION")
     # задняя стенка между губками ниже верха: над ней проходит хвост затвора, донце верхнего патрона открыто затвору
     boolean(b, box("cut_mag_rear_dip", MAG_X[0] - 3.0, MAG_X[0] + 4.5, -5.0, 5.0, Z0 - 1.4, Z0 + 5.0, C))
     # выемка сзади-слева под зуб затворной задержки
@@ -175,6 +266,14 @@ def body(C):
     cx, cz = MAG_CATCH_SLOT
     boolean(b, prism_xz("cut_catch_slot", fillet([(cx - 4.2, cz - 4.0), (cx + 3.4, cz - 4.0), (cx + 3.4, cz + 4.0), (cx - 4.2, cz + 4.0)],
                                                  0.6, 2), 8.0, 20.0, C))
+    # маркировка: вымышленное название и калибр — гравировка 0.25 мм на левой стенке (ниже окна защёлки)
+    if markings_on():
+        engrave(b, MARK_NAME, 4.2, 0.25, (CX - 1.0, MAG_HALF_W, Z0 - 34.0), (0, 1, 0), (0, 0, 1), C)
+        engrave(b, MARK_CAL, 2.4, 0.22, (CX - 1.0, MAG_HALF_W, Z0 - 41.6), (0, 1, 0), (0, 0, 1), C)
+    # справа — калибр и номер партии (вымышленный)
+    if markings_on():
+        engrave(b, MARK_CAL, 2.4, 0.22, (CX + 1.0, -MAG_HALF_W, Z0 - 34.0), (0, -1, 0), (0, 0, 1), C)
+        engrave(b, "ЛОТ 24-07", 2.0, 0.2, (CX + 1.0, -MAG_HALF_W, Z0 - 40.0), (0, -1, 0), (0, 0, 1), C)
     # каркас ниже шахты: ряды панелей между рёбрами — сзади сквозные окна, спереди рифлёные панели
     rows = [(83.0, 95.5), (99.0, 111.5), (115.0, 127.5), (131.0, 143.5), (147.0, 159.5), (163.0, 172.5)]
     hw = BODY_HW
@@ -201,6 +300,18 @@ def body(C):
         y0, y1 = (hw - 0.6, hw + 3.0) if sg > 0 else (-hw - 3.0, -hw + 0.6)
         band.append(side_prism(f"cut_band{sg}", rr_su(78.4, 79.6, -L2 - 2, L2 + 2, 0.0, 1), y0, y1, C))
     boolean(b, join(band, "cut_band"))
+    # ребро на спинке ниже шахты
+    rib = loft("mag_spine", [[pt(s_, u, w) for u, w in ((-L2 - 0.8, -1.7), (-L2 + 0.6, -1.7), (-L2 + 0.6, 1.7), (-L2 - 0.8, 1.7))]
+                             for s_ in stations(85.5, 170.0, 3.0)], C, "Polymer")
+    boolean(b, rib, "UNION")
+    # цифры остатка у окон (литые, на полу задней панели): сколько патронов, если в этом окне видна латунь
+    for i, (s0, s1) in enumerate(rows if markings_on() else []):
+        sc = 0.5 * (s0 + s1)
+        cnt = window_count(sc)
+        for sg in (1, -1):
+            c = pt(sc, -11.75, 0.0)
+            c = Vector((c.x, (hw - 0.9) * sg, c.z))
+            emboss(b, str(cnt), 2.0, 0.22, c, (0, sg, 0), -frame(sc)[1], C)
     finish(b, w=0.3, seg=2, angle=35)
     # пирамидки хвата на передних панелях
     studs = bmesh.new()
@@ -212,13 +323,14 @@ def body(C):
                     u = -3.5 + iu * 3.25
                     sc = s0 + 2.6 + is_ * ((s1 - s0 - 5.2) / (ns - 1))
                     base, topw, h = 1.15, 0.55, 0.65
-                    yb = (hw - 0.9) * sg
+                    yb = (hw - 1.25) * sg
                     yt = (hw - 0.9 + h) * sg
                     ring0 = [pt(sc + ds, u + du, 0.0) for ds, du in ((-base, -base), (-base, base), (base, base), (base, -base))]
                     ring1 = [pt(sc + ds, u + du, 0.0) for ds, du in ((-topw, -topw), (-topw, topw), (topw, topw), (topw, -topw))]
                     vb = [studs.verts.new(Vector((p.x, yb, p.z)) * MM) for p in ring0]
                     vt = [studs.verts.new(Vector((p.x, yt, p.z)) * MM) for p in ring1]
                     studs.faces.new(vt if sg > 0 else list(reversed(vt)))
+                    studs.faces.new(list(reversed(vb)) if sg > 0 else vb)
                     for k in range(4):
                         j = (k + 1) % 4
                         studs.faces.new((vb[k], vb[j], vt[j], vt[k]))
@@ -228,8 +340,31 @@ def body(C):
     so = bpy.data.objects.new("mag_studs", me)
     C.objects.link(so)
     so.data.materials.append(material("Polymer"))
-    auto_sharp(so, 35)
-    return join([b, so], "Magazine_body")
+    boolean(b, so, "UNION")
+    seal(b)
+    renormal(b)
+    b["_fin"] = 1
+    return b
+
+
+def seal(o, max_sides=8):
+    """Заделка мелких дыр, которые EXACT-булево иногда оставляет на вырожденных местах (контуры до max_sides рёбер)."""
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    bnd = [e for e in bm.edges if len(e.link_faces) == 1]
+    if bnd:
+        bmesh.ops.holes_fill(bm, edges=bnd, sides=max_sides)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        bm.to_mesh(o.data)
+    bm.free()
+
+
+def window_count(sc):
+    """Сколько патронов в магазине, когда нижний патрон стоит у окна на хребте sc."""
+    pos = round_positions()
+    for k, (s_, w_) in enumerate(pos):
+        if s_ >= sc - 1.5:
+            return k + 1
+    return len(pos)
 
 
 # ---------- донце ----------
@@ -249,12 +384,24 @@ def floorplate(C):
     boolean(fp, loft("cut_fp_pocket", pocket, C))
     # снизу: поперечные рёбра хвата и фиксатор (кнопка в окне донца)
     gr = [lbox(f"cut_fp_g{k}", f, S_BOTTOM + 4.9, S_BOTTOM + 7.0, u - 0.7, u + 0.7, -BODY_HW + 1.0, BODY_HW - 1.0, C)
-          for k, u in enumerate([-8.0 + 3.6 * i for i in range(11)])]
+          for k, u in enumerate([9.0 + 3.6 * i for i in range(6)])]
     boolean(fp, join(gr, "cut_fp_grooves"))
     boolean(fp, lbox("cut_fp_lock", f, S_BOTTOM + 2.6, S_BOTTOM + 7.0, -27.5, -15.5, -5.6, 5.6, C))
     finish(fp, w=0.3, seg=2, angle=35)
+    # литые надписи на нижней грани донца
+    pb, tb, ub = frame(sm)
+    bottom = S_BOTTOM + 5.6
+    if markings_on():
+        emboss(fp, MARK_NAME, 3.6, 0.3, f(bottom, 1.6, 0.0), tb, ub, C)
+        emboss(fp, MARK_CAL, 2.1, 0.25, f(bottom, -4.4, 0.0), tb, ub, C)
+        renormal(fp)
+    fp["_fin"] = 1
     lock = lbox("Magazine_floorplate_lock", f, S_BOTTOM + 1.0, S_BOTTOM + 4.4, -26.6, -16.4, -4.7, 4.7, C, "Polymer")
-    finish(lock, w=0.5, seg=2, angle=35)
+    # рифление кнопки фиксатора
+    for k in range(4):
+        uu = -25.0 + k * 2.4
+        boolean(lock, lbox(f"cut_lock_g{k}", f, S_BOTTOM + 4.0, S_BOTTOM + 5.0, uu - 0.45, uu + 0.45, -5.0, 5.0, C))
+    finish(lock, w=0.35, seg=2, angle=35)
     return fp, lock
 
 
@@ -278,8 +425,39 @@ def cartridge_mesh(C):
     prof += [(57.4, 0.35), (57.4, 0.0)]
     bullet = lathe("c_bullet", prof, C, "Bullet_jacket", seg=40, cy=0.0, cz=0.0)
     o = join([case, bullet], "Cartridge_556")
-    auto_sharp(o, 30)
+    finish(o, w=0.08, seg=2, angle=40)
+    headstamp(o, C)
+    o["_fin"] = 1
     return o
+
+
+def headstamp(o, C):
+    """Клеймо на донце гильзы: сверху и снизу от капсюля, гравировка 0.07 мм (только при MARKINGS_GEOMETRY)."""
+    if not markings_on():
+        return
+    engrave(o, HEADSTAMP[0], 1.05, 0.07, (0.0, 0.0, 3.5), (-1, 0, 0), (0, 0, 1), C)
+    engrave(o, HEADSTAMP[1], 1.05, 0.07, (0.0, 0.0, -3.5), (-1, 0, 0), (0, 0, 1), C)
+    # торец гильзы плоский: кастомные нормали фаски после вырезания букв интерполируются криво — сбросить их,
+    # резкость по углу заново, грани торца — плоские
+    clear_custom_normals(o)
+    auto_sharp(o, 35)
+    for poly in o.data.polygons:
+        if poly.center.x < 0.15 * MM:
+            poly.use_smooth = False
+
+
+def clear_custom_normals(o):
+    if not o.data.has_custom_normals:
+        return
+    vl = bpy.context.view_layer
+    prev = vl.objects.active
+    for ob in vl.objects:
+        ob.select_set(False)
+    o.select_set(True)
+    vl.objects.active = o
+    bpy.ops.mesh.customdata_custom_splitnormals_clear()
+    o.select_set(False)
+    vl.objects.active = prev
 
 
 def spent_case(C):
@@ -288,7 +466,9 @@ def spent_case(C):
     # вмятина бойка на капсюле
     dent = lathe("cut_dent", [(-0.5, 0.0), (-0.5, 0.75), (0.25, 0.55), (0.45, 0.0)], C, None, seg=20, cy=0.0, cz=0.0)
     boolean(o, dent)
-    auto_sharp(o, 30)
+    finish(o, w=0.08, seg=2, angle=40)
+    headstamp(o, C)
+    o["_fin"] = 1
     return o
 
 
@@ -345,6 +525,7 @@ def follower(C, s_low, s_high, high_side):
     for u0, u1, d in ((25.6, hu1 - 0.6, 12.0), (hu0 + 0.6, -25.4, 9.0)):
         boolean(base, lbox("fol_leg", f, s_low + 4.0, s_low + 4.5 + d, u0, u1, -7.0, 7.0, C, "Polymer"), "UNION")
     finish(base, w=0.35, seg=2, angle=35)
+    base["_fin"] = 1
     return base
 
 
@@ -390,6 +571,7 @@ def spring(C, s0, s1, turns=6, mat="Spring_steel"):
     C.objects.link(o)
     o.data.materials.append(material(mat))
     auto_sharp(o, 40)
+    o["_fin"] = 1
     return o
 
 

@@ -325,8 +325,9 @@ bash tools/vss_m_v8/painter_to_game.sh [набор …] [--scenes] [--shots] # �
                                                               # инструкция — docs/assets/vss_m_painter_manual_wear.md; наборы с «РУКАМИ» скриптом не пересобираются
                                                               # основа материалов без пересборки (сохраняет «РУКАМИ») — задание моста tools/vss_m_v8/sp_base_values.py (BASE_SETS = [...])
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/ar15/build.py -- <out.blend> [стадии]
-                                                              # AR-15 «Fab-сборка» (геометрия high-poly со всей механикой): части tools/ar15/part_*.py, управление —
+                                                              # AR-15 «ГРАНЬ-15» (геометрия high-poly со всей механикой): части tools/ar15/part_*.py, управление —
                                                               # пустышка AR15_Controls (part_rig.py); затем blender -b <out.blend> --python tools/ar15/delivery.py -- <выдача.blend>;
+                                                              # глушитель отдельным файлом (в игре покупной): --python tools/ar15/delivery_suppressor.py -- <глушитель.blend>;
                                                               # проверки: --python tools/ar15/check_overlaps.py [-- состояния] (пересечения в положениях), tools/ar15/shots.py (снимки)
                                                               # снимки как в Material Preview (Eevee, HDRI forest.exr): --python tools/ar15/render_preview.py -- <папка> [вид,…] [ширина]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]

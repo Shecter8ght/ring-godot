@@ -16,8 +16,9 @@ LUG_HALF_W = 6.3              # проушины верхнего ресивер
 PIN_R = 3.15                  # оси сборки и разборки (Ø6.3 — 0.250″)
 FRONT_RING_R = 15.9           # резьбовое кольцо под гайку цевья (Ø1.25″)
 FRONT_RING_LEN = 12.0
-FA_ROD_END = 31.0             # конец стержня досылателя по его оси (поверхность в ~1 мм от рамы)
-FA_PAWL = 3.6                 # вылет собачки к оси канала: в покое ~1 мм до рамы, нажатием — в насечку
+FA_ROD_END = 18.5             # конец стержня досылателя по его оси: и нажатый не касается рамы
+FA_PAWL = 3.9                 # вылет собачки к оси канала: в покое ~1 мм до рамы, нажатием — в насечку
+FA_HOUSING_REAR = -4.4        # задний торец корпуса по оси досылателя: кнопка (до −7.6) выступает на ~3 мм
 HINGE_Y = -15.6               # ось пылезащитной крышки (под окном выброса)
 HINGE_Z = -0.4
 STEP = 0.8                    # уступ боковин над осью крышки
@@ -101,10 +102,12 @@ def build(ctx):
     boolean(body, box("cut_hinge_groove", PORT_X[0] - 0.8, PORT_X[1] + 0.8, -UPPER_HALF_W - 3, -UPPER_HALF_W + 2.3,
                       HINGE_Z - 2.5, HINGE_Z + 2.4, C))
     # отражатель гильз за окном: сбоку — скошенный перед, в плане — клин (гильза уходит вперёд-вправо)
-    defl = prism_xz("Upper_deflector", fillet([(-117.0, 5.0), (-98.5, 5.0), (-104.0, RAIL_BASE - 0.5), (-117.0, RAIL_BASE - 0.5)],
-                                              [2.0, 1.5, 2.5, 1.5], 4), -UPPER_HALF_W + STEP + 0.5, -UPPER_HALF_W - 6.0, C, "Alu_anodized")
-    wedge = prism_xy("cut_defl_wedge", [(-120.0, -UPPER_HALF_W - 7.0), (-109.0, -UPPER_HALF_W - 7.0), (-96.0, -UPPER_HALF_W - 1.2),
-                                        (-96.0, -UPPER_HALF_W - 10.0), (-120.0, -UPPER_HALF_W - 10.0)], 0.0, 30.0, C)
+    dx0, dx1 = PORT_X[0] - 19.3, PORT_X[0] - 1.6
+    defl = prism_xz("Upper_deflector", fillet([(dx0, 5.0), (dx1, 5.0), (dx1, 11.0), (dx1 - 6.2, RAIL_BASE - 0.5),
+                                               (dx0 + 3.5, RAIL_BASE - 0.5)], [2.0, 1.0, 2.0, 2.5, 1.5], 4),
+                    -UPPER_HALF_W + STEP + 0.5, -UPPER_HALF_W - 6.0, C, "Alu_anodized")
+    wedge = prism_xy("cut_defl_wedge", [(dx0 - 3.0, -UPPER_HALF_W - 7.0), (dx0 + 8.0, -UPPER_HALF_W - 7.0), (dx1 + 3.3, -UPPER_HALF_W - 1.2),
+                                        (dx1 + 3.3, -UPPER_HALF_W - 10.0), (dx0 - 3.0, -UPPER_HALF_W - 10.0)], 0.0, 30.0, C)
     boolean(defl, wedge)
     boolean(body, defl, "UNION")
     # за шахтой линия разъёма поднимается: снизу выбрано до REAR_TOP_Z (там боковины нижнего), проушина разборки остаётся
@@ -113,15 +116,13 @@ def build(ctx):
                                                      (tdx + 9.25, REAR_TOP_Z)], [0, 0, STEP_R, 0], 8), -20, 20, C))
     # досылатель: корпус под углом к оси справа сзади, канал толкателя выходит к насечкам рамы
     m = fa_matrix()
-    # цилиндр под кнопкой, дальше корпус сужается и уходит в бок ресивера
-    hs = lathe("fa_housing", [(0.0, 0.0), (0.0, FA_R - 1.0), (1.0, FA_R), (17.0, FA_R), (30.0, FA_R - 1.2), (44.0, 5.2),
-                              (56.0, 2.2), (58.0, 0.0)], C, "Alu_anodized", seg=72, cy=0.0, cz=0.0)
+    hs = fa_housing_mesh(C)
     hs.data.transform(m)
     # внутреннее корпуса досылателя вырезаем до объединения (повторный прорез канала совпал бы с его поверхностью)
     boolean(hs, cyl("cut_hs_bore", UPPER_REAR - 5, -60.0, CARRIER_BORE_R + 0.7, C, seg=64))
     boolean(hs, box("cut_hs_inner", UPPER_REAR - 5, -60.0, -11.0, 20.0, -20.0, 40.0, C))
     boolean(body, hs, "UNION")
-    fb = lathe("cut_fa_bore", [(-2.0, 0.0), (-2.0, 7.55), (9.0, 7.55), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
+    fb = lathe("cut_fa_bore", [(-12.0, 0.0), (-12.0, 7.55), (9.0, 7.55), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
                C, None, seg=48, cy=0.0, cz=0.0)
     fb.data.transform(m)
     boolean(body, fb)
@@ -135,7 +136,7 @@ def build(ctx):
     # выемка снизу сзади под головку фиксатора буфера
     boolean(body, box("cut_retainer_relief", UPPER_REAR - 2, UPPER_REAR + 5.0, -3.0, 3.0, SPLIT_Z - 2, -11.0, C))
     # выемка слева снизу под затворную задержку (её верхняя лопатка и зуб заходят выше разъёма)
-    boolean(body, box("cut_bolt_catch", -61.5, -39.5, 7.0, UPPER_HALF_W + 3, SPLIT_Z - 2, -2.0, C))
+    boolean(body, box("cut_bolt_catch", -59.4, -41.6, 7.0, UPPER_HALF_W + 3, SPLIT_Z - 2, -6.0, C))
     # вырез сзади сверху под защёлку рукоятки заряжания (обе стороны)
     for s in (-1, 1):
         boolean(body, box(f"cut_ch_latch{s}", UPPER_REAR - 2, UPPER_REAR + 9.0, 4.5 * s if s > 0 else -13.5, 13.5 if s > 0 else -4.5,
@@ -155,6 +156,63 @@ def build(ctx):
     out["cover_spring"] = spr
     out["fa"] = forward_assist(C)
     return out
+
+
+def _smooth(t):
+    t = min(1.0, max(0.0, t))
+    return t * t * (3 - 2 * t)
+
+
+def fa_housing_mesh(C):
+    """Корпус досылателя кольцами вдоль его оси (локально X), «капля» по фото PEO: у кнопки цилиндр, дальше вылет
+    наружной стороны над боковиной (локально −Y) плавно сходит на нет к ~64 мм (ось при этом уходит внутрь корпуса),
+    высота убывает к острию — верхняя кромка опускается, нижняя идёт почти ровно. Внутренняя сторона уходит
+    в корпус ресивера и срезается каналом рамы."""
+    import bmesh
+    from lib import v as vmm
+    n = 64
+    d = Vector(FA_D).normalized()
+    side = -(UPPER_HALF_W - STEP)                       # боковина над уступом
+    p0 = side - (FA_S[1] - FA_R)                         # вылет у кнопки
+    cy = 0.9875                                          # локальная Y наклонена к мировой (поворот оси ~11°)
+    L0 = FA_HOUSING_REAR
+    stations = [L0, L0 + 0.5, L0 + 1.2] + [-2.0 + 2.0 * k for k in range(38)]
+    me = bpy.data.meshes.new("fa_housing")
+    bm = bmesh.new()
+    rings = []
+    for L in stations:
+        k = _smooth((L - 12.0) / 54.0)
+        yc = FA_S[1] + d.y * L
+        prot = p0 * (1.0 - k) - 0.8 * _smooth((L - 60.0) / 10.0)   # к концу уходит под боковину
+        ry_out = (yc - (side - prot)) / cy
+        if L < 14.0:
+            ry_out = max(ry_out, FA_R)
+        rz = FA_R - (FA_R - 5.6) * k                        # к острию низкий широкий прилив, а не шип
+        ry_in = FA_R
+        if L < L0 + 1.2:                                  # фаска заднего торца
+            dd = L0 + 1.2 - L
+            ry_out -= dd; rz -= dd; ry_in -= dd
+        ring = []
+        for i in range(n):
+            a = 2 * math.pi * i / n
+            ca, sa = math.cos(a), math.sin(a)
+            ry = ry_in if ca > 0 else ry_out
+            ring.append(bm.verts.new(vmm(L, ry * ca, rz * sa)))
+        rings.append(ring)
+    for r0, r1 in zip(rings, rings[1:]):
+        for i in range(n):
+            j = (i + 1) % n
+            bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    for pl in me.polygons:
+        pl.use_smooth = True
+    o = bpy.data.objects.new("fa_housing", me)
+    C.objects.link(o)
+    o.data.materials.append(material("Alu_anodized"))
+    return o
 
 
 def fa_matrix():
@@ -187,7 +245,7 @@ def forward_assist(C):
     me = bpy.data.meshes.new("fa_pawl")
     bm = bmesh.new()
     vs = {}
-    for ia, a in enumerate((-3.2, 0.4)):
+    for ia, a in enumerate((-0.9, 0.5)):
         for ib, b in enumerate((-1.0, FA_PAWL)):
             for ic, c in enumerate((-1.6, 1.6)):
                 p = e + d * a + u * b + w * c

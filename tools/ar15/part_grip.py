@@ -11,7 +11,7 @@ from lib import (MM, GRIP_TOP_Z, GRIP_TOP_X, v, fillet, prism_xz, prism_xy, pris
 
 ANGLE = 18.0
 LEN = 104.0                     # длина по оси от верхней площадки
-TOP_CX = -156.0                 # ось рукояти на верхней площадке
+TOP_CX = -147.0                 # ось рукояти на верхней площадке (перёд — у заднего уха скобы)
 P_EXP = 2.8                     # «квадратность» сечения
 # t (доля длины), вперёд f, назад b (вдоль поперечной оси), полуширина w
 SECTIONS = [
@@ -61,7 +61,7 @@ def section_at(t):
     return f, b, w
 
 
-def ring(t, f, b, w, n=56):
+def ring(t, f, b, w, n=96):
     c, hx = (f + b) / 2, (f - b) / 2
     a0 = axis_pt(t)
     pts = []
@@ -80,6 +80,92 @@ def surf_y(t, xl):
     c, hx = (f + b) / 2, (f - b) / 2
     u = min(1.0, abs((xl - c) / hx))
     return w * (1.0 - u ** P_EXP) ** (1.0 / P_EXP)
+
+
+PANEL_T = (0.18, 0.83)           # площадка по длине рукояти (доли)
+PANEL_U = (-0.50, 0.44)          # и поперёк (доли полуоси сечения от середины: назад … вперёд)
+PANEL_DEPTH = 0.6
+STIP_PITCH = 1.7
+SCREW_OFF = -11.1                # винт смещён назад от оси рукояти, чтобы попасть в отверстие ресивера
+U_TOP = LEN + SCREW_OFF * math.tan(math.radians(ANGLE))   # где ось винта пересекает площадку (от низа рукояти по оси)
+SCREW_HEAD_D = 18.0              # головка винта на 18 мм ниже площадки, стержень входит в ресивер на 7 мм
+
+
+def _panel_pt(t, uf, s, dy):
+    f, b, w = section_at(t)
+    c, hx = (f + b) / 2, (f - b) / 2
+    xl = c + uf * hx
+    p = axis_pt(t) + FWD * xl
+    return Vector((p.x, s * (surf_y(t, xl) + dy), p.z))
+
+
+def panel_cutter(s, G, nt=44, nu=18):
+    """Срез площадки: тело между поверхностью рукояти минус PANEL_DEPTH и +3 мм наружу, по сетке (t, u)."""
+    me = bpy.data.meshes.new("cut_grip_panel")
+    bm = bmesh.new()
+    ts = [PANEL_T[0] + (PANEL_T[1] - PANEL_T[0]) * i / (nt - 1) for i in range(nt)]
+    us = [PANEL_U[0] + (PANEL_U[1] - PANEL_U[0]) * j / (nu - 1) for j in range(nu)]
+    inner = [[bm.verts.new(v(*_panel_pt(t, u, s, -PANEL_DEPTH))) for u in us] for t in ts]
+    outer = [[bm.verts.new(v(*_panel_pt(t, u, s, 3.0))) for u in us] for t in ts]
+    for i in range(nt - 1):
+        for j in range(nu - 1):
+            bm.faces.new((inner[i][j], inner[i][j + 1], inner[i + 1][j + 1], inner[i + 1][j]))
+            bm.faces.new((outer[i][j], outer[i + 1][j], outer[i + 1][j + 1], outer[i][j + 1]))
+    for i in range(nt - 1):
+        bm.faces.new((inner[i][0], inner[i + 1][0], outer[i + 1][0], outer[i][0]))
+        bm.faces.new((inner[i][-1], outer[i][-1], outer[i + 1][-1], inner[i + 1][-1]))
+    for j in range(nu - 1):
+        bm.faces.new((inner[0][j], outer[0][j], outer[0][j + 1], inner[0][j + 1]))
+        bm.faces.new((inner[-1][j], inner[-1][j + 1], outer[-1][j + 1], outer[-1][j]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new("cut_grip_panel", me)
+    G.objects.link(o)
+    return o
+
+
+def stipple(G):
+    """Бугорки в шахматном порядке по дну площадок; каждый — замкнутое тело, основание на 0.25 мм в дне."""
+    me = bpy.data.meshes.new("grip_texture")
+    tb = bmesh.new()
+    margin = 0.9
+    for s in (-1, 1):
+        tm = PANEL_T[0] * LEN + margin + 0.6
+        row = 0
+        while tm <= PANEL_T[1] * LEN - margin - 0.6:
+            t = tm / LEN
+            f, b, w = section_at(t)
+            c, hx = (f + b) / 2, (f - b) / 2
+            x_lo = c + PANEL_U[0] * hx + margin + 0.6
+            x_hi = c + PANEL_U[1] * hx - margin - 0.6
+            xl = x_lo + (STIP_PITCH / 2 if row % 2 else 0.0)
+            while xl <= x_hi:
+                ys = surf_y(t, xl) - PANEL_DEPTH
+                base = axis_pt(t) + FWD * xl
+                quads = []
+                for half, dy in ((0.55, -0.25), (0.28, 0.38)):
+                    q = []
+                    for du, dv in ((-half, -half), (half, -half), (half, half), (-half, half)):
+                        p = base + FWD * du + DOWN * dv
+                        q.append(tb.verts.new(v(p.x, s * (ys + dy), p.z)))
+                    quads.append(q)
+                lo, hi = quads
+                tb.faces.new(lo)
+                tb.faces.new(list(reversed(hi)))
+                for k in range(4):
+                    k2 = (k + 1) % 4
+                    tb.faces.new((lo[k], hi[k], hi[k2], lo[k2]))
+                xl += STIP_PITCH
+            tm += STIP_PITCH * 0.866
+            row += 1
+    bmesh.ops.recalc_face_normals(tb, faces=tb.faces)
+    tb.to_mesh(me); tb.free()
+    tex = bpy.data.objects.new("grip_texture", me)
+    G.objects.link(tex)
+    tex.data.materials.append(material("Polymer"))
+    for p in tex.data.polygons:
+        p.use_smooth = False
+    return tex
 
 
 def build(ctx):
@@ -107,70 +193,48 @@ def build(ctx):
     # плоская площадка сверху — срез по низу ресивера
     boolean(grip, box("grip_clip", -400, 0, -60, 60, -300, GRIP_TOP_Z, G), "INTERSECT")
     # упор ладони сзади-сверху: заходит за задний торец нижнего ресивера, ниже пластины приклада
-    bt = prism_xz("grip_beavertail", fillet([(-172.0, GRIP_TOP_Z), (-186.6, GRIP_TOP_Z), (-190.5, -44.6), (-196.4, -42.2),
-                                             (-198.6, -44.2), (-196.8, -48.6), (-189.0, -58.0), (-176.0, -60.0)],
+    dz = GRIP_TOP_Z + 45.9
+    bt = prism_xz("grip_beavertail", fillet([(-168.0, GRIP_TOP_Z), (-186.6, GRIP_TOP_Z), (-190.5, -44.6 + dz), (-196.4, -42.2 + dz),
+                                             (-198.6, -44.2 + dz), (-196.8, -48.6 + dz), (-189.0, -58.0 + dz), (-170.0, -62.0 + dz)],
                                             [0, 1.5, 2.5, 2.5, 2.0, 4.0, 4.0, 0], 4), -10.5, 10.5, G, "Polymer")
     finish(bt, w=1.6, seg=3, angle=30)
     boolean(grip, bt, "UNION")
-    # отверстие под винт снизу (по оси, чуть назад)
-    bottom = axis_pt(1.0) + FWD * (-2.0)
-    hole = lathe("cut_grip_screw", [(-1.0, 0.0), (-1.0, 5.2), (20.0, 5.2), (20.0, 0.0)], G, None, seg=32, cy=0.0, cz=0.0)
+    # отверстие под винт снизу: ось винта параллельна оси рукояти и выходит на площадку под отверстием ресивера (x −158.6)
+    bottom = axis_pt(1.0) + FWD * SCREW_OFF
+    # канал под ключ снизу до головки винта и проход стержня через верх рукояти в ресивер
+    hole = lathe("cut_grip_screw", [(-1.0, 0.0), (-1.0, 5.2), (U_TOP - SCREW_HEAD_D + 4.05, 5.2), (U_TOP - SCREW_HEAD_D + 4.05, 3.3),
+                                    (U_TOP + 1.5, 3.3), (U_TOP + 1.5, 0.0)], G, None, seg=40, cy=0.0, cz=0.0)
     hole.rotation_euler = (0, math.radians(-90 + ANGLE), 0)
     hole.location = v(bottom.x, 0, bottom.z)
     apply_transform(hole)
     boolean(grip, hole)
-    # торцы (низ и площадка) — плоское затенение, иначе гладкие нормали на больших треугольниках дают «звёзды»
-    for p in grip.data.polygons:
-        n = p.normal
-        if n.dot(DOWN) > 0.96 or n.z > 0.96:
-            p.use_smooth = False
     finish(grip, w=0.9, seg=3, angle=40)
-    o["grip"] = grip
-    # точечная текстура по бокам: пирамидки на поверхности
-    tme = bpy.data.meshes.new("grip_texture")
-    tb = bmesh.new()
-    pitch = 1.6
-    half = 0.5
-    for s in (-1, 1):
-        tm = 0.16 * LEN
-        while tm <= 0.84 * LEN:
-            t = tm / LEN
-            f, b, w = section_at(t)
-            c, hx = (f + b) / 2, (f - b) / 2
-            row = int(round(tm / pitch))
-            xl = c - 0.52 * hx + (pitch / 2 if row % 2 else 0.0)
-            while xl <= c + 0.52 * hx:
-                ys = surf_y(t, xl)
-                base = axis_pt(t) + FWD * xl
-                corners = []
-                for du, dv in ((-half, -half), (half, -half), (half, half), (-half, half)):
-                    p = base + FWD * du + DOWN * dv
-                    corners.append(tb.verts.new(v(p.x, s * (ys - 0.3), p.z)))
-                apex = tb.verts.new(v(base.x, s * (ys + 0.42), base.z))
-                for i in range(4):
-                    a, bb = corners[i], corners[(i + 1) % 4]
-                    tb.faces.new((a, bb, apex) if s > 0 else (bb, a, apex))
-                xl += pitch
-            tm += pitch * 0.866
-    bmesh.ops.recalc_face_normals(tb, faces=tb.faces)
-    tb.to_mesh(tme); tb.free()
-    tex = bpy.data.objects.new("grip_texture", tme)
-    G.objects.link(tex)
-    tex.data.materials.append(material("Polymer"))
-    for p in tex.data.polygons:
-        p.use_smooth = False
+    # утопленные площадки текстуры по бокам (срез по поверхности рукояти на PANEL_DEPTH)
+    for s_ in (-1, 1):
+        boolean(grip, panel_cutter(s_, G))
+    finish(grip, w=0.3, seg=2, angle=40)
+    for p in grip.data.polygons:
+        p.use_smooth = True
+    # бугорки на дне площадок — замкнутые усечённые пирамидки (основание утоплено в дно)
+    tex = stipple(G)
     grip = join([grip, tex], "Pistol_grip")
+    auto_sharp(grip, 40)
     grip["_fin"] = 1
     o["grip"] = grip
     # винт рукояти: головка с шестигранником в глубине отверстия, хвост вверх по оси
-    sc = lathe("Grip_screw", [(19.0, 0.0), (19.0, 3.6), (19.4, 4.0), (23.4, 4.0), (23.6, 3.2), (23.6, 3.1), (34.0, 3.1),
-                              (34.4, 2.7), (34.4, 0.0)], G, "Steel_black", seg=32, cy=0.0, cz=0.0)
+    u0 = U_TOP - SCREW_HEAD_D
+    # стержень по внутреннему диаметру резьбы (r 2.4) — входит в резьбовое отверстие ресивера (r 2.6, 20 граней) без пересечения
+    sc = lathe("Grip_screw", [(u0, 0.0), (u0, 3.6), (u0 + 0.4, 4.0), (u0 + 3.6, 4.0), (u0 + 4.0, 3.4), (u0 + 4.0, 2.4),
+                              (U_TOP + 6.4, 2.4), (U_TOP + 7.0, 1.9), (U_TOP + 7.0, 0.0)], G, "Steel_black", seg=40, cy=0.0, cz=0.0)
     hexa = prism_yz("cut_screw_hex", [(1.9 * math.cos(math.radians(60 * k + 30)), 1.9 * math.sin(math.radians(60 * k + 30))) for k in range(6)],
-                    18.0, 21.4, G)
+                    u0 - 1.0, u0 + 2.4, G)
     boolean(sc, hexa)
+    for k in range(int(10.0 / 1.06)):
+        uu = U_TOP - 3.0 + k * 1.06
+        boolean(sc, lathe("cut_scr_thread", [(uu - 0.3, 2.5), (uu, 2.05), (uu + 0.3, 2.5)], G, None, seg=40))
     sc.rotation_euler = (0, math.radians(-90 + ANGLE), 0)
     sc.location = v(bottom.x, 0, bottom.z)
     apply_transform(sc)
-    auto_sharp(sc, 35)
+    finish(sc, w=0.15, seg=2, angle=40)
     o["screw"] = sc
     return o

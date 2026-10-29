@@ -3,7 +3,7 @@
 # оси сборки и разборки, фиксатор буфера.
 import math
 import bpy
-from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
+from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
                  TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
                  prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join, bevel_edges, auto_sharp, material)
 from part_upper import LUG_HALF_W, PIN_R
@@ -12,11 +12,11 @@ FCG_HALF_W = 12.2            # боковины кармана УСМ (снар�
 FCG_POCKET_HALF = 9.4        # карман УСМ внутри
 WELL_IN_HALF_W = 11.7        # шахта внутри 23.4 мм (замер 15 ресиверов: 0.905″ + зазор магазину)
 WELL_REAR_OUT = -58.0        # задняя стенка шахты снаружи
-WELL_REAR_IN = -50.9         # задняя стенка толще (в ней тяга защёлки и плунжер задержки)
-WELL_FRONT_IN = 11.6         # шахта внутри 62 мм (замер: 2.409″)
+WELL_REAR_IN = -54.7         # шахта внутри 62.5 мм; задняя стенка ≈3.3 мм
+WELL_FRONT_IN = 7.8          # передняя стенка 3 мм
 WELL_BOTTOM_FRONT = -56.0
 WELL_BOTTOM_REAR = -70.0
-BOTTOM_Z = -45.9             # низ корпуса над скобой
+BOTTOM_Z = GUARD_Z[1]        # низ корпуса над спуском (−50.1)
 TOWER_R = 20.5
 TOWER_X = (LOWER_REAR, UPPER_REAR)
 PART_W = 9.3                 # толщина курка и спуска (0.37″)
@@ -30,18 +30,18 @@ def guard_and_well_profile():
     pts = [
         (MAGWELL_FRONT, SPLIT_Z),                  # верх передней стенки шахты
         (MAGWELL_FRONT, -40.0),
-        (MAGWELL_FRONT + 2.5, WELL_BOTTOM_FRONT + 3.0),   # раструб вперёд
-        (MAGWELL_FRONT + 1.5, WELL_BOTTOM_FRONT),
+        (MAGWELL_FRONT + 4.3, WELL_BOTTOM_FRONT + 3.0),   # раструб вперёд (до 15.1)
+        (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT),
         (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR),          # скошенная губа шахты
-        (WELL_REAR_OUT - 4.0, GUARD_Z[0] - 4.6),          # передняя стойка скобы
-        (GUARD_X[0] - 5.0, GUARD_Z[0] - 4.6),             # низ скобы
-        (GUARD_X[0] - 9.5, -62.0),                        # задняя стойка скобы уходит в рукоять
-        (GUARD_X[0] - 12.0, BOTTOM_Z),                    # площадка рукояти (низ ресивера сзади) — ровная
-        (-186.0, BOTTOM_Z),
+        (WELL_REAR_OUT - 2.9, GUARD_Z[0] - 6.5),          # переднее ухо скобы
+        (GUARD_X[0] - 5.0, GUARD_Z[0] - 6.5),             # низ скобы (перекладина 6.5 мм)
+        (GUARD_X[0] - 5.0, -60.0),                        # заднее ухо скобы
+        (GUARD_X[0] - 5.4, GRIP_TOP_Z),                   # площадка рукояти выше низа над спуском
+        (-186.0, GRIP_TOP_Z),
         (LOWER_REAR + 0.5, -22.0),                        # задняя грань под башней (выше — башня буферной трубки)
         (LOWER_REAR + 0.5, SPLIT_Z),
     ]
-    return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 6.0, 5.0, 0.0, 4.0, 3.0, 0], seg=5)
+    return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 6.0, 4.0, 1.0, 4.0, 3.0, 0], seg=5)
 
 
 def build(ctx):
@@ -52,15 +52,15 @@ def build(ctx):
     body = prism_xz("Lower_receiver", side, -FCG_HALF_W, FCG_HALF_W, C, "Alu_anodized")
     # шахта магазина шире корпуса УСМ
     well = prism_xz("lower_well", fillet([
-        (MAGWELL_FRONT, SPLIT_Z), (MAGWELL_FRONT, -40.0), (MAGWELL_FRONT + 2.5, WELL_BOTTOM_FRONT + 3.0),
-        (MAGWELL_FRONT + 1.5, WELL_BOTTOM_FRONT), (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR), (WELL_REAR_OUT - 1.0, WELL_BOTTOM_REAR + 6.0),
+        (MAGWELL_FRONT, SPLIT_Z), (MAGWELL_FRONT, -40.0), (MAGWELL_FRONT + 4.3, WELL_BOTTOM_FRONT + 3.0),
+        (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT), (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR), (WELL_REAR_OUT - 1.0, WELL_BOTTOM_REAR + 6.0),
         (WELL_REAR_OUT - 1.0, SPLIT_Z)], [1.5, 0, 6.0, 2.5, 3.0, 2.0, 0], 5), -LOWER_HALF_W, LOWER_HALF_W, C, "Alu_anodized")
     boolean(body, well, "UNION")
     # раструб снизу шахты — расширение по бокам
     flare = prism_xz("lower_flare", fillet([
-        (MAGWELL_FRONT + 2.6, WELL_BOTTOM_FRONT + 9.0), (MAGWELL_FRONT + 1.5, WELL_BOTTOM_FRONT),
-        (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR), (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR + 9.0)], [2, 2, 2, 2], 3),
-        -LOWER_HALF_W - 1.6, LOWER_HALF_W + 1.6, C, "Alu_anodized")
+        (MAGWELL_FRONT + 4.4, WELL_BOTTOM_FRONT + 6.0), (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT),
+        (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR), (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR + 6.0)], [1.5, 2, 2, 1.5], 3),
+        -LOWER_HALF_W - 1.2, LOWER_HALF_W + 1.2, C, "Alu_anodized")
     boolean(body, flare, "UNION")
     # «уши» оси сборки (спереди) и оси разборки (сзади) — по бокам проушин верхнего ресивера
     for nm, (px, pz), half in (("pivot", PIVOT_PIN, LOWER_HALF_W), ("takedown", TAKEDOWN_PIN, FCG_HALF_W)):
@@ -92,7 +92,7 @@ def build(ctx):
                         -WELL_IN_HALF_W, WELL_IN_HALF_W, C)
     boolean(body, well_cut)
     # прорезь в дне кармана — перо спуска выходит в скобу
-    boolean(body, box("cut_trig_slot", TRIGGER_PIN[0] - 13.0, TRIGGER_PIN[0] + 9.0, -5.2, 5.2, BOTTOM_Z - 6.0, BOTTOM_Z + 5.0, C))
+    boolean(body, box("cut_trig_slot", TRIGGER_PIN[0] - 13.0, TRIGGER_PIN[0] + 14.5, -5.2, 5.2, BOTTOM_Z - 6.0, BOTTOM_Z + 5.0, C))
     # раструб изнутри — фаска входа
     flare_in = prism_yz("cut_well_flare", [(-WELL_IN_HALF_W - 3.0, -100.0), (WELL_IN_HALF_W + 3.0, -100.0),
                                            (WELL_IN_HALF_W + 3.0, WELL_BOTTOM_REAR - 0.5), (WELL_IN_HALF_W, WELL_BOTTOM_REAR + 7.0),
@@ -141,14 +141,14 @@ def build(ctx):
         for k in range(8):
             zz = -24.0 - k * 3.3
             y0, y1 = (LOWER_HALF_W - 0.7, LOWER_HALF_W + 4) if sgn > 0 else (-LOWER_HALF_W - 4, -LOWER_HALF_W + 0.7)
-            boolean(body, prism_xz(f"cut_rib{sgn}{k}", fillet([(1.5, zz - 0.75), (MAGWELL_FRONT - 2.2, zz - 0.75), (MAGWELL_FRONT - 2.2, zz + 0.75),
-                                                                (1.5, zz + 0.75)], 0.7, 3), y0, y1, C))
+            boolean(body, prism_xz(f"cut_rib{sgn}{k}", fillet([(-3.0, zz - 0.75), (MAGWELL_FRONT - 2.0, zz - 0.75), (MAGWELL_FRONT - 2.0, zz + 0.75),
+                                                                (-3.0, zz + 0.75)], 0.7, 3), y0, y1, C))
         y0, y1 = (LOWER_HALF_W - 0.8, LOWER_HALF_W + 4) if sgn > 0 else (-LOWER_HALF_W - 4, -LOWER_HALF_W + 0.8)
-        boolean(body, prism_xz(f"cut_panel{sgn}", fillet([(-35.0, -51.0), (-2.5, -48.0), (-2.5, -23.0), (-35.0, -23.0)], 3.0, 5), y0, y1, C))
+        boolean(body, prism_xz(f"cut_panel{sgn}", fillet([(-38.0, -52.0), (-6.5, -49.0), (-6.5, -23.0), (-38.0, -23.0)], 3.0, 5), y0, y1, C))
     # отверстие винта рукояти снизу (под углом рукояти)
     gs = cyl("cut_grip_screw", -14.0, 6.0, 2.6, C, seg=20, axis="Z", cy=0.0, cz=0.0)
     gs.rotation_euler = (0, math.radians(18.0), 0)
-    gs.location = (-166.0 * MM, 0, (BOTTOM_Z + 2.0) * MM)
+    gs.location = (-158.0 * MM, 0, (GRIP_TOP_Z + 2.0) * MM)
     from lib import apply_transform as _at
     _at(gs)
     boolean(body, gs)
@@ -197,30 +197,34 @@ def fire_control(F):
     tx, tz = TRIGGER_PIN
     hx, hz = HAMMER_PIN
     half = PART_W / 2
-    # спусковой крючок: перо изогнуто вперёд (вогнутая задняя грань под палец), нос вперёд под курок,
-    # хвост назад под кулачок переводчика
+    # спусковой крючок (фото PEO, увеличенный кадр): перо — серп, открытый вперёд; передняя грань вогнута под палец,
+    # вверху перо широкое и уходит вперёд к корпусу спуска, кончик почти под осью — в ~1 мм над перекладиной скобы.
+    # Корпус: нос вперёд под зуб курка, хвост назад под кулачок переводчика.
+    cl = [(tx + 7.5, tz - 8.0), (tx + 6.6, tz - 14.0), (tx + 4.4, tz - 19.0), (tx + 1.2, tz - 23.5), (tx - 0.6, tz - 27.9),
+          (tx - 0.9, tz - 31.8), (tx - 0.2, tz - 35.2), (tx + 0.9, tz - 37.6)]
+    wd = [10.0, 8.2, 6.6, 5.6, 5.0, 4.5, 4.0, 3.6]
     front, back = [], []
-    n = 14
-    for k in range(n + 1):
-        t = k / n
-        cx, cz = tx - 4.5 + 10.0 * t * t, tz - 8.5 - 27.0 * t
-        dx, dz = 20.0 * t, -27.0
+    for i, (cx, cz) in enumerate(cl):
+        p0 = cl[max(0, i - 1)]; p1 = cl[min(len(cl) - 1, i + 1)]
+        dx, dz = p1[0] - p0[0], p1[1] - p0[1]
         ln = math.hypot(dx, dz)
-        nx, nz = -dz / ln, dx / ln               # нормаль вперёд
-        w = 6.6 - 3.0 * t
-        front.append((cx + nx * w * 0.5, cz + nz * w * 0.5))
-        back.append((cx - nx * w * 0.5, cz - nz * w * 0.5))
-    a_tip = math.degrees(math.atan2(nz, nx))      # нормаль на кончике: дуга от передней кромки вокруг низа к задней
-    tip = arc_pts((front[-1][0] + back[-1][0]) / 2, (front[-1][1] + back[-1][1]) / 2, 1.8, a_tip, a_tip - 180.0, 6)
-    body = [(tx + 22.0, tz + 1.5), (tx + 22.0, tz - 2.6), (tx + 6.0, tz - 6.0)] + front[1:] + tip[1:-1] + list(reversed(back))[:-1] +            [(tx - 9.0, tz - 7.0), (tx - 26.0, tz - 6.0), (tx - 31.0, tz - 4.6), (tx - 31.0, tz - 0.4), (tx - 22.0, tz + 0.2), (tx - 8.0, tz + 4.5)]
+        nx, nz = -dz / ln, dx / ln                     # нормаль вперёд (+X)
+        if nx < 0:
+            nx, nz = -nx, -nz
+        front.append((cx + nx * wd[i] / 2, cz + nz * wd[i] / 2))
+        back.append((cx - nx * wd[i] / 2, cz - nz * wd[i] / 2))
+    a_tip = math.degrees(math.atan2(nz, nx))
+    tip = arc_pts(cl[-1][0], cl[-1][1], wd[-1] / 2, a_tip, a_tip - 180.0, 7)
+    body = [(tx + 22.0, tz + 1.5), (tx + 22.0, tz - 2.6), (tx + 10.0, tz - 6.0)] + front[1:] + tip[1:-1] + list(reversed(back))[:-1] + \
+           [(tx - 6.0, tz - 8.0), (tx - 26.0, tz - 6.0), (tx - 31.0, tz - 4.6), (tx - 31.0, tz - 0.4), (tx - 22.0, tz + 0.2), (tx - 8.0, tz + 4.5)]
     rad = [1.0, 1.0, 3.0] + [0] * (len(front) - 1) + [0] * (len(tip) - 2) + [0] * (len(back) - 1) + [3.0, 1.0, 1.5, 1.0, 2.0, 2.0]
     t = prism_xz("Trigger", fillet(body, rad, seg=3), -half, half, F, "Steel_black")
-    # перо уже корпуса спуска (как у серийного): подрезаем бока ниже оси
+    # перо уже корпуса спуска: ширина 7.8 мм ниже корпуса, лицевая грань скруглена
     for sgn in (-1, 1):
-        y0, y1 = (2.4, 10) if sgn > 0 else (-10, -2.4)
-        boolean(t, box(f"cut_trig_thin{sgn}", tx - 20, tx + 20, y0, y1, tz - 60, tz - 12.0, F))
+        y0, y1 = (3.9, 10) if sgn > 0 else (-10, -3.9)
+        boolean(t, box(f"cut_trig_thin{sgn}", tx - 20.3, tx + 20.3, y0, y1, tz - 60, tz - 13.3, F))
     boolean(t, cyl("cut_trig_pin", -20, 20, 1.95, F, seg=20, cy=tx, cz=tz, axis="Y"))
-    finish(t, w=0.3, seg=2, angle=35)
+    finish(t, w=0.6, seg=3, angle=35)
     o["trigger"] = t
     # разобщитель — пластина над хвостом спуска
     dis = prism_xz("Disconnector", fillet([(tx + 6.0, tz + 2.6), (tx - 24.0, tz + 2.2), (tx - 26.0, tz + 4.4), (tx - 21.0, tz + 6.2),
@@ -253,9 +257,78 @@ def fire_control(F):
     boolean(s, cyl("cut_as_pin", -20, 20, 1.95, F, seg=20, cy=ax, cz=az, axis="Y"))
     finish(s, w=0.2, seg=2, angle=35)
     o["auto_sear"] = s
+    # пружины: курка — витки на оси курка по обе стороны, усики назад на ось спуска; спуска — витки на оси спуска,
+    # усики вперёд на дно кармана (видны при раскрытом ресивере)
+    o.update(fcg_springs(F))
     # оси: спуск, курок, автоспуск
     for nm, (px, pz) in (("Trigger_pin", TRIGGER_PIN), ("Hammer_pin", HAMMER_PIN), ("Auto_sear_pin", AUTOSEAR_PIN)):
         o[nm] = cyl(nm, -FCG_HALF_W + 0.4, FCG_HALF_W - 0.4, 1.95, F, "Steel_black", seg=20, cy=px, cz=pz, axis="Y", ch=0.3)
+    return o
+
+
+def _wire(name, pts, r, F):
+    """Проволока по ломаной (мм) — трубка с круглым сечением."""
+    import bmesh
+    from mathutils import Vector
+    from lib import v as vmm
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    seg = 10
+    rings = []
+    P = [Vector(q) for q in pts]
+    for i, c in enumerate(P):
+        t = (P[min(i + 1, len(P) - 1)] - P[max(i - 1, 0)]).normalized()
+        a = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((1, 0, 0))
+        n1 = t.cross(a).normalized(); n2 = t.cross(n1).normalized()
+        rings.append([bm.verts.new(vmm(*(c + (n1 * math.cos(2 * math.pi * k / seg) + n2 * math.sin(2 * math.pi * k / seg)) * r)))
+                      for k in range(seg)])
+    for r0, r1 in zip(rings, rings[1:]):
+        for k in range(seg):
+            j = (k + 1) % seg
+            bm.faces.new((r0[k], r0[j], r1[j], r1[k]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    for pl in me.polygons:
+        pl.use_smooth = True
+    o = bpy.data.objects.new(name, me)
+    F.objects.link(o)
+    o.data.materials.append(material("Spring_steel"))
+    o["_fin"] = 1
+    return o
+
+
+def _coil_pts(cx, cz, r, y0, y1, turns, a0=0.0):
+    pts = []
+    n = int(turns * 20)
+    for k in range(n + 1):
+        t = k / n
+        a = math.radians(a0) + 2 * math.pi * turns * t
+        pts.append((cx + r * math.cos(a), y0 + (y1 - y0) * t, cz + r * math.sin(a)))
+    return pts
+
+
+def fcg_springs(F):
+    o = {}
+    hx, hz = HAMMER_PIN
+    tx, tz = TRIGGER_PIN
+    w = 0.55                                     # проволока Ø1.1
+    rc = 1.96 + 0.15 + w                          # виток вокруг оси
+    for s in (-1, 1):
+        y0, y1 = s * (PART_W / 2 + 0.8), s * (PART_W / 2 + 0.8 + 2.6)
+        # курок: виток, затем усик назад-вниз и полка на оси спуска сверху
+        coil = _coil_pts(hx, hz, rc, y0, y1, 2.25, a0=200.0)
+        end = coil[-1]
+        leg = [end, (hx - 9.0, end[1], hz - 4.5), (tx + 2.0, end[1], tz + 1.96 + w), (tx - 3.0, end[1], tz + 1.96 + w)]
+        o[f"Hammer_spring{s}"] = _wire(f"Hammer_spring_{'L' if s > 0 else 'R'}", coil + leg[1:], w, F)
+        # спуск: виток вокруг оси спуска, усик вперёд на дно кармана
+        y0, y1 = s * (PART_W / 2 + 0.8), s * (PART_W / 2 + 0.8 + 2.2)
+        coil = _coil_pts(tx, tz, rc, y0, y1, 2.0, a0=-20.0)
+        end = coil[-1]
+        floor = BOTTOM_Z + 4.2 + w + 0.1
+        leg = [end, (tx + 8.0, end[1], tz - 6.0), (tx + 15.0, end[1], floor), (tx + 19.0, end[1], floor)]
+        o[f"Trigger_spring{s}"] = _wire(f"Trigger_spring_{'L' if s > 0 else 'R'}", coil + leg[1:], w, F)
     return o
 
 
