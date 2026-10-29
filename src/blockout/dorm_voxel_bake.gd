@@ -2,7 +2,10 @@ extends RefCounted
 ## CPU VoxelGI cannot evaluate dorm_finish.gdshader. Supply its same diffuse colors
 ## only during synchronous bake(), then restore the original mesh before any frame.
 ## The rendered geometry, shader, collision and base colors remain untouched.
-const VERSION = "dorm_finish_diffuse_proxy_1"
+## Материалы v03 (meta "dorm_gi", src/blockout/dorm_v3) подменяются своими средними цветами (замер по кадрам Blender).
+const VERSION = "dorm_v3_diffuse_proxy_1"
+const V3_COLORS: Dictionary = {"paint":"5b6b58","wash":"c3bfb3","reveal":"c3bfb3","ceiling":"b9b4a8","floor":"4d3a2b",
+	"tile":"beb9ab","tile_floor":"6c5343"}
 var plan: Dictionary
 var saved: Array[Dictionary] = []
 var materials: Dictionary = {}
@@ -21,6 +24,7 @@ func _init(value: Dictionary) -> void:
 	# Mean of the existing procedural tile and its 2%-wide grout lines, in linear light.
 	_add_material("tile",(Color(.73,.78,.74).srgb_to_linear()*.99).lerp(Color(.29,.32,.29),.0396).linear_to_srgb())
 	_add_material("tile_floor",(Color("939d94").srgb_to_linear()*.99).lerp(Color(.29,.32,.29),.0396).linear_to_srgb())
+	for key: String in V3_COLORS:_add_material("v3_"+key,Color(String(V3_COLORS[key])))
 
 func begin(root: Node) -> void:
 	for child: Node in root.get_children():
@@ -61,7 +65,8 @@ func _proxy(instance: MeshInstance3D) -> ArrayMesh:
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
 		var count: int = indices.size() if not indices.is_empty() else vertices.size()
-		var tile: bool = int((material as ShaderMaterial).get_shader_parameter("finish_mode"))>0
+		var v3: String = String(material.get_meta("dorm_gi","")) if material.has_meta("dorm_gi") else ""
+		var tile: bool = v3!="wall" and (v3!="" or int((material as ShaderMaterial).get_shader_parameter("finish_mode"))>0)
 		for face: int in range(0,count,3):
 			var polygon: Array[Vector3] = []
 			var normal: Vector3 = Vector3.UP
@@ -80,6 +85,8 @@ func _proxy(instance: MeshInstance3D) -> ArrayMesh:
 				for vertex: Vector3 in piece:center += vertex
 				center /= piece.size()
 				var key: String = ("tile_floor" if String(instance.name).begins_with("Mesh_tile_floor") else "tile") if tile else _wall_color(center)
+				if v3!="":
+					key = "v3_"+v3 if v3!="wall" else {"green":"v3_paint","white":"v3_wash","exterior":"exterior"}[key]
 				if not buckets.has(key):buckets[key] = {"vertices":PackedVector3Array(),"normals":PackedVector3Array()}
 				var bucket: Dictionary = buckets[key]
 				var out_vertices: PackedVector3Array = bucket.vertices

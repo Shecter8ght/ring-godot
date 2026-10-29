@@ -109,6 +109,23 @@ set REVIEW_KIND=wash|floor|tiles && "D:/ПРОГРАММЫ/Blender 5/blender.exe
 `corridor_bay wall_upper floor_close shower shower_floor`). Отладка паркета без света: `FLOOR_V3_DEBUG=mask`
 (R — стенка ямы, G — яма, B — свежее дерево) или `side` (цвет стенки).
 
+## Материалы v03 в стенде Godot (2026-10-29)
+
+Владелец: «Ок, в стенд». Шейдеры `src/blockout/dorm_v3`: `common.gdshaderinc` (оси карты из нормали грани — развёртка
+боксов стенда не нужна, шум износа по миру, луч вглубь ямы), `paint` / `wash` / `parquet` / `tiles.gdshaderinc` — те же
+числа, что в узлах Blender; верхние `dorm_wall_v3` (стена / откос / потолок), `dorm_parquet_v3`, `dorm_tiles_v3`
+(стена / пол). Палитра — `src/blockout/dorm_geometry.gd` (`_apply_v3`): карты раздаются по имени параметра (`_n` — та
+же карта без сглаживания: номер планки и плитки), без карт — прежние черновые. Износ по месту вместо атрибута
+«Износ» — `wear_attr` в `floors.gdshaderinc` (у пола больше, пятнами). VoxelGI — подмена средними цветами
+(`dorm_voxel_bake.gd`, `V3_COLORS`).
+
+```bat
+python -X utf8 tools/dorm_modules/godot_textures.py
+tools\godot.cmd --headless --import
+tools\godot.cmd --headless --script res://tools/dorm_v3_check.gd
+tools\godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- v3shots
+```
+
 Проверка масок без света: `PAINT_V3_DEBUG=layers` (R — загиб, G — шпаклёвка, B — старый слой) или имя маски
 (`curl`, `putty`, `old`, `peeled`, `lift`, `crack`) перед запуском студии.
 

@@ -1,6 +1,7 @@
 extends Node3D
 ## Этап 1 общежития: прогулка, физическая проверка пеших маршрутов и одни и те же виды для всех этапов.
-## tools/dorm_study.cmd; -- verify; -- shots. JSON — tools/build_dorm.py.
+## tools/dorm_study.cmd; -- verify; -- shots; -- v3shots (материалы v03 при свете «вечер Б» → docs/screens/dorm/v3,
+## DORM_V3_VIEWS=01_corridor,04_wash — выборочно; архивы пробы света не трогает). JSON — tools/build_dorm.py.
 
 const Walker = preload("res://src/blockout/study_walker.gd")
 const PlanMap = preload("res://src/blockout/dorm_map.gd")
@@ -38,7 +39,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["verify", "shots", "bake"]:
+		if arg in ["verify", "shots", "bake", "v3shots"]:
 			mode = arg
 	output_dir = OS.get_environment("DORM_OUTPUT")
 	if output_dir.is_empty():
@@ -83,6 +84,8 @@ func _ready() -> void:
 		elif mode == "bake":
 			var success: bool = await lighting.call("ensure_baked",true)
 			get_tree().quit(0 if success else 1)
+		elif mode == "v3shots":
+			await _v3_shots()
 		else:
 			await _shots()
 
@@ -504,6 +507,53 @@ func _walk_path(points: Array[Vector3]) -> bool:
 	if not passed:
 		route_detail["missed"] = str(missed)
 	return passed
+
+
+func _v3_shots() -> void:
+	if DisplayServer.get_name()=="headless":
+		push_error("dorm: снимки требуют оконного запуска")
+		get_tree().quit(1)
+		return
+	if lighting!=null:
+		for index: int in range(plan.environment.cases.size()):
+			if String(plan.environment.cases[index].id)==String(plan.environment.default):
+				await lighting.call("set_case",index)
+				break
+	walker.set_physics_process(false)
+	hud.hide()
+	for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
+		(node as Node3D).hide()
+	var folder: String = output_dir.path_join("v3")
+	DirAccess.make_dir_recursive_absolute(folder)
+	var only: PackedStringArray = OS.get_environment("DORM_V3_VIEWS").split(",",false)
+	Engine.max_fps = 0
+	var fails: int = 0
+	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
+		leaf.call("reset_pose")
+	for view: Dictionary in plan.shots:
+		if not only.is_empty() and String(view.id) not in only:
+			continue
+		camera.global_position = _vec(view.foot)+Vector3.UP*float(view.eye_height)
+		camera.look_at(_vec(view.look),Vector3.UP)
+		await _frames(40)
+		# время кадра на видеокарте (как в пробе света: синхронизацию держит драйвер) — среднее за 60 кадров
+		var rid: RID = get_viewport().get_viewport_rid()
+		RenderingServer.viewport_set_measure_render_time(rid,true)
+		var gpu: float = 0.0
+		for i: int in range(60):
+			await RenderingServer.frame_post_draw
+			gpu += RenderingServer.viewport_get_measured_render_time_gpu(rid)
+		gpu /= 60.0
+		print("dorm: %s — видеокарта %.2f мс (%.0f к/с)" % [String(view.id),gpu,1000.0/maxf(gpu,0.001)])
+		await RenderingServer.frame_post_draw
+		var filename: String = "v3_"+String(view.id)+".png"
+		var error: Error = get_viewport().get_texture().get_image().save_png(folder.path_join(filename))
+		if error!=OK:
+			fails += 1
+		print("dorm: снимок ",filename," ошибка=",error)
+	world.queue_free()
+	await _frames(3)
+	get_tree().quit(fails)
 
 
 func _shots() -> void:

@@ -46,6 +46,14 @@
 - `assets/textures/worn_corrugated_iron/` — Worn Corrugated Iron, Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_corrugated_iron — обшивка балконов, навесы
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
 
+## Общежитие · материалы v03 (assets/textures/dorm_v3)
+
+Карты — свои (генераторы tools/dorm_modules/gen_*_v3.py, перенос — godot_textures.py); фотосканы внутри них и рядом:
+- Painted Plaster Wall, Amal Kumar, CC0 1.0, https://polyhaven.com/a/painted_plaster_wall — штукатурка под краской и побелкой (plaster_*)
+- Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпич под отвалившейся штукатуркой (brick_*)
+- Oak Veneer 01, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/oak_veneer_01 — дуб паркетных планок (floor_wood)
+Сырьё — `_asset_src/dorm_textures/ph_*_4k` с license.txt.
+
 ## Декали попаданий (tools/import_impact_decals.py)
 
 - `assets/textures/impacts/concrete_*.png` — Bullet Decal, musdasch, CC0 1.0, https://opengameart.org/content/bullet-decal — бетонный скол и производная normal-карта

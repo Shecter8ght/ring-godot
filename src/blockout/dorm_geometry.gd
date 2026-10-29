@@ -204,4 +204,64 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		if key=="tile_floor":
 			finish.set_shader_parameter("tile_color",Color("939d94"))
 		result[key] = finish
+	_apply_v3(result,plan)
 	return result
+
+
+const V3_DIR: String = "res://assets/textures/dorm_v3"
+const V3_SHADERS: Dictionary = {"wall":"dorm_wall_v3","reveal":"dorm_wall_v3","ceiling":"dorm_wall_v3",
+	"floor":"dorm_parquet_v3","tile":"dorm_tiles_v3","tile_floor":"dorm_tiles_v3"}
+const V3_MODES: Dictionary = {"wall":0,"reveal":1,"ceiling":2,"tile":0,"tile_floor":1}
+
+
+## Материалы v03 (краска, побелка, паркет, плитка — tools/dorm_modules, docs/design/dorm_modules.md) вместо
+## черновых. Без карт assets/textures/dorm_v3 остаются черновые — проект запускается и без внешних текстур.
+static func _apply_v3(result: Dictionary, plan: Dictionary) -> void:
+	var textures: Dictionary = _v3_textures()
+	if textures.is_empty():
+		return
+	var levels: Array = plan.scale.floor_y
+	var heights: Array = plan.scale.ceiling_clear
+	var main_rect: Array = plan.main_rect
+	var annex_rect: Array = plan.annex_rect
+	for key: String in V3_SHADERS:
+		var material: ShaderMaterial = ShaderMaterial.new()
+		material.shader = load("res://src/blockout/dorm_v3/%s.gdshader" % V3_SHADERS[key]) as Shader
+		for uniform: Dictionary in material.shader.get_shader_uniform_list():
+			var name: String = String(uniform.name)
+			if int(uniform.type)!=TYPE_OBJECT:
+				continue
+			# Копия карты с выборкой без сглаживания — суффикс _n; шум износа — dorm_wear_noise.
+			var file: String = "dorm_wear_noise" if name=="wear_noise" else name.trim_suffix("_n")
+			if not textures.has(file):
+				push_warning("dorm v3: нет карты "+file)
+				continue
+			material.set_shader_parameter(name,textures[file])
+		if V3_MODES.has(key):
+			material.set_shader_parameter("mode",int(V3_MODES[key]))
+		material.set_shader_parameter("floors",Vector4(float(levels[0]),float(levels[1]),float(levels[2]),float(levels[3])))
+		material.set_shader_parameter("fifth_floor",float(levels[4]))
+		material.set_shader_parameter("heights",Vector4(float(heights[0]),float(heights[1]),float(heights[2]),float(heights[3])))
+		material.set_shader_parameter("main_bounds",Vector4(float(main_rect[0]),float(main_rect[1]),float(main_rect[2]),float(main_rect[3])))
+		material.set_shader_parameter("annex_bounds",Vector4(float(annex_rect[0]),float(annex_rect[1]),float(annex_rect[2]),float(annex_rect[3])))
+		material.set_shader_parameter("paint_fraction",float(plan.finish.get("paint_lower_fraction",0.6667)))
+		# Чем заменить материал при запекании VoxelGI (CPU не считает шейдер) — dorm_voxel_bake.gd.
+		material.set_meta("dorm_gi",key)
+		result[key] = material
+
+
+static func _v3_textures() -> Dictionary:
+	var found: Dictionary = {}
+	var dir: DirAccess = DirAccess.open(V3_DIR)
+	if dir==null:
+		return found
+	for file: String in dir.get_files():
+		var path: String = V3_DIR+"/"+file.trim_suffix(".import").trim_suffix(".remap")
+		var stem: String = path.get_file().get_basename()
+		if found.has(stem) or not ResourceLoader.exists(path):
+			continue
+		found[stem] = load(path) as Texture2D
+	for required: String in ["paint_peel_e","wash_peel_e","floor_wood","tile_masks","dorm_wear_noise"]:
+		if not found.has(required):
+			return {}
+	return found
