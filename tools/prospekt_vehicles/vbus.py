@@ -222,6 +222,7 @@ def build(surf, f, s: dict, views: dict) -> tuple[list, dict]:
             ring = rect_loop(y0, y1, z0, z1, r)
             wins.append(lift_poly(surf, views[vname], np.vstack([ring, ring[:1]]), 0.005)[:-1])
         S["side_" + side] = L
+        S["wins_" + side] = wins                      # контуры окон борта — осколки у перевёрнутого автобуса
         panel("Side_" + side, "paint", vname, L, holes=wins, h=0.035, gap=GAP, hole_depth=0.04)
         for j, W in enumerate(wins):
             panel(f"Glass_Side_{side}{j + 1}", "glass", vname, W, h=0.05, gap=0.004, flange=0.02, fit_deg=2, fit_blend=0.03)
@@ -283,19 +284,22 @@ def _hole_part(surf, views, band, h, H, add, panel, S, s):
                                                     margin=0.004), "hatch")
         add("Engine_Louver_Back", "mesh_black", *pt.backing(surf, views[view], LV, 0.03), "hatch")
     elif h.get("doors") == "swing2":
-        # задние распашные двери: две створки с окнами
+        # задние распашные двери: две створки с окнами (у фургона — глухие, windows=False)
         u0, u1, v0, v1, r = h["rect"]
         mid = (u0 + u1) / 2
         for k, (a, b) in enumerate(((mid + 0.004, u1 - 0.006), (u0 + 0.006, mid - 0.004))):
             ring = rect_loop(a, b, v0 + 0.006, v1 - 0.006, 0.03)
             D = lift_poly(surf, views[view], np.vstack([ring, ring[:1]]), 0.004)[:-1]
-            wr = rect_loop(a + 0.07, b - 0.07, v0 + 0.62, v1 - 0.10, 0.04)
-            WW = lift_poly(surf, views[view], np.vstack([wr, wr[:1]]), 0.004)[:-1]
             grp = "rdoor_l" if k == 0 else "rdoor_r"
-            panel(f"Rear_Door_{'L' if k == 0 else 'R'}", "paint", view, D, holes=[WW], group=grp, h=0.03, gap=GAP,
-                  flange=0.05, hole_depth=0.03)
-            panel(f"Glass_Rear_Door_{'L' if k == 0 else 'R'}", "glass", view, WW, group=grp, h=0.04, gap=0.004, flange=0.02,
-                  fit_deg=2, fit_blend=0.03)
+            if h.get("windows", True):
+                wr = rect_loop(a + 0.07, b - 0.07, v0 + 0.62, v1 - 0.10, 0.04)
+                WW = lift_poly(surf, views[view], np.vstack([wr, wr[:1]]), 0.004)[:-1]
+                panel(f"Rear_Door_{'L' if k == 0 else 'R'}", "paint", view, D, holes=[WW], group=grp, h=0.03, gap=GAP,
+                      flange=0.05, hole_depth=0.03)
+                panel(f"Glass_Rear_Door_{'L' if k == 0 else 'R'}", "glass", view, WW, group=grp, h=0.04, gap=0.004,
+                      flange=0.02, fit_deg=2, fit_blend=0.03)
+            else:
+                panel(f"Rear_Door_{'L' if k == 0 else 'R'}", "paint", view, D, group=grp, h=0.03, gap=GAP, flange=0.05)
             hz = (v0 + v1) / 2 - 0.05
             hp = views[view].lift(surf, np.array([[a + 0.10 if k == 0 else b - 0.10, hz]]))[0]
             add(f"Rear_Door_Handle_{'L' if k == 0 else 'R'}", "trim_black",
@@ -345,11 +349,18 @@ def _side_door(surf, views, s, d, side, sgn, vname, j, add, panel, S):
     ring = fillet_poly([(y0 + 0.003, z_b), (y1 - 0.003, z_b), (y1 - 0.003, zt - 0.003), (y0 + 0.003, zt - 0.003)],
                        [0.02, 0.02, 0.06, 0.06], closed=True, n_arc=6)
     D = lift_poly(surf, view, np.vstack([ring, ring[:1]]), 0.005)[:-1]
-    wz0, wz1 = d["win"]
-    wr = rect_loop(y0 + 0.07, y1 - 0.07, wz0, wz1, 0.04)
-    W = lift_poly(surf, view, np.vstack([wr, wr[:1]]), 0.005)[:-1]
-    panel(f"Door_{side}{j + 1}", "paint", vname, D, holes=[W], group=grp, h=0.03, gap=GAP, flange=0.08, hole_depth=0.03)
-    panel(f"Glass_Door_{side}{j + 1}", "glass", vname, W, group=grp, h=0.04, gap=0.004, flange=0.02, fit_deg=2, fit_blend=0.03)
+    if d.get("win"):
+        wz0, wz1 = d["win"]
+        wr = rect_loop(y0 + 0.07, y1 - 0.07, wz0, wz1, 0.04)
+        W = lift_poly(surf, view, np.vstack([wr, wr[:1]]), 0.005)[:-1]
+        panel(f"Door_{side}{j + 1}", "paint", vname, D, holes=[W], group=grp, h=0.03, gap=GAP, flange=0.08,
+              hole_depth=0.03)
+        panel(f"Glass_Door_{side}{j + 1}", "glass", vname, W, group=grp, h=0.04, gap=0.004, flange=0.02, fit_deg=2,
+              fit_blend=0.03)
+    else:
+        # глухая дверь фургона: ручка и направляющая — на высоте окна ГАЗели
+        wz0, wz1 = 1.24, 1.90
+        panel(f"Door_{side}{j + 1}", "paint", vname, D, group=grp, h=0.03, gap=GAP, flange=0.08)
     add(f"Door_Card_{side}{j + 1}", "interior", *pt.backing(surf, view, D, 0.08), grp)
     hy = y1 - 0.16 if d["kind"] == "car" else y0 + 0.14
     line = view.lift(surf, np.c_[np.linspace(hy - 0.07, hy + 0.07, 12), np.full(12, wz0 - 0.16)])
@@ -503,6 +514,21 @@ def details(surf, f, s: dict, views: dict, S: dict) -> list:
             for y in np.linspace(yn + 1.2, yt - 1.2, 4):
                 p = views[vn].lift(surf, np.array([[y, zs + 0.12]]))[0]
                 add(f"Marker_{'LR'[sgn < 0]}_{y:.1f}", "lamp_amber", rounded_block(p + np.array([sgn * 0.008, 0, 0]), 0.02, 0.10, 0.04, 0.008))
+    # балка проблесковых маячков над кабиной (скорая): основание, два колпака, громкоговоритель между ними;
+    # у скорой ещё пара маячков на задних углах крыши
+    beac = lay.get("beacons")
+    if beac:
+        yb, w = beac["y"], beac["width"]
+        zb = float(f.top(yb))
+        add("Beacon_Base", "trim_black", rounded_block((0.0, yb, zb + 0.035), w, 0.30, 0.05, 0.02))
+        for sgn, lens in ((1.0, beac["lens"][0]), (-1.0, beac["lens"][1])):
+            add(f"Beacon_Lens_{'LR'[sgn < 0]}", lens, rounded_block((sgn * w * 0.29, yb, zb + 0.12), w * 0.40, 0.26, 0.12,
+                                                                     0.05))
+        add("Beacon_Speaker", "trim_black", rounded_block((0.0, yb, zb + 0.11), w * 0.14, 0.24, 0.10, 0.03))
+        for sgn in ((1.0, -1.0) if beac.get("rear") else ()):
+            yr_b = yt - 0.16
+            add(f"Beacon_Rear_{'LR'[sgn < 0]}", beac["lens"][0],
+                rounded_block((sgn * (hw - 0.16), yr_b, float(f.top(yr_b)) + 0.05), 0.14, 0.14, 0.10, 0.05))
     # брызговики за колёсами
     for y in s["wheel_y"]:
         for sgn in (1.0, -1.0):
@@ -608,6 +634,9 @@ def interior(f, s: dict, S: dict) -> list:
     add("Steering_Wheel", "interior", (Vw, sw[1]))
     if kind != "gazel":
         add("Driver_Partition", "interior", rounded_block((x_drv - 0.10, y_drv + 0.45, zf + 0.75), 0.9, 0.04, 1.45, 0.02))
+    if lay.get("cargo"):
+        _cargo(f, s, add, hw, zf, yt, y_drv)
+        return out
     # пассажирские сиденья рядами вдоль окон (у дверей — проход)
     doors_r = lay["doors_r"]
 
@@ -643,3 +672,49 @@ def interior(f, s: dict, S: dict) -> list:
             poles.append(tube([(sgn * 0.32, yn + 0.9, zr - 0.12), (sgn * 0.32, yt - 0.5, zr - 0.12)], 0.016, 10, 3))
         add("Handrails", "rail_yellow", pt.merge(poles))
     return out
+
+
+def _cargo(f, s: dict, add, hw: float, zf: float, yt: float, y_drv: float) -> None:
+    """Отсек фургона и скорой вместо рядов сидений: в кабине двухместное сиденье справа, за кабиной перегородка до
+    крыши (у скорой — с окошком), колёсные ниши. Фургон — пустой с поручнями для крепления груза; скорая — носилки на
+    приёмном устройстве, шкаф по левому борту, два кресла справа, кислородные баллоны у перегородки."""
+    from interior import seat
+    lay = s["lay"]
+    y_p = max(d["y1"] for d in lay["doors_l"]) + 0.05
+    add("Cab_Bench", "seat", seat(-(hw - 0.48), y_drv, zf + 0.12, width=0.78, back_h=0.62, tilt=0.25))
+    zp = float(f.top(y_p)) - 0.07
+    if lay["cargo"] == "medical":
+        zw0, zw1, xw = zf + 0.95, zf + 1.30, 0.34
+        add("Cab_Partition", "interior", pt.merge([
+            rounded_block((0.0, y_p, (zf + zw0) / 2), 2 * hw - 0.02, 0.03, zw0 - zf, 0.01),
+            rounded_block((0.0, y_p, (zw1 + zp) / 2), 2 * hw - 0.02, 0.03, zp - zw1, 0.01),
+            rounded_block(((hw + xw) / 2, y_p, (zw0 + zw1) / 2), hw - xw, 0.03, zw1 - zw0, 0.01),
+            rounded_block((-(hw + xw) / 2, y_p, (zw0 + zw1) / 2), hw - xw, 0.03, zw1 - zw0, 0.01)]))
+        add("Partition_Glass", "glass", rounded_block((0.0, y_p, (zw0 + zw1) / 2), 2 * xw, 0.008, zw1 - zw0, 0.003))
+    else:
+        add("Cab_Partition", "interior", rounded_block((0.0, y_p, (zf + zp) / 2), 2 * hw - 0.02, 0.03, zp - zf, 0.01))
+    yr = s["wheel_y"][1]
+    add("Wheel_Boxes", "paint_inner", pt.merge([rounded_block((sx * (hw - 0.14), yr, zf + 0.13), 0.28, 2 * s["arch_r"] + 0.12,
+                                                               0.26, 0.05) for sx in (1, -1)]))
+    if lay["cargo"] == "van":
+        rails = [rounded_block((sx * (hw - 0.012), (y_p + yt) / 2, z), 0.02, yt - y_p - 0.30, 0.05, 0.006)
+                 for sx in (1, -1) for z in (zf + 0.45, zf + 1.05)]
+        add("Cargo_Rails", "steel_dark", pt.merge(rails))
+        return
+    # носилки: рама с ножками на приёмном устройстве, матрас, подголовник у перегородки
+    y0, y1 = y_p + 0.70, yt - 0.25
+    yc, xs = (y0 + y1) / 2, 0.18
+    legs = [tube([(xs + dx, y, zf), (xs + dx, y, zf + 0.30)], 0.016, 8, 2) for dx in (-0.24, 0.24) for y in (y0 + 0.15, y1 - 0.15)]
+    add("Stretcher_Frame", "steel_dark", pt.merge([rounded_block((xs, yc, zf + 0.32), 0.56, y1 - y0, 0.04, 0.01)] + legs +
+                                                  [rounded_block((xs, yc, zf + 0.04), 0.62, y1 - y0 + 0.1, 0.06, 0.01)]))
+    add("Stretcher_Mattress", "seat", pt.merge([rounded_block((xs, yc + 0.05, zf + 0.39), 0.52, y1 - y0 - 0.12, 0.08, 0.03),
+                                                rounded_block((xs, y0 + 0.24, zf + 0.46), 0.40, 0.30, 0.07, 0.03)]))
+    add("Med_Cabinet", "interior", pt.merge([rounded_block((hw - 0.17, y_p + 1.05, zf + 1.45), 0.30, 1.30, 0.55, 0.02),
+                                             rounded_block((hw - 0.13, y1 - 0.45, zf + 1.30), 0.22, 0.75, 0.38, 0.02)]))
+    a1, b1 = seat_bus(-(hw - 0.30), y1 - 0.55, zf, width=0.46, facing=-1.0)
+    a2, b2 = seat_bus(-(hw - 0.30), y_p + 0.50, zf, width=0.46, facing=1.0)
+    add("Med_Seats", "seat", pt.merge([a1, a2]))
+    add("Med_Seat_Frames", "steel_dark", pt.merge([b1, b2]))
+    add("Oxygen", "seat_plastic", pt.merge([tube([(-(hw - 0.12) + 0.12 * k, y_p + 0.12, zf + 0.02),
+                                                   (-(hw - 0.12) + 0.12 * k, y_p + 0.12, zf + 1.05)], 0.07, 14, 3)
+                                             for k in (0, 1)]))

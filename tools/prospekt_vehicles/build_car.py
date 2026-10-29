@@ -69,8 +69,10 @@ MATERIALS = {
     "floor_rubber": ((0.12, 0.12, 0.12), 0.85, 0.0),
     "seat_plastic": ((0.10, 0.16, 0.30), 0.5, 0.0),
     "rail_yellow": ((0.75, 0.55, 0.05), 0.4, 0.3),
+    "lamp_blue": ((0.04, 0.12, 0.70), 0.06, 0.0),      # колпаки маячков (скорая, полиция)
+    "sign_plastic": ((0.86, 0.80, 0.42), 0.35, 0.0),   # плафон такси
 }
-TRANSPARENT = {"glass": 0.25, "lamp_glass": 0.15, "lamp_red": 0.6, "glass_broken": 0.35}
+TRANSPARENT = {"glass": 0.25, "lamp_glass": 0.15, "lamp_red": 0.6, "glass_broken": 0.35, "lamp_blue": 0.6}
 
 
 def material(name: str) -> bpy.types.Material:
