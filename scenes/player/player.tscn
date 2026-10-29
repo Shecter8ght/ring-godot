@@ -2,9 +2,11 @@
 
 [ext_resource type="Script" uid="uid://ubykrvtjogr5" path="res://src/player/player.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://ddxunpup7v3ia" path="res://src/combat/health.gd" id="2_health"]
-[ext_resource type="PackedScene" path="res://assets/models/characters/persona_animated.glb" id="3_gmlin"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/npc_marauder/npc_marauder.gltf" id="3_gmlin"]
 [ext_resource type="Script" path="res://src/player/character_animator.gd" id="4_animator"]
 [ext_resource type="Script" path="res://src/world/cart_contact.gd" id="5_cart_contact"]
+[ext_resource type="Script" path="res://src/ai/npc_outfit.gd" id="6_outfit"]
+[ext_resource type="Script" path="res://src/player/slung_weapons.gd" id="7_slung"]
 
 [sub_resource type="CapsuleShape3D" id="capsule"]
 radius = 0.35
@@ -62,7 +64,11 @@ omni_range = 6.0
 [node name="CharacterAnimator" type="Node" parent="."]
 script = ExtResource("4_animator")
 
+[node name="NpcOutfit" type="Node" parent="."]
+script = ExtResource("6_outfit")
+
+[node name="SlungWeapons" type="Node" parent="."]
+script = ExtResource("7_slung")
+
 [node name="CartContact" type="Node" parent="."]
 script = ExtResource("5_cart_contact")
-
-[editable path="Body/Persona"]

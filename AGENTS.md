@@ -395,6 +395,10 @@ tools/godot.cmd --headless res://tools/hideout_keys_test.tscn # клавиши �
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/tv_light_shots.tscn # свет от телевизора ночью без генератора: видно мебель и дальнюю стену; снимки tv_light_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_rigs.py # разгрузки rig_*: модели (-- --preview <папка> — превью); затем --import и icon_bake -- rig_belt rig_chest rig_assault rig_heavy
 tools/godot.cmd --headless res://tools/holster_test.tscn    # оружие убирается клавишей своего слота и достаётся ею же, бег быстрее; с открытым рюкзаком в рейде персонаж стоит
+tools/godot.cmd --headless res://tools/slung_test.tscn     # снаряжение и убранное оружие на теле (NpcOutfit, SlungWeapons): игрок на теле мародёра
+                                                              # одет по своему снаряжению, длинные — за спиной (два накрест), пистолет и ракетница —
+                                                              # в кобурах на бёдрах, от первого лица — только тень, убит — пусто; мародёр сменил ствол —
+                                                              # второй на теле (active_slot гостям); с окном (--windowed --resolution 1600x900) — снимки slung_*
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/stickers_test.tscn # наклейки на оружии: клеить (предмет тратится), три на ствол, снять — пропала, зарубки «Счёта» за эвакуацию, страница верстака; снимок stickers_panel
 tools/godot.cmd --headless res://tools/sticker_icons.tscn  # иконки наклеек из их рисунков (assets/stickers/<id>.png владельца или знак кодом) → assets/icons; затем --import
 tools/godot.cmd --headless res://tools/shelter_exit_test.tscn # выход в рейд пешком: запечённого света нет, дверь тамбура, коридор и лестница во двор, план у стола, зона сбора — отсчёт и рейд

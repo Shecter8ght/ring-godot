@@ -13,6 +13,10 @@ enum Stance { STAND, CROUCH, PRONE }
 @export var peer_id: int = 1
 ## Ник над головой (только у чужих игроков в сети).
 var _name_tag: Label3D
+## Вид снаряжения на теле: что надето (строка NpcOutfit), когда сверять, от первого ли лица.
+var _outfit_spec: String = ""
+var _gear_look_t: float = 0.0
+var _first_person_on: bool = false
 
 var stance: Stance = Stance.STAND
 var aiming: bool = false
@@ -968,6 +972,7 @@ func look_dir() -> Vector3:
 ## Вид от первого лица: своё тело и оружие в руках не рисуем (камера внутри капсулы),
 ## но тень оставляем — на полу видно, где стоишь.
 func set_first_person(on: bool) -> void:
+	_first_person_on = on
 	var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if on else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	# своё тело от первого лица — на отдельном слое: тень от солнца и ламп есть, а свет «из глаз»
 	# (ИК-подсветка ПНВ, фонарь в руках) его в тенях не видит — иначе перед камерой тень-прямоугольник
@@ -980,6 +985,49 @@ func set_first_person(on: bool) -> void:
 		for mi in _weapon_model.find_children("*", "MeshInstance3D", true, false):
 			(mi as MeshInstance3D).cast_shadow = mode if not mi.has_meta("no_shadow") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			(mi as MeshInstance3D).layers = layer
+
+
+## Снаряжение на теле (броня, шлем, рюкзак, подсумки — NpcOutfit) и убранное оружие (SlungWeapons): у каждого
+## peer из синхронизированного снаряжения (Inventory) и того, что в руках; раз в Balance.SLUNG.every с.
+func _tick_gear_look(delta: float) -> void:
+	_gear_look_t -= delta
+	if _gear_look_t > 0.0:
+		return
+	_gear_look_t = float(Balance.SLUNG.every)
+	var eq: Dictionary = inventory.equipment if inventory else {}
+	var changed := false
+	var outfit := get_node_or_null("NpcOutfit") as NpcOutfit
+	if outfit:
+		var spec := NpcOutfit.describe(eq, false)
+		if spec != _outfit_spec:
+			_outfit_spec = spec
+			outfit.apply(spec)
+			changed = true
+	var slung := get_node_or_null("SlungWeapons") as SlungWeapons
+	if slung:
+		if health.alive:
+			changed = slung.show_list(slung_list(eq)) or changed
+		elif not slung.anchors().is_empty():
+			slung.clear()
+	# новые сетки на теле — в том же режиме: от первого лица своё тело только отбрасывает тень
+	if changed:
+		set_first_person(_first_person_on)
+
+
+## Что висит на теле: оружие из слотов, кроме того, что в руках (первое совпадение по id).
+func slung_list(eq: Dictionary) -> Array:
+	var held := held_model_id()
+	var list: Array = []
+	var skipped := false
+	for slot: String in ItemDb.WEAPON_SLOTS:
+		var e: Dictionary = eq.get(slot, {})
+		if e.is_empty():
+			continue
+		if not skipped and held != "" and String(e.get("id", "")) == held:
+			skipped = true
+			continue
+		list.append(SlungWeapons.entry(slot, e))
+	return list
 
 
 ## Ник над головой напарника (убежище и рейд): виден сквозь стены — своих не путать с чужими.
@@ -1031,6 +1079,7 @@ func _process(delta: float) -> void:
 		cancel_weapon_action()
 	_was_downed = health.downed
 	_update_hand()
+	_tick_gear_look(delta)
 	_tick_rung_sound()
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null and not _died_shown:

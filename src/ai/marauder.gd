@@ -75,6 +75,15 @@ var spare: Array = []
 var meds: Array = []
 ## Какое оружие в руках: primary / secondary.
 var _active: String = "primary"
+## Какой ствол в руках — у всех: выбирает хост (_use); гостям — модель в руке и убранный на теле (SlungWeapons).
+var active_slot: String = "primary":
+	set(value):
+		if active_slot == value:
+			return
+		active_slot = value
+		if not is_multiplayer_authority() and is_inside_tree() and equipment.has(value) and _active != value:
+			_active = value
+			_show_gun()
 ## Прежнее оружие, пока раненый / в тумане с пистолетом.
 var _main_slot: String = ""
 ## Патроны кончились совсем.
@@ -502,6 +511,7 @@ func _use(slot: String) -> void:
 	if equipment.has(_active) and _active != slot and not _spec.is_empty():
 		_store_mag_rounds()
 	_active = slot
+	active_slot = slot
 	var e: Dictionary = Gear.normalize_chamber(equipment[slot])
 	Gear.chamber_round(e)
 	equipment[slot] = e
@@ -568,6 +578,22 @@ func _show_gun() -> void:
 		gun.position = Vector3(-0.17, 1.24, 0.3 if pistol else 0.22) / _base_scale
 		_body.add_child(gun)
 	_main_gun = gun
+	_update_slung()
+
+
+## Убранный ствол на теле (второй из основного и запасного); мёртвому — ничего (ушло в ящик с телом).
+func _update_slung() -> void:
+	var slung := get_node_or_null("SlungWeapons") as SlungWeapons
+	if slung == null:
+		return
+	if state == State.DEAD or (_health and not _health.alive):
+		slung.clear()
+		return
+	var list: Array = []
+	for slot: String in ["primary", "secondary"]:
+		if slot != _active and equipment.has(slot):
+			list.append(SlungWeapons.entry(slot, equipment[slot]))
+	slung.show_list(list)
 
 
 ## Фонарь ИИ далеко от камеры гаснет, тень — только вблизи (Balance.AI_LIGHT_FADE).
@@ -628,7 +654,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:on_ladder", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq", ".:outfit"]:
+	for prop in [".:global_position", "Body:rotation", "Body:position", "Body:scale", ".:state", ".:crouched", ".:on_ladder", ".:look_pitch", ".:recovered_weapon", ".:animation_event", ".:animation_event_seq", ".:outfit", ".:active_slot"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -2839,6 +2865,10 @@ func _process(delta: float) -> void:
 func _spawn_ragdoll() -> void:
 	if _ragdoll != null or _died_shown:
 		return
+	# убранный ствол ушёл в ящик с телом вместе с основным
+	var slung := get_node_or_null("SlungWeapons") as SlungWeapons
+	if slung:
+		slung.clear()
 	var anim := get_node_or_null("CharacterAnimator") as CharacterAnimator
 	if anim and anim.has_model():
 		_died_shown = true
