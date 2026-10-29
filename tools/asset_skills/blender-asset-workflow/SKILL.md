@@ -25,7 +25,7 @@ description: "Моделирование и исправление редакт�
 
 | Задача | Справка |
 |---|---|
-| Пропорции, Boolean, bevel, нормали и topology | [Геометрия](references/geometry.md), при необходимости [стандарты конструкции](references/construction-standards.md) |
+| Пропорции, Boolean, bevel, нормали и topology; подгонка по фото камерами, сегменты по видимости, опоры фасок, сетка под блик, CAD-тела в сетку | [Геометрия](references/geometry.md), при необходимости [стандарты конструкции](references/construction-standards.md) |
 | Пистолеты, дробовики, автоматы/винтовки | [Семейства оружия](references/archetypes.md) |
 | Прицелы, крепления, глушители, рукоятки и прочие обвесы | [Обвесы](references/attachments.md) |
 | Патроны, гильзы и магазины | [Патроны и магазины](references/ammunition-magazines.md) |
