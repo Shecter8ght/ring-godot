@@ -3,7 +3,9 @@
 # оси сборки и разборки, фиксатор буфера.
 import math
 import bpy
-from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
+from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, GRIP_SEAM_BACK_X, SEAM_ARC_R, REAR_FILLET_R,
+                 REAR_PLAN_R, SEAM_EDGE,
+                 LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
                  TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
                  prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join, bevel_edges, auto_sharp, material)
 from part_upper import LUG_HALF_W, PIN_R
@@ -35,8 +37,34 @@ PIVOT_BOSS_R = 5.4                   # втулка оси сборки снар
 PIVOT_BOSS_H = 0.7
 
 
+REAR_X = LOWER_REAR + 0.5            # задняя грань под башней буферной трубки (заподлицо с её задним торцом)
+# задняя часть под башней: выемка за рукоятью — четверть окружности SEAM_ARC_R от шва вверх до горизонтали
+# (lib.GRIP_SEAM_BACK_X), из неё выпуклым углом REAR_FILLET_R — задняя грань
+
+
+def rear_pts():
+    """Задний срез ресивера от шва с рукоятью вверх до задней грани: точки (x, z), снизу вверх."""
+    r, rc = SEAM_ARC_R, REAR_FILLET_R
+    cx, zt = GRIP_SEAM_BACK_X - r, GRIP_TOP_Z + r
+    pts = [(cx + r * math.cos(math.radians(90.0 * k / 12)), GRIP_TOP_Z + r * math.sin(math.radians(90.0 * k / 12)))
+           for k in range(13)]
+    pts += [(cx - rc * math.sin(math.radians(90.0 * k / 6)), zt + rc - rc * math.cos(math.radians(90.0 * k / 6)))
+            for k in range(1, 7)]
+    return pts
+
+
+def round_rear_corners(body):
+    """Задние рёбра (выемка, угол, задняя грань) с боками — скругление REAR_PLAN_R по чистому профилю до булевых:
+    у шва ребро вертикально, и площадка получает в плане те же углы R, что верх рукояти под ней. Срез сдвинутыми
+    копиями контура на пологой части выемки ложился почти вплотную к ней и оставлял осколки граней."""
+    bevel_edges(body, lambda n1, n2: abs(n1.y) > 0.9 and abs(n2.y) < 0.1 and n2.x < 0.05 and n2.z < 0.5,
+                w=REAR_PLAN_R, seg=10,
+                where=lambda p: p.x < GRIP_SEAM_BACK_X + 0.2 and GRIP_TOP_Z + 0.05 < p.z < REAR_TOP_Z + 0.5)
+
+
 def guard_and_well_profile():
-    """Боковой профиль нижнего ресивера: шахта, низ корпуса, скоба, площадка рукояти, задняя часть до башни."""
+    """Боковой профиль нижнего ресивера: шахта, низ корпуса, скоба, площадка рукояти, выемка за рукоятью, задняя
+    часть с боковинами до REAR_TOP_Z (ось разборки проходит через них)."""
     pts = [
         (MAGWELL_FRONT, SPLIT_Z),                  # верх передней стенки шахты
         (MAGWELL_FRONT, -40.0),
@@ -46,11 +74,11 @@ def guard_and_well_profile():
         (WELL_REAR_OUT - 2.9, GUARD_Z[0] - 6.5),          # переднее ухо скобы
         (GUARD_POST_X, GUARD_Z[0] - 6.5),                 # низ перекладины сзади
         (GUARD_POST_X, GRIP_TOP_Z),                       # задняя стойка — вертикаль, шов с выступом рукояти
-        (-186.0, GRIP_TOP_Z),                             # площадка рукояти; угол острый — спинка рукояти кончается заподлицо
-        (LOWER_REAR + 0.5, -22.0),                        # задняя грань под башней (выше — башня буферной трубки)
-        (LOWER_REAR + 0.5, SPLIT_Z),
     ]
-    return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 2.5, 0, 0.8, 3.0, 0], seg=5)
+    rear = rear_pts()                                     # площадка рукояти до шва, выемка, угол к задней грани
+    pts += rear + [(REAR_X, REAR_TOP_Z), (STEP_X, REAR_TOP_Z), (STEP_X, SPLIT_Z)]
+    radii = [1.5, 0, 6.0, 2.5, 3.0, 6.0, 2.5, 0] + [0] * len(rear) + [0, STEP_R, 0]
+    return fillet(pts, radii, seg=5)
 
 
 def build(ctx):
@@ -59,6 +87,7 @@ def build(ctx):
     out = {}
     side = guard_and_well_profile()
     body = prism_xz("Lower_receiver", side, -FCG_HALF_W, FCG_HALF_W, C, "Alu_anodized")
+    round_rear_corners(body)
     # шахта магазина шире корпуса УСМ
     well = prism_xz("lower_well", fillet([
         (MAGWELL_FRONT, SPLIT_Z), (MAGWELL_FRONT, -40.0), (MAGWELL_FRONT + 4.3, WELL_BOTTOM_FRONT + 3.0),
@@ -85,12 +114,6 @@ def build(ctx):
                 y0, y1 = (half - 0.5, half + PIVOT_BOSS_H) if s_ > 0 else (-half - PIVOT_BOSS_H, -half + 0.5)
                 boolean(body, cyl("lower_pivot_boss", y0, y1, PIVOT_BOSS_R, C, "Alu_anodized", seg=48, cy=px, cz=pz, axis="Y",
                                   ch=0.35), "UNION")
-        else:
-            # сзади боковины целиком подняты до REAR_TOP_Z — ось разборки проходит через них
-            rw = prism_xz("lower_rear_walls", fillet([(LOWER_REAR + 1.5, SPLIT_Z - 1.0), (STEP_X, SPLIT_Z - 1.0), (STEP_X, REAR_TOP_Z),
-                                                      (LOWER_REAR + 1.5, REAR_TOP_Z)], [0, 0, STEP_R, 0], 8),
-                          -FCG_HALF_W, FCG_HALF_W, C, "Alu_anodized")
-            boolean(body, rw, "UNION")
         if nm == "pivot":
             # паз под проушину верхнего: дно вогнутое спереди (носик шахты между ушами — плавная выемка)
             boolean(body, prism_xz("cut_slot_pivot", fillet([(7.0, pz - 9.0), (px + 10.0, pz - 9.0), (px + 10.0, pz + 10.0),
@@ -156,8 +179,8 @@ def build(ctx):
     boolean(body, cyl("cut_bc_pin", bx - 14, bx + 14, 1.2, C, seg=16, cy=by, cz=bz, axis="X"))
     # канал зуба задержки из выемки внутрь, над шахтой
     boolean(body, box("cut_bc_slot", bx - 6.0, bx + 6.0, 6.5, LOWER_HALF_W, bz - 1.5, 5.0, C))
-    # фиксатор буфера: вертикальное отверстие перед башней
-    boolean(body, cyl("cut_retainer", -40, -10, 1.95, C, seg=16, cy=RETAINER_X, cz=0.0, axis="Z"))
+    # фиксатор буфера: вертикальное отверстие перед башней, глухое — ниже −29 за ним уже выемка за рукоятью
+    boolean(body, cyl("cut_retainer", -29, -10, 1.95, C, seg=16, cy=RETAINER_X, cz=0.0, axis="Z"))
     # рифление спереди на шахте (обе стороны) и неглубокие панели на боках шахты
     for sgn in (-1, 1):
         for k in range(8):
@@ -200,6 +223,10 @@ def build(ctx):
         boolean(body, slot)
     gpx, gpz, gpr = GUARD_PIN
     boolean(body, cyl("cut_guard_pin", -20, 20, gpr + 0.05, C, seg=24, cy=gpx, cz=gpz, axis="Y"))
+    # кромки площадки рукояти — узкие: шов с рукоятью тонкой линией, без канавки (три сегмента — широкая фаска их
+    # не берёт); вогнутый угол со стойкой скобы не трогаем — в него упирается выступ рукояти
+    bevel_edges(body, lambda n1, n2: n1.z < -0.9 and n2.z > -0.9, w=SEAM_EDGE, seg=3,
+                where=lambda p: abs(p.z - GRIP_TOP_Z) < 0.05 and p.x < GUARD_POST_X - 0.5)
     finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
     # штифт скобы — разрезной, торцы чуть утоплены
@@ -497,7 +524,10 @@ def ambi_release(F, mx, mz):
                   LOWER_HALF_W + 0.05, py + 2.6, F, "Steel_black")
     boolean(br, box("cut_ambi_slot", px - 6, px + 6, py - 1.9, py + 6, mz - 3.35, mz + 3.35, F))
     boolean(br, cyl("cut_ambi_br_pin", mz - 8, mz + 8, 1.02, F, seg=16, cy=px, cz=py, axis="Z"))
-    finish(br, w=0.3, seg=2, angle=35)
+    # прежняя фаска 0.3 мм: общий множитель скругления (lib.ROUND_K) заливал внутренний угол вилки, и повёрнутый рычаг
+    # её задевал
+    import lib
+    finish(br, w=0.3 / lib.ROUND_K, seg=2, angle=35)
     o["ambi_bracket"] = br
     o["ambi_pin"] = cyl("Mag_release_pin", mz - 6.4, mz + 6.4, 1.0, F, "Steel_black", seg=16, cy=px, cz=py, axis="Z", ch=0.25)
     for k, zz in enumerate((mz - 5.0, mz + 5.0)):

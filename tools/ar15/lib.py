@@ -12,6 +12,11 @@ BORE_Z = 0.0
 # надписи и знаки — на этапе текстур (карта высоты/нормалей + заливка): в геометрию не режутся (владелец, 2026-10-29).
 # True — вернуть гравировку/литьё в сетку (булевы; у шрифтов бывают незамкнутые контуры — проверять топологию)
 MARKINGS_GEOMETRY = False
+# скругление кромок (владелец 2026-10-29, просмотр текстур этапа 1: «очень много острых граней… максимальное скругление
+# везде, всё обтекаемо и кругленько»): ширина фасок finish() × ROUND_K, сегментов не меньше 3 (от 1 мм — 4), профиль
+# круглый; где фаска шире не встаёт, finish() сам откатывается к меньшей ширине
+ROUND_K = 3.0
+ROUND_PROFILE = 0.5
 
 # ---------- ресиверы (фото PEO, сдвиг +20 мм: зеркало затвора 20 мм позади заднего торца гайки ствола) ----------
 UPPER_FRONT = 20.0        # передний торец корпуса верхнего ресивера (дальше — гайка цевья)
@@ -76,6 +81,16 @@ TUBE_X = (-358.0, -176.0)        # буферная трубка (резьба �
 STOCK_TRAVEL = 84.0              # ход приклада: 6 положений (5 шагов по 16.8 мм)
 GRIP_TOP_Z = -42.0               # площадка рукояти под нижним ресивером (выше низа над спуском — фото PEO)
 GRIP_TOP_X = (-184.0, -119.0)    # спереди рукоять упирается в заднее ухо скобы
+# выемка за рукоятью (владелец 29.10, по образцу): в неё вписывается окружность SEAM_ARC_R, и треть окружности (120°)
+# лежит на поверхности — на ресивере четверть от шва (касательная вертикальна, самая глубокая точка выемки) вверх до
+# горизонтали, на спинке рукояти ещё 30° вниз от шва; сечения у шва одинаковые — прямоугольник шириной ресивера
+# со скруглением задних углов REAR_PLAN_R (вид сверху)
+SEAM_ARC_R = 10.0
+REAR_FILLET_R = 6.5              # выпуклый угол от верха выемки к задней грани ресивера (не меньше REAR_PLAN_R — иначе
+                                 # скругление боков на нём пережимается)
+GRIP_SEAM_BACK_X = LOWER_REAR + 0.5 + REAR_FILLET_R + SEAM_ARC_R     # −165: зад площадки рукояти, самая глубокая точка
+REAR_PLAN_R = 6.0
+SEAM_EDGE = 0.4                  # скругление кромок по шву рукояти и ресивера (шов — тонкая линия, не канавка)
 
 
 def v(x, y, z):
@@ -163,6 +178,37 @@ def arc_pts(cx, cy, r, a0, a1, seg):
 
 
 # ---------- сетки ----------
+
+def pchip(points):
+    """Монотонная кубическая интерполяция (Фрич — Карлсон) по точкам (z, значение)."""
+    pts = sorted(points)
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    n = len(xs)
+    h = [xs[i + 1] - xs[i] for i in range(n - 1)]
+    d = [(ys[i + 1] - ys[i]) / h[i] for i in range(n - 1)]
+    m = [0.0] * n
+    m[0], m[-1] = d[0], d[-1]
+    for i in range(1, n - 1):
+        if d[i - 1] * d[i] <= 0:
+            m[i] = 0.0
+        else:
+            w1, w2 = 2 * h[i] + h[i - 1], h[i] + 2 * h[i - 1]
+            m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i])
+
+    def f(x):
+        if x <= xs[0]:
+            return ys[0] + m[0] * (x - xs[0])
+        if x >= xs[-1]:
+            return ys[-1] + m[-1] * (x - xs[-1])
+        for i in range(n - 1):
+            if xs[i] <= x <= xs[i + 1]:
+                t = (x - xs[i]) / h[i]
+                t2, t3 = t * t, t * t * t
+                return ((2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * h[i] * m[i] + (-2 * t3 + 3 * t2) * ys[i + 1]
+                        + (t3 - t2) * h[i] * m[i + 1])
+    return f
+
 
 def _obj(name, me, coll, mat):
     o = bpy.data.objects.new(name, me)
@@ -400,7 +446,7 @@ def _bevel_weights(o, angle, exclude):
         attr.data[i].value = 1.0
 
 
-def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=0.6, clamp=True, miter="MITER_ARC", exclude=None):
+def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=ROUND_PROFILE, clamp=True, miter="MITER_ARC", exclude=None):
     """Фаска по углу. w — мм. Не применяет: применить через apply_all или finish()."""
     m = o.modifiers.new("bevel", "BEVEL")
     m.width = w * MM
@@ -509,10 +555,12 @@ def _spots(o, lo, hi):
     return sorted(spots)[:16]
 
 
-def finish(o, w=0.5, seg=2, angle=30.0, apply=True, exclude=None):
+def finish(o, w=0.5, seg=2, angle=30.0, apply=True, exclude=None, tri_first=False):
     """Общая фаска по углу; если на вырожденных рёбрах фаска разносит сетку — повтор с меньшей шириной,
     в крайнем случае сетка без фаски с жёсткими рёбрами по углу."""
     o["_fin"] = 1
+    w = w * ROUND_K
+    seg = max(seg, 4 if w >= 1.0 else 3)
     clean(o)
     before = _bbox(o)
     keep = o.data.copy()
@@ -521,8 +569,11 @@ def finish(o, w=0.5, seg=2, angle=30.0, apply=True, exclude=None):
         weighted(o)
         bpy.data.meshes.remove(keep)
         return o
-    for k, (ww, tri, mit) in enumerate(((w, False, "MITER_ARC"), (w, False, "MITER_SHARP"), (w, True, "MITER_SHARP"),
-                                        (w * 0.6, True, "MITER_SHARP"), (w * 0.35, True, "MITER_SHARP"))):
+    tries = ((w, False, "MITER_ARC"), (w, False, "MITER_SHARP"), (w, True, "MITER_SHARP"),
+             (w * 0.6, True, "MITER_SHARP"), (w * 0.35, True, "MITER_SHARP"))
+    # tri_first — сразу с разбивкой больших многоугольников: широкая фаска вокруг отверстия в торце (рукоять) делала
+    # большую грань неплоской — радиальные полосы в затенении
+    for k, (ww, tri, mit) in enumerate(tries[2:] if tri_first else tries):
         if k:
             old = o.data
             o.data = keep.copy()

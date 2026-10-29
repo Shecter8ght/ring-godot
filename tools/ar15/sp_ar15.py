@@ -14,7 +14,7 @@ from substance_painter.textureset import MeshMapUsage as U
 import tex_sets as T
 
 JOBS = os.environ.get("SP_BRIDGE_DIR", "")
-PROJECT = T.WORK + "/sp/AR15_tex_stage1.spp"
+PROJECT = T.WORK + "/sp/AR15_tex_stage1_v2.spp"     # v2 — геометрия v07 (скругления); v1 — AR15_tex_stage1.spp
 
 
 def mark(name, text):
@@ -153,7 +153,7 @@ def klass(info):
 # темнее — читается краской), анодирование — тёмно-серое с атласным блеском, не чёрное (ВСС-М 26.10); при 0.06 на
 # пробе AR-15 29.10 отражало меньше чёрного пластика — сплошной чёрный силуэт без фактуры
 BASE = {
-    "anod": ((0.130, 0.133, 0.142), 0.42, 0.85),
+    "anod": ((0.100, 0.100, 0.106), 0.50, 0.0),   # керамическое покрытие (Cerakote) — неметалл, владелец 29.10
     "nitride": ((0.175, 0.175, 0.18), 0.34, 0.9),
     "phos": ((0.150, 0.150, 0.145), 0.60, 0.75),
     "bare": ((0.60, 0.60, 0.61), 0.20, 1.0),
@@ -167,22 +167,22 @@ BASE = {
     "jacket": ((0.78, 0.48, 0.33), 0.25, 1.0),
 }
 VARIANTS = [
-    ("A", "Основа А — чёрное анодирование", {}),
-    ("B", "Основа Б — графит, матовее", {"anod": ((0.210, 0.213, 0.222), 0.55, 0.8),
-                                       "nitride": ((0.21, 0.21, 0.215), 0.40, 0.9),
-                                       "phos": ((0.18, 0.18, 0.175), 0.66, 0.75),
-                                       "poly": ((0.105, 0.105, 0.105), 0.68, 0.0)}),
-    ("C", "Основа В — песок FDE (Cerakote)", {"anod": ((0.58, 0.49, 0.37), 0.55, 0.0),
+    ("A", "Основа А — чёрный Cerakote", {}),
+    # по снимкам владельца 29.10 (покрытие с металлическим зерном, светлая лазерная маркировка, чёрные мелочь и
+    # фурнитура), оттенок — песочный вместо бронзы («замени только оттенок цвета с бронзы на песочный»)
+    ("B", "Основа Б — песок, чёрная фурнитура", {"anod": ((0.58, 0.49, 0.37), 0.46, 0.0)}),
+    ("C", "Основа В — песок целиком (и фурнитура)", {"anod": ((0.58, 0.49, 0.37), 0.46, 0.0),
                                              "poly": ((0.53, 0.44, 0.33), 0.62, 0.0)}),
 ]
 # надписи лазером: по анодированию — светлый осветлённый оксид; по песочному Cerakote — проступает чёрное
 # анодирование под ним; по Cerakote глушителя — светло-серое
-LASER = {"A": ((0.55, 0.55, 0.56), 0.62, 0.0), "B": ((0.58, 0.58, 0.59), 0.64, 0.0),
+LASER = {"A": ((0.55, 0.55, 0.56), 0.62, 0.0), "B": ((0.74, 0.73, 0.71), 0.62, 0.0),
          "C": ((0.06, 0.06, 0.066), 0.45, 0.85), "sup": ((0.50, 0.50, 0.50), 0.60, 0.0)}
 MARKS_KIND = {"lower": "laser", "upper": "laser", "handguard": "laser", "suppressor": "laser", "stock": "mold",
               "magazine": "mold"}
 METALS = ("anod", "nitride", "phos", "bare", "spring", "baffle", "brass", "jacket")
 AO_PARAMS = {"ao_invert": 1}         # маска — углубления (белое там, где AO тёмное)
+FLAKE_POS = 0.07                     # histogram_scan: чем меньше Position, тем меньше белого (0.88 — 91 %, 0.07 — 26 % металла)
 CURV_PARAMS = {"global_balance": 0.6, "global_contrast": 0.3}   # уже, только сами кромки
 SCANS = T.WORK + "/scans"
 LATHE_KEYS = ("Barrel", "pin", "screw", "nut", "Buffer", "Gas_tube", "Bolt", "Muzzle", "tube", "Suppressor_body",
@@ -238,11 +238,11 @@ def build(set_name, verbose=False):
         for k in sorted(set(cls.values())):
             col, rough, metal = over.get(k, BASE[k])
             ms = of(k)
-            if key == "C" and k == "anod":
+            if key in ("B", "C") and k == "anod":
                 black = [m for m in ms if set_name == "sights" or objs[m] in C_BLACK]
                 ms = [m for m in ms if m not in black]
                 if black:
-                    b = fill("Анодирование чёрное (прицелы, рукоятка заряжания)",
+                    b = fill("Покрытие чёрное (прицелы, рукоятка заряжания)",
                              vin if n is None else L.InsertPosition.above_node(n), color=BASE["anod"][0],
                              rough=BASE["anod"][1], metal=BASE["anod"][2], height=H0)
                     only_meshes(b, black)
@@ -314,8 +314,8 @@ def build(set_name, verbose=False):
             only_meshes(f, meshes)
         return f
 
-    def proc_mask(layer, proc, scale, params=None, rot=0.0, blend=None, above=None):
-        return sp_lib.mask_proc(layer, proc, params, scale=scale, tri=True, rot=rot, blend=blend, above=above)
+    def proc_mask(layer, proc, scale, params=None, rot=0.0, blend=None, above=None, tri=True):
+        return sp_lib.mask_proc(layer, proc, params, scale=scale, tri=tri, rot=rot, blend=blend, above=above)
 
     hard = of("anod", "nitride", "phos", "bare", "spring", "cerakote", "baffle", "poly", "follower", "brass", "jacket")
     metal = of(*METALS)
@@ -402,7 +402,8 @@ def build(set_name, verbose=False):
     proc_mask(r1, "grunge_spots/grunge_spots", 3.0)
     r2 = rel("Блеск — пятна матовее", L.InsertPosition.above_node(r1), rough=0.07, meshes=hard)
     proc_mask(r2, "noise_bnw_spots_1/bnw_spots_1", 4.0)
-    r3 = rel("Блеск — протяжки вдоль детали", L.InsertPosition.above_node(r2), rough=-0.035, meshes=metal)
+    # протяжки — только у стали: на покрытии они читались «слоями» (владелец 29.10)
+    r3 = rel("Блеск — протяжки вдоль детали", L.InsertPosition.above_node(r2), rough=-0.035, meshes=steel)
     proc_mask(r3, "grunge_wipe_brushed/grunge_wipe_brushed", 1.6)
     n = r3
 
@@ -427,26 +428,31 @@ def build(set_name, verbose=False):
     # 8. заводская фактура
     an = of("anod")
     if an:
-        # тонкие параллельные риски фрезы вдоль детали (радиальный шум давал «звёзды» в центрах плиток проекции)
-        m1 = rel("Фрезеровка — тонкие риски вдоль детали", L.InsertPosition.above_node(n),
-                 rough="noise_anisotropic_noise/anisotropic_noise", rmode=L.BlendingMode.Overlay, rop=0.07,
-                 height="noise_anisotropic_noise/anisotropic_noise", hmode=L.BlendingMode.Overlay, hop=0.002,
-                 meshes=an)
-        triplanar(m1, 3.0)
-        for ch_ in ("rough", "height"):
-            sp_lib.proc_params(m1, ch_, {"Y_Amount": 1024, "X_Amount": 8})
-        m2 = rel("Пескоструй под анодированием — зерно", L.InsertPosition.above_node(m1),
-                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.30,
-                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.02, meshes=an)
-        sp_lib.uvscale(m2, 0.5)
-        n = m2
+        # керамическое покрытие из печи (владелец 29.10: «металл идёт какими-то слоями… думал, керамическая краска,
+        # запечённая в печке»): без рисок фрезы и протяжек, ровное сатиновое, очень мелкое зерно
+        m2 = rel("Керамическое покрытие — мелкое зерно", L.InsertPosition.above_node(n),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.14,
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.003, meshes=an)
+        sp_lib.uvscale(m2, 0.5)      # зерно в 2 текселя: трёхпроекционно при 600 усреднялось в ничто
+        # металлическое зерно в покрытии (снимки владельца 29.10: керамическое покрытие с металлическими искрами в
+        # бликах): редкие точки-хлопья — металл, глаже и светлее; в среднем сатиновый блеск с искрой
+        fk = rel("Покрытие — металлические хлопья", L.InsertPosition.above_node(m2), color=(0.80, 0.80, 0.80),
+                 cop=0.45, rough=-0.10, meshes=an)
+        fk.active_channels = fk.active_channels | {CH.BaseMetalness}
+        fk.set_source(CH.BaseMetalness, sp_lib._val(0.85, data=True))
+        fk.set_blending_mode(L.BlendingMode.Normal, CH.BaseMetalness)
+        # шум по развёртке, точка = тексель: в трёхпроекционной при масштабе 900 шум усреднялся в ровное серое, и после
+        # порога маска выходила сплошной — всё покрытие становилось зеркальным металлом
+        mf = proc_mask(fk, "white_noise_fast/white_noise_fast", 1.0, tri=False)
+        S._mfilter(mf, "histogram_scan", {"Position": FLAKE_POS, "Contrast": 0.95})
+        n = fk
     # тела вращения: ствол, оси, винты, гайки, трубки (на листовой крышке окна и плоских рычагах риски не к месту)
-    lathe = [m for m in cls if cls[m] in ("nitride", "phos", "bare", "cerakote", "baffle")
+    lathe = [m for m in cls if cls[m] in ("nitride", "phos", "bare", "baffle")
              and any(k in objs[m] for k in LATHE_KEYS)]
     if lathe:
         lt = rel("Токарная обработка — тонкие риски", L.InsertPosition.above_node(n),
-                 rough="noise_anisotropic_noise/anisotropic_noise", rmode=L.BlendingMode.Overlay, rop=0.12,
-                 height="noise_anisotropic_noise/anisotropic_noise", hmode=L.BlendingMode.Overlay, hop=0.008,
+                 rough="noise_anisotropic_noise/anisotropic_noise", rmode=L.BlendingMode.Overlay, rop=0.10,
+                 height="noise_anisotropic_noise/anisotropic_noise", hmode=L.BlendingMode.Overlay, hop=0.004,
                  meshes=lathe)
         triplanar(lt, 4.0, rot=1.5708)
         for ch_ in ("rough", "height"):
@@ -454,56 +460,64 @@ def build(set_name, verbose=False):
         n = lt
     pl = of("poly", "follower", "rubber")
     poly = of("poly", "follower")
-    if poly:
-        # шум литья по образцу (3DG, ч. 1, 30–40 мин): контрастные мелкие точки — светлые глаже, тёмные углублённые
-        # матовее, редкие выпуклые микроточки; на рёбрах шума нет (кромка из формы гладкая)
+    grip = [m for m in poly if objs[m] in SAND_ALWAYS]
+    smooth = [m for m in pl if m not in grip]
+    if grip:
+        # рукоять — шум литья по образцу (3DG, ч. 1, 30–40 мин): мелкие контрастные точки — светлые глаже, тёмные
+        # углублённые матовее, редкие выпуклые микроточки; на рёбрах шума нет. Мельче и ниже, чем в первом показе
+        # (владелец 29.10: «ещё более мелкозернистым, сейчас фактура крупнозернистая»)
         def no_edges(layer):
             g = sp_lib.mask_generator(layer, "mg_curvature/mg_curvature", {"global_balance": 0.62, "global_contrast": 0.4})
             g.set_blending_mode(L.BlendingMode.Subtract)
 
-        q1 = rel("Полимер — светлые точки (глаже)", L.InsertPosition.above_node(n), color=(1.0, 1.0, 1.0), cop=0.50,
-                 rough=-0.28, meshes=poly)
-        mf = proc_mask(q1, "white_noise_fast/white_noise_fast", 160.0)
-        S._mfilter(mf, "histogram_scan", {"Position": 0.82, "Contrast": 0.85})
+        q1 = rel("Рукоять — светлые точки (глаже)", L.InsertPosition.above_node(n), color=(1.0, 1.0, 1.0), cop=0.25,
+                 rough=-0.25, meshes=grip)
+        mf = proc_mask(q1, "white_noise_fast/white_noise_fast", 0.5, tri=False)
+        S._mfilter(mf, "histogram_scan", {"Position": 0.15, "Contrast": 0.85})
         no_edges(q1)
-        q2 = rel("Полимер — тёмные точки в углублениях (матовее)", L.InsertPosition.above_node(q1),
-                 color=(0.0, 0.0, 0.0), cmode=L.BlendingMode.Multiply, cop=0.45, rough=0.25, height=0.015,
-                 hmode=L.BlendingMode.Subtract, meshes=poly)
-        mf = proc_mask(q2, "white_noise_fast/white_noise_fast", 140.0, rot=0.9)
-        S._mfilter(mf, "histogram_scan", {"Position": 0.80, "Contrast": 0.85})
+        q2 = rel("Рукоять — тёмные точки в углублениях (матовее)", L.InsertPosition.above_node(q1),
+                 color=(0.0, 0.0, 0.0), cmode=L.BlendingMode.Multiply, cop=0.18, rough=0.18, height=0.003,
+                 hmode=L.BlendingMode.Subtract, meshes=grip)
+        mf = proc_mask(q2, "white_noise_fast/white_noise_fast", 0.5, rot=0.9, tri=False)
+        S._mfilter(mf, "histogram_scan", {"Position": 0.15, "Contrast": 0.85})
         no_edges(q2)
-        q3 = rel("Полимер — редкие выпуклые микроточки", L.InsertPosition.above_node(q2), color=(0.85, 0.85, 0.85),
-                 cop=0.20, rough=-0.10, height=0.02, meshes=poly)
-        mf = proc_mask(q3, "noise_bnw_spots_2/bnw_spots_2", 60.0)
-        S._mfilter(mf, "histogram_scan", {"Position": 0.75, "Contrast": 0.9})
+        q3 = rel("Рукоять — редкие выпуклые микроточки", L.InsertPosition.above_node(q2), color=(0.85, 0.85, 0.85),
+                 cop=0.18, rough=-0.10, height=0.005, meshes=grip)
+        mf = proc_mask(q3, "noise_bnw_spots_2/bnw_spots_2", 160.0)
+        S._mfilter(mf, "histogram_scan", {"Position": 0.25, "Contrast": 0.9})
         proc_mask(q3, "noise_clouds_2/clouds_2", 0.8, blend=L.BlendingMode.Subtract)
-        n = q3
+        g1 = rel("Рукоять — мелкая фактура формы", L.InsertPosition.above_node(q3),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.25,
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.004, meshes=grip)
+        sp_lib.uvscale(g1, 0.5)
+        n = g1
+    if smooth:
+        # приклад, магазин, резина — гладкие, едва заметное зерно (владелец 29.10: «пластик приклада должен быть
+        # вообще гладким, совсем маленькое-маленькое зерно»)
+        s1 = rel("Литьё — гладкое, едва заметное зерно", L.InsertPosition.above_node(n),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.10,
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.0015,
+                 meshes=smooth)
+        sp_lib.uvscale(s1, 0.5)
+        n = s1
     seams_png = f"{T.WORK}/marks/{set_name}_seams.png"
     if poly and os.path.exists(seams_png):
         # шов литья: тонкая линия разъёма формы, чуть неровная (warp), рельеф поверх шума — уровень, а не прибавка
         sw = fill("Шов литья — линия разъёма формы", L.InsertPosition.above_node(n), color=(0.62, 0.62, 0.62),
-                  rough=0.10, height=H0 + 0.03)
+                  rough=0.10, height=H0 + 0.012)
         sw.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
         sw.set_opacity(0.35, CH.BaseColor)
         sw.set_blending_mode(L.BlendingMode.Subtract, CH.SpecularRoughness)
         bm = S._bmask(sw, seams_png)
-        S._mfilter(bm, "warp", {"intensity": 0.6})
+        S._mfilter(bm, "warp", {"intensity": 0.08})     # 0.6 рвал линию в «трещинки»
         only_meshes(sw, poly)
         n = sw
     if pl:
-        p1 = rel("Литьё — мелкая фактура формы", L.InsertPosition.above_node(n),
-                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.25,
-                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.012, meshes=pl)
-        # трёхпроекционно: в развёртке шум рвался на швах островов (полосы вдоль кромок рукояти)
-        triplanar(p1, 250.0, hardness=0.9)
         # тон литья вблизи: без зерна в цвете полимер и латунь на ~1 мм однотонны (самопроверка, 81–83 % площади)
-        p0 = rel("Литьё — зерно тона", L.InsertPosition.above_node(p1), color="noise_gaussian_noise/gaussian_noise",
-                 cmode=L.BlendingMode.Overlay, cop=0.10, meshes=pl + of("brass", "jacket"))
-        triplanar(p0, 250.0, hardness=0.9)
-        # ячеистая шагрень (cells) на снимках читалась пенопластом и штукатуркой — убрана; фактуру литья дают точки
-        # шума литья (выше) и мелкое зерно
-        p1 = p0
-        p2 = rel("Литьё — следы течения пластика (блеск)", L.InsertPosition.above_node(p1), rough=-0.06, meshes=pl)
+        p0 = rel("Литьё — зерно тона", L.InsertPosition.above_node(n), color="noise_gaussian_noise/gaussian_noise",
+                 cmode=L.BlendingMode.Overlay, cop=0.08, meshes=pl + of("brass", "jacket"))
+        sp_lib.uvscale(p0, 0.5)
+        p2 = rel("Литьё — следы течения пластика (блеск)", L.InsertPosition.above_node(p0), rough=-0.05, meshes=pl)
         proc_mask(p2, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.4, {"Balance": 0.55, "Contrast": 0.3})
         n = p2
     ck = of("cerakote")
