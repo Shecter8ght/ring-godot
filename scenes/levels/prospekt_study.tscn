@@ -634,7 +634,7 @@ script = ExtResource("build")
 
 kind = "mass"
 
-footprint = Vector2(3.6, 7.0)
+footprint = Vector2(3.6, 8.8)
 
 floors = 1
 

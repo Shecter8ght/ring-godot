@@ -277,6 +277,32 @@ def face(fx: float, fz: float) -> float:
     return math.degrees(math.atan2(fx, fz))
 
 
+def revolving_entrance(cx: float, cz: float, yaw: float, doors: bool = True) -> None:
+    """Входная группа в фасаде (cx, cz — середина входа на линии фасада, yaw — куда смотрит вход): карусель утоплена
+    в стену на полдиаметра, по бокам — распашные стеклянные двери, над всем — козырёк на тягах. Владелец 2026-10-29:
+    «круглые двери стоят как будто отдельно от здания» — прежде карусель стояла перед стеной впритык."""
+    r = math.radians(yaw)
+    ox, oz = math.sin(r), math.cos(r)                            # наружу
+    ax, az = math.cos(r), -math.sin(r)                           # вдоль фасада
+
+    def at(a: float, o: float) -> tuple[float, float]:
+        return cx + ax * a + ox * o, cz + az * a + oz * o
+
+    x, z = at(0.0, 0.55)
+    u("U08_01_revolving_door", x, z, yaw, 1.0, 0.0, True)
+    if doors:
+        for a in (-2.65, 2.65):
+            x, z = at(a, 0.08)
+            u("U08_02_glass_doors", x, z, yaw, 1.0, 0.0, True)
+    span = 8.4 if doors else 3.6
+    x, z = at(0.0, 1.2)
+    box(x, 3.32, z, span, 0.14, 2.4, "steel", yaw, False)        # козырёк выше карусели (2,8 м)
+    for a in (-span * 0.5 + 0.3, span * 0.5 - 0.3):
+        x0, z0 = at(a, 0.0)
+        x1, z1 = at(a, 2.3)
+        beam((x0, 4.4, z0), (x1, 3.4, z1), 0.05, 0.05, "steel")  # тяги к стене
+
+
 def building(bid: str, label: str, at: tuple, size: tuple, kind: str = "mass", floors: int = 1,
              story: float = STORY_RETAIL, yaw: float = 0.0, lift: float = 0.0, interior: str = "",
              loot_theme: str = "", loot_density: float = 0.0, region: str = "West", script: str = "build",
@@ -679,21 +705,20 @@ building("Pavilion_Shut", "БЦ «Проспект, 11» · вестибюль �
 BC5 = (-192.2, -162.8)
 flats("BC_Prospekt5", "БЦ «Проспект, 5» — 9 этажей (закрыт)", ((BC5[0] + BC5[1]) * 0.5, (PAV_Z0 + PAV_Z1) * 0.5), 7, 0, 0.0,
       (BC5[1] - BC5[0], PAV_Z1 - PAV_Z0 + 0.4), 3.6, False, True, 8.03, "West", 0.0)
-building("BC_Prospekt5_Lobby", "БЦ «Проспект, 5» · вестибюль (закрыт)", (-194.0, -22.5), (3.6, 7.0), "mass", 1, 4.6, 0.0, 0.0,
+building("BC_Prospekt5_Lobby", "БЦ «Проспект, 5» · вестибюль (закрыт)", (-194.0, -22.5), (3.6, 8.8), "mass", 1, 4.6, 0.0, 0.0,
          "", "", 0.0, "West")
 surface("bc5_apron", "walk", -200.0, PAV_Z0, BC5[0], PAV_Z1, 0.0, 0.05)
-u("U08_01_revolving_door", -197.2, -22.5, -90.0, 1.0, 0.0, True)
-u("U08_03_canopy_bracket", -196.1, -22.5, -90.0, 1.0, 3.6)
+revolving_entrance(-195.8, -22.5, -90.0)
 sign("БЦ «Проспект, 5» · вход", -196.2, 5.4, -22.5, 40)
 KEEP_CLEAR.append((-202.0, -26.0, -195.8, -19.0))
 # БЦ «Проспект, 11»: над закрытым павильоном салона связи, 2 + 8 этажей; вход — стеклянная секция на проспект
 flats("BC_Prospekt11", "БЦ «Проспект, 11» — 10 этажей (закрыт)", (-76.0, (PAV_Z0 + PAV_Z1) * 0.5), 8, 0, 0.0,
       (32.4, PAV_Z1 - PAV_Z0 + 0.4), 3.6, False, True, 2 * STORY_RETAIL, "West", 0.0)
-u("U08_04_curtainwall", -72.0, PAV_Z1 + 0.15, 0.0)
-u("U08_01_revolving_door", -72.0, PAV_Z1 + 1.4, 0.0, 1.0, 0.0, True)
-u("U08_03_canopy_bracket", -72.0, PAV_Z1 + 0.3, 0.0, 1.0, 3.4)
+for dx in (-6.2, 6.2):                                           # витраж вестибюля по сторонам от входа
+    u("U08_04_curtainwall", -72.0 + dx, PAV_Z1 + 0.15, 0.0)
+revolving_entrance(-72.0, PAV_Z1, 0.0)
 sign("БЦ «Проспект, 11» · вход", -72.0, 5.0, PAV_Z1 + 0.4, 40)
-KEEP_CLEAR.append((-76.5, PAV_Z1, -67.5, PAV_Z1 + 5.0))
+KEEP_CLEAR.append((-78.0, PAV_Z1, -66.0, PAV_Z1 + 5.0))
 u("U03_01_lightbox", -184.0, PAV_Z1 + 1.3, 0.0)
 u("U05_02_coffee_kiosk", -168.5, PAV_Z1 + 1.6, 180.0, 1.0, 0.0, True)
 FI["stories"].append({"label": "кофейня «Зерно» — закладка пролога в подсобке", "at": [-184.0, -22.0], "height": 6.0})
@@ -1843,13 +1868,13 @@ flats("Vershina_T4", "ЖК «Вершина», башня 4 — широкая, 
 # фасад стилобата к площади: стеклянная стена, вращающиеся и распашные двери, козырьки, волнистый фасад, светящийся парапет
 for k in range(9):
     x = STY[0] + 4.5 + k * 8.4
-    u("U08_04_curtainwall", x, STY[3] + 0.15, 0.0)
+    if abs(x - 40.0) > 5.0 and abs(x - 74.0) > 5.0:             # против входов — входные группы, не витраж
+        u("U08_04_curtainwall", x, STY[3] + 0.15, 0.0)
     u("U12_04_lit_parapet", x, STY[3] + 0.3, 0.0, 1.0, 9.0)
-u("U08_01_revolving_door", 40.0, STY[3] + 1.4, 0.0, 1.0, 0.0, True)
-u("U08_01_revolving_door", 74.0, STY[3] + 1.4, 0.0, 1.0, 0.0, True)
+revolving_entrance(40.0, STY[3], 0.0)
+revolving_entrance(74.0, STY[3], 0.0)
 u("U08_02_glass_doors", 57.0, STY[3] + 0.2, 0.0, 1.0, 0.0, True)
-for x in (40.0, 57.0, 74.0):
-    u("U08_03_canopy_bracket", x, STY[3] + 0.3, 0.0, 1.0, 3.4)
+u("U08_03_canopy_bracket", 57.0, STY[3] + 0.3, 0.0, 1.0, 3.4)
 u("U12_01_wave_facade", 26.0, STY[3] + 0.5, 0.0, 1.0, 5.0)
 u("U12_01_wave_facade", 88.0, STY[3] + 0.5, 0.0, 1.0, 5.0)
 u("U12_05_triangle_panel", STY[0] - 0.2, -60.0, -90.0, 1.0, 1.5)

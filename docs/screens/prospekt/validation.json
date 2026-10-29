@@ -46,9 +46,9 @@
 			"check": "Наполнение: машины, ларьки, ограждения, фонари — больше 300 экземпляров",
 			"details": {
 				"batches": 1284,
-				"collision_shapes": 2415,
-				"instances": 4176,
-				"models": 1882
+				"collision_shapes": 2422,
+				"instances": 4179,
+				"models": 1885
 			},
 			"pass": true
 		},
@@ -313,7 +313,7 @@
 		}
 	],
 	"fails": 0,
-	"items": 4176,
+	"items": 4179,
 	"scale": {
 		"door_h": 2.415,
 		"height_k": 1.15,

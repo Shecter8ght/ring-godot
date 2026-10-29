@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="2_rig"]
+[ext_resource type="Script" path="res://tools/parking_probe.gd" id="3_probe"]
+
+[sub_resource type="Environment" id="env"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.025, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.6, 0.66, 1)
+ambient_light_energy = 0.12
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 2.5
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_min_cell_size = 0.2
+glow_enabled = true
+glow_intensity = 0.3
+glow_bloom = 0.05
+glow_hdr_threshold = 1.2
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.008
+volumetric_fog_albedo = Color(0.8, 0.82, 0.85, 1)
+adjustment_enabled = true
+adjustment_contrast = 1.05
+adjustment_saturation = 0.9
+
+[sub_resource type="CameraAttributesPractical" id="cam_attr"]
+exposure_multiplier = 1.0
+
+[node name="ParkingProbe" type="Node3D"]
+script = ExtResource("3_probe")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+camera_attributes = SubResource("cam_attr")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47, 0.1, 9.2)
+
+[node name="CameraRig" parent="." instance=ExtResource("2_rig")]
+target_path = NodePath("../Player")

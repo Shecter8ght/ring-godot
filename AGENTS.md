@@ -94,6 +94,10 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/scale_probe.tscn # 
                                                               # E как D с высотами × 1,15 (улица, комната с дверью,
                                                               # коридор, стеллажи, лестница, фигура 1,75); F1/F2/F3 — поле зрения 75/80/90°, F5…F9 — к набору;
                                                               # SCALE_PROBE_SHOTS=1 — снимки scale_probe_* и выход
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/parking_probe.tscn # стенд высоты паркинга −1 «Проспекта» (владелец 2026-10-29): пять залов
+                                                              # с местами и проездами карты — A как сейчас 2,8 м, B 2,8 м с отделкой как в Таркове (колонны 0,9 м
+                                                              # с капителями, балки, воздуховод, трубы, лампы), C/D/E — 4,5/6/9 м в свету под балками; F1/F2/F3 —
+                                                              # поле зрения, F5…F9 — к залу; PARKING_PROBE_SHOTS=1 — снимки parking_probe_* и выход
 tools/godot.cmd --headless res://tools/carry_test.tscn       # стойка «наискосок» (Balance.WEAPON_CARRY): по умолчанию опущено, колесо вверх — от бедра, вниз — наискосок,
                                                               # бегом всегда наискосок, огонь поднимает и стреляет (клик не теряется), ПКМ — и обратно, лёжа и перезарядка
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/carry_shots.tscn # снимки стойки: от бедра и наискосок у стволов песочницы → docs/screens/carry_*;
