@@ -122,12 +122,24 @@ class _Mesh:
         self.poly_of_loop = np.repeat(np.arange(npoly, dtype=np.int32), self.lt)
         k = np.arange(nl) - self.ls[self.poly_of_loop]
         self.next_loop = self.ls[self.poly_of_loop] + (k + 1) % self.lt[self.poly_of_loop]
-        # треугольники веером по многоугольникам (игровые сетки и так из треугольников)
+        # треугольники веером по многоугольникам (игровые сетки и так из треугольников); у сеток с вогнутыми
+        # многоугольниками (high-poly после булевых, AR-15) веер выходит за грань — там тесселяция Blender
         nt = self.lt - 2
-        self.tri_poly = np.repeat(np.arange(npoly, dtype=np.int32), nt)
-        j = np.arange(int(nt.sum())) - np.repeat(np.cumsum(nt) - nt, nt)
-        base = self.ls[self.tri_poly]
-        self.tri = np.stack([base, base + j + 1, base + j + 2], 1)
+        if (self.lt > 4).any():
+            me.calc_loop_triangles()
+            ntri = len(me.loop_triangles)
+            tl = np.empty(ntri * 3, np.int32)
+            me.loop_triangles.foreach_get('loops', tl)
+            tp = np.empty(ntri, np.int32)
+            me.loop_triangles.foreach_get('polygon_index', tp)
+            order = np.argsort(tp, kind='stable')
+            self.tri_poly = tp[order]
+            self.tri = tl.reshape(-1, 3)[order]
+        else:
+            self.tri_poly = np.repeat(np.arange(npoly, dtype=np.int32), nt)
+            j = np.arange(int(nt.sum())) - np.repeat(np.cumsum(nt) - nt, nt)
+            base = self.ls[self.tri_poly]
+            self.tri = np.stack([base, base + j + 1, base + j + 2], 1)
         self.tri_start = np.concatenate([[0], np.cumsum(nt)]).astype(np.int64)
         p = self.co[self.lv[self.tri]]
         cr = np.cross(p[:, 1] - p[:, 0], p[:, 2] - p[:, 0])
