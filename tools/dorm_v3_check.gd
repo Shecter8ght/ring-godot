@@ -21,7 +21,7 @@ func _init() -> void:
 		print("%-28s %5d  формат %d" % [file, tex.get_width(), image.get_format() if image else -1])
 	var plan: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/blockouts/dorm.json"))
 	var palette: Dictionary = Geometry._palette(plan)
-	for key: String in ["wall", "reveal", "ceiling", "floor", "tile", "tile_floor"]:
+	for key: String in ["wall", "reveal", "ceiling", "floor", "tile", "tile_floor", "stair_landing", "stair_tread"]:
 		var material: Material = palette[key]
 		var shader: Shader = (material as ShaderMaterial).shader if material is ShaderMaterial else null
 		var path: String = shader.resource_path if shader else "—"
@@ -40,20 +40,21 @@ func _init() -> void:
 		print("модули: нет файлов assets/models/dorm")
 		failed += 1
 	else:
-		for part: String in ["door_frame", "door_leaf", "window", "radiator"]:
+		for part: String in Modules.get("PARTS") + Modules.get("STAIR_PARTS"):
 			var mesh: Mesh = Modules.call("mesh", part) as Mesh
 			var node: MeshInstance3D = MeshInstance3D.new()
 			node.mesh = mesh
-			Modules.call("apply_materials", node)
+			Modules.call("apply_materials", node, palette)
 			var bare: int = 0
 			for s: int in range(mesh.get_surface_count()):
 				if node.get_surface_override_material(s) == null:
 					bare += 1
-			print("%-11s поверхностей %d, без материала %d, габарит %s" % [part, mesh.get_surface_count(), bare, mesh.get_aabb().size])
+			print("%-16s поверхностей %d, без материала %d, габарит %s" % [part, mesh.get_surface_count(), bare, mesh.get_aabb().size])
 			failed += bare
 			node.free()
 		for section: String in ["Floor1", "Floor2", "NorthAnnex", "CentralStair"]:
-			var m: RefCounted = Modules.new(plan, section)
-			print("%-12s дверей %d, окон %d" % [section, (m.get("doors") as Dictionary).size(), (m.get("windows") as Dictionary).size()])
+			var m: RefCounted = Modules.new(plan, section, palette)
+			print("%-12s дверей %d, окон %d, маршей %d" % [section, (m.get("doors") as Dictionary).size(), (m.get("windows") as Dictionary).size(),
+				(m.get("flights") as Array).size()])
 	print("dorm v3 check: ", "OK" if failed == 0 else "FAIL %d" % failed)
 	quit(1 if failed else 0)

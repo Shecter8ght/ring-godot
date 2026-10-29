@@ -42,7 +42,7 @@ func rebuild() -> void:
 	if section.is_empty():
 		return
 	var palette: Dictionary = _palette(plan)
-	modules = DormModules.new(plan,section_id) if DormModules.available() else null
+	modules = DormModules.new(plan,section_id,palette) if DormModules.available() else null
 	_build_geometry(self,section,palette)
 	for group_name: String in section.get("groups",{}):
 		var group: Node3D = Node3D.new()
@@ -123,7 +123,7 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		else:
 			var pieces: Array = [item] if modules==null else modules.call("trim",item,builder)
 			for piece: Dictionary in pieces:
-				builder.call("box",_vec(piece.at),_vec(piece.size),_batch_material(String(item.mat),float(item.at[1]),palette),bool(item.solid),deg_to_rad(float(item.yaw)))
+				builder.call("box",_vec(piece.at),_vec(piece.size),_batch_material(String(piece.mat),float(item.at[1]),palette),bool(item.solid),deg_to_rad(float(item.yaw)))
 			if String(item.mat)=="glass" and bool(item.solid):
 				# Glass blocks walking but transmits light; visibility probes must skip it.
 				var body: StaticBody3D = builder.get("body") as StaticBody3D
@@ -131,12 +131,19 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 	for item: Dictionary in data.get("beams",[]):
 		var start: Vector3 = _vec(item.start)
 		var end: Vector3 = _vec(item.end)
+		# перила лестницы с маршами-модулями — модулем ограждения (dorm_modules.gd), здесь остаётся коллизия
+		var visual: bool = modules==null or not bool(modules.call("rail_beam",item))
 		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
-			builder.call("box",(start+end)*0.5,Vector3(float(item.width),absf(end.y-start.y),float(item.depth)),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid))
+			var size: Vector3 = Vector3(float(item.width),absf(end.y-start.y),float(item.depth))
+			if visual:
+				builder.call("box",(start+end)*0.5,size,_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid))
+			elif bool(item.solid):
+				builder.call("collision_box",(start+end)*0.5,size)
 		else:
-			builder.call("beam",start,end,float(item.width),float(item.depth),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid))
+			builder.call("beam",start,end,float(item.width),float(item.depth),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid),visual)
 	for item: Dictionary in data.get("stairs",[]):
-		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),_batch_material(String(item.mat),(float(item.start[1])+float(item.end[1]))*.5,palette))
+		var visual: bool = modules==null or not bool(modules.call("flight",item))
+		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),_batch_material(String(item.mat),(float(item.start[1])+float(item.end[1]))*.5,palette),visual)
 	builder.call("finish")
 	if split_gi_batches:ExteriorBatches.separate(target,gi_footprints)
 	for item: Dictionary in data.get("labels",[]):
@@ -220,9 +227,11 @@ static func _palette(plan: Dictionary) -> Dictionary:
 
 
 const V3_DIR: String = "res://assets/textures/dorm_v3"
+## stair_landing — площадки лестницы (верх — мозаика), stair_tread — ступени маршей-модулей (dorm_modules.gd).
 const V3_SHADERS: Dictionary = {"wall":"dorm_wall_v3","reveal":"dorm_wall_v3","ceiling":"dorm_wall_v3",
-	"floor":"dorm_parquet_v3","tile":"dorm_tiles_v3","tile_floor":"dorm_tiles_v3"}
-const V3_MODES: Dictionary = {"wall":0,"reveal":1,"ceiling":2,"tile":0,"tile_floor":1}
+	"floor":"dorm_parquet_v3","tile":"dorm_tiles_v3","tile_floor":"dorm_tiles_v3",
+	"stair_landing":"dorm_wall_v3","stair_tread":"dorm_wall_v3"}
+const V3_MODES: Dictionary = {"wall":0,"reveal":1,"ceiling":2,"tile":0,"tile_floor":1,"stair_landing":3,"stair_tread":4}
 
 
 ## Материалы v03 (краска, побелка, паркет, плитка — tools/dorm_modules, docs/design/dorm_modules.md) вместо

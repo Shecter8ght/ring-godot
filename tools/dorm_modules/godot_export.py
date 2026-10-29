@@ -10,35 +10,47 @@ Z вверх; glTF: Y вверх, +Y Blender → −Z):
   door_leaf  — полотно, ручки, петли и скважина от оси петель (M01), начало — на оси петель;
   window     — окно с переплётами, стёклами, фурнитурой, подоконником и отливом (M03), корень — середина окна на полу,
                ось фасадной стены;
-  radiator   — батарея МС-140 с подводкой (M05), корень — внутренняя грань фасада на полу под серединой окна.
+  radiator   — батарея МС-140 с подводкой (M05), корень — внутренняя грань фасада на полу под серединой окна;
+  stair_flight_12 / _10 — марш M09 / M10, корень — передняя кромка первой ступени у пола, середина ширины, подъём по +Y;
+  stair_rail_12 / _10   — ограждение марша M12 (сбоку +X) в осях того же марша;
+  stair_turn_<a>_<b>    — поворот ограждения M13 через просвет 0,30 между маршами (тем же railing_turn, что в сборке):
+               начало — середина просвета на кромке площадки, на её уровне, +Y — в площадку; слева (−X) конец поручня
+               марша с подступёнком a мм, справа — начало марша с b (12 — 164,2 мм первого этажа, 10 — 162 мм жилых).
 """
 import os
+import sys
 
+import bmesh
 import bpy
-from mathutils import Matrix
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 OUT = "E:/Games/RING-godot/assets/models/dorm"
-# имя файла: (корень, объекты; None — все потомки корня кроме перечисленных в skip)
+# имя файла: (корень, объекты)
 PARTS = {
     "door_frame": ("M01_дверь_комнаты", ["дверь_коробка_наличники", "дверь_номерок"]),
     "door_leaf": ("дверь_полотно_ось_петель", ["дверь_полотно", "дверь_ручки", "дверь_петли_скважина"]),
     "window": ("M03_окно", ["окно_коробка", "окно_створки", "окно_стёкла", "окно_фурнитура", "окно_подоконник", "окно_отлив"]),
     "radiator": ("M05_батарея_МС140", ["батарея_секции", "батарея_подводка"]),
+    "stair_flight_12": ("M09_марш_12", ["M09_марш_12_бетон"]),
+    "stair_flight_10": ("M10_марш_10", ["M10_марш_10_бетон"]),
+    "stair_rail_12": ("M12_ограждение_марша_12", ["M12_ограждение_марша_12_сталь", "M12_ограждение_марша_12_поручень"]),
+    "stair_rail_10": ("M12_ограждение_марша_10", ["M12_ограждение_марша_10_сталь", "M12_ограждение_марша_10_поручень"]),
 }
+# подступёнки маршей плана: 12 ступеней первого этажа и 10 жилых
+RISERS = {"12": 0.1642, "10": 0.162}
+TURNS = [("12", "12"), ("10", "10"), ("12", "10")]
 
 
-def export(name: str, root_name: str, names: list) -> None:
+def export(name: str, root: bpy.types.Object, objects: list) -> None:
     """Части модуля сливаются в одну сетку (поверхность на материал) в осях корня — в Godot один узел на место,
     уровни детализации строит импорт."""
-    root = bpy.data.objects[root_name]
     to_root = root.matrix_world.inverted()
     dg = bpy.context.evaluated_depsgraph_get()
     joined = bpy.data.meshes.new(name)
-    import bmesh
     bm = bmesh.new()
     mats = []
-    for n in names:
-        ob = bpy.data.objects[n]
+    for ob in objects:
         me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg), depsgraph=dg)
         me.transform(to_root @ ob.matrix_world)
         # номера материалов — в общий список слотов
@@ -70,10 +82,35 @@ def export(name: str, root_name: str, names: list) -> None:
     bpy.data.objects.remove(ob)
 
 
+def turn(a: str, b: str) -> None:
+    """Поворот ограждения по концам поручней двух маршей (как stair_core сборки), во временной коллекции."""
+    import build_modules as B
+    import mlib as L
+    xb = B.FLIGHT_W / 2 + 0.03
+    x = 0.9 - xb                       # оси маршей — в 0,9 от середины просвета
+    strip_top = 0.855
+    ra, rb = RISERS[a], RISERS[b]
+    # конец поручня марша a — на 0,01 за кромкой площадки, начало марша b — так же (y_end / y_start ограждения)
+    p_low = (-x, 0.01, ra + ra / B.TREAD * 0.01 + strip_top)
+    p_high = (x, 0.01, rb - rb / B.TREAD * 0.01 + strip_top)
+    coll = L.collection("_экспорт_повороты")
+    m = {"handrail": bpy.data.materials["Поручень_дерево"], "rail": bpy.data.materials["Ограждение_краска"]}
+    root = B.railing_turn(coll, m, p_low, p_high, 0.0)
+    export(f"stair_turn_{a}_{b}", root, [o for o in root.children_recursive if o.type == "MESH"])
+    for o in list(coll.objects):
+        bpy.data.objects.remove(o)
+    bpy.data.collections.remove(coll)
+
+
 def main() -> None:
     os.makedirs(OUT, exist_ok=True)
+    only = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     for name, (root, names) in PARTS.items():
-        export(name, root, names)
+        if not only or name in only:
+            export(name, bpy.data.objects[root], [bpy.data.objects[n] for n in names])
+    for a, b in TURNS:
+        if not only or f"stair_turn_{a}_{b}" in only:
+            turn(a, b)
 
 
 if __name__ == "__main__":

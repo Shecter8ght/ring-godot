@@ -58,11 +58,15 @@ MAPS = {
     "floor_mastic": ("floor_v3", "floor_mastic.png", (0, 1, 2, 3), 2048, "data"),
     "floor_break": ("floor_v3", "floor_break.png", (0, 1, 2, 3), 2048, "data"),
     "floor_break_normal": ("floor_v3", "floor_break_normal.png", (0, 1, 2), 2048, "normal"),
-    # крашеное дерево модулей (ambientCG PaintedWood008A, CC0) — по развёртке модулей
-    "painted_wood_albedo": ("@wood", "PaintedWood008A_2K-JPG_Color.jpg", (0, 1, 2), 2048, "color"),
-    "painted_wood_rough": ("@wood", "PaintedWood008A_2K-JPG_Roughness.jpg", (0,), 2048, "data"),
-    "painted_wood_normal": ("@wood", "PaintedWood008A_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
-    "painted_wood_ao": ("@wood", "PaintedWood008A_2K-JPG_AmbientOcclusion.jpg", (0,), 2048, "data"),
+    # крашеное дерево модулей (ambientCG PaintedWood008A, CC0) — по развёртке модулей; «@папка» — _asset_src/dorm_textures
+    "painted_wood_albedo": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_Color.jpg", (0, 1, 2), 2048, "color"),
+    "painted_wood_rough": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_Roughness.jpg", (0,), 2048, "data"),
+    "painted_wood_normal": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
+    "painted_wood_ao": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_AmbientOcclusion.jpg", (0,), 2048, "data"),
+    # мозаичные ступени и площадки лестницы (ambientCG Terrazzo005, CC0) — по миру, шаг 0,5 м
+    "terrazzo_albedo": ("@Terrazzo005", "Terrazzo005_2K-JPG_Color.jpg", (0, 1, 2), 2048, "color"),
+    "terrazzo_rough": ("@Terrazzo005", "Terrazzo005_2K-JPG_Roughness.jpg", (0,), 1024, "data"),
+    "terrazzo_normal": ("@Terrazzo005", "Terrazzo005_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
     # плитка
     "tile_masks": ("tiles_v3", "tile_masks.png", (0, 1, 2, 3), 4096, "data"),
     "tile_normal": ("tiles_v3", "tile_normal.png", (0, 1, 2), 2048, "normal"),
@@ -135,11 +139,11 @@ def write_import(dst: Path, kind: str) -> None:
         imp.write_text(text, encoding="utf-8", newline="\n")
 
 
-WOOD = ROOT / "_asset_src/dorm_textures/PaintedWood008A"
+SCANS = ROOT / "_asset_src/dorm_textures"
 
 
 def save(name: str, folder: str, file: str, chans: tuple, size: int, kind: str) -> Path:
-    src = WOOD / file if folder == "@wood" else KIT / folder / file
+    src = SCANS / folder[1:] / file if folder.startswith("@") else KIT / folder / file
     a = resize(load(src), size)[..., list(chans)]
     if kind == "field":
         dst = OUT / f"{name}.exr"

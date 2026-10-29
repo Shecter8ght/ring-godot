@@ -193,7 +193,8 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dor
 tools/godot.cmd --headless --script res://tools/dorm_v3_check.gd # материалы v03 в движке: карты и форматы (поля EXR без сжатия), шейдеры, палитра стенда, модули и их места
 python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 из комплекта модулей → assets/textures/dorm_v3 (+ .import, шум износа); затем --import
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Dorm_Modules/models/RING_Dorm_Modules_v03.blend" --python-exit-code 1 --python tools/dorm_modules/godot_export.py
-                                                              # модули общежития в стенд: коробка двери, полотно, окно, батарея — по сетке на модуль
+                                                              # модули общежития в стенд: коробка двери, полотно, окно, батарея, марши, ограждения и повороты
+                                                              # поручня — по сетке на модуль (-- <имя …> — выборочно)
                                                               # → assets/models/dorm/*.glb (материалы — dorm_modules.gd, карт в файлах нет); затем --import
 python -X utf8 tools/dorm_light_archive.py --verify           # r6: хеши архива light5_* и неизменность геометрии, масштаба, базовых цветов и 14 камер
 python -X utf8 tools/dorm_light_r61_archive.py --verify       # r6.1: 46 побайтных файлов «до» light6_* (42 вида, два JSON, две калибровки)

@@ -2,10 +2,11 @@ extends RefCounted
 ## CPU VoxelGI cannot evaluate dorm_finish.gdshader. Supply its same diffuse colors
 ## only during synchronous bake(), then restore the original mesh before any frame.
 ## The rendered geometry, shader, collision and base colors remain untouched.
-## Материалы v03 (meta "dorm_gi", src/blockout/dorm_v3) подменяются своими средними цветами (замер по кадрам Blender).
-const VERSION = "dorm_v3_diffuse_proxy_5_door_openings"
+## Материалы v03 (meta "dorm_gi", src/blockout/dorm_v3) подменяются своими средними цветами (замер по кадрам Blender;
+## мозаика лестницы — среднее карты Terrazzo005 с подкраской и грязью).
+const VERSION = "dorm_v3_diffuse_proxy_6_stairs"
 const V3_COLORS: Dictionary = {"paint":"5b6b58","wash":"c3bfb3","reveal":"c3bfb3","ceiling":"b9b4a8","floor":"4d3a2b",
-	"tile":"beb9ab","tile_floor":"6c5343"}
+	"tile":"beb9ab","tile_floor":"6c5343","stair_landing":"6a645c","stair_tread":"6a645c"}
 var plan: Dictionary
 var saved: Array[Dictionary] = []
 var materials: Dictionary = {}

@@ -76,19 +76,21 @@ func quad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, key: String) -> void:
 	tri(a, b, c, key)
 	tri(a, c, d, key)
 
-func beam(a: Vector3, b: Vector3, width: float, depth: float, key: String, solid: bool = false) -> void:
+## visual = false — только коллизия (вид даёт модель на том же месте).
+func beam(a: Vector3, b: Vector3, width: float, depth: float, key: String, solid: bool = false, visual: bool = true) -> void:
 	var length_m: float = a.distance_to(b)
 	if length_m < 0.001:
 		return
 	var basis: Basis = Basis.looking_at((b - a).normalized(), Vector3.UP)
-	var st: SurfaceTool = stream(key)
 	var size: Vector3 = Vector3(width, depth, length_m)
 	var mid: Vector3 = (a + b) * 0.5
-	for index: int in unit_indices:
-		_edges(st, unit_vertices[index], unit_normals[index], size, 0)
-		st.set_normal(basis * unit_normals[index])
-		st.add_vertex(mid + basis * (unit_vertices[index] * size))
-	triangles += 12
+	if visual:
+		var st: SurfaceTool = stream(key)
+		for index: int in unit_indices:
+			_edges(st, unit_vertices[index], unit_normals[index], size, 0)
+			st.set_normal(basis * unit_normals[index])
+			st.add_vertex(mid + basis * (unit_vertices[index] * size))
+		triangles += 12
 	if solid:
 		var shape: BoxShape3D = BoxShape3D.new()
 		shape.size = size
@@ -112,14 +114,14 @@ func _edges(st: SurfaceTool, local: Vector3, normal: Vector3, size: Vector3, acr
 		st.set_uv(Vector2(k[h] * size[h], (1.0 - k[h]) * size[h]))
 		st.set_uv2(Vector2(k.y * size.y, (1.0 - k.y) * size.y))
 
-func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: String) -> void:
-	# Ступени видны, физика идёт по наклонной поверхности без застревания капсулы.
+func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: String, visual: bool = true) -> void:
+	# Ступени видны, физика идёт по наклонной поверхности без застревания капсулы (visual = false — только она).
 	var delta: Vector3 = finish - start
 	var flat: Vector3 = Vector3(delta.x, 0.0, delta.z)
 	var direction: Vector3 = flat.normalized()
 	var side: Vector3 = direction.cross(Vector3.UP) * width * 0.5
 	var yaw: float = -atan2(direction.x, -direction.z)
-	for i: int in range(count):
+	for i: int in range(count if visual else 0):
 		var k: float = (float(i) + 0.5) / float(count)
 		var at: Vector3 = start + flat * k
 		at.y = start.y + delta.y * float(i + 1) / float(count) - 0.08

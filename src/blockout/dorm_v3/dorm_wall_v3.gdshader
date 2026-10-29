@@ -1,12 +1,15 @@
 shader_type spatial;
 // Стены, откосы и потолки общежития v03: mode 0 — стена (до 2/3 высоты этажа облупленная масляная краска, выше
 // побелка по штукатурке, отвал до кирпича, полоса-«филёнка», грязь у пола), 1 — откос (побелка), 2 — потолок
-// (побелка по бетону плиты, протечки сильнее). Снаружи корпуса — серый фасад, как в черновике.
+// (побелка по бетону плиты, протечки сильнее), 3 — площадка лестницы (верх — мозаика, остальное — побелка по бетону),
+// 4 — ступени маршей (мозаика целиком: проступи и подступёнки модуля). Снаружи корпуса — серый фасад, как в черновике.
+// Оси карт привязаны к горизонтали; на наклонных гранях (низ марша) рельеф карт ложится на настоящую нормаль.
 
 #include "res://src/blockout/dorm_v3/common.gdshaderinc"
 #include "res://src/blockout/dorm_v3/floors.gdshaderinc"
 #include "res://src/blockout/dorm_v3/paint.gdshaderinc"
 #include "res://src/blockout/dorm_v3/wash.gdshaderinc"
+#include "res://src/blockout/dorm_v3/terrazzo.gdshaderinc"
 
 uniform int mode = 0;
 uniform float paint_wear_base = 0.08;
@@ -41,7 +44,9 @@ void fragment() {
 		color = vec3(0.396, 0.418, 0.434);
 		rough = 0.95;
 		nrm = world_normal;
-	} else if (mode == 2) {
+	} else if (mode == 4 || (mode == 3 && n.y > 0.5)) {
+		terrazzo_layer(surface_uv(p, t, b, 2.0), nz, t, b, n, color, rough, nrm);
+	} else if (mode == 2 || mode == 3) {
 		float wash = clamp(0.12 + var_k * 0.3, 0.0, 1.0);
 		float loss = clamp(loss_wear_base + var_k * 0.06, 0.0, 1.0);
 		wash_layer(p, inc, uv, wash, loss, t, b, n, true, 1.5, 1.0, color, rough, nrm);
@@ -64,6 +69,10 @@ void fragment() {
 			color = mix(color, color * rgb(59.0, 52.0, 40.0), min(dirt * 0.8, 1.0));
 		}
 	}
+	// Рельеф считан в осях грани, повёрнутой к ближайшей оси мира, — переносим его на настоящую нормаль
+	// (у граней по осям мира это то же самое).
+	float along = dot(nrm, n);
+	nrm = normalize(along * world_normal + (nrm - along * n));
 	ALBEDO = color;
 	ROUGHNESS = clamp(rough, 0.02, 1.0);
 	NORMAL = normalize((VIEW_MATRIX * vec4(nrm, 0.0)).xyz);
