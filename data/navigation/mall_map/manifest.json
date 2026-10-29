@@ -9,7 +9,7 @@
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
 		"res://scenes/world/urban_road.tscn": "111466f763d0dcbe5c96b9a2df37493b286cee5325cfcfd8f601752d4fd87563",
-		"res://src/blockout/mall_filler.gd": "1ea41c3afcdec840bd992476052f902e509c0122e8a6af5aa03d34534434bb47",
+		"res://src/blockout/mall_filler.gd": "0da2359e0b4dd7fca8ea1f26fb0673cf8dbe20518fb89cc56768c4e876aa55e7",
 		"res://src/blockout/mall_landscape.gd": "a88a7438c463c44589438ea76d3eef2c7158cec913d3134e03406ea4a9c480d4",
 		"res://src/blockout/mall_park.gd": "297d0018dadc06edfff279ae9eff014e12a2256bf73e551030905eddeaca3f18",
 		"res://src/blockout/mall_ring.gd": "3749c9c0593d5211ccd8dc4a8985e25a0b42256ccf53217b56f2f65e2194c9b8",
@@ -19,7 +19,7 @@
 		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
 		"res://src/world/blockout_mesh.gd": "a7e5dfcc5fb8ce1c27c229ab5629e3525495a10c88e73d554fa7a3ae0124bc40",
 		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",
-		"res://src/world/urban_navigation.gd": "204ac30d7fc9f8b82f76d65e408ad9320dd5a3bda7ed53a4ee1133f12cb4cc97",
+		"res://src/world/urban_navigation.gd": "4eef8111d5723cbf72ac826a8831073e6c7df88a257ae7d68e3465393738a2af",
 		"res://src/world/urban_props.gd": "8893c14356c82bcb31fb6b0cfb81777266c3cb794442a57cf32022345c1e2adf",
 		"res://src/world/urban_road.gd": "38cde9cfa97e3ff7c9d10ca910abd1b2ad60ccaee9a76fa54e218caf20b63918"
 	},

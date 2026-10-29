@@ -2030,10 +2030,13 @@ const AI_PATROL_PAUSE := [1.5, 4.0]
 const AI_INVESTIGATE_LINGER := 5.0
 
 ## Большая городская карта: бюджеты отрисовки и точность заранее выпеченной навигации.
+## publish_sec — сколько ждать очередной итерации карты, пока тайлы не опубликованы: одна синхронизация карты ТЦ
+## (58 тыс. полигонов, 45 тыс. свободных рёбер сервер сверяет попарно) — 6,5–12 с; без кэша с окном итераций
+## несколько, готово к ~29 с (замер 2026-10-29).
 const URBAN_WORLD := {
 	"batch_cell": 64.0, "prop_distance": 650.0, "view_distance": 2400.0,
 	"deck_margin": 0.25,
-	"nav_tile": 250.0, "nav_cell": 0.5, "nav_height": 0.25, "nav_border": 2.0, "publish_sec": 10.0,
+	"nav_tile": 250.0, "nav_cell": 0.5, "nav_height": 0.25, "nav_border": 2.0, "publish_sec": 30.0,
 	"nav_radius": 0.5, "nav_agent_height": 1.8, "nav_climb": 0.4, "nav_slope": 40.0,
 	"nav_merge_scale": 0.125,
 	"nav_detail_error": 2.0,

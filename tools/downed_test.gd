@@ -6,6 +6,9 @@ extends Node
 ## только в тишине. Печатает [ok]/[FAIL] и итог. godot --path . res://tools/downed_test.tscn (--headless)
 
 const TEST_PROFILE := "user://profile_downed_test.json"
+## Середина кольцевой улицы ТЦ Ø200 (mall_map, docs/design/mall_1f_plan.md: r 58–68) — здесь стоят боты и игрок.
+## Прежний радиус 72 был улицей удалённого кольца Ø250: на Ø200 там магазины, и товарищ не доходил до раненого.
+const STREET_R := 63.0
 
 var _fails: int = 0
 var _level: Node
@@ -160,8 +163,8 @@ func _marauder_rules() -> void:
 		_level.get_node("Marauders").add_child(m)
 		squad.add(m)
 		(m as Marauder).patrol_point_provider = func() -> Vector3: return (m as Marauder).global_position
-	a.global_position = SectorBuilder.polar(-100.0, 72.0) + Vector3(0, 0.1, 0)
-	b.global_position = SectorBuilder.polar(-108.0, 72.0) + Vector3(0, 0.1, 0)
+	a.global_position = SectorBuilder.polar(-100.0, STREET_R) + Vector3(0, 0.1, 0)
+	b.global_position = SectorBuilder.polar(-108.0, STREET_R) + Vector3(0, 0.1, 0)
 	await _wait(1.0)
 	a.last_known = SectorBuilder.polar(-90.0, 100.0)
 	(a.get_node("Health") as Health).take_damage(300.0, a.last_known, "body")
@@ -195,7 +198,7 @@ func _marauder_rules() -> void:
 		hv.archetype = "heavy"
 		_level.get_node("Marauders").add_child(hv)
 		helm.append(hv)
-		hv.global_position = SectorBuilder.polar(-130.0 - 2.0 * i, 72.0) + Vector3(0, 0.1, 0)
+		hv.global_position = SectorBuilder.polar(-130.0 - 2.0 * i, STREET_R) + Vector3(0, 0.1, 0)
 		await get_tree().physics_frame
 		hv.equipment["helmet"] = ItemDb.make("helmet_top", 1)
 		(hv.get_node("Health") as Health).take_damage(900.0, Vector3.ZERO, "head", Vector3.INF, {"pen": 2.0, "armor_dmg": 2.0})
@@ -213,7 +216,7 @@ func _marauder_rules() -> void:
 ## Лежащего игрока мародёр добивает, только если другие не стреляют.
 func _finish_rule() -> void:
 	var me := get_tree().get_first_node_in_group("players") as Player
-	var ppos := SectorBuilder.polar(-100.0, 72.0)
+	var ppos := SectorBuilder.polar(-100.0, STREET_R)
 	me.global_position = ppos + Vector3(0, 0.1, 0)
 	_fresh(me.health)
 	me.health.take_damage(150.0, Vector3.ZERO, "body")
@@ -223,7 +226,7 @@ func _finish_rule() -> void:
 	c.weapon = "rifle"
 	c.patrol_point_provider = func() -> Vector3: return c.global_position
 	_level.get_node("Marauders").add_child(c)
-	c.global_position = SectorBuilder.polar(-108.0, 72.0) + Vector3(0, 0.1, 0)
+	c.global_position = SectorBuilder.polar(-108.0, STREET_R) + Vector3(0, 0.1, 0)
 	c._facing = atan2(ppos.x - c.global_position.x, ppos.z - c.global_position.z)
 	# кто-то другой стреляет в стороне
 	var hp0 := me.health.down_hp
@@ -234,7 +237,7 @@ func _finish_rule() -> void:
 		"патронов %d, запас %.0f" % [c._mag, me.health.down_hp])
 	# ушёл смотреть, кто стрелял; стихло — вернули лицом к лежащему
 	await _wait(Balance.AI_FINISH_QUIET_SEC)
-	c.global_position = SectorBuilder.polar(-108.0, 72.0) + Vector3(0, 0.1, 0)
+	c.global_position = SectorBuilder.polar(-108.0, STREET_R) + Vector3(0, 0.1, 0)
 	c._face(ppos)
 	c.state = Marauder.State.PATROL
 	c._agent.target_position = c.global_position

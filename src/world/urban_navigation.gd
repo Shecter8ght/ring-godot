@@ -82,6 +82,9 @@ func _prepare() -> void:
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_cache_dir()))
 	var start_ms: int = Time.get_ticks_msec()
 	var synchronization_samples := PackedVector3Array()
+	# Тайлы попадают в карту разом после выпечки: каждый добавленный по ходу запускает полную синхронизацию
+	# карты (секунды), её не прервать, и последняя начиналась бы с опозданием.
+	var regions: Array[NavigationRegion3D] = []
 	for x in range(columns):
 		for z in range(rows):
 			var mesh: NavigationMesh
@@ -105,19 +108,27 @@ func _prepare() -> void:
 			var region := NavigationRegion3D.new()
 			region.name = "Tile_%d_%d" % [x, z]
 			region.navigation_mesh = mesh
-			add_child(region)
+			regions.append(region)
 			if mesh.get_polygon_count() > 0:
 				var polygon: PackedInt32Array = mesh.get_polygon(mesh.get_polygon_count() / 2)
 				var vertices: PackedVector3Array = mesh.get_vertices()
 				if not polygon.is_empty():
 					synchronization_samples.append(vertices[polygon[0]])
+	for region: NavigationRegion3D in regions:
+		add_child(region)
 	if save_cache:
 		_write_manifest()
 	print("навигация: %d тайлов, %d мс, кэш %s" % [columns * rows, Time.get_ticks_msec() - start_ms, str(cached)])
 	# Асинхронная синхронизация тридцати регионов может занимать больше одного физического кадра.
 	var synchronization_start: int = Time.get_ticks_msec()
 	var synchronization_frames: int = 0
+	var last_iteration: int = NavigationServer3D.map_get_iteration_id(map)
 	while NavigationServer3D.map_get_iteration_id(map) <= initial_iteration or not _map_contains_regions(map, synchronization_samples):
+		# Сервер может выпустить карту в несколько итераций (регионы досинхронизируются вразнобой, каждая
+		# итерация большой карты — секунды): срок считаем от последней выпущенной, ошибка — только если он встал.
+		if NavigationServer3D.map_get_iteration_id(map) != last_iteration:
+			last_iteration = NavigationServer3D.map_get_iteration_id(map)
+			synchronization_start = Time.get_ticks_msec()
 		# Первый кадр Forward+ может долго компилировать шейдеры. Даём серверу реальные
 		# физические кадры на публикацию, даже если во время первого из них истёк таймер.
 		if synchronization_frames >= 120 and Time.get_ticks_msec() - synchronization_start > int(float(cfg.publish_sec) * 1000.0):
