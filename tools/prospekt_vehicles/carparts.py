@@ -185,8 +185,9 @@ def alloy_face(rim_r: float, W: float, n_spokes: int = 5, split: bool = False):
     return pt.merge(out), pt.merge([hub, lip]), pt.merge(nuts)
 
 
-def brake(rim_r: float):
-    """Тормозной диск с колоколом и суппорт — видны сквозь спицы."""
+def brake_parts(rim_r: float):
+    """Тормозной диск — рабочее кольцо, колокол ступицы — и суппорт (видны сквозь спицы): кольцо и колокол врозь,
+    у них разная отделка (кольцо натёрто колодками до блеска, колокол ржавый). Возвращает (кольцо, колокол, суппорт)."""
     rd = rim_r * 0.70
     import vq
     if vq.low():
@@ -197,7 +198,7 @@ def brake(rim_r: float):
         P = np.c_[np.full_like(t, -0.033), rd * 0.86 * np.cos(ang), rd * 0.86 * np.sin(ang)]
         radial = np.c_[np.zeros_like(t), np.cos(ang), np.sin(ang)]
         cal = pt.loft(P, np.broadcast_to(np.array([1.0, 0, 0]), P.shape), radial, pt.rounded_rect(0.06, 0.045, 0.012, 1))
-        return pt.merge([disc, hat]), cal
+        return disc, hat, cal
     disc = revolve([(-0.044, rd * 0.45), (-0.044, rd), (-0.022, rd), (-0.022, rd * 0.45)], 64, closed=True)
     hat = revolve([(-0.022, rd * 0.48), (0.0, rd * 0.45), (0.010, rd * 0.42), (0.010, 0.04), (0.004, 0.04),
                    (0.004, rd * 0.40), (-0.018, rd * 0.44)], 48, closed=True)
@@ -206,6 +207,12 @@ def brake(rim_r: float):
     P = np.c_[np.full_like(t, -0.033), rd * 0.86 * np.cos(ang), rd * 0.86 * np.sin(ang)]
     radial = np.c_[np.zeros_like(t), np.cos(ang), np.sin(ang)]
     cal = pt.loft(P, np.broadcast_to(np.array([1.0, 0, 0]), P.shape), radial, pt.rounded_rect(0.06, 0.045, 0.012, 3))
+    return disc, hat, cal
+
+
+def brake(rim_r: float):
+    """Тормоз одной сеткой (диск с колоколом) и суппорт — как раньше."""
+    disc, hat, cal = brake_parts(rim_r)
     return pt.merge([disc, hat]), cal
 
 

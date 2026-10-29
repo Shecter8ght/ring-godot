@@ -227,6 +227,9 @@ bash tools/prospekt_vehicles/sp_family.sh <папка> <Имя> <класс> <с
 bash tools/prospekt_vehicles/batch2_finish.sh [taxi police van ambulance bus12_over] # партия 2, отделка: ливреи и маска мест ссадин в развёртку
                                                               # (livery.py: надписи DejaVu Sans Bold, наклейки Shrinkwrap'ом, EMIT) → семьи в Painter (sp_family.sh, BATCH=Город_партия2);
                                                               # игровая сетка до этого — game_kit.py -- <класс> _asset_src/prospekt_vehicles/<класс>/sp <машина>/game/<Имя>_lod0_v01.blend
+bash tools/prospekt_vehicles/wheels_finish.sh [stack]          # колёса v2 на просмотр: колпак, штамповка, литой (vwheels.py), шина с протектором и надписями
+                                                              # боковины (tire_marks.py, системный Python с PIL) — запекание в Painter, стек vstacks.wheel → карты →
+                                                              # E:/Models Blender/VEHICLES/Колёса/game/Wheels_textured_v01.blend (stack — только стек и карты); Painter с мостом запущен
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
                                                               # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
                                                               # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*

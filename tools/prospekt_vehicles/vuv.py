@@ -36,6 +36,8 @@ HULL = 0.65            # площадь острова / площадь выпу
 CUT = 0.6              # м — шаг разреза таких островов
 HULL_POLAR = 0.85      # у колеса режутся и кольца (у кольца площадь — около 0,75 оболочки)
 SECTOR = 45.0          # град — сектор разреза колец колеса
+WHEEL_MAX_LEN = 0.6    # м — остров колеса длиннее режется секторами (протектор одной полосой во всю окружность задавал
+                       # масштаб всему атласу: заполнение 33 %)
 MAX_LEN = 3.5          # м — остров длиннее режется поперёк: крыша и борта автобуса (12 м) иначе задают масштаб атласу
 TINY = 2e-5            # доля общей площади — крошка, внахлёст
 UNIQUE = ("sign_plastic",)   # материалы с печатью по детали — острова свои, без крошек
@@ -44,6 +46,7 @@ UV_FILL_MIN = 0.80     # норма заполнения (навык godot-asset
 LOWMAT = {"rubber": 0.30, "trim_black": 0.45, "mesh_black": 0.35, "chrome": 0.5, "lamp_inner": 0.5,
           "lamp_red_inner": 0.5, "steel_dark": 0.5, "liner": 0.5, "lamp_amber": 0.6}
 HIDDEN_K = 0.45        # грани, невидимые снаружи
+WHEEL_HIDDEN_K = 0.35  # колесо: острова, обращённые к машине (−X) или закрытые своим же колесом (обод под шиной)
 
 
 def _select(objs) -> None:
@@ -152,7 +155,8 @@ def _cut_bad(o, polar: bool = False) -> tuple[int, int]:
         hull = geometry.convex_hull_2d(pts)
         ha = abs(sum(pts[hull[i]].x * pts[hull[(i + 1) % len(hull)]].y - pts[hull[(i + 1) % len(hull)]].x * pts[hull[i]].y
                      for i in range(len(hull)))) / 2
-        if ha <= 0.0 or area / ha >= (HULL_POLAR if polar else HULL):
+        long_wheel = polar and hi[ax] - lo[ax] > WHEEL_MAX_LEN
+        if ha <= 0.0 or (area / ha >= (HULL_POLAR if polar else HULL) and not long_wheel):
             continue
         if polar:
             key = {f.index: math.floor((math.atan2(f.calc_center_median().z, f.calc_center_median().y) + math.pi)
@@ -214,6 +218,45 @@ def _visibility_density(objs, family_objs) -> None:
             for f in faces:
                 for lp in f.loops:
                     lp[uv].uv = ctr + (lp[uv].uv - ctr) * k
+        bm.to_mesh(o.data)
+        bm.free()
+
+
+def _wheel_density(objs) -> None:
+    """Плотность по видимости у колеса: на машине его видно снаружи (+X) — внутренняя боковина, изнанки колпака и
+    тормоза (нормаль к машине) и обод под шиной (луч упирается в своё же колесо) — мельче (WHEEL_HIDDEN_K)."""
+    verts, polys = [], []
+    for o in objs:
+        b = len(verts)
+        verts += [o.matrix_world @ v.co for v in o.data.vertices]
+        polys += [[b + i for i in p.vertices] for p in o.data.polygons]
+    bvh = BVHTree.FromPolygons(verts, polys)
+    for o in objs:
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        uv = bm.loops.layers.uv.active
+        rot = o.matrix_world.to_3x3()
+        for faces in _islands(bm):
+            vis = tot = 0.0
+            for f in faces:
+                c = o.matrix_world @ f.calc_center_median()
+                n = (rot @ f.normal).normalized()
+                a = f.calc_area()
+                tot += a
+                if n.x > -0.5 and bvh.ray_cast(c + n * 0.002, n, 0.5)[0] is None:
+                    vis += a
+            if tot <= 0.0 or vis / tot >= 0.3:
+                continue
+            ctr = Vector((0.0, 0.0))
+            cnt = 0
+            for f in faces:
+                for lp in f.loops:
+                    ctr += lp[uv].uv
+                    cnt += 1
+            ctr /= max(cnt, 1)
+            for f in faces:
+                for lp in f.loops:
+                    lp[uv].uv = ctr + (lp[uv].uv - ctr) * WHEEL_HIDDEN_K
         bm.to_mesh(o.data)
         bm.free()
 
@@ -326,13 +369,15 @@ def unwrap_set(ts: str, objs, family_objs, res_px: int, work: Path, tag: str) ->
     _unwrap(objs)
     nf = ni = 0
     for o in objs:
-        a, b = _cut_bad(o, polar=(ts == "Wheel"))
+        a, b = _cut_bad(o, polar=ts.startswith("Wheel"))
         nf += a
         ni += b
     _unwrap(objs)
     _unique(objs)
     if ts.startswith("Body"):
         _visibility_density(objs, family_objs)
+    elif ts.startswith("Wheel"):
+        _wheel_density(objs)
     fill = _pack(objs, max(256, res_px // 2), work, tag)
     # плотность: пикселей на сантиметр по видимому кузову (краска) или по всему набору
     uv_a = a3 = 0.0

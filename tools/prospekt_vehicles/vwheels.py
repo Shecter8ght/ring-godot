@@ -9,7 +9,7 @@
 - steel — штамповка: глубокая чаша, выпуклое кольцо, 8 вентиляционных окон, площадка ступицы с 4 шпильками.
 - cap   — пластиковый колпак «турбина» на той же штамповке: 10 изогнутых прорезей, выпуклый центр с пустой эмблемой,
           кольцо с канавкой по краю; сквозь прорези видна тёмная штамповка.
-- alloy — литой: 5 сдвоенных спиц «вилкой», вогнутый профиль, спицы толщиной 30 мм, гайки в колодцах, колпачок.
+- alloy — литой: 5 сдвоенных спиц «вилкой», вогнутый профиль, спицы 46 → 30 мм шириной, гайки в колодцах, колпачок.
 
 Ось колеса +X (наружная сторона), центр в нуле, x0 — плоскость наружной закраины обода (как в carparts).
 Функции выполняются внутри Blender и возвращают детали [(имя, материал, V, F)], как carparts.wheel_parts.
@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import bpy
 import numpy as np
@@ -199,12 +200,12 @@ def steel_disc(rim_r: float, W: float, lugs: int = 4, pcd_r: float = 0.050, vent
     face = _shape("steel_face", V, F, cut, thick=0.0042, bevel=_q(0.0012, 0.0))
     out = [("Rim_Face", "rim_steel", *face)]
     if with_nuts:
-        out.append(("Lug_Nuts", "steel_dark", *pt.merge([_nut(p, x0 - 0.0172, x0 - 0.001) for p in pins])))
+        out.append(("Lug_Nuts", "lug_nut", *pt.merge([_nut(p, x0 - 0.0172, x0 - 0.001) for p in pins])))
         grease = revolve([(x0 - 0.040, 0.0), (x0 - 0.040, 0.030), (x0 - 0.030, 0.029), (x0 - 0.024, 0.020),
                           (x0 - 0.022, 0.0)], _q(32, 12))
-        out.append(("Hub_Cap", "steel_dark", *grease))
+        out.append(("Hub_Cap", "lug_nut", *grease))
     stem, cap = _valve(rim_r, x0, math.radians(20.0))
-    out += [("Valve", "rubber", *stem), ("Valve_Cap", "steel_dark", *cap)]
+    out += [("Valve", "rubber", *stem), ("Valve_Cap", "mesh_black", *cap)]
     return out
 
 
@@ -283,8 +284,215 @@ def alloy(rim_r: float, W: float, pairs: int = 5, lugs: int = 5, pcd_r: float = 
     cap = revolve([(x0 - 0.026, 0.0), (x0 - 0.026, 0.031), (x0 - 0.020, 0.031), (x0 - 0.016, 0.026), (x0 - 0.015, 0.0)],
                   _q(48, 16))
     stem, vcap = _valve(rim_r, x0, math.radians(20.0))
-    return [("Rim_Spokes", "rim_alloy", *face), ("Lug_Nuts", "steel_dark", *nuts), ("Rim_Center_Cap", "rim_alloy", *cap),
-            ("Valve", "rubber", *stem), ("Valve_Cap", "steel_dark", *vcap)]
+    return [("Rim_Spokes", "rim_alloy", *face), ("Lug_Nuts", "lug_nut", *nuts), ("Rim_Center_Cap", "hubcap", *cap),
+            ("Valve", "rubber", *stem), ("Valve_Cap", "mesh_black", *vcap)]
+
+
+# --- шина -------------------------------------------------------------------------------------------------------
+# Подробная шина — сетка по углу × длине профиля, смещённая по нормали профиля: канавки протектора (рисунок
+# «ёлочкой» с переменным шагом, ламели, выступы-индикаторы износа) и рельеф наружной боковины (tire_marks.py).
+# Её запекают в карту нормалей гладкой игровой шины; у игровой — протектор и боковина разными сетками (свои слои
+# в Painter: протектор вытерт и в пыли в канавках, боковина матовая, побуревшая).
+
+TREAD_DEPTH = 6.5          # мм — остаток протектора у брошенной городской машины
+SIPE = 2.2                 # мм — ширина ламели: настоящие ~1 мм, но тоньше шага сетки и пикселя карты они рвутся
+MARKS_DIR = Path(__file__).resolve().parents[2] / "_asset_src" / "prospekt_vehicles" / "wheels"
+
+
+def _tire_curve(R: float, W: float, rim_r: float):
+    """Замкнутый гладкий профиль шины (x, r) в порядке carparts.tire: внутренняя боковина вверх, протектор от −x к +x,
+    наружная боковина вниз, посадка борта. Возвращает плотную кривую и индексы границ: протектор, наружная боковина,
+    борт, внутренняя боковина."""
+    H, hw = R - rim_r, W / 2
+    side = [(0.80, 0.03), (0.90, 0.13), (0.97, 0.30), (1.00, 0.50), (0.985, 0.68), (0.94, 0.82), (0.87, 0.92)]
+    keys = {"tread0": (-0.80 * hw, R - 0.012), "side0": (0.80 * hw, R - 0.012), "bead0": (0.80 * hw, rim_r + 0.004),
+            "inner0": (-0.80 * hw, rim_r + 0.004)}
+    P = [(-k * hw, rim_r + q * H) for k, q in side]
+    P += [keys["tread0"], (-0.76 * hw, R - 0.004), (-0.72 * hw, R), (0.72 * hw, R), (0.76 * hw, R - 0.004), keys["side0"]]
+    P += [(k * hw, rim_r + q * H) for k, q in reversed(side)]
+    P += [keys["bead0"], keys["inner0"]]
+    C = _chaikin(np.array(P), 4)
+    idx = {k: int(np.argmin(np.hypot(C[:, 0] - v[0], C[:, 1] - v[1]))) for k, v in keys.items()}
+    return C, idx
+
+
+def _arc_samples(C: np.ndarray, i0: int, i1: int, step: float) -> np.ndarray:
+    """Точки кривой C от индекса i0 до i1 (по кругу) равномерно по длине с шагом не больше step."""
+    n = len(C)
+    seg = C[[(i0 + k) % n for k in range((i1 - i0) % n + 1)]]
+    s = np.r_[0.0, np.cumsum(np.hypot(*np.diff(seg, axis=0).T))]
+    m = max(2, int(math.ceil(s[-1] / step)) + 1)
+    t = np.linspace(0.0, s[-1], m)
+    return np.c_[np.interp(t, s, seg[:, 0]), np.interp(t, s, seg[:, 1])]
+
+
+def _normals2d(P: np.ndarray) -> np.ndarray:
+    """Наружные нормали профиля (x, r): обход по часовой — нормаль (−dr, dx)."""
+    d = np.gradient(P, axis=0)
+    nrm = np.c_[-d[:, 1], d[:, 0]]
+    return nrm / np.linalg.norm(nrm, axis=1, keepdims=True)
+
+
+def _grid(P: np.ndarray, n_theta: int, h: np.ndarray | None = None):
+    """Тело вращения профиля P (открытого) с n_theta делениями, смещённое по нормали профиля на h (м, n_theta × len(P));
+    порядок вершин и граней — как у wheel.revolve (нормали наружу)."""
+    k = len(P)
+    nrm = _normals2d(P)
+    a = np.linspace(0, 2 * math.pi, n_theta, endpoint=False)
+    hh = np.zeros((n_theta, k)) if h is None else h
+    x = P[None, :, 0] + hh * nrm[None, :, 0]
+    r = P[None, :, 1] + hh * nrm[None, :, 1]
+    V = np.stack([x, r * np.cos(a)[:, None], r * np.sin(a)[:, None]], axis=-1).reshape(-1, 3)
+    i = np.arange(n_theta)[:, None]
+    j = np.arange(k - 1)[None, :]
+    i2 = (i + 1) % n_theta
+    F = np.stack([i * k + j, i * k + j + 1, i2 * k + j + 1, i2 * k + j], axis=-1).reshape(-1, 4)
+    return V, [tuple(f) for f in F]
+
+
+def _groove(d, w: float, depth: float, wall: float = 0.45):
+    """Сечение канавки: полная глубина внутри, стенка шириной 2·wall мм с плавным переходом."""
+    t = np.clip((w / 2 + wall - d) / (2 * wall), 0.0, 1.0)
+    return depth * t * t * (3 - 2 * t)
+
+
+def _tread_depth(n_theta: int, T: np.ndarray, Rmm: float, TW: float, t_end: float, twi_theta: list) -> np.ndarray:
+    """Глубина рисунка протектора, мм (n_theta × len(T)): T — мм поперёк от середины по дуге профиля, TW — половина
+    ширины беговой дорожки. Четыре продольные канавки; плечевые блоки с открытыми поперечными канавками, в средних
+    рёбрах — слепые косые канавки «ёлочкой» (направленный рисунок), в рёбрах и блоках — поперечные ламели, шаг переменный 26–34 мм,
+    правая половина сдвинута на полшага; в канавках — выступы-индикаторы износа против меток на боковине."""
+    C = 2 * math.pi * Rmm
+    du = C / n_theta
+    D = np.zeros((n_theta, len(T)), np.float32)
+    grooves = ((0.19 * TW, 0.135 * TW), (0.60 * TW, 0.12 * TW))
+    for c, w in grooves:
+        for s in (-1, 1):
+            D = np.maximum(D, _groove(np.abs(T - s * c), w, TREAD_DEPTH)[None, :])
+
+    def seg(u0, t0, u1, t1, w, depth, fade=False):
+        i0 = int(math.floor((min(u0, u1) - w - 2) / du))
+        i1 = int(math.ceil((max(u0, u1) + w + 2) / du)) + 1
+        cols = np.where((T >= min(t0, t1) - w - 2) & (T <= max(t0, t1) + w + 2))[0]
+        if not len(cols):
+            return
+        uu = (np.arange(i0, i1) * du)[:, None]
+        tt = T[cols][None, :]
+        dx, dy = u1 - u0, t1 - t0
+        p = np.clip(((uu - u0) * dx + (tt - t0) * dy) / (dx * dx + dy * dy), 0.0, 1.0)
+        # стенка косых канавок положе шага сетки: иначе их кромка на сетке «лесенкой» (ламели — бахромой)
+        v = _groove(np.hypot(uu - u0 - p * dx, tt - t0 - p * dy), w, depth, wall=1.0)
+        if fade:                                   # плечевая канавка мелеет к боковине и сходит на нет до её начала
+            v = v * np.clip((t_end - np.abs(tt)) / 5.0, 0.0, 1.0)
+        rows = np.arange(i0, i1) % n_theta
+        D[np.ix_(rows, cols)] = np.maximum(D[np.ix_(rows, cols)], v)
+    rng = np.random.default_rng(7)
+    n = int(round(C / 30.0))
+    p = rng.choice([0.87, 1.0, 1.13], size=n)
+    p = p / p.sum() * C
+    starts = np.r_[0.0, np.cumsum(p)[:-1]]
+    for u0, pk in zip(starts, p):
+        for s in (-1, 1):
+            b = u0 + (0.5 * pk if s > 0 else 0.0)
+            # плечо: открытая канавка от продольной к боковине, у края загибается поперёк
+            ta, tb, tc = 0.66 * TW, 0.66 * TW + 0.55 * (TW - 0.66 * TW), t_end - 1.0
+            seg(b, s * ta, b + 0.25 * (tb - ta), s * tb, 4.8, 0.92 * TREAD_DEPTH, fade=True)
+            seg(b + 0.25 * (tb - ta), s * tb, b + 0.25 * (tb - ta) + 0.05 * (tc - tb), s * tc, 4.8, 0.92 * TREAD_DEPTH,
+                fade=True)
+            ub = b + 0.5 * pk
+            seg(ub, s * (0.66 * TW + 4.0), ub, s * (TW - 3.0), SIPE, 2.5)   # ламель
+            # среднее ребро: слепая косая канавка от наружной продольной внутрь и ламель от внутренней
+            ua = b + 0.35 * pk
+            seg(ua, s * 0.36 * TW, ua + 0.7 * 0.18 * TW, s * 0.54 * TW, 4.2, 0.8 * TREAD_DEPTH)
+            uc = b + 0.85 * pk
+            seg(uc, s * 0.2575 * TW, uc, s * 0.40 * TW, SIPE, 2.5)
+            # центральное ребро — ламели; все ламели поперёк, вдоль рядов сетки: узкая косая канавка на сетке — зигзагом
+            ue = b + 0.15 * pk
+            seg(ue, s * 0.02 * TW, ue, s * 0.1225 * TW, SIPE, 2.5)
+    for th in twi_theta:                          # индикаторы износа: дно канавки поднято на 1,6 мм на длине 12 мм
+        u = (th % (2 * math.pi)) * Rmm
+        rows = np.arange(int((u - 6.0) / du), int((u + 6.0) / du) + 1) % n_theta
+        for c, w in grooves:
+            for s in (-1, 1):
+                cols = np.where(np.abs(T - s * c) < w / 2)[0]
+                D[np.ix_(rows, cols)] = np.minimum(D[np.ix_(rows, cols)], TREAD_DEPTH - 1.6)
+    return D
+
+
+def _marks(R: float, W: float, rim_r: float) -> dict:
+    """Карта рельефа наружной боковины (tire_marks.py, системный Python с PIL) — из кэша или построить."""
+    import subprocess
+    width = int(round(W * 1000 / 5) * 5)
+    aspect = int(round((R - rim_r) / W * 100 / 5) * 5)
+    rim_in = round(rim_r / 0.0127 * 2) / 2
+    path = MARKS_DIR / f"marks_{width}_{aspect}_{rim_in:g}.npz"
+    src = Path(__file__).resolve().parent / "tire_marks.py"
+    if not path.exists() or path.stat().st_mtime < src.stat().st_mtime:
+        r = subprocess.run(["python", "-X", "utf8", str(src), str(path), str(width), str(aspect), f"{rim_in:g}",
+                            f"{rim_r * 1000:.2f}", f"{(R - rim_r) * 1000:.2f}"], capture_output=True, text=True,
+                           encoding="utf-8")
+        print(r.stdout.strip(), r.stderr.strip()[-400:])
+    z = np.load(path)
+    return {"h": z["h"].astype(np.float32) * float(z["scale"]), "res": float(z["res"]), "r_top": float(z["r_top"])}
+
+
+def _side_height(m: dict, r_mm: np.ndarray, n_theta: int) -> np.ndarray:
+    """Рельеф боковины, мм (n_theta × len(r_mm)): угол сетки θ (от +Y к +Z) → колонка карты (по часовой от верха,
+    взгляд снаружи — справа +Y), радиус → строка; билинейно."""
+    h = m["h"]
+    rows, cols = h.shape
+    th = np.linspace(0, 2 * math.pi, n_theta, endpoint=False)
+    c = ((math.pi / 2 - th) % (2 * math.pi)) / (2 * math.pi) * cols - 0.5
+    rr = np.clip((m["r_top"] - r_mm) / m["res"] - 0.5, 0, rows - 1.001)
+    c0 = np.floor(c).astype(int)
+    fc = (c - c0)[:, None]
+    r0 = np.floor(rr).astype(int)
+    fr = (rr - r0)[None, :]
+    a = h[r0][:, c0 % cols].T
+    b = h[r0][:, (c0 + 1) % cols].T
+    cc = h[r0 + 1][:, c0 % cols].T
+    d = h[r0 + 1][:, (c0 + 1) % cols].T
+    return (a * (1 - fc) * (1 - fr) + b * fc * (1 - fr) + cc * (1 - fc) * fr + d * fc * fr)
+
+
+def tire_high(R: float, W: float, rim_r: float):
+    """Подробная шина для запекания: протектор (шаг сетки ~1,1 мм) и наружная боковина с надписями (~0,8 мм),
+    внутренняя боковина и борт — гладкие и редкие."""
+    C, ix = _tire_curve(R, W, rim_r)
+    tread = _arc_samples(C, ix["tread0"], ix["side0"], 0.0011)
+    side = _arc_samples(C, ix["side0"], ix["bead0"], 0.0007)
+    bead = _arc_samples(C, ix["bead0"], ix["inner0"], 0.004)
+    inner = _arc_samples(C, ix["inner0"], ix["tread0"], 0.003)
+    s = np.r_[0.0, np.cumsum(np.hypot(*np.diff(tread, axis=0).T))]
+    s0 = np.interp(0.0, tread[:, 0], s)                 # середина протектора (x = 0)
+    T = (s - s0) * 1000.0
+    TW = 0.72 * W / 2 * 1000.0
+    t_end = min(-T[0], T[-1]) - 2.0
+    twi = [math.pi / 2 - math.radians(30.0 + 60.0 * i) for i in range(6)]      # против меток на боковине
+    nt = 1700
+    Dt = _tread_depth(nt, T, R * 1000.0, TW, t_end, twi)
+    Vt, Ft = _grid(tread, nt, -Dt / 1000.0)
+    ns = 1900
+    Hs = _side_height(_marks(R, W, rim_r), side[:, 1] * 1000.0, ns)
+    Vs, Fs = _grid(side, ns, Hs / 1000.0)
+    rest = pt.merge([_grid(bead, 120), _grid(inner, 360)])
+    return [("Tire_Tread", "tire_tread", Vt, Ft), ("Tire", "rubber", *pt.merge([(Vs, Fs), rest]))]
+
+
+def tire_low(R: float, W: float, rim_r: float, seg: int = 32):
+    """Игровая шина: гладкий профиль (vq.tire_profile_low), протектор и боковины — разными сетками (свои слои Painter);
+    рельеф — в карте нормалей. seg — деления по кругу (силуэт колеса у LOD0)."""
+    import vq
+    prof = vq.tire_profile_low(R, W, rim_r)
+    tread = prof[5:9]
+    outer = prof[8:15]                          # наружная боковина — до борта
+    inner = prof[14:] + prof[:6]                # борт и внутренняя боковина (к машине): своя сетка — мельче в развёртке
+    return [("Tire_Tread", "tire_tread", *revolve(tread, seg)), ("Tire", "rubber", *revolve(outer, seg)),
+            ("Tire_Inner", "rubber", *revolve(inner, seg))]
+
+
+def tire(R: float, W: float, rim_r: float, seg: int = 32):
+    import vq
+    return tire_low(R, W, rim_r, seg) if vq.low() else tire_high(R, W, rim_r)
 
 
 def face(style: str, rim_r: float, W: float, spec: dict | None = None) -> list:
