@@ -189,7 +189,7 @@ def build(ctx):
     boolean(hs, cyl("cut_hs_bore", UPPER_REAR - 5, -60.0, CARRIER_BORE_R + 0.7, C, seg=64))
     boolean(hs, box("cut_hs_inner", UPPER_REAR - 5, -60.0, -11.0, 20.0, -20.0, 40.0, C))
     boolean(body, hs, "UNION")
-    fb = lathe("cut_fa_bore", [(-12.0, 0.0), (-12.0, 7.15), (9.0, 7.15), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
+    fb = lathe("cut_fa_bore", [(-18.0, 0.0), (-18.0, 7.15), (9.0, 7.15), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
                C, None, seg=48, cy=0.0, cz=0.0)
     fb.data.transform(m)
     boolean(body, fb)
@@ -206,14 +206,9 @@ def build(ctx):
                                               (LEFT_WINDOW_X[1], LEFT_WINDOW_Z[1]), (LEFT_WINDOW_X[0], LEFT_WINDOW_Z[1])], 4.5, 6),
                    8.0, UPPER_HALF_W + 3, C)
     boolean(body, win)
-    # квадратные выемки сеткой слева (образец Fab): 2 × 2 перед карманами и 2 × 2 у переднего края с круглой лункой
-    for nm, xs, zs in (("mid", (-80.8, -77.2), (10.6, 14.2)), ("front", (-10.5, -6.9), (10.2, 13.8))):
-        for i, xx in enumerate(xs):
-            for j, zz in enumerate(zs):
-                sq = prism_xz(f"cut_sq_{nm}{i}{j}", fillet([(xx - 1.2, zz - 1.2), (xx + 1.2, zz - 1.2), (xx + 1.2, zz + 1.2),
-                                                             (xx - 1.2, zz + 1.2)], 0.4, 2), RISER_HW - 0.8, UPPER_HALF_W + 3, C)
-                boolean(body, sq)
-    boolean(body, cyl("cut_dimple", RISER_HW - 0.8, UPPER_HALF_W + 3, 2.1, C, seg=32, cy=-16.0, cz=12.0, axis="Y"))
+    # слева на стойке под планкой — приливы с фасками по краям (образец владельца): у переднего края и перед карманом
+    for nm, (x0, x1) in (("front", (-31.0, -4.0)), ("mid", (-85.0, -71.0))):
+        boolean(body, riser_pad(f"upper_pad_{nm}", x0, x1, 11.4, 19.4, C), "UNION")
     # выемка снизу сзади под головку фиксатора буфера
     boolean(body, box("cut_retainer_relief", UPPER_REAR - 2, UPPER_REAR + 5.0, -3.0, 3.0, SPLIT_Z - 2, -11.0, C))
     # выемка слева снизу под затворную задержку (её верхняя лопатка и зуб заходят выше разъёма)
@@ -305,6 +300,32 @@ def fa_matrix():
     r = Vector((1.0, 0.0, 0.0)).rotation_difference(d).to_matrix().to_4x4()
     r.translation = Vector(FA_S) * MM
     return r
+
+
+def riser_pad(name, x0, x1, z0, z1, C, height=1.9, ch=1.1, sgn=1):
+    """Прилив на стойке под планкой: усечённая пирамида (вылет height, фаски ch по краям), основание утоплено в стойку."""
+    import bmesh
+    from lib import v as vmm
+    yb, yo, yt = (RISER_HW - 0.6) * sgn, (RISER_HW + height - ch) * sgn, (RISER_HW + height) * sgn
+    rings = [(yb, 0.0), (yo, 0.0), (yt, ch)]
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    vs = []
+    for y, ins in rings:
+        vs.append([bm.verts.new(vmm(x, y, z)) for x, z in ((x0 + ins, z0 + ins), (x1 - ins, z0 + ins), (x1 - ins, z1 - ins),
+                                                            (x0 + ins, z1 - ins))])
+    for a, b in zip(vs, vs[1:]):
+        for i in range(4):
+            j = (i + 1) % 4
+            bm.faces.new((a[i], a[j], b[j], b[i]))
+    bm.faces.new(list(reversed(vs[0])))
+    bm.faces.new(vs[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    C.objects.link(o)
+    o.data.materials.append(material("Alu_anodized"))
+    return o
 
 
 def fa_pawl_box(name, ra, rb, rc, C):
