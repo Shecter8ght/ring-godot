@@ -19,6 +19,8 @@ FRONT_RING_LEN = 12.0
 FA_ROD_END = 18.5             # конец стержня досылателя по его оси: и нажатый не касается рамы
 FA_PAWL = 3.9                 # вылет собачки к оси канала: в покое ~1 мм до рамы, нажатием — в насечку
 FA_HOUSING_REAR = -4.4        # задний торец корпуса по оси досылателя: кнопка (до −7.6) выступает на ~3 мм
+LEFT_WINDOW_X = (-136.0, -70.0)   # окно слева над разъёмом (за задержкой, перед проушиной разборки)
+LEFT_WINDOW_Z = (-6.4, 6.0)       # над поднятой линией разъёма (−8.6), рама видна на всю высоту боковины канала
 HINGE_Y = -15.6               # ось пылезащитной крышки (под окном выброса)
 HINGE_Z = -0.4
 STEP = 0.8                    # уступ боковин над осью крышки
@@ -126,13 +128,26 @@ def build(ctx):
                C, None, seg=48, cy=0.0, cz=0.0)
     fb.data.transform(m)
     boolean(body, fb)
-    # «облегчающие» карманы сзади — слева два ряда; справа их место занял досылатель
+    # «облегчающий» карман сзади слева — один ряд над окном (как у образца Fab); справа его место занял досылатель
     for s in (1,):
-        for z0, z1 in ((3.0, 8.4), (11.4, 16.8)):
+        for z0, z1 in ((10.0, 16.8),):
             x0, x1 = -168.0, (-122.0 if s < 0 else -86.0)
             pk = prism_xz(f"cut_pocket{s}{z0}", fillet([(x0, z0), (x1, z0), (x1, z1), (x0, z1)], 2.6, 5),
                           (UPPER_HALF_W - STEP - 1.1) * s, (UPPER_HALF_W + 3) * s, C)
             boolean(body, pk)
+    # окно слева над разъёмом за затворной задержкой (образец Fab): сквозь него видна рама и её ход
+    win = prism_xz("cut_left_window", fillet([(LEFT_WINDOW_X[0], LEFT_WINDOW_Z[0]), (LEFT_WINDOW_X[1], LEFT_WINDOW_Z[0]),
+                                              (LEFT_WINDOW_X[1], LEFT_WINDOW_Z[1]), (LEFT_WINDOW_X[0], LEFT_WINDOW_Z[1])], 4.5, 6),
+                   8.0, UPPER_HALF_W + 3, C)
+    boolean(body, win)
+    # квадратные выемки сеткой слева (образец Fab): 2 × 2 перед карманами и 2 × 2 у переднего края с круглой лункой
+    for nm, xs, zs in (("mid", (-80.8, -77.2), (10.6, 14.2)), ("front", (-10.5, -6.9), (10.2, 13.8))):
+        for i, xx in enumerate(xs):
+            for j, zz in enumerate(zs):
+                sq = prism_xz(f"cut_sq_{nm}{i}{j}", fillet([(xx - 1.2, zz - 1.2), (xx + 1.2, zz - 1.2), (xx + 1.2, zz + 1.2),
+                                                             (xx - 1.2, zz + 1.2)], 0.4, 2), UPPER_HALF_W - STEP - 0.8, UPPER_HALF_W + 3, C)
+                boolean(body, sq)
+    boolean(body, cyl("cut_dimple", UPPER_HALF_W - STEP - 0.8, UPPER_HALF_W + 3, 2.1, C, seg=32, cy=-16.0, cz=12.0, axis="Y"))
     # выемка снизу сзади под головку фиксатора буфера
     boolean(body, box("cut_retainer_relief", UPPER_REAR - 2, UPPER_REAR + 5.0, -3.0, 3.0, SPLIT_Z - 2, -11.0, C))
     # выемка слева снизу под затворную задержку (её верхняя лопатка и зуб заходят выше разъёма)

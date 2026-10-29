@@ -25,6 +25,27 @@ GRIP_ANGLE = 18.0            # наклон рукояти от вертикал
 RETAINER_X = UPPER_REAR + 2.0   # фиксатор буфера — перед торцом трубки, её кромка держит головку
 
 
+GUARD_GRIP_GAP = 0.5          # шов между задней гранью скобы и передней кромкой рукояти
+
+
+def guard_web():
+    """Задняя грань скобы по передней кромке рукояти (со швом GUARD_GRIP_GAP): угол у низа перекладины, точки снизу
+    вверх, точка на площадке рукояти. Возвращает (точки, x угла у низа)."""
+    from part_grip import front_xz
+    bar = GUARD_Z[0] - 6.5
+    line = [front_xz(-0.08 + k * 0.0075, GUARD_GRIP_GAP) for k in range(62)]      # сверху вниз
+
+    def at_z(z0):
+        for (x0, z0a), (x1, z1a) in zip(line, line[1:]):
+            if z1a <= z0 <= z0a:
+                k = (z0 - z0a) / (z1a - z0a)
+                return x0 + (x1 - x0) * k
+        raise ValueError(z0)
+    x_bot, x_top = at_z(bar), at_z(GRIP_TOP_Z)
+    pts = [(x_bot, bar)] + [(x, z) for x, z in reversed(line) if bar + 4.0 < z < GRIP_TOP_Z - 0.3] + [(x_top, GRIP_TOP_Z)]
+    return pts, x_bot
+
+
 def guard_and_well_profile():
     """Боковой профиль нижнего ресивера: шахта, низ корпуса, скоба, площадка рукояти, задняя часть до башни."""
     pts = [
@@ -34,14 +55,15 @@ def guard_and_well_profile():
         (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT),
         (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR),          # скошенная губа шахты
         (WELL_REAR_OUT - 2.9, GUARD_Z[0] - 6.5),          # переднее ухо скобы
-        (GUARD_X[0] - 5.0, GUARD_Z[0] - 6.5),             # низ скобы (перекладина 6.5 мм)
-        (GUARD_X[0] - 5.0, -60.0),                        # заднее ухо скобы
-        (GUARD_X[0] - 5.4, GRIP_TOP_Z),                   # площадка рукояти выше низа над спуском
-        (-186.0, GRIP_TOP_Z),
+    ]
+    web, _x = guard_web()                                 # низ перекладины назад и вверх по кромке рукояти
+    rear = [
+        (-186.0, GRIP_TOP_Z),                             # площадка рукояти
         (LOWER_REAR + 0.5, -22.0),                        # задняя грань под башней (выше — башня буферной трубки)
         (LOWER_REAR + 0.5, SPLIT_Z),
     ]
-    return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 6.0, 4.0, 1.0, 4.0, 3.0, 0], seg=5)
+    radii = [1.5, 0, 6.0, 2.5, 3.0, 6.0] + [3.5] + [0] * (len(web) - 1) + [4.0, 3.0, 0]
+    return fillet(pts + web + rear, radii, seg=5)
 
 
 def build(ctx):
@@ -106,9 +128,10 @@ def build(ctx):
                        -30, 30, C)
     boolean(body, opening)
     # скоба уже корпуса: снимаем бока под проёмом
+    _web, web_x = guard_web()
     for s in (-1, 1):
         y0, y1 = (6.6, 30.0) if s > 0 else (-30.0, -6.6)
-        boolean(body, box(f"cut_guard_side{s}", gx0 - 6.0, gx1 + 1.0, y0, y1, gz0 - 8.0, gz1 - 1.6, C))
+        boolean(body, box(f"cut_guard_side{s}", web_x - 3.0, gx1 + 1.0, y0, y1, gz0 - 8.0, gz1 - 1.6, C))
     # отверстия осей: переводчик, спуск, курок, автоспуск, защёлка магазина
     for nm, (px, pz), r in (("selector", SELECTOR, 4.75), ("trigger", TRIGGER_PIN, 1.96), ("hammer", HAMMER_PIN, 1.96),
                             ("autosear", AUTOSEAR_PIN, 1.96)):
@@ -145,6 +168,14 @@ def build(ctx):
                                                                 (-3.0, zz + 0.75)], 0.7, 3), y0, y1, C))
         y0, y1 = (LOWER_HALF_W - 0.8, LOWER_HALF_W + 4) if sgn > 0 else (-LOWER_HALF_W - 4, -LOWER_HALF_W + 0.8)
         boolean(body, prism_xz(f"cut_panel{sgn}", fillet([(-38.0, -52.0), (-6.5, -49.0), (-6.5, -23.0), (-38.0, -23.0)], 3.0, 5), y0, y1, C))
+    # квадратные выемки сеткой слева (образец Fab): на панели шахты 2 × 3 у задней кромки, над передом скобы 2 × 2
+    for nm, xs, zs, y_face in (("well", (-33.6, -30.0), (-46.0, -42.4, -38.8), LOWER_HALF_W - 0.8),
+                               ("fcg", (-66.4, -62.8), (-45.6, -42.0), FCG_HALF_W)):
+        for i, xx in enumerate(xs):
+            for j, zz in enumerate(zs):
+                sq = prism_xz(f"cut_sq_{nm}{i}{j}", fillet([(xx - 1.2, zz - 1.2), (xx + 1.2, zz - 1.2), (xx + 1.2, zz + 1.2),
+                                                             (xx - 1.2, zz + 1.2)], 0.4, 2), y_face - 0.8, y_face + 4.0, C)
+                boolean(body, sq)
     # отверстие винта рукояти снизу (под углом рукояти)
     gs = cyl("cut_grip_screw", -14.0, 6.0, 2.6, C, seg=20, axis="Z", cy=0.0, cz=0.0)
     gs.rotation_euler = (0, math.radians(18.0), 0)
@@ -154,7 +185,7 @@ def build(ctx):
     boolean(body, gs)
     # низ скобы скруглён
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=2.0, seg=4,
-                where=lambda p: GUARD_X[0] - 8.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
+                where=lambda p: web_x - 4.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
     finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
 
@@ -346,7 +377,7 @@ def selector(F):
     # вырез-«кулачок» на валу (над хвостом спуска)
     boolean(shaft, box("cut_sel_cam", sx - 6, sx + 6, -4.8, 4.8, sz + 0.5, sz + 6, F))
     boolean(shaft, box("cut_sel_cam_r", sx - 6, sx - 0.5, -4.8, 4.8, sz - 6, sz + 6, F))
-    for s, length, nm in ((1, 11.0, "Selector_lever_L"), (-1, 8.0, "Selector_lever_R")):
+    for s, length, nm in ((1, 14.5, "Selector_lever_L"), (-1, 8.0, "Selector_lever_R")):
         y0 = (FCG_HALF_W + 0.5) * s
         y1 = (FCG_HALF_W + 3.4) * s
         lev = prism_xz(nm, fillet([(sx - 5.6, sz - 4.0), (sx + length, sz - 2.2), (sx + length + 2.0, sz + 0.5), (sx + length, sz + 2.6),

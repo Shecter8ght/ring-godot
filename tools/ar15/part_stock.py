@@ -33,6 +33,7 @@ PIN_X0 = STOCK_FRONT - 52.0       # фиксатор приклада (слож�
 LATCH_PIVOT = (STOCK_FRONT - 11.0, -23.2)
 LATCH_DEG = 6.0                   # ход рычага; штифт опускается на ≈ 41·sin(6°) = 4.3 мм
 QD_R = 4.85                       # отверстие стандартного антабочного QD (0.38″)
+QD_HEAD_Y = (17.8, 23.0)          # головка антабки слева — у боковины пластины (её край на высоте головки y ≈ 17.5)
 BODY_HW = 20.0                    # полуширина корпуса сзади
 BUTT_HW = 20.8                    # задняя стойка
 PAD_HW = 21.6                     # затыльник: ширина приклада 43.2
@@ -128,6 +129,55 @@ def side_y(x, z, s, y_max=30.0):
     return (o.matrix_world @ loc).y / MM if ok else s * BODY_HW
 
 
+def _catmull(pts, n=6):
+    """Сглаженная ломаная через точки (Катмулл — Ром), концы сохраняются."""
+    P = [Vector(p) for p in pts]
+    out = []
+    for i in range(len(P) - 1):
+        p0, p1, p2 = P[max(i - 1, 0)], P[i], P[i + 1]
+        p3 = P[min(i + 2, len(P) - 1)]
+        for k in range(n):
+            t = k / n
+            t2, t3 = t * t, t * t * t
+            q = 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+            out.append(tuple(q))
+    out.append(tuple(P[-1]))
+    return out
+
+
+def qd_swivel(S):
+    """Антабка QD в гнезде торцевой пластины слева: хвостовик в отверстии, головка с кнопкой фиксатора, петля из прутка
+    Ø3.5 на двух цапфах головки висит вниз (как у образца Fab)."""
+    from part_lower import _wire
+    from lib import material
+    o = {}
+    qx, qz = QD_PLATE
+    y0, y1 = QD_HEAD_Y
+    yc = (y0 + y1) / 2
+    body = cyl("QD_swivel", 4.0, y0 + 0.3, QD_R - 0.1, S, "Steel_black", seg=32, cy=qx, cz=qz, axis="Y", ch=0.4)
+    boolean(body, cyl("qd_head", y0, y1, 7.5, S, "Steel_black", seg=48, cy=qx, cz=qz, axis="Y", ch=0.8), "UNION")
+    boolean(body, cyl("qd_button", y1 - 0.5, y1 + 1.4, 3.2, S, "Steel_black", seg=32, cy=qx, cz=qz, axis="Y", ch=0.4), "UNION")
+    # гнёзда цапф петли спереди и сзади головки
+    for s in (-1, 1):
+        x0, x1 = (qx + 5.4, qx + 9.0) if s > 0 else (qx - 9.0, qx - 5.4)
+        boolean(body, cyl(f"cut_qd_pivot{s}", x0, x1, 1.95, S, seg=20, cy=yc, cz=qz, axis="X"))
+    # шарики фиксатора в хвостовике
+    for s in (-1, 1):
+        ball = cyl(f"cut_qd_ball{s}", qx + s * (QD_R - 0.9) - 0.9, qx + s * (QD_R - 0.9) + 0.9, 1.0, S, seg=16, cy=6.5, cz=qz, axis="X")
+        boolean(body, ball)
+    finish(body, w=0.25, seg=2, angle=35)
+    o["qd_swivel"] = body
+    # петля: концы в гнёздах головки, D-образная, вниз
+    half = [(-5.9, 0.0), (-11.0, 0.0), (-13.6, -3.2), (-15.4, -9.0), (-16.0, -16.0), (-15.0, -23.0), (-11.6, -29.0),
+            (-6.0, -32.6), (0.0, -33.6)]
+    path = half + [(-x, z) for x, z in reversed(half[:-1])]
+    pts = [(qx + x, yc, qz + z) for x, z in _catmull(path, 5)]
+    loop = _wire("QD_swivel_loop", pts, 1.75, S)
+    loop.data.materials[0] = material("Steel_black")
+    o["qd_loop"] = loop
+    return o
+
+
 def build(ctx):
     S = ctx["coll"]["Stock"]
     o = {}
@@ -186,6 +236,7 @@ def tube(S):
         boolean(hub, d)
     finish(hub, w=0.3, seg=2, angle=35)
     o["end_plate"] = hub
+    o.update(qd_swivel(S))
     # замковая гайка с тремя прорезями сзади и двумя «пазами» под ключ
     nut = lathe("Castle_nut", [(NUT_X[0], TUBE_R + 0.05), (NUT_X[0], NUT_R - 0.8), (NUT_X[0] + 0.8, NUT_R), (NUT_X[1] - 0.6, NUT_R),
                                (NUT_X[1], NUT_R - 0.6), (NUT_X[1], TUBE_R + 0.05)], S, "Steel_black", seg=72)

@@ -28,10 +28,11 @@ SECTIONS = [
     (0.99, 25.0, -22.9, 16.2),
     (1.00, 23.8, -21.8, 15.3),
 ]
-# канавки под пальцы на передней кромке: гребни в t ≈ 0.37 и 0.66, канавки 0.22 / 0.51 / 0.80 (шаг ≈ 30 мм — палец)
+# канавки под пальцы на передней кромке — ниже скобы (она примыкает к рукояти до t ≈ 0.3): канавки 0.40 / 0.64 / 0.87
+# (z ≈ −89 / −112 / −135 — средний, безымянный, мизинец), гребни 0.52 и 0.75; выше t 0.30 кромка гладкая под скобу
 FINGER_AMP = 1.9
-FINGER_PERIOD = 0.29
-FINGER_RIDGE = 0.37
+FINGER_PERIOD = 0.233
+FINGER_RIDGE = 0.52
 STATIONS = [-0.12, -0.06] + [round(0.0 + 0.0125 * k, 4) for k in range(81)]
 SA, CA = math.sin(math.radians(ANGLE)), math.cos(math.radians(ANGLE))
 DOWN = Vector((-SA, 0.0, -CA))          # ось рукояти вниз
@@ -56,9 +57,16 @@ def section_at(t):
             base = (f0 + (f1 - f0) * k, b0 + (b1 - b0) * k, w0 + (w1 - w0) * k)
             break
     f, b, w = base
-    env = _smooth(0.08, 0.17, t) * (1.0 - _smooth(0.84, 0.93, t))
+    env = _smooth(0.30, 0.36, t) * (1.0 - _smooth(0.90, 0.95, t))
     f += FINGER_AMP * env * math.cos(2 * math.pi * (t - FINGER_RIDGE) / FINGER_PERIOD)
     return f, b, w
+
+
+def front_xz(t, gap=0.0):
+    """Передняя кромка рукояти по средней плоскости (мм), сдвинутая вперёд на gap — по ней идёт задняя грань скобы."""
+    f, _b, _w = section_at(t)
+    p = axis_pt(t) + FWD * (f + gap)
+    return p.x, p.z
 
 
 def ring(t, f, b, w, n=96):
