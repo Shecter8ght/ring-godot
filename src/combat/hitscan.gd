@@ -67,8 +67,9 @@ static func fire(world: World3D, from: Vector3, dir: Vector3, spread_deg: float,
 			(body as Target).on_hit(hit.position, d, damage)
 		if body is RagdollPart:
 			(body.get_parent() as Ragdoll).push(d * damage * Balance.BULLET_PUSH, hit.position)
-		elif body is PhysicalBone3D:
-			(body as PhysicalBone3D).apply_impulse(d * damage * Balance.BULLET_PUSH, (hit.position as Vector3) - (body as PhysicalBone3D).global_position)
+		elif body is PhysicalBone3D and body.get_parent() is SkinRagdoll:
+			# через регдолл: толчок с пределом, улёгшееся тело оживает
+			(body.get_parent() as SkinRagdoll).push(d * damage * Balance.BULLET_PUSH, hit.position)
 	ImpactFx.spawn_hit(hit, d)
 	return hit
 

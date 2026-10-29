@@ -36,6 +36,15 @@ const REST_SPEED := 0.2
 const REST_SEC := 0.6
 ## Позже этого, с, — замирает в любом случае.
 const MAX_SEC := 4.0
+## Добили раненого: в лежачей позе руки и спина на 5–15 см под полом — физика выталкивала их, суставы
+## раскачивались, и через полсекунды тело разлеталось нитями на метры. Перед стартом скелет поднимается так,
+## чтобы ни одна капсула не начинала под землёй (не выше LIFT_MAX, м; земля — не выше LIFT_PROBE над центром).
+const LIFT_MAX := 0.4
+const LIFT_PROBE := 0.3
+## Предел скорости частей, м/с и рад/с: решатель суставов не разгоняется до разрыва (сильный толчок,
+## часть застряла в стене).
+const MAX_SPEED := 8.0
+const MAX_SPIN := 30.0
 
 ## Ноги сталкиваются только друг с другом (свои слои физики).
 const LEG_L := ["LeftUpLeg", "LeftLeg", "LeftFoot"]
@@ -59,12 +68,15 @@ static func start(skel: Skeleton3D, velocity: Vector3, impulse: Vector3, at: Vec
 	r.name = "SkinRagdoll"
 	skel.add_child(r)
 	r._build(skel)
+	var lift := r._ground_lift(skel)
+	if lift > 0.0:
+		skel.global_position += Vector3.UP * lift
 	r.add_to_group("ragdolls")
 	r.physical_bones_start_simulation()
 	# движок у симулятора физ-обработку сам не включает — следим, когда тело уляжется
 	r.set_physics_process(true)
 	for pb in r._bones():
-		pb.linear_velocity = velocity
+		pb.linear_velocity = velocity.limit_length(MAX_SPEED)
 	if impulse.length_squared() > 0.0:
 		r.push(impulse, at)
 	return r
@@ -166,12 +178,35 @@ func _build(skel: Skeleton3D) -> void:
 
 
 
+## На сколько поднять скелет до старта: луч сверху у концов и середины каждой капсулы — где земля, а где низ
+## капсулы. Поза — та же, из которой физкости встанут на старте.
+func _ground_lift(skel: Skeleton3D) -> float:
+	var space := skel.get_world_3d().direct_space_state
+	var lift := 0.0
+	for pb in _bones():
+		var cap := (pb.get_child(0) as CollisionShape3D).shape as CapsuleShape3D
+		var xf := skel.global_transform * skel.get_bone_global_pose(skel.find_bone(pb.bone_name)) * pb.body_offset
+		var half := maxf(cap.height * 0.5 - cap.radius, 0.0)
+		for k: float in [-1.0, 0.0, 1.0]:
+			var c: Vector3 = xf * Vector3(0.0, half * k, 0.0)
+			var q := PhysicsRayQueryParameters3D.create(c + Vector3.UP * LIFT_PROBE, c + Vector3.DOWN * LIFT_PROBE, Hitscan.LAYER_WORLD)
+			var hit := space.intersect_ray(q)
+			if hit.is_empty() or (hit.normal as Vector3).y < 0.6:
+				continue
+			lift = maxf(lift, (hit.position as Vector3).y + cap.radius + 0.01 - c.y)
+	return minf(lift, LIFT_MAX)
+
+
 func _physics_process(delta: float) -> void:
 	if _frozen or not is_simulating_physics():
 		return
 	_t += delta
 	var fast := false
 	for pb in _bones():
+		if pb.linear_velocity.length() > MAX_SPEED:
+			pb.linear_velocity = pb.linear_velocity.normalized() * MAX_SPEED
+		if pb.angular_velocity.length() > MAX_SPIN:
+			pb.angular_velocity = pb.angular_velocity.normalized() * MAX_SPIN
 		if pb.linear_velocity.length() > REST_SPEED or pb.angular_velocity.length() > REST_SPEED * 10.0:
 			fast = true
 			break
@@ -209,4 +244,5 @@ func push(impulse: Vector3, at: Vector3) -> void:
 			_t = 0.0
 			for pb in _bones():
 				PhysicsServer3D.body_set_mode(pb.get_rid(), PhysicsServer3D.BODY_MODE_RIGID)
-		best.apply_impulse(impulse, at - best.global_position)
+		# толчок — не сильнее, чем разгоняет часть до MAX_SPEED: за один шаг физики иначе рвутся суставы
+		best.apply_impulse(impulse.limit_length(MAX_SPEED * best.mass), at - best.global_position)

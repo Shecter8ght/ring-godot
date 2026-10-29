@@ -111,6 +111,8 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/blood_shots.tscn # 
 python tools/gen_blood_maps.py                                 # карты крови: растекание лужи (перколяция), подтёки, следы капель → assets/textures/blood; затем --import
 tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики, мышь
 tools/godot.cmd --headless res://tools/downed_test.tscn    # тяжёлое ранение: лечь, добить, голова/граната, поднять, тащить, спасение мародёров
+tools/godot.cmd --headless res://tools/ragdoll_test.tscn   # трупы на модели (SkinRagdoll) не рвутся нитями: «Проспект», обычная смерть, удар в голову,
+                                                              # добили лежачего (руки были под полом), у стены, огромный толчок; пули по телам, разбор ящиков
 tools/godot.cmd --headless res://tools/quest_test.tscn     # сюжет «Не вернулся» целиком: этапы, смерть, эвакуация, сохранение, Антон, второй квест из данных
 tools/godot.cmd --headless res://tools/terminal_story_test.tscn # переписка в терминале: принять заказ, история, отчёт, оплата этапа один раз, гостю тоже, задание ждёт карту
 tools/godot.cmd --headless res://tools/quest_steps_test.tscn # шаги заказа машины в убежище: снимки, ранняя находка, пропуск шагов, сдача деталей без эвакуации, «не в карман»
