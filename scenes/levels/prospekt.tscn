@@ -1900,7 +1900,7 @@ search_s = 6
 look = 1
 
 [node name="Loot_228" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(140, 0.6, 156)
+position = Vector3(141.6, 0.6, 157)
 display_name = "Гараж открыт"
 table = "storage"
 search_s = 3
@@ -2019,7 +2019,7 @@ search_s = 4
 look = 3
 
 [node name="Loot_245" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-118, 0.6, 98.5)
+position = Vector3(-118, 0.6, 103.6)
 display_name = "Контейнер на разгрузке"
 table = "storage"
 search_s = 3

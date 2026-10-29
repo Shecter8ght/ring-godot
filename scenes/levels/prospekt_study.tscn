@@ -12,14 +12,6 @@
 
 [ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
 
-[ext_resource type="Shader" path="res://src/world/screen_sharpen.gdshader" id="sharpen"]
-
-[sub_resource type="ShaderMaterial" id="SharpenMat"]
-
-shader = ExtResource("sharpen")
-
-shader_parameter/amount = 1.8
-
 [node name="ProspektStudy" type="Node3D"]
 
 script = ExtResource("launch")
@@ -39,26 +31,6 @@ light_color = Color(1, 0.9, 0.76, 1)
 light_energy = 2.0
 
 shadow_enabled = true
-
-[node name="Sharpen" type="CanvasLayer" parent="."]
-
-layer = -1
-
-[node name="Mask" type="ColorRect" parent="Sharpen"]
-
-material = SubResource("SharpenMat")
-
-anchors_preset = 15
-
-anchor_right = 1.0
-
-anchor_bottom = 1.0
-
-grow_horizontal = 2
-
-grow_vertical = 2
-
-mouse_filter = 2
 
 [node name="Landscape" type="Node3D" parent="."]
 

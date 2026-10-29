@@ -2,7 +2,8 @@
 """Свет «Проспекта» — один на блокаут и рейд (AGENTS.md п. 10). Владелец 2026-10-26 выбрал на стенде
 (tools/prospekt_light_variants.gd, docs/screens/prospekt/light_stand_*.jpg) вариант «всё вместе» — черты освещения EFT
 поверх умолчаний Godot: перепад (солнце сильнее, рассеянный слабее), бирюзовый холод (небо голубее, тени в холодную
-зелень, солнце тёплое), дымка по расстоянию, тени в углах (SSAO), тёмные помещения (SDFGI), резкость поверх кадра.
+зелень, солнце тёплое), дымка по расстоянию, тени в углах (SSAO), тёмные помещения (SDFGI). Резкость поверх кадра
+(слой screen_sharpen, сила 1,8) убрана по слову владельца 2026-10-29: «свет хорош, резкость убрать».
 
 Окружение — scenes/levels/prospekt/prospekt_environment.tres (пишет tools/build_prospekt.py, ссылаются обе сцены).
 В рейде силу солнца, рассеянный и выдержку по времени суток задаёт RaidAtmosphere, дымку по погоде — RaidWeather:
@@ -10,7 +11,6 @@
 """
 
 ENV_PATH = "res://scenes/levels/prospekt/prospekt_environment.tres"
-SHARPEN_SHADER = "res://src/world/screen_sharpen.gdshader"
 
 # окружение (.tres): небо, рассеянный, тонмаппинг, свечение, SSAO, SDFGI, дымка, цветокоррекция
 ENV_TRES = "\n".join([
@@ -50,23 +50,6 @@ SUN_PROPS = [
     'transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)',
     'light_color = Color(1, 0.9, 0.76, 1)', 'light_energy = 2.0', 'shadow_enabled = true',
 ]
-
-
-def sharpen_nodes(parent: str, shader_id: str, mat_id: str) -> list[str]:
-    """Резкость поверх кадра: слой −1 — после 3D, до интерфейса (подписи и прицел не режет)."""
-    return [
-        f'[node name="Sharpen" type="CanvasLayer" parent="{parent}"]', 'layer = -1',
-        f'[node name="Mask" type="ColorRect" parent="{parent + "/" if parent != "." else ""}Sharpen"]',
-        f'material = SubResource("{mat_id}")', 'anchors_preset = 15', 'anchor_right = 1.0', 'anchor_bottom = 1.0',
-        'grow_horizontal = 2', 'grow_vertical = 2', 'mouse_filter = 2',
-    ]
-
-
-def sharpen_resources(shader_id: str, mat_id: str) -> tuple[str, list[str]]:
-    """(ext_resource шейдера, sub_resource материала) для сцены."""
-    return (f'[ext_resource type="Shader" path="{SHARPEN_SHADER}" id="{shader_id}"]',
-            [f'[sub_resource type="ShaderMaterial" id="{mat_id}"]', f'shader = ExtResource("{shader_id}")',
-             'shader_parameter/amount = 1.8'])
 
 
 # рейд: RaidAtmosphere ставит солнце t.sun_energy × sun_k, рассеянный 0,8 × t.ambient × ambient_k, выдержку t.exposure.

@@ -184,6 +184,10 @@ KIT_MODELS = {
     "container20": ("PC_container20_any", 0.0), "container40": ("PC_container40_any", 0.0),
     "pole_conc": ("PC_pole04_any", 0.0), "pole_trolley": ("PC04_TROLLEY", 0.0),
     "bus_stop": ("PC_busstop_any", 0.0), "ktp": ("PC07_KTP", 0.0),
+    # пролом и поваленная плита — у выхода двором ЖК; ракушки — двор дома 7; открытые — только там, где внутри лут
+    "po2_breach": ("PC01_PO2_BREACH", 0.0), "po2_fallen": ("PC01_PO2_FALLEN", 0.0),
+    "shell": ("PC02_SHELL", 0.0), "shell_open": ("PC02_SHELL_OPEN", 0.0),
+    "container20_open": ("PC03_C20_OPEN", 0.0), "container40_open": ("PC03_C40_OPEN", 0.0),
 }
 MODELS_NOSOLID = ["U19_02", "U16_04", "U15_05", "U10_01", "U19_01", "U14_04", "U10_05", "U02_01", "U14_03", "U08_03"]
 MODELS_POLES = ["U15_02", "U10_02", "U12_03", "U03_03", "U06_02", "U07_02", "U10_03", "U19_05",
@@ -1118,8 +1122,11 @@ u("U10_03_wayfinding", -168.0, 19.0, 180.0)
 building("Minimarket", "минимаркет «Весна»", (-170.0, 22.0), (12.0, 10.0), "hall", 1, STORY_RETAIL, 180.0, 0.0, "shop", "grocery", 0.5, "South")
 upper_floor("минимаркет «Весна»", -170.0, 22.0, 12.0, 10.0, 180.0, roof=True)
 flats("House7", "дом 7 — 12 этажей (закрыт)", (-188.0, 51.0), 12, 0, 180.0, (36.0, 26.0), region="South", loot=0.0)
-for i in range(6):
-    put("garage", -205.0 + i * 3.4, 74.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+# гаражи-ракушки жильцов (план карты §3, участок 12): стоят вразнобой с разным шагом, носом во двор; вскрытая —
+# та, где лут «гараж дома 7» (нос поднят, внутри инструмент и запчасти)
+for (x, z, yaw) in [(-206.4, 74.3, 2.0), (-203.6, 74.6, -1.5), (-200.0, 74.5, 1.0), (-197.1, 74.2, -2.5),
+                    (-194.3, 74.7, 1.5), (-191.2, 74.4, -1.0)]:
+    put("shell_open" if x == -200.0 else "shell", x, z, yaw, 1.0, 0.0, -1, 0.0, True)
 u("R02_dumpster", -176.0, 78.0, 90.0, 1.0, 0.0, True)
 put("trash_pile", -172.0, 81.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 surface("house7_yard", "walk", -210.0, 64.0, -166.0, 108.0, 0.0, 0.05)
@@ -1920,18 +1927,18 @@ for z in (160.0, 163.0):
 u("U14_04_entry_steps", 104.0, 30.0, 180.0, 1.0)                 # ступени к террасе площади «Вершины»
 # владелец 2026-10-24: «по правой стороне карта просматривается насквозь — пусть обзору что-то мешает через 50–90 м»:
 # контейнеры и ларьки в проезде парковки, гаражи между корпусом 3 и «Меридианом», гаражи вдоль двора корпуса 3
-put("container40", 86.5, 140.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+put("container40_open", 86.5, 140.0, 0.0, 1.0, 0.0, -1, 0.0, True)        # открытые — только с лутом внутри
 put("container40", 86.6, 139.6, 1.5, 1.0, 2.62, -1, 0.0, False)
 put("container20", 86.5, 200.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 put("container20", 86.4, 200.3, -2.0, 1.0, 2.62, -1, 0.0, False)
 for z in (92.0, 176.0, 222.0):
     put("kiosk", 86.5, z, 90.0, 1.0, 0.0, -1, 0.0, True)
 for i in range(8):
-    put("garage", 128.0 + i * 3.4, 158.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+    put("garage_open" if i == 4 else "garage", 128.0 + i * 3.4, 158.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 for i in range(10):
     put("garage", 154.0, 78.0 + i * 3.4, -90.0, 1.0, 0.0, -1, 0.0, True)
 put("ktp", 106.0, 160.0, 0.0, 1.0, 0.0, -1, 0.0, True)
-loot(140.0, 0.0, 156.0, "crate", "common", "гараж открыт")
+loot(141.6, 0.0, 157.0, "crate", "common", "гараж открыт")
 loot(86.5, 0.0, 145.5, "crate", "common", "контейнер на парковке")
 u("U08_02_glass_doors", 120.0, 172.8, 180.0, 1.0, 0.0, True)
 # ---- насыпь железной дороги на южном краю и тоннель под ней — выход в следующую локацию (владелец 2026-10-24:
@@ -2133,22 +2140,26 @@ put("truck", 96.0, -9.0, 0.0, 1.0, 0.0, 11, 0.0, True)
 building("MetroPavilion", "вход в метро «Проспект» (закрыт)", (100.0, 26.0), (12.0, 18.0), "mass", 1, 4.5, 0.0, 0.0, "", "", 0.0, "East")
 put("container20", 142.0, 15.0, 0.0, 1.0, 0.0, -1, 0.0, True)
 # линия z ≈ 105 (двор дома 7 → разгрузка → сквер → парковка корпуса 3) и западный край сквера вдоль служебного проезда
-for (kit, x, z, yaw) in [("garage", -190.0, 103.0, 0.0), ("garage", -186.6, 103.0, 0.0), ("container20", -118.0, 102.0, 0.0),
+for (kit, x, z, yaw) in [("garage", -190.0, 103.0, 0.0), ("garage", -186.6, 103.0, 0.0), ("container20_open", -118.0, 102.0, 0.0),
                          ("kiosk", 25.0, 104.0, 0.0), ("container20", 86.5, 108.0, 0.0), ("booth", -49.0, 60.0, 0.0),
                          ("kiosk", -47.5, 145.0, 90.0), ("container20", -47.0, 214.0, 0.0), ("kiosk", -24.0, 186.0, 90.0)]:
     put(kit, x, z, yaw, 1.0, 0.0, -1, 0.0, True)
-loot(-118.0, 0.0, 98.5, "crate", "common", "контейнер на разгрузке")
+loot(-118.0, 0.0, 103.6, "crate", "common", "контейнер на разгрузке")    # двери — на юг, к забору: с севера фура
 # южное плечо и середина сквера: грузовик на восточной полосе, кусты вдоль тротуара, живые изгороди у баскетбола,
 # ларьки на внутреннем тротуаре поворота
 put("truck", XS + 5.2, 136.0, 172.0, 1.0, 0.0, 6, 0.0, True)
 put("paz", XS - 5.0, 232.0, 4.0, 1.0, 0.0, 8, 0.0, True)
 for z in (112.0, 145.0, 190.0, 238.0):
     put("bush_big", XS - F - 1.4, z, rng.uniform(0, 360), 1.15)
-for (x0, z0, x1, z1, n) in [(-18.0, 149.0, -8.0, 149.0, 4), (-2.0, 183.0, 8.0, 183.0, 4), (-22.0, 142.0, -22.0, 150.0, 3),
-                            (10.0, 186.0, 10.0, 192.0, 2), (-40.0, 182.0, -30.0, 182.0, 4)]:
+# у западной изгороди — проход аллеи z ≈ 146 (по ней идут маршруты пролога и с юга к стройке)
+for (x0, z0, x1, z1) in [(-18.0, 149.0, -8.0, 149.0), (-2.0, 183.0, 8.0, 183.0), (-22.0, 139.6, -22.0, 144.0),
+                         (-22.0, 148.4, -22.0, 152.8), (10.0, 186.0, 10.0, 192.0), (-40.0, 182.0, -30.0, 182.0)]:
+    n = max(1, round(math.hypot(x1 - x0, z1 - z0) / 5.0))
     for k in range(n):
         t = (k + 0.5) / n
-        put("bush_big", x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, rng.uniform(0, 360), rng.uniform(1.0, 1.25))
+        put("hedge", x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, 90.0 if z0 == z1 else 0.0, 1.0, 0.0, -1, 0.0, True)
+for _ in range(2 * 17):
+    rng.random()                     # прежние 17 кустов брали по два случайных числа — дальше по карте ничего не сдвигается
 for phi in (0.45, 1.1):
     x, z = curve_point(phi, -(F - 2.2))
     put("kiosk", x, z, 180.0 - math.degrees(phi), 1.0, 0.0, -1, 0.0, True)
@@ -2161,29 +2172,43 @@ for (x, z) in [(XS - F + 2.2, 100.0), (XS + F - 2.2, 130.0), (XS + F - 2.2, 202.
 # район «обнесли забором и поставили кордоны»: вдоль границы — бетонные плиты ПО-2 со спиралью колючки, вышки ЧВК,
 # по верху насыпи — сетка полосы отвода; у стройки граница — её синий профнастил. Выходы — проломы и проходы в заборе
 # (двор ЖК, стройка, пути на запад), тоннель — под насыпью. За забором — город: дома, склады, гаражи.
+# Лицо плиты ПО-2 (пирамиды, +X модели) — внутрь района, к игроку: снаружи он забор не видит, а гладкая тыльная
+# сторона — пустая серая стена (владелец 2026-10-29: «реши сам»). inside — с какой стороны линии район: +1 — к +X / +Z.
+def fence_yaw(axis: str, inside: float) -> float:
+    if axis == "x":
+        return -90.0 if inside > 0 else 90.0
+    return 0.0 if inside > 0 else 180.0
+
+
 def fence_run(axis: str, c: float, a0: float, a1: float, kit: str = "district_fence", gaps=(), dy: float = 0.0,
-              step: float = 2.5) -> None:
+              step: float = 2.5, inside: float = 0.0) -> None:
+    yaw = fence_yaw(axis, inside) if inside != 0.0 else (90.0 if axis == "x" else 0.0)
     a = a0 + step * 0.5
     while a < a1:
         if all(abs(a - g[0]) > g[1] * 0.5 + step * 0.5 for g in gaps):
             if axis == "x":
-                put(kit, a, c, 90.0, 1.0, dy, -1, 0.0, False)
+                put(kit, a, c, yaw, 1.0, dy, -1, 0.0, False)
             else:
-                put(kit, c, a, 0.0, 1.0, dy, -1, 0.0, False)
+                put(kit, c, a, yaw, 1.0, dy, -1, 0.0, False)
         a += step
 
 
-fence_run("x", YARD_Z0 + 0.5, XW, 160.0, gaps=[(-145.0, 5.0)])
-fence_run("z", 159.5, YARD_Z0, EMB_Z0)
-fence_run("z", 159.5, EMB_Z1, RAIL_Z1, dy=EMB_H)
+fence_run("x", YARD_Z0 + 0.5, XW, 160.0, gaps=[(-145.0, 5.0)], inside=1.0)
+fence_run("z", 159.5, YARD_Z0, EMB_Z0, inside=-1.0)
+fence_run("z", 159.5, EMB_Z1, RAIL_Z1, dy=EMB_H, inside=-1.0)
 fence_run("x", RAIL_Z1 - 0.5, -152.0, 160.0, "rail_fence", dy=EMB_H, step=3.0)
-fence_run("z", -151.5, SITE[3], EMB_Z0)
-fence_run("z", -151.5, EMB_Z1, RAIL_Z1, gaps=[(TRACKS[1], 10.0)], dy=EMB_H)
-fence_run("x", 111.5, XW, -152.0)
-fence_run("z", XW + 0.5, YARD_Z0, -17.5)
-fence_run("z", XW + 0.5, 17.5, 112.0)
+fence_run("z", -151.5, SITE[3], EMB_Z0, inside=1.0)
+fence_run("z", -151.5, EMB_Z1, RAIL_Z1, gaps=[(TRACKS[1], 10.0)], dy=EMB_H, inside=1.0)
+fence_run("x", 111.5, XW, -152.0, inside=-1.0)
+fence_run("z", XW + 0.5, YARD_Z0, -17.5, inside=1.0)
+fence_run("z", XW + 0.5, 17.5, 112.0, inside=1.0)
 for zz in (-17.5, 17.5):
-    fence_run("x", zz, XW + 0.5, XC - 0.2)
+    fence_run("x", zz, XW + 0.5, XC - 0.2, inside=-1.0 if zz < 0 else 1.0)
+# выход «Дворами к насыпи» — пролом в заборе района (три места плит, 7,5 м): плиту у запада проломили тараном изнутри
+# (дыра 1,3 × 1,95 м, обломки наружу), восточную повалили наружу — лежит рельефом вверх; посередине плиты нет — проход
+# 2,5 м остаётся чистым для группы и чужих отрядов. Других проломов в заборе нет: пролом читается как выход.
+put("po2_breach", -146.75, YARD_Z0 + 0.5, fence_yaw("x", 1.0), 1.0, 0.0, -1, 0.0, False)
+put("po2_fallen", -141.75, YARD_Z0 + 0.5, fence_yaw("x", 1.0), 1.0, 0.0, -1, 0.0, False)
 for (x, z, yaw) in [(-214.0, YARD_Z0 + 4.0, 45.0), (-214.0, 108.0, 135.0), (20.0, YARD_Z0 + 4.0, 0.0), (90.0, YARD_Z0 + 4.0, 0.0),
                     (156.0, YARD_Z0 + 4.0, -45.0), (156.0, 60.0, -90.0), (156.0, 196.0, -90.0), (-148.0, 205.0, 90.0)]:
     put("watchtower", x, z, yaw, 1.0, 0.0, -1, 0.0, True)
@@ -2405,12 +2430,6 @@ def tf(b: dict) -> str:
 ENV_FILE = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
 ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
 ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
-SHARPEN_EXT, SHARPEN_MAT = LIGHT.sharpen_resources("sharpen", "SharpenMat")
-# окружение — одно на блокаут и рейд
-ENV_FILE = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
-ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
-ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
-SHARPEN_EXT, SHARPEN_MAT = LIGHT.sharpen_resources("sharpen", "SharpenMat")
 scene = [
     '[gd_scene format=3]',
     '[ext_resource type="Script" path="res://src/blockout/prospekt_landscape.gd" id="land"]',
@@ -2420,13 +2439,11 @@ scene = [
     '[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]',
     # свет — tools/prospekt_light.py (владелец 2026-10-26: вариант стенда «всё вместе», черты освещения EFT)
     f'[ext_resource type="Environment" path="{LIGHT.ENV_PATH}" id="env"]',
-    SHARPEN_EXT, *SHARPEN_MAT,
     '[node name="ProspektStudy" type="Node3D"]',
     'script = ExtResource("launch")',
     'metadata/purpose = "Карта «Проспект» — серый блокаут, редакция 3: проспект с поворотом на 90° · правило масштаба E"',
     '[node name="WorldEnvironment" type="WorldEnvironment" parent="."]', 'environment = ExtResource("env")',
     '[node name="EveningSun" type="DirectionalLight3D" parent="."]', *LIGHT.SUN_PROPS,
-    *LIGHT.sharpen_nodes(".", "sharpen", "SharpenMat"),
     '[node name="Landscape" type="Node3D" parent="."]', 'script = ExtResource("land")',
     '[node name="Filler" type="Node3D" parent="."]', 'script = ExtResource("fill")',
 ]

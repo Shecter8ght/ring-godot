@@ -21,8 +21,8 @@ const VIEWS: Array[Dictionary] = [
 ]
 ## SDFGI набирает отражённый свет и глаз привыкает не сразу
 const SETTLE_FRAMES: int = 240
-## Слои, которые остаются: резкость карты, капли на линзе, «объектив» камеры игрока
-const KEEP_LAYERS: Array[String] = ["Sharpen", "LensLayer"]
+## Слои, которые остаются: капли на линзе, «объектив» камеры игрока
+const KEEP_LAYERS: Array[String] = ["LensLayer"]
 
 
 func _ready() -> void:
@@ -49,7 +49,7 @@ func _ready() -> void:
 		if marauders:
 			for m: Node in marauders.get_children():
 				m.queue_free()
-		# прячем интерфейс (HUD уровня и игрока); погода (капли на линзе), резкость и «объектив» остаются
+		# прячем интерфейс (HUD уровня и игрока); погода (капли на линзе) и «объектив» остаются
 		for layer: Node in get_tree().root.find_children("*", "CanvasLayer", true, false):
 			if not (String(layer.name) in KEEP_LAYERS or layer is RainLens):
 				(layer as CanvasLayer).visible = false
