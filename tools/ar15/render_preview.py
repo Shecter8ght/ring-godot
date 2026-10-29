@@ -10,6 +10,8 @@ HDRI = os.path.join(os.path.dirname(bpy.app.binary_path), f"{bpy.app.version[0]}
                     "datafiles", "studiolights", "world", "forest.exr")
 # имя → (камера мм, цель мм, фокусное, положения управления)
 VIEWS = {
+    "f1_side_right": ((-15, -2300, -62), (-15, 0, -62), 85, {}),         # целиком строго сбоку
+    "f2_side_left": ((-15, 2300, -62), (-15, 0, -62), 85, {}, 180),
     "01_full_right": ((540, -1020, 270), (35, 0, -40), 50, {}),
     "02_full_left": ((-430, 1020, 230), (45, 0, -40), 50, {"suppressor_on": 1.0}, 180),
     "03_receiver_right": ((-15, -330, 95), (-92, 0, -12), 55, {}),
