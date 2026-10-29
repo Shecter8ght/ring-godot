@@ -373,11 +373,11 @@ func stop(box: Variant) -> void:
 
 ## Коробка-проекция: Y — по нормали n, Z — по flow; центр сдвинут по flow на shift (источник у края).
 func _box(parent: Node, mat: ShaderMaterial, p: Vector3, n: Vector3, flow: Vector3, size: Vector3, shift: float) -> MeshInstance3D:
+	# сперва выкинуть удалённые вместе с родителем (filter отдаёт нетипизированный Array — только через assign),
+	# потом старейшие сверх предела
+	_boxes.assign(_boxes.filter(func(b: Variant) -> bool: return is_instance_valid(b)))
 	while _boxes.size() >= int(Balance.BLOOD.max_boxes):
-		var old: MeshInstance3D = _boxes.pop_front()
-		if is_instance_valid(old):
-			old.queue_free()
-	_boxes = _boxes.filter(func(b: MeshInstance3D) -> bool: return is_instance_valid(b))
+		_boxes.pop_front().queue_free()
 	var y := n.normalized()
 	var z := (flow - y * flow.dot(y)).normalized()
 	var x := y.cross(z).normalized()
