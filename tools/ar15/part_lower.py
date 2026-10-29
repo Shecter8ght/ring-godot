@@ -3,7 +3,8 @@
 # оси сборки и разборки, фиксатор буфера.
 import math
 import bpy
-from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, GRIP_SEAM_BACK_X, GRIP_SCREW_X, SEAM_ARC_R,
+from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, GRIP_SEAM_BACK_X, GRIP_SCREW_X, GRIP_BACK_C1,
+                 GRIP_BACK_R1,
                  REAR_FILLET_R,
                  REAR_PLAN_R, SEAM_EDGE,
                  LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
@@ -39,19 +40,19 @@ PIVOT_BOSS_H = 0.7
 
 
 REAR_X = LOWER_REAR + 0.5            # задняя грань под башней буферной трубки (заподлицо с её задним торцом)
-# задняя часть под башней: выемка за рукоятью — дуга окружности SEAM_ARC_R от шва (lib.GRIP_SEAM_BACK_X) вверх, из неё
-# выпуклым углом REAR_FILLET_R — задняя грань; угол дуги — сколько помещается между швом и задней гранью
+# задняя часть под башней: выемка за рукоятью — дуга окружности lib.GRIP_BACK_R1 от шва вверх, из неё выпуклым углом
+# REAR_FILLET_R — задняя грань
 
 
 def rear_pts():
     """Задний срез ресивера от шва с рукоятью вверх до задней грани: точки (x, z), снизу вверх."""
-    r, rc = SEAM_ARC_R, REAR_FILLET_R
-    cx = GRIP_SEAM_BACK_X - r
-    beta = math.acos(1.0 - (GRIP_SEAM_BACK_X - REAR_X) / (r + rc))     # дуга + угол ровно доходят до задней грани
-    pts = [(cx + r * math.cos(beta * k / 12), GRIP_TOP_Z + r * math.sin(beta * k / 12)) for k in range(13)]
-    bx, bz = pts[-1]
-    fx, fz = bx + rc * math.cos(beta), bz + rc * math.sin(beta)     # середина выпуклого угла
-    pts += [(fx + rc * math.cos(math.pi + beta * (1 - k / 6)), fz + rc * math.sin(math.pi + beta * (1 - k / 6)))
+    (cx, cz), r, rc = GRIP_BACK_C1, GRIP_BACK_R1, REAR_FILLET_R
+    fx = REAR_X + rc                                               # выпуклый угол касается задней грани и окружности
+    fz = cz + math.sqrt((r + rc) ** 2 - (fx - cx) ** 2)
+    a0 = math.asin((GRIP_TOP_Z - cz) / r)                          # шов на окружности
+    a1 = math.atan2(fz - cz, fx - cx)                              # касание с выпуклым углом
+    pts = [(cx + r * math.cos(a0 + (a1 - a0) * k / 12), cz + r * math.sin(a0 + (a1 - a0) * k / 12)) for k in range(13)]
+    pts += [(fx + rc * math.cos(math.pi + a1 - a1 * k / 6), fz + rc * math.sin(math.pi + a1 - a1 * k / 6))
             for k in range(1, 7)]
     return pts
 
