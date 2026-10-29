@@ -54,7 +54,7 @@ func _build() -> void:
 	title.add_theme_color_override("font_color", ACCENT)
 	title.add_theme_constant_override("outline_size", 0)
 	left.add_child(title)
-	var sub := _label("Сектор 1 · торговый центр «Кольцо»", 16, DIM)
+	var sub := _label("Сектор 1 · торговый центр «РИНГ»", 16, DIM)
 	left.add_child(sub)
 	# в выпуске для друзей — метка сборки и номер патча: у хоста и гостя они должны совпадать
 	if ReleasePatch.label() != "":
