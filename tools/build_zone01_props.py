@@ -6,7 +6,7 @@
 газонные дуги, советские баки 0.75 м³, козырьки. Сделано по фото-референсам (референсы/zone05/)
 в реальных размерах; материал — имя слота (assets/zone01/materials/<слот>.tres), UV в метрах.
 Пишет assets/zone01/models/<имя>.glb и assets/zone01/models/props.json (коллизии, размеры).
-Деревья (берёза, тополь, клён) — поздняя осень: почти голые, редкие листья гроздьями-карточками.
+Деревьев здесь нет: берёза — tools/build_birch.py, клёны и тополя — tools/zone01_trees.
 """
 from __future__ import annotations
 
@@ -313,94 +313,6 @@ def sandbox() -> Builder:
     return b
 
 
-# ------------------------------------------------------------------ деревья
-
-TREE_KINDS = {
-    # высота, радиус ствола, доля голого ствола, ветвей 1-го порядка, угол от вертикали, кора, листва, доля листьев
-    "birch": (15.0, 0.17, 0.32, 14, 38.0, "BarkBirch", "LeavesBirch", 0.4),
-    "poplar": (22.0, 0.32, 0.22, 16, 26.0, "BarkDark", "LeavesMaple", 0.08),
-    "maple": (10.0, 0.14, 0.25, 9, 58.0, "BarkDark", "LeavesMaple", 0.22),
-}
-
-
-def tree(kind: str, seed: int) -> Builder:
-    rng = random.Random(seed)
-    b = Builder()
-    H, R, bare, primaries, spread, bark, leaves, leafy = TREE_KINDS[kind]
-    H *= rng.uniform(0.85, 1.12)
-    lean = Vector((rng.uniform(-0.08, 0.08), 1.0, rng.uniform(-0.08, 0.08))).normalized()
-
-    def limb(start: Vector, direction: Vector, length: float, radius: float, depth: int) -> None:
-        # бюджет: ствол 8 граней, ветки 5–4, веточки — 3 грани в 2 сегмента, без торцов
-        segs = 5 if depth == 0 else (4 if depth == 1 else (3 if depth == 2 else 2))
-        sides = (8, 5, 4, 3)[min(depth, 3)]
-        mat = bark
-        p = start.copy()
-        d = direction.normalized()
-        pts = [p.copy()]
-        for k in range(segs):
-            # ветви первого порядка тянутся вверх, мелкие — свисают (берёза) или торчат
-            if depth == 0:
-                d = (d + Vector((rng.gauss(0, 0.04), 0.02, rng.gauss(0, 0.04)))).normalized()
-            elif depth == 1:
-                d = (d + Vector((rng.gauss(0, 0.12), 0.06, rng.gauss(0, 0.12)))).normalized()
-            else:
-                droop = 0.22 if kind == "birch" else 0.06
-                d = (d + Vector((rng.gauss(0, 0.2), -droop, rng.gauss(0, 0.2)))).normalized()
-            p = p + d * (length / segs)
-            pts.append(p.copy())
-        for k in range(segs):
-            r0 = radius * (1 - k / segs * 0.75)
-            r1 = radius * (1 - (k + 1) / segs * 0.75)
-            b.cyl(mat, pts[k], pts[k + 1], (r0 + r1) * 0.5, sides, caps=False)
-        if depth >= 3:
-            if rng.random() < leafy:
-                leaf_card(pts[-1], d)
-            return
-        if depth == 0:
-            count = primaries
-            t0 = bare
-        else:
-            count = (5, 4, 3)[depth - 1] if depth < 3 else 0
-            t0 = 0.25
-        for c in range(count):
-            t = t0 + (1 - t0) * (c + rng.random()) / count
-            idx = min(int(t * segs), segs - 1)
-            frac = t * segs - idx
-            base = pts[idx].lerp(pts[idx + 1], frac)
-            az = rng.uniform(0, 2 * math.pi) if depth == 0 else rng.uniform(0, 2 * math.pi)
-            ang = math.radians(spread if depth == 0 else rng.uniform(30, 55))
-            side = Vector((math.cos(az), 0, math.sin(az)))
-            child_dir = (d * math.cos(ang) + side * math.sin(ang)).normalized()
-            if depth == 0:
-                child_len = length * (0.42 if kind != "poplar" else 0.33) * (1.15 - 0.6 * t) * rng.uniform(0.8, 1.15)
-            else:
-                child_len = length * rng.uniform(0.4, 0.6)
-            limb(base, child_dir, child_len, radius * (0.42 if depth == 0 else 0.5) * (1.1 - 0.5 * t), depth + 1)
-        if depth >= 2 and rng.random() < leafy:
-            leaf_card(pts[-1], d)
-
-    def leaf_card(at: Vector, d: Vector) -> None:
-        s = rng.uniform(0.7, 1.1)
-        for k in range(2):
-            a = rng.uniform(0, math.pi) + k * math.pi / 2
-            ax = Vector((math.cos(a), 0, math.sin(a))) * s * 0.5
-            up = Vector((0, s, 0))
-            c0 = at - ax - up * 0.3
-            card(b, leaves, [c0, c0 + ax * 2, c0 + ax * 2 + up, c0 + up], [(0, 0), (1, 0), (1, 1), (0, 1)])
-
-    if kind == "maple":
-        # клён ясенелистный — 2–3 ствола из одного корня
-        for k in range(rng.choice([2, 3])):
-            az = rng.uniform(0, 2 * math.pi)
-            d = (lean + Vector((math.cos(az), 0, math.sin(az))) * 0.35).normalized()
-            limb(Vector((0, -0.2, 0)), d, H * rng.uniform(0.75, 0.95), R, 0)
-    else:
-        limb(Vector((0, -0.3, 0)), lean, H, R, 0)
-    b.collide((0, H * 0.3, 0), (R * 2.2, H * 0.6, R * 2.2))
-    return b
-
-
 # ------------------------------------------------------------------ экспорт
 
 def main() -> None:
@@ -415,10 +327,7 @@ def main() -> None:
         "play_swing": swing(), "play_slide": slide(), "play_carousel": carousel(), "play_arch": climbing_arch(),
         "play_sandbox": sandbox(),
     }
-    # берёза — tools/build_birch.py
-    for kind in ("poplar", "maple"):
-        for v in range(3):
-            items[f"tree_{kind}_{v}"] = tree(kind, 100 + v * 17 + len(kind))
+    # деревья — свои: берёза — tools/build_birch.py, клёны и тополя — tools/zone01_trees
     manifest = {}
     for name, b in items.items():
         tris = kh.export(name, b)

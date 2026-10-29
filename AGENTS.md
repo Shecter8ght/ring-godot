@@ -234,6 +234,15 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/pro
                                                               # индекс P_*) → --import; исходники — E:/Models Blender/ENVIRONMENT/RING_Prospekt_Plants
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_plants_perf.tscn [-- off] # кадры в секунду у растений «Проспекта»
                                                               # (сквер, берёзы, тополя, сверху); «off» — растения скрыты, сравнение в одной сборке
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/zone01_trees/<этап>.py -- [maple negundo poplar] [preview]
+                                                              # клёны и тополя зоны 1 (клён остролистный и ясенелистный, тополь берлинский; поздняя осень):
+                                                              # forms (форма, -- maple poplar; check_forms.py — повторное открытие) → python -X utf8
+                                                              # tools/zone01_trees/leaf_textures.py (осенние листья ambientCG LeafSet028/006/007) → pbr (UCUPaint) →
+                                                              # export_game (атлас веточек, LOD0/LOD1/дальний → assets/zone01/trees) → python -X utf8
+                                                              # tools/zone01_trees/godot_assets.py (WebP, материалы) → --import; исходники — E:/Models Blender/ENVIRONMENT/RING_Zone01_Trees
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/zone01_trees_perf.tscn [-- off] # клёны и тополя зоны 1: кадры в секунду и снимки
+                                                              # (двор, ряд тополей, центр, с высоты, опушка, сверху) → docs/screens/zone01_trees/<метка>_*; off — скрыты;
+                                                              # ZONE01_TREES_TAG — метка, ZONE01_TREES_ONLY=клён_вблизи,ясенелистный_вблизи,тополь_вблизи — крупные планы
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)

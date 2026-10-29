@@ -565,3 +565,16 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
 - Иконки `assets/icons/mag_939_10/20/30.png`, `optic_pso_01.png`, `optic_4x_01.png` — снимки этих моделей (`tools/icon_bake.tscn`).
 - Сетки окуляра `pso_vss/pso_vss_reticle.png` (ПСО-1) и `scope_4x32/scope_4x32_reticle.png` — нарисованы скриптом
   `tools/vss_m_v8/reticles.py` для проекта RING; цифры — штриховой шрифт Hershey из OpenCV (общественное достояние).
+
+## Зона 1 · клёны и тополя (`assets/zone01/trees`)
+
+- Клён остролистный, клён ясенелистный, тополь берлинский — собственные модели проекта (генератор `tools/zone01_trees/` на
+  ветвлении `tools/prospekt_plants/plib.py`; форма принята владельцем 2026-10-29; исходники —
+  `E:\Models Blender\ENVIRONMENT\RING_Zone01_Trees`). Атласы веточек и дальние силуэты — рендер своих моделей.
+- Листья клёна остролистного — сканы осенних листьев ambientCG LeafSet028 (CC0, https://ambientcg.com/view?id=LeafSet028),
+  поставлены по оси листа; листочки ясенелистного и листья тополя — ambientCG LeafSet006 (CC0,
+  https://ambientcg.com/view?id=LeafSet006) и LeafSet007 (CC0, https://ambientcg.com/view?id=LeafSet007), зелёный лист тополя —
+  LeafSet024 (через лист растений «Проспекта»); переформованы под контур листа вида (`tools/zone01_trees/leaf_textures.py`).
+  Сырьё с license.txt — `_asset_src/zone01_trees/` и `_asset_src/birch/`.
+- Кора — Poly Haven «Bark Brown 02» (CC0) и ambientCG Bark001 (CC0); гладкая кора ветвей — собственная процедурная растений
+  «Проспекта» (`assets/models/plants/textures/poplar_bark_young_*`, `shrub_bark_*`).

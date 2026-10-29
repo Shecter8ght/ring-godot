@@ -90,6 +90,30 @@ def palmate_angles(sh: Palmate) -> list:
     return sorted(a for a in out if -179.5 <= a <= 179.5)
 
 
+# Режим листа клёна: "form" — сетка по контуру вида (форма на просмотр); "alpha" — для PBR и игры: сетка с запасом
+# в рамке MAPLE_FRAME, край листа — альфа настоящего осеннего листа (tools/zone01_trees/leaf_textures.py, та же рамка).
+LEAF_MODE = "form"
+MAPLE_FRAME = (0.95, -0.42, 1.12)       # x ∈ [−0,95; 0,95], y ∈ [−0,42; 1,12] в долях длины листа
+
+
+def alpha_radius(th: float) -> float:
+    """Контур сетки под альфу: с запасом на все лопасти (выемки закрыты), обрезан рамкой."""
+    a = abs(th)
+    if a < 60.0:
+        r = 1.15
+    elif a < 100.0:
+        r = 1.15 - 0.4 * (a - 60.0) / 40.0
+    elif a < 125.0:
+        r = 0.75 - 0.13 * (a - 100.0) / 25.0
+    else:
+        r = 0.62 - 0.32 * (a - 125.0) / 55.0
+    xh, y0, y1 = MAPLE_FRAME
+    t = math.radians(th)
+    sx, cy = abs(math.sin(t)), math.cos(t)
+    lim = min(xh * 0.985 / sx if sx > 1e-6 else 9.0, (y1 * 0.985 / cy) if cy > 1e-6 else (-y0 * 0.985 / -cy if cy < -1e-6 else 9.0))
+    return min(r, lim)
+
+
 def palmate_leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, normal: Vector, length: float, sh: Palmate,
                  mat: str, col: tuple, stalk_r: float = 0.0013) -> None:
     """Пальчатый лист на длинном черешке: веер от прикрепления, второе кольцо на полрадиуса (изгиб «блюдцем»)."""
@@ -108,11 +132,16 @@ def palmate_leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, norm
     cup = sh.cup * rng.uniform(0.6, 1.4)
     droop = sh.droop * rng.uniform(0.5, 1.5)
     twist = rng.uniform(-0.06, 0.06)
-    angs = palmate_angles(sh)
-    rad = [palmate_radius(sh, a) for a in angs]
-    span = max(max(r * abs(math.sin(math.radians(a))) for a, r in zip(angs, rad)), 1e-3)
-    y_lo = min(r * math.cos(math.radians(a)) for a, r in zip(angs, rad))
-    y_hi = max(r * math.cos(math.radians(a)) for a, r in zip(angs, rad))
+    if LEAF_MODE == "alpha":
+        angs = [-179.0 + 358.0 * i / 47 for i in range(48)]
+        rad = [alpha_radius(a) for a in angs]
+        span, y_lo, y_hi = MAPLE_FRAME
+    else:
+        angs = palmate_angles(sh)
+        rad = [palmate_radius(sh, a) for a in angs]
+        span = max(max(r * abs(math.sin(math.radians(a))) for a, r in zip(angs, rad)), 1e-3)
+        y_lo = min(r * math.cos(math.radians(a)) for a, r in zip(angs, rad))
+        y_hi = max(r * math.cos(math.radians(a)) for a, r in zip(angs, rad))
     cell = (m.leaves * 7 + 3) % 4
     cu, cv = 0.5 * (cell % 2), 0.5 * (cell // 2)
 
@@ -131,11 +160,12 @@ def palmate_leaf(m: Mesh, rng: random.Random, attach: Vector, grow: Vector, norm
     inner = [(x * 0.5, y * 0.5) for x, y in ring]
     c0 = (0.0, 0.0)
     N = len(ring)
+    # обход против часовой со стороны лица (+n): контур идёт по углу по часовой — вершины в обратном порядке
     for i in range(N - 1):
         j = i + 1
-        m.poly(mat, [place(*c0), place(*inner[i]), place(*inner[j])], [luv(*c0), luv(*inner[i]), luv(*inner[j])], col)
-        m.poly(mat, [place(*inner[i]), place(*ring[i]), place(*ring[j]), place(*inner[j])],
-               [luv(*inner[i]), luv(*ring[i]), luv(*ring[j]), luv(*inner[j])], col)
+        m.poly(mat, [place(*c0), place(*inner[j]), place(*inner[i])], [luv(*c0), luv(*inner[j]), luv(*inner[i])], col)
+        m.poly(mat, [place(*inner[i]), place(*inner[j]), place(*ring[j]), place(*ring[i])],
+               [luv(*inner[i]), luv(*inner[j]), luv(*ring[j]), luv(*ring[i])], col)
 
 
 PLATANOIDES = Palmate(lobes=[(0.0, 1.0, 34.0, [(0.62, 0.11, 7.5)]),
@@ -457,7 +487,10 @@ def stubs(m: Mesh, rng: random.Random, tr: Branch, z0: float, z1: float, count: 
         r = rng.uniform(*r_rng)
         start = p + o * rt * 0.7
         mid = start + d * L * 0.5 + plib.rand_unit(rng) * 0.02
-        m.tube("dead", [start, mid, start + d * L], [r * 1.15, r * 0.9, r * 0.75], plib.sides_for(r) if r > 0.012 else 5)
+        if plib.LOD is not None and r * 1.15 < plib.LOD.get("min_r", 0.0):
+            continue
+        m.tube("dead", [start, mid, start + d * L], [r * 1.15, r * 0.9, r * 0.75],
+               plib.lod_sides(plib.sides_for(r) if r > 0.012 else 5), col_fn=plib.LOD.get("col") if plib.LOD else None)
 
 
 def walk(root: Branch, dead: set) -> list:

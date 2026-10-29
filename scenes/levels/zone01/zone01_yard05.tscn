@@ -891,60 +891,96 @@ script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_0"
-model = "res://assets/zone01/models/tree_poplar_0.glb"
+model = "res://assets/zone01/trees/tree_poplar_0_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.36
+far_model = "res://assets/zone01/trees/tree_poplar_0_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_poplar_0_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="TreePoplar1" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_1"
-model = "res://assets/zone01/models/tree_poplar_1.glb"
+model = "res://assets/zone01/trees/tree_poplar_1_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.44
+far_model = "res://assets/zone01/trees/tree_poplar_1_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_poplar_1_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="TreePoplar2" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_2"
-model = "res://assets/zone01/models/tree_poplar_2.glb"
+model = "res://assets/zone01/trees/tree_poplar_2_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.16
+far_model = "res://assets/zone01/trees/tree_poplar_2_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_poplar_2_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="TreeMaple0" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_0"
-model = "res://assets/zone01/models/tree_maple_0.glb"
+model = "res://assets/zone01/trees/tree_maple_0_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.22
+far_model = "res://assets/zone01/trees/tree_maple_0_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_maple_0_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="TreeMaple1" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_1"
-model = "res://assets/zone01/models/tree_maple_1.glb"
+model = "res://assets/zone01/trees/tree_maple_1_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.13
+far_model = "res://assets/zone01/trees/tree_maple_1_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_maple_1_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="TreeMaple2" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")
 local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_2"
-model = "res://assets/zone01/models/tree_maple_2.glb"
+model = "res://assets/zone01/trees/tree_maple_2_lod0.glb"
+materials_dir = "res://assets/zone01/trees/materials"
+cell = 24.0
 view_distance = 900.0
-cell = 96.0
-trunk_radius = 0.25
+trunk_radius = 0.18
+far_model = "res://assets/zone01/trees/tree_maple_2_far.glb"
+near_distance = 160.0
+mid_model = "res://assets/zone01/trees/tree_maple_2_lod1.glb"
+mid_distance = 45.0
+far_cell = 128.0
 
 [node name="BirchA" parent="Vegetation" type="Node3D"]
 script = ExtResource("6")

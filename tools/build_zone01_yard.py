@@ -265,6 +265,11 @@ def scatter(s: z1.Scene) -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     for key in trees:
+        if key in z1.TREE_Z1_RADIUS:
+            # клёны и тополя — свои модели с LOD (tools/zone01_trees)
+            s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",
+                   key=key, local_points=True, **z1.z1_tree(key))
+            continue
         extra = dict(far_model=f"{MODELS}/{key}_far.glb", near_distance=320.0) if key.startswith(("spruce", "birch", "pine")) else {}
         radius = round(z1.pine_radius(key), 3) if key.startswith("pine") else 0.25
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_yard_scatter.json",

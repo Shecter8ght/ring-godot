@@ -792,13 +792,27 @@ def undergrowth_nodes(s: "Scene", parent: str, data_path: str) -> None:
                foliage_tint=Raw(f"Color({tint[0]}, {tint[1]}, {tint[2]}, 1)"))
 
 
+# клёны и тополя (tools/zone01_trees): LOD0 до 45 м, LOD1 до 160 м, дальний силуэт до 900 м крупной клеткой; материалы свои;
+# коллизия ствола — по радиусу экземпляра (у ясенелистного — общий низ трёх стволов)
+TREES_Z1 = "res://assets/zone01/trees"
+TREE_Z1_RADIUS = {"tree_maple_0": 0.22, "tree_maple_1": 0.13, "tree_maple_2": 0.18, "tree_poplar_0": 0.36, "tree_poplar_1": 0.44,
+                  "tree_poplar_2": 0.16}
+
+
+def z1_tree(key: str) -> dict:
+    """Свойства узла DistrictScatter клёна / тополя зоны 1 (одни и те же в мире и во дворе)."""
+    return dict(model=f"{TREES_Z1}/{key}_lod0.glb", mid_model=f"{TREES_Z1}/{key}_lod1.glb", far_model=f"{TREES_Z1}/{key}_far.glb",
+                materials_dir=f"{TREES_Z1}/materials", mid_distance=45.0, near_distance=160.0, view_distance=900.0, cell=24.0,
+                far_cell=128.0, trunk_radius=TREE_Z1_RADIUS[key])
+
+
 def vegetation_nodes(s: "Scene") -> None:
     script = s.resource("res://src/world/district_scatter.gd", "Script")
     s.node("Vegetation")
     keys = [f"tree_{k}_{v}" for k in ("poplar", "maple") for v in range(3)]
     for key in keys:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
-               key=key, model=f"res://assets/zone01/models/{key}.glb", view_distance=550.0, cell=96.0, trunk_radius=0.25)
+               key=key, **z1_tree(key))
     for key in SPRUCES + BIRCHES:
         s.node(key.title().replace("_", ""), "Vegetation", script=script, data_path="res://data/zone01_vegetation.json",
                key=key, model=f"res://assets/zone01/models/{key}.glb", far_model=f"res://assets/zone01/models/{key}_far.glb",

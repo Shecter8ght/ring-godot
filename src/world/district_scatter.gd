@@ -35,6 +35,11 @@ extends Node3D
 ## Дальний вид (два скрещённых силуэта, tools/build_spruce.py): дальше near_distance — он вместо модели.
 @export_file("*.glb") var far_model: String = ""
 @export var near_distance: float = 90.0
+## Средний вид (LOD1: ветви толще, карточек меньше; tools/zone01_trees): от mid_distance до near_distance — он вместо модели.
+@export_file("*.glb") var mid_model: String = ""
+@export var mid_distance: float = 45.0
+## Клетка дальнего вида, м (0 — как cell): силуэтов видно сотни, крупная клетка — меньше вызовов отрисовки.
+@export var far_cell: float = 0.0
 ## Заслоняет ли россыпь свет в SDFGI. Да: без этого кроны и стволы освещены со всех сторон, как одиночное
 ## дерево в поле, — лес белёсый, «в инее» (проба 2026-10-19, владелец: цвет деревьев исказился). Нет —
 ## под кронами светлее, но сама листва без своей тени.
@@ -77,6 +82,12 @@ func _build() -> void:
 	if mesh == null:
 		return
 	var far_mesh: Mesh = _load_model(far_model) if far_model != "" else null
+	var mid_mesh: Mesh = _load_model(mid_model) if mid_model != "" else null
+	# дальше ближней модели — средняя (если есть), затем дальний вид
+	var near_end: float = mid_distance if mid_mesh else (near_distance if far_mesh else view_distance)
+	var mid_end: float = near_distance if far_mesh else view_distance
+	var far_separate: bool = far_mesh != null and far_cell > cell
+	var far_cells: Dictionary = {}
 	# из координат точек — в координаты узла: мир минус положение узла или через корень сцены
 	var to_node: Transform3D = Transform3D(Basis.IDENTITY, -global_position)
 	if local_points and is_inside_tree():
@@ -126,13 +137,39 @@ func _build() -> void:
 		var mmi := MultiMeshInstance3D.new()
 		mmi.name = "_Cell_%d_%d" % [c.x, c.y]
 		mmi.multimesh = mm
-		mmi.visibility_range_end = near_distance if far_mesh else view_distance
-		mmi.visibility_range_end_margin = 8.0 if far_mesh else view_distance * 0.1
+		mmi.visibility_range_end = near_end
+		mmi.visibility_range_end_margin = 8.0 if (far_mesh or mid_mesh) else view_distance * 0.1
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_STATIC if gi_occluder else GeometryInstance3D.GI_MODE_DISABLED
 		add_child(mmi)
-		if far_mesh:
+		if mid_mesh:
+			var md := MultiMesh.new()
+			md.transform_format = MultiMesh.TRANSFORM_3D
+			md.mesh = mid_mesh
+			md.instance_count = mm.instance_count
+			for i in range(mm.instance_count):
+				md.set_instance_transform(i, mm.get_instance_transform(i))
+			var mdi := MultiMeshInstance3D.new()
+			mdi.name = "_Mid_%d_%d" % [c.x, c.y]
+			mdi.multimesh = md
+			mdi.visibility_range_begin = mid_distance
+			mdi.visibility_range_begin_margin = 6.0
+			mdi.visibility_range_end = mid_end
+			mdi.visibility_range_end_margin = 8.0 if far_mesh else view_distance * 0.1
+			mdi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			mdi.cast_shadow = mmi.cast_shadow
+			mdi.gi_mode = mmi.gi_mode
+			add_child(mdi)
+		if far_separate:
+			# дальний вид — своей крупной клеткой (после обхода)
+			for i in range(mm.instance_count):
+				var t: Transform3D = mm.get_instance_transform(i)
+				var fc := Vector2i(int(floor(float(list[i][0]) / far_cell)), int(floor(float(list[i][2]) / far_cell)))
+				if not far_cells.has(fc):
+					far_cells[fc] = []
+				(far_cells[fc] as Array).append(t)
+		elif far_mesh:
 			var fm := MultiMesh.new()
 			fm.transform_format = MultiMesh.TRANSFORM_3D
 			fm.mesh = far_mesh
@@ -150,6 +187,25 @@ func _build() -> void:
 			fmi.cast_shadow = mmi.cast_shadow
 			fmi.gi_mode = mmi.gi_mode
 			add_child(fmi)
+	for fc: Vector2i in far_cells:
+		var ts: Array = far_cells[fc]
+		var fm := MultiMesh.new()
+		fm.transform_format = MultiMesh.TRANSFORM_3D
+		fm.mesh = far_mesh
+		fm.instance_count = ts.size()
+		for i in range(ts.size()):
+			fm.set_instance_transform(i, ts[i])
+		var fmi := MultiMeshInstance3D.new()
+		fmi.name = "_Far_%d_%d" % [fc.x, fc.y]
+		fmi.multimesh = fm
+		fmi.visibility_range_begin = near_distance
+		fmi.visibility_range_begin_margin = 8.0
+		fmi.visibility_range_end = view_distance
+		fmi.visibility_range_end_margin = view_distance * 0.1
+		fmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		fmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		fmi.gi_mode = GeometryInstance3D.GI_MODE_STATIC if gi_occluder else GeometryInstance3D.GI_MODE_DISABLED
+		add_child(fmi)
 
 
 func _mesh() -> Mesh:

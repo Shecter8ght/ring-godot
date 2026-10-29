@@ -43,10 +43,15 @@ def materials(kind: str) -> dict:
 
 
 def build_group(group: str) -> tuple:
+    _, title, kinds = GROUPS[group]
+    return build_set(title, kinds)
+
+
+def build_set(title: str, kinds: list) -> tuple:
+    """Сцена осмотра: экземпляры видов kinds в ряд, модули веточек впереди, мерка, пол и солнце."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.unit_settings.system = "METRIC"
-    _, title, kinds = GROUPS[group]
     root = plib.new_collection(title)
     x = 0.0
     out = []

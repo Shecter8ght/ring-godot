@@ -1,0 +1,22 @@
+[gd_resource type="ShaderMaterial" load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://src/world/spruce_bark.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark001/albedo.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark001/normal.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/models/plants/textures/poplar_bark_young_albedo.webp" id="4"]
+[ext_resource type="Texture2D" path="res://assets/models/plants/textures/poplar_bark_young_normal.webp" id="5"]
+[ext_resource type="Texture2D" path="res://assets/models/plants/textures/poplar_bark_young_arm.webp" id="6"]
+
+[resource]
+resource_name = "PlantZ1PoplarBark_2"
+shader = ExtResource("1")
+shader_parameter/old_albedo = ExtResource("2")
+shader_parameter/old_normal = ExtResource("3")
+shader_parameter/young_albedo = ExtResource("4")
+shader_parameter/young_normal = ExtResource("5")
+shader_parameter/young_arm = ExtResource("6")
+shader_parameter/old_height = 2.2
+shader_parameter/old_saturation = 0.45
+shader_parameter/old_tint = Color(0.8, 0.8, 0.78, 1)
+shader_parameter/young_tint = Color(1, 1, 1, 1)
+shader_parameter/moss = 0.5
