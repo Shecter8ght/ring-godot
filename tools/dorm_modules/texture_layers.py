@@ -1,6 +1,6 @@
 """Слоистые материалы общежития (Blender): облупленная краска, побелка → штукатурка → кирпич, паркет «ёлочкой»,
-плитка 20 × 20 с выбитыми, треснувшими и сколотыми плитками. Карты — из Designer (sd_paint.py, sd_plaster.py
-+ post_cells.py) и gen_floor_maps.py в папке textures комплекта.
+плитка 20 × 20 с выбитыми, треснувшими и сколотыми плитками. Карты — gen_paint_v3.py (краска v03, узлы — paint_v3.py),
+Designer (sd_plaster.py + post_cells.py) и gen_floor_maps.py в папке textures комплекта.
 
 Износ на стенах — атрибут цвета вершин «Износ» (R — краска/побелка, G — штукатурка до кирпича, B — грязь),
 его раскладывает wear_layout() и можно докрашивать кистью (Vertex Paint). Доли повреждений — узлы «Значение»
@@ -136,9 +136,11 @@ def wall(g, P, facade: bool = False) -> None:
     paint_wear = g.math("ADD", g.math("ADD", base_paint, g.math("MULTIPLY", w[0], 0.45)), g.math("MULTIPLY", var, 0.4), True)
     wash_wear = g.math("ADD", g.math("ADD", base_wash, g.math("MULTIPLY", w[0], 0.35)), g.math("MULTIPLY", var, 0.25), True)
     loss_wear = g.math("ADD", g.math("ADD", base_loss, g.math("MULTIPLY", w[1], 0.5)), g.math("MULTIPLY", var, 0.1), True)
-    vec = g.uv(0.5)
-    bvec = g.uv(0.5)
-    pc, pr, ph = paint_layer(g, P, vec, paint_wear)
+    import paint_v3
+    # Координаты от мира: рисунок краски и побелки идёт через стыки модулей без шва.
+    vec, frame = paint_v3.wall_coords(g, 0.5)
+    bvec = vec
+    pc, pr, pn = paint_v3.paint_v3(g, vec, paint_wear, frame)
     wc, wr, wh = wash_layer(g, P, vec, wash_wear, loss_wear, bvec)
     z = g.sep(g.tc.outputs["Object"])[2]
     zz = g.math("ADD", z, g.math("MULTIPLY", g.noise(g.tc.outputs["Object"], 1.5, 2.0), 0.012))
@@ -149,7 +151,8 @@ def wall(g, P, facade: bool = False) -> None:
     dirt = g.math("MULTIPLY", g.math("ADD", w[2], g.math("SUBTRACT", 1.0, g.math("MULTIPLY", z, 4.0), True)), g.noise(g.tc.outputs["Object"], 5.0, 5.0))
     color = g.mix(g.math("MULTIPLY", dirt, 0.8), color, _c("3b3428"), "MULTIPLY")
     rough = g.mixf(lower, wr, pr)
-    height = g.mixf(lower, wh, ph)
+    n_wash = g.bump(wh, 1.0, 0.012)
+    normal = vmix(g, lower, n_wash, pn)
     if facade:
         obj = g.sep(g.tc.outputs["Object"])
         vt = g.node("ShaderNodeVectorTransform", vector_type="NORMAL", convert_from="WORLD", convert_to="OBJECT")
@@ -157,14 +160,25 @@ def wall(g, P, facade: bool = False) -> None:
         reveal = g.math("LESS_THAN", g.math("ABSOLUTE", g.sep(vt.outputs[0])[1]), 0.5)
         color = g.mix(reveal, color, wc)
         rough = g.mixf(reveal, rough, wr)
-        height = g.mixf(reveal, height, wh)
+        normal = vmix(g, reveal, normal, n_wash)
         outside = g.math("LESS_THAN", obj[1], -0.2)
         facade_col = g.tint(_c("a49f93"), g.math("ADD", g.math("MULTIPLY", gray(g, P["plaster_plaster_tone"], vec), 0.3), 0.8))
         streak = g.noise(g.mix(1.0, g.tc.outputs["Object"], (8.0, 8.0, 0.6, 1.0), "MULTIPLY"), 3.0, 6.0)
         facade_col = g.mix(g.math("MULTIPLY", g.lum(g.ramp(streak, 0.5, 0.75)), 0.5), facade_col, _c("6f675a"))
         color = g.mix(outside, color, facade_col)
         rough = g.mixf(outside, rough, 0.92)
-    g.out_bsdf(color, rough, g.bump(height, 1.0, 0.012))
+        normal = vmix(g, outside, normal, n_wash)
+    g.out_bsdf(color, rough, normal)
+
+
+def vmix(g, fac, a, b):
+    """Смешение векторов (нормалей) узлом Mix."""
+    nd = g.node("ShaderNodeMix", data_type="VECTOR")
+    ins = {s.identifier: s for s in nd.inputs}
+    g.link(fac, ins["Factor_Float"])
+    g.link(a, ins["A_Vector"])
+    g.link(b, ins["B_Vector"])
+    return next(s for s in nd.outputs if s.identifier == "Result_Vector")
 
 
 # ---------------------------------------------------------------- паркет и плитка
