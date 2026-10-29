@@ -238,8 +238,10 @@ func _verify() -> void:
 	var pp: Array = checks.get("pit", [-44.0, -70.0])
 	var tp: Array = checks.get("tunnel", [-44.0, 0.0])
 	var yard_y: float = _ray_y(float(pp[0]), float(pp[1]))
-	var pit_y: float = _ray_y(float(pp[0]), float(pp[1]), -1.0, 6.0)
-	_check("Паркинг −1: плита двора на нуле, пол на −3,2", absf(yard_y) < 0.2 and absf(pit_y + 3.2) < 0.2, {"yard_y": yard_y, "pit_y": pit_y})
+	var want_pit: float = float(checks.get("pit_y", -3.2))
+	var pit_y: float = _ray_y(float(pp[0]), float(pp[1]), -1.0, -want_pit + 3.0)
+	_check("Паркинг −1: плита двора на нуле, пол на %.1f" % want_pit, absf(yard_y) < 0.2 and absf(pit_y - want_pit) < 0.2,
+		{"yard_y": yard_y, "pit_y": pit_y})
 	var road_y: float = _ray_y(float(tp[0]), float(tp[1]))
 	var tunnel_y: float = _ray_y(float(tp[0]), float(tp[1]), -0.6, 6.0)
 	_check("Подземный переход: дорога сверху, пол на −3,3", absf(road_y) < 0.2 and absf(tunnel_y + 3.3) < 0.2, {"road_y": road_y, "tunnel_y": tunnel_y})
@@ -392,7 +394,7 @@ func _shots() -> void:
 		{"id": "08_supermarket_hall", "at": Vector3(-108, 1.62, 50), "look": Vector3(-102, 1.5, 82)},
 		{"id": "09_dock_yard", "at": Vector3(-102, 1.62, 95), "look": Vector3(-60, 1.5, 97)},
 		{"id": "10_yard_zhk", "at": Vector3(-125, 1.62, -100), "look": Vector3(-175, 2, -82)},
-		{"id": "11_parking_minus1", "at": Vector3(-110, -1.6, -42), "look": Vector3(-170, -2.2, -42)},
+		{"id": "11_parking_minus1", "at": Vector3(-110, -5.68, -42), "look": Vector3(-170, -5.0, -42)},
 		{"id": "12_ramp", "at": Vector3(-110.6, 1.62, -9), "look": Vector3(-117.5, -0.5, -30)},
 		{"id": "13_curve", "at": Vector3(-40, 1.62, -12), "look": Vector3(40, 3, 30)},
 		{"id": "14_vershina_plaza", "at": Vector3(10, 1.62, 6), "look": Vector3(60, 20, -40)},
@@ -415,13 +417,13 @@ func _shots() -> void:
 		{"id": "30_dps_post", "at": Vector3(46, 1.62, 128), "look": Vector3(56, 1.5, 108)},
 		# редакция 4 (замечания владельца 2026-10-24)
 		{"id": "31_bank_vault", "at": Vector3(-26.5, -1.6, -50), "look": Vector3(-34, -2.2, -42)},
-		{"id": "32_dig_tunnel", "at": Vector3(-63, -1.6, -43), "look": Vector3(-38, -2.2, -43)},
+		{"id": "32_dig_tunnel", "at": Vector3(-63, -5.68, -52), "look": Vector3(-43, -3.0, -44)},
 		{"id": "33_bank_roof", "at": Vector3(-8, 13.9, -36), "look": Vector3(-30, 13.0, -58)},
 		{"id": "34_square_playground", "at": Vector3(-2, 1.62, 143), "look": Vector3(-36, 1.5, 168)},
 		{"id": "35_train_square", "at": Vector3(16, 1.62, 205), "look": Vector3(-6, 3.0, 240)},
 		{"id": "36_bird_south", "at": Vector3(110, 110, 150), "look": Vector3(-20, 0, 200)},
 		{"id": "37_supermarket_checkouts", "at": Vector3(-100, 1.62, 51), "look": Vector3(-138, 2.0, 56)},
-		{"id": "38_pit_rows", "at": Vector3(-190, -1.6, -60.4), "look": Vector3(-150, -2.0, -60.4)},
+		{"id": "38_pit_rows", "at": Vector3(-190, -5.68, -60.4), "look": Vector3(-150, -4.6, -60.4)},
 		{"id": "39_monument", "at": Vector3(-26, 1.62, 50), "look": Vector3(-10, 3.0, 70)},
 		{"id": "40_bird_bank", "at": Vector3(30, 60, 0), "look": Vector3(-30, 0, -50)},
 		# редакция 5 (замечания владельца 2026-10-25)
@@ -433,8 +435,8 @@ func _shots() -> void:
 		{"id": "46_station_platform", "at": Vector3(-112, 9.2, 259.5), "look": Vector3(-140, 8.5, 262)},
 		{"id": "47_site_pit", "at": Vector3(-96, 2.5, 160), "look": Vector3(-114, -3, 182)},
 		{"id": "48_perimeter_north", "at": Vector3(-100, 1.62, -100), "look": Vector3(-60, 3, -111)},
-		{"id": "49_parking_wrecks", "at": Vector3(-150, -1.6, -60.4), "look": Vector3(-120, -2.4, -60.4)},
-		{"id": "51_dig_lights", "at": Vector3(-72, -1.6, -40), "look": Vector3(-60, -2.6, -44)},
+		{"id": "49_parking_wrecks", "at": Vector3(-150, -5.68, -60.4), "look": Vector3(-120, -5.6, -60.4)},
+		{"id": "51_dig_lights", "at": Vector3(-72, -5.68, -40), "look": Vector3(-50, -4.6, -46)},
 		{"id": "52_bird_tower", "at": Vector3(-70, 70, 120), "look": Vector3(-5, 0, 60)},
 		{"id": "53_bird_station", "at": Vector3(-40, 70, 170), "look": Vector3(-115, 0, 225)},
 		# редакция 6 (владелец 2026-10-25): шесть путей и контактная сеть, провода в городе, спуски в паркинг в углах двора

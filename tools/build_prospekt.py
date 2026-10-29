@@ -56,7 +56,10 @@ F = RH + SW                    # 15.65 — край тротуара от оси
 STORY_FLAT = 2.7 * HK
 STORY_RETAIL = 4.0
 DOOR_H = 2.1 * HK
-PIT_Y = -3.2
+# паркинг −1: 6 м в свету под балками 0,9 м и плитой двора 0,4 м — выбор владельца на стенде 2026-10-29
+# (tools/parking_probe.tscn, зал D: «как в Таркове»); было −3,2
+PIT_Y = -7.3
+PIT_BEAM = 0.9                                                  # глубина балок паркинга
 TUNNEL_Y = -3.3
 
 XW = -218.0                    # западный край карты
@@ -790,12 +793,25 @@ surface("yard_road", "road", -213.0, YARD_Z0 + 2.5, -42.0, YARD_Z0 + 9.5)
 PIT = [-212.0, -88.0, -43.2, -33.0]                             # паркинг −1 под парковкой, двором и домами
 RW = [PIT[0], PIT[0] + 7.8]                                     # западный спуск — в продолжение западного торцевого проезда
 RE = [PIT[2] - 7.8, PIT[2]]                                     # восточный спуск
-RAMP_TOP, RAMP_BOT = YARD_Z0 + 9.5, -92.5                       # верх у хозяйственного проезда, низ — перед стеной паркинга
+# верх у хозяйственного проезда; уклон 17 % — на глубину 7,3 м рампа длиннее двора, поэтому низ уходит внутрь паркинга
+# по торцевому проезду (под плитой двора над рампой — 4,1…6 м)
+RAMP_SLOPE = 0.17
+RAMP_TOP = YARD_Z0 + 9.5
+RAMP_BOT = RAMP_TOP + (-PIT_Y) / RAMP_SLOPE
+
+
+def ramp_y(z: float) -> float:
+    """Высота полотна рампы над уровнем двора в точке z."""
+    return -min(max(z - RAMP_TOP, 0.0), RAMP_BOT - RAMP_TOP) * RAMP_SLOPE
 for (x0, x1, side) in [(RW[0], RW[1], -1.0), (RE[0], RE[1], 1.0)]:
-    plan["ramps"].append({"x0": x0, "x1": x1, "z0": RAMP_TOP, "z1": RAMP_BOT, "y0": 0.0, "y1": PIT_Y, "mat": "concrete"})
+    plan["ramps"].append({"x0": x0, "x1": x1, "z0": RAMP_TOP, "z1": RAMP_BOT, "y0": 0.0, "y1": PIT_Y, "mat": "concrete",
+                          "fill": True})
     walk_x = (x0, x0 + 1.0) if side < 0 else (x1 - 1.0, x1)      # тротуар вдоль наружной стены, на 15 см выше
     plan["ramps"].append({"x0": walk_x[0], "x1": walk_x[1], "z0": RAMP_TOP, "z1": RAMP_BOT, "y0": 0.15, "y1": PIT_Y + 0.15, "mat": "walk"})
-    slab("ramp_floor_%d" % int(-x0), [x0, RAMP_BOT, x1, PIT[1]], PIT_Y, 0.4, "concrete")
+    # внутри паркинга у внутренней кромки рампы — стальной отбойник на метр выше полотна
+    edge = x1 if side < 0 else x0
+    plan["ramps"].append({"x0": edge - 0.12, "x1": edge + 0.12, "z0": PIT[1], "z1": RAMP_BOT, "y0": ramp_y(PIT[1]) + 1.0,
+                          "y1": PIT_Y + 1.0, "mat": "steel"})
     plan["ground_holes"].append([x0 - 0.3, RAMP_TOP, x1 + 0.3, PIT[1] - 0.4])
     for wx in (x0 - 0.3, x1):
         wall(wx, RAMP_TOP, wx + 0.3, PIT[1] - 0.4, PIT_Y - 0.4, 1.1, "concrete")
@@ -809,10 +825,12 @@ for (x0, x1, side) in [(RW[0], RW[1], -1.0), (RE[0], RE[1], 1.0)]:
     u("U03_03_parking_sign", x1 + 1.2 if side < 0 else x0 - 1.2, RAMP_TOP - 1.0, 180.0)
     put("speed_bump", (x0 + x1) * 0.5, RAMP_TOP - 1.4, 90.0)
     sign("паркинг −1 · въезд / выезд", (x0 + x1) * 0.5, 4.6, RAMP_TOP - 0.2, 40)
-    for zz in (RAMP_TOP + 6.0, (RAMP_TOP + RAMP_BOT) * 0.5 + 4.0, RAMP_BOT + 1.0):
+    for zz in (RAMP_TOP + 6.0, PIT[1] - 6.0):                    # под навесом во дворе
         plan["lamps"].append([(x0 + x1) * 0.5, 2.6, zz, 0.45, 8.0])
-put("booth", RW[1] + 14.0, -85.0, 0.0, 1.0, PIT_Y, -1, 0.0, True)       # пост охраны у низа западной рампы (ряд A)
-loot(RW[1] + 14.0, PIT_Y, -82.0, "cabinet", "common", "будка охраны паркинга")
+    for zz in (PIT[1] + 6.0, RAMP_BOT - 2.0):                   # внутри — под балками
+        plan["lamps"].append([(x0 + x1) * 0.5, -0.4 - PIT_BEAM - 0.1, zz, 0.6, 12.0])
+put("booth", RW[1] + 3.9, PIT[1] + 1.6, 0.0, 1.0, PIT_Y, -1, 0.0, True)  # пост охраны у низа западной рампы — в углу
+loot(RW[1] + 3.9, PIT_Y, PIT[1] + 3.4, "cabinet", "common", "будка охраны паркинга")  # торцевого проезда у северной стены
 # ряды: места 5,3 в глубину, проезды 7,8; с севера на юг — A | проезд 1 | B C | проезд 2 | D E | проезд 3 | F
 STALL_D, AISLE = 5.3, 7.8
 ROWS = []                                                       # (имя, z0, z1, курс машины носом к «спине» ряда)
@@ -828,7 +846,9 @@ COL_Z.append(z)
 ROWS.append(("E", z, z + STALL_D, 180.0)); z += STALL_D
 AISLES.append((z, z + AISLE)); z += AISLE
 ROWS.append(("F", z, PIT[3], 0.0))
-X_ROW0, X_ROW1 = PIT[0] + AISLE, PIT[2] - AISLE                  # места между поперечными проездами
+# у стен — полосы рамп (рампа уходит внутрь паркинга до RAMP_BOT), рядом с ними — сквозные торцевые проезды:
+# все поперечные проезды соединены и у западной, и у восточной стены (иначе проезд 1 упирался в отбойники рамп)
+X_ROW0, X_ROW1 = PIT[0] + AISLE * 2.0, PIT[2] - AISLE * 2.0     # места между торцевыми проездами
 BAY = 8.0                                                       # колонна 0,5 + три места по 2,5
 TUNNEL_Z = (-44.0, -42.0)                                       # подкоп из хранилища банка — в восточную стену у проезда 3
 for srf in plan["surfaces"]:
@@ -841,11 +861,30 @@ wall(PIT[0] - 0.4, PIT[1] - 0.4, PIT[0], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
 wall(PIT[2], PIT[1] - 0.4, PIT[2] + 0.4, TUNNEL_Z[0], PIT_Y, -0.4, "concrete")
 wall(PIT[2], TUNNEL_Z[1], PIT[2] + 0.4, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
 wall(PIT[2], TUNNEL_Z[0], PIT[2] + 0.4, TUNNEL_Z[1], -1.0, -0.4, "concrete")
+wall(PIT[2], TUNNEL_Z[0], PIT[2] + 0.4, TUNNEL_Z[1], PIT_Y, -3.2, "concrete")      # под проломом подкопа (−3,2…−1)
 wall(RW[1], PIT[1] - 0.4, RE[0], PIT[1], PIT_Y, -0.4, "concrete")             # северная стена — проёмы рамп в торцах
 wall(PIT[0], PIT[3], PIT[2], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
 # колонны — по линиям «спина к спине» через три места; в проездах колонн нет
 for cz in COL_Z:
-    plan["columns"].append({"rect": [X_ROW0, cz, X_ROW1, cz], "y0": PIT_Y, "y1": -0.4, "grid": BAY, "size": 0.5, "mat": "concrete"})
+    plan["columns"].append({"rect": [X_ROW0, cz, X_ROW1, cz], "y0": PIT_Y, "y1": -0.4, "grid": BAY, "size": 0.9, "mat": "concrete"})
+# отделка как в Таркове (владелец 2026-10-29, зал D стенда): капители под балками, полосы от бамперов на низе колонн,
+# балки 0,6 × 0,9 поперёк на каждой колонне и вдоль по линиям колонн, воздуховоды у кромок проездов, трубы над рядами,
+# потолок — бетон (изнанка плиты двора раньше рисовалась плиткой двора)
+BEAM_Y = -0.4 - PIT_BEAM * 0.5
+COL_X = [X_ROW0 + k * BAY for k in range(int((X_ROW1 - X_ROW0) / BAY) + 1)]
+slab("pit_ceiling", [PIT[0], PIT[1], PIT[2], PIT[3]], -0.4, 0.04, "concrete")
+for cx in COL_X:
+    box(cx, BEAM_Y, (PIT[1] + PIT[3]) * 0.5, 0.6, PIT_BEAM, PIT[3] - PIT[1], "slab", 0.0, False)
+    for cz in COL_Z:
+        box(cx, -0.4 - PIT_BEAM - 0.2, cz, 2.2, 0.4, 2.2, "slab", 0.0, False)
+        for k in range(6):
+            box(cx, PIT_Y + 0.1 + k * 0.2, cz, 0.94, 0.2, 0.94, "accent" if k % 2 == 0 else "dark", 0.0, False)
+for cz in COL_Z:
+    box((X_ROW0 + X_ROW1) * 0.5, BEAM_Y, cz, X_ROW1 - X_ROW0, PIT_BEAM, 0.6, "slab", 0.0, False)
+for (a0, a1) in AISLES:
+    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.3, a1 - 0.9, X_ROW1 - X_ROW0, 0.5, 1.2, "wall", 0.0, False)
+for (row, z0, z1, _yaw) in ROWS:
+    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.12, (z0 + z1) * 0.5, X_ROW1 - X_ROW0, 0.14, 0.14, "rust", 0.0, False)
 
 
 def stall_free(x: float, row: str) -> bool:
@@ -889,23 +928,27 @@ for (row, z0, z1, yaw) in ROWS:
 # проезды: свет по оси, пешеходные дорожки вдоль торцевых проездов (продолжают тротуары рамп)
 for (a0, a1) in AISLES:
     for x in range(int(X_ROW0) + 8, int(X_ROW1), 16):
-        plan["lamps"].append([x, -0.9, (a0 + a1) * 0.5, 0.5, 9.0])
+        plan["lamps"].append([x, -0.4 - PIT_BEAM - 0.1, (a0 + a1) * 0.5, 0.6, 12.0])
     box((X_ROW0 + X_ROW1) * 0.5, PIT_Y + 0.01, (a0 + a1) * 0.5, X_ROW1 - X_ROW0, 0.02, 0.12, "stripe", 0.0, False)
 for x in (PIT[0] + 0.5, PIT[2] - 0.5):
     box(x, PIT_Y + 0.01, (PIT[1] + PIT[3]) * 0.5, 1.0, 0.02, PIT[3] - PIT[1] - 1.0, "marker", 0.0, False)
     for z in range(int(PIT[1]) + 6, int(PIT[3]), 14):
-        plan["lamps"].append([x + (3.5 if x < -100 else -3.5), -0.9, z, 0.5, 9.0])
+        plan["lamps"].append([x + (3.5 if x < -100 else -3.5), -0.4 - PIT_BEAM - 0.1, z, 0.6, 12.0])
+for x in (X_ROW0 - AISLE * 0.5, X_ROW1 + AISLE * 0.5):             # торцевые проезды
+    box(x, PIT_Y + 0.01, (PIT[1] + PIT[3]) * 0.5, 0.12, 0.02, PIT[3] - PIT[1] - 6.0, "stripe", 0.0, False)
+    for z in range(int(PIT[1]) + 13, int(PIT[3]), 14):
+        plan["lamps"].append([x, -0.4 - PIT_BEAM - 0.1, z, 0.6, 12.0])
 for (row, z0, z1, _yaw) in ROWS:
-    sign("ряд " + row, PIT[0] + 4.0, -1.0, (z0 + z1) * 0.5, 30)
-    sign("ряд " + row, PIT[2] - 4.0, -1.0, (z0 + z1) * 0.5, 30)
+    sign("ряд " + row, PIT[0] + 4.0, PIT_Y + 4.0, (z0 + z1) * 0.5, 30)
+    sign("ряд " + row, PIT[2] - 4.0, PIT_Y + 4.0, (z0 + z1) * 0.5, 30)
 for x in ((RW[0] + RW[1]) * 0.5, (RE[0] + RE[1]) * 0.5):
-    sign("выезд ↑", x, -1.0, PIT[1] + 1.5, 34)
+    sign("выезд ↑", x, PIT_Y + 4.0, RAMP_BOT + 2.0, 34)
 # техпомещения в торцах ряда A: насосная и электрощитовая (закрыты)
 for (x0, x1, title) in [(X_ROW0, X_ROW0 + 12.0, "насосная"), (X_ROW1 - 12.0, X_ROW1, "электрощитовая")]:
     wall(x0, ROWS[0][2] - 0.2, x1, ROWS[0][2], PIT_Y, -0.4, "wall")
     wall(x0, PIT[1], x0 + 0.2, ROWS[0][2], PIT_Y, -0.4, "wall")
     wall(x1 - 0.2, PIT[1], x1, ROWS[0][2], PIT_Y, -0.4, "wall")
-    sign("паркинг −1 · " + title, (x0 + x1) * 0.5, -1.2, ROWS[0][2] + 1.0, 30)
+    sign("паркинг −1 · " + title, (x0 + x1) * 0.5, PIT_Y + 3.6, ROWS[0][2] + 1.0, 30)
 # брошенные посреди проездов машины, мусор и стекло по проездам, кучи мусора у стен
 for (kit, x, z, yaw) in [("car_wreck", -172.0, (AISLES[0][0] + AISLES[0][1]) * 0.5, 62.0), ("car_open", -142.0, (AISLES[1][0] + AISLES[1][1]) * 0.5, 112.0),
                          ("car", -90.0, (AISLES[0][0] + AISLES[0][1]) * 0.5, 31.0), ("car_wreck", -180.0, (AISLES[2][0] + AISLES[2][1]) * 0.5, 148.0),
@@ -938,7 +981,8 @@ for (x, z, kind, tier, note) in [(X_ROW0 + 3.0, AISLES[1][0] + 2.0, "body", "goo
 BX0, BX1, BZ0, BZ1 = -38.0, -4.0, -62.0, -34.0                  # первый этаж и −1
 UX0, UX1, UZ0, UZ1 = -40.0, -2.0, -64.0, -30.0                  # нависающие 2-й и 3-й
 BY = [0.0, 4.5, 8.4, 12.3]                                      # полы этажей и крыша
-BASE_Y = PIT_Y                                                  # пол −1 на уровне паркинга: подкоп без уклона
+BASE_Y = -3.2                                                   # пол −1 банка: прежний; паркинг стал глубже (6 м в свету),
+                                                                # подкоп выходит в его стену на 4,1 м выше пола — к пролому насыпь
 BFX0, BFX1, BFZ0, BFZ1 = -43.0, 6.0, -68.0, -21.0               # забор
 building_rect_bank = [UX0, UZ0, UX1, UZ1]
 plan["ground_holes"].append([BX0 - 0.4, BZ0 - 0.4, BX1 + 0.4, BZ1 + 0.4])
@@ -1119,15 +1163,24 @@ while x < BX0 - 1.0:
     x += 2.2
 for x in (PIT[2] + 6.0, PIT[2] + 14.0):
     plan["lamps"].append([x, -1.4, (TUNNEL_Z[0] + TUNNEL_Z[1]) * 0.5, 0.3, 5.0])
-put("trash_pile", PIT[2] - 2.0, -40.5, 0.0, 0.8, PIT_Y)
+# насыпь вынутого грунта к пролому (паркинг глубже подкопа на 4,1 м): пандус по торцевому проезду вдоль восточной стены,
+# 27 %, и площадка перед проломом — сплошные, под ними не ходят
+DIG_X = (PIT[2] - 4.4, PIT[2])
+DIG_LAND = (-45.0, -40.4)
+plan["ramps"].append({"x0": DIG_X[0], "x1": DIG_X[1], "z0": DIG_LAND[0] - 15.0, "z1": DIG_LAND[0], "y0": PIT_Y, "y1": BASE_Y,
+                      "mat": "mud", "fill": True})
+box((DIG_X[0] + DIG_X[1]) * 0.5, (PIT_Y + BASE_Y) * 0.5, (DIG_LAND[0] + DIG_LAND[1]) * 0.5, DIG_X[1] - DIG_X[0],
+    BASE_Y - PIT_Y, DIG_LAND[1] - DIG_LAND[0], "mud")
+put("trash_pile", PIT[2] - 2.0, -38.5, 0.0, 0.8, PIT_Y)
 for k in range(3):
-    put("bags", PIT[2] - 2.5 + k * 0.6, -44.8 - k * 0.4, k * 40.0, 1.0, PIT_Y)
-# у подкопа (владелец 2026-10-25): куча вынутого грунта, пыль по полу, пара прожекторов на треногах с кабелем
-for (x, z, sc) in [(PIT[2] - 3.5, -47.5, 1.3), (PIT[2] - 5.5, -45.8, 1.0), (PIT[2] - 3.0, -38.6, 1.1)]:
+    put("bags", PIT[2] - 1.5 + k * 0.4, -40.9 - k * 0.5, k * 40.0, 1.0, BASE_Y)
+# у подкопа (владелец 2026-10-25): куча вынутого грунта, пыль, пара прожекторов на треногах с кабелем — у подножия насыпи
+for (x, z, sc) in [(DIG_X[0] - 1.5, DIG_LAND[0] - 13.0, 1.3), (DIG_X[0] - 2.5, DIG_LAND[0] - 8.0, 1.0), (PIT[2] - 3.0, -37.6, 1.1)]:
     put("pile_dirt", x, z, rng.uniform(0, 360), sc, PIT_Y)
-for (x, z) in [(PIT[2] - 2.5, -43.0), (PIT[2] - 6.0, -42.0), (PIT[2] - 9.0, -44.5), (PIT[2] + 3.0, -43.0)]:
-    put("dust", x, z, rng.uniform(0, 360), 1.0, PIT_Y)
-for (x, z, yaw) in [(PIT[2] - 4.0, -45.4, 75.0), (PIT[2] - 4.0, -40.4, 110.0)]:
+for (x, z, y) in [(PIT[2] - 2.5, -43.0, BASE_Y), (PIT[2] - 3.5, -41.5, BASE_Y), (DIG_X[0] - 1.0, DIG_LAND[0] - 15.5, PIT_Y),
+                  (PIT[2] + 3.0, -43.0, BASE_Y)]:
+    put("dust", x, z, rng.uniform(0, 360), 1.0, y)
+for (x, z, yaw) in [(DIG_X[0] - 2.0, DIG_LAND[0] - 4.0, 60.0), (DIG_X[0] - 2.0, -39.0, 120.0)]:
     put("floodlight", x, z, yaw, 1.0, PIT_Y)
     plan["lamps"].append([x + 1.0, PIT_Y + 1.9, z, 1.6, 14.0])
 sign("подкоп в банк", PIT[2] - 1.0, -1.2, -43.0, 30)
@@ -2492,7 +2545,8 @@ plan["probe_routes"] = [
                 [-110.0, 252.0], [-110.0, 260.3]], "min_y": 7.0},
     {"id": "parking_minus1", "label": "двор → проезд вдоль забора → западный спуск → паркинг −1 → восточный торец", "max_open_m": 0.0,
      "points": [[-110.6, -96], [-110.6, YARD_Z0 + 6.0], [RW[0] + 6.5, YARD_Z0 + 6.0], [RW[0] + 6.5, YARD_Z0 + 9.5], [RW[0] + 6.5, -100.0],
-                [RW[0] + 6.5, -86.0], [RW[0] + 6.5, -78.0], [-150.0, -78.0], [-100.0, -78.0], [RE[1] - 6.5, -78.0]], "max_y": -2.6},
+                [RW[0] + 6.5, -86.0], [RW[0] + 6.5, RAMP_BOT + 1.5], [X_ROW0 - 3.9, RAMP_BOT + 1.5], [X_ROW0 - 3.9, -78.8],
+                [-150.0, -78.8], [-100.0, -78.8], [X_ROW1 + 3.9, -78.8]], "max_y": -2.6},
     {"id": "bank_roof", "label": "банк: калитка → зал → за стойку → ядро → три марша → крыша", "max_open_m": 0.0,
      "points": [[-21, -19], [-21, -33], [-21, -44], [-14.65, -46.5], [-14.65, -49.3], [-28.7, -49.3], [-28.7, -57.3],
                 [-28.7, -58.6], [-28.6, -59.0], [-37.8, -59.0], [-38.0, -61.0], [-28.6, -61.0], [-28.6, -59.2], [-37.8, -59.2],
@@ -2502,7 +2556,7 @@ plan["probe_routes"] = [
                 [RE[1] - 3.9, -86.0], [RE[1] - 3.9, -60.0], [RE[1] - 3.9, -43.0], [-37.0, -43.0], [-30.0, -45.5], [-22.5, -46.0], [-22.4, -60.2],
                 [-16.6, -60.3], [-15.0, -60.0], [-6.4, -60.0], [-5.4, -58.0], [-5.4, -55.0]], "min_y": -0.3},
 ]
-plan["checks"] = {"pit": [-156.0, -42.0], "yard": [-156.0, -42.0], "tunnel": [-156.0, 0.0],
+plan["checks"] = {"pit": [-156.0, -42.0], "pit_y": PIT_Y, "yard": [-156.0, -42.0], "tunnel": [-156.0, 0.0],
                   "cordon": {"from": [-203.0, 0.5], "to": [-226.0, 0.5], "stop_x": XC - 0.6}}
 
 FI["models_index"] = "res://data/urban95_models.json"
