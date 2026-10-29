@@ -1,6 +1,6 @@
 # RING — правила проекта для любого агента (Claude, Codex, локальные модели)
 
-Тактический extraction-шутер от первого лица (изометрии нет — обзор сверху только у разведдрона, docs/design/drone.md). Godot 4.7, GDScript, Forward+.
+Тактический extraction-шутер от первого лица (изометрии нет; разведдрон отменён владельцем 2026-10-29). Godot 4.7, GDScript, Forward+.
 Кооп на 3 игроков (один хостит). Реализм в графике: PBR, фототекстуры (CC0), реальные пропорции.
 
 **Начать с:** `docs/OWNER_NOTES.md` (решения и предпочтения владельца, как с ним работать), конец
@@ -387,7 +387,6 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/tv_light_shots.tscn
 tools/godot.cmd --headless res://tools/holster_test.tscn    # оружие убирается клавишей своего слота и достаётся ею же, бег быстрее; с открытым рюкзаком в рейде персонаж стоит
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/stickers_test.tscn # наклейки на оружии: клеить (предмет тратится), три на ствол, снять — пропала, зарубки «Счёта» за эвакуацию, страница верстака; снимок stickers_panel
 tools/godot.cmd --headless res://tools/sticker_icons.tscn  # иконки наклеек из их рисунков (assets/stickers/<id>.png владельца или знак кодом) → assets/icons; затем --import
-tools/godot.cmd --headless res://tools/birds_test.tscn     # птицы зоны 1: стаи сидят и кружат, взлетают от выстрела и от пробежавшего рядом, садятся, ночью нет, в дождь меньше; с окном — снимки birds_*
 tools/godot.cmd --headless res://tools/shelter_exit_test.tscn # выход в рейд пешком: запечённого света нет, дверь тамбура, коридор и лестница во двор, план у стола, зона сбора — отсчёт и рейд
 tools/godot.cmd --headless res://tools/printer_quest_test.tscn # задание «Фирменный знак»: этапы, сдача расходников разговором, печать наклеек, плёнка у Михалыча; с окном — снимок stickers_printer
 tools/godot.cmd --headless res://tools/mags_test.tscn      # магазины: ПОЛН/ПУСТ и оценка после проверки, снарядить/разрядить поштучно (MagOps), нет патронов — текст, разрядка в клетки ящика и буфер 3×3, плиты по одной, вопрос о буфере, держать R

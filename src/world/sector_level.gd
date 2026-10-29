@@ -107,11 +107,6 @@ func _ready() -> void:
 	var events := RaidEvents.new()
 	events.name = "Events"
 	add_child(events)
-	# птицы — на открытых картах (данные карты, ключ "birds"): узел у всех, взлёт рассылает хост
-	if _sector_def.has("birds"):
-		var birds := BirdFlocks.new()
-		birds.definition = _sector_def
-		add_child(birds)
 	# чужие отряды — «другие игроки» рейда (узел есть у всех: по нему хост шлёт рацию)
 	var rivals := RivalRaids.new()
 	rivals.name = "Rivals"
