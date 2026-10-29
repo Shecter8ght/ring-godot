@@ -52,6 +52,8 @@
 - Painted Plaster Wall, Amal Kumar, CC0 1.0, https://polyhaven.com/a/painted_plaster_wall — штукатурка под краской и побелкой (plaster_*)
 - Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпич под отвалившейся штукатуркой (brick_*)
 - Oak Veneer 01, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/oak_veneer_01 — дуб паркетных планок (floor_wood)
+- Painted Wood 008 A, ambientCG, CC0 1.0, https://ambientcg.com/view?id=PaintedWood008A — фактура и трещины краски на коробках, полотнах и окнах модулей (painted_wood_*, перекрашивается шейдером); сырьё — `_asset_src/dorm_textures/PaintedWood008A`
+- Модули `assets/models/dorm` (коробка двери, полотно, окно, батарея) — свои, Blender (tools/dorm_modules); краска батарей — та же green_metal_rust (Poly Haven, CC0), перекрашенная шейдером
 Сырьё — `_asset_src/dorm_textures/ph_*_4k` с license.txt.
 
 ## Декали попаданий (tools/import_impact_decals.py)

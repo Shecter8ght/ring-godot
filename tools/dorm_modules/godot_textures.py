@@ -58,6 +58,11 @@ MAPS = {
     "floor_mastic": ("floor_v3", "floor_mastic.png", (0, 1, 2, 3), 2048, "data"),
     "floor_break": ("floor_v3", "floor_break.png", (0, 1, 2, 3), 2048, "data"),
     "floor_break_normal": ("floor_v3", "floor_break_normal.png", (0, 1, 2), 2048, "normal"),
+    # крашеное дерево модулей (ambientCG PaintedWood008A, CC0) — по развёртке модулей
+    "painted_wood_albedo": ("@wood", "PaintedWood008A_2K-JPG_Color.jpg", (0, 1, 2), 2048, "color"),
+    "painted_wood_rough": ("@wood", "PaintedWood008A_2K-JPG_Roughness.jpg", (0,), 2048, "data"),
+    "painted_wood_normal": ("@wood", "PaintedWood008A_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
+    "painted_wood_ao": ("@wood", "PaintedWood008A_2K-JPG_AmbientOcclusion.jpg", (0,), 2048, "data"),
     # плитка
     "tile_masks": ("tiles_v3", "tile_masks.png", (0, 1, 2, 3), 4096, "data"),
     "tile_normal": ("tiles_v3", "tile_normal.png", (0, 1, 2), 2048, "normal"),
@@ -130,8 +135,12 @@ def write_import(dst: Path, kind: str) -> None:
         imp.write_text(text, encoding="utf-8", newline="\n")
 
 
+WOOD = ROOT / "_asset_src/dorm_textures/PaintedWood008A"
+
+
 def save(name: str, folder: str, file: str, chans: tuple, size: int, kind: str) -> Path:
-    a = resize(load(KIT / folder / file), size)[..., list(chans)]
+    src = WOOD / file if folder == "@wood" else KIT / folder / file
+    a = resize(load(src), size)[..., list(chans)]
     if kind == "field":
         dst = OUT / f"{name}.exr"
         cv2.imwrite(str(dst), a[..., 0].astype(np.float32), [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_HALF])

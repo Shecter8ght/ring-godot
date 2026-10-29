@@ -6,6 +6,7 @@ extends Node3D
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const StudyDoor = preload("res://src/blockout/dorm_study_door.gd")
 const ExteriorBatches = preload("res://src/blockout/dorm_exterior_batches.gd")
+const DormModules = preload("res://src/blockout/dorm_modules.gd")
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -13,6 +14,8 @@ const ExteriorBatches = preload("res://src/blockout/dorm_exterior_batches.gd")
 var split_gi_batches: bool = true
 var floor_levels: Array = []
 var gi_footprints: Array[Rect2] = []
+## Модули Blender этапа 2 (dorm_modules.gd) — null, если их файлов нет.
+var modules: RefCounted = null
 
 
 func _ready() -> void:
@@ -39,6 +42,7 @@ func rebuild() -> void:
 	if section.is_empty():
 		return
 	var palette: Dictionary = _palette(plan)
+	modules = DormModules.new(plan,section_id) if DormModules.available() else null
 	_build_geometry(self,section,palette)
 	for group_name: String in section.get("groups",{}):
 		var group: Node3D = Node3D.new()
@@ -46,6 +50,8 @@ func rebuild() -> void:
 		group.add_to_group("dorm_detail_"+group_name)
 		add_child(group)
 		_build_geometry(group,section.groups[group_name],palette)
+	if modules!=null:
+		modules.call("place",self)
 	for item: Dictionary in section.get("lights", []):
 		var lamp: Light3D = SpotLight3D.new() if String(item.get("type","omni"))=="spot" else OmniLight3D.new()
 		lamp.name = String(item.get("id","StudyFill"))
@@ -112,8 +118,12 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 			surface.material_override = palette["mirror"] as Material
 			surface.position = _vec(item.at)
 			target.add_child(surface)
+		elif modules!=null and bool(modules.call("skip",item,builder)):
+			continue
 		else:
-			builder.call("box",_vec(item.at),_vec(item.size),_batch_material(String(item.mat),float(item.at[1]),palette),bool(item.solid),deg_to_rad(float(item.yaw)))
+			var pieces: Array = [item] if modules==null else modules.call("trim",item,builder)
+			for piece: Dictionary in pieces:
+				builder.call("box",_vec(piece.at),_vec(piece.size),_batch_material(String(item.mat),float(item.at[1]),palette),bool(item.solid),deg_to_rad(float(item.yaw)))
 			if String(item.mat)=="glass" and bool(item.solid):
 				# Glass blocks walking but transmits light; visibility probes must skip it.
 				var body: StaticBody3D = builder.get("body") as StaticBody3D
@@ -148,6 +158,7 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		leaf.name = String(item.id)
 		leaf.set("data",item)
 		leaf.set("materials",palette)
+		if modules!=null:leaf.set("module_leaf",modules.call("leaf_mesh",item))
 		target.add_child(leaf)
 
 func _batch_material(key: String, height: float, palette: Dictionary) -> String:

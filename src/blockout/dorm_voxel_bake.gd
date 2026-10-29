@@ -3,7 +3,7 @@ extends RefCounted
 ## only during synchronous bake(), then restore the original mesh before any frame.
 ## The rendered geometry, shader, collision and base colors remain untouched.
 ## Материалы v03 (meta "dorm_gi", src/blockout/dorm_v3) подменяются своими средними цветами (замер по кадрам Blender).
-const VERSION = "dorm_v3_diffuse_proxy_1"
+const VERSION = "dorm_v3_diffuse_proxy_5_door_openings"
 const V3_COLORS: Dictionary = {"paint":"5b6b58","wash":"c3bfb3","reveal":"c3bfb3","ceiling":"b9b4a8","floor":"4d3a2b",
 	"tile":"beb9ab","tile_floor":"6c5343"}
 var plan: Dictionary
@@ -66,7 +66,18 @@ func _proxy(instance: MeshInstance3D) -> ArrayMesh:
 		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
 		var count: int = indices.size() if not indices.is_empty() else vertices.size()
 		var v3: String = String(material.get_meta("dorm_gi","")) if material.has_meta("dorm_gi") else ""
-		var tile: bool = v3!="wall" and (v3!="" or int((material as ShaderMaterial).get_shader_parameter("finish_mode"))>0)
+		var finish_mode: Variant = (material as ShaderMaterial).get_shader_parameter("finish_mode")
+		if v3=="" and finish_mode==null:
+			# Краска модулей (dorm_module_paint.gdshader) — своим цветом; иной шейдер — как есть.
+			var paint: Variant = (material as ShaderMaterial).get_shader_parameter("paint")
+			var proxy: StandardMaterial3D = null
+			if paint is Color:
+				proxy = StandardMaterial3D.new()
+				proxy.albedo_color = (paint as Color)*0.85
+			result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+			result.surface_set_material(result.get_surface_count()-1,proxy if proxy!=null else material)
+			continue
+		var tile: bool = v3!="wall" and (v3!="" or int(finish_mode)>0)
 		for face: int in range(0,count,3):
 			var polygon: Array[Vector3] = []
 			var normal: Vector3 = Vector3.UP

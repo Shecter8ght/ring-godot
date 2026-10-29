@@ -1,5 +1,5 @@
 extends SceneTree
-## Материалы общежития v03 в движке: карты загружены и в каком формате (поля EXR — половинной точности без
+## Материалы и модули общежития v03 в движке: карты загружены и в каком формате (поля EXR — половинной точности без
 ## сжатия: формат Image.FORMAT_RH = 9 / RGBH = 11), шейдеры разбираются, палитра стенда отдаёт v03 вместо черновых и каждому параметру нашлась карта.
 ##   tools/godot.cmd --headless --script res://tools/dorm_v3_check.gd
 
@@ -34,5 +34,26 @@ func _init() -> void:
 		print("%-10s %s  параметров %d  без карты %s" % [key, path.get_file(), params, missing])
 		if not path.contains("_v3") or not missing.is_empty() or params == 0:
 			failed += 1
+	# модули Blender: сетки, материалы по слотам, сколько мест на этаже
+	var Modules: GDScript = load("res://src/blockout/dorm_modules.gd") as GDScript
+	if not bool(Modules.call("available")):
+		print("модули: нет файлов assets/models/dorm")
+		failed += 1
+	else:
+		for part: String in ["door_frame", "door_leaf", "window", "radiator"]:
+			var mesh: Mesh = Modules.call("mesh", part) as Mesh
+			var node: MeshInstance3D = MeshInstance3D.new()
+			node.mesh = mesh
+			Modules.call("apply_materials", node)
+			var bare: int = 0
+			for s: int in range(mesh.get_surface_count()):
+				if node.get_surface_override_material(s) == null:
+					bare += 1
+			print("%-11s поверхностей %d, без материала %d, габарит %s" % [part, mesh.get_surface_count(), bare, mesh.get_aabb().size])
+			failed += bare
+			node.free()
+		for section: String in ["Floor1", "Floor2", "NorthAnnex", "CentralStair"]:
+			var m: RefCounted = Modules.new(plan, section)
+			print("%-12s дверей %d, окон %d" % [section, (m.get("doors") as Dictionary).size(), (m.get("windows") as Dictionary).size()])
 	print("dorm v3 check: ", "OK" if failed == 0 else "FAIL %d" % failed)
 	quit(1 if failed else 0)

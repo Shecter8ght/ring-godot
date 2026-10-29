@@ -530,11 +530,19 @@ func _v3_shots() -> void:
 	var fails: int = 0
 	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
 		leaf.call("reset_pose")
+	# свои кадры: DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (глаз и точка взгляда в метрах); с ними штатные — только из DORM_V3_VIEWS
+	var views: Array[Dictionary] = []
+	for spec: String in OS.get_environment("DORM_V3_VIEW").split(";",false):
+		var p: PackedStringArray = spec.split(":")
+		if p.size()==7:
+			views.append({"id":p[0],"eye":Vector3(p[1].to_float(),p[2].to_float(),p[3].to_float()),"look":Vector3(p[4].to_float(),p[5].to_float(),p[6].to_float())})
+	var all_shots: bool = only.is_empty() and views.is_empty()
 	for view: Dictionary in plan.shots:
-		if not only.is_empty() and String(view.id) not in only:
-			continue
-		camera.global_position = _vec(view.foot)+Vector3.UP*float(view.eye_height)
-		camera.look_at(_vec(view.look),Vector3.UP)
+		if all_shots or String(view.id) in only:
+			views.append({"id":view.id,"eye":_vec(view.foot)+Vector3.UP*float(view.eye_height),"look":_vec(view.look)})
+	for view: Dictionary in views:
+		camera.global_position = view.eye
+		camera.look_at(view.look,Vector3.UP)
 		await _frames(40)
 		# время кадра на видеокарте (как в пробе света: синхронизацию держит драйвер) — среднее за 60 кадров
 		var rid: RID = get_viewport().get_viewport_rid()
