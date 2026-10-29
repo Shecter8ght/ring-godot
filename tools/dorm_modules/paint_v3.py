@@ -21,9 +21,9 @@ from texture_layers import param, smoothstep, _c  # noqa: E402
 KIT = "E:/Models Blender/ENVIRONMENT/RING_Dorm_Modules/textures/paint_v3"
 
 
-def img(g, name: str, vec, color: bool = False):
+def img(g, name: str, vec, color: bool = False, folder: str = KIT):
     nd = g.node("ShaderNodeTexImage")
-    im = bpy.data.images.load(f"{KIT}/{name}", check_existing=True)
+    im = bpy.data.images.load(f"{folder}/{name}", check_existing=True)
     im.colorspace_settings.name = "sRGB" if color else "Non-Color"
     im.alpha_mode = "CHANNEL_PACKED"
     nd.image = im
@@ -94,6 +94,39 @@ def wall_coords(g, scale: float = 0.5):
     bvec = g.node("ShaderNodeCombineXYZ")
     bvec.inputs[2].default_value = 1.0
     return vec.outputs[0], (t.outputs[0], bvec.outputs[0], g.geo.outputs["Normal"])
+
+
+def out_normal(g, nx, ny, nz, frame):
+    """Нормаль из составляющих в осях карты: с рамкой (T, B, N) — в мире (n = nx·T + ny·B + nz·N), без неё —
+    касательные развёртки через узел Normal Map."""
+    if frame is not None:
+        acc = None
+        for comp, axis in zip((nx, ny, nz), frame):
+            sc = g.node("ShaderNodeVectorMath", operation="SCALE")
+            g.link(axis, sc.inputs[0])
+            g.link(comp, sc.inputs["Scale"])
+            if acc is None:
+                acc = sc.outputs[0]
+            else:
+                ad = g.node("ShaderNodeVectorMath", operation="ADD")
+                g.link(acc, ad.inputs[0])
+                g.link(sc.outputs[0], ad.inputs[1])
+                acc = ad.outputs[0]
+        nw = g.node("ShaderNodeVectorMath", operation="NORMALIZE")
+        g.link(acc, nw.inputs[0])
+        return nw.outputs[0]
+    vec_n = g.node("ShaderNodeCombineXYZ")
+    for i, sck in enumerate((nx, ny, nz)):
+        g.link(sck, vec_n.inputs[i])
+    nrm = g.node("ShaderNodeVectorMath", operation="NORMALIZE")
+    g.link(vec_n.outputs[0], nrm.inputs[0])
+    enc = g.node("ShaderNodeVectorMath", operation="MULTIPLY_ADD")
+    g.link(nrm.outputs[0], enc.inputs[0])
+    enc.inputs[1].default_value = (0.5, 0.5, 0.5)
+    enc.inputs[2].default_value = (0.5, 0.5, 0.5)
+    nm = g.node("ShaderNodeNormalMap")
+    g.link(enc.outputs[0], nm.inputs["Color"])
+    return nm.outputs[0]
 
 
 def paint_v3(g, vec, wear, frame=None):
@@ -211,34 +244,7 @@ def paint_v3(g, vec, wear, frame=None):
     nx = f.lerp(in_curl, nx, f.mul(f.mul(x, du), -0.9))
     ny = f.lerp(in_curl, ny, f.mul(f.mul(x, dv), -0.9))
     nz = f.lerp(in_curl, nz, nzc)
-    if frame is not None:
-        # n = nx·T + ny·B + nz·N — в мире, без касательных развёртки.
-        acc = None
-        for comp, axis in zip((nx, ny, nz), frame):
-            sc = g.node("ShaderNodeVectorMath", operation="SCALE")
-            g.link(axis, sc.inputs[0])
-            g.link(comp, sc.inputs["Scale"])
-            if acc is None:
-                acc = sc.outputs[0]
-            else:
-                ad = g.node("ShaderNodeVectorMath", operation="ADD")
-                g.link(acc, ad.inputs[0])
-                g.link(sc.outputs[0], ad.inputs[1])
-                acc = ad.outputs[0]
-        nw = g.node("ShaderNodeVectorMath", operation="NORMALIZE")
-        g.link(acc, nw.inputs[0])
-        nm_out = nw.outputs[0]
-    vec_n = g.node("ShaderNodeCombineXYZ")
-    for i, sck in enumerate((nx, ny, nz)):
-        g.link(sck, vec_n.inputs[i])
-    nrm = g.node("ShaderNodeVectorMath", operation="NORMALIZE")
-    g.link(vec_n.outputs[0], nrm.inputs[0])
-    enc = g.node("ShaderNodeVectorMath", operation="MULTIPLY_ADD")
-    g.link(nrm.outputs[0], enc.inputs[0])
-    enc.inputs[1].default_value = (0.5, 0.5, 0.5)
-    enc.inputs[2].default_value = (0.5, 0.5, 0.5)
-    nm = g.node("ShaderNodeNormalMap")
-    g.link(enc.outputs[0], nm.inputs["Color"])
+    nrm_out = out_normal(g, nx, ny, nz, frame)
     dbg = os.environ.get("PAINT_V3_DEBUG")
     if dbg:
         # Проверка масок: R — загиб, G — шпаклёвка, B — старый слой (или имя канала), без света.
@@ -253,4 +259,4 @@ def paint_v3(g, vec, wear, frame=None):
         em = g.node("ShaderNodeEmission")
         g.link(color, em.inputs[0])
         g.link(em.outputs[0], g.out.inputs[0])
-    return color, rough, (nm_out if frame is not None else nm.outputs[0])
+    return color, rough, nrm_out

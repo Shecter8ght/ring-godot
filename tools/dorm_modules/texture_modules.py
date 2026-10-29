@@ -196,19 +196,18 @@ def mat(name: str) -> bpy.types.Material:
 # ---------------------------------------------------------------- стены
 
 def whitewash_material(T: dict) -> None:
-    """Побелка по бетону: плиты, балки, низ маршей. Пятна от протечек, тонкие трещины по шву."""
+    """Побелка по бетону v03: плиты, балки, низ маршей — облетает, разводы протечек, плесень; до бетона редко."""
+    import plaster_v3
+    import tiles_v3
+    from texture_layers import param, world_noise
     g = G(mat("Побелка_потолок"))
-    vec = g.uv(0.5)
-    alb = g.image(T["plaster"]["albedo"], vec)
-    nor = g.image(T["plaster"]["normal"], vec, False)
-    lum = g.lum(alb.outputs[0])
-    obj = g.tc.outputs["Object"]
-    base = g.tint(srgb("dcddd5"), g.math("ADD", g.math("MULTIPLY", lum, 0.8), 0.6))
-    leak = g.lum(g.ramp(g.noise(obj, 0.7, 7.0, 0.7, 0.4), 0.58, 0.8))
-    color = g.mix(g.math("MULTIPLY", leak, 0.6), base, srgb("a8987a"))
-    ring = g.lum(g.ramp(g.noise(obj, 0.7, 7.0, 0.7, 0.4), 0.575, 0.585))
-    color = g.mix(g.math("MULTIPLY", ring, 0.5), color, srgb("7d6b52"))
-    g.out_bsdf(color, 0.93, g.normal_map(nor.outputs[0], 0.7))
+    vec, frame = tiles_v3.surface_coords(g, 0.5)
+    var = g.math("SUBTRACT", g.math("MULTIPLY", world_noise(g, 0.3), 1.4), 0.55)
+    wash = g.math("ADD", param(g, "Облетание побелки, база", 0.12), g.math("MULTIPLY", var, 0.3), True)
+    loss = g.math("ADD", param(g, "Штукатурка до бетона, база", 0.0), g.math("MULTIPLY", var, 0.06), True)
+    color, rough, normal = plaster_v3.wash_v3(g, vec, wash, loss, frame, under="concrete", stains=1.5,
+                                              coords=lambda pos: tiles_v3.surface_coords(g, 0.5, pos)[0])
+    g.out_bsdf(color, rough, normal)
 
 
 # ---------------------------------------------------------------- дерево, металл, мозаика

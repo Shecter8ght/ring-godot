@@ -1,6 +1,5 @@
-"""Слоистые материалы общежития (Blender): облупленная краска, побелка → штукатурка → кирпич, паркет «ёлочкой»,
-плитка 20 × 20 с выбитыми, треснувшими и сколотыми плитками. Карты — gen_paint_v3.py (краска v03, узлы — paint_v3.py),
-Designer (sd_plaster.py + post_cells.py) и gen_floor_maps.py в папке textures комплекта.
+"""Слоистые материалы общежития (Blender), v03: облупленная краска (paint_v3), побелка → штукатурка → кирпич
+(plaster_v3), паркет «ёлочкой» (floor_v3), плитка 200 × 200 (tiles_v3). Карты — gen_*_v3.py в папке textures комплекта.
 
 Износ на стенах — атрибут цвета вершин «Износ» (R — краска/побелка, G — штукатурка до кирпича, B — грязь),
 его раскладывает wear_layout() и можно докрашивать кистью (Vertex Paint). Доли повреждений — узлы «Значение»
@@ -18,18 +17,8 @@ PAINT_LINE = 2.0
 
 
 def tex_paths() -> dict:
-    p = {}
-    for k in ["crack_mask", "peel_field", "paint_tone", "paint_height", "plaster_tone", "plaster_height"]:
-        p["paint_" + k] = f"{KIT}/paint/{k}.png"
-    for k in ["wash_field", "wash_crack", "wash_tone", "loss_field", "plaster_crack", "plaster_tone", "plaster_height", "crumble"]:
-        p["plaster_" + k] = f"{KIT}/plaster/{k}.png"
-    for k in ["parquet_color", "parquet_height", "parquet_id", "parquet_crack", "parquet_mastic"]:
-        p[k] = f"{KIT}/parquet/{k}.png"
-    for k in ["tile_id", "tile_tone", "tile_height", "tile_crack", "tile_chip", "tile_glue"]:
-        p[k] = f"{KIT}/tiles/{k}.png"
-    for k in ["albedo", "normal", "arm"]:
-        p["brick_" + k] = f"{KIT}/brick/brick_{k}.jpg"
-    return p
+    """Карты v02, которые ещё нужны: тон штукатурки для наружной грани фасада."""
+    return {"plaster_plaster_tone": f"{KIT}/plaster/plaster_tone.png"}
 
 
 def param(g, label: str, value: float):
@@ -65,58 +54,7 @@ def world_noise(g, scale: float):
     return g.noise(g.geo.outputs["Position"], scale, 3.0, 0.5)
 
 
-# ---------------------------------------------------------------- стена: краска / побелка
-
-def paint_layer(g, P, vec, wear):
-    """Масляная краска по штукатурке: отслоение по полю ниже износа, светлая загнутая кромка над порогом."""
-    f = gray(g, P["paint_peel_field"], vec)
-    crack = gray(g, P["paint_crack_mask"], vec)
-    tone = gray(g, P["paint_paint_tone"], vec)
-    ph = gray(g, P["paint_paint_height"], vec)
-    pt = gray(g, P["paint_plaster_tone"], vec)
-    plh = gray(g, P["paint_plaster_height"], vec)
-    peeled = g.math("SUBTRACT", 1.0, smoothstep(g, wear, g.math("ADD", wear, 0.006), f))
-    rim = g.math("MULTIPLY", smoothstep(g, wear, g.math("ADD", wear, 0.01), f),
-                 g.math("SUBTRACT", 1.0, smoothstep(g, g.math("ADD", wear, 0.02), g.math("ADD", wear, 0.045), f)))
-    green = g.tint(_c("59654c"), g.math("ADD", g.math("MULTIPLY", tone, 0.45), 0.78))
-    green = g.mix(g.math("MULTIPLY", crack, 0.6), green, _c("1f261c"))
-    plaster = g.tint(_c("c4baa6"), g.math("ADD", g.math("MULTIPLY", pt, 0.35), 0.8))
-    color = g.mix(peeled, green, plaster)
-    color = g.mix(g.math("MULTIPLY", rim, 0.85), color, _c("cfd0bc"))
-    rough = g.mixf(peeled, g.math("ADD", g.math("MULTIPLY", tone, 0.15), 0.36), 0.88)
-    rough = g.mixf(rim, rough, 0.6)
-    h_paint = g.math("ADD", 0.55, g.math("SUBTRACT", g.math("MULTIPLY", ph, 0.06), g.math("MULTIPLY", crack, 0.08)))
-    height = g.mixf(peeled, h_paint, g.math("MULTIPLY", plh, 0.2))
-    height = g.math("ADD", height, g.math("MULTIPLY", rim, 0.35))
-    return color, rough, height
-
-
-def wash_layer(g, P, vec, wash_wear, loss_wear, bvec):
-    """Побелка → штукатурка (толщина ~2 см) → кирпич; редкие длинные трещины штукатурки."""
-    wf = gray(g, P["plaster_wash_field"], vec)
-    wc = gray(g, P["plaster_wash_crack"], vec)
-    wt = gray(g, P["plaster_wash_tone"], vec)
-    lf = gray(g, P["plaster_loss_field"], vec)
-    pc = gray(g, P["plaster_plaster_crack"], vec)
-    pt = gray(g, P["plaster_plaster_tone"], vec)
-    plh = gray(g, P["plaster_plaster_height"], vec)
-    brick = g.image(P["brick_albedo"], bvec).outputs[0]
-    white = g.tint(_c("dfe1d9"), g.math("ADD", g.math("MULTIPLY", wt, 0.16), 0.88))
-    white = g.mix(g.math("MULTIPLY", wc, 0.12), white, _c("8a8a80"))
-    grey = g.tint(_c("a8a296"), g.math("ADD", g.math("MULTIPLY", pt, 0.3), 0.85))
-    flaked = g.math("SUBTRACT", 1.0, smoothstep(g, wash_wear, g.math("ADD", wash_wear, 0.006), wf))
-    color = g.mix(flaked, white, grey)
-    color = g.mix(g.math("MULTIPLY", pc, 0.65), color, _c("3a3630"))
-    keep = smoothstep(g, loss_wear, g.math("ADD", loss_wear, 0.05), lf)
-    edge = g.math("MULTIPLY", g.math("MULTIPLY", keep, g.math("SUBTRACT", 1.0, keep)), 4.0)
-    color = g.mix(g.math("SUBTRACT", 1.0, keep), color, brick)
-    color = g.mix(g.math("MULTIPLY", g.math("GREATER_THAN", edge, 0.3), 0.8), color, g.tint(_c("9a9488"), 0.9))
-    rough = g.mixf(g.math("SUBTRACT", 1.0, keep), g.mixf(flaked, 0.9, 0.85), 0.8)
-    height = g.math("ADD", g.math("MULTIPLY", keep, g.math("ADD", 0.6, g.math("MULTIPLY", plh, 0.05))),
-                    g.math("MULTIPLY", g.math("SUBTRACT", 1.0, keep), 0.08))
-    height = g.math("SUBTRACT", height, g.math("MULTIPLY", pc, 0.05))
-    return color, rough, height
-
+# ---------------------------------------------------------------- стена
 
 def _c(h: str) -> tuple:
     c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
@@ -137,11 +75,13 @@ def wall(g, P, facade: bool = False) -> None:
     wash_wear = g.math("ADD", g.math("ADD", base_wash, g.math("MULTIPLY", w[0], 0.35)), g.math("MULTIPLY", var, 0.25), True)
     loss_wear = g.math("ADD", g.math("ADD", base_loss, g.math("MULTIPLY", w[1], 0.5)), g.math("MULTIPLY", var, 0.1), True)
     import paint_v3
+    import plaster_v3
+    import tiles_v3
     # Координаты от мира: рисунок краски и побелки идёт через стыки модулей без шва.
     vec, frame = paint_v3.wall_coords(g, 0.5)
-    bvec = vec
     pc, pr, pn = paint_v3.paint_v3(g, vec, paint_wear, frame)
-    wc, wr, wh = wash_layer(g, P, vec, wash_wear, loss_wear, bvec)
+    wc, wr, n_wash = plaster_v3.wash_v3(g, vec, wash_wear, loss_wear, frame,
+                                        coords=lambda pos: tiles_v3.surface_coords(g, 0.5, pos)[0])
     z = g.sep(g.tc.outputs["Object"])[2]
     zz = g.math("ADD", z, g.math("MULTIPLY", g.noise(g.tc.outputs["Object"], 1.5, 2.0), 0.012))
     lower = g.math("LESS_THAN", zz, PAINT_LINE)
@@ -151,7 +91,6 @@ def wall(g, P, facade: bool = False) -> None:
     dirt = g.math("MULTIPLY", g.math("ADD", w[2], g.math("SUBTRACT", 1.0, g.math("MULTIPLY", z, 4.0), True)), g.noise(g.tc.outputs["Object"], 5.0, 5.0))
     color = g.mix(g.math("MULTIPLY", dirt, 0.8), color, _c("3b3428"), "MULTIPLY")
     rough = g.mixf(lower, wr, pr)
-    n_wash = g.bump(wh, 1.0, 0.012)
     normal = vmix(g, lower, n_wash, pn)
     if facade:
         obj = g.sep(g.tc.outputs["Object"])
@@ -183,82 +122,30 @@ def vmix(g, fac, a, b):
 
 # ---------------------------------------------------------------- паркет и плитка
 
-def rotated_uv(g, scale: float, angle_deg: float):
-    mp = g.node("ShaderNodeMapping")
-    g.link(g.tc.outputs["UV"], mp.inputs["Vector"])
-    mp.inputs["Rotation"].default_value = (0, 0, math.radians(angle_deg))
-    mp.inputs["Scale"].default_value = (scale, scale, scale)
-    return mp.outputs[0]
-
-
 def parquet(g, P) -> None:
-    """Паркет «ёлочкой» (планка 70 × 350, повёрнут на 45°): часть планок выбита до мастики, часть с расколом
-    по волокну. Доли — ползунки; по полу они меняются пятнами (выбитые места кучкуются)."""
-    miss = param(g, "Выбито, доля", 0.08)
-    cracked = param(g, "Треснуло, доля", 0.15)
-    vec = rotated_uv(g, 1 / 2.1, 45.0)
-    col = g.image(P["parquet_color"], vec).outputs[0]
-    h = gray(g, P["parquet_height"], vec)
-    pid = gray(g, P["parquet_id"], vec)
-    crk = gray(g, P["parquet_crack"], vec)
-    mas = gray(g, P["parquet_mastic"], vec)
-    spot = g.math("ADD", g.math("MULTIPLY", world_noise(g, 0.6), 1.6), -0.3)
-    m_local = g.math("MULTIPLY", miss, g.math("MAXIMUM", spot, 0.0))
-    missing = g.math("LESS_THAN", pid, m_local)
-    is_cracked = g.math("MULTIPLY", g.math("MULTIPLY", g.math("GREATER_THAN", pid, m_local),
-                                           g.math("LESS_THAN", pid, g.math("ADD", m_local, cracked))), crk)
-    mastic = g.mix(g.math("MULTIPLY", mas, 0.6), _c("15110d"), _c("5a564e"))
-    lacquer = g.lum(g.ramp(world_noise(g, 1.2), 0.3, 0.8))
-    wood = g.mix(g.math("MULTIPLY", lacquer, 0.35), col, g.mix(1.0, col, _c("b8a68c"), "MULTIPLY"))
-    color = g.mix(missing, wood, mastic)
-    color = g.mix(is_cracked, color, _c("1a120c"))
-    rough = g.mixf(missing, g.math("ADD", g.math("MULTIPLY", lacquer, 0.3), 0.35), 0.75)
-    height = g.mixf(missing, g.math("SUBTRACT", h, g.math("MULTIPLY", is_cracked, 0.4)), g.math("MULTIPLY", mas, 0.05))
-    g.out_bsdf(color, rough, g.bump(height, 1.0, 0.015))
+    """Паркет «ёлочкой» v03 (floor_v3.py): дуб под старым лаком, выбитые и обломанные планки — ямы в толщину планки."""
+    import floor_v3
+    color, rough, normal = floor_v3.floor_v3(g)
+    g.out_bsdf(color, rough, normal)
 
 
 def tile(g, P, wall_part: bool = False) -> None:
-    """Плитка 20 × 20: выбитые (клей со следами шпателя), сколотые по углу, треснувшие. На стене — до 2,0 м,
-    выше побелка. Доли — ползунки, по месту меняются пятнами."""
-    miss = param(g, "Выбито, доля", 0.06)
-    chip = param(g, "Скол угла, доля", 0.12)
-    crk_p = param(g, "Треснуло, доля", 0.18)
-    vec = g.uv(0.5)
-    tid = gray(g, P["tile_id"], vec)
-    tone = gray(g, P["tile_tone"], vec)
-    th = gray(g, P["tile_height"], vec)
-    tc = gray(g, P["tile_crack"], vec)
-    ch = gray(g, P["tile_chip"], vec)
-    gl = gray(g, P["tile_glue"], vec)
-    spot = g.math("ADD", g.math("MULTIPLY", world_noise(g, 0.8), 1.6), -0.3)
-    k = g.math("MAXIMUM", spot, 0.0)
-    m1 = g.math("MULTIPLY", miss, k)
-    m2 = g.math("ADD", m1, g.math("MULTIPLY", chip, k))
-    m3 = g.math("ADD", m2, g.math("MULTIPLY", crk_p, k))
-    missing = g.math("LESS_THAN", tid, m1)
-    chipped = g.math("MULTIPLY", g.math("MULTIPLY", g.math("GREATER_THAN", tid, m1), g.math("LESS_THAN", tid, m2)), ch)
-    cracked = g.math("MULTIPLY", g.math("MULTIPLY", g.math("GREATER_THAN", tid, m2), g.math("LESS_THAN", tid, m3)), tc)
-    hole = g.math("MAXIMUM", missing, chipped)
-    body = g.math("GREATER_THAN", th, 0.5)
-    tile_col = g.tint(_c("c9cec6"), g.math("ADD", g.math("MULTIPLY", tone, 0.25), 0.78))
-    tile_col = g.mix(g.math("SUBTRACT", 1.0, body), tile_col, _c("4f4c45"))
-    grime = g.lum(g.ramp(world_noise(g, 2.0), 0.45, 0.8))
-    tile_col = g.mix(g.math("MULTIPLY", grime, 0.35), tile_col, _c("7d7563"), "MULTIPLY")
-    glue = g.tint(_c("8f8a7e"), g.math("ADD", g.math("MULTIPLY", gl, 0.35), 0.75))
-    color = g.mix(hole, tile_col, glue)
-    color = g.mix(cracked, color, _c("2a2822"))
-    rough = g.mixf(hole, g.mixf(body, 0.9, 0.12), 0.92)
-    height = g.mixf(hole, g.math("SUBTRACT", th, g.math("MULTIPLY", cracked, 0.3)), g.math("MULTIPLY", gl, 0.25))
-    if wall_part:
-        z = g.sep(g.tc.outputs["Object"])[2]
-        upper = g.math("GREATER_THAN", z, PAINT_LINE)
-        # Над плиткой — побелка (облетание по тому же полю, без кирпича).
-        wvec = g.uv(0.5)
-        wc, wr, wh = wash_layer(g, P, wvec, param(g, "Облетание побелки, база", 0.2), 0.0, g.uv(0.5))
-        color = g.mix(upper, color, wc)
-        rough = g.mixf(upper, rough, wr)
-        height = g.mixf(upper, height, wh)
-    g.out_bsdf(color, rough, g.bump(height, 1.0, 0.006))
+    """Плитка 200 × 200 v03 (tiles_v3.py). На стене — до 2,0 м, выше побелка v03; на полу — тёмная метлахская."""
+    import plaster_v3
+    import tiles_v3
+    if not wall_part:
+        color, rough, normal = tiles_v3.tiles_v3(g, "7d5f4c", 1.0, "6a4f3f")
+        g.out_bsdf(color, rough, normal)
+        return
+    color, rough, normal = tiles_v3.tiles_v3(g)
+    vec, frame = tiles_v3.surface_coords(g, 0.5)
+    w = wear_attr(g)
+    wash = g.math("ADD", param(g, "Облетание побелки, база", 0.2), g.math("MULTIPLY", w[0], 0.35), True)
+    wc, wr, wn = plaster_v3.wash_v3(g, vec, wash, 0.0, frame, mold=1.6,
+                                    coords=lambda pos: tiles_v3.surface_coords(g, 0.5, pos)[0])
+    z = g.sep(g.tc.outputs["Object"])[2]
+    upper = g.math("GREATER_THAN", z, PAINT_LINE)
+    g.out_bsdf(g.mix(upper, color, wc), g.mixf(upper, rough, wr), vmix(g, upper, normal, wn))
 
 
 # ---------------------------------------------------------------- атрибут износа
