@@ -48,7 +48,7 @@ PAIRS = [
     ("CH_latch_L", "CH_latch_L_pin"), ("CH_latch_R", "CH_latch_R_pin"), ("CH_latch_L", "Upper_rail"), ("CH_latch_R", "Upper_rail"),
     ("Charging_handle", "Forward_assist"), ("CH_latch_L", "Stock_body"), ("CH_latch_R", "Stock_body"),
     ("Magazine_body", "Pistol_grip"), ("Magazine_floorplate", "Lower_receiver"),
-    ("Guard_pin", "Lower_receiver"), ("Guard_pin", "Pistol_grip"), ("Pivot_pin", "Lower_receiver"), ("Pivot_pin", "Upper_receiver"),
+    ("Guard_pin", "Lower_receiver"), ("Guard_pin", "Pistol_grip"), ("Guard_pin_front", "Lower_receiver"), ("Pivot_pin", "Lower_receiver"), ("Pivot_pin", "Upper_receiver"),
     ("End_plate", "Lower_receiver"), ("QD_swivel", "Pistol_grip"), ("QD_swivel_loop", "Castle_nut"), ("QD_swivel_loop", "Buffer_tube"),
     ("QD_swivel_loop", "Stock_QD_cup_front_L"), ("Magazine_body", "Bolt_carrier"), ("Magazine_round_00", "Magazine_body"),
     ("Magazine_round_01", "Magazine_body"), ("Rear_sight_spring_L", "Rear_sight_aperture_pin"), ("Rear_sight_spring_R", "Rear_sight_aperture_pin"),

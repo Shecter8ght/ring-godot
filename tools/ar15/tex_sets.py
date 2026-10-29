@@ -14,7 +14,7 @@ SETS = {
                      "Forward_assist", "Charging_handle", "CH_latch_L", "CH_latch_R", "CH_latch_L_pin", "CH_latch_R_pin"]),
     "lower": (4096, ["Lower_receiver", "Bolt_catch", "Selector", "Selector_lever_L", "Selector_lever_R", "Mag_catch",
                      "Mag_button", "Mag_release_*", "Pivot_pin", "Takedown_pin", "QD_swivel", "QD_swivel_loop",
-                     "Guard_pin", "Grip_screw"]),
+                     "Guard_pin*", "Grip_screw"]),
     "handguard": (4096, ["Handguard", "Handguard_rail", "Handguard_QD_L", "Handguard_QD_R", "Handguard_screw*",
                          "Bottom_rail*", "Side_rail*"]),
     "barrel": (4096, ["Barrel", "Barrel_extension", "Barrel_nut", "Gas_block", "Gas_tube", "Gas_tube_pin",

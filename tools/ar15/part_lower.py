@@ -8,7 +8,7 @@ from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP
                  REAR_FILLET_R,
                  REAR_PLAN_R, SEAM_EDGE,
                  LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
-                 TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
+                 TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, GUARD_BAR_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
                  prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join, bevel_edges, auto_sharp, material)
 from part_upper import LUG_HALF_W, PIN_R
 
@@ -20,7 +20,7 @@ WELL_REAR_IN = -54.7         # шахта внутри 62.5 мм; задняя �
 WELL_FRONT_IN = 7.8          # передняя стенка 3 мм
 WELL_BOTTOM_FRONT = -56.0
 WELL_BOTTOM_REAR = -70.0
-BOTTOM_Z = GUARD_Z[1]        # низ корпуса над спуском (−50.1)
+BOTTOM_Z = GUARD_Z[1]        # низ корпуса над спуском (−46.0)
 AMBI_PIVOT = (-24.0, 18.2)    # ось рычага двусторонней защёлки (x, y) на высоте тяги защёлки; ось вертикальная
 AMBI_CLAW_X = -39.5           # палец рычага в пазу переднего конца тяги
 AMBI_DEG = math.degrees(math.asin(3.2 / (AMBI_PIVOT[0] - AMBI_CLAW_X)))   # поворот рычага при ходе тяги 3.2 мм
@@ -33,7 +33,8 @@ RETAINER_X = UPPER_REAR + 2.0   # фиксатор буфера — перед �
 
 
 GUARD_POST_X = GUARD_X[0] - 5.0      # задняя грань стойки скобы — вертикальная, к ней примыкает выступ рукояти
-GUARD_PIN = (-115.6, -73.6, 1.5)     # штифт скобы в заднем нижнем углу (x, z, r)
+# штифты скобы в нижних углах проёма, сзади и спереди (x, z, r) — как у образца, в перекладине под скруглением проёма
+GUARD_PINS = (("Guard_pin", -108.7, -74.1, 1.5), ("Guard_pin_front", -65.8, -74.1, 1.5))
 PIVOT_EAR_R = 6.3                    # скругление «уха» оси сборки вокруг оси (перёд x 24.1 — в выемке цевья)
 PIVOT_BOSS_R = 5.4                   # втулка оси сборки снаружи уха (вокруг головки оси — кольцо 1 мм)
 PIVOT_BOSS_H = 0.7
@@ -75,8 +76,8 @@ def guard_and_well_profile():
         (MAGWELL_FRONT + 4.3, WELL_BOTTOM_FRONT + 3.0),   # раструб вперёд (до 15.1)
         (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT),
         (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR),          # скошенная губа шахты
-        (WELL_REAR_OUT - 2.9, GUARD_Z[0] - 6.5),          # переднее ухо скобы
-        (GUARD_POST_X, GUARD_Z[0] - 6.5),                 # низ перекладины сзади
+        (WELL_REAR_OUT - 2.9, GUARD_BAR_Z),               # переднее ухо скобы
+        (GUARD_POST_X, GUARD_BAR_Z),                      # низ перекладины сзади
         (GUARD_POST_X, GRIP_TOP_Z),                       # задняя стойка — вертикаль, шов с выступом рукояти
     ]
     rear = rear_pts()                                     # площадка рукояти до шва, выемка, угол к задней грани
@@ -151,8 +152,8 @@ def build(ctx):
     # проём скобы
     gx0, gx1 = GUARD_X
     gz0, gz1 = GUARD_Z
-    opening = prism_xz("cut_guard", fillet([(gx0, gz1), (gx1, gz1), (gx1, gz0), (gx0, gz0)], [3.0, 3.0, 10.0, 11.0], 8),
-                       -30, 30, C)
+    rs = (gz1 - gz0) / 2 - 0.05                    # «стадион»: торцы — полукруги (0.1 мм прямой между дугами)
+    opening = prism_xz("cut_guard", fillet([(gx0, gz1), (gx1, gz1), (gx1, gz0), (gx0, gz0)], rs, 16), -30, 30, C)
     boolean(body, opening)
     # скоба уже корпуса: снимаем бока под проёмом
     for s in (-1, 1):
@@ -220,24 +221,21 @@ def build(ctx):
     # кромки проёма скобы — заметная фаска с обеих сторон (как на скрине владельца)
     bevel_edges(body, lambda n1, n2: abs(n1.y) > 0.9 and abs(n2.y) < 0.2, w=0.9, seg=3, clamp=True,
                 where=lambda p: gx0 - 1.0 < p.x < gx1 + 0.5 and gz0 - 1.0 < p.z < gz1 - 1.0 and 6.0 < abs(p.y) < 7.2)
-    # продольный паз на перекладине скобы с обеих сторон
-    for s_ in (-1, 1):
-        y0, y1 = (6.6 - 0.9, 9.0) if s_ > 0 else (-9.0, -6.6 + 0.9)
-        slot = prism_xz(f"cut_guard_slot{s_}", fillet([(-99.0, -75.0), (-72.5, -75.0), (-72.5, -72.6), (-99.0, -72.6)], 1.15, 4), y0, y1, C)
-        boolean(body, slot)
-    gpx, gpz, gpr = GUARD_PIN
-    boolean(body, cyl("cut_guard_pin", -20, 20, gpr + 0.05, C, seg=24, cy=gpx, cz=gpz, axis="Y"))
+    # перекладина тонкая (4.4 мм) — продольного паза на ней больше нет
+    for _nm, gpx, gpz, gpr in GUARD_PINS:
+        boolean(body, cyl("cut_guard_pin", -20, 20, gpr + 0.05, C, seg=24, cy=gpx, cz=gpz, axis="Y"))
     # кромки площадки рукояти — узкие: шов с рукоятью тонкой линией, без канавки (три сегмента — широкая фаска их
     # не берёт); вогнутый угол со стойкой скобы не трогаем — в него упирается выступ рукояти
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and n2.z > -0.9, w=SEAM_EDGE, seg=3,
                 where=lambda p: abs(p.z - GRIP_TOP_Z) < 0.05 and p.x < GUARD_POST_X - 0.5)
     finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
-    # штифт скобы — разрезной, торцы чуть утоплены
-    pin = cyl("Guard_pin", -6.3, 6.3, gpr - 0.05, C, "Steel_black", seg=24, cy=gpx, cz=gpz, axis="Y", ch=0.25)
-    boolean(pin, cyl("cut_guard_pin_bore", -7, 7, gpr - 0.6, C, seg=20, cy=gpx, cz=gpz, axis="Y"))
-    boolean(pin, box("cut_guard_pin_slit", gpx - 0.2, gpx + 0.2, -7, 7, gpz - gpr - 1.0, gpz - gpr + 1.0, C))
-    out["guard_pin"] = pin
+    # штифты скобы — разрезные, торцы чуть утоплены
+    for nm, gpx, gpz, gpr in GUARD_PINS:
+        pin = cyl(nm, -6.3, 6.3, gpr - 0.05, C, "Steel_black", seg=24, cy=gpx, cz=gpz, axis="Y", ch=0.25)
+        boolean(pin, cyl("cut_guard_pin_bore", -7, 7, gpr - 0.6, C, seg=20, cy=gpx, cz=gpz, axis="Y"))
+        boolean(pin, box("cut_guard_pin_slit", gpx - 0.2, gpx + 0.2, -7, 7, gpz - gpr - 1.0, gpz - gpr + 1.0, C))
+        out[nm.lower()] = pin
 
     # --- оси сборки и разборки: головка справа (−Y), выталкиваются вправо ---
     for nm, (px, pz) in (("Pivot_pin", PIVOT_PIN), ("Takedown_pin", TAKEDOWN_PIN)):
@@ -279,12 +277,22 @@ def fire_control(F):
     tx, tz = TRIGGER_PIN
     hx, hz = HAMMER_PIN
     half = PART_W / 2
-    # спусковой крючок (фото PEO, увеличенный кадр): перо — серп, открытый вперёд; передняя грань вогнута под палец,
-    # вверху перо широкое и уходит вперёд к корпусу спуска, кончик почти под осью — в ~1 мм над перекладиной скобы.
-    # Корпус: нос вперёд под зуб курка, хвост назад под кулачок переводчика.
-    cl = [(tx + 7.5, tz - 8.0), (tx + 6.6, tz - 14.0), (tx + 4.4, tz - 19.0), (tx + 1.2, tz - 23.5), (tx - 0.6, tz - 27.9),
-          (tx - 0.9, tz - 31.8), (tx - 0.2, tz - 35.2), (tx + 0.9, tz - 37.6)]
-    wd = [10.0, 8.2, 6.6, 5.6, 5.0, 4.5, 4.0, 3.6]
+    # спусковой крючок: перо — тонкий серп, открытый вперёд (по образцу wafla, владелец 29.10): от корпуса спуска
+    # уходит назад, ниже середины выгибается и кончиком выходит вперёд, в ~4 мм над перекладиной скобы; передняя грань
+    # вогнута под палец. Корпус: нос вперёд под зуб курка, хвост назад под кулачок переводчика.
+    cl = [(tx + 7.0, tz - 8.0), (tx + 5.0, tz - 12.5), (tx + 2.3, tz - 16.5), (tx + 0.0, tz - 20.5), (tx - 1.6, tz - 24.5),
+          (tx - 2.0, tz - 28.5), (tx - 1.1, tz - 32.0), (tx + 0.9, tz - 35.0), (tx + 3.4, tz - 37.2)]
+    wd = [8.6, 6.8, 5.6, 4.9, 4.4, 4.0, 3.7, 3.4, 3.1]
+    # гладкий серп: средняя линия — кривая Катмулла — Рома через опорные точки, по 4 отрезка на пролёт (иначе грани видны)
+    dense, dw = [], []
+    for i in range(len(cl) - 1):
+        p0, p1, p2, p3 = cl[max(i - 1, 0)], cl[i], cl[i + 1], cl[min(i + 2, len(cl) - 1)]
+        for k in range(4):
+            u = k / 4
+            dense.append(tuple(0.5 * (2 * p1[j] + (-p0[j] + p2[j]) * u + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * u * u
+                                      + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * u ** 3) for j in (0, 1)))
+            dw.append(wd[i] + (wd[i + 1] - wd[i]) * u)
+    cl, wd = dense + [cl[-1]], dw + [wd[-1]]
     front, back = [], []
     for i, (cx, cz) in enumerate(cl):
         p0 = cl[max(0, i - 1)]; p1 = cl[min(len(cl) - 1, i + 1)]
