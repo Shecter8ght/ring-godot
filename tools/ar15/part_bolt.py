@@ -193,31 +193,26 @@ def charging_handle(H):
         boolean(bar, hexa)
     finish(bar, w=0.5, seg=2, angle=35)
     o["handle"] = bar
-    # рычаги-крылья (образец владельца): внутренний край у оси, спереди крючок за торец ресивера; наружу — крыло до
-    # ±CH_WING_Y, передняя кромка (за неё цепляют пальцами, оттягивая назад) — «пилой» с зубьями вперёд, на конце —
-    # три бугорка, одно большое окно
-    outline = [(r - 0.5, 9.4), (r + 3.5, 9.4), (r + 10.5, 9.9), (r + 13.5, 11.6), (r + 13.5, 13.4), (r + 10.8, 13.4),
-               (r + 10.4, 15.4)]
-    rad = [1.0, 0.4, 0.6, 0.8, 0.6, 0.6, 0.4]
-    for k in range(6):                                   # зубья передней кромки: вершина вперёд, впадина за ней
-        xf, yk = r + 10.2 - 0.25 * k, 15.8 + 2.55 * k
-        outline += [(xf + 1.3, yk + 0.55), (xf, yk + 2.3)]
-        rad += [0.3, 0.35]
-    outline += [(r + 8.6, CH_WING_Y - 1.0)]
-    rad += [1.6]
-    for xb in (r + 5.2, r + 0.6, r - 4.0):              # бугорки на конце крыла
-        outline += [(xb + 1.1, CH_WING_Y - 1.0), (xb, CH_WING_Y + 0.1), (xb - 1.1, CH_WING_Y - 1.0)]
-        rad += [0.4, 0.5, 0.4]
-    outline += [(r - 7.2, CH_WING_Y - 2.0), (r - 7.6, 24.0), (r - 7.2, 18.0), (r - 4.6, 13.6), (r - 2.6, 11.0)]
-    rad += [2.0, 3.0, 2.0, 2.0, 1.4]
-    win_in = [(r - 4.4, 18.6), (r + 6.4, 18.6), (r + 5.4, 27.6), (r - 4.0, 27.6)]
+    # рычаги-крылья: крыло — обводка образца владельца (tools/ar15/trace_ch_wing.py → ch_wing_trace.json: контур с зубьями
+    # по передней и скошенной задней кромкам, одно окно); внутренняя часть у оси со крючком за торец ресивера — своя
+    import json
+    from pathlib import Path
+    trace = json.loads(Path(__file__).with_name("ch_wing_trace.json").read_text(encoding="utf-8"))
+    wing = [(r + x, y) for x, y in trace["outer"]]
+    win_in = [(r + x, y) for x, y in trace["hole"]]
+    inner = fillet([(r - 0.5, 9.4), (r + 3.5, 9.4), (r + 10.5, 9.9), (r + 13.5, 11.6), (r + 13.5, 13.4), (r + 10.8, 13.4),
+                    (r + 10.0, 17.8), (r - 7.0, 17.8), (r - 6.6, 14.8), (r - 4.6, 13.6), (r - 2.6, 11.0)],
+                   [1.0, 0.4, 0.6, 0.8, 0.6, 0.6, 0, 0, 1.0, 2.0, 1.4], 3)
+    # у образца выемка у основания крыла обнимает ухо средней плиты; у нас уха нет — выемку закрывает само крыло
+    base_fill = [(r - 1.2, 17.2), (r + 9.6, 17.2), (r + 9.6, 19.9), (r + 9.3, 20.8), (r - 1.2, 20.8)]
     for s, nm in ((1, "CH_latch_L"), (-1, "CH_latch_R")):
-        pts = _mirror(fillet(outline, rad, 3), s)
-        lat = prism_xy(nm, pts, z0 + 0.8, z1 + 3.0, H, "Alu_anodized")
-        boolean(lat, prism_xy(f"cut_{nm}_win", _mirror(fillet(win_in, 1.8, 4), s), z0 - 1, z1 + 5, H))
+        lat = prism_xy(nm, _mirror(inner, s), z0 + 0.8, z1 + 3.0, H, "Alu_anodized")
+        boolean(lat, prism_xy(f"{nm}_wing", _mirror(wing, s), z0 + 0.8, z1 + 3.0, H, "Alu_anodized"), "UNION")
+        boolean(lat, prism_xy(f"{nm}_base", _mirror(base_fill, s), z0 + 0.8, z1 + 3.0, H, "Alu_anodized"), "UNION")
+        boolean(lat, prism_xy(f"cut_{nm}_win", _mirror(fillet(win_in, 1.2, 3), s), z0 - 1, z1 + 5, H))
         # ось рычага
         boolean(lat, cyl(f"cut_{nm}_pivot", z0 - 1, z1 + 5, 1.05, H, seg=12, cy=r + 2.5, cz=11.5 * s, axis="Z"))
-        finish(lat, w=0.6, seg=2, angle=35)
+        finish(lat, w=0.35, seg=2, angle=35)
         o[nm] = lat
         o[nm + "_pin"] = cyl(nm + "_pin", z0 + 0.5, z1 + 3.2, 1.0, H, "Steel_black", seg=12, cy=r + 2.5, cz=11.5 * s, axis="Z", ch=0.2)
     return o

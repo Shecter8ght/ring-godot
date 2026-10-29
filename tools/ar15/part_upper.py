@@ -105,6 +105,10 @@ def build(ctx):
     # кольцо под гайку цевья (от самого торца — не выпирает над стойкой)
     ring = cyl("Upper_ring", UPPER_FRONT - 0.4, UPPER_FRONT + FRONT_RING_LEN, FRONT_RING_R, C, "Alu_anodized", seg=64)
     boolean(body, ring, "UNION")
+    # слева на внутреннем ребре (стык стойки под планкой и «трубы») — приливы лицом под 45° вверх-наружу (владелец);
+    # до вырезов: канал рамы и дорожка кулачковой оси прорезают их основание
+    for nm, (x0, x1) in (("front", (-31.0, -4.0)), ("mid", (-85.0, -71.0))):
+        boolean(body, edge_pad(f"upper_pad_{nm}", x0, x1, C), "UNION")
     # нижние кромки корпуса скруглены сильнее (как у фрезерованных ресиверов)
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=1.6, seg=4,
                 where=lambda p: p.x < UPPER_FRONT - 1.0)
@@ -206,9 +210,6 @@ def build(ctx):
                                               (LEFT_WINDOW_X[1], LEFT_WINDOW_Z[1]), (LEFT_WINDOW_X[0], LEFT_WINDOW_Z[1])], 4.5, 6),
                    8.0, UPPER_HALF_W + 3, C)
     boolean(body, win)
-    # слева на стойке под планкой — приливы с фасками по краям (образец владельца): у переднего края и перед карманом
-    for nm, (x0, x1) in (("front", (-31.0, -4.0)), ("mid", (-85.0, -71.0))):
-        boolean(body, riser_pad(f"upper_pad_{nm}", x0, x1, 11.4, 19.4, C), "UNION")
     # выемка снизу сзади под головку фиксатора буфера
     boolean(body, box("cut_retainer_relief", UPPER_REAR - 2, UPPER_REAR + 5.0, -3.0, 3.0, SPLIT_Z - 2, -11.0, C))
     # выемка слева снизу под затворную задержку (её верхняя лопатка и зуб заходят выше разъёма)
@@ -300,6 +301,40 @@ def fa_matrix():
     r = Vector((1.0, 0.0, 0.0)).rotation_difference(d).to_matrix().to_4x4()
     r.translation = Vector(FA_S) * MM
     return r
+
+
+def edge_pad(name, x0, x1, C, width=7.0, lift=2.2, depth=4.6, ch=1.0, sgn=1):
+    """Прилив на внутреннем ребре (стойка под планкой встречает трубу корпуса): усечённая пирамида, лицо под 45°
+    вверх-наружу на расстоянии lift от ребра, фаски ch по краям, основание уходит в угол на depth."""
+    import bmesh
+    from lib import v as vmm
+    zr = math.sqrt(TUBE_R * TUBE_R - RISER_HW * RISER_HW)
+    c45 = math.sqrt(0.5)
+    n = Vector((0.0, c45 * sgn, c45))                   # наружу-вверх
+    vv = Vector((0.0, -c45 * sgn, c45))                 # по лицу: вверх-внутрь
+    pc = Vector((0.0, RISER_HW * sgn, zr)) + n * lift
+    rings = [(-depth, 0.0), (-ch, 0.0), (0.0, ch)]
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    vs = []
+    for off, ins in rings:
+        ring = []
+        for x, w in ((x0 + ins, -width / 2 + ins), (x1 - ins, -width / 2 + ins), (x1 - ins, width / 2 - ins), (x0 + ins, width / 2 - ins)):
+            p = pc + n * off + vv * w
+            ring.append(bm.verts.new(vmm(x, p.y, p.z)))
+        vs.append(ring)
+    for a, b in zip(vs, vs[1:]):
+        for i in range(4):
+            j = (i + 1) % 4
+            bm.faces.new((a[i], a[j], b[j], b[i]))
+    bm.faces.new(list(reversed(vs[0])))
+    bm.faces.new(vs[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    C.objects.link(o)
+    o.data.materials.append(material("Alu_anodized"))
+    return o
 
 
 def riser_pad(name, x0, x1, z0, z1, C, height=1.9, ch=1.1, sgn=1):

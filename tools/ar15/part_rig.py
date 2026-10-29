@@ -21,7 +21,7 @@ from mathutils import Vector
 from lib import (MM, FA_S, FA_D, FA_TRAVEL, CARRIER_TRAVEL, BOLT_FREE, BOLT_UNLOCK, BOLT_ROT, PIVOT_PIN, TAKEDOWN_PIN, SELECTOR, TRIGGER_PIN,
                  HAMMER_PIN, MAG_BUTTON, STOCK_TRAVEL, empty, set_parent, set_origin)
 from part_upper import HINGE_Y, HINGE_Z
-from part_lower import BOLT_CATCH_PIVOT
+from part_lower import BOLT_CATCH_PIVOT, AMBI_DEG
 from part_bolt import CH_REAR
 
 PROPS = ["forward_assist", "charging_handle", "bolt_carrier", "hammer", "trigger", "selector", "dust_cover", "mag_catch", "mag_out",
@@ -181,6 +181,10 @@ def build(ctx):
         if ob(n):
             set_parent(ob(n), mc)
     add_driver(mc, "location", 1, f"mag_catch*3.2*{MM}", ctrl, ["mag_catch"])
+    # двусторонняя защёлка: рычаг слева на вертикальной оси; палец в пазу тяги — поворот вместе с ходом тяги
+    if ob("Mag_release_L"):
+        set_parent(ob("Mag_release_L"), lower_g)
+        add_driver(ob("Mag_release_L"), "rotation_euler", 2, f"-radians({AMBI_DEG:.3f})*mag_catch", ctrl, ["mag_catch"])
     # затворная задержка: поворот вокруг оси вдоль X — зуб поднимается в путь затвора
     bx, by, bz = BOLT_CATCH_PIVOT
     bp = empty("Bolt_catch_pivot", (bx, by, bz), R, lower_g, size=0.005)

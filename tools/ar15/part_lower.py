@@ -17,6 +17,9 @@ WELL_FRONT_IN = 7.8          # передняя стенка 3 мм
 WELL_BOTTOM_FRONT = -56.0
 WELL_BOTTOM_REAR = -70.0
 BOTTOM_Z = GUARD_Z[1]        # низ корпуса над спуском (−50.1)
+AMBI_PIVOT = (-24.0, 18.2)    # ось рычага двусторонней защёлки (x, y) на высоте тяги защёлки; ось вертикальная
+AMBI_CLAW_X = -39.5           # палец рычага в пазу переднего конца тяги
+AMBI_DEG = math.degrees(math.asin(3.2 / (AMBI_PIVOT[0] - AMBI_CLAW_X)))   # поворот рычага при ходе тяги 3.2 мм
 TOWER_R = 17.3                # башня буферной трубки: гайка R 16.3; за кнопкой досылателя вдоль её оси свободно
 TOWER_X = (LOWER_REAR, UPPER_REAR)
 PART_W = 9.3                 # толщина курка и спуска (0.37″)
@@ -163,7 +166,8 @@ def build(ctx):
             boolean(body, prism_xz(f"cut_rib{sgn}{k}", fillet([(-3.0, zz - 0.75), (MAGWELL_FRONT - 2.0, zz - 0.75), (MAGWELL_FRONT - 2.0, zz + 0.75),
                                                                 (-3.0, zz + 0.75)], 0.7, 3), y0, y1, C))
         y0, y1 = (LOWER_HALF_W - 0.8, LOWER_HALF_W + 4) if sgn > 0 else (-LOWER_HALF_W - 4, -LOWER_HALF_W + 0.8)
-        boolean(body, prism_xz(f"cut_panel{sgn}", fillet([(-38.0, -52.0), (-6.5, -49.0), (-6.5, -23.0), (-38.0, -23.0)], 3.0, 5), y0, y1, C))
+        ptop = -23.0 if sgn < 0 else -34.5
+        boolean(body, prism_xz(f"cut_panel{sgn}", fillet([(-38.0, -52.0), (-6.5, -49.0), (-6.5, ptop), (-38.0, ptop)], 3.0, 5), y0, y1, C))
     # квадратные выемки сеткой слева (образец Fab): на панели шахты 2 × 3 у задней кромки, над передом скобы 2 × 2
     for nm, xs, zs, y_face in (("well", (-33.6, -30.0), (-46.0, -42.4, -38.8), LOWER_HALF_W - 0.8),
                                ("fcg", (-66.4, -62.8), (-45.6, -42.0), FCG_HALF_W)):
@@ -172,6 +176,10 @@ def build(ctx):
                 sq = prism_xz(f"cut_sq_{nm}{i}{j}", fillet([(xx - 1.2, zz - 1.2), (xx + 1.2, zz - 1.2), (xx + 1.2, zz + 1.2),
                                                              (xx - 1.2, zz + 1.2)], 0.4, 2), y_face - 0.8, y_face + 4.0, C)
                 boolean(body, sq)
+    # выемка в левой стенке шахты под клавишу двусторонней защёлки
+    mx_, mz_ = MAG_BUTTON
+    boolean(body, prism_xz("cut_ambi_pocket", fillet([(-17.4, mz_ - 4.9), (-6.0, mz_ - 4.9), (-6.0, mz_ + 4.9), (-17.4, mz_ + 4.9)], 2.0, 4),
+                           13.3, 25.0, C))
     # отверстие винта рукояти снизу (под углом рукояти)
     gs = cyl("cut_grip_screw", -14.0, 6.0, 2.6, C, seg=20, axis="Z", cy=0.0, cz=0.0)
     gs.rotation_euler = (0, math.radians(18.0), 0)
@@ -450,8 +458,53 @@ def mag_catch(F):
     # зуб входит через окно шахты в паз на левой стенке магазина
     tooth = box("mag_catch_tooth", mx + 17.0, mx + 23.0, WELL_IN_HALF_W - 1.6, LOWER_HALF_W - 1.0, mz - 2.0, mz + 2.0, F, "Steel_black")
     boolean(bar, tooth, "UNION")
+    # паз под палец рычага двусторонней защёлки (палец ходит по дуге — паз вытянут вдоль)
+    boolean(bar, prism_xz("cut_catch_claw", fillet([(AMBI_CLAW_X - 1.4, mz - 1.1), (AMBI_CLAW_X + 1.4, mz - 1.1), (AMBI_CLAW_X + 1.4, mz + 1.1),
+                                                   (AMBI_CLAW_X - 1.4, mz + 1.1)], 1.05, 3), LOWER_HALF_W - 2.0, LOWER_HALF_W + 1.0, F))
     finish(bar, w=0.25, seg=2, angle=35)
     o["mag_catch"] = bar
+    o.update(ambi_release(F, mx, mz))
+    return o
+
+
+def ambi_release(F, mx, mz):
+    """Двусторонняя защёлка: слева вдоль переда шахты рычаг на вертикальной оси в кронштейне. Задний конец — палец в
+    пазу тяги защёлки, передний — рифлёная клавиша: нажали её внутрь — задний конец уходит наружу и тянет тягу, магазин
+    освобождается; кнопкой справа рычаг поворачивается тягой сам (в риге — от mag_catch)."""
+    o = {}
+    px, py = AMBI_PIVOT
+    y0, y1 = py - 1.0, py + 1.0
+    lev = prism_xz("Mag_release_L", fillet([(AMBI_CLAW_X - 0.9, mz - 2.6), (-18.5, mz - 3.0), (-17.0, mz - 4.2), (-7.0, mz - 4.0),
+                                            (-7.0, mz + 4.0), (-17.0, mz + 4.2), (-18.5, mz + 3.0), (AMBI_CLAW_X - 0.9, mz + 2.6)],
+                                           [1.5, 1.0, 1.5, 2.5, 2.5, 1.5, 1.0, 1.5], 4), y0, y1, F, "Steel_black")
+    # клавиша: накладка снаружи с поперечным рифлением
+    pad = prism_xz("ambi_pad", fillet([(-16.6, mz - 3.6), (-7.6, mz - 3.4), (-7.6, mz + 3.4), (-16.6, mz + 3.6)], 1.6, 3), y1 - 0.2, y1 + 0.9,
+                   F, "Steel_black")
+    boolean(lev, pad, "UNION")
+    for k in range(5):
+        xx = -15.2 + k * 1.7
+        boolean(lev, box(f"cut_ambi_rib{k}", xx - 0.35, xx + 0.35, y1 + 0.35, y1 + 2.0, mz - 5, mz + 5, F))
+    # палец в паз тяги
+    boolean(lev, cyl("ambi_claw", LOWER_HALF_W - 0.6, y0 + 0.2, 0.95, F, "Steel_black", seg=16, cy=AMBI_CLAW_X, cz=mz, axis="Y", ch=0.25),
+            "UNION")
+    boolean(lev, cyl("cut_ambi_pivot", mz - 6, mz + 6, 1.05, F, seg=16, cy=px, cz=py, axis="Z"))
+    finish(lev, w=0.3, seg=2, angle=35)
+    from lib import set_origin
+    set_origin(lev, (px, py, mz))
+    o["ambi_lever"] = lev
+    # кронштейн-вилка на стенке шахты: щёки над и под рычагом, ось вертикальная, два винта в стенку
+    br = prism_xz("Mag_release_bracket", fillet([(px - 3.4, mz - 6.6), (px + 3.4, mz - 6.6), (px + 3.4, mz + 6.6), (px - 3.4, mz + 6.6)], 1.6, 3),
+                  LOWER_HALF_W + 0.05, py + 2.6, F, "Steel_black")
+    boolean(br, box("cut_ambi_slot", px - 6, px + 6, py - 1.9, py + 6, mz - 3.35, mz + 3.35, F))
+    boolean(br, cyl("cut_ambi_br_pin", mz - 8, mz + 8, 1.02, F, seg=16, cy=px, cz=py, axis="Z"))
+    finish(br, w=0.3, seg=2, angle=35)
+    o["ambi_bracket"] = br
+    o["ambi_pin"] = cyl("Mag_release_pin", mz - 6.4, mz + 6.4, 1.0, F, "Steel_black", seg=16, cy=px, cz=py, axis="Z", ch=0.25)
+    for k, zz in enumerate((mz - 5.0, mz + 5.0)):
+        sc = cyl(f"Mag_release_screw{k}", py + 2.65, py + 3.3, 1.3, F, "Steel_black", seg=20, cy=px - 1.9, cz=zz, axis="Y", ch=0.2)
+        boolean(sc, prism_xz("cut_ambi_scr_slot", [(px - 1.9 - 1.3, zz - 0.25), (px - 1.9 + 1.3, zz - 0.25), (px - 1.9 + 1.3, zz + 0.25),
+                                                    (px - 1.9 - 1.3, zz + 0.25)], py + 2.9, py + 4.0, F))
+        o[f"ambi_screw{k}"] = sc
     return o
 
 

@@ -65,6 +65,9 @@ PAIRS = [
     ("Handguard_screw1", "Barrel"), ("Barrel_nut", "Barrel"), ("Barrel_nut", "Barrel_extension"), ("Barrel_nut", "Gas_tube"),
     ("Handguard", "Barrel"), ("Handguard", "Gas_tube"), ("Front_sight_base", "Handguard"), ("Handguard_screw0", "Handguard"),
     ("Handguard_screw1", "Handguard"),
+    ("Mag_release_L", "Lower_receiver"), ("Mag_release_L", "Mag_catch"), ("Mag_release_L", "Mag_release_bracket"),
+    ("Mag_release_L", "Mag_release_pin"), ("Mag_release_bracket", "Lower_receiver"), ("Mag_release_L", "Magazine_body"),
+    ("Mag_release_L", "Bolt_catch"), ("Mag_release_screw0", "Mag_release_bracket"), ("Mag_release_L", "Upper_receiver"),
 ]
 import sys as _sys
 _ONLY = (_sys.argv[_sys.argv.index("--") + 1].split(",") if "--" in _sys.argv else None)
@@ -92,6 +95,7 @@ STATES = {
     "ch_latch": {"ch_latch": 1.0},
     "ch_back_latch": {"charging_handle": 1.0, "ch_latch": 1.0},
     "mag_half_out": {"mag_out": 0.3, "mag_catch": 1.0},
+    "mag_release": {"mag_catch": 1.0},
 }
 
 

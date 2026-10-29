@@ -343,6 +343,7 @@ bash tools/vss_m_v8/painter_to_game.sh [набор …] [--scenes] [--shots] # �
                                                               # глушитель отдельным файлом (в игре покупной): --python tools/ar15/delivery_suppressor.py -- <глушитель.blend>;
                                                               # проверки: --python tools/ar15/check_overlaps.py [-- состояния] (пересечения в положениях), tools/ar15/shots.py (снимки)
                                                               # снимки как в Material Preview (Eevee, HDRI forest.exr): --python tools/ar15/render_preview.py -- <папка> [вид,…] [ширина]
+python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.png]   # AR-15: обводка крыла рукоятки заряжания по снимку владельца → tools/ar15/ch_wing_trace.json (его берёт part_bolt)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
