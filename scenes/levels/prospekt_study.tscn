@@ -60,15 +60,15 @@ label = ""
 
 [node name="Outside_W40" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -258, 0.0, -40)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -264, 0.0, -40)
 
 script = ExtResource("build")
 
 kind = "mass"
 
-footprint = Vector2(14, 20)
+footprint = Vector2(26, 22)
 
-floors = 22
+floors = 44
 
 story_height = 3.0
 
@@ -252,15 +252,31 @@ label = ""
 
 [node name="Outside_City_N2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -140.0, 0.0, -140.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -140.0, 0.0, -144.0)
 
 script = ExtResource("build")
 
 kind = "mass"
 
-footprint = Vector2(40.0, 14.0)
+footprint = Vector2(32.0, 22.0)
 
-floors = 12
+floors = 38
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_S4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 80.0, 0.0, 332.0)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(26.0, 26.0)
+
+floors = 50
 
 story_height = 3.0
 
@@ -584,7 +600,71 @@ floors = 2
 
 story_height = 4.0
 
-label = "салон связи · ломбард (закрыты)"
+label = "БЦ «Проспект, 11» · вестибюль и салон связи (закрыты)"
+
+[node name="BC_Prospekt5" type="Node3D" parent="West" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -177.5, 8.03, -22.5)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(29.399999999999977, 11.4)
+
+floors = 7
+
+story_height = 3.6
+
+label = "БЦ «Проспект, 5» — 9 этажей (закрыт)"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
+
+metadata/lift = 8.03
+
+[node name="BC_Prospekt5_Lobby" type="Node3D" parent="West" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -194.0, 0.0, -22.5)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(3.6, 7.0)
+
+floors = 1
+
+story_height = 4.6
+
+label = "БЦ «Проспект, 5» · вестибюль (закрыт)"
+
+[node name="BC_Prospekt11" type="Node3D" parent="West" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -76.0, 8.0, -22.5)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(32.4, 11.4)
+
+floors = 8
+
+story_height = 3.6
+
+label = "БЦ «Проспект, 11» — 10 этажей (закрыт)"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
+
+metadata/lift = 8.0
 
 [node name="Corpus1_A" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
