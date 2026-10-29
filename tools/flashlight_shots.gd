@@ -2,6 +2,7 @@ extends Node
 ## Фонари в паркинге «Проспекта»: прежнее и новое пятно в одинаковых условиях, прицел,
 ## светлая стена, обычное освещение, мощный фонарь и комбо. Профиль игрока — отдельный.
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/flashlight_shots.tscn
+## FLASHLIGHT_COMPARE=soft — сравнить с первой мягкой версией (32°); FLASHLIGHT_OUTPUT — папка кадров.
 
 const OUT: String = "res://docs/screens/flashlight_eft_20261029"
 const AISLE: Vector3 = Vector3(-174.0, -7.22, -60.4)
@@ -14,6 +15,8 @@ var me: Player
 var rig: CameraRig
 var lamps: Array[Light3D] = []
 var key: String
+var output_dir: String = OUT
+var compare_soft: bool = false
 
 
 func _enter_tree() -> void:
@@ -21,6 +24,10 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	compare_soft = OS.get_environment("FLASHLIGHT_COMPARE") == "soft"
+	var requested_output: String = OS.get_environment("FLASHLIGHT_OUTPUT")
+	if not requested_output.is_empty():
+		output_dir = requested_output
 	if DisplayServer.get_name() == "headless":
 		push_error("flashlight_shots: для снимков нужен оконный запуск")
 		get_tree().quit(1)
@@ -48,7 +55,7 @@ func _ready() -> void:
 	var hud: CanvasLayer = level.get_node_or_null("HUD") as CanvasLayer
 	if hud != null:
 		hud.hide()
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
 	me.loadout_mode = false
 	key = String(me.weapon_keys()[0])
 	me.set_sandbox_mods(key, {"side_right": "tac_flashlight_01"})
@@ -101,7 +108,7 @@ func _ready() -> void:
 	await _save("10_powerful_after")
 	await _attachment("tac_combo_01", "underbarrel")
 	await _save("11_combo_after")
-	print("flashlight_shots: готово · ", OUT)
+	print("flashlight_shots: готово · ", output_dir)
 	get_tree().quit()
 
 
@@ -116,14 +123,18 @@ func _place(at: Vector3, target: Vector3) -> void:
 ## Прежние параметры нужны только для парного кадра; штатный профиль берётся из тех же данных, что в рейде.
 func _legacy(enabled: bool) -> void:
 	var spec: Dictionary = WeaponDb.attachment("tac_flashlight_01").light
+	var before: Dictionary = {"angle": 22.0, "energy": 6.0, "indirect": 1.3, "specular": 0.45}
+	if compare_soft:
+		before = {"angle": 32.0, "energy": 3.2, "indirect": 0.8, "specular": 0.4}
+	var selected: Dictionary = before if enabled else spec
 	for node: Node in rig.find_children("Flashlight*", "SpotLight3D", true, false):
 		var beam: SpotLight3D = node as SpotLight3D
-		beam.light_projector = null if enabled else WeaponMods.FLASHLIGHT_BEAM
-		beam.spot_angle = 22.0 if enabled else float(spec.angle)
-		beam.light_color = Color(1.0, 0.96, 0.9) if enabled else Color(0.96, 0.98, 1.0)
-		beam.light_indirect_energy = 1.3 if enabled else float(spec.indirect)
-		beam.light_specular = 0.45 if enabled else float(spec.specular)
-		var energy: float = 6.0 if enabled else float(spec.energy)
+		beam.light_projector = null if enabled and not compare_soft else WeaponMods.FLASHLIGHT_BEAM
+		beam.spot_angle = float(selected.angle)
+		beam.light_color = Color(1.0, 0.96, 0.9) if enabled and not compare_soft else Color(0.96, 0.98, 1.0)
+		beam.light_indirect_energy = float(selected.indirect)
+		beam.light_specular = float(selected.specular)
+		var energy: float = float(selected.energy)
 		beam.set_meta("condition_energy", energy)
 		beam.light_energy = energy
 
@@ -149,7 +160,7 @@ func _save(label: String) -> void:
 		get_tree().quit(1)
 		return
 	await RenderingServer.frame_post_draw
-	var path: String = ProjectSettings.globalize_path(OUT.path_join(label + ".png"))
+	var path: String = ProjectSettings.globalize_path(output_dir.path_join(label + ".png"))
 	var error: Error = get_viewport().get_texture().get_image().save_png(path)
 	print("flashlight_shots: ", label, " · error=", error)
 	if error != OK:

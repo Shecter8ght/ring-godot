@@ -5957,7 +5957,7 @@
     },
     "light": {
      "range": 30,
-     "angle": 32,
+     "angle": 28,
      "energy": 3.2,
      "indirect": 0.8,
      "specular": 0.4,
@@ -5999,7 +5999,7 @@
     },
     "light": {
      "range": 60,
-     "angle": 23,
+     "angle": 20,
      "energy": 7.5,
      "indirect": 1.3,
      "specular": 0.65,
@@ -6090,7 +6090,7 @@
     },
     "light": {
      "range": 30,
-     "angle": 32,
+     "angle": 28,
      "energy": 3.2,
      "indirect": 0.8,
      "specular": 0.4,

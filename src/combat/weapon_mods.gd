@@ -1031,7 +1031,7 @@ static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) ->
 	light.light_color = Color(0.96, 0.98, 1.0)
 	light.light_energy = float(ls.get("energy", 3.2))
 	light.spot_range = float(ls.get("range", 30.0))
-	light.spot_angle = float(ls.get("angle", 32.0))
+	light.spot_angle = float(ls.get("angle", 28.0))
 	light.spot_attenuation = 0.8
 	light.spot_angle_attenuation = 0.8
 	light.light_projector = FLASHLIGHT_BEAM
