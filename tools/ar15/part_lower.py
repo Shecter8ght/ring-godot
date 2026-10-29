@@ -3,7 +3,8 @@
 # оси сборки и разборки, фиксатор буфера.
 import math
 import bpy
-from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, GRIP_SEAM_BACK_X, SEAM_ARC_R, REAR_FILLET_R,
+from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, GRIP_TOP_Z, GRIP_SEAM_BACK_X, GRIP_SCREW_X, SEAM_ARC_R,
+                 REAR_FILLET_R,
                  REAR_PLAN_R, SEAM_EDGE,
                  LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
                  TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
@@ -38,17 +39,19 @@ PIVOT_BOSS_H = 0.7
 
 
 REAR_X = LOWER_REAR + 0.5            # задняя грань под башней буферной трубки (заподлицо с её задним торцом)
-# задняя часть под башней: выемка за рукоятью — четверть окружности SEAM_ARC_R от шва вверх до горизонтали
-# (lib.GRIP_SEAM_BACK_X), из неё выпуклым углом REAR_FILLET_R — задняя грань
+# задняя часть под башней: выемка за рукоятью — дуга окружности SEAM_ARC_R от шва (lib.GRIP_SEAM_BACK_X) вверх, из неё
+# выпуклым углом REAR_FILLET_R — задняя грань; угол дуги — сколько помещается между швом и задней гранью
 
 
 def rear_pts():
     """Задний срез ресивера от шва с рукоятью вверх до задней грани: точки (x, z), снизу вверх."""
     r, rc = SEAM_ARC_R, REAR_FILLET_R
-    cx, zt = GRIP_SEAM_BACK_X - r, GRIP_TOP_Z + r
-    pts = [(cx + r * math.cos(math.radians(90.0 * k / 12)), GRIP_TOP_Z + r * math.sin(math.radians(90.0 * k / 12)))
-           for k in range(13)]
-    pts += [(cx - rc * math.sin(math.radians(90.0 * k / 6)), zt + rc - rc * math.cos(math.radians(90.0 * k / 6)))
+    cx = GRIP_SEAM_BACK_X - r
+    beta = math.acos(1.0 - (GRIP_SEAM_BACK_X - REAR_X) / (r + rc))     # дуга + угол ровно доходят до задней грани
+    pts = [(cx + r * math.cos(beta * k / 12), GRIP_TOP_Z + r * math.sin(beta * k / 12)) for k in range(13)]
+    bx, bz = pts[-1]
+    fx, fz = bx + rc * math.cos(beta), bz + rc * math.sin(beta)     # середина выпуклого угла
+    pts += [(fx + rc * math.cos(math.pi + beta * (1 - k / 6)), fz + rc * math.sin(math.pi + beta * (1 - k / 6)))
             for k in range(1, 7)]
     return pts
 
@@ -179,8 +182,8 @@ def build(ctx):
     boolean(body, cyl("cut_bc_pin", bx - 14, bx + 14, 1.2, C, seg=16, cy=by, cz=bz, axis="X"))
     # канал зуба задержки из выемки внутрь, над шахтой
     boolean(body, box("cut_bc_slot", bx - 6.0, bx + 6.0, 6.5, LOWER_HALF_W, bz - 1.5, 5.0, C))
-    # фиксатор буфера: вертикальное отверстие перед башней, глухое — ниже −29 за ним уже выемка за рукоятью
-    boolean(body, cyl("cut_retainer", -29, -10, 1.95, C, seg=16, cy=RETAINER_X, cz=0.0, axis="Z"))
+    # фиксатор буфера: вертикальное отверстие перед башней, глухое — ниже −24.5 за ним уже выемка за рукоятью
+    boolean(body, cyl("cut_retainer", -24.5, -10, 1.95, C, seg=16, cy=RETAINER_X, cz=0.0, axis="Z"))
     # рифление спереди на шахте (обе стороны) и неглубокие панели на боках шахты
     for sgn in (-1, 1):
         for k in range(8):
@@ -206,7 +209,7 @@ def build(ctx):
     # отверстие винта рукояти снизу (под углом рукояти)
     gs = cyl("cut_grip_screw", -14.0, 6.0, 2.6, C, seg=20, axis="Z", cy=0.0, cz=0.0)
     gs.rotation_euler = (0, math.radians(18.0), 0)
-    gs.location = (-158.0 * MM, 0, (GRIP_TOP_Z + 2.0) * MM)
+    gs.location = ((GRIP_SCREW_X + 2.0 * math.tan(math.radians(18.0))) * MM, 0, (GRIP_TOP_Z + 2.0) * MM)
     from lib import apply_transform as _at
     _at(gs)
     boolean(body, gs)
