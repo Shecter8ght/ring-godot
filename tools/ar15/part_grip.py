@@ -1,5 +1,6 @@
 # AR-15: пистолетная рукоять в манере листинга Fab — почти вертикальная (18° от вертикали), упор ладони сзади-сверху,
-# выступ под средний палец, расширение внизу, мелкая «точечная» текстура по бокам; винт рукояти снизу по её оси.
+# спереди канавки под средний, безымянный палец и мизинец с гребнями между ними (владелец, 2026-10-29: «рукоятка должна
+# быть с выступами под пальцы»), расширение внизу, мелкая «точечная» текстура по бокам; винт рукояти снизу по её оси.
 # Верх — плоская площадка на GRIP_TOP_Z (под нижним ресивером).
 import math
 import bmesh
@@ -17,7 +18,7 @@ SECTIONS = [
     (-0.12, 24.0, -24.0, 14.6),
     (0.00, 24.0, -24.0, 14.6),
     (0.12, 23.6, -23.2, 14.6),
-    (0.24, 25.4, -22.2, 14.8),
+    (0.24, 23.6, -22.2, 14.8),
     (0.34, 23.2, -21.4, 15.0),
     (0.50, 22.6, -20.8, 15.1),
     (0.66, 22.8, -20.8, 15.2),
@@ -27,6 +28,11 @@ SECTIONS = [
     (0.99, 25.0, -22.9, 16.2),
     (1.00, 23.8, -21.8, 15.3),
 ]
+# канавки под пальцы на передней кромке: гребни в t ≈ 0.37 и 0.66, канавки 0.22 / 0.51 / 0.80 (шаг ≈ 30 мм — палец)
+FINGER_AMP = 1.9
+FINGER_PERIOD = 0.29
+FINGER_RIDGE = 0.37
+STATIONS = [-0.12, -0.06] + [round(0.0 + 0.0125 * k, 4) for k in range(81)]
 SA, CA = math.sin(math.radians(ANGLE)), math.cos(math.radians(ANGLE))
 DOWN = Vector((-SA, 0.0, -CA))          # ось рукояти вниз
 FWD = Vector((CA, 0.0, -SA))            # поперечная ось «вперёд»
@@ -37,12 +43,22 @@ def axis_pt(t):
     return TOP + DOWN * (t * LEN)
 
 
+def _smooth(a, b, x):
+    t = min(1.0, max(0.0, (x - a) / (b - a)))
+    return t * t * (3 - 2 * t)
+
+
 def section_at(t):
+    base = SECTIONS[-1][1:]
     for (t0, f0, b0, w0), (t1, f1, b1, w1) in zip(SECTIONS, SECTIONS[1:]):
         if t0 <= t <= t1:
             k = (t - t0) / (t1 - t0)
-            return f0 + (f1 - f0) * k, b0 + (b1 - b0) * k, w0 + (w1 - w0) * k
-    return SECTIONS[-1][1:]
+            base = (f0 + (f1 - f0) * k, b0 + (b1 - b0) * k, w0 + (w1 - w0) * k)
+            break
+    f, b, w = base
+    env = _smooth(0.08, 0.17, t) * (1.0 - _smooth(0.84, 0.93, t))
+    f += FINGER_AMP * env * math.cos(2 * math.pi * (t - FINGER_RIDGE) / FINGER_PERIOD)
+    return f, b, w
 
 
 def ring(t, f, b, w, n=56):
@@ -72,7 +88,8 @@ def build(ctx):
     me = bpy.data.meshes.new("Pistol_grip")
     bm = bmesh.new()
     rings = []
-    for t, f, b, w in SECTIONS:
+    for t in STATIONS:
+        f, b, w = section_at(t)
         rings.append([bm.verts.new(v(p.x, p.y, p.z)) for p in ring(t, f, b, w)])
     n = len(rings[0])
     for r0, r1 in zip(rings, rings[1:]):
@@ -107,6 +124,7 @@ def build(ctx):
         n = p.normal
         if n.dot(DOWN) > 0.96 or n.z > 0.96:
             p.use_smooth = False
+    finish(grip, w=0.9, seg=3, angle=40)
     o["grip"] = grip
     # точечная текстура по бокам: пирамидки на поверхности
     tme = bpy.data.meshes.new("grip_texture")
@@ -142,6 +160,7 @@ def build(ctx):
     for p in tex.data.polygons:
         p.use_smooth = False
     grip = join([grip, tex], "Pistol_grip")
+    grip["_fin"] = 1
     o["grip"] = grip
     # винт рукояти: головка с шестигранником в глубине отверстия, хвост вверх по оси
     sc = lathe("Grip_screw", [(19.0, 0.0), (19.0, 3.6), (19.4, 4.0), (23.4, 4.0), (23.6, 3.2), (23.6, 3.1), (34.0, 3.1),

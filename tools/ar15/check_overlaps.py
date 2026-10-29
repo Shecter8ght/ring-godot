@@ -14,7 +14,7 @@ PAIRS = [
     ("Cam_pin", "Upper_receiver"), ("Gas_key", "Upper_receiver"), ("Pistol_grip", "Lower_receiver"), ("Stock_body", "Buffer_tube"),
     ("Buffer", "Buffer_tube"), ("Bolt_carrier", "Buffer"), ("Front_sight_base", "Handguard_rail"), ("Rear_sight_base", "Upper_rail"),
     ("Muzzle_brake", "Barrel"), ("Suppressor_body", "Muzzle_brake"), ("Handguard", "Barrel_nut"), ("Handguard", "Gas_block"),
-    ("Handguard", "Upper_receiver"), ("Bolt_catch", "Bolt"), ("Bolt_catch", "Lower_receiver"), ("Bolt_catch", "Upper_receiver"),
+    ("Handguard", "Upper_receiver"), ("Handguard", "Lower_receiver"), ("Forward_assist", "Upper_receiver"), ("Forward_assist", "Bolt_carrier"), ("Bolt_catch", "Bolt"), ("Bolt_catch", "Lower_receiver"), ("Bolt_catch", "Upper_receiver"),
     ("Mag_catch", "Magazine_body"), ("Mag_catch", "Lower_receiver"), ("Selector", "Trigger"), ("Dust_cover", "Upper_receiver"),
     ("Dust_cover", "Lower_receiver"), ("Upper_receiver", "Lower_receiver"), ("Takedown_pin", "Upper_receiver"),
     ("Pivot_pin", "Upper_receiver"), ("Disconnector", "Hammer"), ("Buffer_retainer", "Upper_receiver"),
@@ -34,6 +34,7 @@ STATES = {
     "stock_out": {"stock": 1.0},
     "sights_down": {"rear_sight": 0.0, "front_sight": 0.0},
     "fired": {"hammer": 0.0, "trigger": 1.0},
+    "fa_pressed": {"forward_assist": 1.0},
 }
 
 

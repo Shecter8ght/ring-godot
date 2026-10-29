@@ -1,4 +1,5 @@
 # AR-15: иерархия, оси и управление. Пустышка AR15_Controls — свойства 0…1:
+#   forward_assist  — кнопка досылателя нажата (толкатель идёт вдоль своей оси к насечкам рамы)
 #   charging_handle — рукоятка заряжания назад (тянет раму за ключ; ход как у рамы)
 #   bolt_carrier    — рама назад сама по себе (выстрел, задержка затвора); рукоятка при этом стоит
 #   hammer          — курок взведён (1) / спущен (0); рама при отходе взводит его сама
@@ -15,13 +16,14 @@
 # Затвор: свободный ход рамы BOLT_FREE, поворот на BOLT_ROT за BOLT_UNLOCK, дальше идёт с рамой.
 import math
 import bpy
-from lib import (MM, CARRIER_TRAVEL, BOLT_FREE, BOLT_UNLOCK, BOLT_ROT, PIVOT_PIN, TAKEDOWN_PIN, SELECTOR, TRIGGER_PIN,
+from mathutils import Vector
+from lib import (MM, FA_S, FA_D, FA_TRAVEL, CARRIER_TRAVEL, BOLT_FREE, BOLT_UNLOCK, BOLT_ROT, PIVOT_PIN, TAKEDOWN_PIN, SELECTOR, TRIGGER_PIN,
                  HAMMER_PIN, MAG_BUTTON, STOCK_TRAVEL, empty, set_parent, set_origin)
 from part_upper import HINGE_Y, HINGE_Z
 from part_lower import BOLT_CATCH_PIVOT
 from part_bolt import CH_REAR
 
-PROPS = ["charging_handle", "bolt_carrier", "hammer", "trigger", "selector", "dust_cover", "mag_catch", "mag_out",
+PROPS = ["forward_assist", "charging_handle", "bolt_carrier", "hammer", "trigger", "selector", "dust_cover", "mag_catch", "mag_out",
          "bolt_catch", "ch_latch", "pivot_pin", "takedown_pin", "upper_open", "stock", "stock_latch", "suppressor_off",
          "rear_sight", "front_sight", "rear_aperture"]
 DEFAULTS = {"hammer": 1.0, "selector": 0.5, "rear_sight": 1.0, "front_sight": 1.0}
@@ -103,6 +105,13 @@ def build(ctx):
         if ob(nm + "_pin"):
             set_parent(ob(nm + "_pin"), ch)
         add_driver(lp, "rotation_euler", 2, f"{-s}*radians(14.0)*ch_latch", ctrl, ["ch_latch"])
+    # досылатель: толкатель вдоль оси корпуса
+    if ob("Forward_assist"):
+        fam = empty("Forward_assist_mover", FA_S, R, upper_g, size=0.005)
+        set_parent(ob("Forward_assist"), fam)
+        d = Vector(FA_D).normalized()
+        for i in range(3):
+            add_driver(fam, "location", i, f"{FA_S[i]*MM}+{d[i]*FA_TRAVEL*MM}*forward_assist", ctrl, ["forward_assist"])
     # пылезащитная крышка — на своей оси; открывается рукой или рамой
     cov = empty("Dust_cover_hinge", (0, HINGE_Y, HINGE_Z), R, upper_g, size=0.006)
     if ob("Dust_cover"):

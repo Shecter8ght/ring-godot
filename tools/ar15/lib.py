@@ -15,6 +15,9 @@ UPPER_FRONT = 20.0        # передний торец корпуса верх�
 UPPER_REAR = -176.0       # задний торец верхнего ресивера
 RAIL_TOP = 31.0           # верх зубьев планки над осью канала
 SPLIT_Z = -17.0           # плоскость разъёма верхнего и нижнего ресиверов (у оси сборки)
+REAR_TOP_Z = -8.6         # за шахтой боковины нижнего поднимаются до этой высоты (фото PEO)
+STEP_X = -90.0            # где линия разъёма поднимается (скругление STEP_R)
+STEP_R = 6.0
 UPPER_HALF_W = 15.0       # полуширина корпуса верхнего ресивера (≈1.18″ по типовым)
 RAIL_HALF_W = 10.6        # полуширина планки MIL-STD-1913 (21.2 мм)
 LOWER_HALF_W = 15.5       # полуширина нижнего ресивера у шахты магазина
@@ -39,6 +42,12 @@ CARRIER_TRAVEL = 91.0     # ход рамы до упора буфера (≈3.6
 BOLT_UNLOCK = 9.5         # ход рамы, за который затвор поворачивается (кулачковый паз), оценка
 BOLT_FREE = 3.0           # свободный ход рамы до начала поворота
 BOLT_ROT = 22.5           # поворот затвора при отпирании, град
+# досылатель (справа сзади): ось от торца ресивера вперёд-внутрь-вниз к насечкам рамы (фото PEO: кнопка x −172, z 17.8)
+FA_S = (-175.0, -16.0, 16.0)       # задний торец корпуса — на 1 мм впереди торца ресивера, кнопка выступает назад
+FA_D = (1.0, 0.16, -0.115)
+FA_R = 9.4               # корпус Ø18.8 у кнопки, к переду сужается «языком»
+FA_LEN = 60.0
+FA_TRAVEL = 4.5
 
 # ---------- ствол и перед (листинг Fab: короткий ствол, длинное M-LOK) ----------
 BARREL_LEN = 292.1        # 11.5″ от зеркала затвора
@@ -57,7 +66,7 @@ REAR_SIGHT_X = -150.0     # центр основания складного ц�
 FRONT_SIGHT_X = 268.0     # центр основания складной мушки на планке цевья
 # ---------- магазин, приклад, рукоять ----------
 MAG_TOP_Z = -5.8          # верх губок магазина: затвор (упоры r7.4) проходит над губками, цепляя закраину верхнего патрона
-MAG_X = (-54.4, 12.2)     # магазин в горловине: задняя и передняя стенки
+MAG_X = (-50.6, 11.4)     # магазин в горловине: задняя и передняя стенки (шахта внутри ≈2.41″ × 0.905″ — замер 15 ресиверов)
 MAG_HALF_W = 11.5         # полуширина магазина в горловине
 MAG_CATCH_SLOT = (-42.0, -26.0)  # окно защёлки на левой стенке магазина (x, z)
 TUBE_X = (-358.0, -176.0)        # буферная трубка (резьба в башне до −176)
@@ -331,6 +340,7 @@ def boolean(target, cutter, op="DIFFERENCE", remove=True, solver="EXACT", self_x
         m.use_self = True
     apply_all(target)
     _drop_empty_slots(target)
+    clean(target, 0.002)
     if remove:
         me = cutter.data
         bpy.data.objects.remove(cutter, do_unlink=True)
@@ -369,17 +379,39 @@ def apply_all(o):
         bpy.data.meshes.remove(old)
 
 
-def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=0.6, clamp=True):
+def _bevel_weights(o, angle, exclude):
+    me = o.data
+    bm = bmesh.new(); bm.from_mesh(me); bm.normal_update()
+    sel = []
+    for e in bm.edges:
+        if len(e.link_faces) != 2 or e.calc_face_angle(0) < math.radians(angle):
+            continue
+        if any(exclude(f.calc_center_median() * (1.0 / MM), f.normal) for f in e.link_faces):
+            continue
+        sel.append(e.index)
+    bm.free()
+    attr = me.attributes.get("bevel_weight_edge") or me.attributes.new("bevel_weight_edge", "FLOAT", "EDGE")
+    for i in range(len(me.edges)):
+        attr.data[i].value = 0.0
+    for i in sel:
+        attr.data[i].value = 1.0
+
+
+def bevel(o, w=0.5, seg=2, angle=30.0, harden=True, profile=0.6, clamp=True, miter="MITER_ARC", exclude=None):
     """Фаска по углу. w — мм. Не применяет: применить через apply_all или finish()."""
     m = o.modifiers.new("bevel", "BEVEL")
     m.width = w * MM
     m.segments = seg
-    m.limit_method = "ANGLE"
+    if exclude is None:
+        m.limit_method = "ANGLE"
+    else:
+        _bevel_weights(o, angle, exclude)
+        m.limit_method = "WEIGHT"
     m.angle_limit = math.radians(angle)
     m.profile = profile
     m.harden_normals = harden
     m.use_clamp_overlap = clamp
-    m.miter_outer = "MITER_ARC"
+    m.miter_outer = miter
     for p in o.data.polygons:
         p.use_smooth = True
     return m
@@ -468,24 +500,26 @@ def _spots(o, lo, hi):
         if any(c < l - 0.002 or c > h + 0.002 for c, l, h in zip(vv.co, lo, hi)):
             for f in vv.link_faces:
                 for q in f.verts:
-                    if all(l - 1e-5 <= c <= h + 1e-5 for c, l, h in zip(q.co, lo, hi)) and abs(q.co.y) > 0.015:
+                    if all(l - 1e-5 <= c <= h + 1e-5 for c, l, h in zip(q.co, lo, hi)):
                         spots.add(tuple(round(c / MM) for c in q.co))
     bmd.free()
     return sorted(spots)[:16]
 
 
-def finish(o, w=0.5, seg=2, angle=30.0, apply=True):
+def finish(o, w=0.5, seg=2, angle=30.0, apply=True, exclude=None):
     """Общая фаска по углу; если на вырожденных рёбрах фаска разносит сетку — повтор с меньшей шириной,
     в крайнем случае сетка без фаски с жёсткими рёбрами по углу."""
+    o["_fin"] = 1
     clean(o)
     before = _bbox(o)
     keep = o.data.copy()
     if not apply:
-        bevel(o, w, seg, angle)
+        bevel(o, w, seg, angle, exclude=exclude)
         weighted(o)
         bpy.data.meshes.remove(keep)
         return o
-    for k, (ww, tri) in enumerate(((w, False), (w, True), (w * 0.6, True), (w * 0.35, True))):
+    for k, (ww, tri, mit) in enumerate(((w, False, "MITER_ARC"), (w, False, "MITER_SHARP"), (w, True, "MITER_SHARP"),
+                                        (w * 0.6, True, "MITER_SHARP"), (w * 0.35, True, "MITER_SHARP"))):
         if k:
             old = o.data
             o.data = keep.copy()
@@ -496,7 +530,7 @@ def finish(o, w=0.5, seg=2, angle=30.0, apply=True):
             big = [f for f in bm.faces if len(f.verts) > 12]
             bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="BEAUTY")
             bm.to_mesh(o.data); bm.free()
-            bevel(o, ww, seg, angle)
+            bevel(o, ww, seg, angle, miter=mit, exclude=exclude)
             apply_all(o)
             # после фаски плоские треугольники снова сливаем в многоугольники — иначе тонкие клинья портят затенение
             bm = bmesh.new(); bm.from_mesh(o.data)
@@ -506,7 +540,7 @@ def finish(o, w=0.5, seg=2, angle=30.0, apply=True):
             for p in o.data.polygons:
                 p.use_smooth = True
         else:
-            bevel(o, ww, seg, angle)
+            bevel(o, ww, seg, angle, miter=mit, exclude=exclude)
         weighted(o)
         apply_all(o)
         _drop_loose(o)

@@ -3,24 +3,24 @@
 # оси сборки и разборки, фиксатор буфера.
 import math
 import bpy
-from lib import (MM, SPLIT_Z, LOWER_HALF_W, LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
+from lib import (MM, SPLIT_Z, REAR_TOP_Z, STEP_X, STEP_R, LOWER_HALF_W, LOWER_REAR, UPPER_REAR, PIVOT_PIN, TAKEDOWN_PIN, AUTOSEAR_PIN, SELECTOR,
                  TRIGGER_PIN, HAMMER_PIN, MAG_BUTTON, GUARD_X, GUARD_Z, MAGWELL_FRONT, BUFFER_R, fillet, arc_pts,
                  prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join, bevel_edges, auto_sharp, material)
 from part_upper import LUG_HALF_W, PIN_R
 
 FCG_HALF_W = 12.2            # боковины кармана УСМ (снаружи)
 FCG_POCKET_HALF = 9.4        # карман УСМ внутри
-WELL_IN_HALF_W = 11.7        # шахта внутри (магазин 23 мм в горловине)
+WELL_IN_HALF_W = 11.7        # шахта внутри 23.4 мм (замер 15 ресиверов: 0.905″ + зазор магазину)
 WELL_REAR_OUT = -58.0        # задняя стенка шахты снаружи
-WELL_REAR_IN = -54.6
-WELL_FRONT_IN = 12.4
+WELL_REAR_IN = -50.9         # задняя стенка толще (в ней тяга защёлки и плунжер задержки)
+WELL_FRONT_IN = 11.6         # шахта внутри 62 мм (замер: 2.409″)
 WELL_BOTTOM_FRONT = -56.0
 WELL_BOTTOM_REAR = -70.0
 BOTTOM_Z = -45.9             # низ корпуса над скобой
 TOWER_R = 20.5
 TOWER_X = (LOWER_REAR, UPPER_REAR)
 PART_W = 9.3                 # толщина курка и спуска (0.37″)
-BOLT_CATCH_PIVOT = (-56.0, 15.4, -19.0)   # ось затворной задержки — вдоль X (над защёлкой магазина)
+BOLT_CATCH_PIVOT = (-50.5, 15.4, -19.0)   # ось затворной задержки — вдоль X (над защёлкой магазина)
 GRIP_ANGLE = 18.0            # наклон рукояти от вертикали, град
 RETAINER_X = UPPER_REAR + 2.0   # фиксатор буфера — перед торцом трубки, её кромка держит головку
 
@@ -38,8 +38,8 @@ def guard_and_well_profile():
         (GUARD_X[0] - 9.5, -62.0),                        # задняя стойка скобы уходит в рукоять
         (GUARD_X[0] - 12.0, BOTTOM_Z),                    # площадка рукояти (низ ресивера сзади) — ровная
         (-186.0, BOTTOM_Z),
-        (LOWER_REAR - 1.0, -13.0),
-        (LOWER_REAR - 1.0, SPLIT_Z),
+        (LOWER_REAR + 0.5, -22.0),                        # задняя грань под башней (выше — башня буферной трубки)
+        (LOWER_REAR + 0.5, SPLIT_Z),
     ]
     return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 6.0, 5.0, 0.0, 4.0, 3.0, 0], seg=5)
 
@@ -64,23 +64,30 @@ def build(ctx):
     boolean(body, flare, "UNION")
     # «уши» оси сборки (спереди) и оси разборки (сзади) — по бокам проушин верхнего ресивера
     for nm, (px, pz), half in (("pivot", PIVOT_PIN, LOWER_HALF_W), ("takedown", TAKEDOWN_PIN, FCG_HALF_W)):
-        ear = prism_xz(f"lower_ear_{nm}", fillet([(px - 9.0, SPLIT_Z - 2.0), (px + 9.0, SPLIT_Z - 2.0), (px + 9.0, pz + 1.5),
-                                                  (px + 2.0, pz + 7.2), (px - 9.0, pz + 7.2)], [0, 0, 3.0, 6.0, 1.5], 5),
-                       -half, half, C, "Alu_anodized")
-        boolean(body, ear, "UNION")
+        if nm == "pivot":
+            ear = prism_xz(f"lower_ear_{nm}", fillet([(px - 9.0, SPLIT_Z - 2.0), (px + 5.0, SPLIT_Z - 2.0), (px + 5.0, pz + 1.5),
+                                                      (px + 1.0, pz + 7.2), (px - 9.0, pz + 7.2)], [0, 0, 3.0, 4.0, 1.5], 5),
+                           -half, half, C, "Alu_anodized")
+            boolean(body, ear, "UNION")
+        else:
+            # сзади боковины целиком подняты до REAR_TOP_Z — ось разборки проходит через них
+            rw = prism_xz("lower_rear_walls", fillet([(LOWER_REAR + 1.5, SPLIT_Z - 1.0), (STEP_X, SPLIT_Z - 1.0), (STEP_X, REAR_TOP_Z),
+                                                      (LOWER_REAR + 1.5, REAR_TOP_Z)], [0, 0, STEP_R, 0], 8),
+                          -FCG_HALF_W, FCG_HALF_W, C, "Alu_anodized")
+            boolean(body, rw, "UNION")
         boolean(body, box(f"cut_slot_{nm}", px - 10.0, px + 10.0, -LUG_HALF_W, LUG_HALF_W, pz - 8.0, pz + 10.0, C))
         boolean(body, cyl(f"cut_{nm}_pin", -25, 25, PIN_R + 0.05, C, seg=32, cy=px, cz=pz, axis="Y"))
     # башня буферной трубки
     tower = lathe("lower_tower", [(TOWER_X[0], 0.0), (TOWER_X[0], TOWER_R - 1.5), (TOWER_X[0] + 1.5, TOWER_R),
                                   (TOWER_X[1], TOWER_R), (TOWER_X[1], 0.0)], C, "Alu_anodized", seg=64)
     boolean(body, tower, "UNION")
-    web = prism_xz("lower_tower_web", fillet([(TOWER_X[0], -12.0), (TOWER_X[1] + 6.0, -12.0), (TOWER_X[1] + 6.0, SPLIT_Z - 4.0),
-                                              (TOWER_X[0], SPLIT_Z - 10.0)], [0, 0, 0, 3], 4), -FCG_HALF_W, FCG_HALF_W, C)
-    boolean(body, web, "UNION")
-    boolean(body, cyl("cut_tower", TOWER_X[0] - 5, TOWER_X[1] + 0.5, BUFFER_R + 0.15, C, seg=64))
+    boolean(body, cyl("cut_tower", TOWER_X[0] - 5, TOWER_X[1], BUFFER_R + 0.15, C, seg=64))
     # карман УСМ сверху и шахта магазина насквозь
     boolean(body, box("cut_fcg", -146.0, -69.0, -FCG_POCKET_HALF, FCG_POCKET_HALF, BOTTOM_Z + 4.2, 5.0, C))
     boolean(body, box("cut_fcg_rear", -170.0, -146.0, -FCG_POCKET_HALF, FCG_POCKET_HALF, -24.0, 5.0, C))
+    # посередине сзади — под раму и буфер (боковины выше, середина ниже оси)
+    boolean(body, box("cut_rear_center", UPPER_REAR - 1.5, -145.0, -FCG_POCKET_HALF, FCG_POCKET_HALF, -13.4, 5.0, C))
+    boolean(body, box("cut_fcg_top", -146.0, -69.0, -FCG_POCKET_HALF, FCG_POCKET_HALF, -30.0, 5.0, C))
     well_cut = prism_xz("cut_well", [(WELL_FRONT_IN, 5.0), (WELL_FRONT_IN, -90.0), (WELL_REAR_IN, -90.0), (WELL_REAR_IN, 5.0)],
                         -WELL_IN_HALF_W, WELL_IN_HALF_W, C)
     boolean(body, well_cut)
@@ -108,11 +115,11 @@ def build(ctx):
         boolean(body, cyl(f"cut_{nm}", -30, 30, r, C, seg=24, cy=px, cz=pz, axis="Y"))
     # защёлка магазина: поперечный канал, кнопка справа в ограждении, рычаг слева в выемке
     mx, mz = MAG_BUTTON
-    boolean(body, box("cut_catch_ch", mx - 3.6, mx + 3.6, -30, 30, mz - 3.0, mz + 3.0, C))
+    boolean(body, box("cut_catch_ch", mx - 4.1, mx + 4.1, -30, 30, mz - 3.5, mz + 3.5, C))
     fence = prism_xz("lower_catch_fence", fillet([(mx - 9.0, mz - 9.5), (mx + 9.0, mz - 9.5), (mx + 9.0, SPLIT_Z - 0.6), (mx - 9.0, SPLIT_Z - 0.6)], [7.5, 7.5, 3.0, 3.0], 8),
-                     -LOWER_HALF_W - 1.4, -LOWER_HALF_W + 0.5, C, "Alu_anodized")
+                     -LOWER_HALF_W - 1.4, -FCG_HALF_W + 0.4, C, "Alu_anodized")
     boolean(body, fence, "UNION")
-    boolean(body, cyl("cut_button", -40, -LOWER_HALF_W + 1.0, 5.4, C, seg=32, cy=mx, cz=mz, axis="Y"))
+    boolean(body, cyl("cut_button", -40, -FCG_HALF_W + 1.0, 5.4, C, seg=32, cy=mx, cz=mz, axis="Y"))
     boolean(body, box("cut_catch_left", mx - 5.0, mx + 26.0, LOWER_HALF_W - 1.4, 30, mz - 4.2, mz + 4.2, C))
     # окно в левой стенке шахты под зуб защёлки
     boolean(body, box("cut_catch_window", mx + 16.5, mx + 23.5, WELL_IN_HALF_W - 1.0, LOWER_HALF_W, mz - 2.6, mz + 2.6, C))
@@ -148,7 +155,7 @@ def build(ctx):
     # низ скобы скруглён
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=2.0, seg=4,
                 where=lambda p: GUARD_X[0] - 8.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
-    finish(body, w=0.45, seg=2, angle=35)
+    finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
 
     # --- оси сборки и разборки: головка справа (−Y), выталкиваются вправо ---
@@ -225,7 +232,7 @@ def fire_control(F):
     # курок в положении «спущен»: головка отклонена назад, её передняя грань — ударный торец — стоит на головке
     # ударника (x = FP_HEAD, ось канала); взвод — поворот назад ещё на HAMMER_COCK_DEG вокруг оси.
     fx = -84.4 - hx                       # ударный торец относительно оси курка (головка ударника в −84)
-    hub = arc_pts(hx, hz, 7.0, -60, 200, 16)
+    hub = arc_pts(hx, hz, 7.0, -60, -160, 16)          # ступица снизу: от переднего низа к заднему
     ham = hub + [(hx - 7.4, hz + 1.5), (hx - 10.2, hz + 3.6), (hx - 10.6, hz + 6.4), (hx - 8.0, hz + 7.2),   # крюк разобщителя
                  (hx - 9.5, hz + 12.0), (hx + fx - 11.0, hz + 18.5), (hx + fx - 11.5, hz + 24.0),         # шейка и затылок головки
                  (hx + fx - 7.0, hz + 26.6), (hx + fx, hz + 26.0), (hx + fx + 0.4, hz + 21.0),            # ударный торец
@@ -236,7 +243,7 @@ def fire_control(F):
     # головка уже ступицы (как у серийных курков)
     for sgn in (-1, 1):
         y0, y1 = (3.6, 10) if sgn > 0 else (-10, -3.6)
-        boolean(h, box(f"cut_ham_thin{sgn}", hx - 30, hx + 10, y0, y1, hz + 13.0, hz + 35, F))
+        boolean(h, box(f"cut_ham_thin{sgn}", hx - 30.3, hx + 10.3, y0, y1, hz + 13.4, hz + 35, F))
     finish(h, w=0.3, seg=2, angle=35)
     o["hammer"] = h
     # автоспуск (рычажок над переводчиком)
@@ -266,7 +273,7 @@ def selector(F):
     # вырез-«кулачок» на валу (над хвостом спуска)
     boolean(shaft, box("cut_sel_cam", sx - 6, sx + 6, -4.8, 4.8, sz + 0.5, sz + 6, F))
     boolean(shaft, box("cut_sel_cam_r", sx - 6, sx - 0.5, -4.8, 4.8, sz - 6, sz + 6, F))
-    for s, length, nm in ((1, 21.0, "Selector_lever_L"), (-1, 12.0, "Selector_lever_R")):
+    for s, length, nm in ((1, 11.0, "Selector_lever_L"), (-1, 8.0, "Selector_lever_R")):
         y0 = (FCG_HALF_W + 0.5) * s
         y1 = (FCG_HALF_W + 3.4) * s
         lev = prism_xz(nm, fillet([(sx - 5.6, sz - 4.0), (sx + length, sz - 2.2), (sx + length + 2.0, sz + 0.5), (sx + length, sz + 2.6),

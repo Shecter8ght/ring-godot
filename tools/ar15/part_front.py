@@ -119,6 +119,8 @@ def handguard(Hc):
     for xs in (x0 + 9.0, x0 + 19.0):
         boolean(hg, cyl("cut_clamp", -30, 30, 2.1, Hc, seg=16, cy=xs, cz=-13.5, axis="Y"))
         boolean(hg, cyl("cut_clamp_cb", HG_HALF_W - 1.6, HG_HALF_W + 3, 3.4, Hc, seg=24, cy=xs, cz=-13.5, axis="Y"))
+    # снизу сзади выемка под передок ресиверов (проушины оси сборки)
+    boolean(hg, box("cut_receiver_notch", x0 - 1.0, x0 + 3.6, -16.6, 16.6, HG_BOTTOM - 3.0, -7.0, Hc))
     boolean(hg, box("cut_clamp_split", x0 - 1, x0 + 26.0, -0.8, 0.8, HG_BOTTOM - 3, HG_BOTTOM + WALL + 0.5, Hc))
     # пазы M-LOK: по бокам и снизу; облегчающие прорези на верхних фасках
     xs = []
@@ -156,7 +158,7 @@ def handguard(Hc):
     for s in (-1, 1):
         y0, y1 = (HG_HALF_W - 7.0, HG_HALF_W + 3.0) if s > 0 else (-HG_HALF_W - 3.0, -HG_HALF_W + 7.0)
         boolean(hg, cyl(f"cut_qd{s}", y0, y1, 5.0, Hc, seg=32, cy=x1 - 8.0, cz=0.5, axis="Y"))
-    finish(hg, w=0.45, seg=2, angle=35)
+    finish(hg, w=0.7, seg=3, angle=35)
     o["handguard"] = hg
     o["mlok_x"] = xs
     # верхняя планка цевья: пазы в шаг с ресивером (центры x = 14 + 10·k)

@@ -39,8 +39,11 @@ def build(ctx):
     # правая сторона: плоскость окна выброса и насечки (у «гладкого» ресивера насечки остаются на раме)
     boolean(car, box("cut_port_face", -74.0, CARRIER_FRONT - 2.0, -CARRIER_R - 2, -CARRIER_R + 1.6, -6.0, 8.5, B))
     for k in range(9):
-        xx = -128.0 + k * 3.2
-        boolean(car, box(f"cut_fa_ser{k}", xx - 0.8, xx + 0.8, -CARRIER_R - 2, -CARRIER_R + 1.1, -7.0, 7.0, B))
+        xx = -139.0 + k * 3.2
+        c = box(f"cut_fa_ser{k}", xx - 0.8, xx + 0.8, -3.4, 3.4, CARRIER_R - 1.1, CARRIER_R + 2.0, B)
+        c.rotation_euler = (math.radians(38.0), 0, 0)
+        apply_transform(c)
+        boolean(car, c)
     # кулачковый паз сверху: криволинейная прорезь (поворот затвора на 22.5°)
     slot = []
     for k in range(9):
