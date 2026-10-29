@@ -14,6 +14,8 @@ extends RefCounted
 
 ## Высота планки Пикатинни (основание + зубцы), м.
 const RAIL_H := 0.006
+## Профиль рефлектора: мягкое центральное пятно и слабая широкая периферия, без обрезанного круга.
+const FLASHLIGHT_BEAM: Texture2D = preload("res://assets/textures/lights/flashlight_beam.tres")
 
 
 ## Сокет точки mount у основы model_key: словарь с Vector3 pos (из массива данных); {} — нет.
@@ -1024,14 +1026,21 @@ static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) ->
 	light.set_meta("mount", String(m.get("mount", "")))
 	light.position = at
 	light.rotation.y = PI
-	light.light_color = Color(1.0, 0.96, 0.9)
-	light.light_energy = float(ls.get("energy", 6.0))
+	# Калиброванный свет обвеса: общее Settings.soften не меняет профиль и отражённый свет.
+	light.set_meta("soft", true)
+	light.light_color = Color(0.96, 0.98, 1.0)
+	light.light_energy = float(ls.get("energy", 3.2))
 	light.spot_range = float(ls.get("range", 30.0))
-	light.spot_angle = float(ls.get("angle", 22.0))
+	light.spot_angle = float(ls.get("angle", 32.0))
 	light.spot_attenuation = 0.8
-	light.light_indirect_energy = float(ls.get("indirect", 1.3))
-	light.light_specular = float(ls.get("specular", 0.5))
+	light.spot_angle_attenuation = 0.8
+	light.light_projector = FLASHLIGHT_BEAM
+	light.light_indirect_energy = float(ls.get("indirect", 0.8))
+	light.light_specular = float(ls.get("specular", 0.4))
 	light.shadow_enabled = true
+	light.shadow_bias = 0.03
+	light.shadow_normal_bias = 0.5
+	light.shadow_blur = 1.2
 	light.light_volumetric_fog_energy = float(ls.get("fog", 2.0))
 	light.visible = false
 	# светит в глаза — слепит (LightGlare у игрока, мародёры целятся хуже)
