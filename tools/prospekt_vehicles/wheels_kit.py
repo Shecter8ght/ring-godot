@@ -8,8 +8,8 @@ kit — три колеса (колпак и штамповка R15 как у с
 протектор и надписи боковины — vwheels.tire_high) и грубо (игровая сетка, развёртка vuv под 1K). Каждое колесо — свой
 набор текстур (WheelCap, WheelSteel, WheelAlloy), сетки для Painter — «Набор__материал», как у машин (game_kit). Колёса
 стоят вдоль Y через GAP: сцена размером с машину, чтобы масштаб процедурных масок и луч запекания были те же, что в
-наборе Wheel машины. textured — карты Painter (glTF: цвет, AO+шероховатость+металл, нормали OpenGL) на игровую сетку,
-вьюпорт сразу в Material Preview.
+наборе Wheel машины. textured — карты Painter (glTF: цвет, AO+шероховатость+металл, нормали OpenGL) на игровую сетку: все варианты отделки
+(wheel_looks.py — цвет, глянец, износ) рядом, вьюпорт сразу в Material Preview.
 """
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ from specs import CLASSES  # noqa: E402
 DESIGNS = [("Колпак", "cap", "sedan", "WheelCap"), ("Штамповка", "steel", "sedan", "WheelSteel"),
            ("Литой", "alloy", "hatch", "WheelAlloy")]
 GAP = 3.0
+VAR_GAP = 0.85        # м — варианты отделки одного колеса в файле просмотра
 RES = 1024
 
 
@@ -120,23 +121,24 @@ def _image(path: Path, data: bool):
     return img
 
 
-def material(ts: str, maps: Path) -> bpy.types.Material:
-    """Материал набора по картам Painter (пресет glTF): цвет, ORM (R — AO, G — шероховатость, B — металл), нормали."""
-    m = bpy.data.materials.new(f"SP_{ts}")
+def material(ts: str, key: str, maps: Path) -> bpy.types.Material:
+    """Материал варианта по картам Painter (пресет glTF, файлы «<набор>_<вариант>_…»): цвет, ORM (R — AO, G —
+    шероховатость, B — металл), нормали."""
+    m = bpy.data.materials.new(f"SP_{ts}_{key}")
     m.use_nodes = True
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     col = nt.nodes.new("ShaderNodeTexImage")
-    col.image = _image(maps / f"{ts}_baseColor.png", False)
+    col.image = _image(maps / f"{ts}_{key}_baseColor.png", False)
     nt.links.new(col.outputs["Color"], bsdf.inputs["Base Color"])
     orm = nt.nodes.new("ShaderNodeTexImage")
-    orm.image = _image(maps / f"{ts}_occlusionRoughnessMetallic.png", True)
+    orm.image = _image(maps / f"{ts}_{key}_occlusionRoughnessMetallic.png", True)
     sep = nt.nodes.new("ShaderNodeSeparateColor")
     nt.links.new(orm.outputs["Color"], sep.inputs["Color"])
     nt.links.new(sep.outputs["Green"], bsdf.inputs["Roughness"])
     nt.links.new(sep.outputs["Blue"], bsdf.inputs["Metallic"])
     nrm = nt.nodes.new("ShaderNodeTexImage")
-    nrm.image = _image(maps / f"{ts}_normal.png", True)
+    nrm.image = _image(maps / f"{ts}_{key}_normal.png", True)
     nm = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(nrm.outputs["Color"], nm.inputs["Color"])
     nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
@@ -146,16 +148,31 @@ def material(ts: str, maps: Path) -> bpy.types.Material:
 
 
 def textured(game_blend: Path, maps: Path, out: Path) -> None:
+    """Все варианты отделки (wheel_looks) рядом: у каждого колеса — подколлекции вариантов вдоль Y через VAR_GAP,
+    первый — на месте игровой сетки, остальные — копии объектов с материалом своего варианта."""
+    import wheel_looks
     bpy.ops.wm.open_mainfile(filepath=str(game_blend))
-    mats = {}
-    for ob in bpy.data.objects:
-        if ob.type != "MESH" or "tex_set" not in ob:
-            continue
-        ts = ob["tex_set"]
-        if ts not in mats:
-            mats[ts] = material(ts, maps)
-        ob.data.materials.clear()
-        ob.data.materials.append(mats[ts])
+    for title, style, cls, ts in DESIGNS:
+        col = bpy.data.collections[title]
+        base = [o for o in col.objects if o.type == "MESH" and "tex_set" in o]
+        for j, lk in enumerate(wheel_looks.LOOKS[style]):
+            sub = bpy.data.collections.new(lk["name"])
+            col.children.link(sub)
+            mat = material(ts, lk["key"], maps)
+            for o in base:
+                c = o if j == 0 else o.copy()
+                if j:
+                    c.location.y += j * VAR_GAP
+                    c.name = f"{style}_{lk['key']}:{o.name.split(':', 1)[1]}"
+                    c["look"] = lk["key"]
+                else:
+                    col.objects.unlink(o)
+                    o["look"] = lk["key"]
+                sub.objects.link(c)
+                if not c.material_slots:              # сетка у копий общая — материал варианта на объекте
+                    c.data.materials.append(None)
+                c.material_slots[0].link = "OBJECT"
+                c.material_slots[0].material = mat
     for scr in bpy.data.screens:                  # владелец смотрит сам — сразу с картами
         for ar in scr.areas:
             for sp in ar.spaces:

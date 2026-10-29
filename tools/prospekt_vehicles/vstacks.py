@@ -524,9 +524,15 @@ def _patches(layer, level, scale=S_MID, cut=0.5):
     return _mfilter(mk, "histogram_scan", {"Position": cut, "Contrast": 0.8})
 
 
-def tire(st, tread, side):
+def _scratch(color):
+    """Цвет царапины по краске: светлее основы (на чёрном — серая, на серебре — почти то же серебро)."""
+    return tuple(min(1.0, 0.6 * c + 0.24) for c in color)
+
+
+def tire(st, tread, side, age=1.0):
     """Шина: протектор вытерт и в пыли по канавкам, боковина матовая и побуревшая, надписи и насечка — по пыли в
-    углублениях и вытертым кромкам (так их и видно на настоящей шине)."""
+    углублениях и вытертым кромкам (так их и видно на настоящей шине). age — сколько пыли и побурения (0,4 — у новых
+    литых: шина ездила, но машину мыли)."""
     if tread:
         g = group("Шина: протектор", _top(st), tread)
         pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
@@ -536,10 +542,10 @@ def tire(st, tread, side):
         # канавки темнее блоков (в них тень), пыль — только намёком: светлые канавки читались «наоборот»
         n = fill("03 Пыль и песок в канавках", _above(n), color=(0.20, 0.19, 0.17), rough=0.95)
         _dirt(n, 0.55, 0.75, 0.4)
-        lop(n, 0.4)
-        n = _proc("04 Дорожная пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.3,
+        lop(n, 0.4 * age)
+        n = _proc("04 Дорожная пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.3 * age,
                   color=(0.26, 0.24, 0.21), rough=0.9)
-        n = _proc("05 Песчинки", _above(n), "grunge_spots_dirty/grunge_spots_dirty", S_FINE * 2, 0.3,
+        n = _proc("05 Песчинки", _above(n), "grunge_spots_dirty/grunge_spots_dirty", S_FINE * 2, 0.3 * age,
                   {"invert": 0}, color=(0.36, 0.34, 0.30), rough=0.92)
         _sharpen(g, 0.2)
     if side:
@@ -549,112 +555,123 @@ def tire(st, tread, side):
         n = fill("02 Побурела от солнца", _above(n), color=(0.085, 0.072, 0.060), rough=0.86)
         mk = mask_proc(n, "3D_perlin_noise_fractal/3D_perlin_noise_fractal", None, scale=S_FINE)
         _mfilter(mk, "histogram_scan", {"Position": 0.45, "Contrast": 0.35})
-        lop(n, 0.3)
+        lop(n, 0.3 * age)
         n = fill("03 Пыль в надписях и насечке", _above(n), color=(0.40, 0.38, 0.35), rough=0.95)
         _dirt(n, 0.62, 0.8, 0.3)
-        lop(n, 0.7)
+        lop(n, 0.35 + 0.35 * age)
         n = fill("04 Вытертые кромки надписей", _above(n), color=(0.13, 0.13, 0.13), rough=0.9)
         _edge(n, 0.25)
         lop(n, 0.7)
-        n = _proc("05 Потёртости о бордюр", _above(n), "grunge_scratches_rough/grunge_scratches_rough", S_FINE, 0.35,
-                  None, color=(0.11, 0.11, 0.11), rough=0.9)
-        n = _proc("06 Общая пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.25,
+        n = _proc("05 Потёртости о бордюр", _above(n), "grunge_scratches_rough/grunge_scratches_rough", S_FINE,
+                  0.35 * age, None, color=(0.11, 0.11, 0.11), rough=0.9)
+        n = _proc("06 Общая пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.25 * age,
                   color=(0.45, 0.43, 0.40), rough=0.95)
         _sharpen(g, 0.2)
 
 
-def steel_paint(st, meshes, lip, color=(0.60, 0.61, 0.62)):
-    """Штамповка в краске «серебрянка»-металлик: зерно, пятна тона, разводы блеска, царапины, сколы до металла кусками
-    по кромкам (у закраины — от бордюров и шиномонтажа), ржавчина в сколах, тормозная пыль в углах и плёнкой."""
-    g = group("Штамповка: краска металлик", _top(st), meshes)
+def steel_paint(st, meshes, lip, lk):
+    """Штамповка в краске (вариант lk — wheel_looks: серебро-металлик, чёрная эмаль, коричневая …): зерно металлика
+    (если есть), пятна тона, разводы блеска, царапины, сколы до металла кусками по кромкам (у закраины — от бордюров и
+    шиномонтажа), ржавчина в сколах, тормозная пыль в углах и плёнкой — всё по износу age."""
+    color, rough, metal, age = lk["color"], lk["rough"], lk["metal"], lk["age"]
+    g = group(f"Штамповка: {lk['name']}", _top(st), meshes)
     pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
-    n = fill("01 Краска металлик", pos, color=color, rough=0.36, metal=0.75)
-    n = _proc("02 Зерно металлика", _above(n), "noise_gaussian_noise/gaussian_noise", 90.0, 0.35,
-              color=tuple(min(1.0, c * 1.12) for c in color), rough=0.28)
-    n = _soft(fill("03 Пятна тона", _above(n), color=(0.62, 0.62, 0.62), rough=0.45))
+    n = fill("01 Краска", pos, color=color, rough=rough, metal=metal)
+    if lk["flakes"]:
+        n = _proc("02 Зерно металлика", _above(n), "noise_gaussian_noise/gaussian_noise", 90.0, lk["flakes"],
+                  color=tuple(min(1.0, c * 1.12) for c in color), rough=max(0.05, rough - 0.08))
+    n = _soft(fill("03 Пятна тона", _above(n), color=(0.62, 0.62, 0.62), rough=rough + 0.09))
     mk = mask_proc(n, "3D_perlin_noise_fractal/3D_perlin_noise_fractal", None, scale=S_MID)
     _mfilter(mk, "histogram_scan", {"Position": 0.55, "Contrast": 0.4})
     lop(n, 0.35)
-    n = _proc("04 Разводы блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 2.0, 0.4,
-              {"Balance": 0.55, "Contrast": 0.3}, rough=0.55)
-    n = _proc("05 Царапины", _above(n), "grunge_scratches_fine/grunge_scratches_fine", S_FINE * 2, 0.45,
-              {"invert": 0, "balance": 0.36, "contrast": 0.55}, color=tuple(min(1.0, c * 1.15) for c in color), rough=0.5)
-    n = fill("06 Сколы до металла", _above(n), color=(0.48, 0.48, 0.47), rough=0.42, metal=1.0)
-    _patches(n, 0.16)
-    n = fill("07 Ржавчина в сколах", _above(n), color=(0.33, 0.15, 0.06), rough=0.88, metal=0.0)
-    m = _patches(n, 0.16, cut=0.62)
-    mask_proc(n, "grunge_rust_fine/grunge_rust_fine", None, scale=S_MID, blend=L.BlendingMode.Multiply, above=m)
-    lop(n, 0.85)
-    if lip:
-        n = fill("08 Задиры на закраине", _above(n), color=(0.62, 0.62, 0.61), rough=0.45, metal=1.0)
-        _patches(n, 0.22, scale=S_FINE, cut=0.52)
-        only_meshes(n, lip)
+    n = _proc("04 Разводы блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 2.0,
+              0.15 + 0.25 * age, {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.19)
+    n = _proc("05 Царапины", _above(n), "grunge_scratches_fine/grunge_scratches_fine", S_FINE * 2, 0.45 * age,
+              {"invert": 0, "balance": 0.36, "contrast": 0.55}, color=_scratch(color), rough=rough + 0.14)
+    if age > 0.05:
+        n = fill("06 Сколы до металла", _above(n), color=(0.48, 0.48, 0.47), rough=0.42, metal=1.0)
+        _patches(n, 0.16 * min(age, 1.2))
+        n = fill("07 Ржавчина в сколах", _above(n), color=(0.33, 0.15, 0.06), rough=0.88, metal=0.0)
+        m = _patches(n, 0.16 * min(age, 1.2), cut=0.62)
+        mask_proc(n, "grunge_rust_fine/grunge_rust_fine", None, scale=S_MID, blend=L.BlendingMode.Multiply, above=m)
+        lop(n, 0.85)
+        if lip:
+            n = fill("08 Задиры на закраине", _above(n), color=(0.62, 0.62, 0.61), rough=0.45, metal=1.0)
+            _patches(n, 0.22 * min(age, 1.2), scale=S_FINE, cut=0.52)
+            only_meshes(n, lip)
     n = fill("09 Тормозная пыль в углах", _above(n), color=(0.19, 0.155, 0.12), rough=0.85, metal=0.0)
     _dirt(n, 0.5)
-    lop(n, 0.85)
-    n = _proc("10 Тормозная пыль плёнкой", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.35,
-              color=(0.30, 0.26, 0.21), rough=0.7, metal=0.2)
+    lop(n, 0.85 * age)
+    n = _proc("10 Тормозная пыль плёнкой", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID,
+              0.35 * age, color=(0.30, 0.26, 0.21), rough=0.7, metal=0.2)
     _sharpen(g, 0.25)
     return g
 
 
-def alloy_paint(st, meshes, lip, color=(0.76, 0.77, 0.78)):
-    """Литой диск: серебро под лаком (металл, низкая шероховатость), зерно краски, разводы и пятна от капель, мелкие
-    царапины лака, коррозия под лаком белёсыми нитями у кромок, задиры о бордюр на закраине (голый алюминий),
-    тормозная пыль в углах спиц и плёнкой."""
-    g = group("Литой диск: серебро под лаком", _top(st), meshes)
+def alloy_paint(st, meshes, lip, lk):
+    """Литой диск (вариант lk): краска под лаком — серебро, чёрный глянец, бронза, графит; зерно краски, разводы и пятна
+    от капель, мелкие царапины лака, коррозия под лаком белёсыми нитями у кромок, задиры о бордюр на закраине (голый
+    алюминий), тормозная пыль — всё по износу age; новые (age 0) — чистый лак с зерном и блеском."""
+    color, rough, metal, age = lk["color"], lk["rough"], lk["metal"], lk["age"]
+    g = group(f"Литой диск: {lk['name']}", _top(st), meshes)
     pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
-    # шероховатость 0,3, не зеркало: краска-серебро под лаком при 0,18 читалась хромом с чёрными отражениями
-    n = fill("01 Серебро под лаком", pos, color=color, rough=0.30, metal=1.0)
-    n = _proc("02 Зерно краски", _above(n), "noise_gaussian_noise/gaussian_noise", 120.0, 0.4,
-              color=tuple(min(1.0, c * 1.08) for c in color), rough=0.24)
-    n = _soft(fill("03 Пятна тона", _above(n), color=(0.46, 0.46, 0.46), rough=0.36))
+    n = fill("01 Краска под лаком", pos, color=color, rough=rough, metal=metal)
+    if lk["flakes"]:
+        n = _proc("02 Зерно краски", _above(n), "noise_gaussian_noise/gaussian_noise", 120.0, lk["flakes"],
+                  color=tuple(min(1.0, c * 1.08) for c in color), rough=max(0.05, rough - 0.06))
+    n = _soft(fill("03 Пятна тона", _above(n), color=(0.46, 0.46, 0.46), rough=rough + 0.06))
     mk = mask_proc(n, "3D_perlin_noise_fractal/3D_perlin_noise_fractal", None, scale=S_MID)
     _mfilter(mk, "histogram_scan", {"Position": 0.58, "Contrast": 0.4})
-    lop(n, 0.2)
-    n = _proc("04 Разводы после мойки", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 2.0, 0.5,
-              {"Balance": 0.55, "Contrast": 0.3}, rough=0.42)
-    n = _proc("05 Пятна от капель", _above(n), "grunge_spots_dirty/grunge_spots_dirty", S_FINE, 0.45, None, rough=0.5)
-    n = _proc("06 Царапины лака", _above(n), "grunge_scratches_fine/grunge_scratches_fine", S_FINE * 2, 0.5,
-              {"invert": 0, "balance": 0.36, "contrast": 0.55}, rough=0.45)
-    n = fill("07 Коррозия под лаком", _above(n), color=(0.84, 0.83, 0.80), rough=0.75, metal=0.2)
-    m = _edge(n, 0.12)
-    mask_proc(n, "grunge_rust_fine/grunge_rust_fine", None, scale=S_FINE, blend=L.BlendingMode.Multiply, above=m)
-    lop(n, 0.3)
-    if lip:
-        n = fill("08 Задиры о бордюр", _above(n), color=(0.80, 0.80, 0.80), rough=0.5, metal=1.0)
-        m = _patches(n, 0.25, scale=S_FINE, cut=0.5)
-        mask_proc(n, "grunge_scratches_rough/grunge_scratches_rough", None, scale=S_FINE * 2,
-                  blend=L.BlendingMode.Multiply, above=m)
-        only_meshes(n, lip)
+    lop(n, 0.1 + 0.1 * age)
+    n = _proc("04 Разводы после мойки", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 2.0,
+              0.12 + 0.38 * age, {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.12)
+    n = _proc("05 Пятна от капель", _above(n), "grunge_spots_dirty/grunge_spots_dirty", S_FINE, 0.45 * age, None,
+              rough=rough + 0.2)
+    n = _proc("06 Царапины лака", _above(n), "grunge_scratches_fine/grunge_scratches_fine", S_FINE * 2,
+              0.08 + 0.42 * age, {"invert": 0, "balance": 0.36, "contrast": 0.55}, color=_scratch(color),
+              rough=rough + 0.15)
+    if age > 0.05:
+        n = fill("07 Коррозия под лаком", _above(n), color=(0.84, 0.83, 0.80), rough=0.75, metal=0.2)
+        m = _edge(n, 0.12)
+        mask_proc(n, "grunge_rust_fine/grunge_rust_fine", None, scale=S_FINE, blend=L.BlendingMode.Multiply, above=m)
+        lop(n, 0.3 * age)
+        if lip:
+            n = fill("08 Задиры о бордюр", _above(n), color=(0.80, 0.80, 0.80), rough=0.5, metal=1.0)
+            m = _patches(n, 0.25 * min(age, 1.2), scale=S_FINE, cut=0.5)
+            mask_proc(n, "grunge_scratches_rough/grunge_scratches_rough", None, scale=S_FINE * 2,
+                      blend=L.BlendingMode.Multiply, above=m)
+            only_meshes(n, lip)
     # пыль в углах — без крупного гранжа: с ним по граням спиц шли чёрные пятна
     n = fill("09 Тормозная пыль в углах", _above(n), color=(0.22, 0.19, 0.15), rough=0.85, metal=0.0)
     _dirt(n, 0.45, 0.6, 0.25)
-    lop(n, 0.65)
-    n = _proc("10 Тормозная пыль плёнкой", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.4,
-              color=(0.28, 0.24, 0.19), rough=0.6, metal=0.3)
+    lop(n, 0.65 * age)
+    n = _proc("10 Тормозная пыль плёнкой", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID,
+              0.4 * age, color=(0.28, 0.24, 0.19), rough=0.6, metal=0.3)
     _sharpen(g, 0.25)
     return g
 
 
-def hubcap_plastic(st, meshes):
-    """Колпак: пластик в серебристой краске-металлик; по кромкам и выступам краска стёрта до чёрного пластика, царапины,
-    помутнел от солнца, грязь в углах и тормозная пыль."""
-    g = group("Колпак: пластик под серебро", _top(st), meshes)
+def hubcap_plastic(st, meshes, lk):
+    """Колпак (и колпачок литого): пластик в краске (вариант lk — серебрянка, графит) или голый чёрный; по кромкам
+    краска стёрта до чёрного пластика, царапины, помутнел от солнца, грязь в углах и тормозная пыль — по износу age."""
+    color, rough, metal, age = lk["color"], lk["rough"], lk["metal"], lk["age"]
+    g = group(f"Колпак: {lk['name']}", _top(st), meshes)
     pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
-    n = fill("01 Серебрянка по пластику", pos, color=(0.66, 0.67, 0.68), rough=0.30, metal=0.6)
-    n = _proc("02 Зерно краски", _above(n), "noise_gaussian_noise/gaussian_noise", 90.0, 0.35,
-              color=(0.72, 0.73, 0.74), rough=0.24)
-    n = _proc("03 Помутнел", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.35,
-              color=(0.70, 0.70, 0.68), rough=0.55, metal=0.3)
-    n = _proc("04 Царапины", _above(n), "grunge_scratches_rough/grunge_scratches_rough", S_FINE * 2, 0.45, None,
-              color=(0.50, 0.50, 0.50), rough=0.6, metal=0.3)
-    n = fill("05 Стёрто до пластика", _above(n), color=(0.05, 0.05, 0.05), rough=0.6, metal=0.0)
-    _patches(n, 0.22, scale=S_FINE)
+    n = fill("01 Краска по пластику", pos, color=color, rough=rough, metal=metal)
+    if lk["flakes"]:
+        n = _proc("02 Зерно краски", _above(n), "noise_gaussian_noise/gaussian_noise", 90.0, lk["flakes"],
+                  color=tuple(min(1.0, c * 1.09) for c in color), rough=max(0.05, rough - 0.06))
+    n = _proc("03 Помутнел", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.35 * age,
+              color=tuple(min(1.0, c * 1.06 + 0.04) for c in color), rough=rough + 0.25, metal=metal * 0.5)
+    n = _proc("04 Царапины", _above(n), "grunge_scratches_rough/grunge_scratches_rough", S_FINE * 2, 0.45 * age, None,
+              color=_scratch(color), rough=rough + 0.3, metal=metal * 0.5)
+    if age > 0.05 and metal > 0.0:                # краска стирается до чёрного пластика; у голого пластика — нечему
+        n = fill("05 Стёрто до пластика", _above(n), color=(0.05, 0.05, 0.05), rough=0.6, metal=0.0)
+        _patches(n, 0.22 * min(age, 1.2), scale=S_FINE)
     n = fill("06 Грязь в углах", _above(n), color=(0.20, 0.17, 0.13), rough=0.9, metal=0.0)
     _dirt(n, 0.5)
-    lop(n, 0.8)
-    n = _proc("07 Тормозная пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.3,
+    lop(n, 0.8 * age)
+    n = _proc("07 Тормозная пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.3 * age,
               color=(0.30, 0.26, 0.21), rough=0.75, metal=0.1)
     _sharpen(g, 0.25)
     return g
@@ -696,20 +713,27 @@ def brake_disc(st, meshes):
     return g
 
 
-def wheel(st, have, ts="Wheel", style="steel"):
-    """Колесо v2 (набор ts): style — steel (штамповка), cap (колпак на штамповке), alloy (литой). Обод (rim_barrel) — в
-    одной краске с лицом диска, задиры от бордюров — только на нём (наружная закраина)."""
+def wheel(st, have, ts="Wheel", style="steel", key=None):
+    """Колесо v2 (набор ts): style — steel (штамповка), cap (колпак на штамповке), alloy (литой); key — вариант отделки
+    (wheel_looks: цвет, глянец, износ). Обод (rim_barrel) — в одной краске с лицом диска, задиры от бордюров — только на
+    нём (наружная закраина). Под колпаком — чёрная штамповка; колпачок литого — в цвет диска."""
+    import importlib
+    import wheel_looks
+    importlib.reload(wheel_looks)
+    lk = wheel_looks.look(style, key)
+
     def m(*mats):
         return pick(have, ts, *mats)
-    tire(st, m("tire_tread"), m("rubber"))
+    tire(st, m("tire_tread"), m("rubber"), age=0.4 + 0.6 * lk["age"])
     lip = m("rim_barrel")
     if style == "alloy":
         if m("rim_alloy", "rim_barrel"):
-            alloy_paint(st, m("rim_alloy", "rim_barrel"), lip)
+            alloy_paint(st, m("rim_alloy", "rim_barrel"), lip, lk)
     elif m("rim_steel", "rim_barrel", "rim_alloy"):
-        steel_paint(st, m("rim_steel", "rim_barrel", "rim_alloy"), lip)
+        steel_paint(st, m("rim_steel", "rim_barrel", "rim_alloy"), lip,
+                    wheel_looks.look("steel", "black") if style == "cap" else lk)
     if m("hubcap"):
-        hubcap_plastic(st, m("hubcap"))
+        hubcap_plastic(st, m("hubcap"), lk)
     if m("lug_nut"):
         zinc(st, m("lug_nut"))
     if m("brake"):
