@@ -25,25 +25,11 @@ GRIP_ANGLE = 18.0            # наклон рукояти от вертикал
 RETAINER_X = UPPER_REAR + 2.0   # фиксатор буфера — перед торцом трубки, её кромка держит головку
 
 
-GUARD_GRIP_GAP = 0.5          # шов между задней гранью скобы и передней кромкой рукояти
-
-
-def guard_web():
-    """Задняя грань скобы по передней кромке рукояти (со швом GUARD_GRIP_GAP): угол у низа перекладины, точки снизу
-    вверх, точка на площадке рукояти. Возвращает (точки, x угла у низа)."""
-    from part_grip import front_xz
-    bar = GUARD_Z[0] - 6.5
-    line = [front_xz(-0.08 + k * 0.0075, GUARD_GRIP_GAP) for k in range(62)]      # сверху вниз
-
-    def at_z(z0):
-        for (x0, z0a), (x1, z1a) in zip(line, line[1:]):
-            if z1a <= z0 <= z0a:
-                k = (z0 - z0a) / (z1a - z0a)
-                return x0 + (x1 - x0) * k
-        raise ValueError(z0)
-    x_bot, x_top = at_z(bar), at_z(GRIP_TOP_Z)
-    pts = [(x_bot, bar)] + [(x, z) for x, z in reversed(line) if bar + 4.0 < z < GRIP_TOP_Z - 0.3] + [(x_top, GRIP_TOP_Z)]
-    return pts, x_bot
+GUARD_POST_X = GUARD_X[0] - 5.0      # задняя грань стойки скобы — вертикальная, к ней примыкает выступ рукояти
+GUARD_PIN = (-115.6, -73.6, 1.5)     # штифт скобы в заднем нижнем углу (x, z, r)
+PIVOT_EAR_R = 6.3                    # скругление «уха» оси сборки вокруг оси (перёд x 24.1 — в выемке цевья)
+PIVOT_BOSS_R = 5.4                   # втулка оси сборки снаружи уха (вокруг головки оси — кольцо 1 мм)
+PIVOT_BOSS_H = 0.7
 
 
 def guard_and_well_profile():
@@ -55,15 +41,13 @@ def guard_and_well_profile():
         (MAGWELL_FRONT + 3.6, WELL_BOTTOM_FRONT),
         (WELL_REAR_OUT + 1.0, WELL_BOTTOM_REAR),          # скошенная губа шахты
         (WELL_REAR_OUT - 2.9, GUARD_Z[0] - 6.5),          # переднее ухо скобы
-    ]
-    web, _x = guard_web()                                 # низ перекладины назад и вверх по кромке рукояти
-    rear = [
-        (-186.0, GRIP_TOP_Z),                             # площадка рукояти
+        (GUARD_POST_X, GUARD_Z[0] - 6.5),                 # низ перекладины сзади
+        (GUARD_POST_X, GRIP_TOP_Z),                       # задняя стойка — вертикаль, шов с выступом рукояти
+        (-186.0, GRIP_TOP_Z),                             # площадка рукояти; угол острый — спинка рукояти кончается заподлицо
         (LOWER_REAR + 0.5, -22.0),                        # задняя грань под башней (выше — башня буферной трубки)
         (LOWER_REAR + 0.5, SPLIT_Z),
     ]
-    radii = [1.5, 0, 6.0, 2.5, 3.0, 6.0] + [3.5] + [0] * (len(web) - 1) + [4.0, 3.0, 0]
-    return fillet(pts + web + rear, radii, seg=5)
+    return fillet(pts, [1.5, 0, 6.0, 2.5, 3.0, 6.0, 2.5, 0, 0.8, 3.0, 0], seg=5)
 
 
 def build(ctx):
@@ -87,17 +71,30 @@ def build(ctx):
     # «уши» оси сборки (спереди) и оси разборки (сзади) — по бокам проушин верхнего ресивера
     for nm, (px, pz), half in (("pivot", PIVOT_PIN, LOWER_HALF_W), ("takedown", TAKEDOWN_PIN, FCG_HALF_W)):
         if nm == "pivot":
-            ear = prism_xz(f"lower_ear_{nm}", fillet([(px - 9.0, SPLIT_Z - 2.0), (px + 5.0, SPLIT_Z - 2.0), (px + 5.0, pz + 1.5),
-                                                      (px + 1.0, pz + 7.2), (px - 9.0, pz + 7.2)], [0, 0, 3.0, 4.0, 1.5], 5),
-                           -half, half, C, "Alu_anodized")
+            r = PIVOT_EAR_R
+            arc = arc_pts(px, pz, r, -90.0, 90.0, 24)
+            prof = [(8.6, -30.0), (MAGWELL_FRONT, -30.0), (MAGWELL_FRONT, pz - r)] + arc + [(8.6, pz + r)]
+            radii = [0, 0, 4.5] + [0] * len(arc) + [1.2]
+            ear = prism_xz(f"lower_ear_{nm}", fillet(prof, radii, 6), -half, half, C, "Alu_anodized")
             boolean(body, ear, "UNION")
+            # втулка оси снаружи каждого уха
+            for s_ in (-1, 1):
+                y0, y1 = (half - 0.5, half + PIVOT_BOSS_H) if s_ > 0 else (-half - PIVOT_BOSS_H, -half + 0.5)
+                boolean(body, cyl("lower_pivot_boss", y0, y1, PIVOT_BOSS_R, C, "Alu_anodized", seg=48, cy=px, cz=pz, axis="Y",
+                                  ch=0.35), "UNION")
         else:
             # сзади боковины целиком подняты до REAR_TOP_Z — ось разборки проходит через них
             rw = prism_xz("lower_rear_walls", fillet([(LOWER_REAR + 1.5, SPLIT_Z - 1.0), (STEP_X, SPLIT_Z - 1.0), (STEP_X, REAR_TOP_Z),
                                                       (LOWER_REAR + 1.5, REAR_TOP_Z)], [0, 0, STEP_R, 0], 8),
                           -FCG_HALF_W, FCG_HALF_W, C, "Alu_anodized")
             boolean(body, rw, "UNION")
-        boolean(body, box(f"cut_slot_{nm}", px - 10.0, px + 10.0, -LUG_HALF_W, LUG_HALF_W, pz - 8.0, pz + 10.0, C))
+        if nm == "pivot":
+            # паз под проушину верхнего: дно вогнутое спереди (носик шахты между ушами — плавная выемка)
+            boolean(body, prism_xz("cut_slot_pivot", fillet([(7.0, pz - 9.0), (px + 10.0, pz - 9.0), (px + 10.0, pz + 10.0),
+                                                              (7.0, pz + 10.0)], [0, 6.0, 0, 0], 8),
+                                   -LUG_HALF_W, LUG_HALF_W, C))
+        else:
+            boolean(body, box(f"cut_slot_{nm}", px - 10.0, px + 10.0, -LUG_HALF_W, LUG_HALF_W, pz - 8.0, pz + 10.0, C))
         boolean(body, cyl(f"cut_{nm}_pin", -25, 25, PIN_R + 0.05, C, seg=32, cy=px, cz=pz, axis="Y"))
     # башня буферной трубки
     tower = lathe("lower_tower", [(TOWER_X[0], 0.0), (TOWER_X[0], TOWER_R - 1.5), (TOWER_X[0] + 1.5, TOWER_R),
@@ -128,10 +125,9 @@ def build(ctx):
                        -30, 30, C)
     boolean(body, opening)
     # скоба уже корпуса: снимаем бока под проёмом
-    _web, web_x = guard_web()
     for s in (-1, 1):
         y0, y1 = (6.6, 30.0) if s > 0 else (-30.0, -6.6)
-        boolean(body, box(f"cut_guard_side{s}", web_x - 3.0, gx1 + 1.0, y0, y1, gz0 - 8.0, gz1 - 1.6, C))
+        boolean(body, box(f"cut_guard_side{s}", GUARD_POST_X - 3.0, gx1 + 1.0, y0, y1, gz0 - 8.0, gz1 - 1.6, C))
     # отверстия осей: переводчик, спуск, курок, автоспуск, защёлка магазина
     for nm, (px, pz), r in (("selector", SELECTOR, 4.75), ("trigger", TRIGGER_PIN, 1.96), ("hammer", HAMMER_PIN, 1.96),
                             ("autosear", AUTOSEAR_PIN, 1.96)):
@@ -185,7 +181,7 @@ def build(ctx):
     boolean(body, gs)
     # низ скобы скруглён
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=2.0, seg=4,
-                where=lambda p: web_x - 4.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
+                where=lambda p: GUARD_POST_X - 4.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
     # кромки проёма скобы — заметная фаска с обеих сторон (как на скрине владельца)
     bevel_edges(body, lambda n1, n2: abs(n1.y) > 0.9 and abs(n2.y) < 0.2, w=0.9, seg=3, clamp=True,
                 where=lambda p: gx0 - 1.0 < p.x < gx1 + 0.5 and gz0 - 1.0 < p.z < gz1 - 1.0 and 6.0 < abs(p.y) < 7.2)
@@ -194,14 +190,22 @@ def build(ctx):
         y0, y1 = (6.6 - 0.9, 9.0) if s_ > 0 else (-9.0, -6.6 + 0.9)
         slot = prism_xz(f"cut_guard_slot{s_}", fillet([(-99.0, -75.0), (-72.5, -75.0), (-72.5, -72.6), (-99.0, -72.6)], 1.15, 4), y0, y1, C)
         boolean(body, slot)
+    gpx, gpz, gpr = GUARD_PIN
+    boolean(body, cyl("cut_guard_pin", -20, 20, gpr + 0.05, C, seg=24, cy=gpx, cz=gpz, axis="Y"))
     finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
+    # штифт скобы — разрезной, торцы чуть утоплены
+    pin = cyl("Guard_pin", -6.3, 6.3, gpr - 0.05, C, "Steel_black", seg=24, cy=gpx, cz=gpz, axis="Y", ch=0.25)
+    boolean(pin, cyl("cut_guard_pin_bore", -7, 7, gpr - 0.6, C, seg=20, cy=gpx, cz=gpz, axis="Y"))
+    boolean(pin, box("cut_guard_pin_slit", gpx - 0.2, gpx + 0.2, -7, 7, gpz - gpr - 1.0, gpz - gpr + 1.0, C))
+    out["guard_pin"] = pin
 
     # --- оси сборки и разборки: головка справа (−Y), выталкиваются вправо ---
     for nm, (px, pz) in (("Pivot_pin", PIVOT_PIN), ("Takedown_pin", TAKEDOWN_PIN)):
-        half = LOWER_HALF_W if nm == "Pivot_pin" else FCG_HALF_W
+        half = LOWER_HALF_W + PIVOT_BOSS_H if nm == "Pivot_pin" else FCG_HALF_W
         pr = PIN_R - 0.06
-        prof = [(-half - 1.2, 0.0), (-half - 1.2, 4.1), (-half + 0.2, 4.4), (-half + 0.2, pr), (half - 0.3, pr),
+        hin = -0.05 if nm == "Pivot_pin" else 0.2           # головка оси сборки лежит на втулке, не заходит в неё
+        prof = [(-half - 1.2, 0.0), (-half - 1.2, 4.1), (-half + hin, 4.4), (-half + hin, pr), (half - 0.3, pr),
                 (half, pr - 0.4), (half, 0.0)]
         p = lathe(nm, prof, C, "Steel_black", seg=32, cy=0.0, cz=0.0)
         p.rotation_euler = (0, 0, math.pi / 2)  # ось вдоль Y
@@ -305,20 +309,24 @@ def fire_control(F):
     return o
 
 
-def _wire(name, pts, r, F):
-    """Проволока по ломаной (мм) — трубка с круглым сечением."""
+def _wire(name, pts, r, F, seg=12):
+    """Проволока по ломаной (мм) — трубка с круглым сечением. Сечение переносится вдоль линии без поворота
+    (параллельный перенос), иначе на изгибах пружин и петель сечение перекручивается и сминается."""
     import bmesh
     from mathutils import Vector
     from lib import v as vmm
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
-    seg = 10
     rings = []
     P = [Vector(q) for q in pts]
+    T = [(P[min(i + 1, len(P) - 1)] - P[max(i - 1, 0)]).normalized() for i in range(len(P))]
+    a = Vector((0, 0, 1)) if abs(T[0].z) < 0.9 else Vector((1, 0, 0))
+    n1 = T[0].cross(a).normalized()
     for i, c in enumerate(P):
-        t = (P[min(i + 1, len(P) - 1)] - P[max(i - 1, 0)]).normalized()
-        a = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((1, 0, 0))
-        n1 = t.cross(a).normalized(); n2 = t.cross(n1).normalized()
+        if i > 0:
+            n1 = T[i - 1].rotation_difference(T[i]) @ n1
+            n1 = (n1 - T[i] * n1.dot(T[i])).normalized()
+        n2 = T[i].cross(n1).normalized()
         rings.append([bm.verts.new(vmm(*(c + (n1 * math.cos(2 * math.pi * k / seg) + n2 * math.sin(2 * math.pi * k / seg)) * r)))
                       for k in range(seg)])
     for r0, r1 in zip(rings, rings[1:]):

@@ -35,7 +35,8 @@ PIN_X0 = STOCK_FRONT - 52.0       # фиксатор приклада (слож�
 LATCH_PIVOT = (STOCK_FRONT - 11.0, -23.2)
 LATCH_DEG = 6.0                   # ход рычага; штифт опускается на ≈ 41·sin(6°) = 4.3 мм
 QD_R = 4.85                       # отверстие стандартного антабочного QD (0.38″)
-QD_HEAD_Y = (17.8, 23.0)          # головка антабки слева — у боковины пластины (её край на высоте головки y ≈ 17.5)
+QD_BOSS_Y = 17.9                  # торцы гнезда QD пластины — заподлицо с боковиной нижнего прилива (её край y ≈ 17.2)
+QD_CUP = 1.2                      # глубина чашки на торце гнезда (в неё садится фланец антабки)
 BODY_HW = 19.2                    # полуширина верхней балки
 BUTT_HW = 20.8                    # задняя стойка
 PAD_HW = 21.6                     # затыльник: ширина приклада 43.2
@@ -161,34 +162,72 @@ def _catmull(pts, n=6):
     return out
 
 
+def _qd_loop_path():
+    """Половина петли (x, z) от оси головки: конец в ушке вдоль X, изгиб вниз, нога с развалом, скруглённый угол, низ."""
+    pts = [(6.8 + 0.85 * k, 0.0) for k in range(5)]                        # в ушке и выход из него
+    cx, cz, r = 10.2, -2.8, 2.8
+    a_end = 9.0                                                           # нога чуть наружу
+    for k in range(1, 13):
+        a = math.radians(90.0 - (90.0 - a_end) * k / 12)
+        pts.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    tx, tz = math.sin(math.radians(a_end)), -math.cos(math.radians(a_end))  # направление ноги
+    nx, nz = -tz, tx                                                     # наружная нормаль к ноге
+    bottom, rc = -29.5, 8.5
+    x0, z0 = pts[-1]
+    t = (bottom + rc + rc * nz - z0) / tz
+    lx, lz = x0 + tx * t, z0 + tz * t                                    # точка касания ноги и угла
+    ccx, ccz = lx - rc * nx, lz - rc * nz
+    for k in range(1, 8):
+        pts.append((x0 + tx * t * k / 8, z0 + tz * t * k / 8))
+    a0 = math.degrees(math.atan2(nz, nx))
+    for k in range(13):
+        a = math.radians(a0 + (-90.0 - a0) * k / 12)
+        pts.append((ccx + rc * math.cos(a), ccz + rc * math.sin(a)))
+    xb = pts[-1][0]
+    for k in range(1, 6):
+        pts.append((xb * (1 - k / 6), bottom))
+    return pts
+
+
 def qd_swivel(S):
-    """Антабка QD в гнезде торцевой пластины слева: хвостовик в отверстии, головка с кнопкой фиксатора, петля из прутка
-    Ø3.5 на двух цапфах головки висит вниз (как у образца Fab)."""
+    """Антабка QD в гнезде торцевой пластины слева: хвостовик с шариками в отверстии, фланец в чашке гнезда,
+    вращающееся кольцо с двумя ушками-цапфами спереди и сзади, крышка с кнопкой; петля под ремень 1.25″ —
+    концы пропущены в ушки вдоль оси цапф, гладкий D-образный пруток висит вниз (вне рукояти и приклада)."""
     from part_lower import _wire
     from lib import material
     o = {}
     qx, qz = QD_PLATE
-    y0, y1 = QD_HEAD_Y
-    yc = (y0 + y1) / 2
-    body = cyl("QD_swivel", 4.0, y0 + 0.3, QD_R - 0.1, S, "Steel_black", seg=32, cy=qx, cz=qz, axis="Y", ch=0.4)
-    boolean(body, cyl("qd_head", y0, y1, 7.5, S, "Steel_black", seg=48, cy=qx, cz=qz, axis="Y", ch=0.8), "UNION")
-    boolean(body, cyl("qd_button", y1 - 0.5, y1 + 1.4, 3.2, S, "Steel_black", seg=32, cy=qx, cz=qz, axis="Y", ch=0.4), "UNION")
-    # гнёзда цапф петли спереди и сзади головки
+    f0 = QD_BOSS_Y - QD_CUP + 0.1                      # фланец — на дне чашки
+    r0, r1 = QD_BOSS_Y + 0.5, QD_BOSS_Y + 5.5          # кольцо с ушками
+    c1 = r1 + 1.6                                      # крышка
+    ye = (r0 + r1) / 2                                 # ось цапф и плоскость петли
+    body = cyl("QD_swivel", 4.0, f0 + 0.3, QD_R - 0.1, S, "Steel_black", seg=32, cy=qx, cz=qz, axis="Y", ch=0.4)
+    boolean(body, cyl("qd_flange", f0, r0 + 0.2, 5.5, S, "Steel_black", seg=48, cy=qx, cz=qz, axis="Y", ch=0.3), "UNION")
+    ring = cyl("qd_ring", r0, r1, 7.0, S, "Steel_black", seg=56, cy=qx, cz=qz, axis="Y", ch=0.7)
+    ears = cyl("qd_ears", qx - 9.4, qx + 9.4, 2.4, S, "Steel_black", seg=28, cy=ye, cz=qz, axis="X", ch=0.5)
+    boolean(ring, ears, "UNION")
+    boolean(body, ring, "UNION")
+    boolean(body, cyl("qd_cap", r1 - 0.2, c1, 6.2, S, "Steel_black", seg=48, cy=qx, cz=qz, axis="Y", ch=0.6), "UNION")
+    btn = lathe("qd_button", [(c1 - 0.3, 0.0), (c1 - 0.3, 3.0), (c1 + 0.9, 3.0), (c1 + 1.3, 2.4), (c1 + 1.4, 0.0)],
+                S, "Steel_black", seg=40, cy=0.0, cz=0.0)
+    btn.rotation_euler = (0, 0, math.pi / 2)
+    apply_transform(btn)
+    btn.location = (qx * MM, 0, qz * MM)
+    apply_transform(btn)
+    boolean(body, btn, "UNION")
+    # гнёзда концов петли в ушках
     for s in (-1, 1):
-        x0, x1 = (qx + 5.4, qx + 9.0) if s > 0 else (qx - 9.0, qx - 5.4)
-        boolean(body, cyl(f"cut_qd_pivot{s}", x0, x1, 1.95, S, seg=20, cy=yc, cz=qz, axis="X"))
+        x0, x1 = (qx + 6.4, qx + 10.4) if s > 0 else (qx - 10.4, qx - 6.4)
+        boolean(body, cyl(f"cut_qd_pivot{s}", x0, x1, 1.95, S, seg=24, cy=ye, cz=qz, axis="X"))
     # шарики фиксатора в хвостовике
     for s in (-1, 1):
         ball = cyl(f"cut_qd_ball{s}", qx + s * (QD_R - 0.9) - 0.9, qx + s * (QD_R - 0.9) + 0.9, 1.0, S, seg=16, cy=6.5, cz=qz, axis="X")
         boolean(body, ball)
     finish(body, w=0.25, seg=2, angle=35)
     o["qd_swivel"] = body
-    # петля: концы в гнёздах головки, D-образная, вниз
-    half = [(-5.9, 0.0), (-11.0, 0.0), (-13.6, -3.2), (-15.4, -9.0), (-16.0, -16.0), (-15.0, -23.0), (-11.6, -29.0),
-            (-6.0, -32.6), (0.0, -33.6)]
-    path = half + [(-x, z) for x, z in reversed(half[:-1])]
-    pts = [(qx + x, yc, qz + z) for x, z in _catmull(path, 5)]
-    loop = _wire("QD_swivel_loop", pts, 1.75, S)
+    half = _qd_loop_path()
+    path = [(-x, z) for x, z in half] + [(x, z) for x, z in reversed(half[:-1])]
+    loop = _wire("QD_swivel_loop", [(qx + x, ye, qz + z) for x, z in path], 1.75, S, seg=16)
     loop.data.materials[0] = material("Steel_black")
     o["qd_loop"] = loop
     return o
@@ -238,12 +277,12 @@ def tube(S):
                      PLATE_X[0], PLATE_X[1], S, "Steel_black")
     boolean(hub, plate, "UNION")
     qx, qz = QD_PLATE
-    boss = cyl("end_plate_qd", -12.5, 12.5, 6.5, S, "Steel_black", seg=40, cy=qx, cz=qz, axis="Y", ch=0.8)
+    boss = cyl("end_plate_qd", -QD_BOSS_Y, QD_BOSS_Y, 6.5, S, "Steel_black", seg=40, cy=qx, cz=qz, axis="Y", ch=0.8)
     boolean(hub, boss, "UNION")
     boolean(hub, cyl("cut_plate_bore", HUB_X[0] - 6, HUB_X[1] + 1, TUBE_R + 0.05, S, seg=72))
     boolean(hub, cyl("cut_plate_qd", -20, 20, QD_R, S, seg=32, cy=qx, cz=qz, axis="Y"))
     for s in (-1, 1):
-        y0, y1 = (11.6, 14.0) if s > 0 else (-14.0, -11.6)
+        y0, y1 = (QD_BOSS_Y - QD_CUP, QD_BOSS_Y + 1.0) if s > 0 else (-QD_BOSS_Y - 1.0, -QD_BOSS_Y + QD_CUP)
         boolean(hub, cyl(f"cut_plate_qd_cb{s}", y0, y1, 5.7, S, seg=32, cy=qx, cz=qz, axis="Y"))
     # кернение — две лунки у кромки гайки (гайка застопорена)
     for a in (-60.0, -120.0):

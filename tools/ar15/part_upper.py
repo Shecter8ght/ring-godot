@@ -1,11 +1,11 @@
-# AR-15: верхний ресивер «из заготовки» (без досылателя — как у листинга Fab), планка MIL-STD-1913, окно выброса,
-# отражатель гильз, проушины осей, пылезащитная крышка на оси с пружиной.
+# AR-15: верхний ресивер «из заготовки»: корпус-«труба» вокруг рамы со стойкой под планку MIL-STD-1913, окно выброса
+# с гнутой по корпусу пылезащитной крышкой, отражатель гильз, досылатель, проушины осей.
 import math
 import bpy
 from mathutils import Matrix, Vector
 from lib import (MM, UPPER_FRONT, UPPER_REAR, RAIL_TOP, SPLIT_Z, UPPER_HALF_W, RAIL_HALF_W, PIVOT_PIN, TAKEDOWN_PIN,
                  REAR_TOP_Z, STEP_X, STEP_R, FA_S, FA_D, FA_R, FA_LEN,
-                 PORT_X, PORT_Z, GAS_Z, material, fillet, prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join,
+                 PORT_X, PORT_Z, GAS_Z, material, fillet, arc_pts, prism_xz, prism_yz, prism_xy, box, cyl, lathe, boolean, finish, join,
                  auto_sharp, bevel_edges, renormal, clean)
 
 RAIL_BASE = 22.0              # низ планки (верх корпуса)
@@ -17,14 +17,48 @@ PIN_R = 3.15                  # оси сборки и разборки (Ø6.3 �
 FRONT_RING_R = 15.9           # резьбовое кольцо под гайку цевья (Ø1.25″)
 FRONT_RING_LEN = 12.0
 FA_ROD_END = 14.5             # конец стержня досылателя по его оси: и нажатый не касается рамы
-FA_PAWL = 3.9                 # вылет собачки к оси канала: в покое ~1 мм до рамы, нажатием — в насечку
+FA_PAWL = 4.9                 # вылет собачки к оси канала: в покое 0.2 мм до рамы, нажатием — в насечку на ~0.7 мм
 FA_HOUSING_REAR = -4.4        # задний торец корпуса по оси досылателя: кнопка (до −7.6) выступает на ~3 мм
 LEFT_WINDOW_X = (-136.0, -70.0)   # окно слева над разъёмом (за задержкой, перед проушиной разборки)
 LEFT_WINDOW_Z = (-6.4, 6.0)       # над поднятой линией разъёма (−8.6), рама видна на всю высоту боковины канала
 HINGE_Y = -15.6               # ось пылезащитной крышки (под окном выброса)
 HINGE_Z = -0.4
-STEP = 0.8                    # уступ боковин над осью крышки
+STEP = 0.8                    # прежний уступ боковин (для старых ссылок; корпус теперь «труба»)
 STEP_Z = 1.0
+TUBE_R = 15.4                 # «труба» корпуса вокруг рамы: выше оси боковины идут по этой окружности
+RISER_HW = 11.5               # стойка под планкой (полуширина) — над трубой
+
+
+def side_contour(z):
+    """Полуширина корпуса на высоте z (мм) в зоне юбки над шахтой: плоская юбка ±15 у оси, выше — окружность трубы,
+    ещё выше — стойка под планкой."""
+    return min(UPPER_HALF_W, max(RISER_HW, math.sqrt(max(0.0, TUBE_R * TUBE_R - z * z))))
+
+
+def contour_zs(z0, z1, n=16):
+    """Высоты для обхода контура: густо по дуге трубы, на прямых (юбка, стойка) — только концы (без лишних вершин
+    на плоскостях — иначе булевы рвутся на стыках с карманами)."""
+    zk = math.sqrt(TUBE_R * TUBE_R - UPPER_HALF_W * UPPER_HALF_W)      # колено: дуга сходит в плоскую юбку
+    zr = math.sqrt(TUBE_R * TUBE_R - RISER_HW * RISER_HW)              # дуга встречает стойку
+    a, b = max(z0, zk), min(z1, zr)
+    zs = {round(z0, 4), round(z1, 4)}
+    if a < b:
+        zs |= {round(a + (b - a) * k / n, 4) for k in range(n + 1)}
+    return sorted(zs)
+
+
+def _contour_cut(sgn, z0, z1, n=16):
+    """Профиль (y, z) резака снаружи контура трубы/стойки для стороны sgn на высотах z0…z1 (дуга без зажима к юбке —
+    резак не ложится на плоскость боковины)."""
+    zr = math.sqrt(TUBE_R * TUBE_R - RISER_HW * RISER_HW)
+    b = min(z1, zr)
+    zs = [z0 + (b - z0) * k / n for k in range(n + 1)]
+    pts = [(math.sqrt(max(0.0, TUBE_R * TUBE_R - z * z)), z) for z in zs]
+    if z1 > zr:
+        pts.append((RISER_HW, z1))
+    pts = [(30.0, z0)] + pts + [(30.0, z1)]
+    pts = [(y * sgn, z) for y, z in pts]
+    return pts if sgn > 0 else list(reversed(pts))
 RAIL_SLOT_W = 5.23
 RAIL_SLOT_DEPTH = 2.9
 
@@ -63,8 +97,13 @@ def build(ctx):
         (tdx + 9.0, SPLIT_Z), (tdx + 9.0, tdz - 7.5), (tdx - 9.0, tdz - 7.5), (tdx - 9.0, SPLIT_Z),
     ], [1.5, 2.0, 1.0, 1.0, 0.0, 3.0, 3.0, 0.0], seg=4)
     body = prism_xz("Upper_receiver", side, -UPPER_HALF_W, UPPER_HALF_W, C, "Alu_anodized")
-    # кольцо под гайку цевья
-    ring = cyl("Upper_ring", UPPER_FRONT - 2.0, UPPER_FRONT + FRONT_RING_LEN, FRONT_RING_R, C, "Alu_anodized", seg=64)
+    # «труба» корпуса вокруг рамы (как у серийных верхних ресиверов): над осью боковины сходятся по окружности TUBE_R
+    # к стойке под планкой; за юбкой над шахтой (x < STEP_X) труба видна и ниже оси — продолжает силуэт буферной трубки
+    for sgn in (-1, 1):
+        boolean(body, prism_yz(f"cut_shoulder{sgn}", _contour_cut(sgn, 0.0, RAIL_BASE + 1.0), UPPER_REAR - 2, UPPER_FRONT + 0.5, C))
+        boolean(body, prism_yz(f"cut_tube_low{sgn}", _contour_cut(sgn, REAR_TOP_Z - 1.0, 3.2), UPPER_REAR - 2, STEP_X - STEP_R - 2.0, C))
+    # кольцо под гайку цевья (от самого торца — не выпирает над стойкой)
+    ring = cyl("Upper_ring", UPPER_FRONT - 0.4, UPPER_FRONT + FRONT_RING_LEN, FRONT_RING_R, C, "Alu_anodized", seg=64)
     boolean(body, ring, "UNION")
     # нижние кромки корпуса скруглены сильнее (как у фрезерованных ресиверов)
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=1.6, seg=4,
@@ -87,18 +126,22 @@ def build(ctx):
     for nm, (px, pz) in (("pivot", PIVOT_PIN), ("takedown", TAKEDOWN_PIN)):
         for s in (-1, 1):
             y0, y1 = (LUG_HALF_W, UPPER_HALF_W + 3) if s > 0 else (-UPPER_HALF_W - 3, -LUG_HALF_W)
-            boolean(body, box(f"cut_ear_{nm}{s}", px - 9.5, px + 9.5, y0, y1, pz - 10.0, pz + 7.6, C))
+            if nm == "pivot":       # ухо нижнего спереди круглое (R 6.3 вокруг оси) — выемка по нему, без пустых углов
+                ear = prism_xz(f"cut_ear_{nm}{s}", [(px - 9.5, pz - 10.0), (px + 6.9, pz - 10.0)] +
+                               arc_pts(px, pz, 6.9, 0, 90, 10) + [(px - 9.5, pz + 6.9)], y0, y1, C)
+                boolean(body, ear)
+            else:
+                boolean(body, box(f"cut_ear_{nm}{s}", px - 9.5, px + 9.5, y0, y1, pz - 10.0, pz + 7.6, C))
         boolean(body, cyl(f"cut_pin_{nm}", -20, 20, PIN_R, C, seg=32, cy=px, cz=pz, axis="Y"))
-    # уступ по бокам: выше линии оси крышки корпус уже (характерная «ступень» фрезерованных ресиверов)
-    for sgn in (-1, 1):
-        y0, y1 = (UPPER_HALF_W - STEP, UPPER_HALF_W + 3) if sgn > 0 else (-UPPER_HALF_W - 3, -UPPER_HALF_W + STEP)
-        boolean(body, box(f"cut_step{sgn}", UPPER_REAR - 2, UPPER_FRONT - 2.5, y0, y1, STEP_Z, RAIL_BASE + 1, C))
     # окно выброса (справа, −Y)
     port = prism_xz("cut_port", fillet([(PORT_X[0], PORT_Z[0]), (PORT_X[1], PORT_Z[0]), (PORT_X[1], PORT_Z[1]), (PORT_X[0], PORT_Z[1])],
                                        [1.5, 1.5, 1.5, 1.5], 4), -UPPER_HALF_W - 6, -2.0, C)
     boolean(body, port)
     # ниша под пылезащитную крышку (крышка лежит заподлицо) и прилив оси снизу окна
-    rec = box("cut_cover_recess", PORT_X[0] - 1.0, PORT_X[1] + 1.0, -UPPER_HALF_W - 3, -UPPER_HALF_W + STEP + 0.9, HINGE_Z + 1.2, PORT_Z[1] + 1.4, C)
+    rz0, rz1 = HINGE_Z + 1.2, PORT_Z[1] + 1.4
+    zs = contour_zs(rz0, rz1)
+    rec = prism_yz("cut_cover_recess", [(-30.0, rz0)] + [(-(side_contour(z) - 1.55), z) for z in zs] + [(-30.0, rz1)],
+                   PORT_X[0] - 1.0, PORT_X[1] + 1.0, C)
     boolean(body, rec)
     # канавка под шарнир крышки: проушины крышки вращаются на оси в канавке корпуса
     boolean(body, box("cut_hinge_groove", PORT_X[0] - 0.8, PORT_X[1] + 0.8, -UPPER_HALF_W - 3, -UPPER_HALF_W + 2.3,
@@ -107,7 +150,7 @@ def build(ctx):
     dx0, dx1 = PORT_X[0] - 19.3, PORT_X[0] - 1.6
     defl = prism_xz("Upper_deflector", fillet([(dx0, 5.0), (dx1, 5.0), (dx1, 11.0), (dx1 - 6.2, RAIL_BASE - 0.5),
                                                (dx0 + 3.5, RAIL_BASE - 0.5)], [2.0, 1.0, 2.0, 2.5, 1.5], 4),
-                    -UPPER_HALF_W + STEP + 0.5, -UPPER_HALF_W - 6.0, C, "Alu_anodized")
+                    -RISER_HW + 0.5, -UPPER_HALF_W - 6.0, C, "Alu_anodized")
     wedge = prism_xy("cut_defl_wedge", [(dx0 - 3.0, -UPPER_HALF_W - 7.0), (dx0 + 8.0, -UPPER_HALF_W - 7.0), (dx1 + 3.3, -UPPER_HALF_W - 1.2),
                                         (dx1 + 3.3, -UPPER_HALF_W - 10.0), (dx0 - 3.0, -UPPER_HALF_W - 10.0)], 0.0, 30.0, C)
     boolean(defl, wedge)
@@ -121,7 +164,7 @@ def build(ctx):
         me = bpy.data.meshes.new("cut_front_bevel")
         bm = bmesh.new()
         ends = []
-        for xx, c in ((PORT_X[1] + 1.5, UPPER_HALF_W - STEP + RAIL_BASE + 0.3), (UPPER_FRONT + 1.0, 9.5 + RAIL_BASE)):
+        for xx, c in ((PORT_X[1] + 1.5, RISER_HW + RAIL_BASE + 0.3), (UPPER_FRONT + 1.0, 9.5 + RAIL_BASE)):
             tri = [(c - 26.0, 26.0), (19.0, c - 19.0), (19.0, 26.0)]
             ends.append([bm.verts.new(vmm(xx, y * s, z)) for y, z in tri])
         a, b = ends
@@ -150,12 +193,13 @@ def build(ctx):
                C, None, seg=48, cy=0.0, cz=0.0)
     fb.data.transform(m)
     boolean(body, fb)
+    boolean(body, fa_pawl_box("cut_fa_pawl_slot", (-1.1, 0.4 + 4.5 + 0.6), (-1.6, FA_PAWL + 1.5), (-2.9, 2.9), C))
     # «облегчающий» карман сзади слева — один ряд над окном (как у образца Fab); справа его место занял досылатель
     for s in (1,):
         for z0, z1 in ((10.0, 16.8),):
-            x0, x1 = -168.0, (-122.0 if s < 0 else -86.0)
+            x0, x1 = -164.0, (-122.0 if s < 0 else -86.0)
             pk = prism_xz(f"cut_pocket{s}{z0}", fillet([(x0, z0), (x1, z0), (x1, z1), (x0, z1)], 2.6, 5),
-                          (UPPER_HALF_W - STEP - 1.1) * s, (UPPER_HALF_W + 3) * s, C)
+                          (RISER_HW - 1.1) * s, (UPPER_HALF_W + 3) * s, C)
             boolean(body, pk)
     # окно слева над разъёмом за затворной задержкой (образец Fab): сквозь него видна рама и её ход
     win = prism_xz("cut_left_window", fillet([(LEFT_WINDOW_X[0], LEFT_WINDOW_Z[0]), (LEFT_WINDOW_X[1], LEFT_WINDOW_Z[0]),
@@ -167,9 +211,9 @@ def build(ctx):
         for i, xx in enumerate(xs):
             for j, zz in enumerate(zs):
                 sq = prism_xz(f"cut_sq_{nm}{i}{j}", fillet([(xx - 1.2, zz - 1.2), (xx + 1.2, zz - 1.2), (xx + 1.2, zz + 1.2),
-                                                             (xx - 1.2, zz + 1.2)], 0.4, 2), UPPER_HALF_W - STEP - 0.8, UPPER_HALF_W + 3, C)
+                                                             (xx - 1.2, zz + 1.2)], 0.4, 2), RISER_HW - 0.8, UPPER_HALF_W + 3, C)
                 boolean(body, sq)
-    boolean(body, cyl("cut_dimple", UPPER_HALF_W - STEP - 0.8, UPPER_HALF_W + 3, 2.1, C, seg=32, cy=-16.0, cz=12.0, axis="Y"))
+    boolean(body, cyl("cut_dimple", RISER_HW - 0.8, UPPER_HALF_W + 3, 2.1, C, seg=32, cy=-16.0, cz=12.0, axis="Y"))
     # выемка снизу сзади под головку фиксатора буфера
     boolean(body, box("cut_retainer_relief", UPPER_REAR - 2, UPPER_REAR + 5.0, -3.0, 3.0, SPLIT_Z - 2, -11.0, C))
     # выемка слева снизу под затворную задержку (её верхняя лопатка и зуб заходят выше разъёма)
@@ -209,23 +253,23 @@ def fa_housing_mesh(C):
     from lib import v as vmm
     n = 64
     d = Vector(FA_D).normalized()
-    side = -(UPPER_HALF_W - STEP)                       # боковина над уступом
+    side = -RISER_HW                                    # стойка над трубой
     p0 = side - (FA_S[1] - FA_R)                         # вылет у кнопки
-    cy = 0.9875                                          # локальная Y наклонена к мировой (поворот оси ~11°)
+    cy = (fa_matrix().to_3x3() @ Vector((0.0, 1.0, 0.0))).y   # локальная Y повёрнута вместе с осью
     L0 = FA_HOUSING_REAR
     stations = sorted(set([L0, L0 + 0.5, L0 + 1.2] + [-2.0 + 2.0 * k for k in range(38)] + [5.1, 5.4, 6.6, 6.9]))
     me = bpy.data.meshes.new("fa_housing")
     bm = bmesh.new()
     rings = []
     for L in stations:
-        k = _smooth((L - 12.0) / 54.0)
+        k = _smooth((L - 24.0) / 42.0)                      # цилиндр у кнопки, дальше сходит в боковину
         yc = FA_S[1] + d.y * L
         prot = p0 * (1.0 - k) - 0.8 * _smooth((L - 60.0) / 10.0)   # к концу уходит под боковину
         ry_out = (yc - (side - prot)) / cy
         if L < 14.0:
             ry_out = max(ry_out, FA_R)
-        rz = FA_R - (FA_R - 5.6) * k                        # к острию низкий широкий прилив, а не шип
-        oz = -(FA_R - rz) * 0.85                            # низ держится, верх опускается: «капля» смотрит вниз-вперёд
+        rz = FA_R - (FA_R - 5.0) * _smooth((L - 28.0) / 38.0)   # высота держится, к носу плавно убывает
+        oz = 0.0                                            # ось горизонтальна: верх и низ сходятся к носу симметрично
         if 5.3 < L < 6.7:                                   # поясок за кнопкой
             ry_out -= 0.45; rz -= 0.45
         ry_in = FA_R
@@ -263,6 +307,35 @@ def fa_matrix():
     return r
 
 
+def fa_pawl_box(name, ra, rb, rc, C):
+    """Брусок собачки досылателя от конца стержня: a — вдоль канала рамы (X), b — по радиусу к оси канала, c — по
+    касательной (как насечки рамы: брусок и насечка соосны)."""
+    import bmesh
+    from lib import v as vmm
+    dd = Vector(FA_D).normalized()
+    e = Vector(FA_S) + dd * FA_ROD_END
+    d = Vector((1.0, 0.0, 0.0))
+    u = Vector((0.0, -e.y, -e.z)).normalized()
+    w = d.cross(u)
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    vs = {}
+    for ia, a in enumerate(ra):
+        for ib, b in enumerate(rb):
+            for ic, c in enumerate(rc):
+                p = e + d * a + u * b + w * c
+                vs[(ia, ib, ic)] = bm.verts.new(vmm(p.x, p.y, p.z))
+    for f in (((0, 0, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1)), ((1, 0, 0), (1, 0, 1), (1, 1, 1), (1, 1, 0)),
+              ((0, 0, 0), (0, 0, 1), (1, 0, 1), (1, 0, 0)), ((0, 1, 0), (1, 1, 0), (1, 1, 1), (0, 1, 1)),
+              ((0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)), ((0, 0, 1), (0, 1, 1), (1, 1, 1), (1, 0, 1))):
+        bm.faces.new([vs[k] for k in f])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    C.objects.link(o)
+    return o
+
+
 def forward_assist(C):
     """Толкатель досылателя: круглая кнопка с кольцевыми канавками и стержень с собачкой на конце (к насечкам рамы)."""
     # стержень кончается, где его поверхность в ~1 мм от рамы; к насечкам рамы тянется только собачка
@@ -277,27 +350,7 @@ def forward_assist(C):
     # собачка: брусок от конца стержня к оси канала (в мировых координатах)
     import bmesh
     from lib import v as vmm
-    d = Vector(FA_D).normalized()
-    e = Vector(FA_S) + d * FA_ROD_END
-    u = Vector((0.0, -e.y, -e.z)).normalized()
-    u = (u - d * u.dot(d)).normalized()
-    w = d.cross(u)
-    me = bpy.data.meshes.new("fa_pawl")
-    bm = bmesh.new()
-    vs = {}
-    for ia, a in enumerate((-0.9, 0.5)):
-        for ib, b in enumerate((-1.0, FA_PAWL)):
-            for ic, c in enumerate((-1.6, 1.6)):
-                p = e + d * a + u * b + w * c
-                vs[(ia, ib, ic)] = bm.verts.new(vmm(p.x, p.y, p.z))
-    for f in (((0, 0, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1)), ((1, 0, 0), (1, 0, 1), (1, 1, 1), (1, 1, 0)),
-              ((0, 0, 0), (0, 0, 1), (1, 0, 1), (1, 0, 0)), ((0, 1, 0), (1, 1, 0), (1, 1, 1), (0, 1, 1)),
-              ((0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)), ((0, 0, 1), (0, 1, 1), (1, 1, 1), (1, 0, 1))):
-        bm.faces.new([vs[k] for k in f])
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me); bm.free()
-    paw = bpy.data.objects.new("fa_pawl", me)
-    C.objects.link(paw)
+    paw = fa_pawl_box("fa_pawl", (-0.6, 0.4), (-1.0, FA_PAWL), (-1.6, 1.6), C)
     paw.data.materials.append(material("Steel_black"))
     finish(paw, w=0.25, seg=2, angle=35)
     boolean(pl, paw, "UNION")
@@ -306,25 +359,38 @@ def forward_assist(C):
 
 
 def dust_cover(C):
-    """Крышка окна: тонкая пластина с бортиком, шарнирные проушины снизу, защёлка-выступ внутри (за неё цепляется рама)."""
+    """Крышка окна: тонкая пластина, гнутая по контуру корпуса (труба и стойка), продольная выштамповка, шарнирные
+    проушины снизу, защёлка-выступ внутри у верхней кромки (за неё цепляется рама)."""
     t = 1.3
     x0, x1 = PORT_X[0] - 0.6, PORT_X[1] + 0.6
     z0, z1 = HINGE_Z + 1.6, PORT_Z[1] + 1.1
-    y_out = -UPPER_HALF_W - 0.25
-    plate = prism_xz("Dust_cover", fillet([(x0, z0), (x1, z0), (x1, z1), (x0, z1)], [0.8, 0.8, 2.2, 2.2], 4), y_out, y_out + t, C, "Steel_black")
-    # рёбра жёсткости — продольная выштамповка
-    rib = prism_xz("cover_rib", fillet([(x0 + 8, z0 + 4.5), (x1 - 8, z0 + 4.5), (x1 - 8, z0 + 7.0), (x0 + 8, z0 + 7.0)], 1.2, 3),
-                   y_out - 0.45, y_out + 0.2, C, "Steel_black")
+    zs = contour_zs(z0, z1)
+    prof = [(-(side_contour(z) + 0.25), z) for z in zs] + [(-(side_contour(z) + 0.25 - t), z) for z in reversed(zs)]
+    plate = prism_yz("Dust_cover", list(reversed(prof)), x0, x1, C, "Steel_black")
+    # скругление торцов крышки (вид сбоку)
+    for xa, za, sx, sz in ((x0, z1, 1, -1), (x1, z1, -1, -1)):
+        r = 2.2
+        corner = prism_xz("cut_cover_corner", [(xa - sx * 0.5, za + 0.5), (xa + sx * r, za + 0.5)] +
+                          [(xa + sx * r - sx * r * math.sin(math.radians(a_)), za - r + r * math.cos(math.radians(a_))) for a_ in range(0, 91, 10)] +
+                          [(xa - sx * 0.5, za - r)], -30, 0, C)
+        boolean(plate, corner)
+    # рёбра жёсткости — продольная выштамповка по контуру
+    rz0, rz1 = z0 + 4.5, z0 + 7.0
+    rzs = contour_zs(rz0, rz1, 8)
+    rib = prism_yz("cover_rib", list(reversed([(-(side_contour(z) + 0.7), z) for z in rzs] +
+                                              [(-(side_contour(z) + 0.05), z) for z in reversed(rzs)])), x0 + 8, x1 - 8, C, "Steel_black")
     boolean(plate, rib, "UNION")
     # шарнирные проушины (три) вокруг оси
+    y_in0 = -(side_contour(z0) + 0.25 - t)
     for xa, xb in ((x0 + 0.5, x0 + 7.0), ((x0 + x1) / 2 - 4, (x0 + x1) / 2 + 4), (x1 - 7.0, x1 - 0.5)):
         k = lathe("cover_knuckle", [(xa, 0.0), (xa, 1.9), (xb, 1.9), (xb, 0.0)], C, "Steel_black", seg=24, cy=HINGE_Y, cz=HINGE_Z)
         boolean(plate, k, "UNION")
-        brg = box("cover_web", xa, xb, HINGE_Y - 0.2, y_out + t, HINGE_Z, z0 + 0.5, C)
+        brg = box("cover_web", xa, xb, HINGE_Y - 0.2, y_in0, HINGE_Z, z0 + 0.5, C)
         boolean(plate, brg, "UNION")
     boolean(plate, cyl("cover_rod_hole", x0 - 5, x1 + 5, 1.1, C, seg=16, cy=HINGE_Y, cz=HINGE_Z))
     # выступ-защёлка изнутри у верхней кромки (входит в паз корпуса)
-    latch = box("cover_latch", -40.0, -30.0, y_out + t - 0.1, y_out + t + 1.6, z1 - 3.2, z1 - 1.2, C, "Steel_black")
+    y_in1 = -(side_contour(z1 - 2.2) + 0.25 - t)
+    latch = box("cover_latch", -40.0, -30.0, y_in1 - 0.1, y_in1 + 1.6, z1 - 3.2, z1 - 1.2, C, "Steel_black")
     boolean(plate, latch, "UNION")
     finish(plate, w=0.25, seg=2, angle=35)
     return plate

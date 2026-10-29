@@ -228,25 +228,26 @@ def rear_sight(C):
     ax, az = hx, AP_AXIS_Z
     ring_dz = math.sqrt(AP_RING ** 2 - AP_HALF ** 2)
     a_s = math.degrees(math.atan2(-ring_dz, AP_HALF))
-    small = [(-AP_HALF, az), (AP_HALF, az)] + arc_pts(0.0, SIGHT_Z, AP_RING, a_s, 180.0 - a_s, 28)
-    ap = prism_yz("Rear_sight_aperture", fillet(small, [0.0, 0.0, 0.8] + [0.0] * 27 + [0.8], 3), ax - 1.0, ax + 1.0, C, "Alu_anodized")
+    small = [(-AP_HALF, az), (AP_HALF, az)] + arc_pts(0.0, SIGHT_Z, AP_RING, a_s, 180.0 - a_s, 56)
+    ap = prism_yz("Rear_sight_aperture", fillet(small, [0.0, 0.0, 0.8] + [0.0] * (len(small) - 4) + [0.8], 3), ax - 1.0, ax + 1.0, C,
+                  "Alu_anodized")
     cx = ax - AP_OFFSET
     a_b = math.degrees(math.atan2(-AP_HALF, ring_dz))            # стык стебля с кольцом снизу (−Y)
-    big = [(ax, -AP_HALF), (cx + ring_dz, -AP_HALF)] + arc_pts(cx, 0.0, AP_RING, a_b, a_b - (360.0 + 2 * a_b), 28)[1:-1] + \
+    big = [(ax, -AP_HALF), (cx + ring_dz, -AP_HALF)] + arc_pts(cx, 0.0, AP_RING, a_b, a_b - (360.0 + 2 * a_b), 56)[1:-1] + \
           [(cx + ring_dz, AP_HALF), (ax, AP_HALF)]
-    big_o = prism_xy("ap_big", fillet(big, [0.0, 0.8] + [0.0] * 27 + [0.8, 0.0], 3), az - 1.0, az + 1.0, C, "Alu_anodized")
+    big_o = prism_xy("ap_big", fillet(big, [0.0, 0.8] + [0.0] * (len(big) - 4) + [0.8, 0.0], 3), az - 1.0, az + 1.0, C, "Alu_anodized")
     boolean(ap, big_o, "UNION")
     hub = cyl("ap_hub", -AP_HALF, AP_HALF, 2.3, C, "Alu_anodized", seg=32, cy=ax, cz=az, axis="Y")
     boolean(ap, hub, "UNION")
     boolean(ap, cyl("cut_ap_axis", -8, 8, 0.95, C, seg=16, cy=ax, cz=az, axis="Y"))
     # малое отверстие с зенковкой со стороны глаза; выемка-метка на верхушке кольца
-    sm = lathe("cut_ap_small", [(ax - 3, 0.0), (ax - 3, 1.6), (ax - 1.3, 1.6), (ax - 0.6, 0.95), (ax + 3, 0.95), (ax + 3, 0.0)],
-               C, None, seg=24, cy=0.0, cz=SIGHT_Z)
+    sm = lathe("cut_ap_small", [(ax - 3, 0.0), (ax - 3, 2.9), (ax - 1.6, 2.9), (ax - 0.5, 1.7), (ax + 3, 1.7), (ax + 3, 0.0)],
+               C, None, seg=48, cy=0.0, cz=SIGHT_Z)
     boolean(ap, sm)
     boolean(ap, box("cut_ap_notch", ax - 3, ax + 3, -0.55, 0.55, SIGHT_Z + AP_RING - 0.9, SIGHT_Z + AP_RING + 1, C))
     # большое отверстие с фаской снизу (в рабочем положении — со стороны глаза)
-    bg = lathe("cut_ap_big", [(az - 3, 0.0), (az - 3, 3.1), (az - 1.2, 3.1), (az - 0.6, 2.5), (az + 3, 2.5), (az + 3, 0.0)],
-               C, None, seg=32, cy=0.0, cz=0.0)
+    bg = lathe("cut_ap_big", [(az - 3, 0.0), (az - 3, 3.5), (az - 1.2, 3.5), (az - 0.5, 2.9), (az + 3, 2.9), (az + 3, 0.0)],
+               C, None, seg=48, cy=0.0, cz=0.0)
     bg.rotation_euler = (0, -math.pi / 2, 0)
     apply_transform(bg)
     bg.location = (cx * MM, 0, 0)

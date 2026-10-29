@@ -48,6 +48,23 @@ PAIRS = [
     ("CH_latch_L", "CH_latch_L_pin"), ("CH_latch_R", "CH_latch_R_pin"), ("CH_latch_L", "Upper_rail"), ("CH_latch_R", "Upper_rail"),
     ("Charging_handle", "Forward_assist"), ("CH_latch_L", "Stock_body"), ("CH_latch_R", "Stock_body"),
     ("Magazine_body", "Pistol_grip"), ("Magazine_floorplate", "Lower_receiver"),
+    ("Guard_pin", "Lower_receiver"), ("Guard_pin", "Pistol_grip"), ("Pivot_pin", "Lower_receiver"), ("Pivot_pin", "Upper_receiver"),
+    ("End_plate", "Lower_receiver"), ("QD_swivel", "Pistol_grip"), ("QD_swivel_loop", "Castle_nut"), ("QD_swivel_loop", "Buffer_tube"),
+    ("QD_swivel_loop", "Stock_QD_cup_front_L"), ("Magazine_body", "Bolt_carrier"), ("Magazine_round_00", "Magazine_body"),
+    ("Magazine_round_01", "Magazine_body"), ("Rear_sight_spring_L", "Rear_sight_aperture_pin"), ("Rear_sight_spring_R", "Rear_sight_aperture_pin"),
+    ("Grip_screw", "Pistol_grip"), ("Barrel_nut", "Upper_receiver"),
+    ("Side_rail", "Handguard"), ("Side_rail_screw0", "Side_rail"), ("Side_rail_screw0", "Handguard"), ("Side_rail_tnut0", "Handguard"),
+    ("Side_rail_tnut0", "Side_rail_screw0"), ("Side_rail_tnut0", "Barrel"), ("Side_rail_screw1", "Side_rail"), ("Side_rail_screw1", "Handguard"),
+    ("Side_rail_tnut1", "Handguard"), ("Side_rail_tnut1", "Side_rail_screw1"), ("Side_rail_tnut1", "Barrel"), ("Side_rail_R", "Handguard"),
+    ("Side_rail_R_screw0", "Side_rail_R"), ("Side_rail_R_screw0", "Handguard"), ("Side_rail_R_tnut0", "Handguard"), ("Side_rail_R_tnut0", "Side_rail_R_screw0"),
+    ("Side_rail_R_tnut0", "Barrel"), ("Side_rail_R_screw1", "Side_rail_R"), ("Side_rail_R_screw1", "Handguard"), ("Side_rail_R_tnut1", "Handguard"),
+    ("Side_rail_R_tnut1", "Side_rail_R_screw1"), ("Side_rail_R_tnut1", "Barrel"), ("Bottom_rail", "Handguard"), ("Bottom_rail_screw0", "Bottom_rail"),
+    ("Bottom_rail_screw0", "Handguard"), ("Bottom_rail_tnut0", "Handguard"), ("Bottom_rail_tnut0", "Bottom_rail_screw0"), ("Bottom_rail_tnut0", "Barrel"),
+    ("Bottom_rail_screw1", "Bottom_rail"), ("Bottom_rail_screw1", "Handguard"), ("Bottom_rail_tnut1", "Handguard"), ("Bottom_rail_tnut1", "Bottom_rail_screw1"),
+    ("Bottom_rail_tnut1", "Barrel"), ("Handguard_screw0", "Barrel_nut"), ("Handguard_screw1", "Barrel_nut"), ("Handguard_screw0", "Barrel"),
+    ("Handguard_screw1", "Barrel"), ("Barrel_nut", "Barrel"), ("Barrel_nut", "Barrel_extension"), ("Barrel_nut", "Gas_tube"),
+    ("Handguard", "Barrel"), ("Handguard", "Gas_tube"), ("Front_sight_base", "Handguard"), ("Handguard_screw0", "Handguard"),
+    ("Handguard_screw1", "Handguard"),
 ]
 import sys as _sys
 _ONLY = (_sys.argv[_sys.argv.index("--") + 1].split(",") if "--" in _sys.argv else None)

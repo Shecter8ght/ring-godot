@@ -28,6 +28,10 @@ WALL = 1.8
 RF, RR = 4.0, 3.0                         # скругления передних и задних углов сечения
 BODY_HW = 12.3                            # полуширина корпуса ниже шахты
 TOP_HW = 10.0                             # полуширина верха (проходит между стенками верхнего ресивера)
+LIP_END = MAG_X[0] + 32.0                 # губки — задние ≈32 мм верха (держат гильзу до плеча), дальше ступенька вниз
+FRONT_TOP_Z = MAG_TOP_Z - 10.2            # верх стенок перед губками: открыт верхний патрон (пуля, плечо)
+LIP_ROUND_Y, LIP_ROUND_Z, LIP_ROUND_R = 2.4, MAG_TOP_Z - 5.8, 4.8   # верхний патрон под левой губкой (ось, радиус гильзы)
+LIP_GAP = 0.55                            # зазор низа губки до гильзы
 U_HEAD = -L2 + WALL + 0.9                 # донце гильзы у задней стенки (зазор до скругления угла)
 U_SHOULDER = U_HEAD + 36.53               # начало ската плеча гильзы (Ø 8.99) — ближе к центру изгиба
 SHOULDER_D = 8.99
@@ -249,20 +253,30 @@ def body(C):
              for s in stations(-20.0, S_BOTTOM + 12.0, 2.5, brk)]
     boolean(b, loft("cut_mag_cavity", rings, C))
     # верх: губки сзади на уровне MAG_TOP_Z, спереди опущен под гайку/ресивер (пули поднимаются по рампе)
-    top = prism_xz("cut_mag_top", fillet([(-90.0, Z0), (-10.0, Z0), (-3.0, -16.0), (40.0, -16.0), (40.0, 30.0), (-90.0, 30.0)],
-                                         [0, 3.0, 3.0, 0, 0, 0], 4), -30.0, 30.0, C)
+    top = prism_xz("cut_mag_top", fillet([(-90.0, Z0), (LIP_END, Z0), (LIP_END + 4.0, FRONT_TOP_Z), (40.0, FRONT_TOP_Z), (40.0, 30.0),
+                                          (-90.0, 30.0)], [0, 4.0, 4.0, 0, 0, 0], 8), -30.0, 30.0, C)
     boolean(b, top)
     # губки — продолжение стенок, загнуты внутрь над верхним патроном
     for s in (1, -1):
-        yi, yo = 5.0 * s, (TOP_HW - WALL + 0.3) * s
-        prof = [(yo, Z0 - 1.5), (yi + 0.6 * s, Z0 - 1.5), (yi, Z0 - 1.0), (yi, Z0 - 0.5), (yi + 0.5 * s, Z0), (yo, Z0)]
+        yo = TOP_HW - WALL + 0.3                       # корень губки — в стенке
+        cy0, cz0, rr = LIP_ROUND_Y * s, LIP_ROUND_Z, LIP_ROUND_R + LIP_GAP
+        under = []                                     # низ губки по окружности патрона (с зазором), от носа к стенке
+        for k in range(9):
+            yy = 5.0 + (7.4 - 5.0) * k / 8
+            under.append((yy, cz0 + math.sqrt(max(rr * rr - (yy - abs(cy0)) ** 2, 0.0))))
+        prof = [(yo, Z0), (5.9, Z0), (5.0, Z0 - 0.7)] + under[1:] + [(yo, under[-1][1] - 0.6)]
+        rad = [0, 0.6, 0.4] + [0] * (len(under) - 1) + [0]
+        prof = fillet(prof, rad, 3)
+        prof = [(y * s, z) for y, z in prof]
         if s < 0:
             prof = list(reversed(prof))
-        lip = prism_yz("mag_lip", prof, MAG_X[0] + WALL - 0.3, -10.5, C, "Polymer")
+        lip = prism_yz("mag_lip", prof, MAG_X[0] + WALL - 0.3, LIP_END - 3.4, C, "Polymer")
+        finish(lip, w=0.4, seg=2, angle=40)
         boolean(b, lip, "UNION")
-        y0, y1 = (TOP_HW - 0.35, TOP_HW + 0.25) if s > 0 else (-TOP_HW - 0.25, -TOP_HW + 0.35)
-        bead = prism_yz("mag_lip_bead", fillet([(y0, Z0 - 3.4), (y1, Z0 - 3.4), (y1, Z0 - 1.1), (y0, Z0 - 1.1)], [0, 0.2, 0.2, 0], 2),
-                        MAG_X[0] + 1.2, -11.5, C, "Polymer")
+        y0, y1 = (TOP_HW - 0.35, TOP_HW + 0.3) if s > 0 else (-TOP_HW - 0.3, -TOP_HW + 0.35)
+        bead = prism_yz("mag_lip_bead", fillet([(y0, Z0 - 3.4), (y1, Z0 - 3.4), (y1, Z0 - 0.9), (y0, Z0 - 0.9)], [0, 0.25, 0.25, 0], 2),
+                        MAG_X[0] + 1.2, LIP_END - 4.0, C, "Polymer")
+        finish(bead, w=0.2, seg=2, angle=40)
         boolean(b, bead, "UNION")
     # задняя стенка между губками ниже верха: над ней проходит хвост затвора, донце верхнего патрона открыто затвору
     boolean(b, box("cut_mag_rear_dip", MAG_X[0] - 3.0, MAG_X[0] + 4.5, -5.0, 5.0, Z0 - 1.4, Z0 + 5.0, C))

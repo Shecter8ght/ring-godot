@@ -18,6 +18,17 @@ BOLT_TAIL = -58.0
 FP_HEAD = -84.0
 CH_FRONT = -33.0            # передний зацеп рукоятки — перед носиком ключа
 CH_REAR = UPPER_REAR - 15.0
+
+
+def _fa_groove_x():
+    """x середины собачки досылателя в нажатом положении (под ней — насечка рамы)."""
+    from lib import FA_S, FA_D, FA_TRAVEL
+    from part_upper import FA_ROD_END
+    n = math.sqrt(sum(c * c for c in FA_D))
+    return FA_S[0] + FA_D[0] / n * (FA_ROD_END + FA_TRAVEL) - 0.1
+
+
+FA_GROOVE_X = _fa_groove_x()
 CH_WING_Y = 32.0            # размах крыльев Т-ручки (±): крупная амби-рукоятка (было ±25.5)
 CH_CENTER_HW = 16.5         # полуширина средней плиты Т-ручки (пол под осями рычагов)
 
@@ -43,9 +54,10 @@ def build(ctx):
     boolean(car, box("cut_tail_flat", CARRIER_REAR - 2, FP_HEAD - 12.0, -20, 20, -CARRIER_R - 2, -CARRIER_R + 1.4, B))
     # правая сторона: плоскость окна выброса и насечки (у «гладкого» ресивера насечки остаются на раме)
     boolean(car, box("cut_port_face", -74.0, CARRIER_FRONT - 2.0, -CARRIER_R - 2, -CARRIER_R + 1.6, -6.0, 8.5, B))
-    # насечки досылателя — точно под его собачкой (её кончик при нажатии в x ≈ −140, 49.5° от верха к правому боку)
+    # насечки досылателя — третья точно под нажатой собачкой (ось досылателя горизонтальна, 16° в плане; 49.5° от верха
+    # к правому боку)
     for k in range(9):
-        xx = -151.9 + k * 3.2
+        xx = FA_GROOVE_X - 2 * 3.2 + k * 3.2
         c = box(f"cut_fa_ser{k}", xx - 0.9, xx + 0.9, -3.4, 3.4, CARRIER_R - 1.1, CARRIER_R + 2.0, B)
         c.rotation_euler = (math.radians(49.5), 0, 0)
         apply_transform(c)
