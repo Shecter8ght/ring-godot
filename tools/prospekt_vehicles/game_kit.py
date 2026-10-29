@@ -38,9 +38,13 @@ from specs_bus import BOXES  # noqa: E402
 
 INTERIOR = ("Dashboard", "Instrument_Hood", "Center_Stack", "Center_Screen", "Steering_", "Seat", "Headrest", "Console",
             "Floor", "Headliner", "Door_Card", "Parcel_Shelf", "Cargo_Cover", "Visor", "Mirror_Inner", "Trunk_Tub",
-            "Trunk_Wall", "Sill_Tread", "Dash_Beam", "Driver_", "Dash", "Passenger_", "Handrails", "Ceiling", "Step_")
-UNDER = ("Liner_", "Under_Tray", "Exhaust", "Frame", "Rear_Axle", "Fuel_Tank", "Rear_Springs", "Mudflap")
-GLASS_MATS = ("glass", "lamp_glass", "lamp_red", "glass_broken", "display")
+            "Trunk_Wall", "Sill_Tread", "Dash_Beam", "Driver_", "Dash", "Passenger_", "Handrails", "Ceiling", "Step_",
+            # партия 2: кабина и отсек фургона и скорой
+            "Cab_", "Partition_", "Wheel_Boxes", "Cargo_", "Stretcher_", "Med_", "Oxygen")
+UNDER = ("Liner_", "Under_Tray", "Exhaust", "Frame", "Rear_Axle", "Fuel_Tank", "Rear_Springs", "Mudflap",
+         # низ перевёрнутого автобуса (build_bus.underbody)
+         "Front_Axle", "Knuckles", "Tie_Rod", "Air_Bags", "Shocks", "Engine_Sump", "Muffler", "Air_Tanks")
+GLASS_MATS = ("glass", "lamp_glass", "lamp_red", "glass_broken", "display", "lamp_blue")
 SET_RES = {"Body": 11, "Interior": 10, "Wheel": 10, "Under": 9}
 
 
@@ -78,6 +82,12 @@ def families(spec: dict):
     wparts = cp.wheel_parts(spec)
     wreck = bc.make_wreck(kit, spec, field, surf, views, S)
     burnt, dz = bc.make_burnt(kit, spec, field, surf, views, S)
+    if spec.get("special"):
+        # такси и полиция: навесное на крыше этой же сборки (подробной и игровой — по своей крыше); у битого такси
+        # плафон опрокинут; сгоревших нет
+        import vspecial
+        kit = vspecial.add_to_kit(kit, spec["special"])
+        wreck = vspecial.add_to_kit(wreck, spec["special"], knocked=spec["special"] == "taxi")
     keep = ("Rim_Barrel", "Rim_Face", "Rim_Holes", "Brake_Disc", "Caliper", "Rim_Spokes", "Rim_Hub", "Lug_Nuts")
     recolor = {"rim_steel": "rust", "rim_alloy": "burnt_light", "brake": "rust", "steel_dark": "rust", "mesh_black": "burnt"}
     w_burnt = [(n, recolor.get(m, m), V, F) for n, m, V, F in wparts if n.startswith(keep)]
@@ -102,6 +112,9 @@ def bus_families(spec: dict):
     parts += vbus.details(surf, field, spec, views, S)
     parts += vbus.interior(field, spec, S)
     hinges = bb.hinges(spec, S, surf, views)
+    if spec.get("overturned"):
+        # перевёрнутый автобус: деформация одним полем по координатам — подробная и игровая совпадают
+        return {"over": (bb.overturned(parts, spec, S, surf), vbus.truck_wheel(spec))}, hinges, 0.0
     return {"clean": (parts, vbus.truck_wheel(spec))}, hinges, 0.0
 
 
@@ -245,7 +258,9 @@ def main() -> None:
     cls, sp_dir, game_blend = argv[0], Path(argv[1]), Path(argv[2])
     box = cls in BOXES
     spec = BOXES[cls] if box else CLASSES[cls]
-    only = argv[3].split(",") if len(argv) > 3 else (["clean"] if box else ["clean", "wreck", "burnt"])
+    only = argv[3].split(",") if len(argv) > 3 else \
+        (["over"] if spec.get("overturned") else ["clean"]) if box else \
+        (["clean", "wreck"] if spec.get("special") else ["clean", "wreck", "burnt"])
     fams = bus_families if box else families
     split = box and spec["length"] > LONG_BODY
     wheel_x = spec["width"] / 2 + 2.0 if box else 3.5

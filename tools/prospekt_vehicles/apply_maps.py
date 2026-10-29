@@ -25,7 +25,10 @@ sys.path.insert(0, str(HERE))
 from specs import CLASSES  # noqa: E402
 from specs_bus import BOXES  # noqa: E402
 
-GLASS = {"glass": ((0.06, 0.07, 0.075), 0.30, 0.04), "glass_broken": ((0.06, 0.07, 0.075), 0.40, 0.10),
+# окна отсека скорой — матовые (как у настоящих): сквозь прозрачные изнутри читались надписи бортов (борт — один лист)
+FROSTED = {"ambulance": ("Glass_Side_", "Glass_Door_R2", "Glass_Rear_Door_")}
+GLASS = {"lamp_blue": ((0.03, 0.10, 0.60), 0.70, 0.06), "glass_frosted": ((0.82, 0.83, 0.82), 0.97, 0.45),
+         "glass": ((0.06, 0.07, 0.075), 0.30, 0.04), "glass_broken": ((0.06, 0.07, 0.075), 0.40, 0.10),
          "lamp_glass": ((0.85, 0.87, 0.90), 0.18, 0.03), "lamp_red": ((0.55, 0.03, 0.02), 0.65, 0.08),
          "display": ((0.02, 0.025, 0.02), 1.0, 0.15)}
 
@@ -90,11 +93,15 @@ def mirrored(ob: bpy.types.Object) -> bpy.types.Object:
 
 
 def assemble_box(scn, spec: dict, hinges: dict, fam_col: dict, wheel_x: float) -> None:
-    """Коробчатая: «Целый» и «Открыт» рядом вдоль X; колёса по местам, задние — пары."""
-    wheel = [o for o in fam_col["clean"].objects if o["group"] == "wheel"]
+    """Коробчатая: «Целый» и «Открыт» рядом вдоль X; колёса по местам, задние — пары. Перевёрнутый автобус (семья
+    over) — одна коллекция «Перевёрнут»: корень повёрнут на 90° вокруг продольной оси (лежит на левом борту, смятый
+    борт на земле), передние колёса вывернуты на 18°."""
+    fam = "over" if "over" in fam_col else "clean"
+    wheel = [o for o in fam_col[fam].objects if o["group"] == "wheel"]
     inner = [mirrored(o) for o in wheel]
     slide = [d for d in spec["lay"]["doors_r"] + spec["lay"]["doors_l"] if d["kind"] == "slide"]
-    for i, (title, v) in enumerate((("Целый", "intact"), ("Открыт", "open"))):
+    titles = (("Перевёрнут", "over"),) if fam == "over" else (("Целый", "intact"), ("Открыт", "open"))
+    for i, (title, v) in enumerate(titles):
         col = bpy.data.collections.new(title)
         scn.collection.children.link(col)
         root = bpy.data.objects.new(f"{spec['name']}_{v}", None)
@@ -111,7 +118,7 @@ def assemble_box(scn, spec: dict, hinges: dict, fam_col: dict, wheel_x: float) -
             e.matrix_basis = Matrix.Translation(Vector(a)) @ q.to_matrix().to_4x4()
             hob[g] = (e, sgn)
         bpy.context.view_layer.update()
-        for ob in fam_col["clean"].objects:
+        for ob in fam_col[fam].objects:
             if ob["group"] == "wheel":
                 continue
             c = ob.copy()
@@ -150,6 +157,12 @@ def assemble_box(scn, spec: dict, hinges: dict, fam_col: dict, wheel_x: float) -
             for g, (e, sgn) in hob.items():
                 deg = 82.0 if g[-1] in "ab" else (70.0 if g.startswith("rdoor") else 60.0)
                 e.matrix_basis = e.matrix_basis @ Matrix.Rotation(math.radians(deg) * sgn, 4, "Z")
+        if v == "over":                                 # как build_bus.py: лежит на левом борту, передние вывернуты
+            for o in col.objects:
+                if o.type == "EMPTY" and o.name.startswith(("Wheel_FL_", "Wheel_FR_")):
+                    o.rotation_euler.z += math.radians(18.0)
+            root.rotation_euler = (0.0, math.radians(90.0), 0.0)
+            root.location = (0.0, 0.0, spec["width"] / 2 - 0.02)
 
 
 def main() -> None:
@@ -175,6 +188,9 @@ def main() -> None:
             ts, mat = ob["tex_set"], ob["mat"]
             ob.data.materials.clear()
             if ts == "Glass":
+                part = ob.name.split(":", 1)[-1]
+                if mat == "glass" and part.startswith(FROSTED.get(cls, ())):
+                    mat = "glass_frosted"
                 ob.data.materials.append(glass_material(mat))
             else:
                 ob.data.materials.append(sp_material(f"SP_{fam}_{ts}", folder(fam, ts), ts))

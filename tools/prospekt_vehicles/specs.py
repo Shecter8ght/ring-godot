@@ -10,6 +10,8 @@ section — (Z, доля полуширины); *_sweep — (доля полуш
 """
 from __future__ import annotations
 
+import copy
+
 
 def _wheels(wb: float) -> list[float]:
     return [-wb / 2, wb / 2]
@@ -344,4 +346,9 @@ SUV = dict(
     wreck_steer=12.0,
 )
 
-CLASSES = {"sedan": SEDAN, "hatch": HATCH, "wagon": WAGON, "suv": SUV}
+# Партия 2 (форма принята владельцем 2026-10-29): такси и полиция — принятый седан с навесным на крыше
+# (vspecial.py: плафон «шашечки», балка маячков и антенна); раскраска — ливреей при отделке.
+TAXI = dict(copy.deepcopy(SEDAN), name="taxi", title="Такси", special="taxi")
+POLICE = dict(copy.deepcopy(SEDAN), name="police", title="Полиция", special="police")
+
+CLASSES = {"sedan": SEDAN, "hatch": HATCH, "wagon": WAGON, "suv": SUV, "taxi": TAXI, "police": POLICE}

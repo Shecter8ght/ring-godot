@@ -12,7 +12,8 @@ TAG="${CLS}_${FAM}"
 case $CLS in
   bus12) RES="BodyA:11,BodyB:11,Interior:11,Wheel:10,Under:10" ;;
   paz) RES="BodyA:11,BodyB:11,Interior:10,Wheel:10,Under:10" ;;
-  gazel) RES="Body:11,Interior:10,Wheel:10,Under:10" ;;
+  gazel|van|ambulance) RES="Body:11,Interior:10,Wheel:10,Under:10" ;;
+  bus12_over) RES="BodyA:11,BodyB:11,Interior:10,Wheel:10,Under:10" ;;    # салон 1K: развёртка game_kit — под 1K
   *) RES="Body:11,BodyA:11,BodyB:11,Interior:10,Wheel:10,Under:9" ;;
 esac
 

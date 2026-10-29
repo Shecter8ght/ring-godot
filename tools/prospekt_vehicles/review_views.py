@@ -13,6 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from specs_bus import BOXES  # noqa: E402
 
 def views(name: str, x: float) -> str:
+    if "over" in name.lower():
+        # перевёрнутый автобус лежит на левом борту: корень повёрнут, по X — высота кузова, по Z — ширина
+        v = [("f34", (x + 8.0, -12.0, 5.0), (x + 1.4, -1.0, 1.0), 32), ("r34", (x + 12.0, 2.0, 2.6), (x + 1.4, 0.0, 1.2), 30),
+             ("low", (x - 7.0, -8.0, 3.2), (x + 1.2, 0.0, 1.0), 30), ("top", (x + 1.4, -2.0, 16.0), (x + 1.4, 0.0, 0.0), 30)]
+        return " ".join(f"{n}:{a[0]:.2f},{a[1]:.2f},{a[2]:.2f}:{b[0]:.2f},{b[1]:.2f},{b[2]:.2f}:{lens}" for n, a, b, lens in v)
     spec = next((v for k, v in BOXES.items() if k in name.lower()), None)
     s, h = (spec["length"] / 4.5, spec["height"] / 1.45) if spec else (1.0, 1.0)
     v = [("f34", (x + 4.2 * s, -4.6 * s, 1.3 * h), (x, -0.3 * s, 0.6 * h), 42),

@@ -224,6 +224,9 @@ bash tools/prospekt_vehicles/sp_family.sh <папка> <Имя> <класс> <с
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_vehicles/build_bus.py -- van|ambulance|bus12 <выход.blend> intact,open|intact,over
                                                               # партия 2 (формы): фургон и скорая на кузове ГАЗели, перевёрнутый автобус 12 м (over); такси и полиция —
                                                               # build_special.py -- taxi|police <выход.blend> (принятый седан + плафон / балка маячков) → E:/Models Blender/VEHICLES/Город_партия2
+bash tools/prospekt_vehicles/batch2_finish.sh [taxi police van ambulance bus12_over] # партия 2, отделка: ливреи и маска мест ссадин в развёртку
+                                                              # (livery.py: надписи DejaVu Sans Bold, наклейки Shrinkwrap'ом, EMIT) → семьи в Painter (sp_family.sh, BATCH=Город_партия2);
+                                                              # игровая сетка до этого — game_kit.py -- <класс> _asset_src/prospekt_vehicles/<класс>/sp <машина>/game/<Имя>_lod0_v01.blend
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
                                                               # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
                                                               # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*

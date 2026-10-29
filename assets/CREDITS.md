@@ -578,3 +578,12 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   Сырьё с license.txt — `_asset_src/zone01_trees/` и `_asset_src/birch/`.
 - Кора — Poly Haven «Bark Brown 02» (CC0) и ambientCG Bark001 (CC0); гладкая кора ветвей — собственная процедурная растений
   «Проспекта» (`assets/models/plants/textures/poplar_bark_young_*`, `shrub_bark_*`).
+
+## «Проспект» · транспорт, партия 2 — ливреи (такси, полиция, скорая, фургон)
+- Модели — свои (генератор `tools/prospekt_vehicles`), отделка — Substance Painter (процедурные ресурсы полки Painter), как у
+  партии 1; исходники — `E:/Models Blender/VEHICLES/Город_партия2` (asset-state.md у каждой машины).
+- Надписи ливрей («ТАКСИ», «ВЕРСТА», «ПОЛИЦИЯ», «СКОРАЯ МЕДИЦИНСКАЯ ПОМОЩЬ», «03», «ДОМОВОЙ», номера) — шрифт
+  **DejaVu Sans Bold** (© Bitstream, изменения DejaVu — public domain; лицензия Bitstream Vera Fonts: свободное
+  использование и изменение, в том числе в коммерческих работах), запечён в карты цвета `tools/prospekt_vehicles/livery.py`.
+  Файл шрифта в игру не входит: `_asset_src/fonts/DejaVuSans-Bold.ttf` + `license.txt` (из matplotlib системного Python).
+  Названия фирм вымышленные, гербов и эмблем нет.

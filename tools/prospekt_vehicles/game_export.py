@@ -22,6 +22,7 @@ from mathutils import Matrix
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 LIB = Path("E:/Models Blender/VEHICLES/Город_партия1")
+LIB2 = Path("E:/Models Blender/VEHICLES/Город_партия2")          # партия 2: такси, полиция, фургон, скорая, перевёрнутый
 OUT = ROOT / "assets" / "models" / "prospekt_vehicles"
 INDEX = ROOT / "data" / "urban95_models.json"
 TMP = ROOT / "_asset_src" / "prospekt_vehicles" / "export_maps"      # копии карт с именами для экспорта (не в git)
@@ -31,9 +32,13 @@ MAX_TEX = 2048
 CARS = {"sedan": ("Седан", "Sedan", "Седан"), "hatch": ("Хэтчбек", "Hatchback", "Хэтчбек"),
         "wagon": ("Универсал", "Wagon", "Универсал"), "suv": ("Внедорожник", "SUV", "Внедорожник"),
         "bus12": ("Автобус_12м", "Bus12", "Автобус 12 м"), "paz": ("ПАЗ", "PAZ", "ПАЗ"),
-        "gazel": ("ГАЗель_маршрутка", "Gazel", "ГАЗель-маршрутка")}
+        "gazel": ("ГАЗель_маршрутка", "Gazel", "ГАЗель-маршрутка"),
+        "taxi": ("Такси", "Taxi", "Такси"), "police": ("Полиция", "Police", "Полиция"),
+        "van": ("Фургон", "Van", "ГАЗель-фургон"), "ambulance": ("Скорая", "Ambulance", "Скорая"),
+        "bus12_over": ("Автобус_перевёрнутый", "Bus12Over", "Автобус 12 м")}
+BATCH2 = ("taxi", "police", "van", "ambulance", "bus12_over")
 VARIANTS = {"Целый": ("", "целый"), "Открыт": ("_open", "двери открыты"), "Битый": ("_wreck", "битый"),
-            "Сгоревший": ("_burnt", "сгоревший")}
+            "Сгоревший": ("_burnt", "сгоревший"), "Перевёрнут": ("", "перевёрнутый")}
 # группы «вперемешку» для наборов карты (KIT_MODELS в tools/build_prospekt.py): id → (название, состав)
 LIGHT = ("sedan", "hatch", "wagon", "suv")
 GROUPS = {
@@ -46,6 +51,11 @@ GROUPS = {
     "PV_bus_city": ("Автобусы 12 м: закрыт или двери открыты", ["PV_bus12", "PV_bus12_open"]),
     "PV_paz_any": ("ПАЗ: закрыт или двери открыты", ["PV_paz", "PV_paz_open"]),
     "PV_minibus": ("ГАЗель-маршрутка: закрыта или двери открыты", ["PV_gazel", "PV_gazel_open"]),
+    # партия 2: спецмашины своими группами (на карте — вместо серых форм такси, полиции, скорой, фургона)
+    "PV_taxi_any": ("Такси: целое, двери открыты или битое", ["PV_taxi", "PV_taxi_open", "PV_taxi_wreck"]),
+    "PV_police_any": ("Полиция: целая, двери открыты или битая", ["PV_police", "PV_police_open", "PV_police_wreck"]),
+    "PV_van_any": ("ГАЗель-фургон: закрыт или двери открыты", ["PV_van", "PV_van_open"]),
+    "PV_ambulance_any": ("Скорая: закрыта или двери открыты", ["PV_ambulance", "PV_ambulance_open"]),
 }
 
 
@@ -117,7 +127,7 @@ def variant_mesh(col: bpy.types.Collection, name: str) -> bpy.types.Object:
 
 def export_class(cls: str, index: dict) -> None:
     folder, fname, title = CARS[cls]
-    src = LIB / folder / "game" / f"{fname}_textured_v01.blend"
+    src = (LIB2 if cls in BATCH2 else LIB) / folder / "game" / f"{fname}_textured_v01.blend"
     if not src.exists():
         print("нет файла:", src)
         return

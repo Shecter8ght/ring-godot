@@ -38,15 +38,18 @@ from mathutils import Matrix
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 LIB = Path("E:/Models Blender/VEHICLES/Город_партия1")
+LIB2 = Path("E:/Models Blender/VEHICLES/Город_партия2")          # партия 2
 OUT = ROOT / "assets" / "models" / "prospekt_vehicles"
 INDEX = ROOT / "data" / "urban95_models.json"
 
 CARS = {"sedan": ("Седан", "Sedan"), "hatch": ("Хэтчбек", "Hatchback"), "wagon": ("Универсал", "Wagon"),
         "suv": ("Внедорожник", "SUV"), "bus12": ("Автобус_12м", "Bus12"), "paz": ("ПАЗ", "PAZ"),
-        "gazel": ("ГАЗель_маршрутка", "Gazel")}
-VARIANTS = {"Целый": "", "Открыт": "_open", "Битый": "_wreck", "Сгоревший": "_burnt"}
+        "gazel": ("ГАЗель_маршрутка", "Gazel"), "taxi": ("Такси", "Taxi"), "police": ("Полиция", "Police"),
+        "van": ("Фургон", "Van"), "ambulance": ("Скорая", "Ambulance"), "bus12_over": ("Автобус_перевёрнутый", "Bus12Over")}
+BATCH2 = ("taxi", "police", "van", "ambulance", "bus12_over")
+VARIANTS = {"Целый": "", "Открыт": "_open", "Битый": "_wreck", "Сгоревший": "_burnt", "Перевёрнут": ""}
 # коробчатые: кузов — открытые листы с вырезами окон; и в LOD1 упрощаются с закреплёнными краями (иначе «зубцы» стоек)
-BOXES = ("bus12", "paz", "gazel")
+BOXES = ("bus12", "paz", "gazel", "van", "ambulance", "bus12_over")
 
 LOD1_K = 0.27                # треугольников от LOD0
 LOD2_K = 0.075
@@ -408,12 +411,12 @@ def export(ob: bpy.types.Object, path: Path) -> None:
 
 
 def lod_variant(col: bpy.types.Collection, mid: str, maps: Path, review: bpy.types.Collection, x: float,
-                box: bool) -> dict:
+                box: bool, keep_under: bool = False) -> dict:
     t0 = time.time()
     src = joined(col, f"{mid}_src", lambda o: True)
     n0 = tris(src)
     base = joined(col, f"{mid}_lod1",
-                  lambda o: not part_name(o).startswith(UNDER) or part_name(o).startswith(UNDER_KEEP))
+                  lambda o: keep_under or not part_name(o).startswith(UNDER) or part_name(o).startswith(UNDER_KEEP))
     lod1 = base
     decimate(lod1, int(n0 * LOD1_K), split=box)
     names = [m.name for m in lod1.data.materials]
@@ -491,7 +494,8 @@ def lod_variant(col: bpy.types.Collection, mid: str, maps: Path, review: bpy.typ
 
 def lod_class(cls: str, index: dict) -> None:
     folder, fname = CARS[cls]
-    src = LIB / folder / "game" / f"{fname}_textured_v01.blend"
+    lib = LIB2 if cls in BATCH2 else LIB
+    src = lib / folder / "game" / f"{fname}_textured_v01.blend"
     if not src.exists():
         print("нет файла:", src)
         return
@@ -503,11 +507,12 @@ def lod_class(cls: str, index: dict) -> None:
     scn.render.bake.use_selected_to_active = True
     review = bpy.data.collections.new("LOD")
     scn.collection.children.link(review)
-    maps = LIB / folder / "game" / "lod_maps"
+    maps = lib / folder / "game" / "lod_maps"
     cols = [c for c in bpy.data.collections if c.name in VARIANTS]
     for i, col in enumerate(cols):
         mid = f"PV_{cls}{VARIANTS[col.name]}"
-        res = lod_variant(col, mid, maps, review, i * 5.0, cls in BOXES)
+        # у перевёрнутого автобуса низ на виду — из дальних уровней не выкидывается
+        res = lod_variant(col, mid, maps, review, i * 5.0, cls in BOXES, keep_under=cls == "bus12_over")
         entry = index["models"].get(mid)
         if entry is None:
             print("нет записи в индексе:", mid)
@@ -527,7 +532,7 @@ def lod_class(cls: str, index: dict) -> None:
                 bpy.data.objects.remove(o, do_unlink=True)
             scn.collection.children.unlink(c)
     bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
-    bpy.ops.wm.save_as_mainfile(filepath=str(LIB / folder / "game" / f"{fname}_lods_v01.blend"), compress=True)
+    bpy.ops.wm.save_as_mainfile(filepath=str(lib / folder / "game" / f"{fname}_lods_v01.blend"), compress=True)
 
 
 def main() -> None:

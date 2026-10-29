@@ -193,4 +193,8 @@ AMBULANCE = _derive(GAZEL_VAN, name="ambulance", title="Скорая на ГАЗ
                                       dict(y0=-0.08, y1=1.12, z_top=2.24, kind="slide", win=(1.30, 1.92))],
                              cargo="medical", beacons=dict(y=-0.02, width=1.16, lens=("lamp_blue", "lamp_blue"), rear=True)))
 
-BOXES = {"bus12": LIAZ, "paz": PAZ, "gazel": GAZEL, "van": GAZEL_VAN, "ambulance": AMBULANCE}
+# Перевёрнутый автобус 12 м — тот же автобус, семья «over» (build_bus.overturned: лежит на левом борту, смят, низ
+# подробнее); своя папка и свои карты, принятый автобус не трогается.
+LIAZ_OVER = dict(copy.deepcopy(LIAZ), name="bus12_over", title="Автобус 12 м, перевёрнутый", overturned=True)
+
+BOXES = {"bus12": LIAZ, "paz": PAZ, "gazel": GAZEL, "van": GAZEL_VAN, "ambulance": AMBULANCE, "bus12_over": LIAZ_OVER}

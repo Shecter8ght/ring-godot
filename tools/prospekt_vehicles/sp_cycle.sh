@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 BL="/d/ПРОГРАММЫ/Blender 5/blender.exe"
-R="E:/Models Blender/VEHICLES/Город_партия1/$1"
+R="E:/Models Blender/VEHICLES/${BATCH:-Город_партия1}/$1"           # партия 2 — BATCH=Город_партия2
 NAME="$2"; FAM="$3"; JOB="$4"; shift 4
 SC="${REVIEW_DIR:-$PWD/_asset_src/prospekt_vehicles/review}"     # проверочные снимки (не в git)
 python -X utf8 tools/prospekt_vehicles/sp_run.py "tools/prospekt_vehicles/$JOB" 600 -- "$@" | head -3
@@ -23,6 +23,7 @@ case $FAM in
   clean) HIDE="hide:Открыт hide:Битый hide:Сгоревший"; X=0.0 ;;
   wreck) HIDE="hide:Целый hide:Открыт hide:Сгоревший"; X=6.4 ;;
   burnt) HIDE="hide:Целый hide:Открыт hide:Битый"; X=9.6 ;;
+  over) HIDE=""; X=0.0 ;;
 esac
 # виды — от габарита машины: у легковой как были, у автобуса, ПАЗ и ГАЗели — дальше в длину и выше
 VIEWS=$(python -X utf8 tools/prospekt_vehicles/review_views.py "$NAME" "$X")

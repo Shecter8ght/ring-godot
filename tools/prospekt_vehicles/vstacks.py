@@ -59,6 +59,12 @@ def pick(have, ts, *mats):
     return out
 
 
+def bitmap(path):
+    """Картинка из Blender (ливрея, маска мест — livery.py) → ресурс проекта Painter; источник заливки по развёртке."""
+    import substance_painter.resource as R
+    return R.import_project_resource(path, R.Usage.TEXTURE).identifier()
+
+
 def subset(names, k, salt):
     """k имён из names — всегда одних и тех же для машины (по контрольной сумме), без случайности между прогонами."""
     import zlib
@@ -130,24 +136,31 @@ def smart_mask(layer, name):
     return L.insert_smart_mask(pos, sp_lib.rid(name, "u:smartmask"))
 
 
-def paint(st, meshes, color, rough=0.24, metal=0.0, age=1.0, panels=None, salt=""):
+def paint(st, meshes, color, rough=0.24, metal=0.0, age=1.0, panels=None, salt="", livery=None):
     """Автоэмаль под лаком, брошенная машина (v2, порядок слоёв — справка навыка «Дерево и крашеный металл»):
     основа → свой тон и блеск у отдельных панелей → крупные пятна тона Soft Light (пара в шероховатости) → выгорание
     сверху → рельеф краски → шумы крупного плана → сколы отдельным материалом (грунт, металл, ржавчина; край скола
     приподнят, вокруг — потемнение) → подтёки и ржавчина по кромкам внизу → вариации блеска → резкость. Грязь и пыль —
     общей «историей» поверх всех материалов кузова (history). panels — сетки панелей для разнотона; age — сила
-    старения; salt — чтобы у разных машин перекрашенные панели были разными."""
+    старения; salt — чтобы у разных машин перекрашенные панели были разными; livery — ресурс картинки ливреи (такси,
+    полиция, скорая): цвет эмали — из неё по развёртке, у перекрашенных панелей меняется только блеск (иначе однотонная
+    заливка закрыла бы полосы и надписи); color — основной цвет ливреи (для выгорания и мелкого тона)."""
     CH = sp_lib.CH
     g = group("Краска", _top(st), meshes)
     pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
     n = fill("01 Эмаль", pos, color=color, rough=rough, metal=metal)
+    if livery is not None:
+        n.set_source(CH.BaseColor, livery)
     # детали одного цвета разводятся оттенком и блеском (одна заливка на всё — «пластмасса»): одна-две панели
     # перекрашены (чуть другой оттенок, новее и глянцевее), две выгорели сильнее соседних
     panels = [p for p in (panels or []) if p.count("__") >= 2]
     for k, p in enumerate(subset(panels, 2 if len(panels) > 6 else 1, salt + "repaint")):
         sh = (0.95, 0.985, 1.03) if k == 0 else (1.03, 1.0, 0.96)
-        n = fill(f"02 Перекрашена: {p.split('__')[-1]}", _above(n), color=tuple(min(1.0, c * q) for c, q in zip(color, sh)),
-                 rough=max(0.12, rough - 0.07))
+        if livery is None:
+            n = fill(f"02 Перекрашена: {p.split('__')[-1]}", _above(n),
+                     color=tuple(min(1.0, c * q) for c, q in zip(color, sh)), rough=max(0.12, rough - 0.07))
+        else:
+            n = fill(f"02 Перекрашена: {p.split('__')[-1]}", _above(n), rough=max(0.12, rough - 0.07))
         only_meshes(n, [p])
     for p in subset([p for p in panels if p not in subset(panels, 2, salt + "repaint")], 2, salt + "fade"):
         n = _soft(fill(f"03 Выгорела сильнее: {p.split('__')[-1]}", _above(n), color=(0.66, 0.66, 0.66), rough=rough + 0.12))
@@ -165,7 +178,10 @@ def paint(st, meshes, color, rough=0.24, metal=0.0, age=1.0, panels=None, salt="
     n.set_opacity(0.3, CH.BaseColor)
     n.set_opacity(0.35, CH.SpecularRoughness)
     lighter = tuple(min(1.0, c * 1.06 + 0.04) for c in color)
-    n = fill("06 Выгорание сверху", _above(n), color=lighter, rough=rough + 0.25)
+    if livery is None:
+        n = fill("06 Выгорание сверху", _above(n), color=lighter, rough=rough + 0.25)
+    else:                                       # по ливрее — светлее мягким светом: чёрные шашки и надписи не желтеют
+        n = _soft(fill("06 Выгорание сверху", _above(n), color=(0.72, 0.72, 0.72), rough=rough + 0.25))
     _gen_mask(n, WSN, up(0.55, 0.45))
     mk = mask_proc(n, "3D_perlin_noise_fractal/3D_perlin_noise_fractal", None, scale=S_MID, blend=L.BlendingMode.Multiply)
     _mfilter(mk, "warp", {"intensity": 0.3})
@@ -184,7 +200,9 @@ def paint(st, meshes, color, rough=0.24, metal=0.0, age=1.0, panels=None, salt="
     n = _proc("10 Разводы блеска", _above(n), "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.2, 0.35,
               {"Balance": 0.55, "Contrast": 0.3}, rough=rough + 0.18)
     n = _proc("11 Мелкий тон", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_FINE, 0.12,
-              None, color=tuple(c * 0.9 for c in color))
+              None, color=tuple(c * 0.9 for c in color) if livery is None else (0.40, 0.40, 0.40))
+    if livery is not None:
+        _soft(n)
     n = _proc("12 Царапины лака", _above(n), "grunge_scratches_fine/grunge_scratches_fine", S_FINE, 0.35 * age,
               {"invert": 0, "balance": 0.36, "contrast": 0.55}, rough=rough + 0.25)
     # сколы — только на панелях: тонкие рамки дверей, стойки и проёмы генератор износа целиком считает кромкой
@@ -271,7 +289,7 @@ def history(st, meshes, age=1.0):
     _gen_mask(n, DIRT, {"dirt_level": 0.30, "dirt_contrast": 0.7, "grunge_amount": 0.2, "Grunge_Scale": 6, "Use_Triplanar": 1})
     lop(n, 0.7 * age)
     # узкие рамки окон между стеклом и уплотнителем по AO — целиком «щель»: без этой грязи они тёмные целиком
-    only_meshes(n, [x for x in meshes if "Frame" not in x])
+    only_meshes(n, [x for x in meshes if "Frame" not in x and "sign_plastic" not in x])
     n = fill("03 Пыль сверху", _above(n), color=(0.62, 0.58, 0.52), rough=0.95)
     smart_mask(n, "Dust Surface")
     # умная маска пыли ложится и на борта — только на горизонтали; на вишне и оливе давала главные «заплаты»
@@ -364,12 +382,58 @@ def fabric(st, meshes, color=(0.09, 0.09, 0.095), name="Ткань сидени�
 
 # --- наборы ---------------------------------------------------------------------------------------
 
-def body_clean(st, paint_color, have, ts="Body"):
-    """Набор кузова (Body или половина длинного — BodyA / BodyB): have — имена сеток проекта (только существующие)."""
+def scrapes(st, meshes, where):
+    """Перевёрнутый автобус: где лёг на асфальт и смялся (where — маска мест из Blender, livery.py) — лак стёрт и
+    поцарапан полосами, местами краска содрана до металла, в ссадинах грязь с асфальта. Над краской, под «историей»."""
+    def by_place(layer, proc, scale, params=None):
+        sp_lib.mask_black(layer)
+        f = L.insert_fill(L.InsertPosition.inside_node(layer, L.NodeStack.Mask))
+        f.set_source(None, where)
+        mask_proc(layer, proc, params, scale=scale, blend=L.BlendingMode.Multiply, above=f)
+    g = group("Ссадины об асфальт", _top(st), meshes)
+    pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
+    n = fill("01 Лак стёрт", pos, color=(0.70, 0.62, 0.42), rough=0.72)
+    by_place(n, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft", 1.2, {"Balance": 0.45, "Contrast": 0.4})
+    lop(n, 0.8)
+    n = fill("02 Царапины полосами", _above(n), color=(0.52, 0.50, 0.46), rough=0.5, metal=0.4)
+    by_place(n, "grunge_scratches_fine/grunge_scratches_fine", S_MID, {"invert": 0, "balance": 0.42, "contrast": 0.7})
+    n = fill("03 Содрано до металла", _above(n), color=(0.40, 0.39, 0.37), rough=0.42, metal=0.9)
+    by_place(n, "3D_perlin_noise_fractal/3D_perlin_noise_fractal", 3.0)
+    lop(n, 0.85)
+    n = fill("04 Грязь с асфальта в ссадинах", _above(n), color=(0.16, 0.15, 0.14), rough=0.92)
+    by_place(n, "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID)
+    lop(n, 0.7)
+    return g
+
+
+def livery_plastic(st, meshes, livery, name="Плафон такси"):
+    """Пластик с печатью (плафон «шашечки»): цвет — из ливреи по развёртке, глянец пластика, пыль и грязь."""
+    g = group(name, _top(st), meshes)
+    pos = L.InsertPosition.inside_node(g, L.NodeStack.Substack)
+    n = fill("01 Пластик с печатью", pos, color=(0.86, 0.80, 0.42), rough=0.35)
+    if livery is not None:
+        n.set_source(sp_lib.CH.BaseColor, livery)
+    n = _proc("02 Фактура", _above(n), "noise_gaussian_noise/gaussian_noise", 60.0, 0.3, rough=0.5)
+    n = _proc("03 Помутнел", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_MID, 0.25,
+              None, color=(0.75, 0.73, 0.68), rough=0.6)
+    # грязи по затенённости нет: плафон стоит на широкой крыше, бока затенены на 0,4 — грязь заливала его бурым
+    n = _proc("04 Пыль", _above(n), "grunge_dusty_powder_soft/grunge_dusty_powder_soft", S_FINE, 0.2,
+              None, color=(0.60, 0.57, 0.50), rough=0.8)
+    return g
+
+
+def body_clean(st, paint_color, have, ts="Body", livery=None, where=None):
+    """Набор кузова (Body или половина длинного — BodyA / BodyB): have — имена сеток проекта (только существующие);
+    livery — ресурс картинки ливреи набора, where — маска мест ссадин (перевёрнутый автобус)."""
     def m(*mats):
         return pick(have, ts, *mats)
     if m("paint", "bumper", "paint_inner"):
-        paint(st, m("paint", "bumper", "paint_inner"), paint_color, panels=m("paint"), salt=ts + str(paint_color))
+        paint(st, m("paint", "bumper", "paint_inner"), paint_color, panels=m("paint"), salt=ts + str(paint_color),
+              livery=livery)
+    if where is not None and m("paint", "bumper"):
+        scrapes(st, m("paint", "bumper"), where)
+    if m("sign_plastic"):
+        livery_plastic(st, m("sign_plastic"), livery)
     if m("trim_black", "bumper_plastic", "liner"):
         plastic(st, m("trim_black", "bumper_plastic", "liner"))
     if m("trim_gloss_black"):
@@ -396,10 +460,11 @@ def body_clean(st, paint_color, have, ts="Body"):
         plastic(st, m("seat"), color=(0.045, 0.045, 0.045), rough=0.6, name="Чехол запаски", fade=0.7)
     if m("rim_steel"):
         rusty_steel(st, m("rim_steel"), "Диск запаски", base=(0.30, 0.30, 0.31), rust=0.35)
-    history(st, sorted(h for h in have if h.startswith(ts + "__")))
+    # плафон такси — без общей истории: «грязь с земли» по затенённости заливала его бурым (у него своя пыль)
+    history(st, sorted(h for h in have if h.startswith(ts + "__") and "sign_plastic" not in h))
 
 
-def interior_clean(st, have):
+def interior_clean(st, have, seat_plastic=(0.20, 0.05, 0.04)):
     def m(*mats):
         return pick(have, "Interior", *mats)
     if m("interior", "trim_gloss_black", "trim_black"):
@@ -414,7 +479,7 @@ def interior_clean(st, have):
     if m("floor_rubber"):
         rubber(st, m("floor_rubber"), dust=0.9)
     if m("seat_plastic"):
-        plastic(st, m("seat_plastic"), color=(0.20, 0.05, 0.04), rough=0.45, name="Сиденья пластик", fade=0.5)
+        plastic(st, m("seat_plastic"), color=seat_plastic, rough=0.45, name="Сиденья пластик", fade=0.5)
     if m("rail_yellow"):
         flat(st, m("rail_yellow"), "Поручни", (0.80, 0.58, 0.08), 0.4, dirt=0.4)
     if m("rubber"):

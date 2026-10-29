@@ -13,6 +13,9 @@
 4. Крошки (вырезанные треугольники, мельче TINY общей площади) складываются внахлёст — одна клетка на материал: они
    невидимы, а отступ у каждой съедал бы атлас.
 5. Упаковка — uvpack.py (растр, точная форма крупных островов, четыре поворота) в системном Python.
+6. Детали с печатью (UNIQUE: плафон такси, партия 2) — проекцией по граням с плотностью набора: скруглённая замкнутая
+   коробка без рёбер круче 60° иначе разворачивалась одним островом, почти вся уходила в «крошки» внахлёст — рисунок
+   и запечённая затенённость на них ложились мешаниной (плафон вышел тёмным).
 """
 from __future__ import annotations
 
@@ -35,6 +38,7 @@ HULL_POLAR = 0.85      # у колеса режутся и кольца (у ко
 SECTOR = 45.0          # град — сектор разреза колец колеса
 MAX_LEN = 3.5          # м — остров длиннее режется поперёк: крыша и борта автобуса (12 м) иначе задают масштаб атласу
 TINY = 2e-5            # доля общей площади — крошка, внахлёст
+UNIQUE = ("sign_plastic",)   # материалы с печатью по детали — острова свои, без крошек
 MARGIN = 0.003         # отступ между островами, доля атласа (12 пикс на 4K)
 UV_FILL_MIN = 0.80     # норма заполнения (навык godot-asset-preparation)
 LOWMAT = {"rubber": 0.30, "trim_black": 0.45, "mesh_black": 0.35, "chrome": 0.5, "lamp_inner": 0.5,
@@ -284,6 +288,37 @@ def _pack(objs, grid: int, work: Path, tag: str) -> float:
     return float(res["fill"])
 
 
+def _unique(objs) -> None:
+    """Детали с печатью — проекцией по граням (острова по направлению граней), масштаб — по плотности остального набора."""
+    uniq = [o for o in objs if o["mat"] in UNIQUE]
+    rest = [o for o in objs if o["mat"] not in UNIQUE]
+    if not uniq or not rest:
+        return
+
+    def density(group) -> float:
+        uv_a = a3 = 0.0
+        for o in group:
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            uv = bm.loops.layers.uv.active
+            for f in bm.faces:
+                uv_a += _uva(f, uv)
+                a3 += f.calc_area()
+            bm.free()
+        return uv_a / max(a3, 1e-9)
+    d_rest = density(rest)
+    _select(uniq)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(50.0), island_margin=0.0, area_weight=0.0, correct_aspect=True,
+                             scale_to_bounds=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    k = math.sqrt(d_rest / max(density(uniq), 1e-12))
+    for o in uniq:
+        for d in o.data.uv_layers.active.data:
+            d.uv = d.uv * k
+
+
 def unwrap_set(ts: str, objs, family_objs, res_px: int, work: Path, tag: str) -> dict:
     """Развёртка набора ts (объекты objs одной семьи) под карту res_px; family_objs — вся семья (лучи видимости)."""
     for o in objs:
@@ -295,6 +330,7 @@ def unwrap_set(ts: str, objs, family_objs, res_px: int, work: Path, tag: str) ->
         nf += a
         ni += b
     _unwrap(objs)
+    _unique(objs)
     if ts.startswith("Body"):
         _visibility_density(objs, family_objs)
     fill = _pack(objs, max(256, res_px // 2), work, tag)
