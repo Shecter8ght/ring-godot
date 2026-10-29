@@ -186,6 +186,14 @@ def build(ctx):
     # низ скобы скруглён
     bevel_edges(body, lambda n1, n2: n1.z < -0.9 and abs(n2.y) > 0.9, w=2.0, seg=4,
                 where=lambda p: web_x - 4.0 < p.x < GUARD_X[1] - 2.0 and p.z < GUARD_Z[0] - 2.0)
+    # кромки проёма скобы — заметная фаска с обеих сторон (как на скрине владельца)
+    bevel_edges(body, lambda n1, n2: abs(n1.y) > 0.9 and abs(n2.y) < 0.2, w=0.9, seg=3, clamp=True,
+                where=lambda p: gx0 - 1.0 < p.x < gx1 + 0.5 and gz0 - 1.0 < p.z < gz1 - 1.0 and 6.0 < abs(p.y) < 7.2)
+    # продольный паз на перекладине скобы с обеих сторон
+    for s_ in (-1, 1):
+        y0, y1 = (6.6 - 0.9, 9.0) if s_ > 0 else (-9.0, -6.6 + 0.9)
+        slot = prism_xz(f"cut_guard_slot{s_}", fillet([(-99.0, -75.0), (-72.5, -75.0), (-72.5, -72.6), (-99.0, -72.6)], 1.15, 4), y0, y1, C)
+        boolean(body, slot)
     finish(body, w=0.5, seg=2, angle=35)
     out["body"] = body
 
@@ -255,7 +263,7 @@ def fire_control(F):
         y0, y1 = (3.9, 10) if sgn > 0 else (-10, -3.9)
         boolean(t, box(f"cut_trig_thin{sgn}", tx - 20.3, tx + 20.3, y0, y1, tz - 60, tz - 13.3, F))
     boolean(t, cyl("cut_trig_pin", -20, 20, 1.95, F, seg=20, cy=tx, cz=tz, axis="Y"))
-    finish(t, w=0.6, seg=3, angle=35)
+    finish(t, w=0.9, seg=3, angle=35)
     o["trigger"] = t
     # разобщитель — пластина над хвостом спуска
     dis = prism_xz("Disconnector", fillet([(tx + 6.0, tz + 2.6), (tx - 24.0, tz + 2.2), (tx - 26.0, tz + 4.4), (tx - 21.0, tz + 6.2),
@@ -377,18 +385,28 @@ def selector(F):
     # вырез-«кулачок» на валу (над хвостом спуска)
     boolean(shaft, box("cut_sel_cam", sx - 6, sx + 6, -4.8, 4.8, sz + 0.5, sz + 6, F))
     boolean(shaft, box("cut_sel_cam_r", sx - 6, sx - 0.5, -4.8, 4.8, sz - 6, sz + 6, F))
-    for s, length, nm in ((1, 14.5, "Selector_lever_L"), (-1, 8.0, "Selector_lever_R")):
-        y0 = (FCG_HALF_W + 0.5) * s
-        y1 = (FCG_HALF_W + 3.4) * s
-        lev = prism_xz(nm, fillet([(sx - 5.6, sz - 4.0), (sx + length, sz - 2.2), (sx + length + 2.0, sz + 0.5), (sx + length, sz + 2.6),
-                                   (sx - 5.6, sz + 4.0)] + arc_pts(sx, sz, 6.2, 140, 220, 6)[1:-1],
-                                  [3.0, 2.0, 1.5, 2.0, 3.0] + [0] * 5, 4), min(y0, y1), max(y0, y1), F, "Steel_black")
-        # рифление на конце флажка
+    # флажки: круглая ступица с фаской, флажок сужается к площадке под палец (выше флажка, с поперечным рифлением)
+    for s_, length, nm in ((1, 14.5, "Selector_lever_L"), (-1, 9.5, "Selector_lever_R")):
+        yb, yh = FCG_HALF_W + 0.5, FCG_HALF_W + 2.7
+        yt = FCG_HALF_W + (4.2 if s_ > 0 else 3.6)
+
+        def ys(a_, b_):
+            return min(a_ * s_, b_ * s_), max(a_ * s_, b_ * s_)
+        outline = [(sx + length - 4.0, sz - 2.6), (sx + length - 4.0, sz + 2.6)] + arc_pts(sx, sz, 6.6, 33, 327, 28)
+        y0, y1 = ys(yb, yh)
+        lev = prism_xz(nm, fillet(outline, [1.0, 1.0] + [0] * (len(outline) - 2), 3), y0, y1, F, "Steel_black")
+        ta, tb = ys(yb + 0.3, yt)
+        tab = prism_xz(nm + "_tab", fillet([(sx + length - 7.5, sz - 4.3), (sx + length + 1.6, sz - 3.5), (sx + length + 1.6, sz + 3.5),
+                                            (sx + length - 7.5, sz + 4.3)], [1.5, 2.8, 2.8, 1.5], 4), ta, tb, F, "Steel_black")
+        boolean(lev, tab, "UNION")
         for k in range(4):
-            xx = sx + length - 2.0 - k * 2.4
-            ya, yb = y1 - 0.5 * s, y1 + 2.0 * s
-            boolean(lev, box(f"{nm}_ser{k}", xx - 0.5, xx + 0.5, min(ya, yb), max(ya, yb), sz - 4, sz + 4, F))
-        finish(lev, w=0.3, seg=2, angle=35)
+            xx = sx + length - 5.6 + k * 1.95
+            ya, yb2 = ys(yt - 0.45, yt + 2.0)
+            boolean(lev, box(f"{nm}_ser{k}", xx - 0.45, xx + 0.45, ya, yb2, sz - 6, sz + 6, F))
+        # риска-указатель на ступице (по флажку)
+        ya, yb2 = ys(yh - 0.4, yh + 2.0)
+        boolean(lev, box(f"{nm}_mark", sx - 5.6, sx - 2.4, ya, yb2, sz - 0.4, sz + 0.4, F))
+        finish(lev, w=0.45, seg=2, angle=35)
         o[nm] = lev
     o["selector"] = shaft
     return o

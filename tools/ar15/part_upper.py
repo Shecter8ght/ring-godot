@@ -16,7 +16,7 @@ LUG_HALF_W = 6.3              # проушины верхнего ресивер
 PIN_R = 3.15                  # оси сборки и разборки (Ø6.3 — 0.250″)
 FRONT_RING_R = 15.9           # резьбовое кольцо под гайку цевья (Ø1.25″)
 FRONT_RING_LEN = 12.0
-FA_ROD_END = 18.5             # конец стержня досылателя по его оси: и нажатый не касается рамы
+FA_ROD_END = 14.5             # конец стержня досылателя по его оси: и нажатый не касается рамы
 FA_PAWL = 3.9                 # вылет собачки к оси канала: в покое ~1 мм до рамы, нажатием — в насечку
 FA_HOUSING_REAR = -4.4        # задний торец корпуса по оси досылателя: кнопка (до −7.6) выступает на ~3 мм
 LEFT_WINDOW_X = (-136.0, -70.0)   # окно слева над разъёмом (за задержкой, перед проушиной разборки)
@@ -111,7 +111,29 @@ def build(ctx):
     wedge = prism_xy("cut_defl_wedge", [(dx0 - 3.0, -UPPER_HALF_W - 7.0), (dx0 + 8.0, -UPPER_HALF_W - 7.0), (dx1 + 3.3, -UPPER_HALF_W - 1.2),
                                         (dx1 + 3.3, -UPPER_HALF_W - 10.0), (dx0 - 3.0, -UPPER_HALF_W - 10.0)], 0.0, 30.0, C)
     boolean(defl, wedge)
+    finish(defl, w=1.0, seg=3, angle=30)
     boolean(body, defl, "UNION")
+    # передние верхние углы — фаской в линию верхних фасок цевья (y + z = 9.5 + RAIL_BASE), назад сходят на нет у окна
+    import bmesh
+    from lib import v as vmm
+    from lib import HG_HALF_W
+    for s in (-1, 1):
+        me = bpy.data.meshes.new("cut_front_bevel")
+        bm = bmesh.new()
+        ends = []
+        for xx, c in ((PORT_X[1] + 1.5, UPPER_HALF_W - STEP + RAIL_BASE + 0.3), (UPPER_FRONT + 1.0, 9.5 + RAIL_BASE)):
+            tri = [(c - 26.0, 26.0), (19.0, c - 19.0), (19.0, 26.0)]
+            ends.append([bm.verts.new(vmm(xx, y * s, z)) for y, z in tri])
+        a, b = ends
+        bm.faces.new(a); bm.faces.new(list(reversed(b)))
+        for i in range(3):
+            j = (i + 1) % 3
+            bm.faces.new((a[i], b[i], b[j], a[j]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        bm.to_mesh(me); bm.free()
+        cutter = bpy.data.objects.new("cut_front_bevel", me)
+        C.objects.link(cutter)
+        boolean(body, cutter)
     # за шахтой линия разъёма поднимается: снизу выбрано до REAR_TOP_Z (там боковины нижнего), проушина разборки остаётся
     boolean(body, box("cut_rear_low_a", UPPER_REAR - 3, tdx - 9.25, -20, 20, SPLIT_Z - 9, REAR_TOP_Z, C))
     boolean(body, prism_xz("cut_rear_low_b", fillet([(tdx + 9.25, SPLIT_Z - 9), (STEP_X, SPLIT_Z - 9), (STEP_X, REAR_TOP_Z),
@@ -124,7 +146,7 @@ def build(ctx):
     boolean(hs, cyl("cut_hs_bore", UPPER_REAR - 5, -60.0, CARRIER_BORE_R + 0.7, C, seg=64))
     boolean(hs, box("cut_hs_inner", UPPER_REAR - 5, -60.0, -11.0, 20.0, -20.0, 40.0, C))
     boolean(body, hs, "UNION")
-    fb = lathe("cut_fa_bore", [(-12.0, 0.0), (-12.0, 7.55), (9.0, 7.55), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
+    fb = lathe("cut_fa_bore", [(-12.0, 0.0), (-12.0, 7.15), (9.0, 7.15), (9.0, 4.25), (FA_LEN + 6.0, 4.25), (FA_LEN + 6.0, 0.0)],
                C, None, seg=48, cy=0.0, cz=0.0)
     fb.data.transform(m)
     boolean(body, fb)
@@ -191,7 +213,7 @@ def fa_housing_mesh(C):
     p0 = side - (FA_S[1] - FA_R)                         # вылет у кнопки
     cy = 0.9875                                          # локальная Y наклонена к мировой (поворот оси ~11°)
     L0 = FA_HOUSING_REAR
-    stations = [L0, L0 + 0.5, L0 + 1.2] + [-2.0 + 2.0 * k for k in range(38)]
+    stations = sorted(set([L0, L0 + 0.5, L0 + 1.2] + [-2.0 + 2.0 * k for k in range(38)] + [5.1, 5.4, 6.6, 6.9]))
     me = bpy.data.meshes.new("fa_housing")
     bm = bmesh.new()
     rings = []
@@ -203,6 +225,9 @@ def fa_housing_mesh(C):
         if L < 14.0:
             ry_out = max(ry_out, FA_R)
         rz = FA_R - (FA_R - 5.6) * k                        # к острию низкий широкий прилив, а не шип
+        oz = -(FA_R - rz) * 0.85                            # низ держится, верх опускается: «капля» смотрит вниз-вперёд
+        if 5.3 < L < 6.7:                                   # поясок за кнопкой
+            ry_out -= 0.45; rz -= 0.45
         ry_in = FA_R
         if L < L0 + 1.2:                                  # фаска заднего торца
             dd = L0 + 1.2 - L
@@ -212,7 +237,7 @@ def fa_housing_mesh(C):
             a = 2 * math.pi * i / n
             ca, sa = math.cos(a), math.sin(a)
             ry = ry_in if ca > 0 else ry_out
-            ring.append(bm.verts.new(vmm(L, ry * ca, rz * sa)))
+            ring.append(bm.verts.new(vmm(L, ry * ca, rz * sa + oz)))
         rings.append(ring)
     for r0, r1 in zip(rings, rings[1:]):
         for i in range(n):
@@ -241,7 +266,7 @@ def fa_matrix():
 def forward_assist(C):
     """Толкатель досылателя: круглая кнопка с кольцевыми канавками и стержень с собачкой на конце (к насечкам рамы)."""
     # стержень кончается, где его поверхность в ~1 мм от рамы; к насечкам рамы тянется только собачка
-    prof = [(-7.6, 0.0), (-7.6, 6.2), (-7.0, 7.15), (2.0, 7.15), (2.6, 3.9), (FA_ROD_END - 1.2, 3.9), (FA_ROD_END, 3.0),
+    prof = [(-7.6, 0.0), (-7.6, 5.9), (-7.0, 6.75), (-1.0, 6.75), (-0.4, 3.9), (FA_ROD_END - 1.2, 3.9), (FA_ROD_END, 3.0),
             (FA_ROD_END, 0.0)]
     pl = lathe("Forward_assist", prof, C, "Steel_black", seg=48, cy=0.0, cz=0.0)
     for k, r0 in enumerate((1.4, 3.0, 4.6)):

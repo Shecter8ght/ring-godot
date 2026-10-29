@@ -6,7 +6,8 @@
 # гильзы — клеймо «ГР 24». Владелец (2026-10-29): надписи делаются на этапе текстур — в геометрии они только при
 # lib.MARKINGS_GEOMETRY = True (по умолчанию нет), места под них ровные. Сетки замкнутые.
 # Магазин строится в собственной системе «вдоль хребта»: s — вниз по магазину от верха губок, u — вперёд, w = Y.
-# Верх прямой (в шахте), ниже — дуга R вперёд: изгиб под конусность гильзы (головки сзади, пули спереди).
+# Верх прямой (в шахте), ниже — дуга R вперёд на CURVE_DEG и снова прямой низ: так изогнут 30-зарядный STANAG
+# (замер по фото PEO M4, 4.7 пикс/мм: задняя кромка уходит вперёд на ≈ 22 мм на 85 мм ниже шахты, низ — под ≈ 19–20°).
 import math
 import bmesh
 import bpy
@@ -18,14 +19,18 @@ from part_lower import BOLT_CATCH_PIVOT
 Z0 = MAG_TOP_Z
 CX = (MAG_X[0] + MAG_X[1]) / 2            # середина горловины по X
 L2 = (MAG_X[1] - MAG_X[0]) / 2            # полудлина сечения (33.3)
-S_STRAIGHT = 64.0                         # прямой участок в шахте
-R_CURVE = 560.0                           # радиус изгиба (под конус гильзы 9.60 → 9.00 мм)
+S_STRAIGHT = 58.0                         # прямой участок: в шахте до её переднего среза и чуть ниже
+R_CURVE = 250.0                           # радиус дуги изгиба (по хребту)
+CURVE_DEG = 20.0                          # поворот нижней части вперёд
+S_ARC_END = S_STRAIGHT + R_CURVE * math.radians(CURVE_DEG)   # ниже — прямой участок до донца
 S_BOTTOM = 179.0                          # низ корпуса по хребту
 WALL = 1.8
 RF, RR = 4.0, 3.0                         # скругления передних и задних углов сечения
 BODY_HW = 12.3                            # полуширина корпуса ниже шахты
 TOP_HW = 10.0                             # полуширина верха (проходит между стенками верхнего ресивера)
 U_HEAD = -L2 + WALL + 0.9                 # донце гильзы у задней стенки (зазор до скругления угла)
+U_SHOULDER = U_HEAD + 36.53               # начало ската плеча гильзы (Ø 8.99) — ближе к центру изгиба
+SHOULDER_D = 8.99
 ROUND_D = 9.62
 ROUND_STEP = 4.84                         # шаг рядов по донцам гильз
 COL_W = 4.75                              # центры колонн от середины
@@ -40,10 +45,13 @@ def frame(s):
     """Точка хребта и оси сечения: P, T (вниз по магазину), U (вперёд)."""
     if s <= S_STRAIGHT:
         return Vector((CX, 0.0, Z0 - s)), Vector((0.0, 0.0, -1.0)), Vector((1.0, 0.0, 0.0))
-    ph = (s - S_STRAIGHT) / R_CURVE
+    ph = (min(s, S_ARC_END) - S_STRAIGHT) / R_CURVE
     c = Vector((CX + R_CURVE, 0.0, Z0 - S_STRAIGHT))
     p = c + Vector((-math.cos(ph), 0.0, -math.sin(ph))) * R_CURVE
-    return p, Vector((math.sin(ph), 0.0, -math.cos(ph))), Vector((math.cos(ph), 0.0, math.sin(ph)))
+    t = Vector((math.sin(ph), 0.0, -math.cos(ph)))
+    if s > S_ARC_END:                     # прямой низ по касательной к дуге
+        p = p + t * (s - S_ARC_END)
+    return p, t, Vector((math.cos(ph), 0.0, math.sin(ph)))
 
 
 def pt(s, u, w):
@@ -472,6 +480,16 @@ def spent_case(C):
     return o
 
 
+def row_step(s):
+    """Шаг рядов по хребту. На дуге донца идут по наружной (задней) линии, плечи гильз — ближе к центру изгиба:
+    шаг такой, чтобы ни донца (9.68 мм в колонне), ни плечи (Ø 8.99) соседей одной колонны не пересекались."""
+    if s <= S_STRAIGHT or s >= S_ARC_END:
+        return ROUND_STEP
+    head = ROUND_STEP * R_CURVE / (R_CURVE - U_HEAD)
+    shoulder = (SHOULDER_D + 0.15) / 2.0 * R_CURVE / (R_CURVE - U_SHOULDER)
+    return max(head, shoulder)
+
+
 def round_positions():
     """Центры патронов по хребту (s, w): верхний под левой губкой, ниже — две колонны вплотную к стенкам;
     нижний (30-й) — в правой колонне, на низкой половине подавателя."""
@@ -490,8 +508,8 @@ def round_positions():
                 s = s2
             out.append((s, w))
         else:
-            f = 1.0 if s_prev <= S_STRAIGHT else R_CURVE / (R_CURVE - U_HEAD)
-            s = max(s_prev + ROUND_STEP * f, out[k - 2][0] + 2.0 * ROUND_STEP * f)
+            st = row_step(s_prev)
+            s = max(s_prev + st, out[k - 2][0] + 2.0 * st)
             out.append((s, sg * COL_W))
     return out
 

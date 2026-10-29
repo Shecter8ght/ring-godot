@@ -1,6 +1,8 @@
 # AR-15: буферная трубка mil-spec carbine с направляющей и шестью отверстиями фиксатора, торцевая пластина с гнездом QD,
-# замковая гайка, буфер и возвратная пружина внутри, приклад в стиле SL (корпус-клин со скелетной нижней тягой,
-# резиновый затыльник с рёбрами, гнёзда QD, прорезь антабки, рычаг фиксатора снизу, литой знак «ГРАНЬ» на боках).
+# замковая гайка, буфер и возвратная пружина внутри, приклад скелетный (по снимку владельца — как у STM-416):
+# верхняя балка-гребень вокруг трубки, высокая задняя стойка с резиновым затыльником, снизу «рогатка» из трёх тяг —
+# передняя к рычагу фиксатора, нижняя к носку, задняя к стойке; большое треугольное окно под балкой и малое у носка,
+# сквозные прорези в тягах, гнёзда QD спереди и в стойке, прорезь антабки, рычаг фиксатора снизу.
 # Ширина по затыльнику 43.2 мм (Magpul MOE SL-M — 1.7″ по двум магазинам; форма своя).
 # Приклад в положении «сложен»: передний торец втулки x = STOCK_FRONT; выдвигается назад на STOCK_TRAVEL (5 шагов).
 import math
@@ -34,9 +36,23 @@ LATCH_PIVOT = (STOCK_FRONT - 11.0, -23.2)
 LATCH_DEG = 6.0                   # ход рычага; штифт опускается на ≈ 41·sin(6°) = 4.3 мм
 QD_R = 4.85                       # отверстие стандартного антабочного QD (0.38″)
 QD_HEAD_Y = (17.8, 23.0)          # головка антабки слева — у боковины пластины (её край на высоте головки y ≈ 17.5)
-BODY_HW = 20.0                    # полуширина корпуса сзади
+BODY_HW = 19.2                    # полуширина верхней балки
 BUTT_HW = 20.8                    # задняя стойка
 PAD_HW = 21.6                     # затыльник: ширина приклада 43.2
+FR_HW = 10.2                      # полуширина тяг «рогатки» (тяги уже балки и стойки)
+TOP_F, TOP_R = 19.5, 20.5         # гребень: спереди / сзади (почти горизонтальный, как у образца)
+BEAM_BOT = -23.6                  # низ балки
+FRAME_BOT = -97.8                 # низ носка (тяги)
+BUTT_BOT = -99.2                  # низ стойки
+# узел «рогатки» и концы тяг (x, z): передняя — к низу балки у рычага, нижняя — к носку, задняя — к стойке
+NODE = (STOCK_FRONT - 98.8, -50.6)
+ARM_FRONT = (STOCK_FRONT - 8.0, -28.3)    # щёки передней тяги закрывают ось рычага
+ARM_TOE = (STOCK_FRONT - 150.0 + 36.3, -90.5)
+ARM_BUTT = (STOCK_FRONT - 150.0 + 26.3, -36.5)
+ARM_HW = (5.6, 6.2, 4.2)          # полутолщины тяг: передней, нижней, задней
+BUTT_D = 14.0                     # глубина стойки по X (до переднего торца)
+QD_BUTT = (STOCK_FRONT - 150.0 + 19.5, -32.0)  # гнездо QD в круглом приливе перед стойкой, туда же приходит задняя тяга
+QD_BOSS_R, QD_BOSS_HW = 9.5, 11.8
 LOGO = "ГРАНЬ"
 
 
@@ -268,109 +284,182 @@ def tube(S):
     return o
 
 
+def _unit(a, b):
+    dx, dz = b[0] - a[0], b[1] - a[1]
+    ln = math.hypot(dx, dz)
+    return (dx / ln, dz / ln)
+
+
+def _off(p, n, h):
+    return (p[0] + n[0] * h, p[1] + n[1] * h)
+
+
+def _isect(p, d, q, e):
+    """Пересечение прямых p + t·d и q + s·e на плоскости XZ."""
+    den = d[0] * e[1] - d[1] * e[0]
+    t = ((q[0] - p[0]) * e[1] - (q[1] - p[1]) * e[0]) / den
+    return (p[0] + d[0] * t, p[1] + d[1] * t)
+
+
+def _at_z(p, d, z):
+    t = (z - p[1]) / d[1]
+    return (p[0] + d[0] * t, z)
+
+
+def _at_x(p, d, x):
+    t = (x - p[0]) / d[0]
+    return (x, p[1] + d[1] * t)
+
+
+def frame_outline():
+    """Контур «рогатки» сбоку и два сквозных окна (точки XZ, мм).
+    Тяги — полосы вдоль своих осей от узла NODE; окна ограничены кромками тяг, низом балки и передом стойки."""
+    R = STOCK_FRONT - STOCK_LEN
+    h1, h2, h3 = ARM_HW
+    u1, u2, u3 = _unit(NODE, ARM_FRONT), _unit(NODE, ARM_TOE), _unit(NODE, ARM_BUTT)
+    up1, dn1 = (-u1[1], u1[0]), (u1[1], -u1[0])          # передняя: верх / низ
+    out2, in2 = (-u2[1], u2[0]), (u2[1], -u2[0])         # нижняя: наружу (вперёд) / внутрь (к малому окну)
+    dn3, up3 = (-u3[1], u3[0]), (u3[1], -u3[0])          # задняя: низ / верх
+    lo1 = (_off(NODE, dn1, h1), u1)
+    hi1 = (_off(NODE, up1, h1), u1)
+    ou2 = (_off(NODE, out2, h2), u2)
+    in2l = (_off(NODE, in2, h2), u2)
+    lo3 = (_off(NODE, dn3, h3), u3)
+    hi3 = (_off(NODE, up3, h3), u3)
+    b = _off(ARM_FRONT, dn1, h1)
+    c = _isect(*lo1, *ou2)
+    d = _at_z(*ou2, FRAME_BOT)
+    outer = [(b[0], BEAM_BOT + 3.6), b, c, d, (R + 2.0, FRAME_BOT), (R + 2.0, BEAM_BOT + 3.6)]
+    outer_r = [0, 3.5, 6.0, 3.0, 0, 0]
+    z1 = BEAM_BOT - 1.2
+    x1l = R + 32.5
+    o1 = [(x1l, z1), _at_z(*hi1, z1), _isect(*hi1, *hi3), _at_x(*hi3, x1l)]
+    o1_r = [2.5, 2.0, 4.0, 3.0]
+    z2 = FRAME_BOT + 10.8
+    # малое окно: слева — передний торец стойки (вырез заходит в стойку, стойка добавляется после), сверху — под приливом QD
+    o2 = [(R + BUTT_D - 1.0, -43.0), _isect(*lo3, *in2l), _at_z(*in2l, z2), (R + BUTT_D - 1.0, z2)]
+    o2_r = [0, 3.0, 2.0, 0]
+    return (outer, outer_r), (o1, o1_r), (o2, o2_r), (u1, u2)
+
+
+def _slot_xz(p0, p1, hw, n=8):
+    """Прорезь с полукруглыми концами вдоль отрезка p0–p1 (точки XZ)."""
+    u = _unit(p0, p1)
+    a0 = math.degrees(math.atan2(u[1], u[0]))
+    pts = arc_pts(p1[0], p1[1], hw, a0 - 90.0, a0 + 90.0, n) + arc_pts(p0[0], p0[1], hw, a0 + 90.0, a0 + 270.0, n)
+    return pts
+
+
+def _qd_cups(name, qx, qz, y_in, y_out, S):
+    """Стальные втулки гнезда QD с обеих сторон: от y_in до наружного торца y_out (заподлицо в зенковке)."""
+    cups = []
+    for s in (-1, 1):
+        yi, yo = y_in * s, y_out * s
+        if s > 0:
+            prof = [(yi, QD_R), (yi, 6.9), (yo - 0.2, 6.9), (yo - 0.2, 7.3), (yo, 7.3), (yo, QD_R + 0.5), (yo - 0.5, QD_R)]
+        else:
+            prof = [(yo, QD_R + 0.5), (yo, 7.3), (yo + 0.2, 7.3), (yo + 0.2, 6.9), (yi, 6.9), (yi, QD_R), (yo + 0.5, QD_R)]
+        c = lathe("qd", prof, S, "Steel_black", seg=48)
+        c.rotation_euler = (0, 0, math.pi / 2)
+        apply_transform(c)
+        c.location = (qx * MM, 0, qz * MM)
+        apply_transform(c)
+        c.name = f"{name}_{'L' if s > 0 else 'R'}"
+        cups.append(c)
+    return cups
+
+
 def stock(S):
     o = {}
     F = STOCK_FRONT
     R = F - STOCK_LEN                     # задний торец корпуса (перед затыльником)
-    top_f, top_r = 19.5, 21.5
-    bot = -23.6
-    # --- втулка вокруг трубки: скруглённый верх, плоские бока ---
+    bot = BEAM_BOT
+    # --- верхняя балка вокруг трубки: почти плоский гребень, плоские бока, нос спереди скошен ---
     secs = []
-    for x, hw, zt, zb in ((F, 17.6, top_f - 1.6, bot + 1.6), (F - 1.2, 18.8, top_f - 0.4, bot + 0.4), (F - 3.0, 19.3, top_f, bot),
-                          (F - 60.0, 19.6, top_f + 0.8, bot), (R + 8.0, BODY_HW, top_r, bot), (R - 2.0, BODY_HW, top_r, bot)):
-        secs.append((x, superellipse(hw, zt, zb, n=48, p=3.4)))
-    secs.sort(key=lambda s: s[0])
+    for x, hw, zt, zb in ((F, 17.4, TOP_F - 2.2, bot + 2.2), (F - 1.4, 18.7, TOP_F - 0.6, bot + 0.6), (F - 3.2, BODY_HW, TOP_F, bot),
+                          (F - 60.0, BODY_HW, TOP_F + 0.4, bot), (R + 8.0, BODY_HW, TOP_R, bot), (R - 2.0, BODY_HW, TOP_R, bot)):
+        secs.append((x, superellipse(hw, zt, zb, n=48, p=3.6)))
+    secs.sort(key=lambda s_: s_[0])
     body = loft_yz("Stock_body", secs, S, "Polymer")
     auto_sharp(body, 40)
-    # --- задняя стойка под затыльник ---
-    butt = prism_yz("stock_butt", fillet([(-BUTT_HW, -86.0), (BUTT_HW, -86.0), (BUTT_HW, top_r), (-BUTT_HW, top_r)], [8.0, 8.0, 7.0, 7.0], 6),
-                    R - 2.0, R + 14.0, S, "Polymer")
+    # --- задняя стойка под затыльник (во всю ширину) ---
+    butt = prism_yz("stock_butt", fillet([(-BUTT_HW, BUTT_BOT), (BUTT_HW, BUTT_BOT), (BUTT_HW, TOP_R), (-BUTT_HW, TOP_R)],
+                                         [8.0, 8.0, 7.0, 7.0], 6), R - 2.0, R + BUTT_D - 2.0, S, "Polymer")
     boolean(body, butt, "UNION")
-    # --- нижняя тяга: от низа втулки спереди к носку затыльника ---
-    p0, p1 = (F - 16.0, bot + 2.0), (R + 4.0, -80.0)
-    dx, dz = p1[0] - p0[0], p1[1] - p0[1]
-    ln = math.hypot(dx, dz)
-    nx, nz = -dz / ln, dx / ln
-    th = 6.8
-    strut = prism_xz("stock_strut", [(p0[0] + nx * th, p0[1] + nz * th), (p1[0] + nx * th, p1[1] + nz * th),
-                                     (p1[0] - nx * th, p1[1] - nz * th), (p0[0] - nx * th, p0[1] - nz * th)], -11.8, 11.8, S, "Polymer")
-    boolean(body, strut, "UNION")
-    # тонкая перемычка между втулкой и тягой — бока утоплены (скелет, как на листинге)
-    web = prism_xz("stock_web", [(PIN_X0 - 10.0, bot + 1.0), (R + 6.0, bot + 1.0), (R + 6.0, -76.0), (PIN_X0 - 10.0, -44.0)],
-                   -2.6, 2.6, S, "Polymer")
-    boolean(body, web, "UNION")
-    # задний прилив с гнездом QD в перемычке
-    qx2, qz2 = R + 28.0, -52.0
-    boss = cyl("stock_qd_boss", -11.8, 11.8, 8.2, S, "Polymer", seg=48, cy=qx2, cz=qz2, axis="Y")
-    boolean(body, boss, "UNION")
+    # --- «рогатка»: тяги уже балки, с окнами и прорезями ---
+    (outer, outer_r), (o1, o1_r), (o2, o2_r), (u1, u2) = frame_outline()
+    frame = prism_xz("stock_frame", fillet(outer, outer_r, 5), -FR_HW, FR_HW, S, "Polymer")
+    boolean(frame, cyl("stock_qd_boss", -QD_BOSS_HW, QD_BOSS_HW, QD_BOSS_R, S, "Polymer", seg=64, cy=QD_BUTT[0], cz=QD_BUTT[1],
+                       axis="Y", ch=1.0), "UNION")
+    for nm, (pts, rr) in (("o1", (o1, o1_r)), ("o2", (o2, o2_r))):
+        boolean(frame, prism_xz(f"cut_stock_{nm}", fillet(pts, rr, 5), -30, 30, S))
+    # сквозные прорези вдоль передней и нижней тяг (как у образца: тяга — две полосы)
+    p0 = (NODE[0] + u1[0] * 16.0, NODE[1] + u1[1] * 16.0)
+    p1 = (NODE[0] + u1[0] * 58.0, NODE[1] + u1[1] * 58.0)
+    boolean(frame, prism_xz("cut_arm1_slot", _slot_xz(p0, p1, 1.7), -30, 30, S))
+    p0 = (NODE[0] + u2[0] * 15.0, NODE[1] + u2[1] * 15.0)
+    p1 = (NODE[0] + u2[0] * 33.0, NODE[1] + u2[1] * 33.0)
+    boolean(frame, prism_xz("cut_arm2_slot", _slot_xz(p0, p1, 1.9), -30, 30, S))
+    boolean(body, frame, "UNION")
     # --- внутренности: канал трубки, паз направляющей, карман рычага, канал штифта ---
     boolean(body, cyl("cut_stock_bore", R + 2.0, F + 2, TUBE_R + 0.2, S, seg=72))
     boolean(body, box("cut_stock_key", R + 2.0, F + 2, -RIDGE_HALF_W - 0.3, RIDGE_HALF_W + 0.3, RIDGE_Z - 0.4, -8.0, S))
     boolean(body, box("cut_latch_pocket", PIN_X0 - 9.0, LATCH_PIVOT[0] + 5.0, -5.6, 5.6, bot - 2.0, RIDGE_Z - 0.2, S))
-    # нижняя тяга спереди — «вилка» вокруг рычага: снизу к нему подходит палец
-    boolean(body, box("cut_latch_fork", PIN_X0 - 9.0, LATCH_PIVOT[0] + 5.0, -5.6, 5.6, -70.0, bot - 1.0, S))
+    # передняя тяга у рычага — «вилка»: рычаг ходит между щёк (и нажатый — его середина опускается к тяге)
+    boolean(body, box("cut_latch_fork", LATCH_PIVOT[0] - 38.0, LATCH_PIVOT[0] + 5.0, -5.75, 5.75, -52.0, bot - 1.0, S))
+    boolean(body, cyl("cut_latch_axis_hole", -12.0, 12.0, 1.25, S, seg=16, cy=LATCH_PIVOT[0], cz=LATCH_PIVOT[1], axis="Y"))
     boolean(body, cyl("cut_pin_ch", RIDGE_Z - 3.0, -10.0, 2.6, S, seg=24, cy=PIN_X0, cz=0.0, axis="Z"))
-    # гнёзда QD: спереди с обеих сторон втулки и сзади сквозное
+    # гнёзда QD: спереди с обеих сторон балки, сзади сквозное в стойке
     qx1, qz1 = F - 17.0, -14.5
     for s in (-1, 1):
         y0, y1 = (13.15, 25.0) if s > 0 else (-25.0, -13.15)
         boolean(body, cyl(f"cut_qd_front{s}", y0, y1, 6.95, S, seg=48, cy=qx1, cz=qz1, axis="Y"))
         yy0, yy1 = (17.6, 25.0) if s > 0 else (-25.0, -17.6)
         boolean(body, cyl(f"cut_qd_front_cb{s}", yy0, yy1, 7.4, S, seg=48, cy=qx1, cz=qz1, axis="Y"))
-    boolean(body, cyl("cut_qd_rear", -20, 20, 6.95, S, seg=48, cy=qx2, cz=qz2, axis="Y"))
+    qx2, qz2 = QD_BUTT
+    boolean(body, cyl("cut_qd_rear", -30, 30, 6.95, S, seg=48, cy=qx2, cz=qz2, axis="Y"))
     for s in (-1, 1):
-        y0, y1 = (10.65, 15.0) if s > 0 else (-15.0, -10.65)
-        boolean(body, cyl(f"cut_qd_rear_cb{s}", y0, y1, 7.0, S, seg=48, cy=qx2, cz=qz2, axis="Y"))
-    # прорезь антабки в задней стойке (сквозная по Y, для ремня)
-    boolean(body, prism_xz("cut_sling_slot", fillet([(R + 3.0, -62.0), (R + 9.0, -62.0), (R + 9.0, -30.0), (R + 3.0, -30.0)], 2.5, 4),
+        y0, y1 = (QD_BOSS_HW - 1.2, 30.0) if s > 0 else (-30.0, -QD_BOSS_HW + 1.2)
+        boolean(body, cyl(f"cut_qd_rear_cb{s}", y0, y1, 7.4, S, seg=48, cy=qx2, cz=qz2, axis="Y"))
+    # прорезь антабки внизу стойки (сквозная по Y, для ремня)
+    boolean(body, prism_xz("cut_sling_slot", fillet([(R + 2.5, -84.0), (R + 8.0, -84.0), (R + 8.0, -50.0), (R + 2.5, -50.0)], 2.5, 4),
                            -30, 30, S))
-    # облегчающий паз сбоку втулки (продольная выемка, как у листинга)
+    # бока: ступенька по низу балки (нижняя полоса утоплена), узкий паз на ней, утопленная площадка на стойке
     for s in (-1, 1):
-        y0, y1 = (18.55, 25.0) if s > 0 else (-25.0, -18.55)
-        boolean(body, prism_xz(f"cut_side_flute{s}", fillet([(F - 40.0, 2.0), (R + 22.0, 3.5), (R + 22.0, 9.5), (F - 40.0, 8.0)], 3.0, 4),
+        y0, y1 = (BODY_HW - 0.9, 30.0) if s > 0 else (-30.0, -BODY_HW + 0.9)
+        boolean(body, prism_xz(f"cut_beam_band{s}", fillet([(R + 17.0, bot - 1.0), (F - 30.0, bot - 1.0), (F - 30.0, -11.0), (R + 17.0, -11.0)],
+                                                         [0, 0, 2.5, 2.5], 4), y0, y1, S))
+        boolean(body, prism_xz(f"cut_beam_slot{s}", fillet([(F - 54.0, -9.2), (F - 42.0, -9.2), (F - 42.0, -6.4), (F - 54.0, -6.4)], 1.0, 3),
+                               (y0 - 0.2) if s > 0 else y0, y1 if s > 0 else (y1 + 0.2), S))
+        y0, y1 = (BUTT_HW - 1.0, 30.0) if s > 0 else (-30.0, -BUTT_HW + 1.0)
+        boolean(body, prism_xz(f"cut_butt_panel{s}", fillet([(R + 1.5, -9.5), (R + 9.5, -9.5), (R + 9.5, -0.5), (R + 1.5, -0.5)], 2.0, 4),
                                y0, y1, S))
-    finish(body, w=0.9, seg=3, angle=35)
-    lx0, lz0 = R + 50.0, -6.6
+        for k in range(3):
+            xx = R + 3.3 + k * 2.2
+            boolean(body, box(f"cut_butt_panel_rib{s}{k}", xx - 0.45, xx + 0.45, (y0 - 0.5) if s > 0 else -30.0, 30.0 if s > 0 else (y1 + 0.5),
+                              -8.0, -2.0, S))
+    finish(body, w=1.1, seg=3, angle=35)
+    lx0, lz0 = R + 50.0, 4.0
     for s in (-1, 1):
         logo_relief(body, LOGO, 5.2, (lx0, side_y(lx0, lz0, s), lz0), s, 0.28, S)
     renormal(body)
     set_origin(body, (F, 0.0, 0.0))
     o["stock_body"] = body
     # --- затыльник: резина, рёбра на задней грани ---
-    pad = prism_yz("Stock_buttpad", fillet([(-PAD_HW, -87.0), (PAD_HW, -87.0), (PAD_HW, top_r + 1.0), (-PAD_HW, top_r + 1.0)],
+    pad = prism_yz("Stock_buttpad", fillet([(-PAD_HW, BUTT_BOT - 1.0), (PAD_HW, BUTT_BOT - 1.0), (PAD_HW, TOP_R + 1.0), (-PAD_HW, TOP_R + 1.0)],
                                            [9.0, 9.0, 8.0, 8.0], 8), R - PAD_T, R - 2.05, S, "Rubber")
-    for k in range(int((top_r + 76.0) / 3.6)):
-        zz = -78.0 + k * 3.6
+    for k in range(int((TOP_R + 88.0) / 3.6)):
+        zz = -90.0 + k * 3.6
         boolean(pad, box("cut_pad_rib", R - PAD_T - 1, R - PAD_T + 1.3, -16.9, 16.9, zz - 0.85, zz + 0.85, S))
     # «носок» и «пятка» скошены
-    boolean(pad, prism_xz("cut_pad_toe", [(R - PAD_T - 2, -70.0), (R - PAD_T + 5.0, -92.0), (R - PAD_T - 2, -92.0)], -30, 30, S))
+    boolean(pad, prism_xz("cut_pad_toe", [(R - PAD_T - 2, -82.0), (R - PAD_T + 5.0, BUTT_BOT - 3.0), (R - PAD_T - 2, BUTT_BOT - 3.0)], -30, 30, S))
     finish(pad, w=1.2, seg=3, angle=35)
     set_parent(pad, body)
     o["buttpad"] = pad
     # --- гнёзда QD: стальные втулки ---
-    cups = []
-    for s in (-1, 1):
-        y0, y1 = (13.2, 17.85) if s > 0 else (-17.85, -13.2)
-        yo = y1 if s > 0 else y0                      # наружный торец
-        yi = y0 if s > 0 else y1
-        prof = [(yi, QD_R), (yi, 6.9), (yo - 0.2 * s, 6.9), (yo - 0.2 * s, 7.3), (yo, 7.3), (yo, QD_R + 0.5), (yo - 0.5 * s, QD_R)]
-        if s < 0:
-            prof = [(yo, QD_R + 0.5), (yo, 7.3), (yo + 0.2, 7.3), (yo + 0.2, 6.9), (yi, 6.9), (yi, QD_R), (yo + 0.5, QD_R)]
-        c = lathe("qd", prof, S, "Steel_black", seg=48)
-        c.rotation_euler = (0, 0, math.pi / 2)
-        apply_transform(c)
-        c.location = (qx1 * MM, 0, qz1 * MM)
-        apply_transform(c)
-        c.name = f"Stock_QD_cup_front_{'L' if s > 0 else 'R'}"
-        cups.append(c)
-    c = lathe("qd", [(-10.8, QD_R + 0.5), (-10.8, 6.9), (10.8, 6.9), (10.8, QD_R + 0.5), (10.3, QD_R), (-10.3, QD_R)],
-              S, "Steel_black", seg=48)
-    c.rotation_euler = (0, 0, math.pi / 2)
-    apply_transform(c)
-    c.location = (qx2 * MM, 0, qz2 * MM)
-    apply_transform(c)
-    c.name = "Stock_QD_cup_rear"
-    cups.append(c)
+    qx1, qz1 = F - 17.0, -14.5
+    cups = _qd_cups("Stock_QD_cup_front", qx1, qz1, 13.2, 17.85, S)
+    cups += _qd_cups("Stock_QD_cup_rear", QD_BUTT[0], QD_BUTT[1], QD_BOSS_HW - 5.0, QD_BOSS_HW - 0.95, S)
     for c in cups:
         finish(c, w=0.2, seg=2, angle=35)
         set_parent(c, body)

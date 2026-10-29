@@ -13,6 +13,49 @@ BORE_R = 2.85
 WALL = 2.6
 HG_INNER_TOP = 20.6
 MLOK_LEN, MLOK_H = 32.0, 7.0
+HG_REAR_TAPER = 4.5           # длина конуса у заднего торца цевья
+HG_REAR_INSET = 1.6           # насколько торец уже наружного восьмигранника
+
+
+def _offset(poly, d):
+    """Выпуклый многоугольник (y, z) против часовой, сдвинутый наружу на d (внутрь при d < 0)."""
+    n = len(poly)
+    lines = []
+    for i in range(n):
+        (y0, z0), (y1, z1) = poly[i], poly[(i + 1) % n]
+        ln = math.hypot(y1 - y0, z1 - z0)
+        ny, nz = (z1 - z0) / ln, -(y1 - y0) / ln
+        lines.append(((y0 + ny * d, z0 + nz * d), (y1 - y0, z1 - z0)))
+    out = []
+    for i in range(n):
+        (p, r), (q, s) = lines[i - 1], lines[i]
+        den = r[0] * s[1] - r[1] * s[0]
+        t = ((q[0] - p[0]) * s[1] - (q[1] - p[1]) * s[0]) / den
+        out.append((p[0] + r[0] * t, p[1] + r[1] * t))
+    return out
+
+
+def rear_taper_cutter(C, x0):
+    """Кольцевой резак конуса: наклонная поверхность от торца (внутрь на HG_REAR_INSET) до наружных граней."""
+    import bmesh
+    from lib import v as vmm
+    prof = hg_outer()
+    k = HG_REAR_INSET / HG_REAR_TAPER
+    rings = [(x0 - 1.0, _offset(prof, -HG_REAR_INSET - k * 1.0)), (x0 + HG_REAR_TAPER + 0.5, _offset(prof, k * 0.5)),
+             (x0 + HG_REAR_TAPER + 0.5, _offset(prof, 6.0)), (x0 - 1.0, _offset(prof, 6.0))]
+    me = bpy.data.meshes.new("cut_hg_taper")
+    bm = bmesh.new()
+    vs = [[bm.verts.new(vmm(x, y, z)) for y, z in ring] for x, ring in rings]
+    n = len(prof)
+    for a, b in zip(vs, vs[1:] + vs[:1]):
+        for i in range(n):
+            j = (i + 1) % n
+            bm.faces.new((a[i], a[j], b[j], b[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new("cut_hg_taper", me)
+    C.objects.link(o)
+    return o
 
 
 def hg_outer():
@@ -158,12 +201,15 @@ def handguard(Hc):
     for s in (-1, 1):
         y0, y1 = (HG_HALF_W - 7.0, HG_HALF_W + 3.0) if s > 0 else (-HG_HALF_W - 3.0, -HG_HALF_W + 7.0)
         boolean(hg, cyl(f"cut_qd{s}", y0, y1, 5.0, Hc, seg=32, cy=x1 - 8.0, cz=0.5, axis="Y"))
+    # задний торец сходит на конус к ресиверу: все грани восьмигранника срезаны на HG_REAR_TAPER мм назад,
+    # у торца — на HG_REAR_INSET мм внутрь (стык с ресивером без «коробки»)
+    boolean(hg, rear_taper_cutter(Hc, x0))
     finish(hg, w=0.7, seg=3, angle=35)
     o["handguard"] = hg
     o["mlok_x"] = xs
     # верхняя планка цевья: пазы в шаг с ресивером (центры x = 14 + 10·k)
     first = 14.0 + 10.0 * math.floor((x1 - 4.6 - 14.0) / 10.0)
-    rl, slots = rail("Handguard_rail", x0 + 0.5, x1, Hc, slot_from=first)
+    rl, slots = rail("Handguard_rail", x0 + HG_REAR_TAPER + 1.0, x1, Hc, slot_from=first)
     finish(rl, w=0.35, seg=2, angle=35)
     o["rail"] = rl
     # стяжные винты хомута (головки слева, гайки справа)

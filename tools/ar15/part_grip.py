@@ -1,47 +1,37 @@
-# AR-15: пистолетная рукоять в манере листинга Fab — почти вертикальная (18° от вертикали), упор ладони сзади-сверху,
-# спереди канавки под средний, безымянный палец и мизинец с гребнями между ними (владелец, 2026-10-29: «рукоятка должна
-# быть с выступами под пальцы»), расширение внизу, мелкая «точечная» текстура по бокам; винт рукояти снизу по её оси.
-# Верх — плоская площадка на GRIP_TOP_Z (под нижним ресивером).
+# AR-15: пистолетная рукоять, эргономичная (владелец, 2026-10-29: «рукоятка слишком примитивная и без нужных изгибов» —
+# по образцам: рукоять STM-416 на снимке владельца и рукоять AR15 Lokeig на Sketchfab). Сверху — упор ладони
+# («бобровый хвост») с вогнутым «седлом» под ним, куда ложится перепонка между большим и указательным пальцами;
+# сзади — выпуклость под ладонь, внизу — расширение пятки. Перёд под скобой — прямой, по нему идёт задняя грань скобы
+# (рукоять и скоба одной линией); ниже скобы — три выемки под средний, безымянный палец и мизинец с поперечными
+# рёбрышками внутри; по бокам — утопленные площадки с точечной текстурой, их передний край повторяет выемки.
+# Тело — сечения по горизонтали (z) от площадки под ресивером вниз, дно — срез перпендикулярно оси рукояти (18°).
+# Винт рукояти — снизу по её оси, в отверстие ресивера (x −158.6).
 import math
 import bmesh
 import bpy
 from mathutils import Vector
-from lib import (MM, GRIP_TOP_Z, GRIP_TOP_X, v, fillet, prism_xz, prism_xy, prism_yz, box, cyl, lathe, boolean, finish, auto_sharp,
-                 apply_transform, join, material)
+from lib import (MM, GRIP_TOP_Z, v, prism_xz, prism_yz, lathe, boolean, finish, auto_sharp, apply_transform, join, material)
 
 ANGLE = 18.0
-LEN = 104.0                     # длина по оси от верхней площадки
-TOP_CX = -147.0                 # ось рукояти на верхней площадке (перёд — у заднего уха скобы)
-P_EXP = 2.8                     # «квадратность» сечения
-# t (доля длины), вперёд f, назад b (вдоль поперечной оси), полуширина w
-SECTIONS = [
-    (-0.12, 24.0, -24.0, 14.6),
-    (0.00, 24.0, -24.0, 14.6),
-    (0.12, 23.6, -23.2, 14.6),
-    (0.24, 23.6, -22.2, 14.8),
-    (0.34, 23.2, -21.4, 15.0),
-    (0.50, 22.6, -20.8, 15.1),
-    (0.66, 22.8, -20.8, 15.2),
-    (0.80, 23.6, -21.4, 15.5),
-    (0.90, 25.0, -22.6, 16.2),
-    (0.965, 25.6, -23.4, 16.6),
-    (0.99, 25.0, -22.9, 16.2),
-    (1.00, 23.8, -21.8, 15.3),
-]
-# канавки под пальцы на передней кромке — ниже скобы (она примыкает к рукояти до t ≈ 0.3): канавки 0.40 / 0.64 / 0.87
-# (z ≈ −89 / −112 / −135 — средний, безымянный, мизинец), гребни 0.52 и 0.75; выше t 0.30 кромка гладкая под скобу
-FINGER_AMP = 1.9
-FINGER_PERIOD = 0.233
-FINGER_RIDGE = 0.52
-STATIONS = [-0.12, -0.06] + [round(0.0 + 0.0125 * k, 4) for k in range(81)]
+LEN = 104.0                     # длина по оси от верхней площадки до дна
+TOP_CX = -147.0                 # ось рукояти на верхней площадке
 SA, CA = math.sin(math.radians(ANGLE)), math.cos(math.radians(ANGLE))
 DOWN = Vector((-SA, 0.0, -CA))          # ось рукояти вниз
 FWD = Vector((CA, 0.0, -SA))            # поперечная ось «вперёд»
 TOP = Vector((TOP_CX, 0.0, GRIP_TOP_Z))
 
-
-def axis_pt(t):
-    return TOP + DOWN * (t * LEN)
+SLOPE = math.tan(math.radians(ANGLE))
+FRONT_TOP_X = -118.6            # перёд у площадки: стенка скобы за её проёмом (x −113.6) остаётся ≥ 4.5 мм
+# выемки под пальцы ниже перекладины скобы (её низ z −77.9): (верх, низ, глубина), гребни между ними — z −100.5 и −121.5
+GROOVES = [(-78.0, -100.5, 5.8), (-100.5, -121.5, 5.2), (-121.5, -140.0, 4.2)]
+GROOVE_KERNEL = [(-1.8, 0.06), (-1.2, 0.12), (-0.6, 0.2), (0.0, 0.24), (0.6, 0.2), (1.2, 0.12), (1.8, 0.06)]   # скругление гребней
+Z_BOTTOM = -153.0               # нижнее сечение (ниже наклонного дна — срезается)
+Z_RING_TOP = -37.0              # верхнее сечение: выше площадки, срезается по ней и по подъёму «хвоста»
+# верх «бобрового хвоста» за нижним ресивером поднимается к концу (под торцевую пластину, до её низа −33 — 5 мм)
+BEAVER_TOP = [(-187.0, -42.0), (-189.0, -41.6), (-191.5, -40.7), (-194.5, -39.6), (-198.0, -38.6), (-215.0, -37.8)]
+DZ = 0.5                        # шаг сечений
+N_RING = 128
+P_FRONT, P_BACK = 2.7, 2.4      # «квадратность» передней и задней половин сечения
 
 
 def _smooth(a, b, x):
@@ -49,77 +39,168 @@ def _smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def section_at(t):
-    base = SECTIONS[-1][1:]
-    for (t0, f0, b0, w0), (t1, f1, b1, w1) in zip(SECTIONS, SECTIONS[1:]):
-        if t0 <= t <= t1:
-            k = (t - t0) / (t1 - t0)
-            base = (f0 + (f1 - f0) * k, b0 + (b1 - b0) * k, w0 + (w1 - w0) * k)
-            break
-    f, b, w = base
-    env = _smooth(0.30, 0.36, t) * (1.0 - _smooth(0.90, 0.95, t))
-    f += FINGER_AMP * env * math.cos(2 * math.pi * (t - FINGER_RIDGE) / FINGER_PERIOD)
-    return f, b, w
+def _pchip(points):
+    """Монотонная кубическая интерполяция (Фрич — Карлсон) по точкам (z, значение)."""
+    pts = sorted(points)
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    n = len(xs)
+    h = [xs[i + 1] - xs[i] for i in range(n - 1)]
+    d = [(ys[i + 1] - ys[i]) / h[i] for i in range(n - 1)]
+    m = [0.0] * n
+    m[0], m[-1] = d[0], d[-1]
+    for i in range(1, n - 1):
+        if d[i - 1] * d[i] <= 0:
+            m[i] = 0.0
+        else:
+            w1, w2 = 2 * h[i] + h[i - 1], h[i] + 2 * h[i - 1]
+            m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i])
+
+    def f(x):
+        if x <= xs[0]:
+            return ys[0] + m[0] * (x - xs[0])
+        if x >= xs[-1]:
+            return ys[-1] + m[-1] * (x - xs[-1])
+        for i in range(n - 1):
+            if xs[i] <= x <= xs[i + 1]:
+                t = (x - xs[i]) / h[i]
+                t2, t3 = t * t, t * t * t
+                return ((2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * h[i] * m[i] + (-2 * t3 + 3 * t2) * ys[i + 1]
+                        + (t3 - t2) * h[i] * m[i + 1])
+    return f
+
+
+# спинка (по средней плоскости): «бобровый хвост» сверху → седло под ним (z ≈ −65) → выпуклость под ладонь (≈ −100) → пятка
+BACK_X = _pchip([(-42.0, -197.0), (-44.0, -198.0), (-46.5, -197.9), (-49.0, -196.0), (-51.5, -191.5), (-54.0, -185.5),
+                 (-57.0, -179.5), (-60.5, -175.6), (-64.5, -174.2), (-69.0, -174.6), (-74.0, -176.4), (-82.0, -179.4),
+                 (-92.0, -184.6), (-100.0, -187.8), (-110.0, -190.3), (-120.0, -192.6), (-130.0, -196.4), (-137.0, -200.2),
+                 (-142.0, -201.0), (-160.0, -201.0)])
+# полуширина: у площадки 14.6 (рукоять 29.2), под ладонью 15.6, внизу расширение 16.4
+HALF_W = _pchip([(-42.0, 14.6), (-60.0, 14.7), (-80.0, 15.0), (-100.0, 15.6), (-118.0, 15.4), (-134.0, 15.6), (-142.0, 16.4),
+                 (-160.0, 16.4)])
+
+
+def axis_pt(t):
+    return TOP + DOWN * (t * LEN)
+
+
+def _groove_raw(z):
+    g = 0.0
+    for z0, z1, d in GROOVES:
+        if z1 <= z <= z0:
+            g += d * math.sin(math.pi * (z0 - z) / (z0 - z1)) ** 0.75
+    return g
+
+
+def groove_depth(z):
+    return sum(w * _groove_raw(z + dz) for dz, w in GROOVE_KERNEL)
+
+
+def front_x(z):
+    """Перёд рукояти по средней плоскости: прямая под 18° от площадки, ниже скобы — выемки, внизу — губа вперёд."""
+    base = FRONT_TOP_X + SLOPE * (z - GRIP_TOP_Z)
+    return base - groove_depth(z) + 3.6 * _smooth(-139.0, -149.0, z)
+
+
+def back_x(z):
+    return BACK_X(z)
 
 
 def front_xz(t, gap=0.0):
-    """Передняя кромка рукояти по средней плоскости (мм), сдвинутая вперёд на gap — по ней идёт задняя грань скобы."""
-    f, _b, _w = section_at(t)
-    p = axis_pt(t) + FWD * (f + gap)
-    return p.x, p.z
+    """Передняя кромка рукояти по средней плоскости (мм), сдвинутая вперёд на gap — по ней идёт задняя грань скобы.
+    t — параметр по высоте: z = −49.4 − 98.9·t (убывает с t; −0.08 → над площадкой, 0.3775 → ниже перекладины скобы)."""
+    z = -49.4 - 98.9 * t
+    x = front_x(z)
+    return x + FWD.x * gap, z + FWD.z * gap
 
 
-def ring(t, f, b, w, n=96):
-    c, hx = (f + b) / 2, (f - b) / 2
-    a0 = axis_pt(t)
+def _taper(x, z):
+    """Сужение «бобрового хвоста» к концу (в плане), только в верхних сечениях."""
+    return 1.0 - 0.45 * _smooth(-181.0, -198.0, x) * _smooth(-62.0, -52.0, z)
+
+
+def section(z):
+    xb, xf = back_x(z), front_x(z)
+    return xb, xf, HALF_W(z)
+
+
+def ring(z, n=N_RING):
+    xb, xf, w = section(z)
+    c, hx = (xf + xb) / 2, (xf - xb) / 2
     pts = []
     for k in range(n):
         a = 2 * math.pi * k / n
         ca, sa = math.cos(a), math.sin(a)
-        xl = c + hx * math.copysign(abs(ca) ** (2 / P_EXP), ca)
-        y = w * math.copysign(abs(sa) ** (2 / P_EXP), sa)
-        p = a0 + FWD * xl
-        pts.append(Vector((p.x, y, p.z)))
+        p = P_FRONT if ca >= 0 else P_BACK
+        x = c + hx * math.copysign(abs(ca) ** (2 / p), ca)
+        y = w * math.copysign(abs(sa) ** (2 / p), sa) * _taper(x, z)
+        pts.append((x, y, z))
     return pts
 
 
-def surf_y(t, xl):
-    f, b, w = section_at(t)
-    c, hx = (f + b) / 2, (f - b) / 2
-    u = min(1.0, abs((xl - c) / hx))
-    return w * (1.0 - u ** P_EXP) ** (1.0 / P_EXP)
+def surf_y(z, x):
+    """Полуширина поверхности рукояти в точке x сечения z."""
+    xb, xf, w = section(z)
+    c, hx = (xf + xb) / 2, (xf - xb) / 2
+    u = min(1.0, abs((x - c) / hx))
+    p = P_FRONT if x >= c else P_BACK
+    return w * (1.0 - u ** p) ** (1.0 / p) * _taper(x, z)
 
 
-PANEL_T = (0.18, 0.83)           # площадка по длине рукояти (доли)
-PANEL_U = (-0.50, 0.44)          # и поперёк (доли полуоси сечения от середины: назад … вперёд)
-PANEL_DEPTH = 0.6
+def bottom_plane_z(x):
+    """Дно рукояти — плоскость, перпендикулярная её оси, через конец оси."""
+    a = axis_pt(1.0)
+    return a.z - (SA / CA) * (x - a.x)
+
+
+# утопленные площадки с текстурой по бокам: по высоте и поперёк (доли полудлины сечения от середины: −1 спинка … +1 перёд)
+PANEL_Z = (-82.5, -139.5)
+PANEL_U = (-0.74, 0.60)
+PANEL_DEPTH = 0.7
 STIP_PITCH = 1.7
+# рёбрышки в выемках под пальцы: шаг, высота над поверхностью, ширина основания, доля ширины переда
+RIB_PITCH = 2.6
+RIB_H = 0.45
+RIB_HALF = 0.5
+RIB_SPAN = 0.55
 SCREW_OFF = -11.1                # винт смещён назад от оси рукояти, чтобы попасть в отверстие ресивера
 U_TOP = LEN + SCREW_OFF * math.tan(math.radians(ANGLE))   # где ось винта пересекает площадку (от низа рукояти по оси)
 SCREW_HEAD_D = 18.0              # головка винта на 18 мм ниже площадки, стержень входит в ресивер на 7 мм
 
 
-def _panel_pt(t, uf, s, dy):
-    f, b, w = section_at(t)
-    c, hx = (f + b) / 2, (f - b) / 2
-    xl = c + uf * hx
-    p = axis_pt(t) + FWD * xl
-    return Vector((p.x, s * (surf_y(t, xl) + dy), p.z))
+def _panel_range(z):
+    """Пределы площадки поперёк на высоте z: прямоугольник со скруглёнными углами в координатах (z, u)."""
+    zc, zh = (PANEL_Z[0] + PANEL_Z[1]) / 2, (PANEL_Z[0] - PANEL_Z[1]) / 2
+    s = min(1.0, abs(z - zc) / zh)
+    k = max(0.0, (s - 0.72) / 0.28)
+    f = max(0.18, math.sqrt(max(0.0, 1.0 - k * k)))
+    uc, hu = (PANEL_U[0] + PANEL_U[1]) / 2, (PANEL_U[1] - PANEL_U[0]) / 2
+    return uc - hu * f, uc + hu * f
 
 
-def panel_cutter(s, G, nt=44, nu=18):
-    """Срез площадки: тело между поверхностью рукояти минус PANEL_DEPTH и +3 мм наружу, по сетке (t, u)."""
+def _panel_pt(z, u, s, dy):
+    xb, xf, _w = section(z)
+    c, hx = (xf + xb) / 2, (xf - xb) / 2
+    x = c + u * hx
+    return x, s * (surf_y(z, x) + dy), z
+
+
+def panel_cutter(s, G, nz=60, nu=22):
+    """Срез площадки: тело между поверхностью рукояти минус PANEL_DEPTH и +3 мм наружу, по сетке (z, u)."""
     me = bpy.data.meshes.new("cut_grip_panel")
     bm = bmesh.new()
-    ts = [PANEL_T[0] + (PANEL_T[1] - PANEL_T[0]) * i / (nt - 1) for i in range(nt)]
-    us = [PANEL_U[0] + (PANEL_U[1] - PANEL_U[0]) * j / (nu - 1) for j in range(nu)]
-    inner = [[bm.verts.new(v(*_panel_pt(t, u, s, -PANEL_DEPTH))) for u in us] for t in ts]
-    outer = [[bm.verts.new(v(*_panel_pt(t, u, s, 3.0))) for u in us] for t in ts]
-    for i in range(nt - 1):
+    zs = [PANEL_Z[0] + (PANEL_Z[1] - PANEL_Z[0]) * i / (nz - 1) for i in range(nz)]
+    inner, outer = [], []
+    for z in zs:
+        u0, u1 = _panel_range(z)
+        us = [u0 + (u1 - u0) * j / (nu - 1) for j in range(nu)]
+        inner.append([bm.verts.new(v(*_panel_pt(z, u, s, -PANEL_DEPTH))) for u in us])
+        outer.append([bm.verts.new(v(*_panel_pt(z, u, s, 3.0))) for u in us])
+    for i in range(nz - 1):
         for j in range(nu - 1):
             bm.faces.new((inner[i][j], inner[i][j + 1], inner[i + 1][j + 1], inner[i + 1][j]))
             bm.faces.new((outer[i][j], outer[i + 1][j], outer[i + 1][j + 1], outer[i][j + 1]))
-    for i in range(nt - 1):
+    for i in range(nz - 1):
         bm.faces.new((inner[i][0], inner[i + 1][0], outer[i + 1][0], outer[i][0]))
         bm.faces.new((inner[i][-1], outer[i][-1], outer[i + 1][-1], inner[i + 1][-1]))
     for j in range(nu - 1):
@@ -132,24 +213,32 @@ def panel_cutter(s, G, nt=44, nu=18):
     return o
 
 
+def _closed_bump(tb, quads):
+    lo, hi = quads
+    tb.faces.new(lo)
+    tb.faces.new(list(reversed(hi)))
+    for k in range(4):
+        k2 = (k + 1) % 4
+        tb.faces.new((lo[k], hi[k], hi[k2], lo[k2]))
+
+
 def stipple(G):
     """Бугорки в шахматном порядке по дну площадок; каждый — замкнутое тело, основание на 0.25 мм в дне."""
     me = bpy.data.meshes.new("grip_texture")
     tb = bmesh.new()
-    margin = 0.9
+    margin = 1.0
     for s in (-1, 1):
-        tm = PANEL_T[0] * LEN + margin + 0.6
+        z = PANEL_Z[0] - margin - 0.6
         row = 0
-        while tm <= PANEL_T[1] * LEN - margin - 0.6:
-            t = tm / LEN
-            f, b, w = section_at(t)
-            c, hx = (f + b) / 2, (f - b) / 2
-            x_lo = c + PANEL_U[0] * hx + margin + 0.6
-            x_hi = c + PANEL_U[1] * hx - margin - 0.6
-            xl = x_lo + (STIP_PITCH / 2 if row % 2 else 0.0)
-            while xl <= x_hi:
-                ys = surf_y(t, xl) - PANEL_DEPTH
-                base = axis_pt(t) + FWD * xl
+        while z >= PANEL_Z[1] + margin + 0.6:
+            u0, u1 = _panel_range(z)
+            xb, xf, _w = section(z)
+            c, hx = (xf + xb) / 2, (xf - xb) / 2
+            x_lo, x_hi = c + u0 * hx + margin + 0.6, c + u1 * hx - margin - 0.6
+            x = x_lo + (STIP_PITCH / 2 if row % 2 else 0.0)
+            while x <= x_hi:
+                ys = surf_y(z, x) - PANEL_DEPTH
+                base = Vector((x, 0.0, z))
                 quads = []
                 for half, dy in ((0.55, -0.25), (0.28, 0.38)):
                     q = []
@@ -157,14 +246,9 @@ def stipple(G):
                         p = base + FWD * du + DOWN * dv
                         q.append(tb.verts.new(v(p.x, s * (ys + dy), p.z)))
                     quads.append(q)
-                lo, hi = quads
-                tb.faces.new(lo)
-                tb.faces.new(list(reversed(hi)))
-                for k in range(4):
-                    k2 = (k + 1) % 4
-                    tb.faces.new((lo[k], hi[k], hi[k2], lo[k2]))
-                xl += STIP_PITCH
-            tm += STIP_PITCH * 0.866
+                _closed_bump(tb, quads)
+                x += STIP_PITCH
+            z -= STIP_PITCH * 0.866
             row += 1
     bmesh.ops.recalc_face_normals(tb, faces=tb.faces)
     tb.to_mesh(me); tb.free()
@@ -176,15 +260,72 @@ def stipple(G):
     return tex
 
 
+def _front_arc(z, half_span):
+    """Точки передней дуги сечения z (|y| ≤ half_span) и нормали к ней в плоскости XY (наружу)."""
+    xb, xf, w = section(z)
+    c, hx = (xf + xb) / 2, (xf - xb) / 2
+    p = P_FRONT
+    out = []
+    n = max(8, int(2 * half_span / 0.45))
+    for k in range(n + 1):
+        y = -half_span + 2 * half_span * k / n
+        r = min(0.999, abs(y) / w)
+        x = c + hx * (1.0 - r ** p) ** (1.0 / p)
+        # производная dx/dy по суперэллипсу
+        if r > 1e-6:
+            dxdy = -hx * (1.0 - r ** p) ** (1.0 / p - 1.0) * r ** (p - 1.0) / w * math.copysign(1.0, y)
+        else:
+            dxdy = 0.0
+        nx, ny = 1.0, -dxdy
+        ln = math.hypot(nx, ny)
+        out.append((x, y, nx / ln, ny / ln, abs(y) / half_span))
+    return out
+
+
+def ribs(G):
+    """Поперечные рёбрышки в выемках под пальцы: замкнутые бруски по передней дуге, основание утоплено на 0.45 мм."""
+    me = bpy.data.meshes.new("grip_ribs")
+    tb = bmesh.new()
+    for z0, z1, _d in GROOVES:
+        span = z0 - z1
+        z = z0 - 0.2 * span
+        while z >= z1 + 0.2 * span - 0.01:
+            half = RIB_SPAN * HALF_W(z)
+            arc = _front_arc(z, half)
+            rows = []
+            for x, y, nx, ny, e in arc:
+                h = RIB_H if e < 0.75 else RIB_H - (RIB_H + 0.1) * _smooth(0.75, 1.0, e)
+                q = []
+                for off, dz in ((-0.45, -RIB_HALF), (-0.45, RIB_HALF), (h, RIB_HALF * 0.6), (h, -RIB_HALF * 0.6)):
+                    q.append(tb.verts.new(v(x + nx * off, y + ny * off, z + dz)))
+                rows.append(q)
+            tb.faces.new(rows[0])
+            tb.faces.new(list(reversed(rows[-1])))
+            for r0, r1 in zip(rows, rows[1:]):
+                for k in range(4):
+                    k2 = (k + 1) % 4
+                    tb.faces.new((r0[k], r0[k2], r1[k2], r1[k]))
+            z -= RIB_PITCH
+    bmesh.ops.recalc_face_normals(tb, faces=tb.faces)
+    tb.to_mesh(me); tb.free()
+    o = bpy.data.objects.new("grip_ribs", me)
+    G.objects.link(o)
+    o.data.materials.append(material("Polymer"))
+    for p in o.data.polygons:
+        p.use_smooth = False
+    return o
+
+
 def build(ctx):
     G = ctx["coll"]["Grip"]
     o = {}
     me = bpy.data.meshes.new("Pistol_grip")
     bm = bmesh.new()
     rings = []
-    for t in STATIONS:
-        f, b, w = section_at(t)
-        rings.append([bm.verts.new(v(p.x, p.y, p.z)) for p in ring(t, f, b, w)])
+    z = Z_RING_TOP
+    while z >= Z_BOTTOM - 1e-6:
+        rings.append([bm.verts.new(v(*p)) for p in ring(z)])
+        z -= DZ
     n = len(rings[0])
     for r0, r1 in zip(rings, rings[1:]):
         for i in range(n):
@@ -197,16 +338,12 @@ def build(ctx):
     grip = bpy.data.objects.new("Pistol_grip", me)
     G.objects.link(grip)
     grip.data.materials.append(material("Polymer"))
-    auto_sharp(grip, 50)
-    # плоская площадка сверху — срез по низу ресивера
-    boolean(grip, box("grip_clip", -400, 0, -60, 60, -300, GRIP_TOP_Z, G), "INTERSECT")
-    # упор ладони сзади-сверху: заходит за задний торец нижнего ресивера, ниже пластины приклада
-    dz = GRIP_TOP_Z + 45.9
-    bt = prism_xz("grip_beavertail", fillet([(-168.0, GRIP_TOP_Z), (-186.6, GRIP_TOP_Z), (-190.5, -44.6 + dz), (-196.4, -42.2 + dz),
-                                             (-198.6, -44.2 + dz), (-196.8, -48.6 + dz), (-189.0, -58.0 + dz), (-170.0, -62.0 + dz)],
-                                            [0, 1.5, 2.5, 2.5, 2.0, 4.0, 4.0, 0], 4), -10.5, 10.5, G, "Polymer")
-    finish(bt, w=1.6, seg=3, angle=30)
-    boolean(grip, bt, "UNION")
+    # срез: дно — перпендикулярно оси рукояти через конец оси; верх — площадка под ресивером и подъём «хвоста» за ним
+    a = axis_pt(1.0)
+    p0, p1 = a + FWD * 120.0, a - FWD * 120.0
+    top = [(p1.x, BEAVER_TOP[-1][1])] + list(reversed(BEAVER_TOP)) + [(p0.x, GRIP_TOP_Z)]
+    clip = prism_xz("grip_clip", [(p0.x, p0.z), (p1.x, p1.z)] + top, -60, 60, G)
+    boolean(grip, clip, "INTERSECT")
     # отверстие под винт снизу: ось винта параллельна оси рукояти и выходит на площадку под отверстием ресивера (x −158.6)
     bottom = axis_pt(1.0) + FWD * SCREW_OFF
     # канал под ключ снизу до головки винта и проход стержня через верх рукояти в ресивер
@@ -216,16 +353,18 @@ def build(ctx):
     hole.location = v(bottom.x, 0, bottom.z)
     apply_transform(hole)
     boolean(grip, hole)
-    finish(grip, w=0.9, seg=3, angle=40)
+    # кромки площадки и дна скруглены (дно — шире: за него берутся)
+    finish(grip, w=1.2, seg=4, angle=40)
     # утопленные площадки текстуры по бокам (срез по поверхности рукояти на PANEL_DEPTH)
     for s_ in (-1, 1):
         boolean(grip, panel_cutter(s_, G))
     finish(grip, w=0.3, seg=2, angle=40)
     for p in grip.data.polygons:
         p.use_smooth = True
-    # бугорки на дне площадок — замкнутые усечённые пирамидки (основание утоплено в дно)
+    # бугорки на дне площадок и рёбрышки в выемках — замкнутые тела, основания утоплены в поверхность
     tex = stipple(G)
-    grip = join([grip, tex], "Pistol_grip")
+    rb = ribs(G)
+    grip = join([grip, tex, rb], "Pistol_grip")
     auto_sharp(grip, 40)
     grip["_fin"] = 1
     o["grip"] = grip

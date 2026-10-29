@@ -107,7 +107,8 @@ def build(ctx):
         set_parent(ob(nm), lp)
         if ob(nm + "_pin"):
             set_parent(ob(nm + "_pin"), ch)
-        add_driver(lp, "rotation_euler", 2, f"{-s}*radians(14.0)*ch_latch", ctrl, ["ch_latch"])
+        # крыло тянут назад — крючок у оси уходит наружу и выходит из выреза ресивера
+        add_driver(lp, "rotation_euler", 2, f"{s}*radians(14.0)*ch_latch", ctrl, ["ch_latch"])
     # досылатель: толкатель вдоль оси корпуса
     if ob("Forward_assist"):
         fam = empty("Forward_assist_mover", FA_S, R, upper_g, size=0.005)
