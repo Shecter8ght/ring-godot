@@ -1,5 +1,5 @@
 extends Node
-## Иконки предметов: модель каждого предмета (ItemModels) снимается ортокамерой на прозрачном
+## Иконки предметов: модель каждого предмета (ItemModels) снимается ортокамерой в студии ItemStudio на прозрачном
 ## фоне в assets/icons/<id>.png — размер по клеткам предмета (ItemDb.size × PX). Оружие и обвесы —
 ## сбоку, дулом вправо; остальное — на три четверти сверху. После прогона — переимпорт:
 ## tools/godot.cmd --headless --import. Иконок нет — сетки рисуют цветной прямоугольник.
@@ -17,6 +17,9 @@ func _ready() -> void:
 	# арсенал (data/weapons.json, armor.json) — те же иконки
 	items.merge(WeaponDb.items())
 	for id in items:
+		# наклейки — свои иконки из рисунков (tools/sticker_icons), модель их не заменяет; по имени — можно
+		if only.is_empty() and String(id).begins_with("sticker_"):
+			continue
 		if only.is_empty() or String(id) in only:
 			ids.append(String(id))
 	var n := 0
@@ -36,25 +39,7 @@ func _bake(id: String) -> void:
 	vp.msaa_3d = Viewport.MSAA_8X
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(vp)
-	var env := WorldEnvironment.new()
-	var e := Environment.new()
-	e.background_mode = Environment.BG_CLEAR_COLOR
-	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color(0.75, 0.77, 0.82)
-	e.ambient_light_energy = 0.9
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	e.tonemap_exposure = 1.1
-	env.environment = e
-	vp.add_child(env)
-	var key := DirectionalLight3D.new()
-	key.rotation_degrees = Vector3(-45, -35, 0)
-	key.light_energy = 2.2
-	vp.add_child(key)
-	var fill := DirectionalLight3D.new()
-	fill.rotation_degrees = Vector3(-20, 140, 0)
-	fill.light_color = Color(0.75, 0.85, 1.0)
-	fill.light_energy = 0.9
-	vp.add_child(fill)
+	ItemStudio.setup(vp)
 	var model := ItemModels.build(id)
 	vp.add_child(model)
 	# фонарь и лазер обвесов в иконке не светят

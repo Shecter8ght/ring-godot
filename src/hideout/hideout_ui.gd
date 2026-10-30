@@ -1011,8 +1011,11 @@ func _shop_card(sid: String) -> ItemCard:
 	var tl := maxi(TraderStock.catalog_of(sid), 1)
 	if _trust_blocked(sid, tl):
 		# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
-		card.controls.add_child(_text("ступень %d" % TraderStock.step_of(tl), Color(0.8, 0.5, 0.4)))
-		card.modulate = Color(1, 1, 1, 0.6)
+		# закрытое не бледнеет целиком (полупрозрачный ствол читался «блеклым», владелец 2026-10-30): предмет виден
+		# как есть, приглушена цена, замок — ярлык ступени
+		card.controls.add_child(_text("откроется со ступени %d" % TraderStock.step_of(tl), Color(0.9, 0.62, 0.42)))
+		if card.price_label:
+			card.price_label.add_theme_color_override("font_color", Color(0.55, 0.57, 0.6))
 	else:
 		var b := _button("Купить", func() -> void:
 			var q := _qty_of(sid) if ItemDb.stack(sid) > 1 else 1

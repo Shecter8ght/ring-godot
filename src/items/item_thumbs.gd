@@ -1,7 +1,7 @@
 class_name ItemThumbs
 extends Node
 ## Миниатюры конкретных экземпляров оружия: та же съёмка, что у печёных иконок (tools/icon_bake —
-## ортокамера сбоку, дулом вправо, студийный свет), но с фактической сборкой — обвес, переходники
+## ортокамера сбоку, дулом вправо, студия ItemStudio), но с фактической сборкой — обвес, переходники
 ## по пазам, износ и магазин (вынут / другой). Два одинаковых автомата с разными сборками выглядят
 ## по-разному. Снимок — в фоне, по одному за кадр; пока его нет, окна рисуют обычную иконку и
 ## перерисовываются, когда он готов. Кэш — в памяти по ключу вида модели.
@@ -128,25 +128,7 @@ func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> 
 	vp.msaa_3d = Viewport.MSAA_8X
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(vp)
-	var env := WorldEnvironment.new()
-	var e := Environment.new()
-	e.background_mode = Environment.BG_CLEAR_COLOR
-	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color(0.75, 0.77, 0.82)
-	e.ambient_light_energy = 0.9
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	e.tonemap_exposure = 1.1
-	env.environment = e
-	vp.add_child(env)
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-45, -35, 0)
-	light.light_energy = 2.2
-	vp.add_child(light)
-	var fill := DirectionalLight3D.new()
-	fill.rotation_degrees = Vector3(-20, 140, 0)
-	fill.light_color = Color(0.75, 0.85, 1.0)
-	fill.light_energy = 0.9
-	vp.add_child(fill)
+	ItemStudio.setup(vp)
 	var weapon: bool = WeaponDb.is_weapon(id)
 	var model: Node3D = WeaponModels.build(id, entry.get("mods", {}), 0, WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry)) 		if weapon else ItemModels.build(id)
 	vp.add_child(model)
