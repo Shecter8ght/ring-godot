@@ -189,7 +189,7 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dor
                                                               # src/blockout/dorm_v3) при свете «вечер Б»: снимки docs/screens/dorm/v3 и время кадра на видеокарте
                                                               # (DORM_V3_VIEWS=01_corridor,04_wash — выборочно; архивы пробы света не трогает);
                                                               # с модулями Blender (dorm_modules.gd: двери, окна, батареи); свои кадры —
-                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*)
+                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*); DORM_V3_CASE=overcast_A — другой свет
 tools/godot.cmd --headless --script res://tools/dorm_v3_check.gd # материалы v03 в движке: карты и форматы (поля EXR без сжатия), шейдеры, палитра стенда, модули и их места
 python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 из комплекта модулей → assets/textures/dorm_v3 (+ .import, шум износа); затем --import
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Dorm_Modules/models/RING_Dorm_Modules_v03.blend" --python-exit-code 1 --python tools/dorm_modules/godot_export.py

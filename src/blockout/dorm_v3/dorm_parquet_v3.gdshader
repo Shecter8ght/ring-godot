@@ -9,6 +9,11 @@ varying vec3 world_at;
 varying vec3 world_normal;
 
 void vertex() {
+	// Бок плиты пола над пустотой лестницы лежит в плоскости стены этажа ниже (она заходит в толщину плиты) —
+	// утапливаем боковые грани на 4 мм: где перед ними стена, видна стена, без мерцания.
+	if (abs(NORMAL.y) < 0.5) {
+		VERTEX -= NORMAL * 0.004;
+	}
 	world_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(mat3(MODEL_MATRIX) * NORMAL);
 }

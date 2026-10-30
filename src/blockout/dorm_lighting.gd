@@ -162,12 +162,13 @@ func update_active_probes() -> void:
 
 ## Атлас отражений держит 64 зонда, и скрытый зонд (hide) своё место не отдаёт: за прогулку по этажам и лестнице
 ## показанных из 90 зондов стенда набиралось больше 64 — «Reflection probe atlas index invalid» и падение Godot.
-## Неактивный зонд снимается со сцены сервера отрисовки (место в атласе освобождается); вернувшийся снимает комнату заново.
+## У неактивного зонда на сервере отрисовки снимается основа: место в атласе и очередь съёмки освобождаются (снятие со
+## сцены оставляло его в очереди — «scenario is null»); вернувшийся снимает комнату заново.
 func _set_probe_active(probe: ReflectionProbe, active: bool) -> void:
 	probe.visible = active
-	if bool(probe.get_meta("dorm_probe_attached",true))==active or not probe.is_inside_tree():
+	if bool(probe.get_meta("dorm_probe_attached",true))==active:
 		return
-	RenderingServer.instance_set_scenario(probe.get_instance(),probe.get_world_3d().scenario if active else RID())
+	RenderingServer.instance_set_base(probe.get_instance(),probe.get_base() if active else RID())
 	probe.set_meta("dorm_probe_attached",active)
 
 

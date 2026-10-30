@@ -20,6 +20,13 @@ varying vec3 world_at;
 varying vec3 world_normal;
 
 void vertex() {
+	// Бока площадок (3) лежат в плоскостях стен клетки, верх перемычек (2) — на отметке чистого пола: утапливаем
+	// их на 4 мм, иначе они спорят со стеной и паркетом и мерцают. У граней по осям мира это незаметно.
+	if (mode == 3 && abs(NORMAL.y) < 0.5) {
+		VERTEX -= NORMAL * 0.004;
+	} else if (mode == 2 && NORMAL.y > 0.9) {
+		VERTEX.y -= 0.004;
+	}
 	world_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(mat3(MODEL_MATRIX) * NORMAL);
 }

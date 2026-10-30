@@ -515,8 +515,10 @@ func _v3_shots() -> void:
 		get_tree().quit(1)
 		return
 	if lighting!=null:
+		# DORM_V3_CASE=overcast_A — другой случай света (по умолчанию — выбранный владельцем)
+		var case_id: String = OS.get_environment("DORM_V3_CASE") if OS.get_environment("DORM_V3_CASE")!="" else String(plan.environment.default)
 		for index: int in range(plan.environment.cases.size()):
-			if String(plan.environment.cases[index].id)==String(plan.environment.default):
+			if String(plan.environment.cases[index].id)==case_id:
 				await lighting.call("set_case",index)
 				break
 	walker.set_physics_process(false)

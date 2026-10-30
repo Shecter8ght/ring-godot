@@ -107,11 +107,12 @@ func skip(item: Dictionary, builder: RefCounted) -> bool:
 
 ## Брусок стены у двери-модуля — кусками под черновой проём коробки (откосы отходят на 37 мм, низ перемычки
 ## поднимается до верха коробки); срезанное остаётся коллизией. Остальные бруски — [item] как есть.
-## Площадки лестницы с маршами-модулями — мозаикой (палитра stair_landing), коробка та же.
+## Площадки лестницы с маршами-модулями — мозаикой (палитра stair_landing), коробка та же; пол клетки 1-го этажа
+## (stair_ground, та же коробка, что и площадка) — тоже, иначе две совпавшие поверхности мерцают.
 func trim(item: Dictionary, builder: RefCounted) -> Array[Dictionary]:
 	var result: Array[Dictionary] = [item]
 	var id: String = String(item.get("id", ""))
-	if id.begins_with("stair_") and id.ends_with("_landing") and not flights.is_empty() and palette.has("stair_landing"):
+	if id.begins_with("stair_") and (id.ends_with("_landing") or id == "stair_ground") and _stairs_available() and palette.has("stair_landing"):
 		var landing: Dictionary = item.duplicate()
 		landing.mat = "stair_landing"
 		return [landing]
