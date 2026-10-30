@@ -371,10 +371,11 @@ bash tools/vss_m_v8/painter_to_game.sh [набор …] [--scenes] [--shots] # �
                                                               # проверки: --python tools/ar15/check_overlaps.py [-- состояния] (пересечения в положениях), tools/ar15/shots.py (снимки)
                                                               # снимки как в Material Preview (Eevee, HDRI forest.exr): --python tools/ar15/render_preview.py -- <папка> [вид,…] [ширина]
 python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.png]   # AR-15: обводка крыла рукоятки заряжания по снимку владельца → tools/ar15/ch_wing_trace.json (его берёт part_bolt)
-# AR-15, текстуры этап 1 (blender … --background --factory-startup --python-exit-code 1 --python): tools/ar15/tex_uv_blender.py -- <AR15_uv_v01.blend>
-#   на AR-15_геометрия_v06.blend (развёртка 13 наборов tools/ar15/tex_sets.py: Smart UV + Minimum Stretch + укладка asset_kit/uv.py; RizomUV 2024.1 на этой
-#   сетке не справился — tools/ar15/rz_unwrap.py, rizomuv.exe -cfi) → на AR15_uv_v01.blend: tex_marks.py -- preview <папка>|bake|seams (надписи, знак, швы литья →
-#   маски в развёртку), sp_export.py -- <AR15_sp.fbx> → Painter: python -X utf8 tools/ar15/sp_run.py start; -c "sp_ar15.create|bake|build|export_variant(...)"
+# AR-15, текстуры этап 1 (blender … --background --factory-startup --python-exit-code 1 --python): tools/ar15/tex_uv_blender.py -- <AR15_uv_v02.blend>
+#   на AR-15_геометрия_v07.blend (развёртка 13 наборов tools/ar15/tex_sets.py: Smart UV + Minimum Stretch + укладка asset_kit/uv.py; RizomUV 2024.1 на этой
+#   сетке не справился — tools/ar15/rz_unwrap.py, rizomuv.exe -cfi) → на AR15_uv_v02.blend: tex_marks.py -- preview <папка>|bake|seams (надписи, знак, швы литья →
+#   маски в развёртку), sp_export.py -- <AR15_sp.fbx> → Painter: python -X utf8 tools/ar15/sp_run.py start; -c "sp_ar15.create|bake([набор])|save|build|export_variant(...)"
+#   (запекать по одному набору и сохранять после каждого — общий прогон пропадает при сбое)
 #   (стек tools/ar15/sp_ar15.py, варианты основы А/Б/В) → tex_apply.py -- apply <A|B|C> <карты> <out.blend> <нормали> (студия в файле) | shots <папка> [samples]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
