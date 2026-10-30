@@ -196,6 +196,10 @@ python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 �
                                                               # модули общежития в стенд: коробка двери, полотно, окно, батарея, марши, ограждения и повороты
                                                               # поручня — по сетке на модуль (-- <имя …> — выборочно)
                                                               # → assets/models/dorm/*.glb (материалы — dorm_modules.gd, карт в файлах нет); затем --import
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_found_lights.py -- build|export
+                                                              # свет, оставленный людьми (фонарь, налобник, химсвет, кемпинговый фонарь, свечи, мигалка): build <.blend> — форма
+                                                              # на просмотр (RING_Dorm_FoundLights), export (на этом .blend) → assets/models/dorm/found_*.glb + found_lights.json;
+                                                              # расстановка в стенде — data/blockouts/dorm_found_lights.json (лампы плана там же убраны)
 python -X utf8 tools/dorm_light_archive.py --verify           # r6: хеши архива light5_* и неизменность геометрии, масштаба, базовых цветов и 14 камер
 python -X utf8 tools/dorm_light_r61_archive.py --verify       # r6.1: 46 побайтных файлов «до» light6_* (42 вида, два JSON, две калибровки)
 tools/godot.cmd --headless --script res://tools/dorm_light_geometry_check.gd # r6: те же треугольники / нормали / UV / коллизии при группировке по этажам и наружным граням

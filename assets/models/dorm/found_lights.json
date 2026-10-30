@@ -1,0 +1,58 @@
+{
+ "found_flashlight": {
+  "light": [
+   0.0,
+   0.0172,
+   -0.153
+  ],
+  "beam": [
+   0.0,
+   0.0,
+   -1.0
+  ]
+ },
+ "found_headlamp": {
+  "light": [
+   0.0,
+   0.018,
+   -0.034
+  ],
+  "beam": [
+   0.0,
+   0.0,
+   -1.0
+  ]
+ },
+ "found_chemlight": {
+  "light": [
+   0.0,
+   0.03,
+   -0.0
+  ],
+  "beam": null
+ },
+ "found_lantern": {
+  "light": [
+   0.0,
+   0.086,
+   -0.0
+  ],
+  "beam": null
+ },
+ "found_candles": {
+  "light": [
+   0.0,
+   0.08,
+   0.05
+  ],
+  "beam": null
+ },
+ "found_beacon": {
+  "light": [
+   0.0,
+   0.19,
+   -0.0
+  ],
+  "beam": null
+ }
+}

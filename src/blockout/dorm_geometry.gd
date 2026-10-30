@@ -7,6 +7,10 @@ const Geometry = preload("res://src/blockout/study_geometry.gd")
 const StudyDoor = preload("res://src/blockout/dorm_study_door.gd")
 const ExteriorBatches = preload("res://src/blockout/dorm_exterior_batches.gd")
 const DormModules = preload("res://src/blockout/dorm_modules.gd")
+const FoundLight = preload("res://src/blockout/dorm_found_light.gd")
+## Электричества в заброшенном здании нет: лампы плана из remove_groups не ставятся, вместо них — свет, оставленный
+## людьми (dorm_found_light.gd). Без файла — прежние лампы.
+const FOUND_LIGHTS_PATH: String = "res://data/blockouts/dorm_found_lights.json"
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -52,7 +56,10 @@ func rebuild() -> void:
 		_build_geometry(group,section.groups[group_name],palette)
 	if modules!=null:
 		modules.call("place",self)
+	var found: Dictionary = _found_lights()
 	for item: Dictionary in section.get("lights", []):
+		if String(item.get("group","legacy")) in found.get("remove_groups",[]):
+			continue
 		var lamp: Light3D = SpotLight3D.new() if String(item.get("type","omni"))=="spot" else OmniLight3D.new()
 		lamp.name = String(item.get("id","StudyFill"))
 		lamp.position = _vec(item.at)
@@ -87,6 +94,17 @@ func rebuild() -> void:
 		lamp.shadow_bias = float(item.get("shadow_bias",.025))
 		if item.has("specular"):lamp.light_specular = float(item.specular)
 		if item.has("angle_attenuation"):(lamp as SpotLight3D).spot_angle_attenuation = float(item.angle_attenuation)
+	for item: Dictionary in found.get("lights",[]):
+		if String(item.get("section",""))!=section_id:
+			continue
+		var source: Node3D = FoundLight.new() as Node3D
+		source.name = String(item.id)
+		source.set("kind",String(item.kind))
+		source.set("charge",float(item.get("charge",0.6)))
+		source.set("seed_value",String(item.id).hash())
+		source.position = _vec(item.at)
+		source.rotation_degrees.y = float(item.get("yaw",0.0))
+		add_child(source)
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))
@@ -178,6 +196,13 @@ func _batch_material(key: String, height: float, palette: Dictionary) -> String:
 	var alias: String = key+"__floor_"+str(floor_index+1)
 	palette[alias] = palette[key]
 	return alias
+
+
+static func _found_lights() -> Dictionary:
+	if not FileAccess.file_exists(FOUND_LIGHTS_PATH):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(FOUND_LIGHTS_PATH))
+	return parsed as Dictionary if parsed is Dictionary else {}
 
 
 static func _vec(values: Array) -> Vector3:

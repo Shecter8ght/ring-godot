@@ -55,6 +55,7 @@
 - Painted Wood 008 A, ambientCG, CC0 1.0, https://ambientcg.com/view?id=PaintedWood008A — фактура и трещины краски на коробках, полотнах и окнах модулей (painted_wood_*, перекрашивается шейдером); сырьё — `_asset_src/dorm_textures/PaintedWood008A`
 - Terrazzo 005, ambientCG, CC0 1.0, https://ambientcg.com/view?id=Terrazzo005 — мозаичная крошка ступеней и площадок лестницы (terrazzo_*); сырьё — `_asset_src/dorm_textures/Terrazzo005`
 - Модули `assets/models/dorm` (коробка двери, полотно, окно, батарея, марши, ограждения, повороты поручня) — свои, Blender (tools/dorm_modules); краска батарей и ограждения — та же green_metal_rust (Poly Haven, CC0), поручень — Sapele Veneer (Poly Haven, CC0), перекрашенные шейдером
+- Оставленный свет `assets/models/dorm/found_*` (фонарь, налобник, химсвет, кемпинговый фонарь, свечи, мигалка) — свои, Blender (tools/dorm_modules/build_found_lights.py)
 Сырьё — `_asset_src/dorm_textures/ph_*_4k` с license.txt.
 
 ## Декали попаданий (tools/import_impact_decals.py)
