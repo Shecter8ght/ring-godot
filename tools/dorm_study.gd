@@ -533,6 +533,13 @@ func _v3_shots() -> void:
 	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
 		leaf.call("reset_pose")
 	# свои кадры: DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (глаз и точка взгляда в метрах); с ними штатные — только из DORM_V3_VIEWS
+	# DORM_V3_FILL=1 — свет от камеры, как фонарь в руке: проверить мелочь и следы в тёмных местах
+	if OS.get_environment("DORM_V3_FILL")!="":
+		var fill: OmniLight3D = OmniLight3D.new()
+		fill.omni_range = 9.0
+		fill.light_energy = 1.6
+		fill.shadow_enabled = true
+		camera.add_child(fill)
 	var views: Array[Dictionary] = []
 	for spec: String in OS.get_environment("DORM_V3_VIEW").split(";",false):
 		var p: PackedStringArray = spec.split(":")

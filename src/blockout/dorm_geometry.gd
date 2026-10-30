@@ -11,6 +11,9 @@ const FoundLight = preload("res://src/blockout/dorm_found_light.gd")
 ## Электричества в заброшенном здании нет: лампы плана из remove_groups не ставятся, вместо них — свет, оставленный
 ## людьми (dorm_found_light.gd). Без файла — прежние лампы.
 const FOUND_LIGHTS_PATH: String = "res://data/blockouts/dorm_found_lights.json"
+## Следы (кровь, грязь, пыль, копоть) — декали из масок владельца; без карт assets/textures/dorm_decals их нет.
+const DECALS_PATH: String = "res://data/blockouts/dorm_decals.json"
+const DECAL_DIR: String = "res://assets/textures/dorm_decals"
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -105,6 +108,9 @@ func rebuild() -> void:
 		source.position = _vec(item.at)
 		source.rotation_degrees.y = float(item.get("yaw",0.0))
 		add_child(source)
+	for item: Dictionary in _read_json(DECALS_PATH).get("decals",[]):
+		if String(item.get("section",""))==section_id:
+			_add_decal(item)
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))
@@ -199,10 +205,45 @@ func _batch_material(key: String, height: float, palette: Dictionary) -> String:
 
 
 static func _found_lights() -> Dictionary:
-	if not FileAccess.file_exists(FOUND_LIGHTS_PATH):
+	return _read_json(FOUND_LIGHTS_PATH)
+
+
+static func _read_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(FOUND_LIGHTS_PATH))
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return parsed as Dictionary if parsed is Dictionary else {}
+
+
+## Декаль проецируется вдоль −Y на поверхность с нормалью normal; на стене низ картинки (+Z декали) — вниз,
+## на полу картинка повёрнута на rot.
+func _add_decal(item: Dictionary) -> void:
+	var name_id: String = String(item.name)
+	var albedo_path: String = "%s/%s_albedo.png" % [DECAL_DIR,name_id]
+	if not ResourceLoader.exists(albedo_path):
+		return
+	var n: Vector3 = _vec(item.normal).normalized()
+	var down: Vector3
+	if absf(n.y)>0.9:
+		var rot: float = deg_to_rad(float(item.get("rot",0.0)))
+		down = Vector3(sin(rot),0,cos(rot))
+	else:
+		down = (Vector3.DOWN-n*n.dot(Vector3.DOWN)).normalized()
+	var decal: Decal = Decal.new()
+	decal.name = String(item.id)
+	decal.transform = Transform3D(Basis(n.cross(down),n,down),_vec(item.at))
+	decal.size = Vector3(float(item.size[0]),float(item.get("depth",0.3)),float(item.size[1]))
+	decal.texture_albedo = load(albedo_path) as Texture2D
+	decal.texture_normal = load("%s/%s_normal.png" % [DECAL_DIR,name_id]) as Texture2D
+	decal.texture_orm = load("%s/%s_orm.png" % [DECAL_DIR,name_id]) as Texture2D
+	decal.normal_fade = 0.5
+	decal.upper_fade = 0.2
+	decal.lower_fade = 0.2
+	decal.distance_fade_enabled = true
+	decal.distance_fade_begin = 30.0
+	decal.distance_fade_length = 10.0
+	decal.add_to_group("dorm_decals")
+	add_child(decal)
 
 
 static func _vec(values: Array) -> Vector3:

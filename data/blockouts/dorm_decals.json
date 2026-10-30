@@ -1,0 +1,26 @@
+{
+ "about": "Следы в общежитии — декали из масок владельца (tools/dorm_modules/gen_dorm_decals.py → assets/textures/dorm_decals). name — карты, at — точка на поверхности, normal — куда смотрит поверхность, size — ширина и высота картинки, м, depth — на сколько проецировать, м, rot — поворот на полу, градусы (на стене низ картинки — вниз), section — узел стенда.",
+ "decals": [
+  {"id": "f3_307_pool", "note": "в 307-й кого-то ранили: старая лужа у койки", "name": "blood_edge", "section": "Floor3", "at": [16.9, 7.66, -6.4], "normal": [0, 1, 0], "size": [1.1, 1.1], "depth": 0.3, "rot": 20},
+  {"id": "f3_307_crust", "name": "blood_crust", "section": "Floor3", "at": [16.85, 7.66, -6.45], "normal": [0, 1, 0], "size": [0.85, 0.85], "depth": 0.3, "rot": 75},
+  {"id": "f3_307_drops", "note": "капли от лужи к двери", "name": "blood_drops", "section": "Floor3", "at": [16.0, 7.66, -4.3], "normal": [0, 1, 0], "size": [0.9, 0.9], "depth": 0.3, "rot": 70},
+  {"id": "f3_corridor_palm", "note": "ладонью о стену у двери 307", "name": "blood_palm", "section": "Floor3", "at": [15.5, 8.85, -1.70], "normal": [0, 0, 1], "size": [0.32, 0.32], "depth": 0.2},
+  {"id": "f3_corridor_smear", "note": "шёл к лестнице, держась за стену", "name": "blood_smear", "section": "Floor3", "at": [17.4, 8.7, -1.70], "normal": [0, 0, 1], "size": [0.9, 0.9], "depth": 0.2},
+  {"id": "f3_corridor_runs", "name": "blood_runs", "section": "Floor3", "at": [17.8, 8.25, -1.70], "normal": [0, 0, 1], "size": [0.55, 0.75], "depth": 0.2},
+  {"id": "stair_f3_crust", "note": "засохшая корка у решётки", "name": "blood_crust", "section": "CentralStair", "at": [20.95, 7.66, -2.95], "normal": [0, 1, 0], "size": [0.9, 0.9], "depth": 0.3, "rot": -30},
+  {"id": "f2_205_soot", "note": "свечи коптят окно в лагере", "name": "soot_plume", "section": "Floor2", "at": [10.635, 6.75, -8.86], "normal": [0, 0, 1], "size": [1.1, 1.5], "depth": 0.7},
+  {"id": "f2_205_dirt", "note": "натоптано в лагере", "name": "dirt_patches", "section": "Floor2", "at": [10.6, 4.42, -5.2], "normal": [0, 1, 0], "size": [2.6, 2.6], "depth": 0.3, "rot": 40},
+  {"id": "f2_lounge_burn_floor", "note": "в углу гостиной жгли мусор", "name": "soot_dense", "section": "Floor2", "at": [27.7, 4.42, 7.9], "normal": [0, 1, 0], "size": [1.5, 1.5], "depth": 0.3, "rot": 15},
+  {"id": "f2_lounge_burn_wall", "name": "soot_plume", "section": "Floor2", "at": [28.52, 5.9, 7.7], "normal": [-1, 0, 0], "size": [1.6, 2.2], "depth": 0.3},
+  {"id": "f1_entry_dirt", "note": "у входа натаскали грязи", "name": "dirt_grain", "section": "Floor1", "at": [2.0, 0.48, 6.4], "normal": [0, 1, 0], "size": [2.6, 2.6], "depth": 0.3, "rot": 0},
+  {"id": "f1_corridor_dirt", "name": "dirt_patches", "section": "Floor1", "at": [4.2, 0.48, 0.4], "normal": [0, 1, 0], "size": [3.0, 3.0], "depth": 0.3, "rot": 120},
+  {"id": "f1_corridor_dust_1", "name": "dust_patches", "section": "Floor1", "at": [9.5, 0.48, 1.1], "normal": [0, 1, 0], "size": [2.4, 2.4], "depth": 0.3, "rot": 30},
+  {"id": "f1_corridor_dust_2", "name": "dust_dense", "section": "Floor1", "at": [16.2, 0.48, -1.0], "normal": [0, 1, 0], "size": [2.2, 2.2], "depth": 0.3, "rot": 200},
+  {"id": "f1_commandant_wipe", "note": "кто-то вытирал руки о дверь коменданта", "name": "blood_fingers", "section": "Floor1", "at": [30.95, 1.55, -1.70], "normal": [0, 0, 1], "size": [0.3, 0.3], "depth": 0.25},
+  {"id": "f2_corridor_dust", "name": "dust_patches", "section": "Floor2", "at": [5.5, 4.42, 1.0], "normal": [0, 1, 0], "size": [2.4, 2.4], "depth": 0.3, "rot": 80},
+  {"id": "f2_corridor_dirt", "name": "dirt_grain", "section": "Floor2", "at": [30.5, 4.42, -0.8], "normal": [0, 1, 0], "size": [2.2, 2.2], "depth": 0.3, "rot": 10},
+  {"id": "f2_corridor_wipe", "name": "grime_wipe", "section": "Floor2", "at": [12.2, 5.4, 1.70], "normal": [0, 0, -1], "size": [1.4, 1.4], "depth": 0.2},
+  {"id": "annex_wash_dirt", "name": "dirt_patches", "section": "NorthAnnex", "at": [36.8, 4.42, -16.6], "normal": [0, 1, 0], "size": [2.0, 2.0], "depth": 0.3, "rot": 60},
+  {"id": "f3_corridor_dust", "name": "dust_dense", "section": "Floor3", "at": [8.0, 7.66, -0.9], "normal": [0, 1, 0], "size": [2.4, 2.4], "depth": 0.3, "rot": 140}
+ ]
+}
