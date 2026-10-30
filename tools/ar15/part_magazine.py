@@ -6,8 +6,13 @@
 # гильзы — клеймо «ГР 24». Владелец (2026-10-29): надписи делаются на этапе текстур — в геометрии они только при
 # lib.MARKINGS_GEOMETRY = True (по умолчанию нет), места под них ровные. Сетки замкнутые.
 # Магазин строится в собственной системе «вдоль хребта»: s — вниз по магазину от верха губок, u — вперёд, w = Y.
-# Верх прямой (в шахте), ниже — дуга R вперёд на CURVE_DEG и снова прямой низ: так изогнут 30-зарядный STANAG
-# (замер по фото PEO M4, 4.7 пикс/мм: задняя кромка уходит вперёд на ≈ 22 мм на 85 мм ниже шахты, низ — под ≈ 19–20°).
+# Верх прямой (в шахте); сразу под шахтой — короткий плавный перегиб вперёд (BENDS[0]), спрятанный за губой шахты, так
+# что пояс-«плечо» корпуса ложится параллельно скошенному срезу шахты; ниже — мягкая дуга ещё на BENDS[1] и прямой низ.
+# Владелец 30.10 повернул магазин в файле на 7.8° («так лучше смотрится», «расширение магазина параллельно со срезом
+# шахты»), но поворот целиком ломает механику (корпус в стенках шахты, верхний патрон в затворе) — поэтому внутри
+# шахты магазин прямой, а наклон набирается под ней. Так же нарисован магазин у образца wafla (Sketchfab, наложение
+# сбоку: под поясом корпус наклонён вперёд ≈ 10°, пояс параллелен срезу шахты). Кривизна везде нарастает и сходит
+# плавно (smoothstep) — без изломов.
 import math
 import bmesh
 import bpy
@@ -19,10 +24,11 @@ from part_lower import BOLT_CATCH_PIVOT
 Z0 = MAG_TOP_Z
 CX = (MAG_X[0] + MAG_X[1]) / 2            # середина горловины по X
 L2 = (MAG_X[1] - MAG_X[0]) / 2            # полудлина сечения (33.3)
-S_STRAIGHT = 58.0                         # прямой участок: в шахте до её переднего среза и чуть ниже
-R_CURVE = 250.0                           # радиус дуги изгиба (по хребту)
-CURVE_DEG = 20.0                          # поворот нижней части вперёд
-S_ARC_END = S_STRAIGHT + R_CURVE * math.radians(CURVE_DEG)   # ниже — прямой участок до донца
+S_STRAIGHT = 56.0                         # прямой участок: в шахте до её переднего среза (z −56 у раструба)
+# изгибы хребта: (начало s, конец s, угол °, длина нарастания и спада кривизны мм)
+BENDS = ((S_STRAIGHT, 72.0, 12.0, 8.0),    # перегиб под шахтой — до пояса s 74…80
+         (76.0, 150.0, 18.0, 15.0))         # мягкая дуга корпуса, как у 30-зарядного STANAG (фото PEO M4: 19–20°)
+CURVE_DEG = sum(b[2] for b in BENDS)      # итоговый наклон низа
 S_BOTTOM = 179.0                          # низ корпуса по хребту
 WALL = 1.8
 RF, RR = 4.0, 3.0                         # скругления передних и задних углов сечения
@@ -45,17 +51,61 @@ HEADSTAMP = ("ГР", "24")
 
 # ---------- хребет ----------
 
+def _smooth(t):
+    t = max(0.0, min(1.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _bump(s, b):
+    s0, s1, _, ramp = b
+    return _smooth((s - s0) / ramp) * (1.0 - _smooth((s - (s1 - ramp)) / ramp))
+
+
+SPINE_DS = 0.1
+SPINE_END = S_BOTTOM + 30.0
+# кривизна каждого изгиба нормирована на его угол: ∫κ ds = угол
+_BUMP_K = [math.radians(b[2]) / (sum(_bump((i + 0.5) * SPINE_DS, b) for i in range(int(SPINE_END / SPINE_DS) + 1)) * SPINE_DS)
+           for b in BENDS]
+
+
+def kappa(s):
+    """Кривизна хребта (1/мм): ноль в шахте, плавные изгибы ниже."""
+    return sum(k * _bump(s, b) for k, b in zip(_BUMP_K, BENDS))
+
+
+def _integrate():
+    """Хребет от верха губок: (x, z, θ) через SPINE_DS мм до SPINE_END."""
+    x, z, th = CX, Z0, 0.0
+    out = [(x, z, th)]
+    n = int(SPINE_END / SPINE_DS) + 1
+    for i in range(n):
+        k = kappa((i + 0.5) * SPINE_DS)
+        thm = th + k * SPINE_DS / 2.0
+        x += math.sin(thm) * SPINE_DS
+        z -= math.cos(thm) * SPINE_DS
+        th += k * SPINE_DS
+        out.append((x, z, th))
+    return out
+
+
+_SPINE = _integrate()
+
+
 def frame(s):
     """Точка хребта и оси сечения: P, T (вниз по магазину), U (вперёд)."""
-    if s <= S_STRAIGHT:
+    if s <= 0.0:                          # выше губок (запас лофта) — прямо вверх
         return Vector((CX, 0.0, Z0 - s)), Vector((0.0, 0.0, -1.0)), Vector((1.0, 0.0, 0.0))
-    ph = (min(s, S_ARC_END) - S_STRAIGHT) / R_CURVE
-    c = Vector((CX + R_CURVE, 0.0, Z0 - S_STRAIGHT))
-    p = c + Vector((-math.cos(ph), 0.0, -math.sin(ph))) * R_CURVE
-    t = Vector((math.sin(ph), 0.0, -math.cos(ph)))
-    if s > S_ARC_END:                     # прямой низ по касательной к дуге
-        p = p + t * (s - S_ARC_END)
-    return p, t, Vector((math.cos(ph), 0.0, math.sin(ph)))
+    f = min(s / SPINE_DS, len(_SPINE) - 1.0001)
+    i = int(f)
+    t = f - i
+    (x0, z0, a0), (x1, z1, a1) = _SPINE[i], _SPINE[i + 1]
+    x, z, th = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, a0 + (a1 - a0) * t
+    extra = s - SPINE_END
+    if extra > 0.0:                       # ниже таблицы — прямо по касательной
+        x += math.sin(th) * extra
+        z -= math.cos(th) * extra
+    return (Vector((x, 0.0, z)), Vector((math.sin(th), 0.0, -math.cos(th))),
+            Vector((math.cos(th), 0.0, math.sin(th))))
 
 
 def pt(s, u, w):
@@ -497,11 +547,14 @@ def spent_case(C):
 def row_step(s):
     """Шаг рядов по хребту. На дуге донца идут по наружной (задней) линии, плечи гильз — ближе к центру изгиба:
     шаг такой, чтобы ни донца (9.68 мм в колонне), ни плечи (Ø 8.99) соседей одной колонны не пересекались."""
-    if s <= S_STRAIGHT or s >= S_ARC_END:
+    # кривизна берётся наибольшая на шаг вперёд: на нарастающем участке иначе соседи сходились бы плечами
+    k = max(kappa(s + d) for d in (0.0, 2.5, 5.0, 7.5, 10.0))
+    if k <= 1e-6:
         return ROUND_STEP
-    head = ROUND_STEP * R_CURVE / (R_CURVE - U_HEAD)
-    shoulder = (SHOULDER_D + 0.15) / 2.0 * R_CURVE / (R_CURVE - U_SHOULDER)
-    return max(head, shoulder)
+    shoulder = (SHOULDER_D + 0.15) / 2.0 / (1.0 - U_SHOULDER * k)
+    # не меньше прямого шага: при нарастающей кривизне соседние ряды повёрнуты неодинаково, и донца, сведённые по
+    # наружной линии, задевали друг друга (патроны 8–12, проверка 30.10)
+    return max(ROUND_STEP, shoulder)
 
 
 def round_positions():
