@@ -279,3 +279,64 @@ def build_lower():
     e = _zs(i5, "internals", "trigger_face", above=g, blend=L.BlendingMode.Multiply)
     _pattern(e, f"{MK}/grime.png", GRIME_SCALE * 0.7, rot=0.6, opacity=0.4)
     return f"lower: группа износа — {n_lower} слоёв; internals — 5"
+
+
+# ── магазин (полимер чёрный гладкий; подаватель — серый) ─────────────────────────────────────────────────────────────
+# Металла нет: потёртость — светлее и матовее основы (смятый полимер), заглаженность — темнее и с блеском. Суть по
+# образцам владельца 30.10: трётся выступающее, в углублениях — темно и пыль; светлые продольные полосы по ходу в
+# шахте. Места — wear_magazine.py.
+SCUFF = (0.24, 0.24, 0.24)          # потёртый полимер (основа — 0.088); 0.21 тонкими линиями почти не читался (30.10)
+
+
+def build_magazine():
+    inside = _new_group("magazine")
+    z = lambda lay, zone, above=None: _zs(lay, "magazine", zone, above=above, blend=L.BlendingMode.Multiply if above else None)
+
+    def edges(lay, zone, balance=0.62, breakup=0.4):
+        g = sp_lib.mask_generator(lay, "mg_curvature/mg_curvature", {"global_balance": balance, "global_contrast": 0.5})
+        e = _zs(lay, "magazine", zone, above=g, blend=L.BlendingMode.Multiply)
+        _pattern(e, f"{MK}/grime.png", GRIME_SCALE * 0.6, rot=0.8, opacity=breakup)
+
+    # 1–2. ход в шахте: заглажено полосой и светлые продольные полосы
+    m1 = _layer("Ход в шахте — заглажено", inside, rough=-0.12, color=(0.90, 0.90, 0.90), cop=0.5)
+    z(m1, "slide", _mask_pattern(m1, f"{MK}/polish_var.png", SMEAR_SCALE * 2.0, rot=0.3))
+    m2 = _plain("Продольные полосы — шахта, подсумок, руки", L.InsertPosition.above_node(m1), SCUFF, 0.72, cop=0.85)
+    z(m2, "streaks")
+    # 3. губки и верх — кромки потёрты патронами и затвором
+    m3 = _plain("Губки и верх — потёртости", L.InsertPosition.above_node(m2), (0.23, 0.23, 0.23), 0.75, cop=0.7)
+    edges(m3, "lips", balance=0.58)
+    # 4–5. выступы под шахтой: кромки светлее, вершины глаже
+    m4 = _layer("Выступы — заглажены", L.InsertPosition.above_node(m3), rough=-0.10, color=(0.92, 0.92, 0.92), cop=0.4)
+    z(m4, "raised", _mask_pattern(m4, f"{MK}/polish_var.png", SMEAR_SCALE * 2.0, rot=1.2))
+    m5 = _plain("Выступы — кромки светлее", L.InsertPosition.above_node(m4), SCUFF, 0.72, cop=0.8)
+    edges(m5, "raised", balance=0.57, breakup=0.3)
+    # 6–7. хват при перезарядке: заглажено, отпечатки (на гладком полимере видны в блеске)
+    m6 = _layer("Хват — заглажено", L.InsertPosition.above_node(m5), rough=-0.12, color=(0.92, 0.92, 0.92), cop=0.4)
+    z(m6, "grip", _mask_pattern(m6, f"{MK}/polish_var.png", SMEAR_SCALE * 1.5, rot=2.0))
+    m7 = _layer("Хват — отпечатки", L.InsertPosition.above_node(m6), rough=-0.15, color=(0.90, 0.90, 0.90), cop=0.3)
+    z(m7, "grip", _mask_pattern(m7, f"{MK}/prints_a.png", PRINT_SCALE, rot=0.9))
+    # 8–10. донце: кромки и углы потёрты, царапины разнонаправленные (глубокие — светлее: смятый полимер)
+    m8 = _plain("Донце — кромки потёрты", L.InsertPosition.above_node(m7), (0.23, 0.23, 0.23), 0.75, cop=0.7)
+    edges(m8, "plate", balance=0.6)
+    m9 = _plain("Донце — царапины", L.InsertPosition.above_node(m8), (0.22, 0.22, 0.22), 0.74, cop=0.7)
+    z(m9, "plate_scr")
+    m10 = _plain("Донце — царапины глубокие", L.InsertPosition.above_node(m9), (0.30, 0.30, 0.30), 0.78, cop=0.85)
+    z(m10, "plate_scr_deep")
+    # 11. окно защёлки — слабая выработка кромки
+    m11 = _plain("Окно защёлки — выработка", L.InsertPosition.above_node(m10), SCUFF, 0.72, cop=0.6)
+    edges(m11, "catch", balance=0.58, breakup=0.3)
+    # 12. пыль в углублениях под шахтой
+    m12 = _layer("Пыль в углублениях", L.InsertPosition.above_node(m11), rough=0.15, color=(0.62, 0.59, 0.53),
+                 cmode=L.BlendingMode.Normal, cop=0.45)
+    g = sp_lib.mask_generator(m12, "mg_dirt/mg_dirt", {"dirt_level": 0.3, "dirt_contrast": 0.7, "grunge_amount": 0.3,
+                                                       "Grunge_Scale": 6, "Use_Triplanar": 1, "edges_masking": 0.9})
+    pz = _zs(m12, "magazine", "recess", above=g, blend=L.BlendingMode.Multiply)
+    _pattern(pz, f"{MK}/dust_grain.png", GRAIN_SCALE, rot=0.4, opacity=0.5)
+    # 13. подаватель — верх, где лежит патрон, заглажен
+    m13 = _layer("Подаватель — верх заглажен", L.InsertPosition.above_node(m12), rough=-0.10, color=(0.92, 0.92, 0.92),
+                 cop=0.4)
+    z(m13, "follower_top")
+    # 14. ворсинки (синтетика — нити кодом)
+    m14 = _plain("Ворсинки", L.InsertPosition.above_node(m13), (0.86, 0.85, 0.82), 0.85, cop=0.9)
+    z(m14, "lint")
+    return "magazine: группа износа — 14 слоёв"

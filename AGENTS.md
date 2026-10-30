@@ -391,6 +391,8 @@ python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.pn
 #   Остальные детали — места попиксельно: blender -b <AR15_uv_v03.blend> --python tools/ar15/wear_maps.py -- <набор> <папка> (положение,
 #   нормаль, номер детали в каждом пикселе развёртки → <набор>_maps.npz) → python -X utf8 tools/ar15/wear_lower.py (нижний ресивер и УСМ:
 #   зоны <набор>_zone_*_L.png, просмотр lower_zones_preview.png) → sp_ar15_wear.build_lower(), export_variant('B', <папка>, ['lower', 'internals'])
+#   Магазин: wear_maps.py -- magazine → python -X utf8 tools/ar15/wear_magazine.py (штрихи strokes() — по якобиану карты положения) →
+#   sp_ar15_wear.build_magazine(), export_variant('B', <папка>, ['magazine'])
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
