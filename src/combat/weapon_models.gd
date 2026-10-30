@@ -151,6 +151,10 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 			var bolt: Node3D = model.find_child(String(action.get("bolt", "")), true, false) as Node3D
 			if bolt:
 				bolt.set_meta("rest", bolt.transform)
+			# пылезащитная шторка: закрыта в покое, откидывается на cover_deg вокруг своей оси (+Z модели — ось шарнира)
+			var cover: Node3D = model.find_child(String(action.get("cover", "")), true, false) as Node3D
+			if cover:
+				cover.set_meta("rest", cover.transform)
 	# отражение неметалла по материалу (weapon.material_specular {имя материала: 0…1}): у Cerakote ВСС-М — 0.1,
 	# как в сценах Blender (в glTF его нет; при обычных 0.5 чёрное покрытие на свету читалось серым, владелец 2026-10-26)
 	var spec: Dictionary = weapon.get("material_specular", {})

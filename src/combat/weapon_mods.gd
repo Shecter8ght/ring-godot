@@ -167,6 +167,7 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0,
 				mesh.set_meta("reticle_dot", true)
 				mesh.set_meta("mount", key)
 	root.set_meta("frames", frames)
+	_fold_sights(root, model_key, mods)
 	Metka4Model.fit(root, model_key, mods, weapon_id)
 	update_condition(root, mods)
 	if rig and root.get_meta("muzzle", Vector3.ZERO) != bare_muzzle:
@@ -638,6 +639,46 @@ static func _side_optic(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 
 static func _mat(id: String) -> StandardMaterial3D:
 	return WeaponModels._mat(id)
+
+
+## Откидные прицельные модели (models.<основа>.fold_sights {узел: {axis, deg, pivot, when}}): лист на шарнире ложится,
+## когда на одной из точек when (или на переходнике на ней) стоит прицел. У AR-15 — коллиматор или оптика на верхней
+## планке: целик ложится вперёд, мушка назад; ось, угол и шарнир (оси модели) — из драйверов исходника. Узел, у которого
+## своё начало не на шарнире (диоптр целика), поворачивается вокруг pivot. Положение покоя запоминается (meta
+## fold_rest): повторная сборка не накручивает поворот, без прицела лист снова поднят.
+static func _fold_sights(root: Node3D, model_key: String, mods: Dictionary) -> void:
+	var folds: Dictionary = WeaponDb.model(model_key).get("fold_sights", {})
+	if folds.is_empty():
+		return
+	for node_name: String in folds:
+		var f: Dictionary = folds[node_name]
+		var n: Node3D = root.find_child(node_name, true, false) as Node3D
+		if n == null:
+			continue
+		if not n.has_meta("fold_rest"):
+			n.set_meta("fold_rest", n.transform)
+		var rest: Transform3D = n.get_meta("fold_rest")
+		var fold: bool = false
+		for key: String in mods:
+			if String(WeaponBuild.base_of(key)) in (f.get("when", []) as Array) and WeaponDb.is_optic(WeaponDb.mod_id(mods[key])):
+				fold = true
+		if not fold:
+			n.transform = rest
+			continue
+		# шарнир и ось — в осях модели; узел может сидеть глубже корня (обёртка ассета) — перевод в оси родителя
+		var to_root := Transform3D.IDENTITY
+		var p: Node = n.get_parent()
+		while p != null and p != root:
+			if p is Node3D:
+				to_root = (p as Node3D).transform * to_root
+			p = p.get_parent()
+		var inv: Transform3D = to_root.affine_inverse()
+		var ax: Array = f.get("axis", [1, 0, 0])
+		var axis: Vector3 = (inv.basis * Vector3(float(ax[0]), float(ax[1]), float(ax[2]))).normalized()
+		var pv: Array = f.get("pivot", [])
+		var q: Vector3 = inv * Vector3(float(pv[0]), float(pv[1]), float(pv[2])) if pv.size() == 3 else rest.origin
+		var turn := Transform3D(Basis(axis, deg_to_rad(float(f.get("deg", 90.0)))), Vector3.ZERO)
+		n.transform = Transform3D(Basis.IDENTITY, q) * turn * Transform3D(Basis.IDENTITY, -q) * rest
 
 
 static func _hide_part(root: Node3D, part: String) -> void:

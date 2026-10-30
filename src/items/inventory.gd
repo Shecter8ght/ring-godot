@@ -360,6 +360,9 @@ func apply_weapon_state(slot: String, st: Dictionary) -> void:
 	var mode: String = String(st.get("fire_mode", ""))
 	if mode != "" and WeaponDb.fire_modes(String(e.get("id", ""))).size() > 1:
 		e["fire_mode"] = WeaponDb.fire_mode_of(String(e.get("id", "")), mode)
+	# пылезащитная шторка откинута рамой (Player.dust_cover_open) — сама не закрывается
+	if bool(st.get("cover_open", false)):
+		e["cover_open"] = true
 	var mods: Dictionary = e.get("mods", {})
 	var tac: Dictionary = st.get("tac", {})
 	for m in mods:

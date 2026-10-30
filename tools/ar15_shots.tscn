@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/ar15_shots.gd" id="1_ar15"]
+
+[node name="Ar15Shots" type="Node"]
+script = ExtResource("1_ar15")

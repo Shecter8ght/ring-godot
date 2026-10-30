@@ -435,6 +435,163 @@
   "flare_pistol_codex": {
    "anim": "pistol",
    "sockets": {}
+  },
+  "ar15": {
+   "anim": "rifle",
+   "fold_sights": {
+    "RearSightLeaf_Handguard": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": 90.0,
+     "pivot": [
+      0.0,
+      0.12616,
+      0.0073
+     ],
+     "when": [
+      "optic_primary",
+      "top_front"
+     ]
+    },
+    "RearAperture_Handguard": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": 90.0,
+     "pivot": [
+      0.0,
+      0.12616,
+      0.0073
+     ],
+     "when": [
+      "optic_primary",
+      "top_front"
+     ]
+    },
+    "FrontSightLeaf_Handguard": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": -90.0,
+     "pivot": [
+      0.0,
+      0.12966,
+      0.4453
+     ],
+     "when": [
+      "optic_primary",
+      "top_front"
+     ]
+    }
+   },
+   "action": {
+    "carrier": "BoltCarrier_Steel",
+    "bolt": "Bolt_Steel",
+    "travel": 0.091,
+    "bolt_lag": 0.0125,
+    "unlock": [
+     0.003,
+     0.012
+    ],
+    "unlock_deg": 22.5,
+    "cover": "DustCover_Receiver",
+    "cover_deg": 112.0
+   },
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0.0,
+      0.11716,
+      0.1153
+     ],
+     "rail": false,
+     "rail_z": [
+      0.0453,
+      0.1853
+     ]
+    },
+    "top_front": {
+     "pos": [
+      0.0,
+      0.11716,
+      0.3053
+     ],
+     "rail": false,
+     "rail_z": [
+      0.1953,
+      0.4153
+     ]
+    },
+    "side_left": {
+     "pos": [
+      0.02955,
+      0.08666,
+      0.4193
+     ],
+     "side": true,
+     "rail_z": [
+      0.4043,
+      0.4343
+     ]
+    },
+    "side_right": {
+     "pos": [
+      -0.02955,
+      0.08666,
+      0.4193
+     ],
+     "side": true,
+     "rail_z": [
+      0.4043,
+      0.4343
+     ]
+    },
+    "underbarrel": {
+     "pos": [
+      0.0,
+      0.05611,
+      0.3263
+     ],
+     "rail_z": [
+      0.2663,
+      0.3863
+     ]
+    },
+    "muzzle": {
+     "pos": [
+      0.0,
+      0.08616,
+      0.5063
+     ],
+     "bore_r": 0.0028
+    },
+    "stock": {
+     "pos": [
+      0.0,
+      0.08616,
+      -0.0287
+     ]
+    },
+    "mag": {
+     "pos": [
+      0.0,
+      0.08039,
+      0.13053
+     ],
+     "asset_pos": [
+      0.0,
+      0.08039,
+      0.13053
+     ]
+    }
+   }
   }
  },
  "weapons": {
@@ -2527,6 +2684,75 @@
     }
    },
    "model": "res://assets/models/weapons/flare_pistol_codex/flare_pistol_codex.glb"
+  },
+  "wpn_ar_09": {
+   "name": "ГРАНЬ-15",
+   "cat": "weapon",
+   "size": [
+    4,
+    2
+   ],
+   "value": 95000,
+   "stack": 1,
+   "weight": 3.0,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "code": "ГРАНЬ-15",
+   "desc": "Карабин 5.56 на платформе AR-15 в песочном покрытии: полноразмерные планки Picatinny сверху, снизу и по бокам цевья, откидные механические прицельные, переводчик «безопасно — одиночный — автомат».",
+   "weapon": {
+    "slot": "primary",
+    "class": "CARBINE",
+    "caliber": "556x45",
+    "model": "ar15",
+    "scale": 1.0,
+    "stats": {
+     "spread": 1.6,
+     "ads_spread": 0.3,
+     "ads_fov": 58,
+     "kick": 0.017,
+     "kick_h": 0.009,
+     "kick_bias": 0.3,
+     "recover": 0.44,
+     "shake": 0.08,
+     "ergo": 60,
+     "rpm": 800,
+     "auto": true,
+     "reload": 2.15,
+     "range": 105,
+     "noise": 80,
+     "reliability": 0.978,
+     "wear": 0.02
+    },
+    "fire_modes": [
+     "semi",
+     "auto"
+    ],
+    "mounts": {
+     "optic_primary": "RAIL_TOP",
+     "top_front": "RAIL_TOP",
+     "side_left": "RAIL_SIDE",
+     "side_right": "RAIL_SIDE",
+     "underbarrel": "RAIL_BOTTOM",
+     "muzzle": "THREAD_556",
+     "stock": "STOCK_AR"
+    },
+    "mag_if": "MAG_STANAG",
+    "default_mag": "mag_556_30_gran",
+    "sound": "shot_rifle",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "",
+    "asset": "res://assets/models/weapons/ar15/ar15.gltf",
+    "asset_kind": "static",
+    "viewmodel": {
+     "ads_z": 0.12
+    },
+    "length": 0.718
+   },
+   "flavor": "Знакомая платформа без сюрпризов: планки под любой обвес, а песочное покрытие держит свою историю на кромках."
   }
  },
  "ammo": {
@@ -4627,6 +4853,36 @@
     "reliability": 0.97
    },
    "flavor": "Двести выстрелов закрывают проход надолго, но такой короб сам просится в отдельный рюкзак."
+  },
+  "mag_556_30_gran": {
+   "name": "Магазин «ГРАНЬ» 5.56 на 30 (полимер)",
+   "cat": "mag",
+   "size": [
+    1,
+    2
+   ],
+   "value": 3000,
+   "stack": 1,
+   "weight": 0.14,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "30",
+   "mag": {
+    "if": "MAG_STANAG",
+    "capacity": 30,
+    "reload_k": 1,
+    "ergo": 0,
+    "reliability": 1,
+    "look": "asset",
+    "asset": "res://assets/models/weapons/ar15/ar15_mag30.gltf",
+    "asset_detail": "res://assets/models/weapons/ar15/ar15_mag30.gltf"
+   },
+   "flavor": "Полимерный STANAG с окнами остатка: видно, сколько осталось, не вынимая магазин.",
+   "model": "res://assets/models/weapons/ar15/ar15_mag30.gltf"
   }
  },
  "attachments": {
@@ -7737,6 +7993,22 @@
    ],
    "sight": "primary",
    "mag": "mag_939_10"
+  },
+  "GRAN15_BASE": {
+   "weapon": "wpn_ar_09",
+   "mods": {},
+   "ammo": [
+    [
+     "ammo_556_std",
+     1
+    ]
+   ],
+   "dur": [
+    70,
+    100
+   ],
+   "sight": "primary",
+   "mag": "mag_556_30_gran"
   }
  },
  "sandbox": [

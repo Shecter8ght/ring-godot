@@ -427,6 +427,18 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
                                                               # AR-15, рендеры для владельца: две винтовки на полевом столе в палатке (разобранная — физикой
                                                               # жёстких тел), 26 кадров: 5 общих, 11 собранной, 4 — разряжание, 6 средних планов; окружение — tools/ar15/tent_scene.py;
                                                               # на раскладушке — tools/ar15/render_tent.py -- <out.blend> <out.png> [ширина высота сэмплы] [вид]
+# ГРАНЬ-15 (AR-15) в игру (blender … --python): tools/ar15/game_lp.py (сетка ~40 тыс. из AR-15_износ_этап2_v1.blend: подвижные детали — свои узлы
+#   по моверам, рукоять — вокселями; развёртка asset_kit, планки Picatinny с пазами) → game_bake.py -- [атлас …] [--cpu] (с high-poly, каждая
+#   деталь — со своих) → python -X utf8 tools/ar15/game_pack.py → game_export.py (assets/models/weapons/ar15: ar15.gltf, ar15_mag30.gltf,
+#   отчёт ar15.json) → python -X utf8 tools/ar15/game_data.py (models.ar15 — сокеты планок по пазам, откидные прицельные, ход рамы и шторка;
+#   wpn_ar_09, mag_556_30_gran, хват) → --import → python -X utf8 tools/ar15/game_imports.py → --import; иконки — icon_bake -- wpn_ar_09 mag_556_30_gran
+tools/godot.cmd --headless res://tools/ar15_check.tscn         # ГРАНЬ-15 в движке: узлы и метки, треугольники, карты, габарит, ход рамы и шторка, сокет у каждого
+                                                              # крепления, планки длиннее зажима, обвесы встают, с прицелом сверху целик и мушка сложены (90°)
+tools/godot.cmd --windowed --resolution 1920x1080 res://tools/ar15_shots.tscn # ГРАНЬ-15 в руках (Пригород): механический, коллиматор + фонарь + рукоятка,
+                                                              # фонарь слева / справа — от бедра, в прицел, на отдаче, сбоку; выстрел (ход рамы в лог), рама отведена
+                                                              # и шторка откинута; снимки ar15_* (AR15_ONLY=iron,optic); без окна — только лог отвода ствола
+tools/godot.cmd --headless res://tools/dust_cover_test.tscn    # шторка ГРАНЬ-15: у нового ствола закрыта; выстрел, перезарядка с пустым магазином, задержка —
+                                                              # откинута и такой остаётся (перезарядка, убрал-достал), в руках — до упора с отскоком, хосту в запись ствола
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader

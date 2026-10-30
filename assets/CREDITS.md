@@ -171,6 +171,20 @@
 - Игровая копия, PBR-атласы цвета/ORM/normal и два уровня детализации подготовлены `tools/export_pm_game.py`; импорт — `tools/import_weapon_model.py`. Фото служили референсами формы; их пиксели в игровых текстурах не использованы. Текстуры запечены из собственных процедурных материалов и highpoly-геометрии.
 <!-- PM_MODEL_END -->
 
+<!-- AR15_START -->
+## ГРАНЬ-15 (AR-15)
+
+- `assets/models/weapons/ar15/` (винтовка `ar15.gltf`, магазин-предмет `ar15_mag30.gltf`, атласы `ar15_<атлас>_100_*`),
+  `assets/icons/wpn_ar_09.png`, `assets/icons/mag_556_30_gran.png` — собственная модель (Blender, геометрия v08),
+  отделка в Substance Painter (этап 1 «песок» v7, износ этап 2 v1), игровая сетка и запечённые карты —
+  `tools/ar15/game_*.py`; исходники — `E:/Models Blender/WEAPONS/AR-15 — модель/`, `_asset_src/ar15/`.
+- Рисунок износа в запечённых картах — фото-маски CC0 1.0: ambientCG (https://ambientcg.com, лицензия
+  https://docs.ambientcg.com/license/) — Fingerprints002, Fingerprints007, Smear002, Smear008, SurfaceImperfections007,
+  SurfaceImperfections008, Scratches002; ShareTextures (https://www.sharetextures.com, лицензия
+  https://www.sharetextures.com/p/license) — grunge_3, grunge_5. Сырьё — `E:/Models Blender/Маски_АЛЬФА/
+  50_Скачанные_CC0_ambientCG_ShareTextures` (там же лицензия и каталог).
+<!-- AR15_END -->
+
 <!-- VSS_OPTICS_START -->
 ## Отдельная оптика ВСС
 

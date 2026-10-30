@@ -675,6 +675,8 @@ func entry_of(key: String) -> Dictionary:
 	e["sight"] = String(st.sight)
 	if WeaponDb.fire_modes(String(e.id)).size() > 1:
 		e["fire_mode"] = String(st.get("fire_mode", ""))
+	if bool(st.get("cover_open", false)):
+		e["cover_open"] = true
 	var zc: Array = st.get("zero_c", [0, 0])
 	if Gear.zero_clicks(e) != Vector2i(int(zc[0]), int(zc[1])):
 		Gear.set_zero_clicks(e, Vector2i(int(zc[0]), int(zc[1])))
@@ -707,6 +709,7 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 		if mods[m] is Dictionary:
 			tac[m] = {"light": bool((mods[m] as Dictionary).get("light", false)), "laser": bool((mods[m] as Dictionary).get("laser", false))}
 	var jam := bool(_ws[key].get("jam", false)) if _ws.has(key) and String(_ws[key].id) == String(base.id) else false
+	var cover := bool(base.get("cover_open", false)) or (_ws.has(key) and String(_ws[key].id) == String(base.id) and bool(_ws[key].get("cover_open", false)))
 	# mix — слои патронов магазина (вперемешку, Gear.mag_layers): по ним после выстрела виден следующий тип
 	_ws[key] = {"id": String(base.id), "rev": rev, "rounds": int(mag.get("rounds", 0)), "ammo": Gear.mag_top(mag),
 		"mix": (mag.get("mix") as Array).duplicate(true) if mag.get("mix") is Array else [],
@@ -714,7 +717,7 @@ func _ws_sync(key: String, base: Dictionary) -> void:
 		"optic_zoom": WeaponStats.scope_zooms(base),
 		"dur": WeaponCondition.percent(base), "mod_dur": mod_dur, "shots": int(base.get("_condition_shots", 0)), "sight": String(base.get("sight", "primary")), "tac": tac, "jam": jam,
 		"chamber": int(normalized.get("chamber", 0)), "chamber_ammo": String(normalized.get("chamber_ammo", "")),
-		"fire_mode": WeaponDb.fire_mode_of(String(base.id), String(base.get("fire_mode", "")))}
+		"fire_mode": WeaponDb.fire_mode_of(String(base.id), String(base.get("fire_mode", ""))), "cover_open": cover}
 	if String(base.id) == "signal_launcher":
 		_ws[key].ammo = String(mag.get("ammo", "flare"))
 
@@ -865,7 +868,8 @@ func _ws_state(key: String) -> Dictionary:
 		"sight": String(st.get("sight", "primary")), "tac": (st.get("tac", {}) as Dictionary).duplicate(true),
 		"optic_zoom": (st.get("optic_zoom", {}) as Dictionary).duplicate(),
 		"chamber": int(st.get("chamber", 0)), "chamber_ammo": String(st.get("chamber_ammo", "")),
-		"zero_c": (st.get("zero_c", [0, 0]) as Array).duplicate(), "fire_mode": String(st.get("fire_mode", ""))}
+		"zero_c": (st.get("zero_c", [0, 0]) as Array).duplicate(), "fire_mode": String(st.get("fire_mode", "")),
+		"cover_open": bool(st.get("cover_open", false))}
 
 
 func _send_ws(key: String) -> void:
@@ -915,6 +919,27 @@ func equipment_state() -> Dictionary:
 ## Задержка у оружия в руках (устраняется R).
 func is_jammed() -> bool:
 	return bool((_ws.get(weapon_slot, {}) as Dictionary).get("jam", false))
+
+
+## Пылезащитная шторка ствола в руках (models.<ключ>.action.cover, у AR-15) открыта. Закрыта она только у ствола,
+## рама которого ещё ни разу не отходила, — каким он попал в руки; отход рамы (выстрел, рукоятка заряжания при
+## перезарядке с пустым магазином и при устранении задержки) её откидывает, и открытой она остаётся — сама не
+## закрывается. Хранится на экземпляре ствола, хосту — с состоянием оружия, как режим огня.
+func dust_cover_open() -> bool:
+	return bool((_ws.get(weapon_slot, {}) as Dictionary).get("cover_open", false))
+
+
+## Рама отошла назад — шторка ствола в слоте откинулась (если она у него есть и ещё закрыта).
+func _open_dust_cover(slot: String) -> void:
+	if slot == "" or not _ws.has(slot):
+		return
+	var st: Dictionary = _ws[slot]
+	if bool(st.get("cover_open", false)) or WeaponDb.dust_cover(String(st.get("id", ""))) == "":
+		return
+	st["cover_open"] = true
+	if not loadout_mode:
+		_base_entry(slot)["cover_open"] = true
+	_ws_dirty = true
 
 
 ## Режим огня оружия в руках ("auto" / "burst" / "semi"; Balance.FIRE_MODES).
@@ -1812,6 +1837,9 @@ func _start_clear(spec: Dictionary) -> void:
 
 
 func _finish_reload(spec: Dictionary) -> void:
+	# с пустым магазином и на задержке рукоятку заряжания оттягивают — рама откидывает шторку
+	if _reload_kind == "clear" or _reload_empty:
+		_open_dust_cover(_reload_slot)
 	if (_has_chamber(weapon_id) or is_signal_launcher()) and _reload_kind != "clear":
 		_commit_pm_action()
 		return
@@ -2434,6 +2462,7 @@ func _fire(spec: Dictionary) -> void:
 			st["chamber"] = 1
 	else:
 		_take_round(st)
+	_open_dust_cover(weapon_slot)
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
 	_weapon_action("shot", ammo <= 0, 0.0, ammo, false)

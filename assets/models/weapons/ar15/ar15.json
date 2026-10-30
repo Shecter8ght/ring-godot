@@ -1,0 +1,398 @@
+{
+ "version": "v1 (2026-10-30): геометрия v08, этап 1 «песок» v7 + износ этап 2 v1",
+ "source": "E:\\Models Blender\\WEAPONS\\AR-15 — модель\\AR-15_износ_этап2_v1.blend",
+ "grip_source_m": [
+  -0.166295126080513,
+  0.0,
+  -0.08615680038928986
+ ],
+ "nodes": {
+  "Bolt_Steel": 506,
+  "BoltCarrier_Steel": 1120,
+  "BoltCatch_Receiver": 215,
+  "ChargingHandle_Receiver": 631,
+  "ChLatchL_Receiver": 351,
+  "ChLatchR_Receiver": 351,
+  "DustCover_Receiver": 359,
+  "ForwardAssist_Receiver": 370,
+  "FrontSightLeaf_Handguard": 825,
+  "Lower_Polymer": 1800,
+  "Lower_Receiver": 5820,
+  "Magazine": 2775,
+  "MagCatch_Receiver": 308,
+  "MagReleaseL_Receiver": 209,
+  "PivotPin_Receiver": 78,
+  "RearAperture_Handguard": 356,
+  "RearSightLeaf_Handguard": 890,
+  "Selector_Receiver": 543,
+  "Stock_Polymer": 3433,
+  "StockLatch_Polymer": 156,
+  "TakedownPin_Receiver": 65,
+  "Trigger_Receiver": 266,
+  "Upper_Handguard": 10963,
+  "Upper_Receiver": 5464,
+  "Upper_Steel": 2242
+ },
+ "mag_item_tris": 2775,
+ "pivots_game_m": {
+  "Bolt_Steel": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "BoltCarrier_Steel": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "BoltCatch_Receiver": [
+   0.0154,
+   0.06716,
+   0.1158
+  ],
+  "ChargingHandle_Receiver": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "ChLatchL_Receiver": [
+   0.0115,
+   0.11116,
+   -0.0222
+  ],
+  "ChLatchR_Receiver": [
+   -0.0115,
+   0.11116,
+   -0.0222
+  ],
+  "DustCover_Receiver": [
+   -0.0156,
+   0.08576,
+   0.1663
+  ],
+  "ForwardAssist_Receiver": [
+   -0.01818,
+   0.09746,
+   0.00269
+  ],
+  "FrontSightLeaf_Handguard": [
+   0.0,
+   0.12966,
+   0.4453
+  ],
+  "Magazine": [
+   0.0,
+   0.08039,
+   0.13053
+  ],
+  "MagCatch_Receiver": [
+   0.0,
+   0.05996,
+   0.1039
+  ],
+  "MagReleaseL_Receiver": [
+   0.0182,
+   0.05996,
+   0.1423
+  ],
+  "PivotPin_Receiver": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "RearAperture_Handguard": [
+   0.0,
+   0.14516,
+   0.0073
+  ],
+  "RearSightLeaf_Handguard": [
+   0.0,
+   0.12616,
+   0.0073
+  ],
+  "Selector_Receiver": [
+   0.0,
+   0.05996,
+   0.0364
+  ],
+  "Stock_Polymer": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "StockLatch_Polymer": [
+   0.0,
+   0.06296,
+   -0.0577
+  ],
+  "TakedownPin_Receiver": [
+   0.0,
+   0.08616,
+   0.1663
+  ],
+  "Trigger_Receiver": [
+   0.0,
+   0.05516,
+   0.0672
+  ],
+  "Upper_Handguard": [
+   0.0,
+   0.07096,
+   0.1841
+  ],
+  "Upper_Receiver": [
+   0.0,
+   0.07096,
+   0.1841
+  ],
+  "Upper_Steel": [
+   0.0,
+   0.07096,
+   0.1841
+  ]
+ },
+ "size_game_m": [
+  0.0652,
+  0.2678,
+  0.7181
+ ],
+ "tris_in_hands": 40096,
+ "marks_game_m": {
+  "Muzzle": [
+   0.0,
+   0.08616,
+   0.5063
+  ],
+  "SightRear": [
+   0.0,
+   0.14894,
+   0.0035
+  ],
+  "SightFront": [
+   0.0,
+   0.15066,
+   0.4453
+  ],
+  "MagMount": [
+   0.0,
+   0.08039,
+   0.13053
+  ]
+ },
+ "rails_game": {
+  "RailTop": {
+   "line_xy": [
+    0.0,
+    0.11716
+   ],
+   "z": [
+    [
+     -0.0097,
+     0.1863
+    ],
+    [
+     0.1926,
+     0.4523
+    ]
+   ],
+   "slots_z": [
+    0.0003,
+    0.0103,
+    0.0203,
+    0.0303,
+    0.0403,
+    0.0503,
+    0.0603,
+    0.0703,
+    0.0803,
+    0.0903,
+    0.1003,
+    0.1103,
+    0.1203,
+    0.1303,
+    0.1403,
+    0.1503,
+    0.1603,
+    0.1703,
+    0.1803,
+    0.2003,
+    0.2103,
+    0.2203,
+    0.2303,
+    0.2403,
+    0.2503,
+    0.2603,
+    0.2703,
+    0.2803,
+    0.2903,
+    0.3003,
+    0.3103,
+    0.3203,
+    0.3303,
+    0.3403,
+    0.3503,
+    0.3603,
+    0.3703,
+    0.3803,
+    0.3903,
+    0.4003,
+    0.4103,
+    0.4203,
+    0.4303,
+    0.4403
+   ],
+   "up": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  "RailBottom": {
+   "line_xy": [
+    0.0,
+    0.05611
+   ],
+   "z": [
+    [
+     0.2623,
+     0.3903
+    ]
+   ],
+   "slots_z": [
+    0.27132,
+    0.2813,
+    0.2913,
+    0.3013,
+    0.3113,
+    0.3213,
+    0.3313,
+    0.3413,
+    0.3513,
+    0.3613,
+    0.3713,
+    0.38128
+   ],
+   "up": [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  "RailLeft": {
+   "line_xy": [
+    0.02955,
+    0.08666
+   ],
+   "z": [
+    [
+     0.4103,
+     0.4383
+    ]
+   ],
+   "slots_z": [
+    0.4193,
+    0.4293
+   ],
+   "up": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  "RailRight": {
+   "line_xy": [
+    -0.02955,
+    0.08666
+   ],
+   "z": [
+    [
+     0.4103,
+     0.4383
+    ]
+   ],
+   "slots_z": [
+    0.4193,
+    0.4293
+   ],
+   "up": [
+    -1.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "action_game": {
+  "charging_handle:ChargingHandle": {
+   "move": [
+    0.0,
+    0.0,
+    -0.091
+   ],
+   "rot_deg": 0.0
+  },
+  "charging_handle:BoltCarrier": {
+   "move": [
+    0.0,
+    0.0,
+    -0.091
+   ],
+   "rot_deg": 0.0
+  },
+  "charging_handle:Bolt": {
+   "move": [
+    0.0,
+    0.0,
+    -0.0785
+   ],
+   "rot_deg": 22.5
+  },
+  "charging_handle:DustCover": {
+   "move": [
+    -0.02181,
+    0.01391,
+    0.0
+   ],
+   "rot_deg": 112.0
+  },
+  "mag_out:Magazine": {
+   "move": [
+    0.0,
+    -0.23,
+    0.0
+   ],
+   "rot_deg": 0.0
+  },
+  "trigger:Trigger": {
+   "move": [
+    0.0,
+    -0.01231,
+    0.00304
+   ],
+   "rot_deg": 7.0
+  },
+  "selector:Selector": {
+   "move": [
+    0.0,
+    -0.1561,
+    -0.1037
+   ],
+   "rot_deg": 90.0
+  },
+  "bolt_catch:BoltCatch": {
+   "move": [
+    0.00279,
+    0.00196,
+    0.0
+   ],
+   "rot_deg": 8.0
+  },
+  "stock:Stock": {
+   "move": [
+    0.0,
+    0.0,
+    -0.084
+   ],
+   "rot_deg": 0.0
+  }
+ }
+}

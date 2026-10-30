@@ -218,6 +218,12 @@ static func model(key: String) -> Dictionary:
 	return (_w.models as Dictionary).get(key, {})
 
 
+## Узел пылезащитной шторки модели ствола (models.<ключ>.action.cover; у AR-15 её откидывает рама) или "".
+static func dust_cover(id: String) -> String:
+	var action: Dictionary = model(String(weapon(id).get("model", ""))).get("action", {})
+	return String(action.get("cover", ""))
+
+
 static func preset(id: String) -> Dictionary:
 	_ensure()
 	return (_w.presets as Dictionary).get(id, {})

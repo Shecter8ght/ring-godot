@@ -33,6 +33,14 @@ var _carrier: Node3D
 var _bolt: Node3D
 var _bolt_kick: float = 0.0
 var _bolt_ammo: int = -1
+# пылезащитная шторка (action.cover): откидывается пружиной, бьётся об упор и чуть отскакивает (COVER_POP_SEC);
+# _cover_t — время с начала откидывания (меньше нуля — стоит как есть), _cover_slot — чей ствол показан
+const COVER_POP_SEC := 0.12
+const COVER_BOUNCE_DEG := 14.0
+var _cover: Node3D
+var _cover_t: float = -1.0
+var _cover_open: bool = false
+var _cover_slot: String = ""
 var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
@@ -840,6 +848,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_carry_grip = null if _viewmodel is ViewmodelClips else _viewmodel.find_child("RightGrip", true, false) as Node3D
 		_carrier = null
 		_bolt = null
+		_cover = null
+		_cover_slot = ""
 		if not _viewmodel is ViewmodelClips:
 			for raw: Node in _viewmodel.find_children("*", "Node3D", true, false):
 				if raw.has_meta("action"):
@@ -850,6 +860,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_bolt = _viewmodel.find_child(String((_carrier.get_meta("action") as Dictionary).get("bolt", "")), true, false) as Node3D
 			if _bolt:
 				_bolt.transform = _bolt.get_meta("rest")
+			_cover = _viewmodel.find_child(String((_carrier.get_meta("action") as Dictionary).get("cover", "")), true, false) as Node3D
+			if _cover and not _cover.has_meta("rest"):
+				_cover = null
 		_bolt_ammo = -1
 		_bolt_kick = 0.0
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
@@ -1268,6 +1281,7 @@ func _set_scope(on: bool) -> void:
 ## Механика затвора статичной модели (models.<ключ>.action, как драйверы исходника): выстрел — патронов стало меньше;
 ## рама отходит на свой ход и возвращается тем же темпом, что у ВЕРАСа с клипами (ViewmodelClips.BOLT_KICK_SEC);
 ## затвор трогается, когда рама прошла bolt_lag, и на участке unlock проворачивается на unlock_deg (отпирание).
+## Ход за кадр — не больше трети цикла: долгий кадр (первый выстрел грузит эффекты) не съедает отход целиком.
 func _tick_action(pl: Player, delta: float) -> void:
 	if _carrier == null or not is_instance_valid(_carrier):
 		return
@@ -1276,9 +1290,10 @@ func _tick_action(pl: Player, delta: float) -> void:
 	_bolt_ammo = pl.ammo
 	var open: float = 0.0
 	if _bolt_kick > 0.0:
-		_bolt_kick = maxf(0.0, _bolt_kick - delta)
+		_bolt_kick = maxf(0.0, _bolt_kick - minf(delta, ViewmodelClips.BOLT_KICK_SEC / 3.0))
 		open = sin(PI * (1.0 - _bolt_kick / ViewmodelClips.BOLT_KICK_SEC))
 	var act: Dictionary = _carrier.get_meta("action")
+	_tick_cover(pl, act, delta)
 	# дуло модели — по +Z: рама и затвор уходят назад, к прикладу; поворот затвора — вокруг оси канала (Z)
 	var s: float = float(act.get("travel", 0.0)) * open
 	var rest: Transform3D = _carrier.get_meta("rest")
@@ -1290,6 +1305,40 @@ func _tick_action(pl: Player, delta: float) -> void:
 		var brest: Transform3D = _bolt.get_meta("rest")
 		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, deg_to_rad(float(act.get("unlock_deg", 0.0))) * turn),
 			brest.origin - Vector3(0.0, 0.0, back))
+
+
+## Шторка ствола в руках — по состоянию экземпляра (Player.dust_cover_open): взял в руки — стоит как есть, рама
+## отошла — откидывается вокруг шарнира (+Z узла) на cover_deg: пружина разгоняет её до упора за пятую часть
+## COVER_POP_SEC, об упор она отскакивает на COVER_BOUNCE_DEG и успокаивается двумя затухающими отскоками.
+func _tick_cover(pl: Player, act: Dictionary, delta: float) -> void:
+	if _cover == null or not is_instance_valid(_cover):
+		return
+	var want: bool = pl.dust_cover_open()
+	if _cover_slot != pl.weapon_slot:
+		_cover_slot = pl.weapon_slot
+		_cover_open = want
+		_cover_t = -1.0
+	elif want and not _cover_open:
+		_cover_open = true
+		_cover_t = 0.0
+	elif not want:
+		_cover_open = false
+		_cover_t = -1.0
+	var deg: float = float(act.get("cover_deg", 0.0))
+	var angle: float = deg if _cover_open else 0.0
+	if _cover_t >= 0.0:
+		_cover_t += minf(delta, COVER_POP_SEC / 4.0)
+		var u: float = minf(1.0, _cover_t / COVER_POP_SEC)
+		const RISE := 0.2
+		if u < RISE:
+			angle = deg * (u / RISE) * (u / RISE)
+		else:
+			var v: float = (u - RISE) / (1.0 - RISE)
+			angle = deg - signf(deg) * COVER_BOUNCE_DEG * exp(-4.0 * v) * absf(sin(TAU * v))
+		if u >= 1.0:
+			_cover_t = -1.0
+	var rest: Transform3D = _cover.get_meta("rest")
+	_cover.transform = Transform3D(Basis(Vector3.BACK, deg_to_rad(angle)) * rest.basis, rest.origin)
 
 
 ## Наглазник у глаза: ближняя точка его рамки глубже ближней плоскости камеры (с запасом) — виден, иначе спрятан.
