@@ -125,10 +125,16 @@ def studio():
     S.render.engine = "CYCLES"
     S.cycles.device = "GPU"
     S.cycles.samples = 128
-    S.cycles.preview_samples = 32
+    S.cycles.preview_samples = 64
     S.cycles.use_denoising = True
     S.cycles.use_preview_denoising = True
     S.cycles.denoising_use_gpu = False      # Painter держит видеопамять — шумоподавление на процессоре
+    # шумоподавление по цвету и нормалям: по одной картинке оно смывало мелкое зерно покрытия вместе с шумом рендера,
+    # и металл во вьюпорте казался гладким (владелец 30.10 показал настройки вьюпорта в ролике Dolinskyi — резкость
+    # текстуры важнее скорости)
+    for pre in ("", "preview_"):
+        setattr(S.cycles, pre + "denoising_input_passes", "RGB_ALBEDO_NORMAL")
+        setattr(S.cycles, pre + "denoising_prefilter", "ACCURATE")
     S.render.resolution_x, S.render.resolution_y = 1920, 1080
     S.render.film_transparent = False
     S.view_settings.view_transform = "AgX"
