@@ -3,7 +3,8 @@
 # эффекта, а густые отпечатки и мазки кистью давали «мрамор» по всей рукояти (проба 30.10). Здесь — растяжка уровней,
 # порог (редкие отдельные отпечатки, редкие масляные мазки) и размытие (полировка — мягкие пятна, а не штрихи).
 # Здесь же — зоны рукояти из tools/ar15/wear_zones.py (16 бит RGBA) в 8-битные ч/б для Painter и их объединения:
-# hand (ладонь, пальцы, большой), prints (пальцы + большой), polish (ладонь + большой).
+# hand (ладонь, пальцы, большой), prints (пальцы + большой), polish (ладонь + большой), hand_edges (hand без площадок
+# насечки).
 #   python -X utf8 tools/ar15/wear_masks.py
 # Пишет <имя>.png (ч/б 8 бит) в _asset_src/ar15/tex/wear/masks, рядом — license.txt с источниками;
 # grip_zone_<зона>_L.png — в _asset_src/ar15/tex/wear.
@@ -15,7 +16,7 @@ from PIL import Image, ImageFilter
 SRC = "E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures"
 WEAR = "E:/Games/RING-godot/_asset_src/ar15/tex/wear"
 OUT = WEAR + "/masks"
-ZONES = ("palm", "fingers", "thumb", "base", "ribs", "rib_dirt", "rib_dust")
+ZONES = ("palm", "fingers", "thumb", "base", "ribs", "rib_dirt", "rib_dust", "stip_gloss", "stip_dirt", "panels")
 UNIONS = {"hand": ("palm", "fingers", "thumb"), "prints": ("fingers", "thumb"), "polish": ("palm", "thumb")}
 SIZE = 2048
 
@@ -74,6 +75,8 @@ def zones():
         z[k] = a / (65535.0 if a.max() > 255.0 else 255.0)
     for k, parts in UNIONS.items():
         z[k] = np.maximum.reduce([z[q] for q in parts])
+    # кромки и рёбра в зоне руки — без площадок насечки: пупырышки — своими слоями (слева только большой палец)
+    z["hand_edges"] = z["hand"] * (1.0 - z["panels"])
     for k, a in z.items():
         Image.fromarray((np.clip(a, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)).save(f"{WEAR}/grip_zone_{k}_L.png")
     return "зоны: " + ", ".join(z)

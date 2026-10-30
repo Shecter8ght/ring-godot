@@ -8,8 +8,12 @@
 # закрытого рёбрышком (там AO с радиусом 1,2 мм — полная тень): до 0,3 мм — грязь, до 0,75 мм — пыль (рёбрышко
 # 0,45 мм почти не даёт тени AO, и угол по одному AO выходил в пару пикселей); на самом рёбрышке — низ боков по AO.
 # Пыль гуще в верхнем углу (над рёбрышком), грязь — в обоих.
+# Пупырышки на боковых площадках (владелец 30.10): так же — вершины заглажены, в углах у основания грязь, пыли нет;
+# справа (ладонь) — вся площадка, слева — только место большого пальца: он обхватывает левый бок наискосок (основание
+# сзади вверху, подушечка вперёд и вниз на уровне среднего пальца) — пятно ~30 × 18 мм в верхней части площадки.
 #   blender -b <AR15_uv_v03.blend> --python tools/ar15/wear_zones.py -- <папка вывода> [размер 2048] [размер углов 4096]
-# Пишет grip_zone_<palm|fingers|thumb|base|ribs>.png и grip_zone_<rib_dirt|rib_dust>.png (ч/б, 16 бит) в папку вывода;
+# Пишет grip_zone_<palm|fingers|thumb|base|ribs|stip_gloss|panels>.png и grip_zone_<rib_dirt|rib_dust|stip_dirt>.png
+# (ч/б, 16 бит) в папку вывода;
 # 8-битные копии и объединения зон для Painter — tools/ar15/wear_masks.py.
 import math
 import os
@@ -26,11 +30,18 @@ ANGLE = math.radians(18.0)                       # part_grip.ANGLE
 TOP = Vector((-147.0, 0.0, GRIP_TOP_Z))           # part_grip.TOP (TOP_CX, GRIP_TOP_Z)
 DOWN = Vector((-math.sin(ANGLE), 0.0, -math.cos(ANGLE)))
 FWD = Vector((math.cos(ANGLE), 0.0, -math.sin(ANGLE)))
-ZONES = ("palm", "fingers", "thumb", "base", "ribs")
+ZONES = ("palm", "fingers", "thumb", "base", "ribs", "stip_gloss", "panels")
 AO_DIST = 1.2                                     # радиус AO углов, мм: стык рёбрышка (высота 0,45) с телом
 AREA_MM = (1.2, 2.0)                              # область углов — до 2 мм от рёбрышек (плавно с 1,2)
 DIRT_MM, DUST_MM = 0.3, 0.75                      # ширина полос грязи и пыли от края рёбрышка (шаг рёбрышек 2,6 мм:
                                                   # пыль по 1,2 мм заливала выемку между ними целиком)
+STIP_AREA_MM = (0.9, 1.4)                         # дно площадки между пупырышками (шаг 1,7 мм)
+STIP_DIRT_MM = 0.22                               # полоса грязи у основания пупырышка
+AO_STIP = 0.3                                     # свой радиус AO у пупырышков (низ их боков), мм
+STIP_FOOT = 0.443 / 0.55                          # сечение пупырышка на уровне дна к его низу: усечённая пирамида, низ
+                                                  # 1,1 мм на 0,25 мм в дне, верх 0,56 мм на 0,38 над дном (part_grip.stipple)
+THUMB_PANEL = (54.0, 0.55, 30.0, 15.0, 9.0)       # пятно большого пальца на левой площадке: s центра (мм вниз от верха
+                                                  # рукояти), доля ширины площадки вперёд, наклон (° вперёд-вниз), полуоси
 
 
 def sstep(a, b, x):
@@ -59,27 +70,36 @@ def components(me):
             return lab
 
 
-def ribs_area(o, p):
-    """Рёбрышки (куски сетки 4…40 мм — бугорки насечки ~1 мм, тело ~110 мм) и область углов вокруг них."""
+def _near(p, sel):
+    """Ближайшая вершина из sel для каждой вершины: (расстояние, номер среди sel)."""
     from mathutils import kdtree
+    kd = kdtree.KDTree(int(sel.sum()))
+    for i, q in enumerate(p[sel]):
+        kd.insert(Vector(q), i)
+    kd.balance()
+    near = [kd.find(Vector(q)) for q in p]
+    return np.array([f[2] for f in near]), np.array([f[1] for f in near])
+
+
+def parts(o, p):
+    """Куски сетки: рёбрышки (4…40 мм), пупырышки насечки (< 4 мм), тело (~110 мм); области углов вокруг них."""
     lab = components(o.data)
     u, inv = np.unique(lab, return_inverse=True)
     mn = np.full((len(u), 3), 1e9); mx = np.full((len(u), 3), -1e9)
     np.minimum.at(mn, inv, p); np.maximum.at(mx, inv, p)
     ext = (mx - mn).max(1)
     rib = ((ext > 4.0) & (ext < 40.0))[inv]
-    print("RIBS кусков:", int(((ext > 4.0) & (ext < 40.0)).sum()), "вершин:", int(rib.sum()))
-    kd = kdtree.KDTree(int(rib.sum()))
-    for i, q in enumerate(p[rib]):
-        kd.insert(Vector(q), i)
-    kd.balance()
-    near = [kd.find(Vector(q)) for q in p]
-    d = np.array([f[2] for f in near])
+    stip = (ext < 4.0)[inv]
+    print("RIBS кусков:", int(((ext > 4.0) & (ext < 40.0)).sum()), "вершин:", int(rib.sum()),
+          "| пупырышков:", int((ext < 4.0).sum()))
+    d, k = _near(p, rib)
     area = 1.0 - sstep(AREA_MM[0], AREA_MM[1], d)
     # над рёбрышком или под ним: пыль оседает в верхнем углу (рукоять стоит рукоятью вниз)
-    zr = p[rib][:, 2]
-    above = sstep(-0.15, 0.15, p[:, 2] - np.array([zr[f[1]] for f in near]))
-    return rib.astype(np.float64), area, above
+    above = sstep(-0.15, 0.15, p[:, 2] - p[rib][:, 2][k])
+    ds, _ = _near(p, stip)
+    stip_area = (1.0 - sstep(STIP_AREA_MM[0], STIP_AREA_MM[1], ds)) * (1.0 - rib)
+    return {"ribs": rib.astype(np.float64), "rib_area": area, "rib_above": above, "stip": stip.astype(np.float64),
+            "stip_area": stip_area}
 
 
 def weights(o):
@@ -113,9 +133,22 @@ def weights(o):
     thumb = sstep(0.4, 0.8, ny) * window(s, -2.0, 4.0, 22.0, 32.0) * window(t, 0.1, 0.3, 0.75, 0.9)
     # торец и его кромка; вниз смотрит ещё низ выступа под скобой (s ≈ 35) — он не «низ»
     base = np.maximum(sstep(0.5, 0.85, nd) * sstep(80.0, 92.0, s), 0.6 * sstep(97.0, 102.0, s))
-    ribs, area, above = ribs_area(o, p)
-    return {"palm": palm, "fingers": fingers, "thumb": thumb, "base": base, "ribs": ribs, "rib_area": area,
-            "rib_above": above}
+    w = {"palm": palm, "fingers": fingers, "thumb": thumb, "base": base}
+    w.update(parts(o, p))
+    # пупырышки: справа (ладонь) — вся площадка, слева — пятно большого пальца
+    st = w["stip"] > 0.5
+    left = st & (p[:, 1] > 0)
+    s0, f0, ang, a, b = THUMB_PANEL
+    uc = u[left].min() + f0 * (u[left].max() - u[left].min())
+    ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+    du, dv = u - uc, s - s0
+    r = np.sqrt(((du * ca + dv * sa) / a) ** 2 + ((-du * sa + dv * ca) / b) ** 2)
+    w["stip_w"] = np.where(p[:, 1] < 0, 1.0, 1.0 - sstep(0.75, 1.1, r))
+    w["stip_gloss"] = w["stip"] * w["stip_w"]
+    w["panels"] = np.maximum(w["stip"], w["stip_area"])
+    print("THUMB на левой площадке: пупырышков вершин с весом > 0,5:", int((left & (w["stip_w"] > 0.5)).sum()),
+          "из", int(left.sum()))
+    return w
 
 
 def _setup(o):
@@ -174,6 +207,58 @@ def _dist(src, steps):
     return d
 
 
+def stip_footprints(o, w, size):
+    """Места дна площадки под пупырышками — по геометрии, а не по AO: при радиусе 1,2 мм затенено всё дно между ними
+    (шаг 1,7 мм — дно выходило грязным целиком), при 0,3 мм лучи из середины основания не достают до боков. Сечение
+    каждого пупырышка на уровне дна переносится на ближайшие грани дна и закрашивается в их развёртке."""
+    from mathutils.bvhtree import BVHTree
+    from mathutils.geometry import barycentric_transform
+    me = o.data
+    me.calc_loop_triangles()
+    n = len(me.vertices)
+    co = np.empty(n * 3); me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    body = (w["stip"] < 0.5) & (w["ribs"] < 0.5)
+    tris = [t for t in me.loop_triangles if body[t.vertices[0]] and body[t.vertices[1]] and body[t.vertices[2]]]
+    verts = [Vector(q) for q in co]
+    bvh = BVHTree.FromPolygons(verts, [tuple(t.vertices) for t in tris])
+    uvl = me.uv_layers["UVMap"].data
+    lab = components(me)
+    mask = np.zeros((size, size), dtype=bool)
+    skipped = 0
+    for c in np.unique(lab[w["stip"] > 0.5]):
+        idx = np.nonzero(lab == c)[0]
+        ay = np.abs(co[idx, 1])
+        low = idx[np.argsort(ay)[:4]]                 # низ пупырышка — ближе к оси рукояти (глубже в дне)
+        cb = co[low].mean(0)
+        pts = []
+        for q in co[low]:
+            loc, _n, ti, _d = bvh.find_nearest(Vector(cb + (q - cb) * STIP_FOOT))
+            t = tris[ti]
+            uvs = [Vector((*uvl[li].uv, 0.0)) for li in t.loops]
+            uv = barycentric_transform(loc, verts[t.vertices[0]], verts[t.vertices[1]], verts[t.vertices[2]], *uvs)
+            pts.append((uv.x * size, uv.y * size))
+        pts = np.array(pts)
+        c0 = pts.mean(0)
+        pts = pts[np.argsort(np.arctan2(pts[:, 1] - c0[1], pts[:, 0] - c0[0]))]   # обход по кругу
+        x0, y0 = np.floor(pts.min(0)).astype(int)
+        x1, y1 = np.ceil(pts.max(0)).astype(int)
+        if x1 - x0 > 60 or y1 - y0 > 60 or x0 < 0 or y0 < 0 or x1 >= size or y1 >= size:
+            skipped += 1                              # углы разошлись по разным островам (шов) — пропуск
+            continue
+        gx, gy = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+        inside = np.ones(gx.shape, dtype=bool)
+        sgn = []
+        for k in range(4):
+            a, b = pts[k], pts[(k + 1) % 4]
+            sgn.append((b[0] - a[0]) * (gy - a[1]) - (b[1] - a[1]) * (gx - a[0]))
+        inside = np.all([q >= 0 for q in sgn], axis=0) | np.all([q <= 0 for q in sgn], axis=0)
+        mask[y0:y1 + 1, x0:x1 + 1] |= inside
+    print("STIP основания: пупырышков", len(np.unique(lab[w["stip"] > 0.5])), "пропущено на швах", skipped,
+          "пикселей", int(mask.sum()))
+    return mask
+
+
 def bake_corners(o, w, out_dir, size):
     """Углы у рёбрышек: на теле — полосы грязи и пыли от края закрытого рёбрышком места (по AO), на рёбрышке — низ
     боков по AO; всё в пределах области рёбрышек. AO — только по самой рукояти: остальные детали скрыты от рендера,
@@ -199,10 +284,12 @@ def bake_corners(o, w, out_dir, size):
     if S.world is None:
         S.world = bpy.data.worlds.new("wz_world")
     res = {}
-    for key, kind in (("area", "EMIT"), ("ribs", "EMIT"), ("above", "EMIT"), ("ao", "AO")):
+    src = {"area": "rib_area", "ribs": "ribs", "above": "rib_above", "stip": "stip", "stip_area": "stip_area",
+           "stip_w": "stip_w"}
+    for key, kind in [(k, "EMIT") for k in src] + [("ao", "AO"), ("ao_s", "AO")]:
         if kind == "EMIT":
             data = np.zeros((len(me.vertices), 4), dtype=np.float32)
-            data[:, 0] = data[:, 1] = data[:, 2] = w["rib_" + key if key != "ribs" else "ribs"]
+            data[:, 0] = data[:, 1] = data[:, 2] = w[src[key]]
             data[:, 3] = 1.0
             attr.data.foreach_set("color", data.ravel())
         img = bpy.data.images.new(f"grip_corner_{key}", size, size, float_buffer=True, alpha=False)
@@ -210,7 +297,7 @@ def bake_corners(o, w, out_dir, size):
         tex.image = img
         nt.nodes.active = tex
         if kind == "AO":
-            S.world.light_settings.distance = AO_DIST * MM
+            S.world.light_settings.distance = (AO_DIST if key == "ao" else AO_STIP) * MM
             S.cycles.samples = 128
         else:
             S.cycles.samples = 1
@@ -232,7 +319,19 @@ def bake_corners(o, w, out_dir, size):
     dust = body * sstep(0.5 * DIRT_MM, DIRT_MM, d) * (1.0 - sstep(0.4 * DUST_MM, DUST_MM, d))
     dust *= 0.45 + 0.55 * np.clip(res["above"], 0.0, 1.0)     # в верхнем углу пыли больше
     print("CORNERS пикс/мм:", round(px, 1), "под рёбрышками пикселей:", int(under.sum()))
-    for k, a in (("rib_dirt", dirt), ("rib_dust", dust)):
+    # пупырышки: только грязь у основания (пыли нет — владелец), на самом пупырышке — низ боков по AO; вес стороны
+    isl = res["stip"] > 0.5
+    sa = np.clip(res["stip_area"], 0.0, 1.0)
+    sw = np.clip(res["stip_w"], 0.0, 1.0)
+    pxs = texel_mm(me, w["stip_area"], size)
+    occs = 1.0 - res["ao_s"]
+    under_s = stip_footprints(o, w, size) & (~isl) & (~rib)
+    ds = _dist(under_s, int(math.ceil(STIP_DIRT_MM * pxs)) + 2) / pxs
+    stip_dirt = sw * np.where(isl, sstep(0.45, 0.8, occs), sa * (1.0 - sstep(0.6 * STIP_DIRT_MM, STIP_DIRT_MM, ds)))
+    floor = (~isl) & (~rib) & (sa > 0.5)
+    print("STIP дно: закрыто пупырышками %.2f, в грязи %.2f" % (under_s[floor].mean(), (stip_dirt[floor] > 0.5).mean()))
+    print("STIP пикс/мм:", round(pxs, 1), "под пупырышками пикселей:", int(under_s.sum()))
+    for k, a in (("rib_dirt", dirt), ("rib_dust", dust), ("stip_dirt", stip_dirt)):
         img = bpy.data.images.new(f"grip_zone_{k}", size, size, float_buffer=True, alpha=False)
         img.colorspace_settings.name = "Non-Color"
         buf = np.zeros((size, size, 4), dtype=np.float32)

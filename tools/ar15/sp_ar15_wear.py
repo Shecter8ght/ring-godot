@@ -102,7 +102,7 @@ def build_grip():
     l4 = _layer("Насечка и рёбра в хвате — затёрты", L.InsertPosition.above_node(l3), rough=-0.08,
                 color=(0.78, 0.78, 0.78), cmode=L.BlendingMode.SoftLight, cop=0.4)
     g = sp_lib.mask_generator(l4, "mg_curvature/mg_curvature", {"global_balance": 0.62, "global_contrast": 0.5})
-    _zone(l4, "hand", above=g, blend=L.BlendingMode.Multiply)
+    _zone(l4, "hand_edges", above=g, blend=L.BlendingMode.Multiply)   # без площадок насечки — у них слои 10–11
     # 5. пыль — светлая, матовая, в углублениях насечки и выемках (противовес жиру)
     l5 = _layer("Пыль в углублениях", L.InsertPosition.above_node(l4), rough=0.15, color=(0.66, 0.62, 0.55),
                 cmode=L.BlendingMode.Normal, cop=0.5)
@@ -134,7 +134,17 @@ def build_grip():
                 cmode=L.BlendingMode.Normal, cop=0.55)
     p = _mask_pattern(l9, f"{MK}/dust_grain.png", GRAIN_SCALE, rot=1.4)
     _zone(l9, "rib_dust", above=p, blend=L.BlendingMode.Multiply)
+    # 10–11. пупырышки боковых площадок (владелец 30.10): так же, как рёбрышки, но без пыли — вершины заглажены, в углах
+    # у основания грязь; справа (ладонь) — вся площадка, слева — только место большого пальца (маски stip_gloss, stip_dirt)
+    l10 = _layer("Пупырышки — заглажены ладонью и большим пальцем", L.InsertPosition.above_node(l9), rough=-0.22,
+                 color=(0.93, 0.93, 0.93), cop=0.5)
+    p = _mask_pattern(l10, f"{MK}/polish_var.png", SMEAR_SCALE, rot=2.6)
+    _zone(l10, "stip_gloss", above=p, blend=L.BlendingMode.Multiply)
+    l11 = _layer("Углы у пупырышек — грязь", L.InsertPosition.above_node(l10), rough=0.15, color=(0.55, 0.50, 0.44),
+                 cop=0.7)
+    p = _mask_pattern(l11, f"{MK}/grime.png", GRIME_SCALE, rot=1.9)
+    _zone(l11, "stip_dirt", above=p, blend=L.BlendingMode.Multiply)
     # резкости на группе нет: эффект на группе делает её отдельным слоем, и Subtract / Multiply / SoftLight внутри
     # смешивались с пустотой, а не с заводской отделкой — рукоять целиком белёсая и зеркальная (проба 30.10, блеск −0,25
     # и цвет +0,13 по всей рукояти); резкость кадра — уже у группы этапа 1
-    return "grip: группа износа — 9 слоёв"
+    return "grip: группа износа — 11 слоёв"
