@@ -410,6 +410,13 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
                                                               # --python tools/ar15/mark_views.py -- <Разметка_износа> [вид,…] [сэмплы] (рендер + карта точек);
                                                               # перенос: python -X utf8 tools/ar15/mark_apply.py → sp_ar15_wear.build_marks() (группа
                                                               # «Этап 2 — метки владельца», вид — по материалу под меткой) → export_variant('B', <папка>, [наборы])
+#   Остальные детали (верхний, затвор, цевьё, ствол, приклад, трубка, прицелы, патроны): python -X utf8 tools/ar15/wear_parts.py [набор …]
+#   (кромки — по выпуклости в пространстве и месту, рисунок — фото-маски CC0 трипланарно, маски по виду: слой на вид) →
+#   sp_ar15_wear.build_part(<набор>) → export_variant('B', <папка>, [наборы]) — выгружать по 2–4 набора (видеопамять)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" -b -y <AR-15_износ_этап2_v1.blend> --python tools/ar15/render_table.py -- <папка кадров> <сцена.blend> <сцена_разряжание.blend> [ширина высота сэмплы] [кадры]
+                                                              # AR-15, рендеры для владельца: две винтовки на полевом столе в палатке (разобранная — физикой
+                                                              # жёстких тел), 20 кадров: 5 общих, 11 собранной, 4 — разряжание; окружение — tools/ar15/tent_scene.py;
+                                                              # на раскладушке — tools/ar15/render_tent.py -- <out.blend> <out.png> [ширина высота сэмплы] [вид]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader

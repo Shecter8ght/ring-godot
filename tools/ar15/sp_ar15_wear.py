@@ -422,3 +422,66 @@ def build_marks():
             lay = _mark_layer(it, pos)
             pos = L.InsertPosition.above_node(lay)
     return touched
+
+
+# ── остальные детали (верхний ресивер, затворная группа, цевьё, ствол, приклад, трубка, прицелы, патроны) ─────────────
+# Места — tools/ar15/wear_parts.py (<набор>_zones.json — какие зоны есть); вид — по зоне и классу отделки под ней.
+# Рисунок (кромки кусками, сколы, пыль, царапины) уже в масках — с фото-масок CC0 трипланарно; здесь — только материал.
+# «adj» — поправка поверх отделки (блеск вычитанием / прибавкой, цвет наложением), «plain» — то, что лежит поверх или
+# проступает из-под покрытия.
+_SCREEN = getattr(L.BlendingMode, "Screen", L.BlendingMode.LinearDodge)
+_MODES = {"mul": L.BlendingMode.Multiply, "screen": _SCREEN, "soft": L.BlendingMode.SoftLight,
+          "normal": L.BlendingMode.Normal}
+_STEEL = ((0.55, 0.55, 0.56), 0.30, 1.0)
+_ALU = ((0.62, 0.62, 0.64), 0.38, 1.0)
+_UNDER_FDE = ((0.06, 0.06, 0.065), 0.50, 0.0)
+# вид: (название слоя, adj / plain, параметры); силы мест — уже в масках (wear_parts.FAMILIES)
+PART_LOOK = {
+    "matte": ("Протёрто при чистке — матовее", "adj", dict(rough=0.05)),
+    "smooth": ("Захватано, заглажено, масло — глаже и темнее", "adj", dict(rough=-0.20, color=0.84)),
+    "dust": ("Пыль в углах", "adj", dict(rough=0.15, color=(0.66, 0.62, 0.55), mode="normal", cop=0.45)),
+    "tarnish": ("Латунь — потускнение", "adj", dict(rough=0.08, color=(0.80, 0.72, 0.60))),
+    "light": ("Затёрто светлее — фосфат, царапины по тёмному", "adj", dict(rough=-0.10, color=0.16, mode="screen")),
+    "scuff": ("Полимер и резина — потёрто", "adj", dict(rough=0.10, color=0.15, mode="screen")),
+    "anod_grey": ("Кромки — анодирование сереет", "plain", dict(color=(0.30, 0.30, 0.31), rough=0.36, metal=0.6)),
+    "nit_satin": ("Кромки — нитрид до сатина", "plain", dict(color=(0.44, 0.44, 0.45), rough=0.30, metal=1.0)),
+    "polish": ("Полозья — полированные полосы", "plain", dict(color=(0.58, 0.58, 0.60), rough=0.24, metal=1.0)),
+    "under_fde": ("Сквозь песок — чёрное анодирование", "plain", dict(color=_UNDER_FDE[0], rough=0.5)),
+    "alu": ("Сквозь анодирование — алюминий", "plain", dict(color=_ALU[0], rough=_ALU[1], metal=1.0)),
+    "steel": ("Сквозь — сталь", "plain", dict(color=_STEEL[0], rough=_STEEL[1], metal=1.0)),
+    "brass": ("Латунные мазки гильз", "plain", dict(color=(0.60, 0.45, 0.20), rough=0.38, metal=0.85)),
+    "carbon": ("Нагар — дымка внутри", "plain", dict(color=(0.06, 0.06, 0.06), rough=0.7, metal=0.2)),
+    "lint": ("Ворсинки", "plain", dict(color=(0.86, 0.85, 0.82), rough=0.85)),
+}
+PART_ORDER = ("matte", "smooth", "prints", "dust", "tarnish", "light", "scuff", "anod_grey", "nit_satin", "polish",
+              "under_fde", "alu", "steel", "brass", "carbon", "lint")
+
+
+def build_part(setname):
+    """Группа «Этап 2 — износ» набора по маскам видов wear_parts.py (слой на вид)."""
+    import json
+    idx = json.load(open(f"{W}/{setname}_zones.json", encoding="utf-8"))
+    pos = _new_group(setname)
+    n = 0
+    for key in PART_ORDER:
+        if key not in idx:
+            continue
+        zone = f"{W}/{setname}_zone_f_{key}_L.png"
+        if key == "prints":
+            # отпечатки с узором — фото-маски ambientCG в месте хвата (на матовом песке — тёмные гладкие пятна)
+            lay = _layer("Хват — отпечатки", pos, rough=-0.12, color=(0.88, 0.88, 0.88), cop=0.3)
+            p = _mask_pattern(lay, f"{MK}/prints_a.png", PRINT_SCALE * 1.3, rot=0.9)
+            p = _pattern(p, f"{MK}/prints_b.png", PRINT_SCALE, rot=2.1, blend=L.BlendingMode.Lighten, opacity=0.6)
+            S._bmask(lay, zone, blend=L.BlendingMode.Multiply, above=p)
+        else:
+            title, kind, a = PART_LOOK[key]
+            if kind == "plain":
+                lay = _plain(title, pos, a["color"], a["rough"], metal=a.get("metal"), cop=a.get("cop", 1.0))
+            else:
+                c = a.get("color")
+                lay = _layer(title, pos, rough=a.get("rough"), color=(c, c, c) if isinstance(c, float) else c,
+                             cmode=_MODES[a.get("mode", "mul")], cop=a.get("cop", 1.0))
+            S._bmask(lay, zone)
+        pos = L.InsertPosition.above_node(lay)
+        n += 1
+    return f"{setname}: группа износа — {n} слоёв"
