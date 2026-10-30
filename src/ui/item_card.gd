@@ -73,6 +73,54 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	return c
 
 
+## Строка списка светлого окна (LightUi, витрина Михалыча): слева снимок на светлой плашке, имя и подпись,
+## справа цена; выбранная — с рамкой акцентом, закрытая — подпись цветом замка. Клик вешает окно.
+static func row(entry: Dictionary, sub: String, price: String, selected: bool, locked: bool) -> ItemCard:
+	var c := ItemCard.new()
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c.custom_minimum_size.y = 76
+	var sb := LightUi.box(LightUi.ACCENT_SOFT if selected else LightUi.SURFACE, 6, 0,
+		LightUi.ACCENT if selected else Color("e2ded6"), 2 if selected else 1)
+	sb.content_margin_left = 8
+	sb.content_margin_right = 14
+	c.add_theme_stylebox_override("panel", sb)
+	c.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(h)
+	var icon := IconBox.new()
+	icon.id = String(entry.get("id", ""))
+	icon.entry = entry
+	icon.studio = true
+	icon.light = true
+	icon.plate = LightUi.PLATE
+	icon.pad = 5.0
+	icon.frame = Vector2i(320, 145)
+	icon.custom_minimum_size = Vector2(132, 60)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(icon)
+	var v := VBoxContainer.new()
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_theme_constant_override("separation", 2)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(v)
+	var name := LightUi.label(ItemDb.item_name(String(entry.get("id", ""))), 18, LightUi.ACCENT_DARK if selected else LightUi.TEXT, LightUi.head_font())
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(name)
+	var s := LightUi.label(sub, 13, LightUi.LOCK if locked else LightUi.MUTED)
+	s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(s)
+	c.price_label = LightUi.mono(price, 15, Color("8a8b8f") if locked else LightUi.TEXT2)
+	c.price_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(c.price_label)
+	for n: Control in [name, s, c.price_label]:
+		n.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
+
+
 ## Куда класть окно описания: ближайший CanvasLayer сверху (окна убежища, рюкзак) — поверх них.
 func popup_host() -> Node:
 	var n: Node = self
@@ -110,6 +158,14 @@ class IconBox:
 	## крупным снимком модели; высота — aspect от ширины.
 	var studio: bool = false
 	var aspect: float = 0.0
+	## Светлые окна (LightUi): своя ровная подложка вместо студийной (прозрачная — без подложки, витрина) и свой
+	## кадр снимка (нулевой — BIG_FRAME), отступ картинки от краёв.
+	var plate: Color = Color(0, 0, 0, 0)
+	var light: bool = false
+	var frame: Vector2i = Vector2i.ZERO
+	var pad: float = 12.0
+	## снимать вне очереди (большой снимок витрины)
+	var urgent: bool = false
 
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_RESIZED and aspect > 0.0:
@@ -136,15 +192,19 @@ class IconBox:
 	## спорит с предметом; цвет категории — тонкой полосой снизу.
 	func _draw_studio() -> void:
 		var r := Rect2(Vector2.ZERO, size)
-		var top := Color(0.33, 0.345, 0.36)
-		var bottom := Color(0.2, 0.21, 0.225)
-		draw_polygon(PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]),
-			PackedColorArray([top, top, bottom, bottom]))
-		var cat := String(ItemDb.item(id).get("cat", "misc"))
-		var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
-		draw_rect(Rect2(r.position.x, r.end.y - 3.0, r.size.x, 3.0), col.lightened(0.35))
-		var inner := r.grow(-12.0)
-		var tex: Texture2D = ItemThumbs.card_texture(entry if not entry.is_empty() else {"id": id}, ItemCard.BIG_FRAME, self)
+		if light:
+			if plate.a > 0.0:
+				draw_rect(r, plate)
+		else:
+			var top := Color(0.33, 0.345, 0.36)
+			var bottom := Color(0.2, 0.21, 0.225)
+			draw_polygon(PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]),
+				PackedColorArray([top, top, bottom, bottom]))
+			var cat := String(ItemDb.item(id).get("cat", "misc"))
+			var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
+			draw_rect(Rect2(r.position.x, r.end.y - 3.0, r.size.x, 3.0), col.lightened(0.35))
+		var inner := r.grow(-pad)
+		var tex: Texture2D = ItemThumbs.card_texture(entry if not entry.is_empty() else {"id": id}, frame if frame.x > 0 else ItemCard.BIG_FRAME, self, urgent)
 		if tex:
 			ItemIcons.draw_tex(self, tex, inner, false)
 		else:

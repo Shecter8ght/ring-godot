@@ -34,18 +34,20 @@ func _ready() -> void:
 	_check("патроны и магазины — по калибру", String(ui._subgroup("ammo_545_std")[1]) == String(ui._subgroup("mag_545_30")[1]), String(ui._subgroup("ammo_545_std")[1]))
 	var stock: Array = ui._trader_stock()
 	_check("без читов находок в продаже нет", not "laser_head" in stock and not "supply_signal" in stock, "%d поз." % stock.size())
-	# шапка стоит над прокруткой
+	# шапка разделов стоит над прокруткой (светлое окно «Б1»: разделы и поиск — не в списке)
 	var scroll := ui._shop_list.get_parent() as ScrollContainer
-	var box := scroll.get_parent()
-	_check("шапка закреплена над списком", box.get_child(1) is PanelContainer and box.get_child(2) == scroll, "")
+	_check("шапка закреплена над списком", scroll != null and ui._shop_head != null and not scroll.is_ancestor_of(ui._shop_head), "")
+	_check("выбран первый в списке, витрина и подробности есть", ui._sel != "" and ui._shop_center.get_child_count() > 0 and ui._shop_detail.get_child_count() > 0, ui._sel)
 	_save("trader_buy")
 
 	# --- количество: «+» у патронов — по 30, руками — любое
 	_check("патроны по умолчанию — 30", ui._qty_of("ammo_918_pst") == 30, str(ui._qty_of("ammo_918_pst")))
 	ui._step_qty("ammo_918_pst", 1)
 	_check("«+» — ещё 30", ui._qty_of("ammo_918_pst") == 60, str(ui._qty_of("ammo_918_pst")))
+	ui._select("ammo_918_pst")
+	await _frames(4)
 	var field := _find_field(ui, "ammo_918_pst")
-	_check("поле количества есть в карточке", field != null, "")
+	_check("поле количества есть в подробностях", field != null, "")
 	if field:
 		field.text = "45"
 		field.text_changed.emit("45")
@@ -56,6 +58,24 @@ func _ready() -> void:
 		ui._step_qty("ammo_918_pst", -1)
 		_check("«−» не уходит ниже шага", ui._qty_of("ammo_918_pst") == 30, str(ui._qty_of("ammo_918_pst")))
 	ui._qty.clear()
+
+	# --- ГРАНЬ-15 с открытыми каталогами: к нему подходит свой магазин, покупка в рюкзак
+	Settings.set_unlock_all(true)
+	ui._cat_tab = "weapon"
+	await _frames(20)
+	ui._select("wpn_ar_09")
+	await _frames(4)
+	_check("ГРАНЬ-15: к нему подходит магазин «ГРАНЬ»", "mag_556_30_gran" in ui._fits_of("wpn_ar_09"), str(ui._fits_of("wpn_ar_09")))
+	_check("магазин «ГРАНЬ»: подходит к ГРАНЬ-15", "wpn_ar_09" in ui._fits_of("mag_556_30_gran"), str(ui._fits_of("mag_556_30_gran")))
+	var gran_before: int = Profile.money
+	ui._buy("wpn_ar_09", "backpack")
+	_check("ГРАНЬ-15 куплен (деньги списаны)", Profile.money == gran_before - Profile.buy_price("wpn_ar_09"), "%d → %d" % [gran_before, Profile.money])
+	await _frames(20)
+	_save("trader_gran15")
+	Settings.set_unlock_all(false)
+	Profile.money = Profile.buy_price("supply_signal") + 400000
+	ui._cat_tab = "all"
+	await _frames(20)
 
 	# --- раздел «Оружие» и подгруппа
 	ui._cat_tab = "weapon"
@@ -111,6 +131,10 @@ func _ready() -> void:
 	Settings.set_unlock_all(false)
 	Profile.use_file("user://trader_ui_test.json", true)
 	Profile.money = 400000
+	ui._trader_tab = "kits"
+	await _frames(30)
+	_check("вкладка «Комплекты»: карточки комплектов", ui._cols.find_children("*", "GridContainer", true, false).size() > 0, "")
+	_save("trader_kits")
 	await _frames(20)
 
 	# --- обвес оружия: своё оружие выбирается кликом по карточке
@@ -157,12 +181,12 @@ func _only(ui: HideoutUI, cls: String) -> bool:
 
 
 ## Поле количества в карточке товара id.
+## Поле количества в подробностях выбранного предмета id.
 func _find_field(ui: HideoutUI, id: String) -> LineEdit:
-	for c in ui._shop_list.find_children("*", "", true, false):
-		if c is ItemCard.IconBox and (c as ItemCard.IconBox).id == id:
-			var fields := c.get_parent().find_children("*", "LineEdit", true, false)
-			return fields[0] if not fields.is_empty() else null
-	return null
+	if ui._sel != id:
+		return null
+	var fields := ui._shop_detail.find_children("*", "LineEdit", true, false)
+	return fields[0] if not fields.is_empty() else null
 
 
 func _frames(n: int) -> void:

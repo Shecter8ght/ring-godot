@@ -48,6 +48,18 @@ var _shop_search: String = ""
 var _shop_sort: String = ""
 ## Торговец: список товаров под закреплённой шапкой (перезаполняется без перестройки окна).
 var _shop_list: VBoxContainer
+## Витрина Михалыча (LightUi): выбранный предмет, шапка разделов, витрина и подробности, раздел выбора
+var _sel: String = ""
+var _sel_view: String = ""
+var _shop_head: VBoxContainer
+var _shop_center: VBoxContainer
+var _shop_detail: VBoxContainer
+## Рамка окна: тёмная у всех, у Михалыча — светлая без своей строки заголовка (у него шапка своя)
+var _panel: PanelContainer
+var _panel_dark: StyleBoxFlat
+var _head_row: HBoxContainer
+## Где окну переносить строки само (у Михалыча — только тёмная вставка прежних вкладок; null — нигде)
+var _wrap_root: Control
 ## Кадр открытия: Tab, открывший окно, его же не закрывает.
 var _opened_frame: int = -1
 var _toast: Label
@@ -97,11 +109,14 @@ func _ready() -> void:
 	sb.set_content_margin_all(18)
 	panel.add_theme_stylebox_override("panel", sb)
 	_root.add_child(panel)
+	_panel = panel
+	_panel_dark = sb
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 12)
 	panel.add_child(v)
 	var head := HBoxContainer.new()
 	v.add_child(head)
+	_head_row = head
 	_title = Label.new()
 	_title.add_theme_font_size_override("font_size", 26)
 	_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
@@ -222,6 +237,10 @@ func _process(delta: float) -> void:
 	_stash_slots.clear()
 	for c in _cols.get_children():
 		c.queue_free()
+	# Михалыч — светлое окно со своей шапкой (LightUi), остальные — прежние тёмные
+	var light := _kind == HideoutStation.Kind.TRADER
+	_panel.add_theme_stylebox_override("panel", LightUi.box(LightUi.BG, 6, 0) if light else _panel_dark)
+	_head_row.visible = not light
 	match _kind:
 		HideoutStation.Kind.STASH:
 			_build_stash()
@@ -237,13 +256,17 @@ func _process(delta: float) -> void:
 			_title.text = "Лазерный гравировщик"
 			_cols.add_child(EngraverPanel.new())
 			_sig = "engraver"
-	# строки-абзацы в колонках переносятся по словам: длинная строка не раздвигает окно за экран
-	for l in _cols.find_children("*", "Label", true, false):
-		if l.get_parent() is VBoxContainer and (l as Label).autowrap_mode == TextServer.AUTOWRAP_OFF:
-			(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for b in _cols.find_children("*", "Button", true, false):
-		if b.get_parent() is VBoxContainer and not b.get_parent().get_parent() is MountBoard:
-			(b as Button).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# строки-абзацы в колонках переносятся по словам: длинная строка не раздвигает окно за экран. Светлое окно
+	# Михалыча переносит само, где надо (подписи строк и плиток обрезаются: с переносом они схлопывались в
+	# нулевую высоту); прежние его вкладки — тёмная вставка (_wrap_root) — как у всех
+	var wrap_root: Control = _wrap_root if light else _cols
+	if wrap_root and is_instance_valid(wrap_root):
+		for l in wrap_root.find_children("*", "Label", true, false):
+			if l.get_parent() is VBoxContainer and (l as Label).autowrap_mode == TextServer.AUTOWRAP_OFF:
+				(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		for b in wrap_root.find_children("*", "Button", true, false):
+			if b.get_parent() is VBoxContainer and not b.get_parent().get_parent() is MountBoard:
+				(b as Button).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_restore_scroll(scrolls)
 
 
@@ -705,93 +728,121 @@ func _split(name: String, idx: int) -> void:
 
 # ---------------------------------------------------------------- торговец
 
+## Михалыч в светлом виде (владелец 2026-10-30, макет «Б1 — витрина светлая»): шапка с вкладками-«пилюлями»,
+## «Купить» — разделы чертой, слева список, в центре большой снимок выбранного и что к нему подходит, справа
+## подробности и покупка; «Комплекты» — карточками по три в строку. Обвес, продажа и задания пока прежние —
+## тёмной вставкой под светлой шапкой.
 func _build_trader() -> void:
-	_title.text = "%s   ·   у тебя %s ₽   ·   доверие: ступень %d / %d%s" % [String(_trader.get("name", "Торговец")), InventoryUI.money(Profile.money), Profile.trust_step(), int(Balance.TRUST_STEPS.max),
-		"   ·   АДМИН: всё у Михалыча" if Settings.shop_all() else ""]
-	# вкладки слева: купить, обвес оружия, продать, задания (разговор — отметка)
-	var tabs := VBoxContainer.new()
-	tabs.custom_minimum_size.x = 170
-	tabs.add_theme_constant_override("separation", 6)
-	_cols.add_child(tabs)
-	var talk := not Quests.talk_options("trader").is_empty()
-	for t in [["buy", "Купить"], ["mods", "Обвес оружия"], ["sell", "Продать"], ["tasks", "Задания" + ("  •" if talk else "")]]:
-		var key := String(t[0])
-		var b := _button(String(t[1]), func() -> void: _trader_tab = key)
-		b.toggle_mode = true
-		b.button_pressed = _trader_tab == key
-		b.custom_minimum_size.y = 36
-		b.add_theme_font_size_override("font_size", 16)
-		if key == "tasks" and talk:
-			b.add_theme_color_override("font_color", Color(1.0, 0.72, 0.45))
-		tabs.add_child(b)
+	_title.text = String(_trader.get("name", "Торговец"))
+	_wrap_root = null
+	var page := VBoxContainer.new()
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("separation", 0)
+	page.theme = LightUi.theme()
+	_cols.add_child(page)
+	page.add_child(_trader_header())
 	match _trader_tab:
 		"buy":
-			_trader_buy()
-		"mods":
-			_trader_mods()
-		"sell":
-			_trader_sell()
+			_trader_buy(page)
+		"kits":
+			_trader_kits(page)
 		_:
-			_missions_column()
+			# прежние вкладки — тёмной вставкой со своей (умалчиваемой) темой: их надписи светлые
+			var pad := MarginContainer.new()
+			pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			for side: String in ["left", "right", "top", "bottom"]:
+				pad.add_theme_constant_override("margin_" + side, 18)
+			page.add_child(pad)
+			var inset := PanelContainer.new()
+			_wrap_root = inset
+			inset.theme = ThemeDB.get_default_theme()
+			inset.add_theme_stylebox_override("panel", LightUi.box(Color(0.075, 0.07, 0.065, 0.97), 8, 16))
+			pad.add_child(inset)
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 16)
+			inset.add_child(row)
+			var keep := _cols
+			_cols = row
+			match _trader_tab:
+				"mods":
+					_trader_mods()
+				"sell":
+					_trader_sell()
+				_:
+					_missions_column()
+			_cols = keep
 
 
-## Купить: шапка (поиск, куда класть, разделы, подгруппы, порядок) закреплена над списком и не уезжает
-## при прокрутке; ниже — карточки по разделам и подгруппам (оружие — по классам, патроны и магазины —
-## по калибрам, обвес — по назначению). Справа — готовые комплекты и свои шаблоны.
-func _trader_buy() -> void:
-	var shop := _column("Купить", 1.0)
-	_shop_list = shop
-	var scroll := shop.get_parent() as ScrollContainer
-	scroll.resized.connect(_shop_resized)
-	var box := scroll.get_parent() as VBoxContainer
+## Шапка: имя, доверие, вкладки, деньги, закрыть.
+func _trader_header() -> Control:
+	var bar := PanelContainer.new()
+	var sb := LightUi.box(LightUi.SURFACE, 0, 0)
+	sb.border_color = LightUi.LINE
+	sb.border_width_bottom = 1
+	sb.content_margin_left = 28
+	sb.content_margin_right = 20
+	sb.content_margin_top = 12
+	sb.content_margin_bottom = 12
+	bar.add_theme_stylebox_override("panel", sb)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 24)
+	bar.add_child(h)
+	var who := HBoxContainer.new()
+	who.add_theme_constant_override("separation", 12)
+	h.add_child(who)
+	var name := LightUi.caps(String(_trader.get("short", "Михалыч")), 30, LightUi.TEXT)
+	who.add_child(name)
+	var trust := LightUi.caps("доверие %d / %d" % [Profile.trust_step(), int(Balance.TRUST_STEPS.max)], 14)
+	trust.size_flags_vertical = Control.SIZE_SHRINK_END
+	who.add_child(trust)
+	var nav := HBoxContainer.new()
+	nav.add_theme_constant_override("separation", 4)
+	h.add_child(nav)
+	var talk := not Quests.talk_options("trader").is_empty()
+	for t in [["buy", "Купить"], ["kits", "Комплекты"], ["mods", "Обвес оружия"], ["sell", "Продать"], ["tasks", "Задания" + ("  •" if talk else "")]]:
+		var key := String(t[0])
+		var b := LightUi.button(String(t[1]).to_upper(), "pill_on" if _trader_tab == key else "pill", func() -> void: _trader_tab = key)
+		b.custom_minimum_size.y = 38
+		b.add_theme_font_size_override("font_size", 16)
+		if key == "tasks" and talk and _trader_tab != key:
+			b.add_theme_color_override("font_color", LightUi.ACCENT)
+		nav.add_child(b)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(gap)
+	if Settings.shop_all():
+		var admin := LightUi.caps("админ: всё у Михалыча", 13, LightUi.ACCENT)
+		admin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(admin)
+	var money := LightUi.mono("%s ₽" % InventoryUI.money(Profile.money), 22)
+	money.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(money)
+	var close := Button.new()
+	close.text = "Закрыть · Esc"
+	close.focus_mode = Control.FOCUS_NONE
+	close.pressed.connect(close_ui)
+	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(close)
+	return bar
+
+
+## Купить: разделы и поиск сверху (не уезжают), ниже — список, витрина выбранного, подробности.
+func _trader_buy(page: VBoxContainer) -> void:
 	var stock := _trader_stock()
-	# --- шапка: панель с золотой кромкой снизу, стоит на месте
-	var head_panel := PanelContainer.new()
-	var hsb := StyleBoxFlat.new()
-	hsb.bg_color = Color(0.125, 0.115, 0.1, 1.0)
-	hsb.border_color = Color(1.0, 0.8, 0.45, 0.85)
-	hsb.border_width_bottom = 2
-	hsb.set_corner_radius_all(5)
-	hsb.set_content_margin_all(10)
-	hsb.shadow_color = Color(0, 0, 0, 0.55)
-	hsb.shadow_size = 6
-	hsb.shadow_offset = Vector2(0, 3)
-	head_panel.add_theme_stylebox_override("panel", hsb)
-	box.add_child(head_panel)
-	box.move_child(head_panel, 1)
+	var top := MarginContainer.new()
+	top.add_theme_constant_override("margin_left", 28)
+	top.add_theme_constant_override("margin_right", 28)
+	top.add_theme_constant_override("margin_top", 4)
+	page.add_child(top)
 	var head := VBoxContainer.new()
-	head.add_theme_constant_override("separation", 8)
-	head_panel.add_child(head)
-	var to_top := func() -> void: scroll.scroll_vertical = 0
-	# поиск и куда класть
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 8)
-	head.add_child(top)
-	var search := LineEdit.new()
-	search.placeholder_text = "Поиск по названию…"
-	search.text = _shop_search
-	search.clear_button_enabled = true
-	search.custom_minimum_size = Vector2(260, 34)
-	search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	search.add_theme_font_size_override("font_size", 16)
-	search.text_changed.connect(func(t: String) -> void:
-		_shop_search = t
-		scroll.scroll_vertical = 0
-		_fill_shop())
-	search.text_submitted.connect(func(_t: String) -> void: search.release_focus())
-	top.add_child(search)
-	top.add_child(_text("Класть:", Color(0.75, 0.75, 0.72)))
-	for d in [["backpack", "В рюкзак"], ["stash", "В тайник"]]:
-		var key := String(d[0])
-		var b := _button(String(d[1]), func() -> void: _buy_to = key)
-		b.toggle_mode = true
-		b.button_pressed = _buy_to == key
-		top.add_child(b)
-	top.add_child(_text("рюкзак %d / %d" % [Profile.backpack_cells(), Profile.backpack_capacity()], Color(0.6, 0.62, 0.6)))
-	# разделы: всё, оружие, патроны, магазины, обвес… — только те, где что-то есть
-	var cats := HFlowContainer.new()
-	cats.add_theme_constant_override("h_separation", 6)
-	cats.add_theme_constant_override("v_separation", 6)
+	head.add_theme_constant_override("separation", 0)
+	top.add_child(head)
+	_shop_head = head
+	# разделы чертой снизу (только те, где что-то есть) и поиск
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 22)
+	head.add_child(tabs)
 	for t in CAT_TABS:
 		var key := String(t[0])
 		var cnt := 0
@@ -800,17 +851,35 @@ func _trader_buy() -> void:
 				cnt += 1
 		if cnt == 0:
 			continue
-		var tb := _button("%s  %d" % [String(t[1]), cnt], func() -> void:
+		var tb := LightUi.button("%s  %d" % [String(t[1]).to_upper(), cnt], "tab_on" if _cat_tab == key else "tab", func() -> void:
 			_cat_tab = key
-			_sub_tab = ""
-			to_top.call())
-		tb.toggle_mode = true
-		tb.button_pressed = _cat_tab == key
-		tb.custom_minimum_size.y = 36
-		tb.add_theme_font_size_override("font_size", 16)
-		cats.add_child(tb)
-	head.add_child(cats)
-	# подгруппы выбранного раздела (пистолеты, ПП, автоматы… / калибры / прицелы, дульные…)
+			_sub_tab = "")
+		tb.add_theme_font_size_override("font_size", 15)
+		tabs.add_child(tb)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tabs.add_child(gap)
+	var search := LineEdit.new()
+	search.placeholder_text = "Поиск по названию"
+	search.text = _shop_search
+	search.clear_button_enabled = true
+	search.custom_minimum_size = Vector2(300, 36)
+	search.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	search.add_theme_font_size_override("font_size", 15)
+	search.text_changed.connect(func(t: String) -> void:
+		_shop_search = t
+		if _fill_shop(false):
+			_fill_showcase())
+	search.text_submitted.connect(func(_t: String) -> void: search.release_focus())
+	tabs.add_child(search)
+	var rule := ColorRect.new()
+	rule.color = LightUi.LINE
+	rule.custom_minimum_size.y = 1
+	head.add_child(rule)
+	# подгруппы раздела (пистолеты, ПП… / калибры / прицелы, дульные…) и порядок по цене
+	var subs_row := HBoxContainer.new()
+	subs_row.add_theme_constant_override("separation", 18)
+	head.add_child(subs_row)
 	if _cat_tab != "all":
 		var subs: Array = []
 		var counts := {}
@@ -823,57 +892,80 @@ func _trader_buy() -> void:
 			counts[g[1]] = int(counts.get(g[1], 0)) + 1
 		subs.sort_custom(func(a: Array, b: Array) -> bool: return int(a[0]) < int(b[0]))
 		if subs.size() > 1:
-			var chips := HFlowContainer.new()
-			chips.add_theme_constant_override("h_separation", 4)
-			chips.add_theme_constant_override("v_separation", 4)
-			var all_b := _button("Все", func() -> void:
-				_sub_tab = ""
-				to_top.call())
-			all_b.toggle_mode = true
-			all_b.button_pressed = _sub_tab == ""
-			chips.add_child(all_b)
+			var all_b := LightUi.button("ВСЕ", "tab_on" if _sub_tab == "" else "tab", func() -> void: _sub_tab = "")
+			all_b.add_theme_font_size_override("font_size", 14)
+			subs_row.add_child(all_b)
 			for g in subs:
 				var gname := String(g[1])
-				var cb := _button("%s  %d" % [gname, int(counts[gname])], func() -> void:
-					_sub_tab = gname
-					to_top.call())
-				cb.toggle_mode = true
-				cb.button_pressed = _sub_tab == gname
-				chips.add_child(cb)
-			head.add_child(chips)
+				var cb := LightUi.button("%s  %d" % [gname.to_upper(), int(counts[gname])], "tab_on" if _sub_tab == gname else "tab", func() -> void: _sub_tab = gname)
+				cb.add_theme_font_size_override("font_size", 14)
+				subs_row.add_child(cb)
 		elif _sub_tab != "":
 			_sub_tab = ""
-	# порядок и «к чему подходит»
-	var tools := HBoxContainer.new()
-	tools.add_theme_constant_override("separation", 6)
-	head.add_child(tools)
+	var sgap := Control.new()
+	sgap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	subs_row.add_child(sgap)
 	var sort_names := {"": "Цена: по каталогу", "up": "Цена ↑ дешёвые", "down": "Цена ↓ дорогие"}
-	var sort_b := _button(String(sort_names[_shop_sort]), func() -> void:
-		_shop_sort = {"": "up", "up": "down", "down": ""}[_shop_sort]
-		to_top.call())
-	sort_b.toggle_mode = true
-	sort_b.button_pressed = _shop_sort != ""
-	tools.add_child(sort_b)
-	if _focus != "":
-		tools.add_child(_text("Подходит к: %s" % ItemDb.item_name(_focus), Color(1.0, 0.82, 0.45)))
-		var only := _button("Только подходящее", func() -> void: _focus_only = not _focus_only)
-		only.toggle_mode = true
-		only.button_pressed = _focus_only
-		tools.add_child(only)
-		tools.add_child(_button("Сбросить", func() -> void:
-			_focus = ""
-			_focus_only = false))
-	var gap := Control.new()
-	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools.add_child(gap)
+	var sort_b := Button.new()
+	sort_b.text = String(sort_names[_shop_sort])
+	sort_b.focus_mode = Control.FOCUS_NONE
+	sort_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sort_b.pressed.connect(func() -> void: _shop_sort = {"": "up", "up": "down", "down": ""}[_shop_sort])
+	subs_row.add_child(sort_b)
+	# тело: список, витрина, подробности
+	var body_pad := MarginContainer.new()
+	body_pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side: String in ["left", "right"]:
+		body_pad.add_theme_constant_override("margin_" + side, 28)
+	body_pad.add_theme_constant_override("margin_top", 14)
+	body_pad.add_theme_constant_override("margin_bottom", 20)
+	page.add_child(body_pad)
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 20)
+	body_pad.add_child(body)
+	var left := VBoxContainer.new()
+	left.custom_minimum_size.x = 440
+	left.add_theme_constant_override("separation", 8)
+	body.add_child(left)
+	var open_n := Profile.trust_level()
+	var cat_line := "открыто каталогов %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
+	if open_n < TraderStock.catalogs().size():
+		cat_line += " · «%s» — со ступени %d" % [TraderStock.catalog_name(open_n + 1), TraderStock.step_of(open_n + 1)]
+	var cl := LightUi.label(cat_line, 13, LightUi.MUTED)
+	cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	left.add_child(cl)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	left.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+	_shop_list = list
+	var center := VBoxContainer.new()
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center.add_theme_constant_override("separation", 12)
+	body.add_child(center)
+	_shop_center = center
+	var detail_panel := PanelContainer.new()
+	detail_panel.custom_minimum_size.x = 400
+	detail_panel.add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 8, 22, LightUi.LINE, 1))
+	body.add_child(detail_panel)
+	var detail := VBoxContainer.new()
+	detail.add_theme_constant_override("separation", 10)
+	detail_panel.add_child(detail)
+	_shop_detail = detail
 	_fill_shop()
-	_kits_column()
+	_fill_showcase()
 
 
-## Список товаров под шапкой: перезаполняется сам (поиск) — шапка и поле поиска остаются на месте.
-func _fill_shop() -> void:
+## Список под шапкой: перезаполняется сам (поиск) — шапка и поле поиска остаются на месте. Выбранное держится,
+## пока оно в продаже (keep_sel — и когда его нет в списке: выбрали плиткой «подходит»); сменили раздел или
+## поиском убрали выбранное из списка — выбирается первое. true — выбранное сменилось.
+func _fill_shop(keep_sel: bool = true) -> bool:
 	if _shop_list == null or not is_instance_valid(_shop_list):
-		return
+		return false
 	var shop := _shop_list
 	for c in shop.get_children():
 		shop.remove_child(c)
@@ -883,17 +975,48 @@ func _fill_shop() -> void:
 		var kit: Array[String] = []
 		for pair in Balance.RESCUE_KIT:
 			kit.append(ItemDb.label(ItemDb.make(String(pair[0]), int(pair[1]))))
-		shop.add_child(_wrap(_text("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), Color(1.0, 0.85, 0.55))))
-		shop.add_child(_button("Взять даром", func() -> void: Profile.take_rescue()))
-	# каталоги: что открыто и когда следующий
-	var open_n := Profile.trust_level()
-	var cat_line := "Открыто каталогов: %d из %d — %s" % [open_n, TraderStock.catalogs().size(), TraderStock.catalog_name(open_n)]
-	if open_n < TraderStock.catalogs().size():
-		cat_line += "   ·   следующий «%s» — со ступени %d" % [TraderStock.catalog_name(open_n + 1), TraderStock.step_of(open_n + 1)]
-	var cl := _wrap(_text(cat_line, Color(0.7, 0.66, 0.58)))
-	cl.add_theme_font_size_override("font_size", 13)
-	shop.add_child(cl)
-	# что показываем: раздел, подгруппа, поиск, «только подходящее»
+		var rescue := LightUi.label("Михалыч: «Гол как сокол? Держи, отдашь потом»  —  " + ", ".join(kit), 14, LightUi.ACCENT_DARK)
+		rescue.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		shop.add_child(rescue)
+		var take := LightUi.button("ВЗЯТЬ ДАРОМ", "primary", func() -> void: Profile.take_rescue())
+		take.custom_minimum_size.y = 40
+		shop.add_child(take)
+	var rows := _shop_rows()
+	if rows.is_empty():
+		shop.add_child(LightUi.label("Ничего не найдено." if _shop_search.strip_edges() != "" else "В этом разделе пусто.", 15, LightUi.MUTED))
+		return false
+	var ids: Array = rows.map(func(r: Dictionary) -> String: return String(r.id))
+	var view := "%s|%s" % [_cat_tab, _sub_tab]
+	if view != _sel_view:
+		_sel_view = view
+		keep_sel = false
+	var before := _sel
+	if _sel == "" or not _sel in _trader_stock() or (not keep_sel and not _sel in ids):
+		_sel = String(ids[0])
+	var cat_names := {}
+	for t in CAT_TABS:
+		cat_names[String(t[0])] = String(t[1])
+	var last_cat := ""
+	var last_g := ""
+	for r: Dictionary in rows:
+		if String(r.cat) != last_cat and _cat_tab == "all":
+			var ch := LightUi.caps(String(cat_names.get(String(r.cat), "Разное")), 14, LightUi.TEXT)
+			if last_cat != "":
+				var pad := Control.new()
+				pad.custom_minimum_size.y = 8
+				shop.add_child(pad)
+			shop.add_child(ch)
+			last_g = ""
+		if String(r.cat) != last_cat or String(r.g) != last_g:
+			last_cat = String(r.cat)
+			last_g = String(r.g)
+			shop.add_child(LightUi.caps(last_g, 12))
+		shop.add_child(_shop_row(String(r.id)))
+	return _sel != before
+
+
+## Что показывать в списке: раздел, подгруппа, поиск; порядок — раздел, подгруппа, цена (если выбрана), каталог.
+func _shop_rows() -> Array:
 	var needle := _shop_search.strip_edges().to_lower()
 	var rows: Array = []
 	var stock := _trader_stock()
@@ -906,8 +1029,6 @@ func _fill_shop() -> void:
 		if _cat_tab != "all" and _sub_tab != "" and String(g[1]) != _sub_tab:
 			continue
 		if needle != "" and not needle in ItemDb.item_name(sid).to_lower() and not needle in String(ItemDb.item(sid).get("short", "")).to_lower():
-			continue
-		if _focus_only and _fits_focus(sid) < 0:
 			continue
 		var cat_rank := 0
 		for ti in CAT_TABS.size():
@@ -925,74 +1046,320 @@ func _fill_shop() -> void:
 		if by_price != "" and a.price != b.price:
 			return int(a.price) < int(b.price) if by_price == "up" else int(a.price) > int(b.price)
 		return int(a.i) < int(b.i))
-	if rows.is_empty():
-		shop.add_child(_text("Ничего не найдено." if needle != "" else "В этом разделе пусто.", Color(0.7, 0.6, 0.5)))
+	return rows
+
+
+## Строка списка: снимок, имя, подпись (закрытое — со ступени N), цена; клик — выбрать.
+func _shop_row(sid: String) -> ItemCard:
+	var tl := maxi(TraderStock.catalog_of(sid), 1)
+	var locked := _trust_blocked(sid, tl)
+	var sub := "откроется со ступени %d" % TraderStock.step_of(tl) if locked else _sub_of(sid)
+	var row := ItemCard.row({"id": sid, "n": 1}, sub, "%s ₽" % InventoryUI.money(Profile.buy_price(sid)), sid == _sel, locked)
+	row.gui_input.connect(func(ev: InputEvent) -> void:
+		var mb := ev as InputEventMouseButton
+		if mb and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			_select(sid))
+	return row
+
+
+## Выбрать предмет: список (подсветка), витрина и подробности — без перестройки окна (поиск не теряет курсор).
+func _select(sid: String) -> void:
+	if sid == _sel:
 		return
-	var cat_names := {}
-	for t in CAT_TABS:
-		cat_names[String(t[0])] = String(t[1])
-	var last_cat := ""
-	var last_g := ""
-	var flow: GridContainer = null
-	var count_label: Label = null
-	var count := 0
-	for r: Dictionary in rows:
-		if String(r.cat) != last_cat and _cat_tab == "all":
-			# заголовок раздела — крупно, с чертой
-			if last_cat != "":
-				var pad := Control.new()
-				pad.custom_minimum_size.y = 10
-				shop.add_child(pad)
-			var ch := _text(String(cat_names.get(String(r.cat), "Разное")).to_upper(), Color(1.0, 0.86, 0.6))
-			ch.add_theme_font_size_override("font_size", 20)
-			shop.add_child(ch)
-			var sep := HSeparator.new()
-			sep.modulate = Color(1.0, 0.8, 0.45, 0.5)
-			shop.add_child(sep)
-			last_g = ""
-		if String(r.cat) != last_cat or String(r.g) != last_g:
-			last_cat = String(r.cat)
-			last_g = String(r.g)
-			if count_label:
-				count_label.text += "   %d" % count
-			count = 0
-			count_label = _text(last_g, Color(0.88, 0.8, 0.66))
-			count_label.add_theme_font_size_override("font_size", 16)
-			shop.add_child(count_label)
-			# крупные карточки сеткой: 3 в строку, на узком окне — 2 (_shop_cols)
-			flow = GridContainer.new()
-			flow.columns = _shop_cols()
-			flow.add_theme_constant_override("h_separation", 10)
-			flow.add_theme_constant_override("v_separation", 10)
-			shop.add_child(flow)
-		count += 1
-		flow.add_child(_shop_card(String(r.id)))
-	if count_label:
-		count_label.text += "   %d" % count
+	_sel = sid
+	Audio.play_ui("ui_click")
+	var scroll := _shop_list.get_parent() as ScrollContainer if _shop_list and is_instance_valid(_shop_list) else null
+	var at: int = scroll.scroll_vertical if scroll else 0
+	_fill_shop(true)
+	if scroll:
+		scroll.set_deferred("scroll_vertical", at)
+	_fill_showcase()
 
 
-## Карточка витрины не уже этого: иначе в строку — две.
-const SHOP_CARD_MIN_W := 300.0
-
-
-## Сколько карточек витрины в строку: 3, на узкой колонке — 2 (ширина колонки ещё не известна — по окну).
-func _shop_cols() -> int:
-	var w: float = 0.0
-	if _shop_list and is_instance_valid(_shop_list) and _shop_list.get_parent() is ScrollContainer:
-		w = (_shop_list.get_parent() as ScrollContainer).size.x
-	if w <= 0.0:
-		w = get_viewport().get_visible_rect().size.x - 620.0
-	return 3 if w >= SHOP_CARD_MIN_W * 3.0 else 2
-
-
-## Окно поменяло размер — сетки витрины перестраиваются на своё число колонок.
-func _shop_resized() -> void:
-	if _shop_list == null or not is_instance_valid(_shop_list):
+## Витрина (большой снимок и что подходит) и подробности выбранного.
+func _fill_showcase() -> void:
+	if _shop_center == null or not is_instance_valid(_shop_center) or _sel == "":
 		return
-	var cols := _shop_cols()
-	for g in _shop_list.get_children():
-		if g is GridContainer and (g as GridContainer).columns != cols:
-			(g as GridContainer).columns = cols
+	for c in _shop_center.get_children():
+		_shop_center.remove_child(c)
+		c.queue_free()
+	var stage := PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.add_theme_stylebox_override("panel", LightUi.box(LightUi.STAGE, 8, 0))
+	_shop_center.add_child(stage)
+	var shot := ItemCard.IconBox.new()
+	shot.id = _sel
+	shot.entry = {"id": _sel, "n": 1}
+	shot.studio = true
+	shot.light = true
+	shot.pad = 34.0
+	shot.frame = SHOWCASE_FRAME
+	shot.urgent = true
+	shot.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	shot.custom_minimum_size.y = 200
+	stage.add_child(shot)
+	var fits := _fits_of(_sel)
+	if not fits.is_empty():
+		_shop_center.add_child(LightUi.caps("подходит к нему" if WeaponDb.is_weapon(_sel) else "к чему подходит", 13))
+		var grid := GridContainer.new()
+		grid.columns = 3
+		grid.add_theme_constant_override("h_separation", 12)
+		grid.add_theme_constant_override("v_separation", 12)
+		_shop_center.add_child(grid)
+		for fid: String in fits:
+			grid.add_child(_fit_tile(fid))
+	_fill_detail()
+
+
+## Кадр большого снимка на витрине (пропорции витрины ~2,4 : 1).
+const SHOWCASE_FRAME := Vector2i(1280, 536)
+## Сколько показывать «что подходит».
+const SHOWCASE_FITS := 6
+
+
+## Что подходит к выбранному из того, что продаётся: к стволу — магазины (штатный первым), патроны, обвес;
+## к магазину, патрону, обвесу — стволы. Закрытое доверием не показывается.
+func _fits_of(sid: String) -> Array:
+	var out: Array = []
+	var stock := _trader_stock()
+	var avail := func(id: String) -> bool: return not _trust_blocked(id, maxi(TraderStock.catalog_of(id), 1))
+	if WeaponDb.is_weapon(sid):
+		var w := WeaponDb.weapon(sid)
+		var first: Array = [String(w.get("default_mag", "")), WeaponDb.default_ammo(String(w.get("caliber", "")))]
+		for id: String in first:
+			if id in stock and avail.call(id) and _fits(sid, id):
+				out.append(id)
+		for kind: String in ["mag", "ammo", "mod"]:
+			for id in stock:
+				var s := String(id)
+				if out.size() >= SHOWCASE_FITS:
+					return out
+				if s in out or _cat_of(s) != kind or not avail.call(s):
+					continue
+				if _fits(sid, s):
+					out.append(s)
+		return out
+	for id in stock:
+		var s := String(id)
+		if out.size() >= SHOWCASE_FITS:
+			break
+		if WeaponDb.is_weapon(s) and avail.call(s) and _fits(s, sid):
+			out.append(s)
+	return out
+
+
+## Подходит ли предмет к стволу weapon: патрон — калибр, магазин — шахта, обвес — есть место крепления.
+func _fits(weapon: String, sid: String) -> bool:
+	if not WeaponDb.ammo(sid).is_empty():
+		return WeaponDb.ammo_fits(weapon, sid)
+	if not WeaponDb.magazine(sid).is_empty():
+		return WeaponDb.mag_fits(weapon, sid)
+	if not WeaponDb.attachment(sid).is_empty():
+		return not WeaponDb.mounts_for({"id": weapon, "n": 1, "mods": {}}, sid).is_empty()
+	return false
+
+
+## Плитка «подходит»: имя, снимок, цена; клик — выбрать.
+func _fit_tile(fid: String) -> Control:
+	var tile := PanelContainer.new()
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tile.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	tile.add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 6, 10, LightUi.LINE, 1))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tile.add_child(v)
+	var name := LightUi.caps(ItemDb.item_name(fid), 13, LightUi.TEXT)
+	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(name)
+	var icon := ItemCard.IconBox.new()
+	icon.id = fid
+	icon.entry = {"id": fid, "n": 1}
+	icon.studio = true
+	icon.light = true
+	icon.pad = 4.0
+	icon.frame = Vector2i(320, 145)
+	icon.custom_minimum_size.y = 64
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(icon)
+	var price := LightUi.mono("%s ₽" % InventoryUI.money(Profile.buy_price(fid)), 13, LightUi.TEXT2)
+	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(price)
+	tile.gui_input.connect(func(ev: InputEvent) -> void:
+		var mb := ev as InputEventMouseButton
+		if mb and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			_select(fid))
+	return tile
+
+
+## Подробности выбранного: что это, характеристики, цена с количеством, купить в рюкзак или в тайник.
+func _fill_detail() -> void:
+	var d := _shop_detail
+	if d == null or not is_instance_valid(d):
+		return
+	for c in d.get_children():
+		d.remove_child(c)
+		c.queue_free()
+	var sid := _sel
+	var it := ItemDb.item(sid)
+	var w := WeaponDb.weapon(sid)
+	var over := _sub_of(sid) if not w.is_empty() else String(_subgroup(sid)[1])
+	d.add_child(LightUi.caps(over, 14, LightUi.ACCENT))
+	var title := LightUi.label(ItemDb.item_name(sid), 38, LightUi.TEXT, LightUi.head_font())
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	d.add_child(title)
+	var about := String(it.get("desc", ""))
+	if about == "":
+		about = String(it.get("flavor", ""))
+	if w.is_empty() and _sub_of(sid) != "":
+		about = (_sub_of(sid) + ("\n" + about if about != "" else ""))
+	if about != "":
+		var al := LightUi.label(about, 14, LightUi.TEXT2)
+		al.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		d.add_child(al)
+	for r: Array in _detail_stats(sid):
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		var top := HBoxContainer.new()
+		var k := LightUi.caps(String(r[0]), 13, LightUi.TEXT2)
+		k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(k)
+		top.add_child(LightUi.mono(String(r[1]), 14))
+		row.add_child(top)
+		var track := Panel.new()
+		track.custom_minimum_size.y = 6
+		track.add_theme_stylebox_override("panel", LightUi.box(LightUi.TRACK, 3))
+		var fill := Panel.new()
+		fill.add_theme_stylebox_override("panel", LightUi.box(LightUi.BAR, 3))
+		fill.anchor_bottom = 1.0
+		fill.anchor_right = clampf(float(r[2]) / 100.0, 0.0, 1.0)
+		track.add_child(fill)
+		row.add_child(track)
+		d.add_child(row)
+	var info := Button.new()
+	info.text = "Подробнее"
+	info.focus_mode = Control.FOCUS_NONE
+	info.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	info.pressed.connect(func() -> void: ItemInfo.open(self, {"id": sid, "n": 1}))
+	d.add_child(info)
+	var gap := Control.new()
+	gap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	d.add_child(gap)
+	var stackable := ItemDb.stack(sid) > 1
+	var unit := Profile.buy_price(sid)
+	var tl := maxi(TraderStock.catalog_of(sid), 1)
+	var line := HBoxContainer.new()
+	var cat_l := LightUi.caps("каталог «%s»" % TraderStock.catalog_name(tl) if TraderStock.catalog_of(sid) > 0 else "находка", 13)
+	cat_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cat_l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	line.add_child(cat_l)
+	var price := LightUi.mono("%s ₽" % InventoryUI.money(unit * (_qty_of(sid) if stackable else 1)), 26)
+	line.add_child(price)
+	d.add_child(line)
+	if _trust_blocked(sid, tl):
+		var lock := LightUi.caps("откроется со ступени %d" % TraderStock.step_of(tl), 16, LightUi.LOCK)
+		d.add_child(lock)
+		return
+	var buy_bp := LightUi.button("КУПИТЬ В РЮКЗАК", "primary", func() -> void: _buy(sid, "backpack"))
+	buy_bp.custom_minimum_size.y = 52
+	buy_bp.add_theme_font_size_override("font_size", 19)
+	var buy_st := Button.new()
+	buy_st.text = "В ТАЙНИК"
+	buy_st.focus_mode = Control.FOCUS_NONE
+	buy_st.custom_minimum_size.y = 40
+	buy_st.add_theme_font_override("font", LightUi.head_font())
+	buy_st.add_theme_font_size_override("font_size", 15)
+	buy_st.pressed.connect(func() -> void: _buy(sid, "stash"))
+	var afford := func() -> void:
+		var cost := unit * (_qty_of(sid) if stackable else 1)
+		price.text = "%s ₽" % InventoryUI.money(cost)
+		buy_bp.disabled = cost > Profile.money
+		buy_st.disabled = cost > Profile.money
+	if stackable:
+		# количество: шаг кнопками (патроны — по 30), любое число — руками в поле
+		var qrow := HBoxContainer.new()
+		qrow.add_theme_constant_override("separation", 6)
+		var field := LineEdit.new()
+		field.text = str(_qty_of(sid))
+		field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		field.max_length = 4
+		field.select_all_on_focus = true
+		field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		field.tooltip_text = "Сколько купить — можно набрать число"
+		field.add_theme_font_override("font", LightUi.mono_font())
+		var step := func(dir: int) -> void:
+			_step_qty(sid, dir)
+			field.text = str(_qty_of(sid))
+			afford.call()
+		var minus := Button.new()
+		minus.text = "−"
+		minus.focus_mode = Control.FOCUS_NONE
+		minus.custom_minimum_size.x = 44
+		minus.pressed.connect(func() -> void: step.call(-1))
+		var plus := Button.new()
+		plus.text = "+"
+		plus.focus_mode = Control.FOCUS_NONE
+		plus.custom_minimum_size.x = 44
+		plus.pressed.connect(func() -> void: step.call(1))
+		qrow.add_child(minus)
+		qrow.add_child(field)
+		qrow.add_child(plus)
+		field.text_changed.connect(func(t: String) -> void:
+			if t.is_valid_int() and int(t) >= 1:
+				_qty[sid] = clampi(int(t), 1, _qty_max(sid))
+				afford.call())
+		field.focus_exited.connect(func() -> void: field.text = str(_qty_of(sid)))
+		field.text_submitted.connect(func(_t: String) -> void: field.release_focus())
+		d.add_child(qrow)
+	d.add_child(buy_bp)
+	d.add_child(buy_st)
+	afford.call()
+
+
+## Характеристики в подробностях: [название, значение, полоса 0–100]. Ствол — урон, пробитие, темп,
+## эргономика, дальность, вес (как в схеме оружия, WeaponStats); патрон — урон и пробитие; остальное — нет.
+func _detail_stats(sid: String) -> Array:
+	var out: Array = []
+	if WeaponDb.is_weapon(sid):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 1
+		var e: Dictionary = WeaponDb.bare_weapon(sid, rng, [100, 100])
+		var s := WeaponStats.compute(e, WeaponDb.default_ammo(String(WeaponDb.weapon(sid).get("caliber", ""))))
+		if s.is_empty():
+			return out
+		var rows := WeaponStats.rows(s)
+		# не боевое (ракетница): урона нет — характеристики стрельбы не показываем
+		if float((rows[0] as Array)[1]) <= 0.0:
+			return out
+		for i: int in [0, 1, 2, 7, 9, 12]:
+			var r: Array = rows[i]
+			out.append([String(r[0]), String(r[4]) % float(r[1]), float(r[2])])
+		return out
+	var a := WeaponDb.ammo(sid)
+	if not a.is_empty():
+		out.append(["Урон", "%d" % int(a.damage), clampf(float(a.damage), 0.0, 100.0)])
+		out.append(["Пробитие", "%d" % int(a.pen), clampf(float(a.pen) * 1.6, 0.0, 100.0)])
+	return out
+
+
+## Купить выбранное: в рюкзак (не влезло — в тайник, с сообщением) или в тайник.
+func _buy(sid: String, to: String) -> void:
+	var q := _qty_of(sid) if ItemDb.stack(sid) > 1 else 1
+	var stash_before: int = Profile.stash_count(sid)
+	_buy_to = to
+	if not Profile.buy(sid, q, to):
+		if Profile.buy_price(sid) * q > Profile.money:
+			toast("Не хватает денег")
+		else:
+			toast("Нет места ни в рюкзаке, ни в тайнике" if to == "backpack" else "В тайнике нет места")
+		return
+	if to == "backpack" and Profile.stash_count(sid) > stash_before:
+		toast("Покупка отправлена в тайник: в рюкзаке нет места")
+	# купил — количество снова по умолчанию
+	_qty.erase(sid)
 
 
 ## Абзац в колонке: переносится по словам (строки, добавленные после общей перестройки окна).
@@ -1001,170 +1368,95 @@ func _wrap(l: Label) -> Label:
 	return l
 
 
-## Карточка товара: у расходников — количество («−», поле для числа руками, «+»), цена за всё выбранное.
-func _shop_card(sid: String) -> ItemCard:
-	var fit := _fits_focus(sid)
-	var stackable := ItemDb.stack(sid) > 1
-	var n := _qty_of(sid) if stackable else 1
-	var unit := Profile.buy_price(sid)
-	var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(unit * n), 0.0, true)
-	var tl := maxi(TraderStock.catalog_of(sid), 1)
-	if _trust_blocked(sid, tl):
-		# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
-		# закрытое не бледнеет целиком (полупрозрачный ствол читался «блеклым», владелец 2026-10-30): предмет виден
-		# как есть, приглушена цена, замок — ярлык ступени
-		card.controls.add_child(_text("откроется со ступени %d" % TraderStock.step_of(tl), Color(0.9, 0.62, 0.42)))
-		if card.price_label:
-			card.price_label.add_theme_color_override("font_color", Color(0.55, 0.57, 0.6))
-	else:
-		var b := _button("Купить", func() -> void:
-			var q := _qty_of(sid) if ItemDb.stack(sid) > 1 else 1
-			var stash_before: int = Profile.stash_count(sid)
-			if not Profile.buy(sid, q, _buy_to):
-				if Profile.buy_price(sid) * q > Profile.money:
-					toast("Не хватает денег")
-				else:
-					toast("Нет места ни в рюкзаке, ни в тайнике" if _buy_to == "backpack" else "В тайнике нет места")
-				return
-			if _buy_to == "backpack" and Profile.stash_count(sid) > stash_before:
-				toast("Покупка отправлена в тайник: в рюкзаке нет места")
-			# купил — количество снова по умолчанию
-			_qty.erase(sid)
-			if WeaponDb.is_weapon(sid):
-				# купил ствол — сразу видно, что к нему подходит
-				_focus = sid)
-		b.disabled = unit * n > Profile.money
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if stackable:
-			# количество: шаг кнопками (патроны — по 30), любое число — руками в поле
-			var qrow := HBoxContainer.new()
-			qrow.add_theme_constant_override("separation", 4)
-			var field := LineEdit.new()
-			field.text = str(n)
-			field.alignment = HORIZONTAL_ALIGNMENT_CENTER
-			field.max_length = 4
-			field.select_all_on_focus = true
-			field.custom_minimum_size.x = 58
-			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			field.tooltip_text = "Сколько купить — можно набрать число"
-			var show := func() -> void:
-				var q := _qty_of(sid)
-				if card.price_label:
-					card.price_label.text = "%s ₽" % InventoryUI.money(unit * q)
-				b.disabled = unit * q > Profile.money
-			var step := func(dir: int) -> void:
-				_step_qty(sid, dir)
-				field.text = str(_qty_of(sid))
-				show.call()
-			qrow.add_child(_button("−", func() -> void: step.call(-1)))
-			qrow.add_child(field)
-			qrow.add_child(_button("+", func() -> void: step.call(1)))
-			field.text_changed.connect(func(t: String) -> void:
-				if t.is_valid_int() and int(t) >= 1:
-					_qty[sid] = clampi(int(t), 1, _qty_max(sid))
-					show.call())
-			field.focus_exited.connect(func() -> void: field.text = str(_qty_of(sid)))
-			field.text_submitted.connect(func(_t: String) -> void: field.release_focus())
-			var body := card.controls.get_parent()
-			body.add_child(qrow)
-			body.move_child(qrow, card.controls.get_index())
-		card.controls.add_child(b)
-	if WeaponDb.is_weapon(sid):
-		card.controls.add_child(_button("Что подходит", func() -> void: _focus = "" if _focus == sid else sid))
-		if sid == _focus:
-			card.mark(1)
-	elif fit != 0:
-		card.mark(fit)
-	return card
-
-
-## Правая колонка у Михалыча: готовые комплекты (Balance.TRADER_KITS) и свои шаблоны — полный набор
-## одной кнопкой: что есть в тайнике — оттуда, остальное докупается.
-func _kits_column() -> void:
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size.x = 330
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.13, 0.115, 0.085, 0.96)
-	sb.border_color = Color(1.0, 0.8, 0.45, 0.7)
-	sb.set_border_width_all(1)
-	sb.border_width_top = 3
-	sb.set_corner_radius_all(5)
-	sb.set_content_margin_all(12)
-	panel.add_theme_stylebox_override("panel", sb)
-	_cols.add_child(panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	panel.add_child(box)
-	var title := _text("Готовые комплекты", Color(1.0, 0.86, 0.6))
-	title.add_theme_font_size_override("font_size", 18)
-	box.add_child(title)
+## Комплекты: готовые (Balance.TRADER_KITS) и свои шаблоны карточками по три в строку — полный набор одной
+## кнопкой: что есть в тайнике — оттуда, остальное докупается; ниже — сохранить надетое как свой.
+func _trader_kits(page: VBoxContainer) -> void:
+	var pad := MarginContainer.new()
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side: String in ["left", "right"]:
+		pad.add_theme_constant_override("margin_" + side, 28)
+	pad.add_theme_constant_override("margin_top", 18)
+	pad.add_theme_constant_override("margin_bottom", 20)
+	page.add_child(pad)
 	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	box.add_child(scroll)
+	pad.add_child(scroll)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 8)
+	list.add_theme_constant_override("separation", 12)
 	scroll.add_child(list)
+	list.add_child(LightUi.caps("готовые комплекты", 14))
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 14)
+	list.add_child(grid)
 	for kit: Dictionary in Balance.TRADER_KITS:
-		list.add_child(_kit_card(kit))
-	# свои комплекты: игрок собирает под себя — надел, сложил в рюкзак, сохранил под именем
-	var own_title := _text("Свои комплекты  %d / %d" % [LoadoutTemplates.all().size(), LoadoutTemplates.MAX], Color(1.0, 0.86, 0.6))
-	own_title.add_theme_font_size_override("font_size", 18)
-	list.add_child(own_title)
-	for i in range(LoadoutTemplates.all().size()):
-		list.add_child(_kit_card(LoadoutTemplates.all()[i], i))
-	var hint := _text("Надень и сложи в рюкзак то, с чем ходишь, — и сохрани: потом соберётся одной кнопкой (что есть в тайнике — оттуда, остальное докупится). То же имя — заменить.", Color(0.6, 0.6, 0.56))
-	hint.add_theme_font_size_override("font_size", 13)
+		grid.add_child(_kit_card(kit))
+	list.add_child(LightUi.caps("свои комплекты  %d / %d" % [LoadoutTemplates.all().size(), LoadoutTemplates.MAX], 14))
+	if not LoadoutTemplates.all().is_empty():
+		var own := GridContainer.new()
+		own.columns = 3
+		own.add_theme_constant_override("h_separation", 14)
+		own.add_theme_constant_override("v_separation", 14)
+		list.add_child(own)
+		for i in range(LoadoutTemplates.all().size()):
+			own.add_child(_kit_card(LoadoutTemplates.all()[i], i))
+	var hint := LightUi.label("Надень и сложи в рюкзак то, с чем ходишь, — и сохрани: потом соберётся одной кнопкой (что есть в тайнике — оттуда, остальное докупится). То же имя — заменить.", 14, LightUi.MUTED)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	list.add_child(hint)
+	var save_row := HBoxContainer.new()
+	save_row.add_theme_constant_override("separation", 10)
+	list.add_child(save_row)
 	var name_edit := LineEdit.new()
 	name_edit.placeholder_text = "Имя комплекта"
 	name_edit.max_length = 24
-	list.add_child(name_edit)
-	var save := _button("Сохранить надетое и рюкзак", func() -> void:
+	name_edit.custom_minimum_size = Vector2(320, 40)
+	save_row.add_child(name_edit)
+	var save := LightUi.button("СОХРАНИТЬ НАДЕТОЕ И РЮКЗАК", "primary", func() -> void:
 		if Profile.equipment.is_empty() and Profile.backpack.is_empty():
 			toast("Сохранять нечего: ничего не надето и рюкзак пуст")
 			return
 		var t := LoadoutTemplates.capture(name_edit.text)
 		toast("Комплект «%s» сохранён" % String(t.name)))
-	save.custom_minimum_size.y = 34
-	list.add_child(save)
+	save.custom_minimum_size.y = 40
+	save_row.add_child(save)
 
 
-## Карточка комплекта: что в нём, сколько докупить, чего не хватает (доверие, верстак), «Собрать».
+## Карточка комплекта: снимок основного ствола, что в нём, сколько докупить, чего не хватает, «Собрать».
 func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 	var card := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.085, 0.08, 0.072, 0.96)
-	sb.border_color = Color(0.95, 0.78, 0.5, 0.25)
-	sb.set_border_width_all(1)
-	sb.set_corner_radius_all(4)
-	sb.set_content_margin_all(10)
-	card.add_theme_stylebox_override("panel", sb)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 8, 14, LightUi.LINE, 1))
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
+	v.add_theme_constant_override("separation", 6)
 	card.add_child(v)
 	var slots: Dictionary = kit.get("slots", {})
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 8)
-	v.add_child(head)
 	var icon := ItemCard.IconBox.new()
 	icon.id = String((slots.get("primary", {}) as Dictionary).get("id", ""))
-	icon.custom_minimum_size = Vector2(120, 48)
+	icon.entry = (slots.get("primary", {}) as Dictionary).duplicate(true)
+	icon.studio = true
+	icon.light = true
+	icon.plate = LightUi.PLATE
+	icon.pad = 14.0
+	icon.aspect = ItemCard.BIG_ASPECT
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	head.add_child(icon)
-	var name := _text(String(kit.name), Color(1.0, 0.9, 0.7))
-	name.add_theme_font_size_override("font_size", 18)
-	head.add_child(name)
+	v.add_child(icon)
+	var head := HBoxContainer.new()
+	v.add_child(head)
+	var name := LightUi.label(String(kit.name), 24, LightUi.TEXT, LightUi.head_font())
 	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name.clip_text = true
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	head.add_child(name)
 	if own_idx >= 0:
-		var del := _button("✕", func() -> void: LoadoutTemplates.remove(own_idx))
-		del.tooltip_text = "Удалить комплект"
+		var del := Button.new()
+		del.text = "Удалить"
+		del.focus_mode = Control.FOCUS_NONE
+		del.pressed.connect(func() -> void: LoadoutTemplates.remove(own_idx))
 		head.add_child(del)
 	if String(kit.get("about", "")) != "":
-		var about := _text(String(kit.get("about", "")), Color(0.75, 0.75, 0.7))
-		about.add_theme_font_size_override("font_size", 13)
+		var about := LightUi.label(String(kit.get("about", "")), 14, LightUi.TEXT2)
+		about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(about)
 	# состав одной строкой: стволы, броня, шлем, рюкзак, сколько всего в рюкзаке
 	var parts: Array[String] = []
@@ -1177,8 +1469,8 @@ func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 	var bp_n := (kit.get("backpack", []) as Array).size()
 	if bp_n > 0:
 		parts.append("в рюкзаке %d поз." % bp_n)
-	var what := _text(" · ".join(parts), Color(0.86, 0.84, 0.78))
-	what.add_theme_font_size_override("font_size", 13)
+	var what := LightUi.label(" · ".join(parts), 13, LightUi.MUTED)
+	what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(what)
 	var p := LoadoutTemplates.plan(kit)
 	var cost := int(p.cost)
@@ -1188,13 +1480,14 @@ func _kit_card(kit: Dictionary, own_idx: int = -1) -> Control:
 			if String(r.how) == "нет":
 				why = String(r.why)
 				break
-		var miss := _text("не собрать полностью: %d поз. — %s" % [int(p.missing), why], Color(0.85, 0.55, 0.45))
-		miss.add_theme_font_size_override("font_size", 13)
+		var miss := LightUi.label("не собрать полностью: %d поз. — %s" % [int(p.missing), why], 13, LightUi.LOCK)
+		miss.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(miss)
-	var go := _button("Собрать — всё есть" if cost == 0 and int(p.missing) == 0 else "Собрать  ·  докупить на %s ₽" % InventoryUI.money(cost), func() -> void: _confirm_template(kit))
+	var go := LightUi.button("СОБРАТЬ — ВСЁ ЕСТЬ" if cost == 0 and int(p.missing) == 0 else "СОБРАТЬ · ДОКУПИТЬ НА %s ₽" % InventoryUI.money(cost), "primary",
+		func() -> void: _confirm_template(kit))
 	go.disabled = cost > Profile.money
-	go.custom_minimum_size.y = 34
-	go.add_theme_font_size_override("font_size", 15)
+	go.custom_minimum_size.y = 42
+	go.add_theme_font_size_override("font_size", 16)
 	if go.disabled:
 		go.tooltip_text = "Не хватает денег"
 	v.add_child(go)

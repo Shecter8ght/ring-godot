@@ -41,7 +41,7 @@ static func texture(entry: Dictionary, canvas: CanvasItem = null) -> Texture2D:
 ## печёная иконка (96 на клетку, по клеткам предмета) в большой карточке расплывается и мелка. Оружие — его
 ## сборка (и без обвеса), остальное — модель предмета (ItemModels, как у печёных иконок); наклейки — null: их
 ## иконки нарисованы, а не сняты с модели; пустой снимок (модели нет) — тоже null, рисуется иконка.
-static func card_texture(entry: Dictionary, frame: Vector2i, canvas: CanvasItem = null) -> Texture2D:
+static func card_texture(entry: Dictionary, frame: Vector2i, canvas: CanvasItem = null, urgent: bool = false) -> Texture2D:
 	var id: String = String(entry.get("id", ""))
 	if id == "" or id.begins_with("sticker_"):
 		return null
@@ -57,7 +57,7 @@ static func card_texture(entry: Dictionary, frame: Vector2i, canvas: CanvasItem 
 	var me: ItemThumbs = _instance()
 	if me == null:
 		return null
-	me._request(key, entry, canvas, frame)
+	me._request(key, entry, canvas, frame, urgent)
 	return null
 
 
@@ -96,7 +96,8 @@ static func _instance() -> ItemThumbs:
 	return _self
 
 
-func _request(key: String, entry: Dictionary, canvas: CanvasItem, frame: Vector2i = Vector2i.ZERO) -> void:
+## urgent — вперёд очереди (большой снимок витрины не ждёт мелкие в списке).
+func _request(key: String, entry: Dictionary, canvas: CanvasItem, frame: Vector2i = Vector2i.ZERO, urgent: bool = false) -> void:
 	if canvas:
 		var list: Array = _waiting.get(key, [])
 		list.append(weakref(canvas))
@@ -104,7 +105,11 @@ func _request(key: String, entry: Dictionary, canvas: CanvasItem, frame: Vector2
 	if _queued.has(key):
 		return
 	_queued[key] = true
-	_queue.append({"key": key, "entry": entry.duplicate(true), "frame": frame})
+	var job := {"key": key, "entry": entry.duplicate(true), "frame": frame}
+	if urgent:
+		_queue.push_front(job)
+	else:
+		_queue.append(job)
 
 
 func _process(_delta: float) -> void:

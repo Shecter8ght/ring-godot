@@ -860,7 +860,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_bolt = _viewmodel.find_child(String((_carrier.get_meta("action") as Dictionary).get("bolt", "")), true, false) as Node3D
 			if _bolt:
 				_bolt.transform = _bolt.get_meta("rest")
-			_cover = _viewmodel.find_child(String((_carrier.get_meta("action") as Dictionary).get("cover", "")), true, false) as Node3D
+			var cover_name := String((_carrier.get_meta("action") as Dictionary).get("cover", ""))
+			_cover = _viewmodel.find_child(cover_name, true, false) as Node3D if cover_name != "" else null
 			if _cover and not _cover.has_meta("rest"):
 				_cover = null
 		_bolt_ammo = -1
