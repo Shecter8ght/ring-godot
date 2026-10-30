@@ -37,6 +37,11 @@ MASKS = {
     "grime": ("dirt_5", "dirt_5-2K.png", 20.0, 99.5, 0, 0.3),
     # пыль в углах — частицы (ShareTextures dirt_1)
     "dust_grain": ("dirt_1-1", "dirt_1-2K.png", 30.0, 99.7, 0, 0.2),
+    # метки владельца «до металла» / «протёрто» (mark_apply.py): формы сколов покрытия (ShareTextures grunge_5),
+    # ширина протёртой кромки — мягкие облака (SurfaceImperfections008), рваный край — мелкие крапины (grunge_3)
+    "chips": ("grunge_5", "grunge_5-4K.png", 0.0, 100.0, 0, 0.0),
+    "cloudy": ("SurfaceImperfections008_2K-PNG", "SurfaceImperfections008_2K-PNG_Opacity.png", 2.0, 98.0, 0, 0.0),
+    "fine": ("grunge_3", "grunge_3-4K.png", 50.0, 99.8, 0, 0.0),
 }
 SOURCES = {"ambientCG": "https://ambientcg.com", "ShareTextures": "https://www.sharetextures.com"}
 
@@ -90,7 +95,7 @@ def main():
     sets = sorted({s[0] for s in MASKS.values()})
     with open(os.path.join(OUT, "license.txt"), "w", encoding="utf-8", newline="\n") as f:
         for src, url in SOURCES.items():
-            own = [n for n in sets if n.startswith("dirt") == (src == "ShareTextures")]
+            own = [n for n in sets if n.startswith(("dirt", "grunge")) == (src == "ShareTextures")]
             f.write(f"CC0 1.0 — {src} ({url}), наборы: {', '.join(own)}.\n")
         f.write("Скачаны в " + SRC + " (00_ЛИЦЕНЗИЯ_и_источники.txt); здесь — уровни, порог, размытие "
                 "(tools/ar15/wear_masks.py).\n")

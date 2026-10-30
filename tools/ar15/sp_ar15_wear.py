@@ -348,12 +348,14 @@ def build_magazine():
 MARKS_GROUP = "Этап 2 — метки владельца"
 # протёрто / царапины / сколы: что проступает или как выглядит потёртость на этом материале — (цвет, шероховатость, металл)
 WORN = {"fde": ((0.06, 0.06, 0.065), 0.5, 0.0),        # сквозь песочный Cerakote — чёрное анодирование
-        "anod": ((0.50, 0.50, 0.52), 0.40, 1.0),       # сквозь чёрное анодирование — серый алюминий
-        "steel": ((0.56, 0.56, 0.57), 0.22, 1.0),      # сквозь фосфат и нитрид — блестящая сталь
+        "anod": ((0.62, 0.62, 0.64), 0.36, 1.0),       # сквозь чёрное анодирование — серый алюминий
+        "steel": ((0.62, 0.62, 0.63), 0.28, 1.0),      # сквозь фосфат и нитрид — блестящая сталь
         "poly": ((0.24, 0.24, 0.24), 0.75, 0.0),       # полимер — светлая матовая потёртость
         "brass": ((0.88, 0.70, 0.42), 0.20, 1.0)}      # латунь — свежая, блестящая
-BARE = {"poly": WORN["poly"], "brass": WORN["brass"]}  # «до блестящего металла»: остальное — сталь / алюминий
-BARE_METAL = ((0.60, 0.60, 0.62), 0.20, 1.0)
+# «до блестящего металла»: под песком и анодированием — алюминий, у стали — сталь. Шероховатость 0,3, не 0,2: на
+# тёмном студийном фоне гладкий металл отражал черноту, и узкие кромки выходили тёмными (метки владельца 30.10)
+BARE = {"poly": WORN["poly"], "brass": WORN["brass"], "steel": ((0.64, 0.64, 0.65), 0.28, 1.0)}
+BARE_METAL = ((0.80, 0.80, 0.82), 0.32, 1.0)
 
 
 def _mark_layer(item, pos):
@@ -365,18 +367,10 @@ def _mark_layer(item, pos):
         S._bmask(lay, zone, blend=L.BlendingMode.Multiply, above=above)
 
     if typ in ("wear_through", "scratches", "chips", "bare"):
+        # пятна, штрихи и сколы уже в маске (mark_apply: доля места — по силе метки), слой — непрозрачный материал
         col, rough, metal = (BARE.get(cl, BARE_METAL) if typ == "bare" else WORN[cl])
         lay = _plain(name, pos, col, rough, metal=metal)
-        if typ == "scratches":
-            p = _mask_pattern(lay, f"{MK}/scratches.png", SCRATCH_SCALE * 1.5, rot=0.5)
-        elif typ == "chips":
-            p = _mask_pattern(lay, f"{MK}/grime.png", GRIME_SCALE, rot=1.3)
-            p = S._mfilter(p, "histogram_scan", {"Position": 0.35, "Contrast": 0.8})
-        elif typ == "wear_through":
-            p = _mask_pattern(lay, f"{MK}/grime.png", GRIME_SCALE * 0.6, rot=0.7)
-        else:
-            p = _mask_pattern(lay, f"{MK}/polish_var.png", SMEAR_SCALE * 4.0, rot=0.9)
-        zone_last(lay, p)
+        S._bmask(lay, zone)
         return lay
     if typ == "polish":
         lay = _layer(name, pos, rough=-0.15, color=(0.90, 0.90, 0.90), cop=0.5)
