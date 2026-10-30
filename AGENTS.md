@@ -202,6 +202,12 @@ python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 �
                                                               # расстановка в стенде — data/blockouts/dorm_found_lights.json (лампы плана там же убраны)
 python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # следы общежития (кровь, грязь, пыль, копоть) из масок владельца
                                                               # Маски_АЛЬФА → assets/textures/dorm_decals; расстановка — data/blockouts/dorm_decals.json; затем --import
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_clutter.py -- <файл.blend>
+                                                              # мусор общежития, партия 1 (банки, бутылки, окурки с пачкой, гильзы) → RING_Dorm_Clutter;
+                                                              # затем мятые банки симуляцией: blender --background <файл.blend> --python tools/dorm_modules/crush_sim.py
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
+                                                              # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
+                                                              # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)
 python -X utf8 tools/dorm_light_archive.py --verify           # r6: хеши архива light5_* и неизменность геометрии, масштаба, базовых цветов и 14 камер
 python -X utf8 tools/dorm_light_r61_archive.py --verify       # r6.1: 46 побайтных файлов «до» light6_* (42 вида, два JSON, две калибровки)
 tools/godot.cmd --headless --script res://tools/dorm_light_geometry_check.gd # r6: те же треугольники / нормали / UV / коллизии при группировке по этажам и наружным граням
