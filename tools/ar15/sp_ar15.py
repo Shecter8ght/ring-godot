@@ -162,11 +162,11 @@ BASE = {
     "phos": ((0.150, 0.150, 0.145), 0.60, 0.75),
     "bare": ((0.60, 0.60, 0.61), 0.20, 1.0),
     "spring": ((0.30, 0.30, 0.31), 0.38, 1.0),
-    "cerakote": ((0.085, 0.085, 0.09), 0.58, 0.0),
+    "cerakote": ((0.098, 0.098, 0.103), 0.58, 0.0),
     "baffle": ((0.42, 0.41, 0.40), 0.45, 1.0),
-    "poly": ((0.072, 0.072, 0.072), 0.62, 0.0),
+    "poly": ((0.088, 0.088, 0.088), 0.62, 0.0),     # без светлых точек шума 0.072 уходил в «чёрную дыру» (30.10)
     "follower": ((0.18, 0.18, 0.18), 0.60, 0.0),
-    "rubber": ((0.085, 0.085, 0.085), 0.85, 0.0),
+    "rubber": ((0.095, 0.095, 0.095), 0.85, 0.0),
     "brass": ((0.80, 0.62, 0.34), 0.24, 1.0),
     "jacket": ((0.78, 0.48, 0.33), 0.25, 1.0),
 }
@@ -187,13 +187,13 @@ MARKS_KIND = {"lower": "laser", "upper": "laser", "handguard": "laser", "suppres
 METALS = ("anod", "nitride", "phos", "bare", "spring", "baffle", "brass", "jacket")
 AO_PARAMS = {"ao_invert": 1}         # маска — углубления (белое там, где AO тёмное)
 CURV_PARAMS = {"global_balance": 0.6, "global_contrast": 0.3}   # уже, только сами кромки
-# шершавость: (блеск Overlay, рельеф Overlay) зерна в два текселя по классу отделки; прежнее зерно покрытия
-# (0.14 / 0.003) не читалось — «слишком гладкий» металл, а 0.60 в блеске по текселю — «крошка» (владелец 30.10):
-# рельеф оставлен, в блеске — едва заметно
-GRAIN = {"anod": (0.20, 0.008), "phos": (0.25, 0.004), "nitride": (0.15, 0.004), "spring": (0.12, 0.003),
-         "bare": (0.10, 0.002), "baffle": (0.20, 0.004)}
-COAT_GRAIN_COLOR = 0.05              # зерно покрытия в цвете (Overlay)
-PEEL_H = 0.005                       # «апельсиновая корка» покрытия — бугорки в ~8 текселей
+# зерно: (блеск Overlay, рельеф Overlay) по классу отделки. Владелец 30.10: тексельные точки с порогом — «крошка»,
+# рельеф 0.008 с «коркой» — «бугристость»; по его образцам (фото серийных цевий) поверхность гладкая — зерно почти
+# целиком в блеске, рельеф — следы
+GRAIN = {"anod": (0.25, 0.0010), "phos": (0.25, 0.0012), "nitride": (0.15, 0.0008), "spring": (0.12, 0.0006),
+         "bare": (0.10, 0.0005), "baffle": (0.20, 0.0010)}
+COAT_GRAIN_COLOR = 0.04              # зерно покрытия в цвете (Overlay)
+COAT_GRAIN_TX = 1.5                  # зерно покрытия мельче стального — ровное «напыление»
 # у процедуры gaussian_noise 32 ячейки на плитку: при масштабе 0.5 «зерно» выходило 16 мягкими пятнами на весь атлас
 # (30.10, замер карт); масштаб считается от разрешения набора — ячейка в заданное число текселей
 GAUSS_CELLS = 32
@@ -377,15 +377,9 @@ def build(set_name, verbose=False):
         proc_mask(c2, "noise_clouds_1/clouds_1", 0.22, rot=2.1)
         n = c2
 
-    # 7. шумы — светлые и тёмные, зерно блеска; покрытию — нет: точки по текселю читались «крошкой» (владелец 30.10)
-    nocoat = [m for m in hard if m not in coat]
-    w1 = rel("Шум белый — светлее", L.InsertPosition.above_node(n), color=(1.0, 1.0, 1.0), cop=0.05,
-             rough=-0.04, meshes=nocoat)
-    proc_mask(w1, "white_noise_fast/white_noise_fast", 40.0)
-    w2 = rel("Шум чёрный — темнее", L.InsertPosition.above_node(w1), color=(0.0, 0.0, 0.0), cmode=L.BlendingMode.Multiply,
-             cop=0.06, rough=0.04, meshes=nocoat)
-    proc_mask(w2, "white_noise_fast/white_noise_fast", 33.0, rot=1.3)
-    fl = rel("Хлопья — блеск", L.InsertPosition.above_node(w2), rough="noise_gaussian_noise/gaussian_noise",
+    # 7. зерно блеска стали; светлых и тёмных точек белым шумом нет — на покрытии и на винтах они читались «крошкой»
+    # (владелец 30.10)
+    fl = rel("Хлопья — блеск", L.InsertPosition.above_node(n), rough="noise_gaussian_noise/gaussian_noise",
              rmode=L.BlendingMode.Overlay, rop=0.25, meshes=[m for m in metal if m not in coat] + of("cerakote"))
     grain_uv(fl)
     n = fl
@@ -393,20 +387,16 @@ def build(set_name, verbose=False):
     # 8. заводская фактура
     an = of("anod")
     if an:
-        # керамическое покрытие из печи — шершавое (владелец 30.10: «слишком гладкий»): зерно порошкового покрытия
-        # в рельефе, в блеск и цвет — «чуть-чуть, едва заметно» (Dolinskyi: зерно matfinish powder coated через якорь
-        # в блеск и цвет); металлических искр нет — их владелец назвал «крошкой» (30.10)
-        m2 = rel("Покрытие — шершавое зерно", L.InsertPosition.above_node(n),
+        # покрытие гладкое, без бугров (владелец 30.10, образцы — фото серийных цевий: ровная сатиново-матовая
+        # поверхность): мелкое ровное «напыление» в блеске, в цвете — едва заметно, в рельефе — почти ничего;
+        # «апельсиновой корки» и металлических искр нет — «бугристость» и «крошка» владельцу не понравились
+        m2 = rel("Покрытие — мелкое зерно", L.InsertPosition.above_node(n),
                  color="noise_gaussian_noise/gaussian_noise", cmode=L.BlendingMode.Overlay, cop=COAT_GRAIN_COLOR,
                  rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=GRAIN["anod"][0],
                  height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=GRAIN["anod"][1],
                  meshes=an)
-        grain_uv(m2)
-        m3 = rel("Покрытие — апельсиновая корка", L.InsertPosition.above_node(m2),
-                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.05,
-                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=PEEL_H, meshes=an)
-        grain_uv(m3, 8.0, rot=0.6)
-        n = m3
+        grain_uv(m2, COAT_GRAIN_TX)
+        n = m2
     # сталь: фосфат — дробеструйное матовое зерно, нитрид и пружины — мельче и слабее; токарных рисок нет — на
     # болтиках и осях они читались слоями (владелец 30.10)
     for k in ("phos", "nitride", "spring", "bare", "baffle"):
@@ -484,7 +474,7 @@ def build(set_name, verbose=False):
     if ck:
         c1 = rel("Cerakote — порошковое зерно", L.InsertPosition.above_node(n),
                  rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.3,
-                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.006, meshes=ck)
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.002, meshes=ck)
         grain_uv(c1, 3.0)
         n = c1
 
