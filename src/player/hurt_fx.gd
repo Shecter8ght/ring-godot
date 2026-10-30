@@ -43,13 +43,17 @@ func _ready() -> void:
 	_rect.material = _mat
 	_rect.visible = false
 	add_child(_rect)
-	# Дуга рисуется после экранного эффекта: остаётся читаемой при ранении и в ПНВ.
+	# Цветной указатель — после ПНВ и экранного ранения (HUD на слое 10); виньетка остаётся под ними.
+	var indicator_layer: CanvasLayer = CanvasLayer.new()
+	indicator_layer.name = "DirectionLayer"
+	indicator_layer.layer = 11
+	add_child(indicator_layer)
 	_indicator = Control.new()
 	_indicator.name = "DamageDirection"
 	_indicator.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_indicator.draw.connect(_draw_directions)
-	add_child(_indicator)
+	indicator_layer.add_child(_indicator)
 
 
 ## Попадание на amount урона.

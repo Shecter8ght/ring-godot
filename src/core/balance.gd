@@ -861,6 +861,15 @@ const HURT_DIRECTION := {"hold_sec": 0.25, "fade_sec": 1.1, "max_hits": 6, "merg
 	"radius": 0.15, "arc_deg": 50.0, "width": 0.008, "outline": 0.004, "highlight": 0.002,
 	"min_alpha": 0.65, "per_dmg_alpha": 0.015, "segments": 32,
 	"color": Color(0.95, 0.12, 0.07), "highlight_color": Color(1.0, 0.65, 0.5), "outline_color": Color(0.08, 0.01, 0.005)}
+## Враг действительно заметил игрока: обновление от его зрения не чаще refresh_sec, с;
+## после потери контакта указатель держится hold_sec и гаснет за fade_sec. Геометрия — доли
+## короткой стороны кадра; жёлтые стрелки дальше от центра, чем красные дуги попаданий.
+const DETECTION_INDICATOR := {"refresh_sec": 0.25, "hold_sec": 0.45, "fade_sec": 0.75, "max_sources": 6,
+	"radius": 0.21, "arrow_depth": 0.013, "arrow_half_width": 0.012, "merge_deg": 22.0,
+	"line_width": 0.003, "outline_width": 0.006, "status_offset": 0.29,
+	"font_size": 0.021, "font_min": 16, "font_max": 28, "text_outline": 6,
+	"eye_width": 0.016, "eye_height": 0.007, "pupil": 0.003, "eye_gap": 0.012, "eye_segments": 20,
+	"color": Color(1.0, 0.77, 0.2), "outline_color": Color(0.045, 0.03, 0.005)}
 const SHAKE_DECAY := 9.0
 ## Отдача: подброс ствола (корпуса) вверх, рад, и возврат, 1/с.
 const RECOIL_KICK := 0.12

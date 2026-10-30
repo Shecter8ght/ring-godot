@@ -559,6 +559,27 @@ func _rpc_hurt(amount: float, from: Vector3, origin: Vector3) -> void:
 		_show_hurt(amount, from, origin)
 
 
+## Вызывает зрение врага на хосте после настоящего обнаружения; это только подсказка HUD.
+func notify_detected(observer: int, from: Vector3, origin: Vector3) -> void:
+	if Net.is_networked() and not multiplayer.is_server():
+		return
+	if is_local():
+		_show_detection(observer, from, origin)
+	elif Net.is_networked():
+		_rpc_detected.rpc_id(peer_id, observer, from, origin)
+
+
+func _show_detection(observer: int, from: Vector3, origin: Vector3) -> void:
+	if is_local() and is_alive() and _camera_rig is CameraRig:
+		(_camera_rig as CameraRig).show_detection(observer, from, origin)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_detected(observer: int, from: Vector3, origin: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		_show_detection(observer, from, origin)
+
+
 func is_local() -> bool:
 	return peer_id == multiplayer.get_unique_id()
 

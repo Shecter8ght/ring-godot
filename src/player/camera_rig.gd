@@ -10,6 +10,8 @@ extends Node3D
 
 @export var target_path: NodePath
 
+const DetectionIndicator = preload("res://src/ui/detection_indicator.gd")
+
 var ads_active: bool = false
 ## Игра только от первого лица (решение владельца 2026-10-07): камера всегда в глазах, ПКМ — прицел.
 ## Вид сверху остаётся только у инструментов съёмки и будущего разведдрона (docs/design/drone.md).
@@ -35,6 +37,7 @@ var _distance: float = Balance.CAMERA_DISTANCE
 var _target: Node3D
 var _shake: float = 0.0
 var _hurt: HurtFx
+var _detection: DetectionIndicator
 ## толчок взгляда от попадания: (кивок, крен), рад; _punch_t — 1 → 0
 var _punch: Vector2 = Vector2.ZERO
 ## Люфт оружия: где было направление взгляда кадр назад и на сколько оружие сейчас отстаёт (в осях камеры).
@@ -179,6 +182,8 @@ func _ready() -> void:
 	_hurt = HurtFx.new()
 	_hurt.name = "Hurt"
 	add_child(_hurt)
+	_detection = (preload("res://scenes/ui/detection_indicator.tscn") as PackedScene).instantiate() as DetectionIndicator
+	add_child(_detection)
 	_build_scope()
 	_look = CameraLook.new()
 	_look.name = "Look"
@@ -207,6 +212,11 @@ func hurt(amount: float, from: Vector3 = Vector3.INF, origin: Vector3 = Vector3.
 
 func add_shake(amount: float) -> void:
 	_shake = minf(_shake + amount, 1.0)
+
+
+func show_detection(observer: int, from: Vector3, origin: Vector3) -> void:
+	if _detection:
+		_detection.contact(observer, from, origin)
 
 
 ## Крестик у курсора (в прицеле — по центру): попал; kill — крупнее и красный.
@@ -584,6 +594,10 @@ func _process(delta: float) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam and _hurt:
 		_hurt.camera_basis = cam.global_basis
+	if _detection:
+		_detection.set_enabled(pl != null and pl.is_local() and pl.is_alive() and (Raid.current == null or not Raid.current.has_left(pl.peer_id)))
+		if cam:
+			_detection.camera_basis = cam.global_basis
 	if _glare:
 		_glare.tick(cam, pl if pl and pl.is_local() else null, ads_active, pl != null and pl.is_local() and pl.nvg_on, delta)
 	if cam:

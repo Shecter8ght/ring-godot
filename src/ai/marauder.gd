@@ -150,6 +150,9 @@ var _burst_left: int = 0
 ## Прицел «садится»: 1 — точно, AI_AIM_COLD — только что заметил.
 var _aim: float = 1.0
 var _seen_now: bool = false
+## Подсказка обнаруженному игроку: зрение обновляет её редко, при смене цели — сразу.
+var _detection_t: float = 0.0
+var _detection_peer: int = 0
 var _unseen_t: float = 99.0
 var _callout_t: float = 0.0
 var _tactic_t: float = 0.0
@@ -734,6 +737,7 @@ func _eye() -> Vector3:
 # ---------------------------------------------------------------- восприятие
 
 func _perceive(delta: float) -> void:
+	_detection_t = maxf(0.0, _detection_t - delta)
 	var seen: Player = null
 	var seen_down: Player = null
 	var fwd := Vector3(sin(_facing), 0.0, cos(_facing))
@@ -785,6 +789,10 @@ func _perceive(delta: float) -> void:
 			_seen_now = true
 			_unseen_t = 0.0
 			_target_player = seen
+			if _detection_t <= 0.0 or _detection_peer != seen.peer_id:
+				_detection_t = float(Balance.DETECTION_INDICATOR.refresh_sec)
+				_detection_peer = seen.peer_id
+				seen.notify_detected(get_instance_id(), global_position, seen.global_position)
 			player_contact_ms = Time.get_ticks_msec()
 			last_known = seen.global_position
 			memory_timer = _mem()
