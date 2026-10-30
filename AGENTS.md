@@ -421,7 +421,7 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
 #   sp_ar15_wear.build_part(<набор>) → export_variant('B', <папка>, [наборы]) — выгружать по 2–4 набора (видеопамять)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b -y <AR-15_износ_этап2_v1.blend> --python tools/ar15/render_table.py -- <папка кадров> <сцена.blend> <сцена_разряжание.blend> [ширина высота сэмплы] [кадры]
                                                               # AR-15, рендеры для владельца: две винтовки на полевом столе в палатке (разобранная — физикой
-                                                              # жёстких тел), 20 кадров: 5 общих, 11 собранной, 4 — разряжание; окружение — tools/ar15/tent_scene.py;
+                                                              # жёстких тел), 26 кадров: 5 общих, 11 собранной, 4 — разряжание, 6 средних планов; окружение — tools/ar15/tent_scene.py;
                                                               # на раскладушке — tools/ar15/render_tent.py -- <out.blend> <out.png> [ширина высота сэмплы] [вид]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
