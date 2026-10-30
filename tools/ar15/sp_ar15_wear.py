@@ -230,7 +230,32 @@ def build_lower():
     # 14. ворсинки (синтетика — нити кодом в wear_lower.py): светлые, хлопковая ветошь
     l14 = _plain("Ворсинки", L.InsertPosition.above_node(l13), (0.86, 0.85, 0.82), 0.85, cop=0.9)
     z(l14, "lint")
-    n_lower = 14
+    # v2 (владелец 30.10): 15. низ раструба — потёртости и 16. царапины сквозь покрытие (тёмные), 17. тычки от магазина
+    l15 = _layer("Низ раструба — потёртости", L.InsertPosition.above_node(l14), rough=-0.12, color=(0.85, 0.85, 0.85),
+                 cop=0.6)
+    z(l15, "flare_bottom", _mask_pattern(l15, f"{MK}/polish_var.png", SMEAR_SCALE * 2.5, rot=0.3))
+    # царапины — короткие штрихи по ходу магазина (wear_lower.flare_scratches): мелкие — заглажены и темнее, четверть —
+    # сквозь покрытие (тёмные)
+    l16a = _layer("Низ раструба — царапины мелкие", L.InsertPosition.above_node(l15), rough=-0.10,
+                  color=(0.80, 0.80, 0.80), cop=0.6)
+    z(l16a, "flare_scr")
+    l16 = _plain("Низ раструба — царапины до анодирования", L.InsertPosition.above_node(l16a), (0.07, 0.07, 0.075), 0.5,
+                 cop=0.85)
+    z(l16, "flare_scr_deep")
+    l17 = _plain("Тычки от магазина", L.InsertPosition.above_node(l16), (0.07, 0.07, 0.075), 0.5, cop=0.9)
+    z(l17, "dings", _mask_pattern(l17, f"{MK}/grime.png", GRIME_SCALE, rot=2.2))
+    # 18. бороздка на борту по ходу флажка — сквозь покрытие (тёмная), рваная
+    l18 = _plain("Бороздка от флажка переводчика", L.InsertPosition.above_node(l17), (0.06, 0.06, 0.065), 0.45, cop=0.95)
+    z(l18, "groove", _mask_pattern(l18, f"{MK}/grime.png", GRIME_SCALE, rot=0.9))
+    # 19–20. органы: гребни ступенек (рёбра, кольца кнопки) и края упора флажков — протёрты до блестящей стали
+    # гребни — места по геометрии (wear_lower: верхняя плоскость детали), без кривизны Painter; сталь с лёгкой
+    # неровностью (полировка неравномерная), отражающая
+    STEEL = (0.56, 0.56, 0.57)
+    l19 = _plain("Гребни ступенек — до блестящей стали", L.InsertPosition.above_node(l18), STEEL, 0.22, metal=1.0)
+    z(l19, "crest", _mask_pattern(l19, f"{MK}/polish_var.png", SMEAR_SCALE * 4.0, rot=1.5))
+    l20 = _plain("Края упора флажка — до стали", L.InsertPosition.above_node(l19), STEEL, 0.24, metal=1.0)
+    z(l20, "tab_edges", _mask_pattern(l20, f"{MK}/polish_var.png", SMEAR_SCALE * 4.0, rot=0.2))
+    n_lower = 20
 
     inside = _new_group("internals")
     zi = lambda lay, zone, above=None: _zs(lay, "internals", zone, above=above, blend=L.BlendingMode.Multiply if above else None)
@@ -242,4 +267,15 @@ def build_lower():
     i3 = _layer("Торцы осей — промаслены", L.InsertPosition.above_node(i2), rough=-0.15, color=(0.75, 0.75, 0.75),
                 cop=0.6)
     zi(i3, "pin_ends")
-    return f"lower: группа износа — {n_lower} слоёв; internals — 3"
+    # 4. передние грани спуска — потёртости до стали (слабее, чем на органах)
+    i4 = _plain("Спуск — передние грани до стали", L.InsertPosition.above_node(i3), (0.52, 0.52, 0.53), 0.28, metal=1.0,
+                cop=0.6)
+    zi(i4, "trigger_front", _mask_pattern(i4, f"{MK}/grime.png", GRIME_SCALE * 0.7, rot=1.8))
+    # 5. края лица спуска — тонкая полоса стали по выпуклым кромкам (кривизна узко, только в пределах лица под пальцем):
+    # передние скосы у модели узкие, одних их не видно (проба 30.10)
+    i5 = _plain("Спуск — кромки лица до стали", L.InsertPosition.above_node(i4), (0.52, 0.52, 0.53), 0.28, metal=1.0,
+                cop=0.7)
+    g = sp_lib.mask_generator(i5, "mg_curvature/mg_curvature", {"global_balance": 0.75, "global_contrast": 0.7})
+    e = _zs(i5, "internals", "trigger_face", above=g, blend=L.BlendingMode.Multiply)
+    _pattern(e, f"{MK}/grime.png", GRIME_SCALE * 0.7, rot=0.6, opacity=0.4)
+    return f"lower: группа износа — {n_lower} слоёв; internals — 5"

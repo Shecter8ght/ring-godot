@@ -7,6 +7,10 @@
 # lower_zones_preview.png (зоны цветом поверх заводского цвета — для проверки).
 # Хват правый: левая рука держит шахту и жмёт задержку и левую кнопку магазина, правая — рукоять, указательный — спуск и
 # кнопку магазина, большой — переводчик. Координаты, мм: X — к дулу, Y — влево, Z — вверх.
+# v2 (владелец 30.10): гребни ступенек органов управления (кольца кнопки магазина, рёбра задержки, левой кнопки и
+# флажков) — протёрты до блестящей стали; края упора флажка — сильнее; бороздка на борту по ходу флажка (SAFE → SEMI →
+# AUTO, 180°) от выступа на его обратной стороне; лицо и передние грани спуска; низ раструба шахты — царапины, потёртости
+# и тычки от магазина.
 import math
 import os
 import sys
@@ -22,6 +26,11 @@ SEED = 1530
 TAKEDOWN = (-150.3, -15.6, 4.6)          # ось разборки (x, z, радиус головки)
 PIVOT = (17.8, -15.2, 4.2)               # ось сборки
 SELECTOR = (-129.9, -26.2)
+# бороздка от флажка: радиус от оси переводчика, мм. У модели обратная сторона упора флажка не касается борта (зазор
+# 0,75 мм, выступа нет) — радиус взят под упором, где выступ трёт борт у настоящего переводчика: слева упор 10,6…16,1,
+# справа (короткий флажок) 6,6…11,1
+GROOVE_R = {1: 13.2, -1: 9.0}
+GROOVE_W = 0.35                          # полуширина бороздки, мм
 TRIGGER_PIN = (-99.1, -31.0)
 HAMMER_PIN = (-78.7, -23.5)
 MAG_BUTTON = (-62.4, -26.2)
@@ -88,6 +97,56 @@ def lint(mask_ok, starts, px_mm, rng, size):
     return np.asarray(img).astype(np.float32) / 255.0
 
 
+def flare_scratches(pos, nrm, ids, body, flare, rng, px_mm=17.5):
+    """Царапины низа и кромок раструба — короткие штрихи 2–6 мм по ходу магазина (к центру шахты по плоскости грани),
+    рисуются в развёртке: направление из 3D переводится в пиксели по местному якобиану карты положения. Фото-маска
+    царапин давала длинные дуги «ручкой» поперёк всего (проба 30.10). Треть — глубже (сквозь покрытие)."""
+    size = ids.shape[0]
+    centre = np.array([(WELL_X[0] + WELL_X[1]) / 2.0, 0.0, -62.0])
+    cand = np.argwhere((flare > 0.6) & body & (nrm[..., 2] < -0.2))
+    light = Image.new("L", (size * 2, size * 2), 0)
+    deep = Image.new("L", (size * 2, size * 2), 0)
+    dl, dd = ImageDraw.Draw(light), ImageDraw.Draw(deep)
+    for k in rng.choice(len(cand), size=min(130, len(cand)), replace=False):
+        r0, c0 = cand[k]
+        if not (2 <= r0 < size - 2 and 2 <= c0 < size - 2):
+            continue
+        if not (ids[r0 - 1:r0 + 2, c0 - 1:c0 + 2] == ids[r0, c0]).all():
+            continue
+        p0, n0 = pos[r0, c0], nrm[r0, c0]
+        d = centre - p0
+        d -= n0 * np.dot(n0, d)
+        if np.linalg.norm(d) < 1e-3:
+            continue
+        a = rng.normal(0.0, 0.25)                      # разброс направления ~15°
+        t = np.cross(n0, d)
+        d = d / np.linalg.norm(d) * math.cos(a) + t / (np.linalg.norm(t) + 1e-9) * math.sin(a)
+        J = np.stack([(pos[r0, c0 + 1] - pos[r0, c0 - 1]) / 2.0, (pos[r0 + 1, c0] - pos[r0 - 1, c0]) / 2.0], 1)
+        uv = np.linalg.lstsq(J, d, rcond=None)[0]      # (по столбцу, по строке) на 1 мм
+        if not np.isfinite(uv).all() or np.linalg.norm(uv) < 1e-6:
+            continue
+        uv /= np.linalg.norm(uv)
+        n = rng.uniform(2.0, 6.0) * px_mm
+        bend = rng.normal(0.0, 0.002)
+        pts, cx_, cy_ = [], float(c0), float(r0)
+        for i in range(int(n)):
+            ang = math.atan2(uv[1], uv[0]) + bend * i
+            cx_ += math.cos(ang); cy_ += math.sin(ang)
+            yi, xi = int(round(cy_)), int(round(cx_))
+            if not (0 <= yi < size and 0 <= xi < size) or flare[yi, xi] < 0.3 or ids[yi, xi] != ids[r0, c0]:
+                break
+            pts.append((cx_ * 2.0, cy_ * 2.0))
+        if len(pts) < 6:
+            continue
+        is_deep = rng.random() < 0.33
+        (dd if is_deep else dl).line(pts, fill=int(rng.uniform(150, 255)), width=2 if is_deep else 1)
+    out = []
+    for img in (light, deep):
+        img = img.filter(ImageFilter.GaussianBlur(0.7)).resize((size, size), Image.LANCZOS)
+        out.append(np.asarray(img).astype(np.float32) / 255.0 * body)
+    return out
+
+
 def lower_zones(folder):
     pos, nrm, ids, names = load("lower", folder)
     size = ids.shape[0]
@@ -126,7 +185,13 @@ def lower_zones(folder):
     r = np.hypot(x - SELECTOR[0], z - SELECTOR[1])
     arc_l = (y > 10) * window(r, 9.5, 11.0, 16.0, 17.5)
     arc_r = (y < -10) * window(r, 6.5, 7.5, 11.0, 12.5)
-    Z["sel_arc"] = side * np.maximum(arc_l, arc_r) * window(ang, -20.0, -5.0, 95.0, 110.0)
+    sweep = window(ang, -12.0, 2.0, 178.0, 192.0)                 # SAFE (вперёд) → SEMI (вверх) → AUTO (назад)
+    Z["sel_arc"] = side * np.maximum(arc_l, arc_r) * sweep
+    # бороздка: узкая дуга (сквозь покрытие — тёмная), по краям — заглажено
+    gr = np.zeros_like(x)
+    for sgn, R in GROOVE_R.items():
+        gr = np.maximum(gr, (np.sign(y) == sgn) * (1.0 - sstep(GROOVE_W * 0.4, GROOVE_W, np.abs(r - R))))
+    Z["groove"] = side * gr * sweep
     # 7. кольца у осей разборки и сборки — выбивают носиком патрона
     ring = np.zeros_like(x)
     for cx, cz, rp in (TAKEDOWN, PIVOT):
@@ -169,6 +234,20 @@ def lower_zones(folder):
 
     # кромки под заглаживание (в Painter — × кривизна × разрыв): раструб и скоба целиком, прочие рёбра низа — слабее
     Z["edgewear"] = np.maximum(np.maximum(Z["flare"], Z["guard"]), 0.6 * Z["edges"])
+    # низ раструба (плоскость, смотрящая вниз) — царапины и потёртости от магазина; тычки — на низе, гранях и углах
+    Z["flare_bottom"] = Z["flare"] * sstep(0.4, 0.75, -nz)
+    rng_d = np.random.default_rng(SEED + 7)
+    cand = np.argwhere(Z["flare"] > 0.6)
+    dings = np.zeros_like(x)
+    for k in rng_d.choice(len(cand), size=min(28, len(cand)), replace=False):
+        r0, c0 = cand[k]
+        p0 = pos[r0, c0]
+        rad = rng_d.uniform(0.25, 0.7)
+        d = np.sqrt(((pos[max(r0 - 60, 0):r0 + 60, max(c0 - 60, 0):c0 + 60] - p0) ** 2).sum(-1))
+        sub = dings[max(r0 - 60, 0):r0 + 60, max(c0 - 60, 0):c0 + 60]
+        np.maximum(sub, (1.0 - sstep(rad * 0.5, rad, d)) * rng_d.uniform(0.6, 1.0), out=sub)
+    Z["dings"] = dings * body
+    Z["flare_scr"], Z["flare_scr_deep"] = flare_scratches(pos, nrm, ids, body, Z["flare"], rng_d)
 
     # органы управления (фосфат): то, чего касается палец
     def obj(n):
@@ -183,6 +262,34 @@ def lower_zones(folder):
     for n in ("Takedown_pin", "Pivot_pin"):
         ctl = np.maximum(ctl, obj(n) * sstep(0.7, 0.9, np.abs(ny)) * 0.7)
     Z["controls"] = ctl
+    # гребни ступенек — по геометрии: у рёбер задержки, лопатки левой кнопки и упора флажков вершины лежат в одной
+    # плоскости, у кнопки магазина «ступеньки» — плоские кольца между кольцевыми канавками на одной высоте (16,5 мм,
+    # канавки −0,3 мм). Всё, что на верхней плоскости детали, — протёрто до стали, канавки — нет; скосы вокруг — слабее.
+    # Кривизной в Painter выходило размыто: сталь пятнами-«лужами» и весь упор флажка белым (проба 30.10)
+    def top_faces(m, h, nout, w=1.0):
+        if not m.any():
+            return np.zeros_like(x)
+        hmax = np.percentile(h[m], 99.5)
+        flat = (1.0 - sstep(0.05, 0.14, hmax - h)) * sstep(0.85, 0.97, nout)
+        rim = (1.0 - sstep(0.25, 0.6, hmax - h)) * window(nout, 0.25, 0.4, 0.8, 0.9) * 0.8
+        return m * np.maximum(flat, rim) * w
+    crest = np.zeros_like(x)
+    crest = np.maximum(crest, top_faces(obj("Selector_lever_L") & (ra > 9.0), y, ny))
+    crest = np.maximum(crest, top_faces(obj("Selector_lever_R") & (ra > 6.5), -y, -ny))
+    crest = np.maximum(crest, top_faces(obj("Bolt_catch") & (z < -12.0), y, ny))           # нижняя лопатка — жмут чаще
+    crest = np.maximum(crest, top_faces(obj("Bolt_catch") & (z >= -12.0), y, ny, 0.7))
+    crest = np.maximum(crest, top_faces(obj("Mag_release_L") & (x > -21.0), y, ny))        # лопатка — передний конец
+    crest = np.maximum(crest, top_faces(obj("Mag_button"), -y, -ny))
+    Z["crest"] = crest
+    # края упора флажков: скосы и боковины по контуру упора (дальше 11 / 7,5 мм от оси) — сильнее, до стали
+    def tab_rim(m, h, nout):
+        if not m.any():
+            return np.zeros_like(x)
+        hmax = np.percentile(h[m], 99.5)
+        # боковины упора отвесные (нормаль ≈ 0, скосов почти нет) — полоса по ним у верхней плоскости, не глубже 0,7 мм
+        return m * (1.0 - sstep(0.3, 0.7, hmax - h)) * window(nout, -0.12, -0.02, 0.85, 0.95)
+    Z["tab_edges"] = np.maximum(tab_rim(obj("Selector_lever_L") & (ra > 11.0), y, ny),
+                                tab_rim(obj("Selector_lever_R") & (ra > 7.5), -y, -ny))
 
     # ворсинки: от точек в карманах (зерно постоянное — тот же рисунок при пересборке)
     rng = np.random.default_rng(SEED)
@@ -206,9 +313,12 @@ def internals_zones(folder):
     x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
     nx, ny = nrm[..., 0], nrm[..., 1]
     Z = {}
-    # лицо спускового крючка под пальцем (ниже верха скобы, передняя сторона)
+    # лицо спускового крючка под пальцем (ниже верха скобы, передняя сторона); передние грани — потёртости
     tr = ids == names.index("Trigger")
     Z["trigger_face"] = tr * (1.0 - sstep(-50.0, -44.0, z)) * sstep(0.1, 0.5, nx)
+    # передние грани (скосы между лицом и боками) — лёгкие потёртости до стали; само лицо — только заполировано
+    # (сталью по всему лицу выходило «хромированное» блестящее пятно, проба 30.10)
+    Z["trigger_front"] = tr * (1.0 - sstep(-48.0, -42.0, z)) * sstep(0.15, 0.35, nx) * window(np.abs(ny), 0.25, 0.4, 0.85, 0.95)
     # торцы осей курка, спуска (видны на бортах) — промаслены
     pins = np.zeros_like(x)
     for n in ("Trigger_pin", "Hammer_pin"):
@@ -230,7 +340,9 @@ def preview(Z, folder):
     img = base * 0.55
     cols = {"hold": (0.2, 0.5, 1.0), "flare": (1.0, 0.5, 0.0), "guard": (0.8, 0.2, 0.9), "cover_hit": (1.0, 1.0, 0.0),
             "ch_rub": (0.0, 1.0, 1.0), "sel_arc": (0.3, 1.0, 0.3), "pin_rings": (1.0, 0.3, 0.6), "oil": (0.1, 0.1, 0.1),
-            "pockets": (0.6, 0.4, 0.2), "controls": (0.2, 1.0, 0.6), "lint": (1.0, 1.0, 1.0), "through": (1.0, 0.0, 0.0)}
+            "pockets": (0.6, 0.4, 0.2), "controls": (0.2, 1.0, 0.6), "lint": (1.0, 1.0, 1.0), "through": (1.0, 0.0, 0.0),
+            "groove": (1.0, 0.0, 0.0), "dings": (1.0, 0.0, 0.0), "crest": (1.0, 1.0, 1.0),
+            "flare_scr": (1.0, 1.0, 1.0), "flare_scr_deep": (1.0, 0.0, 0.0), "tab_edges": (0.0, 1.0, 1.0)}
     for k, c in cols.items():
         a = np.clip(Z[k], 0, 1)[..., None] * 0.85
         img = img * (1 - a) + np.array(c) * a
