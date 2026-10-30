@@ -43,7 +43,19 @@ def projects(names: list[str]) -> None:
         print(sp_run.run(f"print(sp_finish.save_as(r'{out.as_posix()}'))", 180, "save_" + name))
 
 
+def wait_shelves(tries: int = 60) -> None:
+    """Свежий Painter ещё обходит полки: генераторы масок (mg_curvature…) находятся не сразу — ждать снаружи."""
+    import time
+    for _ in range(tries):
+        out = sp_run.run("import substance_painter.resource as R\nprint(len(R.search('u:generator')))", 30, "shelves")
+        n = out.strip().split("\n")[-1]
+        if n.isdigit() and int(n) > 5:
+            return
+        time.sleep(3)
+
+
 def stack(names: list[str]) -> None:
+    wait_shelves()
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     by_part = {}
     for slot in spec["slots"]:
@@ -52,6 +64,7 @@ def stack(names: list[str]) -> None:
     jobs = sp_run.SP_JOBS
     for name in names:
         (jobs / "_project_ready.txt").unlink(missing_ok=True)
+        (jobs / f"_stack_{name}.txt").unlink(missing_ok=True)  # метка прошлого прогона дала бы ложный успех
         print(sp_run.run(f"print(sp_finish.open_project(r'{(SRC / 'sp' / (name + '.spp')).as_posix()}'))", 180, "open_" + name))
         print(sp_run.wait(jobs / "_project_ready.txt", 400))
         meshes = sp_run.run("import substance_painter.textureset as TS\n"
