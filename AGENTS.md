@@ -215,6 +215,9 @@ python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи 
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
                                                               # projects|stack (тот же Painter, что у оставленного света); просмотр со студией —
                                                               # blender --background <…_uv_v01.blend> --python tools/dorm_modules/finish_review.py -- <карты> <выход.blend> clutter_uv|found_lights_uv
+python -X utf8 tools/dorm_modules/print_designs.py             # печать мусора и маркировка оставленного света: вымышленные марки → _asset_src/dorm_clutter/prints;
+                                                              # blender --background <…_uv_v01.blend> --python tools/dorm_modules/print_bake.py -- <папка geo> clutter_uv|found_lights_uv
+                                                              # (положение/нормаль/деталь в развёртку) → python -X utf8 tools/dorm_modules/print_apply.py [вещь …]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
                                                               # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
                                                               # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)
