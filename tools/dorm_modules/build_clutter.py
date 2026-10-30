@@ -37,6 +37,7 @@ def mats() -> dict:
         "can_dark": L.material("Банка_отверстие", (0.02, 0.02, 0.02), 0.6),
         "glass_clear": L.material("Стекло_бутылка_прозрачное", (0.85, 0.9, 0.88), 0.03, 0.0, 0.25),
         "glass_brown": L.material("Стекло_бутылка_коричневое", (0.25, 0.12, 0.03), 0.03, 0.0, 0.5),
+        "label": L.material("Этикетка_бумага", (0.82, 0.8, 0.74), 0.65),
         "cap_alu": L.material("Пробка_алюминий", (0.7, 0.7, 0.72), 0.3, 1.0),
         "cap_crown": L.material("Пробка_кроненпробка", (0.55, 0.5, 0.4), 0.3, 1.0),
         "filter": L.material("Окурок_ободок", (0.8, 0.55, 0.3), 0.7),
@@ -141,11 +142,73 @@ def bottle_profile(kind: str) -> list:
     return outer + inner + [(0.0, 0.012)]
 
 
-def bottle(coll, m, at, name, kind="vodka", lying=False) -> bpy.types.Object:
+def _profile_radius(outer: list, z: float) -> float:
+    """Радиус наружного профиля бутылки на высоте z (по участкам, где профиль идёт вверх; донце не берём)."""
+    out = outer[3][0]
+    for (r0, z0), (r1, z1) in zip(outer[3:], outer[4:]):
+        if z0 <= z <= z1 and z1 > z0:
+            out = r0 + (r1 - r0) * (z - z0) / (z1 - z0)
+    return out
+
+
+def label(bm, outer: list, z0: float, z1: float, a0: float, a1: float, seed: int = 0, peel: float = 0.0,
+          tear: float = 0.0) -> None:
+    """Бумажная этикетка по наружному профилю (на конусе плеча — тоже по нему): лист 0,1 мм в 0,2 мм от стекла,
+    по кругу a0…a1 (рад), по высоте z0…z1. peel — отклеился и загнулся нижний угол (доля размера листа),
+    tear — оторван кусок у того же края (доля ширины), край рваный. Рисунок — на текстурах."""
+    rnd = random.Random(seed)
+    na = max(6, int((a1 - a0) / math.radians(4)))
+    nz = max(4, int((z1 - z0) / 0.003))
+    grid = []
+    for j in range(nz + 1):
+        w = j / nz
+        z = z0 + (z1 - z0) * w
+        row = []
+        for i in range(na + 1):
+            u = i / na
+            a = a0 + (a1 - a0) * u
+            rr = _profile_radius(outer, z) + 0.0002
+            zz = z
+            if peel:  # угол (u = 1, w = 0) отошёл от стекла и завернулся наружу
+                d = max(0.0, 1.0 - math.hypot((1.0 - u) * (a1 - a0) * rr, w * (z1 - z0)) / (peel * (z1 - z0)))
+                rr += 0.007 * d * d
+                zz += 0.003 * d * d
+            row.append(bm.verts.new((rr * math.cos(a), rr * math.sin(a), zz)))
+        grid.append(row)
+    faces = []
+    for j in range(nz):
+        for i in range(na):
+            f = bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]))
+            faces.append((f, (i + 0.5) / na, (j + 0.5) / nz))
+    if tear:  # оторван кусок у нижнего края с рваной границей
+        ph = rnd.uniform(0, TAU)
+        gone = [f for f, u, w in faces
+                if u < tear and w < 0.55 + 0.18 * math.sin(u * 23 + ph) + 0.08 * math.sin(u * 61 + ph * 2)]
+        bmesh.ops.delete(bm, geom=gone, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bmesh.ops.solidify(bm, geom=bm.faces[:], thickness=0.0001)
+
+
+def bottle(coll, m, at, name, kind="vodka", lying=False, worn=0, seed=1) -> bpy.types.Object:
+    """Бутылка с пробкой и бумажными этикетками; worn — сколько потрёпаны этикетки: 0 целые, 1 отклеился угол,
+    2 угол отклеился и кусок оторван."""
     r = L.root(name, coll, at)
     bm = bmesh.new()
-    F.lathe(bm, bottle_profile(kind), 48)
+    prof = bottle_profile(kind)
+    F.lathe(bm, prof, 48)
     part(bm, name + "_стекло", coll, m["glass_clear" if kind == "vodka" else "glass_brown"], r, smooth=50)
+    outer = prof[:10] if kind == "vodka" else prof[:12]  # наружная часть профиля (bottle_profile: наружный, затем внутренний)
+    peel = 0.45 if worn else 0.0
+    tear = 0.4 if worn > 1 else 0.0
+    bm = bmesh.new()
+    if kind == "vodka":
+        label(bm, outer, 0.050, 0.135, math.radians(-62), math.radians(62), seed, peel, tear)  # лицевая
+        label(bm, outer, 0.060, 0.110, math.radians(145), math.radians(215), seed + 1)  # контрэтикетка
+        label(bm, outer, 0.236, 0.249, math.radians(-195), math.radians(155), seed + 2)  # кольцо на горле, стык с зазором
+    else:
+        label(bm, outer, 0.040, 0.112, math.radians(-75), math.radians(75), seed, peel, tear)
+        label(bm, outer, 0.170, 0.188, math.radians(-50), math.radians(50), seed + 1)  # на плече (по конусу)
+    part(bm, name + "_этикетки", coll, m["label"], r, smooth=50)
     bm = bmesh.new()
     if kind == "vodka":
         # винтовая алюминиевая пробка с кольцом контроля вскрытия; рифление — текстурой
@@ -192,9 +255,16 @@ def broken_bottle(coll, m, at, name, seed=3) -> bpy.types.Object:
         bmesh.ops.bridge_loops(bm, edges=edges)
     except Exception:  # noqa: BLE001
         pass
-    L.transform(bm, bm.verts, Matrix.Rotation(math.radians(90), 4, "X") @ Matrix.Translation((0, 0, -0.13)))
-    L.transform(bm, bm.verts, Matrix.Translation((0, 0, 0.0335)))
+    lay = Matrix.Translation((0, 0, 0.0335)) @ Matrix.Rotation(math.radians(90), 4, "X") @ Matrix.Translation((0, 0, -0.13))
+    L.transform(bm, bm.verts, lay)
     part(bm, name + "_горлышко", coll, m["glass_brown"], r, smooth=50)
+    # этикетка плеча уцелела на горлышке — ниже линии разлома её нет
+    bm = bmesh.new()
+    label(bm, prof[:12], 0.170, 0.188, math.radians(-50), math.radians(50), seed + 5)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().z < cut(math.atan2(f.calc_center_median().y, f.calc_center_median().x)) + 0.002], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    L.transform(bm, bm.verts, lay)
+    part(bm, name + "_этикетка", coll, m["label"], r, smooth=50)
     bm = bmesh.new()
     for k in range(7):
         n = rnd.randint(5, 8)
@@ -473,8 +543,8 @@ def build(out: str) -> None:
     can(c, m, (0.38, 0.02, 0.0), "CL_банка_раздавлена", crush=1.0, seed=5)
     c = L.collection("бутылки", top)
     bottle(c, m, (0.62, 0.0, 0.0), "CL_бутылка_водка", "vodka")
-    bottle(c, m, (0.76, 0.0, 0.0), "CL_бутылка_пиво", "beer")
-    bottle(c, m, (0.95, 0.06, 0.0), "CL_бутылка_водка_лежит", "vodka", lying=True)
+    bottle(c, m, (0.76, 0.0, 0.0), "CL_бутылка_пиво", "beer", worn=1, seed=4)
+    bottle(c, m, (0.95, 0.06, 0.0), "CL_бутылка_водка_лежит", "vodka", lying=True, worn=2, seed=7)
     broken_bottle(c, m, (1.30, 0.0, 0.0), "CL_бутылка_разбита")
     c = L.collection("окурки", top)
     butts(c, m, (1.75, 0.0, 0.0), "CL_окурки")

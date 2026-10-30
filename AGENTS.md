@@ -205,6 +205,11 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_clutter.py -- <файл.blend>
                                                               # мусор общежития, партия 1 (банки, бутылки, окурки с пачкой, гильзы) → RING_Dorm_Clutter;
                                                               # затем мятые банки симуляцией: blender --background <файл.blend> --python tools/dorm_modules/crush_sim.py
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_trash_bags.py -- <файл.blend> [вариант …]
+                                                              # мусор общежития, партия 2: чёрные мешки 60 л с синей лентой — симуляция плёнки по куче мусора
+                                                              # (полный, лежит, полупустой; ~5 мин на мешок) → RING_Dorm_Bags
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_rubble.py -- <файл.blend>
+                                                              # обломки стен: глыбы кладки со штукатуркой, кирпичи, обломок плиты ПК, штукатурка, крошка → RING_Dorm_Rubble
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
                                                               # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
                                                               # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)
