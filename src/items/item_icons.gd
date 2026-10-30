@@ -35,17 +35,22 @@ static func backdrop(cat_color: Color) -> Color:
 
 
 ## Нарисовать иконку в прямоугольник rect элемента canvas, сохранив пропорции; rotated — предмет
-## лежит повёрнутым (иконка снята в неповёрнутом виде — поворачиваем на 90°).
-static func draw(canvas: CanvasItem, id: String, rect: Rect2, rotated: bool) -> bool:
-	return _draw_tex(canvas, get_icon(id), rect, rotated)
+## лежит повёрнутым (иконка снята в неповёрнутом виде — поворачиваем на 90°); max_k — во сколько раз
+## иконку можно растянуть (большие карточки: печёная иконка сильнее расплывается).
+static func draw(canvas: CanvasItem, id: String, rect: Rect2, rotated: bool, max_k: float = INF) -> bool:
+	return draw_tex(canvas, get_icon(id), rect, rotated, max_k)
 
 
 static func _draw_tex(canvas: CanvasItem, tex: Texture2D, rect: Rect2, rotated: bool) -> bool:
+	return draw_tex(canvas, tex, rect, rotated)
+
+
+static func draw_tex(canvas: CanvasItem, tex: Texture2D, rect: Rect2, rotated: bool, max_k: float = INF) -> bool:
 	if tex == null:
 		return false
 	var box := Vector2(rect.size.y, rect.size.x) if rotated else rect.size
 	var ts := Vector2(tex.get_size())
-	var k := minf(box.x / ts.x, box.y / ts.y)
+	var k := minf(minf(box.x / ts.x, box.y / ts.y), max_k)
 	var sz := ts * k
 	if rotated:
 		canvas.draw_set_transform(rect.get_center(), PI * 0.5, Vector2.ONE)

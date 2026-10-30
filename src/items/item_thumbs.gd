@@ -37,6 +37,30 @@ static func texture(entry: Dictionary, canvas: CanvasItem = null) -> Texture2D:
 	return null
 
 
+## Крупный снимок предмета для карточки витрины (торговец) кадром frame (точки, пропорции картинки карточки):
+## печёная иконка (96 на клетку, по клеткам предмета) в большой карточке расплывается и мелка. Оружие — его
+## сборка (и без обвеса), остальное — модель предмета (ItemModels, как у печёных иконок); наклейки — null: их
+## иконки нарисованы, а не сняты с модели; пустой снимок (модели нет) — тоже null, рисуется иконка.
+static func card_texture(entry: Dictionary, frame: Vector2i, canvas: CanvasItem = null) -> Texture2D:
+	var id: String = String(entry.get("id", ""))
+	if id == "" or id.begins_with("sticker_"):
+		return null
+	var key: String = "card%dx%d|item|%s" % [frame.x, frame.y, id]
+	if WeaponDb.is_weapon(id):
+		var mods: Dictionary = entry.get("mods", {})
+		key = "card%dx%d|%s|%s|%s" % [frame.x, frame.y, WeaponCondition.model_key(id, mods, WeaponCondition.percent(entry),
+			WeaponMods.mag_state(entry)), _placement(mods), WeaponMark.key(WeaponMark.marks(entry))]
+	if _cache.has(key):
+		return _cache[key]
+	if DisplayServer.get_name() == "headless":
+		return null
+	var me: ItemThumbs = _instance()
+	if me == null:
+		return null
+	me._request(key, entry, canvas, frame)
+	return null
+
+
 ## Ключ вида экземпляра; "" — выглядит как печёная иконка.
 static func key_of(entry: Dictionary) -> String:
 	var id: String = String(entry.get("id", ""))
@@ -72,7 +96,7 @@ static func _instance() -> ItemThumbs:
 	return _self
 
 
-func _request(key: String, entry: Dictionary, canvas: CanvasItem) -> void:
+func _request(key: String, entry: Dictionary, canvas: CanvasItem, frame: Vector2i = Vector2i.ZERO) -> void:
 	if canvas:
 		var list: Array = _waiting.get(key, [])
 		list.append(weakref(canvas))
@@ -80,7 +104,7 @@ func _request(key: String, entry: Dictionary, canvas: CanvasItem) -> void:
 	if _queued.has(key):
 		return
 	_queued[key] = true
-	_queue.append({"key": key, "entry": entry.duplicate(true)})
+	_queue.append({"key": key, "entry": entry.duplicate(true), "frame": frame})
 
 
 func _process(_delta: float) -> void:
@@ -88,16 +112,17 @@ func _process(_delta: float) -> void:
 		return
 	_busy = true
 	var job: Dictionary = _queue.pop_front()
-	await _shoot(String(job.key), job.entry)
+	await _shoot(String(job.key), job.entry, job.get("frame", Vector2i.ZERO) as Vector2i)
 	_queued.erase(String(job.key))
 	_busy = false
 
 
-func _shoot(key: String, entry: Dictionary) -> void:
+## frame — свой кадр (карточка витрины); нулевой — по клеткам предмета, как у печёной иконки.
+func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> void:
 	var id: String = String(entry.id)
 	var cells: Vector2i = ItemDb.size(id)
 	var vp := SubViewport.new()
-	vp.size = Vector2i(cells.x * PX, cells.y * PX)
+	vp.size = frame if frame.x > 0 and frame.y > 0 else Vector2i(cells.x * PX, cells.y * PX)
 	vp.transparent_bg = true
 	vp.own_world_3d = true
 	vp.msaa_3d = Viewport.MSAA_8X
@@ -122,7 +147,8 @@ func _shoot(key: String, entry: Dictionary) -> void:
 	fill.light_color = Color(0.75, 0.85, 1.0)
 	fill.light_energy = 0.9
 	vp.add_child(fill)
-	var model: Node3D = WeaponModels.build(id, entry.get("mods", {}), 0, WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry))
+	var weapon: bool = WeaponDb.is_weapon(id)
+	var model: Node3D = WeaponModels.build(id, entry.get("mods", {}), 0, WeaponCondition.percent(entry), WeaponMods.mag_state(entry), WeaponMark.marks(entry)) 		if weapon else ItemModels.build(id)
 	vp.add_child(model)
 	# фонарь и лазер в миниатюре не светят
 	for l: Node in model.find_children("*", "Light3D", true, false):
@@ -137,7 +163,11 @@ func _shoot(key: String, entry: Dictionary) -> void:
 	vp.add_child(cam)
 	var aabb: AABB = _aabb(model)
 	var c: Vector3 = aabb.get_center()
-	cam.look_at_from_position(c + Vector3(-1.0, 0.1, 0.0).normalized() * 3.0, c, Vector3.UP)
+	# как у печёных иконок: оружие и обвес — сбоку, дулом вправо, остальное — на три четверти сверху
+	var dir := Vector3(-1.0, 0.1, 0.0).normalized()
+	if not weapon and String(ItemDb.item(id).get("cat", "")) != "mod":
+		dir = Vector3(-0.7, 1.2, 1.0).normalized() if id == Metka4Model.ID else Vector3(0.75, 0.95, 1.0).normalized()
+	cam.look_at_from_position(c + dir * 3.0, c, Vector3.UP)
 	# вписать с запасом 8 %, как у печёных иконок
 	var inv: Transform3D = cam.global_transform.affine_inverse()
 	var lo := Vector3(INF, INF, INF)
@@ -161,7 +191,8 @@ func _shoot(key: String, entry: Dictionary) -> void:
 		return
 	if _cache.size() >= CACHE:
 		_cache.clear()
-	_cache[key] = ImageTexture.create_from_image(img)
+	# пустой кадр (у предмета нет модели) — не снимок: окно нарисует печёную иконку
+	_cache[key] = ImageTexture.create_from_image(img) if img.get_used_rect().has_area() else null
 	for ref: WeakRef in _waiting.get(key, []):
 		var canvas: CanvasItem = ref.get_ref() as CanvasItem
 		if canvas:

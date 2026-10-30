@@ -3,8 +3,16 @@ extends PanelContainer
 ## Плашка предмета для окон (торговец, схема оружия): иконка на подложке цвета категории, имя,
 ## строка подробностей, цена; снизу — ряд кнопок (controls). Без иконки — плашка цвета категории.
 ## В правом верхнем углу иконки — «i»: описание предмета простыми словами (ItemInfo).
+## Ширина 0 — крупная карточка витрины (владелец 2026-10-30: «оружие мелкое, по 2–3 в строку»): тянется на
+## колонку сетки, картинка — на нейтральном студийном фоне, высота картинки — доля ширины (BIG_ASPECT),
+## предмет — свой снимок модели под этот кадр (ItemThumbs.card_texture).
 
 const W := 200.0
+const BIG_ASPECT := 0.42
+## Кадр снимка предмета в крупной карточке (точки; пропорции — как у картинки карточки, BIG_ASPECT).
+const BIG_FRAME := Vector2i(640, 268)
+## Во сколько раз можно растянуть печёную иконку (96 точек на клетку) в крупной карточке.
+const BIG_MAX_K := 1.35
 
 var controls: HBoxContainer
 ## Строка цены (нет цены — null): окно правит её на месте, когда меняют количество.
@@ -15,21 +23,27 @@ var price_label: Label
 ## plain — только имя (витрина торговца: новое, состояние писать незачем).
 static func make(entry: Dictionary, sub: String, price: String, width: float = W, plain: bool = false) -> ItemCard:
 	var c := ItemCard.new()
-	c.custom_minimum_size = Vector2(width, 0)
+	var big := width <= 0.0
+	c.custom_minimum_size = Vector2(maxf(width, 0.0), 0)
+	if big:
+		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.11, 0.105, 0.1, 0.96)
-	sb.border_color = Color(0.95, 0.78, 0.5, 0.18)
+	sb.bg_color = Color(0.085, 0.09, 0.095, 0.98) if big else Color(0.11, 0.105, 0.1, 0.96)
+	sb.border_color = Color(1, 1, 1, 0.09) if big else Color(0.95, 0.78, 0.5, 0.18)
 	sb.set_border_width_all(1)
-	sb.set_corner_radius_all(3)
-	sb.set_content_margin_all(8)
+	sb.set_corner_radius_all(4 if big else 3)
+	sb.set_content_margin_all(10 if big else 8)
 	c.add_theme_stylebox_override("panel", sb)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
+	v.add_theme_constant_override("separation", 6 if big else 4)
 	c.add_child(v)
 	var icon := IconBox.new()
 	icon.id = String(entry.get("id", ""))
 	icon.entry = entry
 	icon.custom_minimum_size = Vector2(0, 78)
+	if big:
+		icon.studio = true
+		icon.aspect = BIG_ASPECT
 	v.add_child(icon)
 	var info := Button.new()
 	info.text = "i"
@@ -46,12 +60,12 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	icon.add_child(info)
 	var n := int(entry.get("n", 1))
 	var title := ItemDb.item_name(String(entry.get("id", ""))) if plain else ItemDb.label(entry)
-	var name := _label(title + ("  ×%d" % n if n > 1 else ""), 14, Color(0.93, 0.91, 0.86))
+	var name := _label(title + ("  ×%d" % n if n > 1 else ""), 18 if big else 14, Color(0.95, 0.95, 0.94) if big else Color(0.93, 0.91, 0.86))
 	v.add_child(name)
 	if sub != "":
-		v.add_child(_label(sub, 12, Color(0.66, 0.68, 0.66)))
+		v.add_child(_label(sub, 13 if big else 12, Color(0.6, 0.63, 0.66) if big else Color(0.66, 0.68, 0.66)))
 	if price != "":
-		c.price_label = _label(price, 14, Color(0.72, 0.87, 0.66))
+		c.price_label = _label(price, 18 if big else 14, Color(0.78, 0.9, 0.7) if big else Color(0.72, 0.87, 0.66))
 		v.add_child(c.price_label)
 	c.controls = HBoxContainer.new()
 	c.controls.add_theme_constant_override("separation", 4)
@@ -92,8 +106,21 @@ class IconBox:
 	var id: String = ""
 	## Запись экземпляра (необязательно): у оружия рисуется его сборка.
 	var entry: Dictionary = {}
+	## Крупная карточка: студийный фон вместо цвета категории (категория — полоской снизу), оружие —
+	## крупным снимком модели; высота — aspect от ширины.
+	var studio: bool = false
+	var aspect: float = 0.0
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_RESIZED and aspect > 0.0:
+			var h: float = roundf(size.x * aspect)
+			if absf(custom_minimum_size.y - h) > 1.0:
+				custom_minimum_size.y = h
 
 	func _draw() -> void:
+		if studio:
+			_draw_studio()
+			return
 		var cat := String(ItemDb.item(id).get("cat", "misc"))
 		var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
 		var r := Rect2(Vector2.ZERO, size)
@@ -104,3 +131,21 @@ class IconBox:
 		else:
 			ItemIcons.draw_entry(self, entry, r.grow(-4.0), false)
 		draw_rect(r, Color(1, 1, 1, 0.12), false, 1.0)
+
+	## Нейтральный серый фон сверху светлее, как студийная подложка: воронёный металл и песок читаются, фон не
+	## спорит с предметом; цвет категории — тонкой полосой снизу.
+	func _draw_studio() -> void:
+		var r := Rect2(Vector2.ZERO, size)
+		var top := Color(0.33, 0.345, 0.36)
+		var bottom := Color(0.2, 0.21, 0.225)
+		draw_polygon(PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]),
+			PackedColorArray([top, top, bottom, bottom]))
+		var cat := String(ItemDb.item(id).get("cat", "misc"))
+		var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
+		draw_rect(Rect2(r.position.x, r.end.y - 3.0, r.size.x, 3.0), col.lightened(0.35))
+		var inner := r.grow(-12.0)
+		var tex: Texture2D = ItemThumbs.card_texture(entry if not entry.is_empty() else {"id": id}, ItemCard.BIG_FRAME, self)
+		if tex:
+			ItemIcons.draw_tex(self, tex, inner, false)
+		else:
+			ItemIcons.draw_tex(self, ItemIcons.entry_icon(entry if not entry.is_empty() else {"id": id}, self), inner, false, ItemCard.BIG_MAX_K)

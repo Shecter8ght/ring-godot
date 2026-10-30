@@ -742,6 +742,7 @@ func _trader_buy() -> void:
 	var shop := _column("Купить", 1.0)
 	_shop_list = shop
 	var scroll := shop.get_parent() as ScrollContainer
+	scroll.resized.connect(_shop_resized)
 	var box := scroll.get_parent() as VBoxContainer
 	var stock := _trader_stock()
 	# --- шапка: панель с золотой кромкой снизу, стоит на месте
@@ -932,7 +933,7 @@ func _fill_shop() -> void:
 		cat_names[String(t[0])] = String(t[1])
 	var last_cat := ""
 	var last_g := ""
-	var flow: HFlowContainer = null
+	var flow: GridContainer = null
 	var count_label: Label = null
 	var count := 0
 	for r: Dictionary in rows:
@@ -958,14 +959,40 @@ func _fill_shop() -> void:
 			count_label = _text(last_g, Color(0.88, 0.8, 0.66))
 			count_label.add_theme_font_size_override("font_size", 16)
 			shop.add_child(count_label)
-			flow = HFlowContainer.new()
-			flow.add_theme_constant_override("h_separation", 8)
-			flow.add_theme_constant_override("v_separation", 8)
+			# крупные карточки сеткой: 3 в строку, на узком окне — 2 (_shop_cols)
+			flow = GridContainer.new()
+			flow.columns = _shop_cols()
+			flow.add_theme_constant_override("h_separation", 10)
+			flow.add_theme_constant_override("v_separation", 10)
 			shop.add_child(flow)
 		count += 1
 		flow.add_child(_shop_card(String(r.id)))
 	if count_label:
 		count_label.text += "   %d" % count
+
+
+## Карточка витрины не уже этого: иначе в строку — две.
+const SHOP_CARD_MIN_W := 300.0
+
+
+## Сколько карточек витрины в строку: 3, на узкой колонке — 2 (ширина колонки ещё не известна — по окну).
+func _shop_cols() -> int:
+	var w: float = 0.0
+	if _shop_list and is_instance_valid(_shop_list) and _shop_list.get_parent() is ScrollContainer:
+		w = (_shop_list.get_parent() as ScrollContainer).size.x
+	if w <= 0.0:
+		w = get_viewport().get_visible_rect().size.x - 620.0
+	return 3 if w >= SHOP_CARD_MIN_W * 3.0 else 2
+
+
+## Окно поменяло размер — сетки витрины перестраиваются на своё число колонок.
+func _shop_resized() -> void:
+	if _shop_list == null or not is_instance_valid(_shop_list):
+		return
+	var cols := _shop_cols()
+	for g in _shop_list.get_children():
+		if g is GridContainer and (g as GridContainer).columns != cols:
+			(g as GridContainer).columns = cols
 
 
 ## Абзац в колонке: переносится по словам (строки, добавленные после общей перестройки окна).
@@ -980,7 +1007,7 @@ func _shop_card(sid: String) -> ItemCard:
 	var stackable := ItemDb.stack(sid) > 1
 	var n := _qty_of(sid) if stackable else 1
 	var unit := Profile.buy_price(sid)
-	var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(unit * n), ItemCard.W, true)
+	var card := ItemCard.make({"id": sid, "n": 1}, _sub_of(sid), "%s ₽" % InventoryUI.money(unit * n), 0.0, true)
 	var tl := maxi(TraderStock.catalog_of(sid), 1)
 	if _trust_blocked(sid, tl):
 		# сильное Михалыч продаёт только тем, кому доверяет: каталог — со своей ступени
