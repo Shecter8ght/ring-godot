@@ -385,7 +385,7 @@ python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.pn
                                                               # по деталям, горячие места клетками 6 мм в JSON; --show — копия файла с коллекцией «Острые рёбра»
                                                               # (выпуклые красным, вогнутые синим)
 # AR-15, этап 2 — износ: blender -b <AR15_uv_v03.blend> --python-expr "import sys; sys.path.insert(0, r'E:/Games/RING-godot/tools/ar15')"
-#   --python tools/ar15/wear_zones.py -- <папка> [2048] (зоны хвата рукояти в развёртку) → python -X utf8 tools/ar15/wear_masks.py (фото-маски CC0
+#   --python tools/ar15/wear_zones.py -- <папка> [2048] [4096] (зоны хвата, рёбрышки и углы у них в развёртку) → python -X utf8 tools/ar15/wear_masks.py (фото-маски CC0
 #   из Маски_АЛЬФА/50_Скачанные_CC0_… — уровни, порог) → Painter: tools/ar15/sp_run.py -c "import sp_ar15_wear; print(sp_ar15_wear.build_grip())"
 #   (группа «Этап 2 — износ», Passthrough), export_variant('B', <папка>, ['grip'])
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]

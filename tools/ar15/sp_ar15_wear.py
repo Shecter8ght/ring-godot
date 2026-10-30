@@ -23,6 +23,8 @@ PRINT_SCALE = 7.0
 SMEAR_SCALE = 3.0
 DUST_SCALE = 5.0
 SCRATCH_SCALE = 4.0
+GRIME_SCALE = 20.0          # рваный гранж грязи в углах у рёбрышек — пятна долями миллиметра
+GRAIN_SCALE = 10.0          # частицы пыли там же
 
 
 def _layer(name, pos, rough=None, color=None, cmode=L.BlendingMode.Multiply, cop=1.0, rop=1.0):
@@ -114,7 +116,25 @@ def build_grip():
                 cmode=L.BlendingMode.SoftLight, cop=0.5)
     p = _mask_pattern(l6, f"{MK}/scratches.png", SCRATCH_SCALE, rot=0.9)
     _zone(l6, "base", above=p, blend=L.BlendingMode.Multiply)
+    # 7–9. рёбрышки в выемках под пальцы (владелец 30.10): сами заглажены пальцами и перчаткой — глянец; в углах стыка
+    # с телом — грязь (тёмная, у самого края) и пыль (светлая, полосой чуть шире). Маски — wear_zones.py (ribs,
+    # rib_dirt, rib_dust); грязь поверх глянца: низ боков рёбрышка в углу — матовый
+    l7 = _layer("Рёбрышки — заглажены пальцами", L.InsertPosition.above_node(l6), rough=-0.28, color=(0.92, 0.92, 0.92),
+                cop=0.5)
+    p = _mask_pattern(l7, f"{MK}/polish_var.png", SMEAR_SCALE, rot=2.0)
+    _zone(l7, "ribs", above=p, blend=L.BlendingMode.Multiply)
+    # грязь — затемняет родной цвет пластика (Multiply), а не закрашивает ровным тоном: ровная заливка читалась
+    # обводкой тушью вокруг рёбрышек (проба 30.10); рисунок — рваный гранж с фото (ShareTextures dirt_5)
+    l8 = _layer("Углы у рёбрышек — грязь", L.InsertPosition.above_node(l7), rough=0.18, color=(0.55, 0.50, 0.44),
+                cop=0.75)
+    p = _mask_pattern(l8, f"{MK}/grime.png", GRIME_SCALE, rot=0.6)
+    _zone(l8, "rib_dirt", above=p, blend=L.BlendingMode.Multiply)
+    # пыль — светлая, частицами (ShareTextures dirt_1); в верхнем углу гуще (маска rib_dust)
+    l9 = _layer("Углы у рёбрышек — пыль", L.InsertPosition.above_node(l8), rough=0.15, color=(0.70, 0.66, 0.59),
+                cmode=L.BlendingMode.Normal, cop=0.55)
+    p = _mask_pattern(l9, f"{MK}/dust_grain.png", GRAIN_SCALE, rot=1.4)
+    _zone(l9, "rib_dust", above=p, blend=L.BlendingMode.Multiply)
     # резкости на группе нет: эффект на группе делает её отдельным слоем, и Subtract / Multiply / SoftLight внутри
     # смешивались с пустотой, а не с заводской отделкой — рукоять целиком белёсая и зеркальная (проба 30.10, блеск −0,25
     # и цвет +0,13 по всей рукояти); резкость кадра — уже у группы этапа 1
-    return "grip: группа износа — 6 слоёв"
+    return "grip: группа износа — 9 слоёв"
