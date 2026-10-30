@@ -388,6 +388,9 @@ python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.pn
 #   --python tools/ar15/wear_zones.py -- <папка> [2048] [4096] (зоны хвата, рёбрышки и углы у них в развёртку) → python -X utf8 tools/ar15/wear_masks.py (фото-маски CC0
 #   из Маски_АЛЬФА/50_Скачанные_CC0_… — уровни, порог) → Painter: tools/ar15/sp_run.py -c "import sp_ar15_wear; print(sp_ar15_wear.build_grip())"
 #   (группа «Этап 2 — износ», Passthrough), export_variant('B', <папка>, ['grip'])
+#   Остальные детали — места попиксельно: blender -b <AR15_uv_v03.blend> --python tools/ar15/wear_maps.py -- <набор> <папка> (положение,
+#   нормаль, номер детали в каждом пикселе развёртки → <набор>_maps.npz) → python -X utf8 tools/ar15/wear_lower.py (нижний ресивер и УСМ:
+#   зоны <набор>_zone_*_L.png, просмотр lower_zones_preview.png) → sp_ar15_wear.build_lower(), export_variant('B', <папка>, ['lower', 'internals'])
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
