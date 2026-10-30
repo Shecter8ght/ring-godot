@@ -1798,6 +1798,16 @@ const AI_NOTICE_SEC := 0.35
 ## последние shot_sec с) — быстрее. Отвёл взгляд — «забывает» вдвое медленнее, чем замечал.
 const AI_NOTICE := {"near_m": 8.0, "far_m": 100.0, "near_sec": 0.25, "far_sec": 2.6,
 	"stance": {"stand": 1.0, "crouch": 1.25, "prone": 1.7}, "sprint": 0.55, "shot": 0.45, "shot_sec": 2.0}
+## После подтверждения цели — довести оружие, затем открыть огонь (отдельно от разброса).
+## В упор быстрее; короткий повторный выход не сбрасывает готовность. Новая цель, большой
+## скачок направления или долгая потеря — новое доведение. Подготовленная засада держит угол.
+const AI_FIRE_REACTION := {
+	"profiles": {"scav": [0.55, 0.9], "veteran": [0.35, 0.6], "pmc": [0.22, 0.4]},
+	"archetypes": {"heavy": "veteran", "sniper": "veteran", "bank_boss": "veteran",
+		"bank_guard": "veteran", "pmc": "pmc", "rival": "veteran", "rival_scout": "veteran", "rival_sniper": "veteran"},
+	"close_m": 5.0, "full_m": 25.0, "close_sec": [0.15, 0.25], "prepared_sec": [0.15, 0.3],
+	"reset_sec": 1.2, "turn_deg": 40.0,
+}
 ## Очередь на огонь: по одной цели прицельно стреляют не больше tokens мародёров (остальные — на
 ## подавление: разброс × untoken_spread, реже); право держат hold_sec, с, потом отдают и ждут
 ## cooldown_sec, с, — по игроку стреляют по очереди, а не все разом.

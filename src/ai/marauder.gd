@@ -48,6 +48,7 @@ enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE, 
 
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
+const AimReaction = preload("res://src/ai/aim_reaction.gd")
 
 var state: State = State.PATROL
 var animation_event: String = ""
@@ -146,6 +147,7 @@ var _reload_t: float = 0.0
 ## Липучка подсумка: при каком остатке _reload_t звучит (−1 — нет).
 var _velcro_left: float = -1.0
 var _shot_t: float = 0.0
+var _fire_reaction: AimReaction = AimReaction.new()
 var _burst_left: int = 0
 ## Прицел «садится»: 1 — точно, AI_AIM_COLD — только что заметил.
 var _aim: float = 1.0
@@ -257,6 +259,8 @@ func _ready() -> void:
 	_blind_t = -phase * float(Balance.AI_WORK.glare_scan_sec)
 	_repath_t = -phase * float(Balance.AI_WORK.follow_repath_sec)
 	_rng.seed = hash(name) + int(global_position.x * 13.0)
+	# Отдельный генератор: настройка реакции не меняет случайные решения тактики и разброс.
+	_fire_reaction.rng.seed = _rng.seed + 7919
 	if not Balance.AI_ARCHETYPES.has(archetype):
 		archetype = pick_archetype(_rng)
 	_arch = Balance.AI_ARCHETYPES[archetype]
@@ -763,7 +767,6 @@ func _perceive(delta: float) -> void:
 	var foe: Marauder = null
 	if seen == null:
 		foe = _scan_foes(delta, fwd, exclude)
-	var was_seen := _seen_now
 	_seen_now = false
 	if seen == null and foe:
 		_foe = foe
@@ -772,8 +775,6 @@ func _perceive(delta: float) -> void:
 		_unseen_t = 0.0
 		last_known = foe.global_position
 		memory_timer = _mem()
-		if not was_seen:
-			_aim = _fresh_aim(foe.global_position)
 		_ambush_rolled = false
 		if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
 			_enter_combat(Tactic.ENGAGE)
@@ -796,9 +797,6 @@ func _perceive(delta: float) -> void:
 			player_contact_ms = Time.get_ticks_msec()
 			last_known = seen.global_position
 			memory_timer = _mem()
-			if not was_seen:
-				# только что поймал в поле зрения — первые выстрелы мимо (из засады — почти сразу в цель)
-				_aim = _fresh_aim(seen.global_position)
 			_ambush_rolled = false
 			if state != State.COMBAT and state != State.RETREAT and state != State.DOWNED and state != State.RESCUE:
 				_enter_combat(Tactic.ENGAGE)
@@ -814,6 +812,7 @@ func _perceive(delta: float) -> void:
 			memory_timer -= delta
 			if memory_timer <= 0.0:
 				_start_search()
+	_update_fire_reaction(delta)
 	# горящая ракета рядом, смотрит на неё — слепит: целится как только что заметивший
 	_blind_t -= delta
 	if _blind_t <= 0.0:
@@ -831,6 +830,25 @@ func _perceive(delta: float) -> void:
 		var sf: Dictionary = Balance.AI_AIM_SETTLE_FAR
 		var settle := lerpf(Balance.AI_AIM_SETTLE_SEC, float(sf.far_sec), smoothstep(float(sf.near_m), float(sf.far_m), global_position.distance_to(last_known)))
 		_aim = move_toward(_aim, 1.0, delta * (Balance.AI_AIM_COLD - 1.0) / settle)
+
+
+func _update_fire_reaction(delta: float) -> void:
+	if not _seen_now and state in [State.PATROL, State.INVESTIGATE, State.SEARCH]:
+		_fire_reaction.reset()
+		return
+	var contact_id: int = 0
+	if _seen_now:
+		if is_instance_valid(_target_player):
+			contact_id = _target_player.get_instance_id()
+		elif is_instance_valid(_foe):
+			contact_id = _foe.get_instance_id()
+	var prepared: bool = state == State.COMBAT and tactic == Tactic.AMBUSH \
+		and last_known.distance_to(_ambush_at) < float(Balance.AI_AMBUSH.near_m)
+	var profile: String = String(Balance.AI_FIRE_REACTION.archetypes.get(archetype, "scav"))
+	if _fire_reaction.step(delta, _seen_now, contact_id, last_known, global_position, profile, prepared):
+		# Смена видимой цели тоже требует нового наведения, даже без промежуточной потери зрения.
+		# Начальный разброс больше, но попадание возможно уже первой разрешённой пулей.
+		_aim = _fresh_aim(last_known)
 
 
 ## Фонарь на оружии светит мне в лицо: близко (FLASHLIGHT_BLIND_M), я в луче, смотрю в его
@@ -2295,6 +2313,8 @@ func _try_fire(suppress: bool = false) -> void:
 		# лежащего не добивает, пока стреляет кто-то другой
 		return
 	if _shot_t > 0.0:
+		return
+	if not _fire_reaction.can_fire():
 		return
 	if not _line_of_fire():
 		# перед каждым выстрелом заново проверяем стену и дверь
