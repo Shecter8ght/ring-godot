@@ -219,7 +219,9 @@ function render() {
 function renderSpec() {
   const s = S.spec;
   if (!s) { $("spec").innerHTML = ""; return; }
-  const slots = (s.slots || []).map((x) => `<span class="slot">${esc(x.title)}: <b>${esc(x.finish || "—")}</b></span>`).join("");
+  // не выбрано владельцем — показываем предложение агента (recommended) серым
+  const slots = (s.slots || []).map((x) => `<span class="slot">${esc(x.title)}: ${x.finish ? "<b>" + esc(x.finish) + "</b>"
+    : (x.recommended ? "<span class='sub'>предлагаю " + esc(x.recommended) + "</span>" : "<b>—</b>")}</span>`).join("");
   $("spec").innerHTML = `<span class="sub">${s.asset ? "Модель: <b>" + esc(s.asset) + "</b> · " : ""}файл выбора: <span class="mono">${esc(s._path || "")}</span></span>${slots}
     <span class="sub">★ ${(s.favorites || []).length}</span>`;
 }
