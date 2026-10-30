@@ -9,7 +9,7 @@
 или побелкой; плита ПК 220 с каналами Ø159 через 185, проволока Вр Ø5 внизу. Глыба ломается уступами по швам:
 кирпич на краю либо цел, либо расколот (излом — сетка с шумом, булева разность), либо выпал; раствор в швах
 у края выкрошен на миллиметры, на постелях и тычках по излому — пятна корки, штукатурка отваливается по своей линии. Кирпич — ручной формовки: рёбра чуть скруглены, грани
-неровные, на углах сколы плоскими гранями. Корень — точка опоры на полу, Z вверх. Материалы — нейтральные
+неровные, на углах сколы плоскими гранями; лицо — кирпич со снимка стены стенда (brick_rects.py). Корень — точка опоры на полу, Z вверх. Материалы — нейтральные
 слоты; текстуры после принятия формы.
 """
 import math
@@ -33,16 +33,158 @@ JOINT = 0.011
 COURSE = BH + JOINT
 
 
+TEX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "_asset_src", "dorm_textures")
+BRICKS = os.path.join(TEX, "ph_red_bricks_04_4k")
+PLASTER = os.path.join(TEX, "ph_painted_plaster_wall_4k")
+CONCRETE = os.path.join(TEX, "texturecan_concrete_0011", "maps")
+
+
+def _rects() -> list:
+    """Кирпичи с фотоскана стены без швов (tools/dorm_modules/brick_rects.py); нет файла — весь снимок."""
+    try:
+        import json
+        with open(os.path.join(BRICKS, "brick_rects.json"), encoding="utf-8") as fh:
+            return json.load(fh)["rects"]
+    except OSError:
+        return [[0.0, 0.0, 1.0, 1.0]]
+
+
+RECTS = _rects()
+
+
+def photo(name: str, diff: str, rough: str, nor: str, scale: float, tint=None, white: float = 0.0,
+          rough_add: float = 0.0, fallback=(0.5, 0.5, 0.5), box: bool = True) -> bpy.types.Material:
+    """Материал по фототекстуре (CC0): box — кубическая проекция по координатам объекта (метры; изломы без растяжек
+    и швов), иначе — по развёртке (кирпич: лицо со снимка); scale — повторов на метр / на единицу развёртки;
+    tint — умножить цвет (краска по штукатурке), white — подмешать белого (побелка). Нет файлов — простой цвет."""
+    m = L.material(name, fallback, 0.85)
+    if not os.path.exists(diff):
+        return m
+    nt = m.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    mp = nt.nodes.new("ShaderNodeMapping")
+    mp.inputs["Scale"].default_value = (scale, scale, scale)
+    nt.links.new(tc.outputs["Object" if box else "UV"], mp.inputs["Vector"])
+
+    def img(path, non_color):
+        n = nt.nodes.new("ShaderNodeTexImage")
+        n.image = bpy.data.images.load(os.path.abspath(path), check_existing=True)
+        if non_color:
+            n.image.colorspace_settings.name = "Non-Color"
+        if box:
+            n.projection = "BOX"
+            n.projection_blend = 0.3
+        nt.links.new(mp.outputs["Vector"], n.inputs["Vector"])
+        return n
+    col = img(diff, False).outputs["Color"]
+    if tint is not None:  # краска по штукатурке: рельеф и пятна штукатурки, цвет — краски
+        bw = nt.nodes.new("ShaderNodeRGBToBW")
+        nt.links.new(col, bw.inputs["Color"])
+        mul = nt.nodes.new("ShaderNodeMix")
+        mul.data_type = "RGBA"
+        mul.blend_type = "MULTIPLY"
+        mul.inputs["Factor"].default_value = 1.0
+        nt.links.new(bw.outputs["Val"], mul.inputs[6])
+        mul.inputs[7].default_value = (*[c * 1.6 for c in tint], 1.0)
+        col = mul.outputs[2]
+    if white:
+        mw = nt.nodes.new("ShaderNodeMix")
+        mw.data_type = "RGBA"
+        mw.inputs["Factor"].default_value = white
+        nt.links.new(col, mw.inputs[6])
+        mw.inputs[7].default_value = (0.9, 0.9, 0.88, 1.0)
+        col = mw.outputs[2]
+    nt.links.new(col, bsdf.inputs["Base Color"])
+    r = img(rough, True).outputs["Color"]
+    if rough_add:
+        ma = nt.nodes.new("ShaderNodeMath")
+        ma.operation = "ADD"
+        ma.use_clamp = True
+        nt.links.new(r, ma.inputs[0])
+        ma.inputs[1].default_value = rough_add
+        r = ma.outputs[0]
+    nt.links.new(r, bsdf.inputs["Roughness"])
+    nm = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(img(nor, True).outputs["Color"], nm.inputs["Color"])
+    nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+    return m
+
+
 def mats() -> dict:
+    """Материалы обломков — те же фотосканы, что у стен стенда v03: кирпич Red Bricks 04 (каждому кирпичу — свой
+    кирпич со снимка, RECTS), штукатурка Painted Plaster Wall (раствор, краска, побелка — от неё), бетон плиты —
+    TextureCan Concrete 0011 в сером (карты sbsrender, см. license.txt рядом)."""
+    pd, pr, pn = (os.path.join(PLASTER, f"painted_plaster_wall_{k}_4k.jpg") for k in ("diff", "rough", "nor_gl"))
     return {
-        "brick": L.material("Кирпич_красный", (0.42, 0.18, 0.11), 0.85),
-        "mortar": L.material("Раствор", (0.58, 0.56, 0.51), 0.95),
-        "plaster": L.material("Штукатурка", (0.74, 0.72, 0.67), 0.92),
-        "paint_green": L.material("Краска_панель_зелёная", (0.2, 0.36, 0.28), 0.55),
-        "whitewash": L.material("Побелка", (0.86, 0.86, 0.83), 0.9),
-        "concrete": L.material("Бетон_плита", (0.5, 0.49, 0.46), 0.9),
+        "brick": photo("Кирпич_красный", *(os.path.join(BRICKS, f"red_bricks_04_{k}_4k.jpg") for k in ("diff", "rough", "nor_gl")),
+                       1.0, fallback=(0.42, 0.18, 0.11), box=False),
+        "mortar": photo("Раствор", *(os.path.join(CONCRETE, f"{k}.png") for k in ("basecolor", "roughness", "normal")), 4.0,
+                        tint=(0.62, 0.58, 0.5), rough_add=0.1, fallback=(0.58, 0.56, 0.51)),
+        "plaster": photo("Штукатурка", pd, pr, pn, 0.6, white=0.15, fallback=(0.74, 0.72, 0.67)),
+        "paint_green": photo("Краска_панель_зелёная", pd, pr, pn, 0.6, tint=(0.2, 0.36, 0.28), rough_add=-0.25,
+                             fallback=(0.2, 0.36, 0.28)),
+        "whitewash": photo("Побелка", pd, pr, pn, 0.6, white=0.55, rough_add=0.1, fallback=(0.86, 0.86, 0.83)),
+        "concrete": photo("Бетон_плита", *(os.path.join(CONCRETE, f"{k}.png") for k in ("basecolor", "roughness", "normal")),
+                          1.2, tint=(1.25, 1.23, 1.18), fallback=(0.5, 0.49, 0.46)),
         "wire": L.material("Проволока_ржавая", (0.3, 0.17, 0.1), 0.75, 0.6),
     }
+
+
+def brick_uv(bm, rect) -> None:
+    """Развёртка кирпича на один кирпич со снимка: ложок (250 × 65) — весь прямоугольник, тычок — его часть,
+    постель — растянута по высоте; излом и сколы — по своей грани той же картинкой."""
+    u0, v0, u1, v1 = rect
+    uv = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")  # имя — по нему ensure_uv отличает настоящую
+    bm.normal_update()
+    lo = [min(v.co[i] for v in bm.verts) for i in range(3)]
+    hi = [max(v.co[i] for v in bm.verts) for i in range(3)]
+    for f in bm.faces:
+        ax = max(range(3), key=lambda i: abs(f.normal[i]))
+        a, b = {0: (1, 2), 1: (0, 2), 2: (0, 1)}[ax]
+        for loop in f.loops:
+            s = (loop.vert.co[a] - lo[a]) / max(hi[a] - lo[a], 1e-6)
+            t = (loop.vert.co[b] - lo[b]) / max(hi[b] - lo[b], 1e-6)
+            if ax == 0:  # тычок 120 × 65 — треть длины ложка со снимка
+                s = 0.3 + s * 0.48
+            loop[uv].uv = (u0 + s * (u1 - u0), v0 + t * (v1 - v0))
+
+
+def fix_cut_uv(ob: bpy.types.Object, rnd) -> None:
+    """Грани излома от булевой операции пришли без развёртки (нули): кладём на них один случайный кирпич со снимка
+    по рамке всех граней излома — глина внутри та же, развёртка без разрывов."""
+    me = ob.data
+    if not me.uv_layers:
+        return
+    uvl = me.uv_layers.active.data
+    cut = [p for p in me.polygons if all(abs(uvl[i].uv.x) < 1e-6 and abs(uvl[i].uv.y) < 1e-6 for i in p.loop_indices)]
+    if not cut:
+        return
+    pts = [me.vertices[me.loops[i].vertex_index].co for p in cut for i in p.loop_indices]
+    lo = [min(c[k] for c in pts) for k in range(3)]
+    span = max(max(c[k] for c in pts) - lo[k] for k in range(3)) or 1.0
+    u0, v0, u1, v1 = rnd.choice(RECTS)
+    for p in cut:
+        ax = max(range(3), key=lambda i: abs(p.normal[i]))
+        a, b = {0: (1, 2), 1: (0, 2), 2: (0, 1)}[ax]
+        for i in p.loop_indices:
+            co = me.vertices[me.loops[i].vertex_index].co
+            s_, t = (co[a] - lo[a]) / span, (co[b] - lo[b]) / span
+            uvl[i].uv = (u0 + s_ * (u1 - u0), v0 + t * (v1 - v0))
+
+
+def ensure_uv(ob: bpy.types.Object) -> None:
+    """Нет развёртки — метрическая (раствор, штукатурка, бетон, крошка): фототекстура ложится в масштабе.
+    Булева операция оставляет вместо развёртки пустой слой «Float2» — его не считаем."""
+    if "UVMap" in ob.data.uv_layers:
+        return
+    for uvl in list(ob.data.uv_layers):
+        ob.data.uv_layers.remove(uvl)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    L.uv_metric(bm)
+    bm.to_mesh(ob.data)
+    bm.free()
 
 
 # ---------------------------------------------------------------- помощники
@@ -224,6 +366,7 @@ def brick_bm(rnd, seed: int) -> bmesh.types.BMesh:
         c = V((rnd.choice((-1, 1)) * size[0] / 2, rnd.choice((-1, 1)) * size[1] / 2, rnd.choice((-1, 1)) * size[2] / 2))
         nrm = V((c.x / size[0] * rnd.uniform(0.3, 1.0), c.y / size[1] * rnd.uniform(0.3, 1.0), c.z / size[2] * rnd.uniform(0.3, 1.0)))
         chip(bm, c, nrm, rnd.uniform(0.006, 0.022))
+    brick_uv(bm, rnd.choice(RECTS))
     return bm
 
 
@@ -288,6 +431,7 @@ def masonry(coll, m, at, name, w: float, h: float, full: bool, seed: int, paint:
                         xb = x0 + along * rnd.uniform(0.3, 0.7)
                         nrm = V((1.0 if left_in else -1.0, rnd.uniform(-0.35, 0.35), rnd.uniform(-0.3, 0.3)))
                         boolean(ob, fracture_cutter(V((xb, y0 + depth / 2, (zc0 + zc1) / 2)), nrm, 0.3, 0.004, seed + course * 7 + int(x * 100)), "DIFFERENCE")
+                        fix_cut_uv(ob, rnd)
                         broken.append(ob)
                         kept_x.append((x0, xb) if left_in else (xb, x1))
                         # у излома корка кончается на сантиметр раньше рваного торца
@@ -347,10 +491,14 @@ def masonry(coll, m, at, name, w: float, h: float, full: bool, seed: int, paint:
         low = min(low, min((v.co.z for v in ob.data.vertices), default=0.0))
     for ob, mat, mat2 in pieces:
         ob.data.transform(Matrix.Translation((0, 0, -low)))
+        ensure_uv(ob)
+        keep = [p.material_index for p in ob.data.polygons] if mat2 is not None else None
+        ob.data.materials.clear()  # пустой слот от булевой операции
         ob.data.materials.append(mat)
         if mat2 is not None:
             ob.data.materials.append(mat2)
-        for p in ob.data.polygons:
+        for k, p in enumerate(ob.data.polygons):
+            p.material_index = keep[k] if keep else 0
             p.use_smooth = True
         try:
             ob.data.set_sharp_from_angle(angle=math.radians(40))
@@ -405,6 +553,7 @@ def loose_bricks(coll, m, at, name, seed: int) -> bpy.types.Object:
         if kind == "bit":  # обломок — ещё и вдоль
             ax2 = (mtx.to_3x3() @ V((0, 1, 0))).normalized()
             boolean(ob, fracture_cutter(mtx.to_translation() + ax2 * rnd.uniform(-0.01, 0.02), ax2, 0.3, 0.004, seed + k * 29), "DIFFERENCE")
+        fix_cut_uv(ob, rnd)
         broken.append(ob)
     br = obj(whole, name + "_кирпич")
     bm = bmesh.new()
@@ -448,6 +597,11 @@ def drop_islands(ob: bpy.types.Object) -> None:
 
 
 def finish(ob: bpy.types.Object, mat, parent, coll) -> None:
+    ensure_uv(ob)
+    if any(m is None for m in ob.data.materials):  # булева операция добавляет пустой слот — грани ушли бы на него
+        ob.data.materials.clear()
+        for p in ob.data.polygons:
+            p.material_index = 0
     ob.data.materials.append(mat)
     for p in ob.data.polygons:
         p.use_smooth = True
