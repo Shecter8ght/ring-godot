@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог отделок</title>
+<style>
+:root {
+  --bg: #f3f2ef; --panel: #ffffff; --ink: #1d1d1b; --muted: #6c6a64; --line: #e2e0da; --chip: #ecebe6;
+  --accent: #2f5d50; --accent-ink: #ffffff; --warn: #9a4a16; --star: #c08a12; --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #a09d95; --line: #2f2e2b; --chip: #2a2927;
+    --accent: #7fb7a4; --accent-ink: #0e1512; --warn: #e3a073; --star: #e6b84a; --shadow: none; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+header { position: static; z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+/* шапка прилипает только на широком и высоком окне: в узкой панели она закрывала полэкрана */
+@media (min-width: 1200px) and (min-height: 860px) { header { position: sticky; top: 0; } }
+.wrap { max-width: 1500px; margin: 0 auto; padding: 0 16px; }
+.top { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; padding: 14px 0 6px; }
+h1 { font-size: 20px; margin: 0; letter-spacing: .2px; }
+.sub { color: var(--muted); font-size: 13px; }
+.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 6px 0 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--panel); color: var(--ink); padding: 6px 12px; cursor: pointer; font: inherit; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.chip { border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 999px; padding: 4px 11px;
+  cursor: pointer; font: inherit; font-size: 13px; }
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+input[type=search] { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px;
+  padding: 6px 10px; font: inherit; min-width: 200px; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 12px;
+  cursor: pointer; font: inherit; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.spec { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 0 0 12px; font-size: 13px; }
+.spec .slot { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; }
+.spec .slot b { font-family: Consolas, monospace; }
+.note { color: var(--warn); font-size: 13px; padding: 0 0 10px; }
+main { padding: 18px 0 60px; }
+section h2 { font-size: 16px; margin: 26px 0 2px; }
+section .gnote { color: var(--muted); margin: 0 0 12px; font-size: 13px; max-width: 900px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; }
+.card.chosen { outline: 2px solid var(--accent); }
+.shot { position: relative; aspect-ratio: 3 / 2; background: #9a9a98; cursor: zoom-in; }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot .miss { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 13px; }
+.shot .flip { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 4px; }
+.shot .flip span { background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 6px; cursor: pointer; }
+.shot .flip span.on { background: rgba(255,255,255,.9); color: #111; }
+.body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.head { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+.code { font-family: Consolas, "Cascadia Mono", monospace; font-weight: 700; font-size: 15px; letter-spacing: .3px; }
+.title { font-size: 14px; }
+.step { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); border: 1px solid var(--line);
+  border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.star { border: 0; background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--line); padding: 0 2px; }
+.star.on { color: var(--star); }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+td { padding: 2px 0; vertical-align: top; }
+td:first-child { color: var(--muted); width: 108px; padding-right: 8px; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; border: 1px solid rgba(0,0,0,.2); margin-right: 6px; }
+.mono { font-family: Consolas, monospace; }
+.use { font-size: 12.5px; color: var(--muted); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 12px; background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 1px 7px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.actions select { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 5px 6px; font: inherit; max-width: 170px; }
+details { font-size: 12.5px; }
+details summary { cursor: pointer; color: var(--muted); }
+.lb { position: fixed; inset: 0; background: rgba(0,0,0,.86); z-index: 20; display: none; flex-direction: column; }
+.lb.on { display: flex; }
+.lb .imgs { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; min-height: 0; }
+.lb .imgs img { width: 100%; height: 100%; object-fit: contain; }
+.lb .cap { color: #eee; padding: 8px 16px 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 800px) { .lb .imgs { grid-template-columns: 1fr; } }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 30; display: none; place-items: center; padding: 16px; }
+.modal.on { display: grid; }
+.dialog { background: var(--panel); color: var(--ink); border-radius: 14px; width: min(560px, 100%); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.drop { border: 2px dashed var(--line); border-radius: 10px; padding: 18px; text-align: center; color: var(--muted); cursor: pointer; }
+.drop.over { border-color: var(--accent); color: var(--accent); }
+.thumbs { display: flex; gap: 6px; flex-wrap: wrap; }
+.thumbs img { height: 64px; border-radius: 6px; }
+textarea { width: 100%; min-height: 90px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; padding: 8px; }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--bg);
+  padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity .2s; z-index: 40; pointer-events: none; }
+.toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <h1>Каталог заводских отделок</h1>
+      <span class="sub" id="sub"></span>
+    </div>
+    <div class="spec" id="spec"></div>
+    <div class="note" id="offline" hidden>Страница открыта файлом — выбор не сохранится. Запустите сервер:
+      <span class="mono">python -X utf8 tools/asset_kit/finish/catalog_server.py</span> и откройте http://localhost:8765/</div>
+    <div class="bar">
+      <div class="seg" id="light"><button data-v="studio" class="on">Студия</button><button data-v="outdoor">Улица</button></div>
+      <input type="search" id="q" placeholder="Поиск: код, название, где применяется">
+      <button class="chip" id="favonly">★ Избранное</button>
+      <span id="steps"></span>
+      <button class="btn" id="newreq">Прислать образец</button>
+    </div>
+    <div class="bar" id="groups" style="padding-top:0"></div>
+  </div>
+</header>
+<main class="wrap" id="main"></main>
+
+<div class="lb" id="lb">
+  <div class="imgs"><img id="lb1" alt=""><img id="lb2" alt=""></div>
+  <div class="cap"><span id="lbcap"></span><span>← → — соседние, Esc — закрыть</span></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="dialog">
+    <b id="mtitle">Образец</b>
+    <div class="sub">Картинки (перетащить, вставить Ctrl+V или выбрать) и что нравится или что поправить.</div>
+    <div class="drop" id="drop">Перетащите картинки сюда или нажмите</div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+    <div class="thumbs" id="thumbs"></div>
+    <textarea id="comment" placeholder="Например: «блеск как здесь, но цвет темнее» или «нужна такая отделка»"></textarea>
+    <div class="actions"><button class="btn primary" id="send">Отправить</button><button class="btn" id="cancel">Отмена</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const S = { cat: null, spec: null, light: "studio", group: null, step: null, q: "", fav: false, online: location.protocol.startsWith("http"), list: [], lbi: 0, mcode: null, imgs: [] };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hex = (c) => "#" + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0")).join("");
+function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("on"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("on"), 2200); }
+
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const d = await r.json(); if (d.error) throw new Error(d.error); return d;
+}
+
+function finishSummary(f) {
+  const rows = [];
+  const b = f.base;
+  if (f.material) rows.push(["Основа", `материал Painter <span class="mono">${esc(f.material.res.split("/")[0])}</span>, плитка ${f.material.mm} мм`]);
+  rows.push(["Цвет (sRGB)", `<span class="sw" style="background:${hex(b.color)}"></span><span class="mono">${b.color.map((v) => v.toFixed(3)).join(" · ")}</span>`]);
+  rows.push(["Шероховатость", `<span class="mono">${b.rough.toFixed(2)}</span>`]);
+  rows.push(["Металличность", `<span class="mono">${b.metal.toFixed(2)}</span>`]);
+  if (f.grain) rows.push(["Зерно", `<span class="mono">${f.grain.mm} мм</span>: блеск ${f.grain.rough ?? 0}, цвет ${f.grain.color ?? 0}, рельеф ${f.grain.height ?? 0}`]);
+  const k = Object.assign({}, S.cat.kinds[f.kind] || {}, f);
+  if (k.edges) rows.push(["Кромки", `цвет +${k.edges.color ?? 0}, блеск ${k.edges.rough ?? 0}`]);
+  for (const l of f.layers || []) {
+    if (l.type === "ramp") rows.push(["Переход", l.stops.map((s) => `<span class="sw" style="background:${hex(s[1])}" title="${s[0]}"></span>`).join("") + ` вдоль оси ${l.axis}`]);
+    if (l.type === "blotch") rows.push(["Пятна", l.items.map((s) => `<span class="sw" style="background:${hex(s[0])}"></span>`).join("") + " крупными шумами"]);
+    if (l.type === "brushed") rows.push(["Шлифовка", `риски, блеск ${l.rough}, период ${l.mm} мм`]);
+    if (l.type === "stipple") rows.push(["Литьё", `точки ${l.dots_mm} мм, блеск ±${l.rough}, рельеф ${l.height}`]);
+    if (l.type === "flow") rows.push(["Течение", "мягкие разводы в блеске"]);
+  }
+  const r = f.render || {};
+  const extra = [];
+  if (r.coat) extra.push(`лак ${r.coat[0]} / шероховатость ${r.coat[1]}`);
+  if (r.transmission) extra.push(`прозрачность ${r.transmission}, IOR ${r.ior}`);
+  if (r.thin_film) extra.push(`плёнка ${r.thin_film[0]} нм`);
+  if (r.sheen) extra.push(`бархат ${r.sheen[0]}`);
+  if (extra.length) rows.push(["Сверх карт", extra.join("; ")]);
+  if (f.godot) rows.push(["В игре", esc(f.godot)]);
+  return rows;
+}
+
+function chosenSlots(code) { return (S.spec?.slots || []).filter((s) => s.finish === code).map((s) => s.title); }
+
+function card(f, i) {
+  const favs = S.spec?.favorites || [];
+  const rows = finishSummary(f);
+  const img = f.cards?.[S.light];
+  const slots = S.spec?.slots || [];
+  const chosen = chosenSlots(f.code);
+  return `<article class="card ${chosen.length ? "chosen" : ""}" data-i="${i}">
+    <div class="shot" data-lb="${i}">${img ? `<img loading="lazy" src="${encodeURI(img)}" alt="${esc(f.code)}">` : `<div class="miss">карточка ещё не снята</div>`}
+      <div class="flip"><span data-flip="studio" class="${S.light === "studio" ? "on" : ""}">студия</span><span data-flip="outdoor" class="${S.light === "outdoor" ? "on" : ""}">улица</span></div></div>
+    <div class="body">
+      <div class="head"><div><div class="code">${esc(f.code)}</div><div class="title">${esc(f.title)}</div></div>
+        <div style="display:flex;gap:6px;align-items:center"><span class="step">${esc(f.step)}</span>
+        <button class="star ${favs.includes(f.code) ? "on" : ""}" data-fav="${esc(f.code)}" title="В избранное" ${S.online ? "" : "disabled"}>★</button></div></div>
+      ${chosen.length ? `<div class="tags">${chosen.map((t) => `<span class="tag">выбрано: ${esc(t)}</span>`).join("")}</div>` : ""}
+      <div class="use">${esc(f.use || "")}</div>
+      <table>${rows.slice(0, 4).map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table>
+      <details><summary>все параметры</summary><table>${rows.slice(4).map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}
+        ${f.origin ? `<tr><td>Откуда</td><td>${esc(f.origin)}</td></tr>` : ""}</table></details>
+      <div class="actions">
+        ${slots.length ? `<select data-slotsel="${esc(f.code)}">${slots.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}${s.finish ? " — " + esc(s.finish) : ""}</option>`).join("")}</select>
+          <button class="btn primary" data-choose="${esc(f.code)}" ${S.online ? "" : "disabled"}>Выбрать</button>` : ""}
+        <button class="btn" data-req="${esc(f.code)}" ${S.online ? "" : "disabled"}>Образец / замечание</button>
+      </div>
+    </div></article>`;
+}
+
+function visible() {
+  const q = S.q.toLowerCase();
+  const favs = S.spec?.favorites || [];
+  return S.cat.finishes.filter((f) => (!S.group || f.group === S.group) && (!S.step || f.step === S.step) && (!S.fav || favs.includes(f.code))
+    && (!q || [f.code, f.title, f.use, f.origin].join(" ").toLowerCase().includes(q)));
+}
+
+function render() {
+  S.list = visible();
+  const byG = new Map();
+  S.list.forEach((f, i) => { if (!byG.has(f.group)) byG.set(f.group, []); byG.get(f.group).push([f, i]); });
+  $("main").innerHTML = S.cat.groups.filter((g) => byG.has(g.id)).map((g) => `<section><h2>${esc(g.title)}</h2><p class="gnote">${esc(g.note)}</p>
+    <div class="grid">${byG.get(g.id).map(([f, i]) => card(f, i)).join("")}</div></section>`).join("") || `<p class="sub">Ничего не найдено.</p>`;
+  renderSpec();
+}
+
+function renderSpec() {
+  const s = S.spec;
+  if (!s) { $("spec").innerHTML = ""; return; }
+  const slots = (s.slots || []).map((x) => `<span class="slot">${esc(x.title)}: <b>${esc(x.finish || "—")}</b></span>`).join("");
+  $("spec").innerHTML = `<span class="sub">${s.asset ? "Модель: <b>" + esc(s.asset) + "</b> · " : ""}файл выбора: <span class="mono">${esc(s._path || "")}</span></span>${slots}
+    <span class="sub">★ ${(s.favorites || []).length}</span>`;
+}
+
+function filters() {
+  $("groups").innerHTML = [`<button class="chip ${!S.group ? "on" : ""}" data-g="">Все</button>`].concat(
+    S.cat.groups.map((g) => `<button class="chip ${S.group === g.id ? "on" : ""}" data-g="${g.id}">${esc(g.title)}</button>`)).join("");
+  $("steps").innerHTML = [`<button class="chip ${!S.step ? "on" : ""}" data-s="">любой блеск</button>`].concat(
+    S.cat.steps.map((s) => `<button class="chip ${S.step === s ? "on" : ""}" data-s="${s}">${s}</button>`)).join(" ");
+}
+
+function openLb(i) {
+  S.lbi = (i + S.list.length) % S.list.length;
+  const f = S.list[S.lbi];
+  $("lb1").src = f.cards?.studio ? encodeURI(f.cards.studio) : ""; $("lb2").src = f.cards?.outdoor ? encodeURI(f.cards.outdoor) : "";
+  $("lbcap").innerHTML = `<b class="mono">${esc(f.code)}</b> — ${esc(f.title)} · ${esc(f.step)}`;
+  $("lb").classList.add("on");
+}
+
+function openReq(code) {
+  S.mcode = code; S.imgs = [];
+  $("mtitle").textContent = code ? `Образец или замечание к ${code}` : "Образец новой отделки";
+  $("thumbs").innerHTML = ""; $("comment").value = ""; $("modal").classList.add("on");
+}
+function addFiles(files) {
+  for (const file of files) {
+    if (!file.type.startsWith("image/")) continue;
+    const rd = new FileReader();
+    rd.onload = () => { S.imgs.push({ name: file.name || "вставка.png", data: rd.result }); $("thumbs").insertAdjacentHTML("beforeend", `<img src="${rd.result}">`); };
+    rd.readAsDataURL(file);
+  }
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.dataset.g !== undefined) { S.group = t.dataset.g || null; filters(); render(); return; }
+  if (t.dataset.s !== undefined) { S.step = t.dataset.s || null; filters(); render(); return; }
+  if (t.dataset.flip) { e.stopPropagation(); S.light = t.dataset.flip; document.querySelectorAll("#light button").forEach((b) => b.classList.toggle("on", b.dataset.v === S.light)); render(); return; }
+  if (t.closest("#light button")) { S.light = t.dataset.v; document.querySelectorAll("#light button").forEach((b) => b.classList.toggle("on", b === t)); render(); return; }
+  if (t.id === "favonly") { S.fav = !S.fav; t.classList.toggle("on", S.fav); render(); return; }
+  if (t.dataset.fav) { try { S.spec = Object.assign(await api("/api/favorite", { code: t.dataset.fav }), { _path: S.spec._path }); render(); } catch (err) { toast(err.message); } return; }
+  if (t.dataset.choose) {
+    const sel = document.querySelector(`select[data-slotsel="${CSS.escape(t.dataset.choose)}"]`);
+    try { const sp = await api("/api/choose", { slot: sel.value, code: t.dataset.choose }); S.spec = Object.assign(sp, { _path: S.spec._path });
+      toast(`${t.dataset.choose} → ${sel.options[sel.selectedIndex].text.split(" — ")[0]}: сохранено`); render(); } catch (err) { toast(err.message); }
+    return;
+  }
+  if (t.dataset.req !== undefined || t.id === "newreq") { if (!S.online) { toast("Нужен сервер каталога"); return; } openReq(t.dataset.req || null); return; }
+  const shot = t.closest("[data-lb]"); if (shot) { openLb(+shot.dataset.lb); return; }
+  if (t.closest("#lb")) { $("lb").classList.remove("on"); return; }
+  if (t.id === "drop") { $("file").click(); return; }
+  if (t.id === "cancel" || t.id === "modal") { $("modal").classList.remove("on"); return; }
+  if (t.id === "send") {
+    if (!S.imgs.length && !$("comment").value.trim()) { toast("Добавьте картинку или напишите, что нужно"); return; }
+    t.disabled = true;
+    try { const r = await api("/api/sample", { code: S.mcode, comment: $("comment").value, images: S.imgs });
+      S.spec = Object.assign(r.spec, { _path: S.spec._path }); $("modal").classList.remove("on");
+      toast(r.saved.length ? `Сохранено: ${r.saved.length} карт.` : "Замечание сохранено"); } catch (err) { toast(err.message); }
+    t.disabled = false;
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (!$("lb").classList.contains("on")) return;
+  if (e.key === "Escape") $("lb").classList.remove("on");
+  if (e.key === "ArrowRight") openLb(S.lbi + 1);
+  if (e.key === "ArrowLeft") openLb(S.lbi - 1);
+});
+$("q").addEventListener("input", (e) => { S.q = e.target.value; render(); });
+$("file").addEventListener("change", (e) => addFiles(e.target.files));
+const drop = $("drop");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); });
+document.addEventListener("paste", (e) => { if ($("modal").classList.contains("on")) addFiles([...e.clipboardData.items].filter((i) => i.kind === "file").map((i) => i.getAsFile())); });
+
+(async () => {
+  S.cat = await (await fetch("catalog.json")).json();
+  $("sub").textContent = `${S.cat.finishes.length} отделок · образец ${S.cat.sample.bbox_mm} мм, карты ${S.cat.sample.res} (${S.cat.sample.px_mm} пикс/мм — как оружие в руках в игре) · стек Painter sp_finish.py`;
+  if (S.online) { try { S.spec = await api("/api/spec"); } catch (e) { S.online = false; } }
+  $("offline").hidden = S.online;
+  filters(); render();
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,11 @@
-"""Проверить, упаковать и установить четыре общих скилла Codex/Claude Code."""
+"""Проверить, упаковать и установить общие скиллы Codex/Claude Code (текстурирование — два этапа: заводская отделка и износ)."""
 import argparse,ast,hashlib,importlib.util,json,os,re,shutil,sys,zipfile
 from datetime import datetime
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent
 SOURCE=ROOT/'tools/asset_skills'
 WORK=ROOT/'_asset_src/asset_skill_build'
-NAMES=('blender-asset-workflow','weapon-asset-texturing','blender-vegetation-workflow','godot-asset-preparation')
+NAMES=('blender-asset-workflow','weapon-asset-texturing','weapon-asset-wear','blender-vegetation-workflow','godot-asset-preparation')
 def sha(path):
     with path.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 def managed_files(folder,provider):
@@ -90,6 +90,14 @@ def install(codex_root,claude_root):
                 assert dst.resolve().is_relative_to(target.resolve()),dst
                 dst.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dst);assert sha(src)==sha(dst),dst
                 hashes.append({'path':rel.as_posix(),'sha256':sha(dst)})
+            # Файлы, которых больше нет в исходнике (переехавшие справки), убираются: прежняя версия уже в резервной копии.
+            keep={h['path'] for h in hashes}
+            for old in sorted(target.rglob('*'),reverse=True):
+                rel=old.relative_to(target).as_posix()
+                if old.is_file() and rel not in keep and '__pycache__' not in old.parts and not (provider=='claude' and rel.startswith('agents/')):
+                    old.unlink()
+                elif old.is_dir() and not any(old.iterdir()):
+                    old.rmdir()
             records.append({'provider':provider,'skill':name,'root':str(target),'files':hashes})
     report={'installed':records,'backup_root':str(backup),'package_source':str(SOURCE)}
     (WORK/'installation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
@@ -105,6 +113,10 @@ def verify_installed():
         codex=next(Path(r['root']) for r in report['installed'] if r['provider']=='codex' and r['skill']==name)
         claude=next(Path(r['root']) for r in report['installed'] if r['provider']=='claude' and r['skill']==name)
         for src,rel in managed_files(SOURCE/name,'claude'):assert sha(codex/rel)==sha(claude/rel)==sha(src),(name,rel)
+        # Набор файлов копии Codex совпадает с исходником: лишних (переехавших) нет.
+        want={rel.as_posix() for _,rel in managed_files(SOURCE/name,'codex')}
+        got={f.relative_to(codex).as_posix() for f,_ in ((f,0) for f in codex.rglob('*')) if f.is_file() and '__pycache__' not in f.parts and f.suffix!='.pyc'}
+        assert got==want,(name,sorted(got^want))
     print('INSTALLED_PARITY_PASS',len(report['installed']),'copies',flush=True)
 
 def main():
