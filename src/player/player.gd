@@ -287,10 +287,11 @@ func _ready() -> void:
 		_last_hit_from = from
 		_last_damage = amount
 		Audio.play("pain_player", global_position + Vector3.UP * 1.2)
-		if is_local() and _camera_rig is CameraRig:
-			# на адреналине попадание почти не сбивает
-			(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
-			(_camera_rig as CameraRig).hurt(amount)
+		if is_local():
+			_show_hurt(amount, from, global_position)
+		elif Net.is_networked() and multiplayer.is_server():
+			# Health считает хост; гостю нужно отдельное событие, а не только новое hp.
+			_rpc_hurt.rpc_id(peer_id, amount, from, global_position)
 		add_stress(float(Balance.STRESS.hit) + amount * float(Balance.STRESS.hit_per_dmg)))
 	health.downed_changed.connect(func(on: bool) -> void:
 		Audio.play("downed" if on else "revive", global_position + Vector3.UP)
@@ -538,6 +539,24 @@ func is_dragging() -> bool:
 ## Тащит напарника или несёт раненого NPC — руки заняты.
 func is_burdened() -> bool:
 	return carrying or is_dragging()
+
+
+## Только владелец пострадавшего видит указатель; урон и броню здесь не пересчитываем.
+func _show_hurt(amount: float, from: Vector3, origin: Vector3) -> void:
+	if not is_local():
+		return
+	_last_hit_from = from
+	_last_damage = amount
+	if _camera_rig is CameraRig:
+		# на адреналине попадание почти не сбивает
+		(_camera_rig as CameraRig).add_shake(Balance.HURT_SHAKE * (1.0 - float(Balance.STRESS.adr_shake) * stress_k()))
+		(_camera_rig as CameraRig).hurt(amount, from, origin)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_hurt(amount: float, from: Vector3, origin: Vector3) -> void:
+	if multiplayer.get_remote_sender_id() == 1:
+		_show_hurt(amount, from, origin)
 
 
 func is_local() -> bool:

@@ -195,12 +195,11 @@ func add_recoil(pitch: float, h: float) -> void:
 
 
 ## Толчок камеры (выстрел, попадание по тебе, взрыв); складывается и затухает сам.
-## Своё попадание: виньетка по краям и резкий толчок взгляда (кивок и крен в случайную сторону),
-## без направления — откуда стреляли, слышно.
-func hurt(amount: float) -> void:
+## Своё попадание: виньетка, дуга со стороны источника и резкий толчок взгляда.
+func hurt(amount: float, from: Vector3 = Vector3.INF, origin: Vector3 = Vector3.INF) -> void:
 	var f: Dictionary = Balance.HURT_FX
 	if _hurt:
-		_hurt.hit(amount)
+		_hurt.hit(amount, from, origin)
 	var deg := minf(float(f.punch_deg) + amount * float(f.per_dmg_deg), float(f.punch_max_deg))
 	_punch = Vector2(deg_to_rad(deg) * _rng.randf_range(0.6, 1.0), deg_to_rad(deg) * _rng.randf_range(-1.0, 1.0))
 	_punch_t = 1.0
@@ -583,6 +582,8 @@ func _process(delta: float) -> void:
 		_nvg_copy.visible = on
 		_tick_nvg_ir(on)
 	var cam := get_viewport().get_camera_3d()
+	if cam and _hurt:
+		_hurt.camera_basis = cam.global_basis
 	if _glare:
 		_glare.tick(cam, pl if pl and pl.is_local() else null, ads_active, pl != null and pl.is_local() and pl.nvg_on, delta)
 	if cam:

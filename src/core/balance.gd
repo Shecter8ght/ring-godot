@@ -851,9 +851,16 @@ const AUDIO_FAR := {"sound_mps": 343.0, "delay_from_m": 25.0}
 const AUDIO_BURST := {"radius_m": 1.5, "window_sec": 0.6, "voices": 6, "fade_sec": 0.08}
 ## Попадание по себе (HurtFx и толчок взгляда в CameraRig): виньетка — не меньше min, + per_dmg за
 ## единицу урона, до max; гаснет за fade_sec, с. Взгляд дёргается на punch_deg (+ per_dmg_deg за
-## урон, до punch_max_deg), возвращается за punch_sec, с. Направления нет — только звук.
+## урон, до punch_max_deg), возвращается за punch_sec, с.
 const HURT_FX := {"min": 0.35, "per_dmg": 0.02, "max": 1.0, "fade_sec": 0.7,
 	"punch_deg": 1.6, "per_dmg_deg": 0.06, "punch_max_deg": 4.5, "punch_sec": 0.22}
+## Направление входящего попадания: дуга вокруг центра, сверху — спереди, снизу — сзади.
+## Размеры — доли короткой стороны экрана; очередь с одной стороны обновляет ту же дугу,
+## разные стороны остаются до hold_sec + fade_sec, с. Направление запоминается в момент удара.
+const HURT_DIRECTION := {"hold_sec": 0.25, "fade_sec": 1.1, "max_hits": 6, "merge_deg": 25.0,
+	"radius": 0.15, "arc_deg": 50.0, "width": 0.008, "outline": 0.004, "highlight": 0.002,
+	"min_alpha": 0.65, "per_dmg_alpha": 0.015, "segments": 32,
+	"color": Color(0.95, 0.12, 0.07), "highlight_color": Color(1.0, 0.65, 0.5), "outline_color": Color(0.08, 0.01, 0.005)}
 const SHAKE_DECAY := 9.0
 ## Отдача: подброс ствола (корпуса) вверх, рад, и возврат, 1/с.
 const RECOIL_KICK := 0.12
