@@ -1,8 +1,10 @@
 # AR-15 «ГРАНЬ-15», текстуры этапа 1 (заводское покрытие без износа) в Substance Painter — выполняется внутри Painter
 # через мост (tools/ar15/sp_run.py). Порядок слоёв — рецепт «металл слоями» навыка weapon-asset-texturing
-# (references/metal-layers.md): основа в вариантах → надписи → кромки и AO → вариации тона → градиенты → сканы →
-# вариации блеска → шумы → заводская фактура (фрезеровка, токарка, литьё) → резкость. Износа на этапе 1 нет: ни
-# отпечатков, ни пыли, ни царапин, ни вытертых кромок (задание владельца 2026-10-29).
+# (references/metal-layers.md): основа в вариантах → надписи → кромки и AO → крупные градиенты → шумы → заводская
+# фактура (шершавое зерно покрытия и стали, литьё) → резкость. Износа на этапе 1 нет: ни отпечатков, ни пыли, ни
+# царапин, ни вытертых кромок (задание владельца 2026-10-29). Пятна тона и блеска, сканы металла, протяжки и токарные
+# риски убраны 30.10: владелец увидел в них отпечатки пальцев на корпусе и рукоятке заряжания и «слоистость» на
+# болтиках — винтовка должна быть новой, с завода.
 import os
 
 import substance_painter.baking as B
@@ -182,11 +184,13 @@ MARKS_KIND = {"lower": "laser", "upper": "laser", "handguard": "laser", "suppres
               "magazine": "mold"}
 METALS = ("anod", "nitride", "phos", "bare", "spring", "baffle", "brass", "jacket")
 AO_PARAMS = {"ao_invert": 1}         # маска — углубления (белое там, где AO тёмное)
-FLAKE_POS = 0.07                     # histogram_scan: чем меньше Position, тем меньше белого (0.88 — 91 %, 0.07 — 26 % металла)
+FLAKE_POS = 0.06                     # histogram_scan: чем меньше Position, тем меньше белого (0.88 — 91 %, 0.07 — 26 % металла)
 CURV_PARAMS = {"global_balance": 0.6, "global_contrast": 0.3}   # уже, только сами кромки
-SCANS = T.WORK + "/scans"
-LATHE_KEYS = ("Barrel", "pin", "screw", "nut", "Buffer", "Gas_tube", "Bolt", "Muzzle", "tube", "Suppressor_body",
-              "baffle", "axis", "Firing", "Cam_", "QD", "Selector")
+# шершавость: (блеск Overlay, рельеф Overlay) зерна в два текселя по классу отделки; прежнее зерно покрытия
+# (0.14 / 0.003) на модели не читалось — «слишком гладкий» металл (владелец 30.10)
+GRAIN = {"anod": (0.60, 0.090), "phos": (0.55, 0.070), "nitride": (0.30, 0.025), "spring": (0.25, 0.020),
+         "bare": (0.20, 0.012), "baffle": (0.30, 0.030)}
+PEEL_H = 0.080                       # «апельсиновая корка» покрытия — пятна в ~6 текселей
 CYL = ("Barrel", "Buffer_tube", "Suppressor_body", "Gas_tube", "Barrel_nut", "Castle_nut", "Muzzle_brake",
        "Muzzle_lock_collar", "Bolt_carrier", "Buffer")
 
@@ -319,10 +323,6 @@ def build(set_name, verbose=False):
 
     hard = of("anod", "nitride", "phos", "bare", "spring", "cerakote", "baffle", "poly", "follower", "brass", "jacket")
     metal = of(*METALS)
-    # сталь: сканы металла и тёплые/холодные оттенки — ей; у анодирования (и песочного Cerakote) цвет почти ровный,
-    # главный канал — блеск (справка навыка, «Твёрдое анодирование»); на песке сканы давали пятна цвета без пары
-    steel = of("nitride", "phos", "bare", "spring", "baffle")
-    soft = of("poly", "follower", "rubber", "cerakote")
 
     # 3. объём: кромки светлее и глаже, углубления темнее и матовее (без вытертого до металла)
     # слабее: плоские верхушки зубьев планки целиком «кромка» и серебрились (снимки 29.10)
@@ -336,76 +336,25 @@ def build(set_name, verbose=False):
     sp_lib.mask_generator(a, "mg_ambient_occlusion/mg_ambient_occlusion", AO_PARAMS)
     n = a
 
-    # 4. вариации тона с противовесом (светлее ↔ темнее) и крупные градиенты
-    t1 = rel("Тон — светлее пятнами", L.InsertPosition.above_node(n), color=(0.78, 0.78, 0.78), cop=0.12,
-             rough=-0.18, rop=1.0, meshes=hard)
-    proc_mask(t1, "noise_clouds_2/clouds_2", 2.0)
-    t2 = rel("Тон — темнее пятнами", L.InsertPosition.above_node(t1), color=(0.22, 0.22, 0.22), cop=0.12,
-             rough=0.18, meshes=hard)
-    proc_mask(t2, "noise_clouds_3/clouds_3", 2.6, rot=0.3)
-    t3 = rel("Тон — холоднее", L.InsertPosition.above_node(t2), color=(0.42, 0.46, 0.55), cop=0.06, rough=-0.10,
-             meshes=steel)
-    proc_mask(t3, "noise_clouds_1/clouds_1", 1.2)
-    t4 = rel("Тон — теплее", L.InsertPosition.above_node(t3), color=(0.56, 0.50, 0.44), cop=0.05, rough=0.10,
-             meshes=steel)
-    proc_mask(t4, "noise_clouds_1/clouds_1", 1.0, rot=0.5)
-    g1 = rel("Градиенты — крупные светлые", L.InsertPosition.above_node(t4), color=(0.75, 0.75, 0.75), cop=0.12,
-             rough=-0.15, meshes=hard)
+    # 4. только крупные мягкие градиенты: пятна тона и блеска мельче детали читались отпечатками пальцев (владелец 30.10)
+    g1 = rel("Градиенты — крупные светлые", L.InsertPosition.above_node(n), color=(0.75, 0.75, 0.75), cop=0.06,
+             rough=-0.04, meshes=hard)
     proc_mask(g1, "noise_clouds_1/clouds_1", 0.4)
-    g2 = rel("Градиенты — крупные тёмные", L.InsertPosition.above_node(g1), color=(0.25, 0.25, 0.25), cop=0.12,
-             rough=0.15, meshes=hard)
+    g2 = rel("Градиенты — крупные тёмные", L.InsertPosition.above_node(g1), color=(0.25, 0.25, 0.25), cop=0.06,
+             rough=0.04, meshes=hard)
     proc_mask(g2, "noise_clouds_1/clouds_1", 0.35, rot=1.0)
     n = g2
     cyl = [m for m in cls if objs[m] in CYL]
     if cyl:
-        # на цилиндре блик собирается в полосу и съедает мелкие пятна — один большой мягкий градиент 40–50 %
+        # на цилиндре блик собирается в полосу и съедает мелкие пятна — один большой мягкий градиент
         # (мировой линейный градиент не годится: детали в FBX разложены врозь)
-        c = rel("Градиент цилиндров — крупный", L.InsertPosition.above_node(n), color=(0.72, 0.72, 0.72), cop=0.45,
-                rough=-0.04, meshes=cyl)
+        c = rel("Градиент цилиндров — крупный", L.InsertPosition.above_node(n), color=(0.72, 0.72, 0.72), cop=0.22,
+                rough=-0.03, meshes=cyl)
         proc_mask(c, "noise_clouds_1/clouds_1", 0.18, rot=0.2)
-        c2 = rel("Градиент цилиндров — тёмный", L.InsertPosition.above_node(c), color=(0.28, 0.28, 0.28), cop=0.40,
-                 rough=0.04, meshes=cyl)
+        c2 = rel("Градиент цилиндров — тёмный", L.InsertPosition.above_node(c), color=(0.28, 0.28, 0.28), cop=0.20,
+                 rough=0.03, meshes=cyl)
         proc_mask(c2, "noise_clouds_1/clouds_1", 0.22, rot=2.1)
         n = c2
-
-    # 5. фотосканы металла (ambientCG, CC0) поверх цвета: тёплые и холодные вариации настоящей стали
-    if steel:
-        sc1 = S._bitmap(f"{SCANS}/Metal046A/Metal046A_2K-JPG_Color.jpg")
-        s1 = L.insert_fill(L.InsertPosition.above_node(n))
-        s1.set_name("Скан металла — Metal046A (Overlay)")
-        # скан и в шероховатости: у пятна цвета — пара в блеске (самопроверка, песочный вариант: пар было 14 %)
-        s1.active_channels = {CH.BaseColor, CH.SpecularRoughness}
-        s1.set_source(CH.BaseColor, sc1)
-        s1.set_source(CH.SpecularRoughness, sc1)
-        triplanar(s1, 0.6)
-        s1.set_blending_mode(L.BlendingMode.Overlay, CH.BaseColor)
-        s1.set_opacity(0.12, CH.BaseColor)
-        s1.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
-        s1.set_opacity(0.35, CH.SpecularRoughness)
-        only_meshes(s1, steel)
-        sc2 = S._bitmap(f"{SCANS}/Metal052A/Metal052A_2K-JPG_Color.jpg")
-        s2 = L.insert_fill(L.InsertPosition.above_node(s1))
-        s2.set_name("Скан металла — Metal052A (Soft Light)")
-        s2.active_channels = {CH.BaseColor, CH.SpecularRoughness}
-        s2.set_source(CH.BaseColor, sc2)
-        s2.set_source(CH.SpecularRoughness, sc2)
-        triplanar(s2, 0.9, rot=0.7)
-        s2.set_blending_mode(L.BlendingMode.SoftLight, CH.BaseColor)
-        s2.set_opacity(0.10, CH.BaseColor)
-        s2.set_blending_mode(L.BlendingMode.Overlay, CH.SpecularRoughness)
-        s2.set_opacity(0.30, CH.SpecularRoughness)
-        only_meshes(s2, steel)
-        n = s2
-
-    # 6. вариации блеска (только шероховатость, больше, чем в цвете)
-    r1 = rel("Блеск — пятна глаже", L.InsertPosition.above_node(n), rough=-0.08, meshes=hard)
-    proc_mask(r1, "grunge_spots/grunge_spots", 3.0)
-    r2 = rel("Блеск — пятна матовее", L.InsertPosition.above_node(r1), rough=0.07, meshes=hard)
-    proc_mask(r2, "noise_bnw_spots_1/bnw_spots_1", 4.0)
-    # протяжки — только у стали: на покрытии они читались «слоями» (владелец 29.10)
-    r3 = rel("Блеск — протяжки вдоль детали", L.InsertPosition.above_node(r2), rough=-0.035, meshes=steel)
-    proc_mask(r3, "grunge_wipe_brushed/grunge_wipe_brushed", 1.6)
-    n = r3
 
     # 7. шумы — много и разных, светлые и тёмные; хлопья — в блеск
     w1 = rel("Шум белый — светлее", L.InsertPosition.above_node(n), color=(1.0, 1.0, 1.0), cop=0.05,
@@ -417,47 +366,46 @@ def build(set_name, verbose=False):
     fl = rel("Хлопья — блеск", L.InsertPosition.above_node(w2), rough="noise_gaussian_noise/gaussian_noise",
              rmode=L.BlendingMode.Overlay, rop=0.25, meshes=metal + of("cerakote"))
     sp_lib.uvscale(fl, 0.5)
-    d1 = rel("Точки светлые", L.InsertPosition.above_node(fl), color=(0.85, 0.85, 0.85), cop=0.10, rough=-0.05,
-             meshes=hard)
-    proc_mask(d1, "noise_bnw_spots_3/bnw_spots_3", 9.0)
-    d2 = rel("Точки тёмные", L.InsertPosition.above_node(d1), color=(0.1, 0.1, 0.1), cmode=L.BlendingMode.Multiply,
-             cop=0.12, rough=0.05, meshes=hard)
-    proc_mask(d2, "noise_bnw_spots_2/bnw_spots_2", 8.0, rot=0.8)
-    n = d2
+    n = fl
 
     # 8. заводская фактура
     an = of("anod")
     if an:
-        # керамическое покрытие из печи (владелец 29.10: «металл идёт какими-то слоями… думал, керамическая краска,
-        # запечённая в печке»): без рисок фрезы и протяжек, ровное сатиновое, очень мелкое зерно
-        m2 = rel("Керамическое покрытие — мелкое зерно", L.InsertPosition.above_node(n),
-                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.14,
-                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=0.003, meshes=an)
+        # керамическое покрытие из печи — шершавое (владелец 30.10: «не сложилось ощущение, что там есть шершавый
+        # металл… слишком гладкий»; образец — ролик Black Gun Texturing, чёрное тактическое цевьё): зерно порошкового
+        # покрытия в рельефе и блеске — мелкое в два текселя и «апельсиновая корка» крупнее, без рисок и протяжек
+        m2 = rel("Покрытие — шершавое зерно", L.InsertPosition.above_node(n),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=GRAIN["anod"][0],
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=GRAIN["anod"][1],
+                 meshes=an)
         sp_lib.uvscale(m2, 0.5)      # зерно в 2 текселя: трёхпроекционно при 600 усреднялось в ничто
-        # металлическое зерно в покрытии (снимки владельца 29.10: керамическое покрытие с металлическими искрами в
-        # бликах): редкие точки-хлопья — металл, глаже и светлее; в среднем сатиновый блеск с искрой
-        fk = rel("Покрытие — металлические хлопья", L.InsertPosition.above_node(m2), color=(0.80, 0.80, 0.80),
-                 cop=0.45, rough=-0.10, meshes=an)
+        m3 = rel("Покрытие — апельсиновая корка", L.InsertPosition.above_node(m2),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=0.12,
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=PEEL_H, meshes=an)
+        sp_lib.uvscale(m3, 0.16, rot=0.6)
+        # металлическое зерно в покрытии (снимки владельца 29.10): редкие слабые искры — тёмными крапинами в
+        # тени они читаться не должны
+        fk = rel("Покрытие — металлические искры", L.InsertPosition.above_node(m3), color=(0.70, 0.70, 0.70),
+                 cop=0.40, rough=-0.08, meshes=an)
         fk.active_channels = fk.active_channels | {CH.BaseMetalness}
-        fk.set_source(CH.BaseMetalness, sp_lib._val(0.85, data=True))
+        fk.set_source(CH.BaseMetalness, sp_lib._val(0.75, data=True))
         fk.set_blending_mode(L.BlendingMode.Normal, CH.BaseMetalness)
         # шум по развёртке, точка = тексель: в трёхпроекционной при масштабе 900 шум усреднялся в ровное серое, и после
         # порога маска выходила сплошной — всё покрытие становилось зеркальным металлом
         mf = proc_mask(fk, "white_noise_fast/white_noise_fast", 1.0, tri=False)
         S._mfilter(mf, "histogram_scan", {"Position": FLAKE_POS, "Contrast": 0.95})
         n = fk
-    # тела вращения: ствол, оси, винты, гайки, трубки (на листовой крышке окна и плоских рычагах риски не к месту)
-    lathe = [m for m in cls if cls[m] in ("nitride", "phos", "bare", "baffle")
-             and any(k in objs[m] for k in LATHE_KEYS)]
-    if lathe:
-        lt = rel("Токарная обработка — тонкие риски", L.InsertPosition.above_node(n),
-                 rough="noise_anisotropic_noise/anisotropic_noise", rmode=L.BlendingMode.Overlay, rop=0.10,
-                 height="noise_anisotropic_noise/anisotropic_noise", hmode=L.BlendingMode.Overlay, hop=0.004,
-                 meshes=lathe)
-        triplanar(lt, 4.0, rot=1.5708)
-        for ch_ in ("rough", "height"):
-            sp_lib.proc_params(lt, ch_, {"Y_Amount": 1024, "X_Amount": 8})
-        n = lt
+    # сталь: фосфат — дробеструйное матовое зерно, нитрид и пружины — мельче и слабее; токарных рисок нет — на
+    # болтиках и осях они читались слоями (владелец 30.10)
+    for k in ("phos", "nitride", "spring", "bare", "baffle"):
+        ms = of(k)
+        if not ms:
+            continue
+        sg = rel(f"Сталь ({k}) — шершавое зерно", L.InsertPosition.above_node(n),
+                 rough="noise_gaussian_noise/gaussian_noise", rmode=L.BlendingMode.Overlay, rop=GRAIN[k][0],
+                 height="noise_gaussian_noise/gaussian_noise", hmode=L.BlendingMode.Overlay, hop=GRAIN[k][1], meshes=ms)
+        sp_lib.uvscale(sg, 0.5)
+        n = sg
     pl = of("poly", "follower", "rubber")
     poly = of("poly", "follower")
     grip = [m for m in poly if objs[m] in SAND_ALWAYS]

@@ -377,6 +377,10 @@ python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.pn
 #   маски в развёртку), sp_export.py -- <AR15_sp.fbx> → Painter: python -X utf8 tools/ar15/sp_run.py start; -c "sp_ar15.create|bake([набор])|save|build|export_variant(...)"
 #   (запекать по одному набору и сохранять после каждого — общий прогон пропадает при сбое)
 #   (стек tools/ar15/sp_ar15.py, варианты основы А/Б/В) → tex_apply.py -- apply <A|B|C> <карты> <out.blend> <нормали> (студия в файле) | shots <папка> [samples]
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" -b <файл.blend> --python tools/ar15/sharp_edges.py -- [--angle 35] [--json <отчёт.json>] [--show <out.blend>]
+                                                              # AR-15: острые рёбра (угол граней больше 35° или скругление меньше R 0,35 мм) — число и длина
+                                                              # по деталям, горячие места клетками 6 мм в JSON; --show — копия файла с коллекцией «Острые рёбра»
+                                                              # (выпуклые красным, вогнутые синим)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
