@@ -16,7 +16,7 @@ from substance_painter.textureset import MeshMapUsage as U
 import tex_sets as T
 
 JOBS = os.environ.get("SP_BRIDGE_DIR", "")
-PROJECT = T.WORK + "/sp/AR15_tex_stage1_v2.spp"     # v2 — геометрия v07 (скругления); v1 — AR15_tex_stage1.spp
+PROJECT = T.WORK + "/sp/AR15_tex_stage1_v3.spp"     # v3 — геометрия v08 (изгиб магазина); v2 — v07, v1 — v06
 
 
 def mark(name, text):
