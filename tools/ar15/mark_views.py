@@ -18,24 +18,26 @@ import tex_sets  # noqa: E402
 
 W, H = 1920, 1200
 LENS = 50.0
-# вид: (подпись, центр м, направление на камеру, расстояние м)
+# вид: (подпись, центр м, направление на камеру, расстояние м[, скрыть — начала имён деталей]); глушитель в сцене
+# лежит отдельно под винтовкой — в видах снизу он загораживал цевьё
 VIEWS = {
     "01_left": ("Слева целиком", (-0.02, 0.0, -0.06), (0.0, 1.0, 0.05), 1.12),
     "02_right": ("Справа целиком", (-0.02, 0.0, -0.06), (0.0, -1.0, 0.05), 1.12),
     "03_top": ("Сверху целиком", (-0.02, 0.0, 0.0), (0.0, 0.15, 1.0), 1.12),
-    "04_bottom": ("Снизу целиком", (-0.02, 0.0, -0.06), (0.0, 0.15, -1.0), 1.12),
+    "04_bottom": ("Снизу целиком", (-0.02, 0.0, -0.06), (0.0, 0.15, -1.0), 1.12, ("Suppressor_",)),
     "05_receivers_l": ("Ресиверы слева", (-0.08, 0.0, -0.02), (0.03, 1.0, 0.1), 0.42),
     "06_receivers_r": ("Ресиверы справа", (-0.08, 0.0, -0.02), (0.03, -1.0, 0.1), 0.42),
     "07_port": ("Окно выброса", (-0.03, -0.02, 0.01), (0.15, -1.0, 0.45), 0.22),
     "08_handguard_l": ("Цевьё слева", (0.15, 0.0, 0.0), (0.0, 1.0, 0.1), 0.42),
     "09_handguard_r": ("Цевьё справа", (0.15, 0.0, 0.0), (0.0, -1.0, 0.1), 0.42),
-    "10_handguard_b": ("Цевьё снизу", (0.15, 0.0, -0.02), (0.05, 0.25, -1.0), 0.42),
+    "10_handguard_b": ("Цевьё снизу", (0.15, 0.0, -0.02), (0.05, 0.25, -1.0), 0.42, ("Suppressor_",)),
     "11_stock_l": ("Приклад слева", (-0.29, 0.0, -0.03), (0.0, 1.0, 0.05), 0.38),
     "12_stock_r": ("Приклад справа", (-0.29, 0.0, -0.03), (0.0, -1.0, 0.05), 0.38),
     "13_grip_mag_l": ("Рукоять и магазин слева", (-0.08, 0.0, -0.11), (0.05, 1.0, -0.05), 0.42),
     "14_grip_mag_r": ("Рукоять и магазин справа", (-0.08, 0.0, -0.11), (0.05, -1.0, -0.05), 0.42),
     "15_muzzle": ("Ствол и дульник", (0.31, 0.0, 0.0), (0.25, 1.0, 0.3), 0.22),
     "16_sights": ("Прицелы и верх", (0.05, 0.0, 0.05), (-0.3, 0.6, 1.0), 0.5),
+    "17_suppressor": ("Глушитель", (0.265, 0.0, -0.112), (0.2, 1.0, 0.4), 0.3),
 }
 
 
@@ -103,7 +105,11 @@ def main():
     meta["size"] = [W, H]
     look = (S.view_settings.view_transform, S.view_settings.look, S.view_settings.exposure, S.view_settings.gamma)
     for name in names:
-        title, c, d, dist = VIEWS[name]
+        title, c, d, dist = VIEWS[name][:4]
+        hide = VIEWS[name][4] if len(VIEWS[name]) > 4 else ()
+        hidden = [o for o in meshes if o.name.startswith(hide)] if hide else []
+        for o in hidden:
+            o.hide_render = True
         c = Vector(c)
         cam.location = c + Vector(d).normalized() * dist
         cam.rotation_euler = (c - cam.location).to_track_quat("-Z", "Y").to_euler()
@@ -145,6 +151,8 @@ def main():
         np.savez_compressed(os.path.join(out, "views", f"{name}_pts.npz"), pos=pos, set=sid)
         mmpp = dist * 1000.0 * (36.0 / LENS) / W
         meta["views"][name] = {"title": title, "cam": [v * 1000.0 for v in cam.location], "mm_per_px": mmpp}
+        for o in hidden:
+            o.hide_render = False
         print("VIEW", name, title, "пикселей детали:", int((sid > 0).sum()), "мм/пикс %.3f" % mmpp)
     S.view_settings.view_transform, S.view_settings.look, S.view_settings.exposure, S.view_settings.gamma = look
     json.dump(meta, open(meta_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
