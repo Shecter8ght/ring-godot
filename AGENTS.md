@@ -211,6 +211,10 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_rubble.py -- <файл.blend>
                                                               # обломки стен: глыбы кладки со штукатуркой, кирпичи, обломок плиты ПК, штукатурка, крошка → RING_Dorm_Rubble
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
+                                                              # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
+                                                              # projects|stack (тот же Painter, что у оставленного света); просмотр со студией —
+                                                              # blender --background <…_uv_v01.blend> --python tools/dorm_modules/finish_review.py -- <карты> <выход.blend> clutter_uv|found_lights_uv
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
                                                               # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
                                                               # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)

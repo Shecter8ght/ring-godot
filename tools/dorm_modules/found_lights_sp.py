@@ -27,6 +27,7 @@ RES = 2048
 # предмет: наибольший размер, мм (для трёхпроекционных узоров), плотность развёртки, пикс/мм (по площади упаковки)
 ITEMS = {"found_flashlight": 155, "found_headlamp": 193, "found_chemlight": 162, "found_lantern": 194,
          "found_candles": 317, "found_beacon": 262}
+PX = {}  # плотность развёртки, пикс/мм, если замерена (clutter_sp.py); иначе — оценка по габариту
 
 
 def projects(names: list[str]) -> None:
@@ -68,7 +69,7 @@ def stack(names: list[str]) -> None:
             groups.setdefault(json.dumps(f, ensure_ascii=False, sort_keys=True), []).append(mesh)
         parts = [{"finish": json.loads(k) if k.startswith("{") else json.loads(k), "meshes": v} for k, v in groups.items()]
         print(name, "детали без отделки (светятся в игре или не выбраны):", skipped)
-        px_mm = RES / ITEMS[name] * 0.55
+        px_mm = PX.get(name, RES / ITEMS[name] * 0.55)
         code = (f"import json\nparts = json.loads(r'''{json.dumps(parts, ensure_ascii=False)}''')\n"
                 f"name = TS.all_texture_sets()[0].name() if False else None\n"
                 "import substance_painter.textureset as TS\n"
