@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Разметка износа</title>
+<style>
+  :root {
+    --bg: #15171a; --panel: #1e2125; --panel2: #262a2f; --line: #343941; --text: #e6e8eb; --muted: #9aa1aa;
+    --accent: #e0b25c; --danger: #e5534b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.4 "Segoe UI", system-ui, sans-serif; }
+  body { display: grid; grid-template-columns: 300px 1fr; height: 100vh; overflow: hidden; }
+  aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 14px 6px; }
+  #views { overflow-y: auto; padding: 0 10px 8px; flex: 0 0 auto; max-height: 46vh; }
+  .view { display: flex; gap: 8px; align-items: center; padding: 6px; border-radius: 6px; cursor: pointer; }
+  .view:hover { background: var(--panel2); }
+  .view.on { background: var(--panel2); outline: 1px solid var(--accent); }
+  .view img { width: 72px; height: 45px; object-fit: cover; border-radius: 4px; background: #000; }
+  .view .t { flex: 1; }
+  .badge { font-size: 11px; background: var(--accent); color: #111; border-radius: 9px; padding: 0 6px; }
+  #marks { overflow-y: auto; padding: 0 10px 10px; flex: 1 1 auto; min-height: 0; }
+  .mark { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; padding: 6px;
+    border-radius: 6px; background: var(--panel2); margin-bottom: 6px; }
+  .mark .sw { width: 14px; height: 14px; border-radius: 3px; }
+  .mark .n { font-size: 12px; color: var(--muted); }
+  .mark button { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 16px; }
+  .mark button:hover { color: var(--danger); }
+  .hint { color: var(--muted); font-size: 12px; padding: 8px 14px 14px; border-top: 1px solid var(--line); }
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 8px 12px;
+    background: var(--panel); border-bottom: 1px solid var(--line); }
+  .bar label { display: flex; gap: 6px; align-items: center; color: var(--muted); }
+  .btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 12px; cursor: pointer; font: inherit; }
+  .btn.on { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
+  #status { color: var(--muted); }
+  #viewport { position: relative; flex: 1; overflow: hidden; background: #0b0c0e; cursor: none; }
+  #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #stage img, #stage canvas { position: absolute; left: 0; top: 0; image-rendering: auto; }
+  #overlay { opacity: .5; }
+  #live { opacity: .55; }
+  #cursor { position: absolute; border: 1.5px solid #fff; border-radius: 50%; pointer-events: none;
+    box-shadow: 0 0 0 1px #000; transform: translate(-50%, -50%); }
+  #popup { position: absolute; display: none; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px; width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 5; cursor: default; }
+  #popup select, #popup input[type=text] { width: 100%; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 5px; padding: 5px; font: inherit; margin: 4px 0 8px; }
+  #popup .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  #typedesc { color: var(--muted); font-size: 12px; min-height: 2.8em; }
+</style>
+</head>
+<body>
+<aside>
+  <h2>Виды</h2>
+  <div id="views"></div>
+  <h2>Метки этого вида</h2>
+  <div id="marks"></div>
+  <div class="hint">
+    Кисть — левая кнопка; после мазка выберите тип. Колесо — приближение, правая кнопка или пробел — сдвиг,
+    F — весь кадр, [ и ] — размер кисти, E — ластик, Ctrl+Z — отменить. Не забудьте «Сохранить».
+  </div>
+</aside>
+<main>
+  <div class="bar">
+    <button class="btn on" id="bBrush">Кисть</button>
+    <button class="btn" id="bErase">Ластик</button>
+    <label>Размер <input type="range" id="size" min="2" max="160" value="24"> <span id="sizeV">24</span> пикс</label>
+    <label><input type="checkbox" id="showMarks" checked> показывать метки</label>
+    <span style="flex:1"></span>
+    <span id="status">загрузка…</span>
+    <button class="btn primary" id="bSave">Сохранить</button>
+  </div>
+  <div id="viewport">
+    <div id="stage"><img id="img" alt=""><canvas id="overlay"></canvas><canvas id="live"></canvas></div>
+    <div id="cursor"></div>
+    <div id="popup">
+      <div>Тип повреждения</div>
+      <select id="pType"></select>
+      <div id="typedesc"></div>
+      <label>Сила <input type="range" id="pStr" min="10" max="100" value="70"> <span id="pStrV">70</span>%</label>
+      <input type="text" id="pNote" placeholder="заметка (необязательно)">
+      <div class="row">
+        <button class="btn primary" id="pNew">Новая метка</button>
+        <button class="btn" id="pAdd">К прошлой метке</button>
+        <button class="btn" id="pCancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+// Типы повреждений. Вид в Painter подбирается по материалу под меткой (песочный Cerakote, анодирование, сталь, полимер).
+const TYPES = [
+  ["polish", "Заглажено (блеск)", "#4fc3f7", "Место трения рукой или одеждой: глаже и чуть темнее, покрытие цело."],
+  ["wear_through", "Протёрто до основания", "#ff7043", "Песок — тёмное анодирование; чёрное анодирование — серый алюминий; сталь — блестящая сталь; полимер — светлая потёртость."],
+  ["bare", "До блестящего металла", "#f5f5f5", "Яркий голый металл с хорошим отражением (кромки, гребни, места удара)."],
+  ["scratches", "Царапины", "#ffd54f", "Тонкие риски в пределах метки; цвет — как у протёртого по материалу."],
+  ["chips", "Сколы, тычки", "#e53935", "Мелкие отдельные сколы и вмятинки в пределах метки."],
+  ["dirt", "Грязь", "#8d6e63", "Тёмный налёт, рваный по краям; матовее."],
+  ["dust", "Пыль", "#bdbdbd", "Светлая городская пыль частицами; матовее."],
+  ["oil", "Масло", "#7e57c2", "Масляная плёнка: темнее и с блеском."],
+  ["prints", "Отпечатки", "#26a69a", "Отпечатки пальцев и ладони — в блеске."],
+  ["lint", "Ворсинки", "#f06292", "Несколько тонких нитей ткани в пределах метки."],
+];
+const TYPE = Object.fromEntries(TYPES.map(t => [t[0], {label: t[1], color: t[2], desc: t[3]}]));
+
+let W = 1920, H = 1200, views = {}, order = [], cur = null;
+let marks = [];               // {id, view, type, strength, note, canvas, dirty}
+let mode = "brush", size = 24, zoom = 1, panX = 0, panY = 0;
+let drawing = false, panning = false, spaceDown = false, last = null, lastMark = null, undo = [];
+let unsaved = false;
+
+const $ = id => document.getElementById(id);
+const img = $("img"), overlay = $("overlay"), live = $("live"), stage = $("stage"), vp = $("viewport");
+const octx = overlay.getContext("2d"), lctx = live.getContext("2d");
+
+function status(t) { $("status").textContent = t; }
+function setUnsaved(v) { unsaved = v; status(v ? "есть несохранённые изменения" : "сохранено"); }
+
+function applyTransform() { stage.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`; }
+function fit() {
+  const r = vp.getBoundingClientRect();
+  zoom = Math.min(r.width / W, r.height / H);
+  panX = (r.width - W * zoom) / 2; panY = (r.height - H * zoom) / 2; applyTransform();
+}
+function toImg(e) {
+  const r = vp.getBoundingClientRect();
+  return { x: (e.clientX - r.left - panX) / zoom, y: (e.clientY - r.top - panY) / zoom };
+}
+
+function newCanvas() { const c = document.createElement("canvas"); c.width = W; c.height = H; return c; }
+
+function redraw() {
+  octx.clearRect(0, 0, W, H);
+  if (!$("showMarks").checked) return;
+  const tint = newCanvas(), t = tint.getContext("2d");
+  for (const m of marks.filter(m => m.view === cur)) {
+    t.globalCompositeOperation = "source-over";
+    t.clearRect(0, 0, W, H);
+    t.fillStyle = TYPE[m.type].color; t.fillRect(0, 0, W, H);
+    t.globalCompositeOperation = "destination-in"; t.drawImage(m.canvas, 0, 0);
+    octx.globalAlpha = 0.35 + 0.65 * m.strength; octx.drawImage(tint, 0, 0); octx.globalAlpha = 1;
+  }
+}
+
+function listViews() {
+  const el = $("views"); el.innerHTML = "";
+  for (const name of order) {
+    const n = marks.filter(m => m.view === name).length;
+    const d = document.createElement("div");
+    d.className = "view" + (name === cur ? " on" : "");
+    d.innerHTML = `<img src="views/${name}.png" loading="lazy"><span class="t">${views[name].title}</span>` +
+      (n ? `<span class="badge">${n}</span>` : "");
+    d.onclick = () => openView(name);
+    el.appendChild(d);
+  }
+}
+function listMarks() {
+  const el = $("marks"); el.innerHTML = "";
+  const ms = marks.filter(m => m.view === cur);
+  if (!ms.length) { el.innerHTML = `<div class="n" style="padding:6px">Пока нет — закрасьте место кистью.</div>`; return; }
+  for (const m of ms) {
+    const d = document.createElement("div"); d.className = "mark";
+    d.innerHTML = `<span class="sw" style="background:${TYPE[m.type].color}"></span>` +
+      `<span>${TYPE[m.type].label} · ${Math.round(m.strength * 100)}%` +
+      (m.note ? `<div class="n">${m.note.replace(/</g, "&lt;")}</div>` : "") + `</span>` +
+      `<button title="удалить метку">×</button>`;
+    d.querySelector("button").onclick = () => { marks = marks.filter(x => x !== m); undo.push({kind: "del", mark: m});
+      setUnsaved(true); refresh(); };
+    el.appendChild(d);
+  }
+}
+function refresh() { redraw(); listMarks(); listViews(); }
+
+function openView(name) {
+  cur = name; img.src = `views/${name}.png`; lctx.clearRect(0, 0, W, H); hidePopup(); lastMark = null;
+  refresh(); fit();
+}
+
+// кисть: штрих рисуется в «живой» холст, после отпускания — выбор типа
+function dab(ctx, a, b, erase) {
+  ctx.globalCompositeOperation = erase ? "destination-out" : "source-over";
+  ctx.strokeStyle = "#fff"; ctx.fillStyle = "#fff"; ctx.lineWidth = size; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+}
+vp.addEventListener("contextmenu", e => e.preventDefault());
+vp.addEventListener("pointerdown", e => {
+  if ($("popup").contains(e.target)) return;
+  if (e.button === 2 || e.button === 1 || spaceDown) { panning = true; last = {x: e.clientX, y: e.clientY}; vp.setPointerCapture(e.pointerId); return; }
+  if (e.button !== 0 || $("popup").style.display === "block") return;
+  drawing = true; vp.setPointerCapture(e.pointerId);
+  const p = toImg(e); last = p;
+  if (mode === "erase") {
+    const ms = marks.filter(m => m.view === cur);
+    undo.push({kind: "erase", snaps: ms.map(m => [m, m.canvas.getContext("2d").getImageData(0, 0, W, H)])});
+    for (const m of ms) { dab(m.canvas.getContext("2d"), p, p, true); m.dirty = true; }
+    redraw();
+  } else { lctx.clearRect(0, 0, W, H); lctx.fillStyle = "#fff"; dab(lctx, p, p, false); }
+});
+vp.addEventListener("pointermove", e => {
+  const r = vp.getBoundingClientRect(), c = $("cursor");
+  c.style.left = (e.clientX - r.left) + "px"; c.style.top = (e.clientY - r.top) + "px";
+  c.style.width = c.style.height = (size * zoom) + "px";
+  c.style.borderColor = mode === "erase" ? "#e5534b" : "#fff";
+  if (panning) { panX += e.clientX - last.x; panY += e.clientY - last.y; last = {x: e.clientX, y: e.clientY}; applyTransform(); return; }
+  if (!drawing) return;
+  const p = toImg(e);
+  if (mode === "erase") { for (const m of marks.filter(m => m.view === cur)) dab(m.canvas.getContext("2d"), last, p, true); redraw(); }
+  else dab(lctx, last, p, false);
+  last = p;
+});
+vp.addEventListener("pointerup", e => {
+  if (panning) { panning = false; return; }
+  if (!drawing) return;
+  drawing = false;
+  if (mode === "erase") { setUnsaved(true); listMarks(); return; }
+  showPopup(e);
+});
+vp.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = vp.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = Math.exp(-e.deltaY * 0.0015), nz = Math.min(12, Math.max(0.1, zoom * k));
+  panX = mx - (mx - panX) * nz / zoom; panY = my - (my - panY) * nz / zoom; zoom = nz; applyTransform();
+}, {passive: false});
+
+// всплывающий выбор типа
+function showPopup(e) {
+  const p = $("popup"), r = vp.getBoundingClientRect();
+  p.style.display = "block";
+  let x = e.clientX - r.left + 14, y = e.clientY - r.top + 14;
+  x = Math.min(x, r.width - 300); y = Math.min(y, r.height - 260);
+  p.style.left = x + "px"; p.style.top = y + "px";
+  $("pAdd").disabled = !lastMark || lastMark.view !== cur || !marks.includes(lastMark);
+  $("pAdd").textContent = $("pAdd").disabled ? "К прошлой метке" : `К прошлой (${TYPE[lastMark.type].label})`;
+  $("pNote").value = ""; $("typedesc").textContent = TYPE[$("pType").value].desc;
+}
+function hidePopup() { $("popup").style.display = "none"; lctx.clearRect(0, 0, W, H); }
+$("pType").onchange = () => { $("typedesc").textContent = TYPE[$("pType").value].desc; };
+$("pStr").oninput = () => { $("pStrV").textContent = $("pStr").value; };
+$("pCancel").onclick = hidePopup;
+$("pNew").onclick = () => {
+  const c = newCanvas(); c.getContext("2d").drawImage(live, 0, 0);
+  const m = {id: `${cur}_${Date.now().toString(36)}`, view: cur, type: $("pType").value,
+    strength: $("pStr").value / 100, note: $("pNote").value.trim(), canvas: c, dirty: true};
+  marks.push(m); lastMark = m; undo.push({kind: "add", mark: m}); hidePopup(); setUnsaved(true); refresh();
+};
+$("pAdd").onclick = () => {
+  const ctx = lastMark.canvas.getContext("2d");
+  undo.push({kind: "append", mark: lastMark, snap: ctx.getImageData(0, 0, W, H)});
+  ctx.globalCompositeOperation = "source-over"; ctx.drawImage(live, 0, 0); lastMark.dirty = true;
+  hidePopup(); setUnsaved(true); refresh();
+};
+
+function doUndo() {
+  const a = undo.pop(); if (!a) return;
+  if (a.kind === "add") marks = marks.filter(m => m !== a.mark);
+  if (a.kind === "del") marks.push(a.mark);
+  if (a.kind === "append") { a.mark.canvas.getContext("2d").putImageData(a.snap, 0, 0); a.mark.dirty = true; }
+  if (a.kind === "erase") for (const [m, s] of a.snaps) { m.canvas.getContext("2d").putImageData(s, 0, 0); m.dirty = true; }
+  setUnsaved(true); refresh();
+}
+
+function setMode(m) { mode = m; $("bBrush").classList.toggle("on", m === "brush"); $("bErase").classList.toggle("on", m === "erase"); }
+$("bBrush").onclick = () => setMode("brush"); $("bErase").onclick = () => setMode("erase");
+$("size").oninput = () => { size = +$("size").value; $("sizeV").textContent = size; };
+$("showMarks").onchange = redraw;
+window.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if (e.code === "Space") { spaceDown = true; e.preventDefault(); }
+  if (e.key === "[") { size = Math.max(2, size - 4); $("size").value = size; $("sizeV").textContent = size; }
+  if (e.key === "]") { size = Math.min(160, size + 4); $("size").value = size; $("sizeV").textContent = size; }
+  if (e.code === "KeyE") setMode(mode === "erase" ? "brush" : "erase");
+  if (e.code === "KeyF") fit();
+  if (e.code === "KeyZ" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doUndo(); }
+  if (e.key === "Escape") hidePopup();
+});
+window.addEventListener("keyup", e => { if (e.code === "Space") spaceDown = false; });
+window.addEventListener("resize", fit);
+window.addEventListener("beforeunload", e => { if (unsaved) { e.preventDefault(); e.returnValue = ""; } });
+
+$("bSave").onclick = async () => {
+  status("сохраняю…");
+  const payload = {marks: marks.map(m => ({id: m.id, view: m.view, type: m.type, strength: m.strength, note: m.note,
+    mask: m.dirty ? m.canvas.toDataURL("image/png") : null}))};
+  const r = await fetch("save", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
+  if (r.ok) { marks.forEach(m => m.dirty = false); const j = await r.json(); setUnsaved(false); status(`сохранено меток: ${j.count}`); }
+  else status("ошибка сохранения");
+};
+
+async function init() {
+  for (const [k, t] of TYPES.map(t => [t[0], t[1]])) { const o = document.createElement("option"); o.value = k; o.textContent = t; $("pType").appendChild(o); }
+  const vj = await (await fetch("views.json")).json();
+  views = vj.views; order = Object.keys(views).sort(); [W, H] = vj.size || [W, H];
+  for (const c of [overlay, live]) { c.width = W; c.height = H; }
+  img.width = W; img.height = H;
+  const mj = await (await fetch("marks.json")).json();
+  await Promise.all((mj.marks || []).map(m => new Promise(res => {
+    const c = newCanvas(), im = new Image();
+    im.onload = () => { c.getContext("2d").drawImage(im, 0, 0); res(); }; im.onerror = res;
+    im.src = `marks/${m.id}.png?${Date.now()}`;
+    marks.push({id: m.id, view: m.view, type: m.type, strength: m.strength, note: m.note || "", canvas: c, dirty: false});
+  })));
+  openView(order[0]); status(marks.length ? `загружено меток: ${marks.length}` : "меток пока нет");
+}
+init();
+</script>
+</body>
+</html>

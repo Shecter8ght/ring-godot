@@ -340,3 +340,91 @@ def build_magazine():
     m14 = _plain("Ворсинки", L.InsertPosition.above_node(m13), (0.86, 0.85, 0.82), 0.85, cop=0.9)
     z(m14, "lint")
     return "magazine: группа износа — 14 слоёв"
+
+
+# ── метки владельца (сервис разметки: tools/ar15/mark_server.py → mark_apply.py) ─────────────────────────────────────
+# Отдельная группа «Этап 2 — метки владельца» над группой износа: пересборка автоматического износа её не трогает.
+# Вид — по типу метки и материалу под ней (класс места: fde, anod, steel, poly, brass).
+MARKS_GROUP = "Этап 2 — метки владельца"
+# протёрто / царапины / сколы: что проступает или как выглядит потёртость на этом материале — (цвет, шероховатость, металл)
+WORN = {"fde": ((0.06, 0.06, 0.065), 0.5, 0.0),        # сквозь песочный Cerakote — чёрное анодирование
+        "anod": ((0.50, 0.50, 0.52), 0.40, 1.0),       # сквозь чёрное анодирование — серый алюминий
+        "steel": ((0.56, 0.56, 0.57), 0.22, 1.0),      # сквозь фосфат и нитрид — блестящая сталь
+        "poly": ((0.24, 0.24, 0.24), 0.75, 0.0),       # полимер — светлая матовая потёртость
+        "brass": ((0.88, 0.70, 0.42), 0.20, 1.0)}      # латунь — свежая, блестящая
+BARE = {"poly": WORN["poly"], "brass": WORN["brass"]}  # «до блестящего металла»: остальное — сталь / алюминий
+BARE_METAL = ((0.60, 0.60, 0.62), 0.20, 1.0)
+
+
+def _mark_layer(item, pos):
+    typ, cl = item["type"], item["class"]
+    name = f"Метка: {typ} / {cl}"
+    zone = f"{W}/{item['file']}"
+
+    def zone_last(lay, above):
+        S._bmask(lay, zone, blend=L.BlendingMode.Multiply, above=above)
+
+    if typ in ("wear_through", "scratches", "chips", "bare"):
+        col, rough, metal = (BARE.get(cl, BARE_METAL) if typ == "bare" else WORN[cl])
+        lay = _plain(name, pos, col, rough, metal=metal)
+        if typ == "scratches":
+            p = _mask_pattern(lay, f"{MK}/scratches.png", SCRATCH_SCALE * 1.5, rot=0.5)
+        elif typ == "chips":
+            p = _mask_pattern(lay, f"{MK}/grime.png", GRIME_SCALE, rot=1.3)
+            p = S._mfilter(p, "histogram_scan", {"Position": 0.35, "Contrast": 0.8})
+        elif typ == "wear_through":
+            p = _mask_pattern(lay, f"{MK}/grime.png", GRIME_SCALE * 0.6, rot=0.7)
+        else:
+            p = _mask_pattern(lay, f"{MK}/polish_var.png", SMEAR_SCALE * 4.0, rot=0.9)
+        zone_last(lay, p)
+        return lay
+    if typ == "polish":
+        lay = _layer(name, pos, rough=-0.15, color=(0.90, 0.90, 0.90), cop=0.5)
+        zone_last(lay, _mask_pattern(lay, f"{MK}/polish_var.png", SMEAR_SCALE * 2.0, rot=0.4))
+    elif typ == "oil":
+        lay = _layer(name, pos, rough=-0.20, color=(0.80, 0.80, 0.80), cop=0.5)
+        zone_last(lay, _mask_pattern(lay, f"{MK}/polish_var.png", SMEAR_SCALE * 3.0, rot=1.1))
+    elif typ == "prints":
+        lay = _layer(name, pos, rough=-0.15, color=(0.88, 0.88, 0.88), cop=0.35)
+        zone_last(lay, _mask_pattern(lay, f"{MK}/prints_a.png", PRINT_SCALE, rot=2.0))
+    elif typ == "dirt":
+        lay = _layer(name, pos, rough=0.15, color=(0.55, 0.50, 0.44), cop=0.75)
+        zone_last(lay, _mask_pattern(lay, f"{MK}/grime.png", GRIME_SCALE, rot=0.3))
+    elif typ == "dust":
+        lay = _layer(name, pos, rough=0.15, color=(0.66, 0.62, 0.55), cmode=L.BlendingMode.Normal, cop=0.5)
+        zone_last(lay, _mask_pattern(lay, f"{MK}/dust_grain.png", GRAIN_SCALE, rot=0.8))
+    else:                                                # lint — нити уже нарисованы в маске
+        lay = _plain(name, pos, (0.86, 0.85, 0.82), 0.85, cop=0.9)
+        S._bmask(lay, zone)
+    return lay
+
+
+def build_marks():
+    """Слои меток владельца по marks_index.json (mark_apply.py) во всех наборах, где они есть; где меток больше нет —
+    группа удаляется. → какие наборы изменились (их выгрузить)."""
+    import json
+    idx = json.load(open(f"{W}/marks_index.json", encoding="utf-8"))["items"]
+    touched = []
+    for t in TS.all_texture_sets():
+        name = t.name()
+        st = t.get_stack()
+        had = False
+        for n in L.get_root_layer_nodes(st):
+            if n.get_name() == MARKS_GROUP:
+                L.delete_node(n)
+                had = True
+        items = [i for i in idx if i["set"] == name]
+        if not items and not had:
+            continue
+        touched.append(name)
+        if not items:
+            continue
+        grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
+        grp.set_name(MARKS_GROUP)
+        for ch in st.all_channels():
+            grp.set_blending_mode(L.BlendingMode.Passthrough, ch)
+        pos = L.InsertPosition.inside_node(grp, L.NodeStack.Substack)
+        for it in items:
+            lay = _mark_layer(it, pos)
+            pos = L.InsertPosition.above_node(lay)
+    return touched

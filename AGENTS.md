@@ -393,6 +393,11 @@ python -X utf8 tools/ar15/trace_ch_wing.py <снимок> [наложение.pn
 #   зоны <набор>_zone_*_L.png, просмотр lower_zones_preview.png) → sp_ar15_wear.build_lower(), export_variant('B', <папка>, ['lower', 'internals'])
 #   Магазин: wear_maps.py -- magazine → python -X utf8 tools/ar15/wear_magazine.py (штрихи strokes() — по якобиану карты положения) →
 #   sp_ar15_wear.build_magazine(), export_variant('B', <папка>, ['magazine'])
+tools/ar15/mark_server.cmd                                   # AR-15, разметка мест износа владельцем: http://localhost:8766/ — кистью место, тип и сила
+                                                              # из списка, «Сохранить» → «Разметка_износа/marks» в папке модели. Виды: blender -b <файл просмотра>
+                                                              # --python tools/ar15/mark_views.py -- <Разметка_износа> [вид,…] [сэмплы] (рендер + карта точек);
+                                                              # перенос: python -X utf8 tools/ar15/mark_apply.py → sp_ar15_wear.build_marks() (группа
+                                                              # «Этап 2 — метки владельца», вид — по материалу под меткой) → export_variant('B', <папка>, [наборы])
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader

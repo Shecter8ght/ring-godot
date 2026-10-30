@@ -4,7 +4,9 @@
 # краям, и малые пятна (масло у осей, кольца у отверстий, место удара крышки окна) в них не помещаются.
 #   blender -b <AR15_uv_v03.blend> --python tools/ar15/wear_maps.py -- <набор> <папка> [размер]
 # Пишет <набор>_maps.npz: pos (мм, float32 ×3), nrm (float16 ×3), ids (uint8, 0 — пусто) — строки сверху вниз, как в
-# картинке; ids_names — имена деталей по номеру. Размер по умолчанию — разрешение набора (tex_sets.SETS).
+# картинке; ids_names — имена деталей по номеру, ids_mats — их материал геометрии (ar15_mat: Alu_anodized, Steel_black,
+# Polymer…; по нему метки владельца выбирают вид износа — tools/ar15/mark_apply.py). Размер по умолчанию — разрешение
+# набора (tex_sets.SETS); набор «all» — все наборы по очереди.
 import os
 import sys
 
@@ -43,8 +45,15 @@ def _material(kind, off, scale):
 
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
-    name, out_dir = a[0], a[1]
-    size = int(a[2]) if len(a) > 2 else tex_sets.SETS[name][0]
+    if a[0] == "all":
+        for n in tex_sets.SETS:
+            bake_set(n, a[1], None)
+        return
+    bake_set(a[0], a[1], int(a[2]) if len(a) > 2 else None)
+
+
+def bake_set(name, out_dir, size):
+    size = size or tex_sets.SETS[name][0]
     objs = [o for o in bpy.data.objects if o.type == "MESH" and tex_sets.set_of(o.name) == name]
     S = bpy.context.scene
     S.render.engine = "CYCLES"
@@ -91,7 +100,8 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f"{name}_maps.npz")
     np.savez_compressed(path, pos=pos, nrm=nrm.astype(np.float16), ids=ids,
-                        ids_names=np.array([""] + [o.name for o in objs]))
+                        ids_names=np.array([""] + [o.name for o in objs]),
+                        ids_mats=np.array([""] + [str(o.get("ar15_mat", "")) for o in objs]))
     print("MAPS", name, size, "деталей", len(objs), "пикселей с деталью", int((ids > 0).sum()), "→", path)
 
 
