@@ -1,5 +1,5 @@
 # Задание Painter: битая — Body: краска как у целой + удар (ARGS: color, fi — инверсия «перёд», li — «лево»;
-# livery — начало пути картинок ливреи, как у sp/stack_car.py: такси и полиция партии 2).
+# livery — начало пути картинок ливреи, как у sp/stack_car.py: такси и полиция партии 2; wheel — колесо «стиль:вариант»).
 import importlib
 import os
 
@@ -26,7 +26,7 @@ for t in TS.all_texture_sets():
     elif t.name() == "Interior":
         vstacks.interior_clean(st, have)
     elif t.name() == "Wheel":
-        vstacks.wheel_clean(st, have)
+        vstacks.wheel_clean(st, have, ARGS.get("wheel"))     # «стиль:вариант» (wheel_looks.CAR_WHEELS)
     elif t.name() == "Under":
         vstacks.under_clean(st, have)
     print(t.name(), "слоёв:", len(L.get_root_layer_nodes(st)))

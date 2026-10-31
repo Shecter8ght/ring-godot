@@ -97,10 +97,18 @@ def prepare_material(m: bpy.types.Material, cls: str) -> None:
         nt.links.new(sep.outputs["Red"], grp.inputs["Occlusion"])
 
 
+def root_inverse(root) -> Matrix:
+    """Обратная матрица осей варианта. У перевёрнутого автобуса корень повёрнут на борт (apply_maps.assemble_box) — в
+    игру он идёт лёжа, как в файле: снимается только сдвиг по плану (без этого выгружался бы стоя)."""
+    if root.rotation_euler.to_matrix() != Matrix.Identity(3):
+        return Matrix.Translation((root.location.x, root.location.y, 0.0)).inverted()
+    return root.matrix_world.inverted()
+
+
 def variant_mesh(col: bpy.types.Collection, name: str) -> bpy.types.Object:
     """Все сетки варианта → одна сетка в осях корня варианта (корень — пустышка без родителя)."""
     root = next(o for o in col.objects if o.type == "EMPTY" and o.parent is None)
-    inv = root.matrix_world.inverted()
+    inv = root_inverse(root)
     meshes = [o for o in col.objects if o.type == "MESH"]
     copies = []
     for o in meshes:

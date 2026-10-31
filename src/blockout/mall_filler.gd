@@ -494,6 +494,10 @@ const KITS: Dictionary = {
 		["cyl", Vector3(-1.1, 0.55, -3.2), Vector3(1.1, 0.4, 1.1), "black", Vector3(0, 0, 90)],
 		["cyl", Vector3(1.1, 0.55, -3.2), Vector3(1.1, 0.4, 1.1), "black", Vector3(0, 0, 90)]],
 		"solid": [[Vector3(0, 1.75, 0), Vector3(2.5, 3.5, 7.9)]], "range": 520},
+	# перевёрнутый автобус на левом борту — запасная серая форма модели PV_bus12_over (без assets/models)
+	"bus_over": {"parts": [["box", Vector3(0.35, 1.28, 0), Vector3(2.6, 2.55, 12), "white"],
+		["box", Vector3(0.3, 2.56, 0.3), Vector3(1, 0.02, 10.8), "dark"],
+		["box", Vector3(1.66, 0.5, 0), Vector3(0.7, 0.9, 9), "black"]]},
 	"police_car": {"parts": [["box", Vector3(0, 0.55, 0), Vector3(1.9, 0.8, 4.6), "paint_white"],
 		["box", Vector3(0, 1.2, -0.2), Vector3(1.6, 0.55, 2.4), "paint_white"],
 		["box", Vector3(0, 1.22, -0.2), Vector3(1.64, 0.3, 2.1), "dark"],

@@ -2028,7 +2028,7 @@ search_s = 2.5
 look = 4
 
 [node name="Loot_239" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-192, 0.6, -7.4)
+position = Vector3(-191, 0.6, -7.4)
 display_name = "Укладка"
 table = "pharmacy"
 search_s = 3.5

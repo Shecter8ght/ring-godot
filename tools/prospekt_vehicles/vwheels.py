@@ -128,6 +128,7 @@ def _shape(name: str, V, F, cutters: list, thick: float = 0.0, bevel: float = 0.
         bv.use_clamp_overlap = True
     dg = bpy.context.evaluated_depsgraph_get()
     me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
+    me.validate()                                # у колпака после вырезов и толщины — дубли граней (выгрузка их ругала)
     Vo = np.array([v.co[:] for v in me.vertices])
     Fo = [tuple(p.vertices) for p in me.polygons]
     bpy.data.meshes.remove(me)
@@ -207,6 +208,35 @@ def steel_disc(rim_r: float, W: float, lugs: int = 4, pcd_r: float = 0.050, vent
     stem, cap = _valve(rim_r, x0, math.radians(20.0))
     out += [("Valve", "rubber", *stem), ("Valve_Cap", "mesh_black", *cap)]
     return out
+
+
+def truck_disc(rim_r: float, W: float, studs: int = 10):
+    """Грузовая штамповка (автобус, ПАЗ, ГАЗель): глубокая чаша, 6 (на малых — 5) овальных окон, площадка с шпильками
+    по кругу (у автобуса 10 гаек «на 32»), ступица с колпаком. Окна и отверстия — вырезы, как у легковой штамповки."""
+    x0 = W / 2 * 0.86
+    seg = _q(128, 40)
+    big = rim_r > 0.25
+    prof = [(x0 - 0.004, rim_r + 0.004), (x0 - 0.02, rim_r - 0.02), (x0 - 0.05, rim_r * 0.72), (x0 - 0.05, rim_r * 0.55),
+            (x0 - 0.02, rim_r * 0.45), (x0 - 0.02, 0.105 if big else 0.07)]
+    V, F = revolve(prof, seg)
+    cut = []
+    xa, xb = x0 - 0.12, x0 + 0.03
+    n_vent = 6 if big else 5
+    rr = np.linspace(rim_r * 0.565, rim_r * 0.705, _q(10, 4))
+    for i in range(n_vent):
+        c = (i + 0.5) * 2 * math.pi / n_vent
+        half = 0.5 * rim_r * 0.24 / rr
+        cut.append(_prism(_window(rr, c - half, c + half, _q(8, 3), _q(3, 1)), xa, xb))
+    pcd = 0.142 if big else 0.09
+    pins = [(pcd * math.cos(a), pcd * math.sin(a)) for a in np.arange(studs) * 2 * math.pi / studs]
+    for p in pins:
+        cut.append(_prism(_circle(p, 0.012 if big else 0.008, _q(16, 8)), xa, xb))
+    face = _shape("truck_face", V, F, cut, thick=0.006, bevel=_q(0.0015, 0.0))
+    nuts = pt.merge([_nut(p, x0 - 0.026, x0 + 0.012, af=0.032 if big else 0.019) for p in pins])
+    hr = pcd * 0.62
+    hub = revolve([(x0 - 0.02, 0.0), (x0 - 0.02, hr), (x0 + 0.03, hr * 0.92), (x0 + 0.06, hr * 0.64), (x0 + 0.07, 0.0)],
+                  _q(48, 16))
+    return [("Rim_Face", "rim_steel", *face), ("Lug_Nuts", "lug_nut", *nuts), ("Hub", "steel_dark", *hub)]
 
 
 # --- колпак -----------------------------------------------------------------------------------------------------

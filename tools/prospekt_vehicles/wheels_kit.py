@@ -47,17 +47,6 @@ def wheel(style: str, spec: dict) -> list:
     return parts + vwheels.face(style, rim_r, W, spec)
 
 
-def outward(ob) -> None:
-    """Нормали наружу: тела вращения wheel.revolve при порядке профиля carparts выходят нормалями внутрь (протектор
-    смотрел к оси) — запекание и плотность развёртки по видимости иначе путают стороны; в игре — отсечение изнанки."""
-    import bmesh
-    bm = bmesh.new()
-    bm.from_mesh(ob.data)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    bm.to_mesh(ob.data)
-    bm.free()
-
-
 def place(parts, i: int, R: float, col, tag: str, ts: str) -> list:
     objs = []
     for name, mat, V, F in parts:
@@ -66,7 +55,7 @@ def place(parts, i: int, R: float, col, tag: str, ts: str) -> list:
         ob.location = (0.0, i * GAP, R)
         ob["tex_set"], ob["mat"], ob["group"] = ts, mat, "wheel"
         gk.triangulate(ob)
-        outward(ob)
+        gk.outward(ob)
         gk.smooth_normals(ob)
         objs.append(ob)
     bpy.context.view_layer.update()               # matrix_world по новому положению — до слияния копий для FBX

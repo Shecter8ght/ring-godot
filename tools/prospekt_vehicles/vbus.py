@@ -384,40 +384,16 @@ def _fins():
 
 
 def truck_wheel(spec: dict, inner: bool = False):
-    """Колесо: шина, штампованный диск с вентиляционными окнами, ступица, гайки по окружности; inner —
-    внутреннее колесо пары (лицом внутрь)."""
-    from carparts import tire, rim_barrel
+    """Колесо: шина с протектором и надписями (vwheels.tire), обод, грузовая штамповка с окнами и гайками по окружности
+    (vwheels.truck_disc); inner — внутреннее колесо пары (лицом внутрь, без ступицы и гаек)."""
+    import vq
+    import vwheels
+    from carparts import rim_barrel
     R, W = spec["tire_r"], spec["tire_w"]
     rim_r = spec["rim_d_in"] * 0.0127
-    x0 = W / 2 * 0.86
-    face = revolve([(x0 - 0.004, rim_r + 0.004), (x0 - 0.02, rim_r - 0.02), (x0 - 0.05, rim_r * 0.72),
-                    (x0 - 0.05, rim_r * 0.55), (x0 - 0.02, rim_r * 0.45), (x0 - 0.02, 0.0)], 72)
-    holes = []
-    for i in range(6 if rim_r > 0.25 else 5):
-        n = 6 if rim_r > 0.25 else 5
-        a = (i + 0.5) * 2 * math.pi / n
-        k = 16
-        t = np.linspace(0, 2 * math.pi, k, endpoint=False)
-        r0 = rim_r * 0.635
-        pts = [(x0 - 0.048, (r0 + rim_r * 0.07 * math.cos(th)) * math.cos(a + 0.16 * math.sin(th)),
-                (r0 + rim_r * 0.07 * math.cos(th)) * math.sin(a + 0.16 * math.sin(th))) for th in t]
-        P = np.array(pts)
-        V = np.vstack([P, P.mean(0)[None]])
-        holes.append((V, [(q, (q + 1) % k, k) for q in range(k)]))
-    hub = revolve([(x0 - 0.02, 0.0), (x0 - 0.02, 0.11), (x0 + 0.03, 0.10), (x0 + 0.06, 0.07), (x0 + 0.07, 0.0)], 48)
-    nuts = []
-    ns = spec.get("studs", 10)
-    for i in range(ns):
-        a = i * 2 * math.pi / ns
-        v, f = revolve([(x0 - 0.02, 0.0), (x0 - 0.02, 0.014), (x0 + 0.012, 0.014), (x0 + 0.016, 0.009),
-                        (x0 + 0.017, 0.0)], 6, phase=math.pi / 6)
-        rr = 0.142 if rim_r > 0.25 else 0.09
-        v[:, 1] += rr * math.cos(a)
-        v[:, 2] += rr * math.sin(a)
-        nuts.append((v, f))
-    parts = [("Tire", "rubber", *tire(R, W, rim_r, 96)), ("Rim_Barrel", "rim_steel", *rim_barrel(rim_r, W, 96)),
-             ("Rim_Face", "rim_steel", *face), ("Rim_Holes", "mesh_black", *pt.merge(holes)), ("Hub", "steel_dark", *hub),
-             ("Lug_Nuts", "steel_dark", *pt.merge(nuts))]
+    parts = vwheels.tire(R, W, rim_r, 40)
+    parts.append(("Rim_Barrel", "rim_barrel", *rim_barrel(rim_r, W, 24 if vq.low() else 96)))
+    parts += vwheels.truck_disc(rim_r, W, spec.get("studs", 10))
     if inner:
         parts = [(n, m, V * np.array([-1.0, 1, 1]), [f[::-1] for f in F]) for n, m, V, F in parts if n != "Hub" and n != "Lug_Nuts"]
     return parts

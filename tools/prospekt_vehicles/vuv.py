@@ -305,10 +305,17 @@ def _pack(objs, grid: int, work: Path, tag: str) -> float:
     work.mkdir(parents=True, exist_ok=True)
     src, dst = work / f"{tag}.islands.json", work / f"{tag}.pack.json"
     src.write_text(json.dumps({"islands": islands}), encoding="utf-8")
+    # прежняя упаковка — долой: упаковщик упал (2026-10-29 его убили вместе с сессией), а сборка молча взяла старый
+    # файл от другой сетки — развёртка колеса вышла мешаниной, Painter запёк по ней
+    dst.unlink(missing_ok=True)
     r = subprocess.run(["python", "-X", "utf8", str(HERE / "uvpack.py"), str(src), str(dst), str(grid), str(MARGIN)],
                        capture_output=True, text=True, encoding="utf-8")
     print(" ", tag, r.stdout.strip(), r.stderr.strip()[-400:])
+    if r.returncode != 0 or not dst.exists():
+        raise RuntimeError(f"упаковщик развёртки {tag} не отработал (код {r.returncode})")
     res = json.loads(dst.read_text(encoding="utf-8"))
+    if len(res["place"]) != len(islands):
+        raise RuntimeError(f"упаковка {tag}: островов {len(islands)}, мест {len(res['place'])}")
     s = res["scale"]
     by_obj: dict = {}
     for rr, (k, x, y) in zip(refs, res["place"]):

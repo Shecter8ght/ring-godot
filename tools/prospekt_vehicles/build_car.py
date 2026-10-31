@@ -434,13 +434,11 @@ def make_burnt(kit, spec: dict, field, surf, views, S):
 
 def main() -> None:
     import carparts as cp
-    import vdamage as vd
 
     spec = CLASSES[CLS]
     bpy.ops.wm.read_factory_settings(use_empty=True)
     kit, hinges, S, (field, surf, views) = build_kit(spec)
-    wparts = cp.wheel_parts(spec)
-    std = [(n, make_mesh("W_" + n, m, V, F)) for n, m, V, F in wparts]
+    std = [(n, make_mesh("W_" + n, m, V, F)) for n, m, V, F in cp.wheel_parts(spec, "clean")]
     titles = {"intact": "Целый", "open": "Открыт", "wreck": "Битый", "burnt": "Сгоревший"}
     for i, v in enumerate(VARIANTS):
         sets = {k: std for k in ("FL", "FR", "RL", "RR")}
@@ -449,19 +447,15 @@ def main() -> None:
             cfg = spec.get("open_cfg")
         elif v == "wreck":
             k2 = make_wreck(kit, spec, field, surf, views, S)
-            flat = []
-            for n, m, V, F in wparts:
-                if n == "Tire":
-                    V = vd.flat_tire(V, spec["tire_r"], 0.05)
-                flat.append((n, make_mesh("WF_" + n, m, V, F)))
-            sets["FL"] = flat
+            # битая: колёса своего стиля и варианта (wheel_looks.CAR_WHEELS), переднее левое спущено
+            sets = {k: [(n, make_mesh(f"WW{k}_" + n, m, V, F)) for n, m, V, F in cp.wheel_parts(spec, "wreck")]
+                    for k in ("FR", "RL", "RR")}
+            sets["FL"] = [(n, make_mesh("WF_" + n, m, V, F)) for n, m, V, F in cp.wreck_wheel(spec)]
             wcfg = {"steer": spec.get("wreck_steer", 14.0)}
             cfg = spec.get("wreck_open")
         elif v == "burnt":
             k2, dz = make_burnt(kit, spec, field, surf, views, S)
-            keep = ("Rim_Barrel", "Rim_Face", "Rim_Holes", "Brake_Disc", "Caliper", "Rim_Spokes", "Rim_Hub", "Lug_Nuts")
-            recolor = {"rim_steel": "rust", "rim_alloy": "burnt_light", "brake": "rust", "steel_dark": "rust"}
-            rims = [(n, make_mesh("WB_" + n, recolor.get(m, m), V, F)) for n, m, V, F in wparts if n.startswith(keep)]
+            rims = [(n, make_mesh("WB_" + n, m, V, F)) for n, m, V, F in cp.burnt_wheel(spec)]
             sets = {k: rims for k in sets}
             wcfg = {"z": spec["wheel_z"] - dz}
             h2 = {g: (a - np.array([0, 0, dz]), ax, sg) for g, (a, ax, sg) in hinges.items()}

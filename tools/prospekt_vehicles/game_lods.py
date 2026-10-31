@@ -99,10 +99,17 @@ def part_name(ob: bpy.types.Object) -> str:
     return n.rsplit(".", 1)[0] if n[-4:-3] == "." and n[-3:].isdigit() else n
 
 
+def root_inverse(root) -> Matrix:
+    """Как game_export.root_inverse: перевёрнутый автобус (корень повёрнут на борт) — лёжа, снимается только сдвиг."""
+    if root.rotation_euler.to_matrix() != Matrix.Identity(3):
+        return Matrix.Translation((root.location.x, root.location.y, 0.0)).inverted()
+    return root.matrix_world.inverted()
+
+
 def joined(col: bpy.types.Collection, name: str, keep) -> bpy.types.Object:
     """Сетки варианта, прошедшие keep, → одна сетка в осях корня варианта (как game_export.variant_mesh)."""
     root = next(o for o in col.objects if o.type == "EMPTY" and o.parent is None)
-    inv = root.matrix_world.inverted()
+    inv = root_inverse(root)
     copies = []
     for o in col.objects:
         if o.type != "MESH" or not keep(o):

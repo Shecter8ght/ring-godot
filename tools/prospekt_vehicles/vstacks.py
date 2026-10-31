@@ -490,9 +490,12 @@ def interior_clean(st, have, seat_plastic=(0.20, 0.05, 0.04)):
         flat(st, m("paint_inner", "paint"), "Окрашенный металл салона", (0.5, 0.5, 0.5), 0.5)
 
 
-def wheel_clean(st, have, alloy=False):
-    """Набор Wheel машины — колесо v2 (wheel); стиль диска — по материалам набора."""
-    wheel(st, have, "Wheel", "alloy" if pick(have, "Wheel", "rim_alloy") else "steel")
+def wheel_clean(st, have, spec=None):
+    """Набор Wheel машины — колесо v2 (wheel). spec — «стиль:вариант» из задания (wheel_looks.stack_arg); без него
+    стиль — по материалам набора, вариант — основной."""
+    style, key = (spec.split(":") + [""])[:2] if spec else ("", "")
+    style = style or ("alloy" if pick(have, "Wheel", "rim_alloy") else "steel")
+    wheel(st, have, "Wheel", style, key or None)
 
 
 # --- колесо v2 --------------------------------------------------------------------------------------

@@ -276,6 +276,9 @@ bash tools/prospekt_vehicles/wheels_finish.sh [stack|open]     # колёса v2
                                                               # боковины (tire_marks.py, системный Python с PIL) — запекание в Painter, стек vstacks.wheel по вариантам
                                                               # отделки wheel_looks.py (цвет, глянец, износ) → карты <набор>_<вариант>_* → E:/Models Blender/VEHICLES/Колёса/
                                                               # game/Wheels_textured_v01.blend (stack — только стеки и карты, open — сначала открыть проект); Painter с мостом запущен
+bash tools/prospekt_vehicles/wheels_cars.sh [класс …]          # колёса v2 на машины обеих партий: игровая сетка (game_kit.py — стиль и вариант колеса класса —
+                                                              # wheel_looks.CAR_WHEELS), у партии 2 ливреи (livery.py), семьи в Painter с прежним цветом кузова и колесом
+                                                              # («wheel=стиль:вариант»); SKIP_KIT=1 — сетка уже собрана; затем game_export.py, game_lods.py, импорт
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
                                                               # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
                                                               # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*

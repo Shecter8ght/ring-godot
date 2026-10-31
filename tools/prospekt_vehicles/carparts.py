@@ -19,11 +19,6 @@ from wheel import revolve
 SEG = 96
 
 
-def _rect(w: float, h: float) -> np.ndarray:
-    """Прямоугольное сечение для игровой сетки (скругления — в карте нормалей)."""
-    return np.array([(w / 2, h / 2), (-w / 2, h / 2), (-w / 2, -h / 2), (w / 2, -h / 2)])
-
-
 # =============================================================================== колёса
 
 def tire(R: float, W: float, rim_r: float, seg: int = SEG):
@@ -67,124 +62,6 @@ def rim_barrel(rim_r: float, W: float, seg: int = SEG):
     return revolve(outer + inner, seg, closed=True)
 
 
-def hubcap(rim_r: float, W: float, n: int = 8):
-    """Пластиковый колпак на штампованном диске: чаша, рёбра-спицы, тёмные прорези между ними."""
-    x0 = W / 2 * 0.86 + 0.004
-    R = rim_r + 0.012
-    import vq
-    dish = [(x0 - 0.004, R), (x0 + 0.006, R - 0.004), (x0 + 0.012, R - 0.020), (x0 + 0.018, R * 0.72),
-            (x0 + 0.024, R * 0.45), (x0 + 0.030, R * 0.30), (x0 + 0.032, R * 0.20), (x0 + 0.036, R * 0.12),
-            (x0 + 0.038, 0.0)]
-    if vq.low():
-        dish = [dish[0], dish[2], dish[3], dish[5], dish[8]]
-    dV, dF = revolve(dish, SEG, closed=False)
-    ribs, slots = [], []
-    for i in range(n):
-        a = i * 2 * math.pi / n
-        import vq
-        t = np.linspace(0.30, 0.86, 10 if not vq.low() else 3)
-        r = R * t
-        x = x0 + 0.030 - 0.018 * (t - 0.30) / 0.56 + 0.005
-        P = np.c_[x, r * math.cos(a), r * math.sin(a)]
-        rad = np.array([0.0, math.cos(a), math.sin(a)])
-        tang = np.cross(np.array([1.0, 0, 0]), rad)
-        sec = _rect(0.026, 0.008) if vq.low() else pt.rounded_rect(0.026, 0.008, 0.003, 2)
-        ribs.append(pt.loft(P, np.broadcast_to(tang, P.shape), np.broadcast_to(np.array([1.0, 0, 0]), P.shape), sec))
-        # прорезь между рёбрами: тёмная трапеция чуть глубже чаши
-        b = a + math.pi / n
-        poly = []
-        for rr, da in ((0.40, 0.17), (0.80, 0.20), (0.80, -0.20), (0.40, -0.17)):
-            poly.append((rr * R, b + da))
-        quad = np.array([[x0 + 0.030 - 0.018 * (rr / R - 0.30) / 0.56 - 0.002, rr * math.cos(ang), rr * math.sin(ang)]
-                         for rr, ang in poly])
-        slots.append((quad, [(0, 1, 2, 3)]))
-    cap = revolve([(x0 + 0.040, 0.0), (x0 + 0.040, 0.030), (x0 + 0.036, 0.040), (x0 + 0.030, 0.045)], 48)
-    return (dV, dF), pt.merge(ribs), pt.merge(slots), cap
-
-
-def steel_face(rim_r: float, W: float, n_holes: int = 8):
-    """Штампованный диск под колпаком: чаша с выштамповкой, вентиляционные окна (тёмные), ступица, гайки."""
-    x0 = W / 2 * 0.86
-    import vq
-    prof = [(x0 - 0.002, rim_r + 0.004), (x0 - 0.010, rim_r - 0.010), (x0 - 0.020, rim_r * 0.80),
-            (x0 - 0.018, rim_r * 0.62), (x0 - 0.008, rim_r * 0.50), (x0 - 0.006, rim_r * 0.40),
-            (x0 - 0.012, rim_r * 0.30), (x0 - 0.012, 0.03), (x0 - 0.008, 0.0)]
-    if vq.low():
-        prof = [prof[0], prof[2], prof[4], prof[6], prof[8]]
-    dish = revolve(prof, SEG)
-    holes = []
-    for i in range(n_holes):
-        a = (i + 0.5) * 2 * math.pi / n_holes
-        r0 = rim_r * 0.68
-        k = 18
-        t = np.linspace(0, 2 * math.pi, k, endpoint=False)
-        ru, rt = rim_r * 0.075, rim_r * 0.10
-        pts = []
-        for th in t:
-            rr = r0 + ru * math.cos(th)
-            aa = a + (rt / r0) * math.sin(th)
-            pts.append((x0 - 0.0185 + 0.001, rr * math.cos(aa), rr * math.sin(aa)))
-        P = np.array(pts)
-        c = P.mean(0)
-        V = np.vstack([P, c[None]])
-        F = [(j, (j + 1) % k, k) for j in range(k)]
-        holes.append((V, F))
-    nuts = []
-    for i in range(4):
-        a = i * 2 * math.pi / 4 + math.pi / 4
-        v, f = revolve([(x0 - 0.010, 0.0), (x0 - 0.010, 0.010), (x0 + 0.004, 0.0105), (x0 + 0.008, 0.007),
-                        (x0 + 0.009, 0.0)], 6, phase=math.pi / 6)
-        v[:, 1] += 0.050 * math.cos(a)
-        v[:, 2] += 0.050 * math.sin(a)
-        nuts.append((v, f))
-    return dish, pt.merge(holes), pt.merge(nuts)
-
-
-def alloy_face(rim_r: float, W: float, n_spokes: int = 5, split: bool = False):
-    """Литой диск: спицы (по одной или сдвоенные), ступица, колпачок; спицы вогнуты к центру."""
-    x0 = W / 2 * 0.86
-    out = []
-    pairs = [(-1, 1)] if split else [(0,)]
-    for p in range(n_spokes):
-        base = p * 2 * math.pi / n_spokes
-        for side in pairs[0]:
-            import vq
-            t = np.linspace(0, 1, 18 if not vq.low() else 3)
-            r = 0.060 + (rim_r + 0.004 - 0.060) * t
-            x = x0 - 0.006 - 0.030 * (1 - t) ** 1.5 + 0.004
-            spread = (math.radians(4.5) * side * (0.4 + t)) if split else 0.0
-            ang = base + spread
-            P = np.c_[x, r * np.cos(ang), r * np.sin(ang)]
-            radial = np.c_[np.zeros_like(r), np.cos(ang) * np.ones_like(r), np.sin(ang) * np.ones_like(r)]
-            tang = np.cross(np.array([1.0, 0, 0]), radial)
-            w0, w1 = (0.030, 0.020) if split else (0.052, 0.034)
-
-            def sec(i, t=t, w0=w0, w1=w1):
-                w = w0 + (w1 - w0) * t[i]
-                return _rect(w, 0.026) if vq.low() else pt.rounded_rect(w, 0.026, 0.008, 3)
-            out.append(pt.loft(P, tang, np.broadcast_to(np.array([1.0, 0, 0]), P.shape), sec, cap=True))
-    import vq
-    if vq.low():
-        # игровая сетка: ступица — четыре пояса, закраина — треугольник, гайки — в картах
-        hub = revolve([(x0 - 0.035, 0.0), (x0 - 0.035, 0.075), (x0 - 0.002, 0.072), (x0 + 0.009, 0.0)], 16)
-        lip = revolve([(x0 - 0.010, rim_r + 0.002), (x0 + 0.008, rim_r + 0.012), (x0 - 0.012, rim_r + 0.014)], SEG,
-                      closed=True)
-        return pt.merge(out), pt.merge([hub, lip]), (np.zeros((0, 3)), [])
-    hub = revolve([(x0 - 0.035, 0.0), (x0 - 0.035, 0.075), (x0 - 0.010, 0.078), (x0 - 0.002, 0.070),
-                   (x0 + 0.004, 0.052), (x0 + 0.008, 0.032), (x0 + 0.009, 0.0)], 64)
-    lip = revolve([(x0 - 0.010, rim_r + 0.002), (x0 + 0.004, rim_r + 0.004), (x0 + 0.008, rim_r + 0.014),
-                   (x0 + 0.004, rim_r + 0.018), (x0 - 0.012, rim_r + 0.012)], SEG, closed=True)
-    nuts = []
-    for i in range(4 if n_spokes == 4 else 5):
-        a = i * 2 * math.pi / (4 if n_spokes == 4 else 5) + math.pi / n_spokes
-        v, f = revolve([(x0 + 0.002, 0.0), (x0 + 0.002, 0.009), (x0 + 0.012, 0.0095), (x0 + 0.016, 0.006),
-                        (x0 + 0.017, 0.0)], 6, phase=math.pi / 6)
-        v[:, 1] += 0.052 * math.cos(a)
-        v[:, 2] += 0.052 * math.sin(a)
-        nuts.append((v, f))
-    return pt.merge(out), pt.merge([hub, lip]), pt.merge(nuts)
-
-
 def brake_parts(rim_r: float):
     """Тормозной диск — рабочее кольцо, колокол ступицы — и суппорт (видны сквозь спицы): кольцо и колокол врозь,
     у них разная отделка (кольцо натёрто колодками до блеска, колокол ржавый). Возвращает (кольцо, колокол, суппорт)."""
@@ -216,35 +93,43 @@ def brake(rim_r: float):
     return pt.merge([disc, hat]), cal
 
 
-def wheel_parts(spec: dict) -> list[tuple[str, str, np.ndarray, list]]:
+def wheel_parts(spec: dict, fam: str = "clean") -> list[tuple[str, str, np.ndarray, list]]:
+    """Колесо v2 (vwheels): шина — протектор, наружная боковина, внутренняя сторона (подробная — с рисунком протектора и
+    надписями, для запекания), обод, тормоз, лицо диска по стилю семьи (wheel_looks.CAR_WHEELS: колпак, штамповка,
+    литой). Прежние лица (чаша с накладными планками, тёмные пятна вместо отверстий) владелец забраковал 2026-10-29."""
+    import vq
+    import vwheels
+    import wheel_looks
     R, W = spec["tire_r"], spec["tire_w"]
     rim_r = spec["rim_d_in"] * 0.0127
-    style = spec.get("wheel_style", "steel_cap")
-    import vq
-    # игровая сетка легковой: шина 20 граней по кругу, обод (виден только в арке) — 16
-    ts, bs = (20, 16) if vq.low() else (SEG, SEG)
-    out = [("Tire", "rubber", *tire(R, W, rim_r, ts)), ("Rim_Barrel", "rim_steel" if style == "steel_cap" else "rim_alloy",
-                                                        *rim_barrel(rim_r, W, bs))]
-    disc, cal = brake(rim_r)
-    out += [("Brake_Disc", "brake", *disc), ("Caliper", "steel_dark", *cal)]
-    import vq
-    if style == "steel_cap" and vq.low():
-        face, holes, nuts = steel_face(rim_r, W)
-        out += [("Rim_Face", "rim_steel", *face)]
-        dish, ribs, slots, cap = hubcap(rim_r, W, spec.get("cap_spokes", 8))
-        out += [("Hubcap", "hubcap", *dish), ("Hubcap_Ribs", "hubcap", *ribs), ("Hubcap_Slots", "mesh_black", *slots)]
-    elif style == "steel_cap":
-        face, holes, nuts = steel_face(rim_r, W)
-        out += [("Rim_Face", "rim_steel", *face), ("Rim_Holes", "mesh_black", *holes), ("Lug_Nuts", "steel_dark", *nuts)]
-        dish, ribs, slots, cap = hubcap(rim_r, W, spec.get("cap_spokes", 8))
-        out += [("Hubcap", "hubcap", *dish), ("Hubcap_Ribs", "hubcap", *ribs), ("Hubcap_Slots", "mesh_black", *slots),
-                ("Hubcap_Center", "hubcap", *cap)]
-    else:
-        spokes, hub, nuts = alloy_face(rim_r, W, spec.get("spokes", 5), spec.get("split_spokes", False))
-        out += [("Rim_Spokes", "rim_alloy", *spokes), ("Rim_Hub", "rim_alloy", *hub)]
-        if len(nuts[0]):
-            out.append(("Lug_Nuts", "steel_dark", *nuts))
-    return out
+    style, _ = wheel_looks.car_wheel(spec["name"], fam)
+    out = vwheels.tire(R, W, rim_r, 32)
+    # обод — свой материал: краска та же, что у лица диска, задиры от бордюров — только на его закраине
+    out.append(("Rim_Barrel", "rim_barrel", *rim_barrel(rim_r, W, 16 if vq.low() else SEG)))
+    disc, hat, cal = brake_parts(rim_r)
+    out += [("Brake_Disc", "brake", *disc), ("Brake_Hat", "brake_hat", *hat), ("Caliper", "steel_dark", *cal)]
+    return out + vwheels.face(style, rim_r, W, spec)
+
+
+TIRE_PARTS = ("Tire_Tread", "Tire", "Tire_Inner")
+
+
+def wreck_wheel(spec: dict) -> list:
+    """Колесо битой: свой стиль и вариант (wheel_looks.CAR_WHEELS), шина спущена."""
+    import vdamage as vd
+    return [(n, m, vd.flat_tire(V, spec["tire_r"], 0.05) if n in TIRE_PARTS else V, F)
+            for n, m, V, F in wheel_parts(spec, "wreck")]
+
+
+def burnt_wheel(spec: dict) -> list:
+    """Колесо сгоревшей: шина, колпак, колпачок и ниппель сгорели — металл диска и тормоза в ржавчине и окалине
+    (литой — светлый пережжённый алюминий)."""
+    parts = wheel_parts(spec, "burnt")
+    alloy = any(m == "rim_alloy" for _, m, _, _ in parts)
+    keep = ("Rim_Barrel", "Rim_Face", "Rim_Spokes", "Brake_Disc", "Brake_Hat", "Caliper", "Lug_Nuts", "Hub_Cap")
+    recolor = {"rim_steel": "rust", "rim_alloy": "burnt_light", "rim_barrel": "burnt_light" if alloy else "rust",
+               "brake": "rust", "brake_hat": "rust", "steel_dark": "rust", "lug_nut": "rust", "mesh_black": "burnt"}
+    return [(n, recolor.get(m, m), V, F) for n, m, V, F in parts if n.startswith(keep)]
 
 
 # =============================================================================== низ
@@ -940,7 +825,10 @@ def spare_wheel(spec: dict, S: dict, surf):
     mv = mount[0].copy()
     mv[:, 0] = mv[:, 0] * 0.5 - W / 2 - 0.02
     bv, bf = rim_barrel(rim_r, W, 72)
-    fv, ff = steel_face(rim_r, W)[0]
+    # диск запаски — гладкая чаша штамповки: под чехлом видна только её изнанка к двери
+    x0 = W / 2 * 0.86
+    fv, ff = revolve([(x0 - 0.002, rim_r + 0.004), (x0 - 0.020, rim_r * 0.80), (x0 - 0.008, rim_r * 0.50),
+                      (x0 - 0.012, rim_r * 0.30), (x0 - 0.008, 0.0)], 48)
     return [("Spare_Tire", "rubber", (place(tv), tf)), ("Spare_Cover", "seat", (place(cover[0]), cover[1])),
             ("Spare_Rim", "rim_steel", (place(np.vstack([bv, fv])), list(bf) + [tuple(i + len(bv) for i in q) for q in ff])),
             ("Spare_Mount", "steel_dark", (place(mv), mount[1]))]

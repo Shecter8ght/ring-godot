@@ -76,10 +76,8 @@ def families(spec: dict):
     """Детали всех семей при текущем качестве: {семья: (детали, колесо)}; колесо — детали одного колеса."""
     import build_car as bc
     import carparts as cp
-    import vdamage as vd
 
     kit, hinges, S, (field, surf, views) = bc.build_kit(spec)
-    wparts = cp.wheel_parts(spec)
     wreck = bc.make_wreck(kit, spec, field, surf, views, S)
     burnt, dz = bc.make_burnt(kit, spec, field, surf, views, S)
     if spec.get("special"):
@@ -88,11 +86,8 @@ def families(spec: dict):
         import vspecial
         kit = vspecial.add_to_kit(kit, spec["special"])
         wreck = vspecial.add_to_kit(wreck, spec["special"], knocked=spec["special"] == "taxi")
-    keep = ("Rim_Barrel", "Rim_Face", "Rim_Holes", "Brake_Disc", "Caliper", "Rim_Spokes", "Rim_Hub", "Lug_Nuts")
-    recolor = {"rim_steel": "rust", "rim_alloy": "burnt_light", "brake": "rust", "steel_dark": "rust", "mesh_black": "burnt"}
-    w_burnt = [(n, recolor.get(m, m), V, F) for n, m, V, F in wparts if n.startswith(keep)]
-    w_flat = [(n, m, vd.flat_tire(V, spec["tire_r"], 0.05) if n == "Tire" else V, F) for n, m, V, F in wparts]
-    return {"clean": (kit, wparts), "wreck": (wreck, w_flat), "burnt": (burnt, w_burnt)}, hinges, dz
+    return {"clean": (kit, cp.wheel_parts(spec, "clean")), "wreck": (wreck, cp.wreck_wheel(spec)),
+            "burnt": (burnt, cp.burnt_wheel(spec))}, hinges, dz
 
 
 def bus_families(spec: dict):
@@ -151,6 +146,16 @@ def material(name: str, rgb=(0.5, 0.5, 0.5)) -> bpy.types.Material:
     return m
 
 
+def outward(ob) -> None:
+    """Нормали наружу: тела вращения wheel.revolve при порядке профиля carparts выходят нормалями внутрь (протектор
+    смотрел к оси) — запекание и плотность развёртки по видимости путали стороны, в игре — отсечение изнанки."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
 def build_family(fam: str, parts, wheel, col, wheel_x: float = 3.5, split: bool = False) -> dict:
     """Детали семьи → объекты с набором текстур в свойстве; колесо — отдельно в стороне. Возвращает {набор: [объекты]}."""
     sets: dict = {}
@@ -170,6 +175,7 @@ def build_family(fam: str, parts, wheel, col, wheel_x: float = 3.5, split: bool 
         ob = mesh_obj(f"{fam}:Wheel_{name}", V + np.array([wheel_x, 0, 0]), F, col)
         ob["tex_set"], ob["mat"], ob["group"] = ts, mat, "wheel"
         triangulate(ob)
+        outward(ob)
         smooth_normals(ob)
         sets.setdefault(ts, []).append(ob)
     return sets

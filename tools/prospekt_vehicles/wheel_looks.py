@@ -40,6 +40,38 @@ LOOKS = {
 
 SET_STYLE = {"WheelCap": "cap", "WheelSteel": "steel", "WheelAlloy": "alloy"}
 
+# Какие колёса у машин (владелец 2026-10-29: «да, ставь на машины» — вперемешку): стиль и вариант на класс. Колесо у
+# машины одно на все места, у битой спущено только переднее левое, а три других — колёса целой той же машины, поэтому у
+# битой стиль и вариант — как у целой (иначе на одной машине два вида дисков); разнообразие — между классами.
+# У сгоревшей — металл диска того же стиля (колпак сгорел — штамповка под ним). Коробчатые (автобусы, ГАЗели) —
+# грузовая штамповка (vwheels.truck_disc) в краске варианта стиля steel.
+CAR_WHEELS = {
+    "sedan": {"clean": ("cap", "silver"), "burnt": ("steel", None)},
+    "hatch": {"clean": ("alloy", "bronze")},
+    "wagon": {"clean": ("steel", "brown")},
+    "suv": {"clean": ("alloy", "new")},
+    "taxi": {"clean": ("steel", "black")},
+    "police": {"clean": ("cap", "graphite"), "burnt": ("steel", None)},
+    "bus12": {"clean": ("truck", "silver")},
+    "paz": {"clean": ("truck", "black")},
+    "gazel": {"clean": ("truck", "silver")},
+    "van": {"clean": ("truck", "black")},
+    "ambulance": {"clean": ("truck", "silver")},
+    "bus12_over": {"over": ("truck", "silver")},
+}
+
+
+def car_wheel(name: str, fam: str) -> tuple[str, str | None]:
+    """(стиль, вариант) колеса класса name в семье fam; семьи нет в таблице — как у целой."""
+    t = CAR_WHEELS[name]
+    return t.get(fam) or t.get("clean") or next(iter(t.values()))
+
+
+def stack_arg(name: str, fam: str) -> str:
+    """Ключ задания Painter «wheel=стиль:вариант» (грузовая штамповка красится как steel)."""
+    style, key = car_wheel(name, fam)
+    return f"wheel={'steel' if style == 'truck' else style}:{key or ''}"
+
 
 def look(style: str, key: str | None = None) -> dict:
     """Вариант стиля по ключу (нет ключа — основной)."""
@@ -53,6 +85,10 @@ def rounds() -> list[dict]:
     return [{ts: LOOKS[st][min(k, len(LOOKS[st]) - 1)]["key"] for ts, st in SET_STYLE.items()} for k in range(n)]
 
 
-if __name__ == "__main__":                        # для цепочки: строки «Набор=вариант,…» по проходам
-    for r in rounds():
-        print(",".join(f"{ts}={k}" for ts, k in r.items()))
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 3 and sys.argv[1] == "arg":   # wheels_cars.sh: ключ задания Painter класса и семьи
+        print(stack_arg(sys.argv[2], sys.argv[3]))
+    else:                                           # wheels_finish.sh: строки «Набор=вариант,…» по проходам
+        for r in rounds():
+            print(",".join(f"{ts}={k}" for ts, k in r.items()))
