@@ -129,6 +129,15 @@ def _shape(name: str, V, F, cutters: list, thick: float = 0.0, bevel: float = 0.
     dg = bpy.context.evaluated_depsgraph_get()
     me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
     me.validate()                                # у колпака после вырезов и толщины — дубли граней (выгрузка их ругала)
+    import vq
+    if vq.low():
+        # игровая: изнанка лица диска (грани к машине) снаружи не видна — долой; окна и их стенки остаются
+        import bmesh
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.normal.x < -0.5], context="FACES")
+        bm.to_mesh(me)
+        bm.free()
     Vo = np.array([v.co[:] for v in me.vertices])
     Fo = [tuple(p.vertices) for p in me.polygons]
     bpy.data.meshes.remove(me)
@@ -147,8 +156,10 @@ def _shape(name: str, V, F, cutters: list, thick: float = 0.0, bevel: float = 0.
 def _nut(pos_yz, x_back: float, x_front: float, af: float = 0.017):
     """Гайка колеса: шестигранник «под ключ» af и конус-седло сзади, торец со снятой фаской."""
     rh = af / 2 / math.cos(math.pi / 6)
-    v, f = revolve([(x_back, 0.0), (x_back, rh * 0.62), (x_back + 0.004, rh), (x_front - 0.002, rh),
-                    (x_front, rh * 0.82), (x_front, 0.0)], 6, phase=math.pi / 6)
+    prof = _q([(x_back, 0.0), (x_back, rh * 0.62), (x_back + 0.004, rh), (x_front - 0.002, rh), (x_front, rh * 0.82),
+               (x_front, 0.0)],
+              [(x_back, 0.0), (x_back + 0.002, rh), (x_front, rh * 0.86), (x_front, 0.0)])    # игровая: седло и фаска — в карте
+    v, f = revolve(prof, 6, phase=math.pi / 6)
     v[:, 1] += pos_yz[0]
     v[:, 2] += pos_yz[1]
     return v, f
@@ -187,17 +198,17 @@ def steel_disc(rim_r: float, W: float, lugs: int = 4, pcd_r: float = 0.050, vent
     prof = [(x0 - 0.036, rim_r - 0.008), (x0 - 0.040, rim_r * 0.93), (x0 - 0.035, rim_r * 0.865), (x0 - 0.028, rim_r * 0.82),
             (x0 - 0.027, rim_r * 0.56), (x0 - 0.019, rim_r * 0.47), (x0 - 0.013, rim_r * 0.42), (x0 - 0.013, 0.046),
             (x0 - 0.019, 0.036)]
-    V, F = revolve(prof, seg)
+    V, F = revolve(_q(prof, [prof[i] for i in (0, 1, 3, 4, 6, 7, 8)]), seg)
     cut = []
     xa, xb = x0 - 0.08, x0 + 0.02
-    rr = np.linspace(rim_r * 0.585, rim_r * 0.765, _q(10, 4))
+    rr = np.linspace(rim_r * 0.585, rim_r * 0.765, _q(10, 3))
     for i in range(vents):
         c = (i + 0.5) * 2 * math.pi / vents
         half = 0.5 * 0.060 / rr                    # окно ~60 мм по дуге, края радиальные
-        cut.append(_prism(_window(rr, c - half, c + half, _q(8, 3), _q(3, 1)), xa, xb))
+        cut.append(_prism(_window(rr, c - half, c + half, _q(8, 2), _q(3, 1)), xa, xb))
     pins = [((pcd_r * math.cos(a), pcd_r * math.sin(a))) for a in np.arange(lugs) * 2 * math.pi / lugs + math.pi / lugs]
     for p in pins:
-        cut.append(_prism(_circle(p, 0.0068, _q(16, 8)), xa, xb))
+        cut.append(_prism(_circle(p, 0.0068, _q(16, 6)), xa, xb))
     face = _shape("steel_face", V, F, cut, thick=0.0042, bevel=_q(0.0012, 0.0))
     out = [("Rim_Face", "rim_steel", *face)]
     if with_nuts:
@@ -214,7 +225,7 @@ def truck_disc(rim_r: float, W: float, studs: int = 10):
     """Грузовая штамповка (автобус, ПАЗ, ГАЗель): глубокая чаша, 6 (на малых — 5) овальных окон, площадка с шпильками
     по кругу (у автобуса 10 гаек «на 32»), ступица с колпаком. Окна и отверстия — вырезы, как у легковой штамповки."""
     x0 = W / 2 * 0.86
-    seg = _q(128, 40)
+    seg = _q(128, 32)
     big = rim_r > 0.25
     prof = [(x0 - 0.004, rim_r + 0.004), (x0 - 0.02, rim_r - 0.02), (x0 - 0.05, rim_r * 0.72), (x0 - 0.05, rim_r * 0.55),
             (x0 - 0.02, rim_r * 0.45), (x0 - 0.02, 0.105 if big else 0.07)]
@@ -222,15 +233,15 @@ def truck_disc(rim_r: float, W: float, studs: int = 10):
     cut = []
     xa, xb = x0 - 0.12, x0 + 0.03
     n_vent = 6 if big else 5
-    rr = np.linspace(rim_r * 0.565, rim_r * 0.705, _q(10, 4))
+    rr = np.linspace(rim_r * 0.565, rim_r * 0.705, _q(10, 3))
     for i in range(n_vent):
         c = (i + 0.5) * 2 * math.pi / n_vent
         half = 0.5 * rim_r * 0.24 / rr
-        cut.append(_prism(_window(rr, c - half, c + half, _q(8, 3), _q(3, 1)), xa, xb))
+        cut.append(_prism(_window(rr, c - half, c + half, _q(8, 2), _q(3, 1)), xa, xb))
     pcd = 0.142 if big else 0.09
     pins = [(pcd * math.cos(a), pcd * math.sin(a)) for a in np.arange(studs) * 2 * math.pi / studs]
     for p in pins:
-        cut.append(_prism(_circle(p, 0.012 if big else 0.008, _q(16, 8)), xa, xb))
+        cut.append(_prism(_circle(p, 0.012 if big else 0.008, _q(16, 6)), xa, xb))
     face = _shape("truck_face", V, F, cut, thick=0.006, bevel=_q(0.0015, 0.0))
     nuts = pt.merge([_nut(p, x0 - 0.026, x0 + 0.012, af=0.032 if big else 0.019) for p in pins])
     hr = pcd * 0.62
@@ -245,24 +256,24 @@ def hubcap(rim_r: float, W: float, slots: int = 10, sweep_deg: float = 16.0):
     """Пластиковый колпак «турбина» на штамповке: край заходит на закраину, кольцо с канавкой, поле изогнутых прорезей,
     выпуклый центр с пустой площадкой эмблемы. Под ним — та же штамповка (видна в прорезях), без гаек."""
     x0 = W / 2 * 0.86
-    seg = _q(128, 40)
+    seg = _q(128, 32)
     prof = [(x0 + 0.003, rim_r + 0.011), (x0 + 0.011, rim_r + 0.006), (x0 + 0.017, rim_r * 0.975),
             (x0 + 0.018, rim_r * 0.945), (x0 + 0.013, rim_r * 0.915), (x0 + 0.014, rim_r * 0.89),
             (x0 + 0.020, rim_r * 0.865), (x0 + 0.027, rim_r * 0.64), (x0 + 0.032, rim_r * 0.42),
             (x0 + 0.034, rim_r * 0.355), (x0 + 0.041, rim_r * 0.325), (x0 + 0.045, rim_r * 0.24),
             (x0 + 0.047, 0.058), (x0 + 0.047, 0.040)]
-    V, F = revolve(prof, seg)
+    V, F = revolve(_q(prof, [prof[i] for i in (0, 1, 2, 4, 6, 7, 8, 10, 12, 13)]), seg)
     cut = []
-    rr = np.linspace(rim_r * 0.42, rim_r * 0.84, _q(14, 5))
+    rr = np.linspace(rim_r * 0.42, rim_r * 0.84, _q(14, 3))
     t = (rr - rr[0]) / (rr[-1] - rr[0])
     sw = math.radians(sweep_deg) * t ** 1.2           # прорезь закручена: внешний конец сдвинут по кругу
     width = 0.016 + 0.020 * t                         # уже у центра, шире у края, м по дуге
     for i in range(slots):
         c = i * 2 * math.pi / slots + sw
         half = 0.5 * width / rr
-        cut.append(_prism(_window(rr, c - half, c + half, _q(6, 3), _q(3, 1)), x0 - 0.02, x0 + 0.08))
+        cut.append(_prism(_window(rr, c - half, c + half, _q(6, 2), _q(3, 1)), x0 - 0.02, x0 + 0.08))
     cap = _shape("hubcap", V, F, cut, thick=0.0028, bevel=_q(0.0008, 0.0))
-    badge = revolve([(x0 + 0.0505, 0.0), (x0 + 0.0505, 0.036), (x0 + 0.048, 0.042), (x0 + 0.045, 0.042)], _q(64, 24))
+    badge = revolve([(x0 + 0.0505, 0.0), (x0 + 0.0505, 0.036), (x0 + 0.048, 0.042), (x0 + 0.045, 0.042)], _q(64, 16))
     out = [("Hubcap", "hubcap", *cap), ("Hubcap_Badge", "hubcap", *badge)]
     import vq
     if vq.low():
@@ -280,16 +291,19 @@ def alloy(rim_r: float, W: float, pairs: int = 5, lugs: int = 5, pcd_r: float = 
     """Литой диск: 5 сдвоенных спиц «вилкой» (у ступицы сливаются, к ободу расходятся), профиль вогнутый к ступице,
     толщина спицы ~30 мм, у ступицы толще; колодцы гаек, колпачок с пустой эмблемой."""
     x0 = W / 2 * 0.86
-    seg = _q(160, 40)
+    seg = _q(160, 32)
     front = [(x0 + 0.005, rim_r - 0.001), (x0 - 0.003, rim_r * 0.94), (x0 - 0.012, rim_r * 0.82), (x0 - 0.024, rim_r * 0.62),
              (x0 - 0.032, rim_r * 0.44), (x0 - 0.034, rim_r * 0.36), (x0 - 0.027, 0.070), (x0 - 0.026, 0.034)]
     back = [(x0 - 0.064, 0.034), (x0 - 0.072, 0.075), (x0 - 0.066, rim_r * 0.44), (x0 - 0.058, rim_r * 0.62),
             (x0 - 0.048, rim_r * 0.82), (x0 - 0.040, rim_r * 0.94), (x0 - 0.034, rim_r - 0.006)]
+    if _q(False, True):                           # игровая: профиль реже, плавность — в карте нормалей
+        front = [front[i] for i in (0, 1, 2, 3, 4, 6, 7)]
+        back = [back[i] for i in (0, 1, 2, 4, 6)]
     V, F = revolve(front + back, seg, closed=True)
     cut = []
     xa, xb = x0 - 0.12, x0 + 0.04
     r_hub, r_out = 0.082, rim_r * 0.885
-    rr = np.linspace(r_hub, r_out, _q(18, 6))
+    rr = np.linspace(r_hub, r_out, _q(18, 4))
     t = (rr - r_hub) / (r_out - r_hub)
     w = 0.046 - 0.016 * t                             # ширина одной спицы, м: литая спица толще штампованной
     d = np.where(t > 0.12, 0.027 * ((t - 0.12) / 0.88) ** 0.8, 0.0)   # половина развода пары: щель у обода ~2 см
@@ -300,15 +314,15 @@ def alloy(rim_r: float, W: float, pairs: int = 5, lugs: int = 5, pcd_r: float = 
         lo = c + (d + w / 2) / rr
         hi = c + step - (d + w / 2) / rr
         ok = hi - lo > 0.02
-        cut.append(_prism(_window(rr[ok], lo[ok], hi[ok], _q(10, 4), _q(3, 1)), xa, xb))
+        cut.append(_prism(_window(rr[ok], lo[ok], hi[ok], _q(10, 3), _q(3, 1)), xa, xb))
         # прорезь между спицами пары
         s = (d - w / 2) / rr
         ok = s > 0.004 / rr
         if ok.sum() > 2:
-            cut.append(_prism(_window(rr[ok], c - s[ok], c + s[ok], _q(5, 3), _q(3, 1)), xa, xb))
+            cut.append(_prism(_window(rr[ok], c - s[ok], c + s[ok], _q(5, 2), _q(3, 1)), xa, xb))
     pins = [((pcd_r * math.cos(a), pcd_r * math.sin(a))) for a in np.arange(lugs) * 2 * math.pi / lugs + math.pi / lugs]
     for p in pins:
-        cut.append(_prism(_circle(p, 0.0115, _q(20, 8)), x0 - 0.050, xb))   # колодец гайки до площадки
+        cut.append(_prism(_circle(p, 0.0115, _q(20, 6)), x0 - 0.050, xb))   # колодец гайки до площадки
     face = _shape("alloy_face", V, F, cut, bevel=_q(0.0018, 0.0))
     nuts = pt.merge([_nut(p, x0 - 0.050, x0 - 0.030) for p in pins])
     cap = revolve([(x0 - 0.026, 0.0), (x0 - 0.026, 0.031), (x0 - 0.020, 0.031), (x0 - 0.016, 0.026), (x0 - 0.015, 0.0)],
@@ -515,7 +529,7 @@ def tire_low(R: float, W: float, rim_r: float, seg: int = 32):
     prof = vq.tire_profile_low(R, W, rim_r)
     tread = prof[5:9]
     outer = prof[8:15]                          # наружная боковина — до борта
-    inner = prof[14:] + prof[:6]                # борт и внутренняя боковина (к машине): своя сетка — мельче в развёртке
+    inner = prof[14:] + [prof[i] for i in (0, 2, 4, 5)]   # борт и внутренняя боковина (к машине, не видна) — реже
     return [("Tire_Tread", "tire_tread", *revolve(tread, seg)), ("Tire", "rubber", *revolve(outer, seg)),
             ("Tire_Inner", "rubber", *revolve(inner, seg))]
 

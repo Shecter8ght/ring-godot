@@ -2429,7 +2429,7 @@
    "id": "PV_sedan_wreck",
    "name": "Седан, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck.gltf",
-   "triangles": 44265,
+   "triangles": 36793,
    "materials": 9,
    "aabb": {
     "center": [
@@ -2453,17 +2453,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck.gltf",
      "end": 25.0,
-     "triangles": 44265
+     "triangles": 36793
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck_lod1.gltf",
      "end": 60.0,
-     "triangles": 11808
+     "triangles": 9851
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_wreck_lod2.gltf",
      "end": 520.0,
-     "triangles": 6208
+     "triangles": 5229
     }
    ],
    "lod_fade": false
@@ -2472,7 +2472,7 @@
    "id": "PV_sedan_open",
    "name": "Седан, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_open.gltf",
-   "triangles": 44956,
+   "triangles": 37484,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2510,17 +2510,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_open.gltf",
      "end": 25.0,
-     "triangles": 44956
+     "triangles": 37484
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_open_lod1.gltf",
      "end": 60.0,
-     "triangles": 12078
+     "triangles": 10120
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 6218
+     "triangles": 5290
     }
    ],
    "lod_fade": false
@@ -2529,7 +2529,7 @@
    "id": "PV_sedan_burnt",
    "name": "Седан, сгоревший",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt.gltf",
-   "triangles": 29012,
+   "triangles": 24692,
    "materials": 4,
    "aabb": {
     "center": [
@@ -2553,17 +2553,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt.gltf",
      "end": 25.0,
-     "triangles": 29012
+     "triangles": 24692
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt_lod1.gltf",
      "end": 60.0,
-     "triangles": 7596
+     "triangles": 6423
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_burnt_lod2.gltf",
      "end": 520.0,
-     "triangles": 3850
+     "triangles": 3626
     }
    ],
    "lod_fade": false
@@ -2572,7 +2572,7 @@
    "id": "PV_sedan",
    "name": "Седан, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_sedan.gltf",
-   "triangles": 44956,
+   "triangles": 37484,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2596,17 +2596,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan.gltf",
      "end": 25.0,
-     "triangles": 44956
+     "triangles": 37484
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_lod1.gltf",
      "end": 60.0,
-     "triangles": 12077
+     "triangles": 10120
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_sedan_lod2.gltf",
      "end": 520.0,
-     "triangles": 5934
+     "triangles": 4842
     }
    ],
    "lod_fade": false
@@ -2621,7 +2621,7 @@
     "PV_wagon",
     "PV_suv"
    ],
-   "triangles": 46658,
+   "triangles": 42986,
    "materials": 0,
    "aabb": {
     "center": [
@@ -2651,7 +2651,7 @@
     "PV_wagon_open",
     "PV_suv_open"
    ],
-   "triangles": 46658,
+   "triangles": 42986,
    "materials": 0,
    "aabb": {
     "center": [
@@ -2685,7 +2685,7 @@
     "PV_wagon_burnt",
     "PV_suv_burnt"
    ],
-   "triangles": 46157,
+   "triangles": 42485,
    "materials": 0,
    "aabb": {
     "center": [
@@ -2723,7 +2723,7 @@
     "U14_01",
     "U14_01"
    ],
-   "triangles": 46658,
+   "triangles": 42986,
    "materials": 0,
    "aabb": {
     "center": [
@@ -2747,7 +2747,7 @@
    "id": "PV_hatch_wreck",
    "name": "Хэтчбек, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck.gltf",
-   "triangles": 42176,
+   "triangles": 38472,
    "materials": 9,
    "aabb": {
     "center": [
@@ -2771,17 +2771,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck.gltf",
      "end": 25.0,
-     "triangles": 42176
+     "triangles": 38472
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck_lod1.gltf",
      "end": 60.0,
-     "triangles": 11297
+     "triangles": 10296
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_wreck_lod2.gltf",
      "end": 520.0,
-     "triangles": 5706
+     "triangles": 5531
     }
    ],
    "lod_fade": false
@@ -2790,7 +2790,7 @@
    "id": "PV_hatch_open",
    "name": "Хэтчбек, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_hatch_open.gltf",
-   "triangles": 42835,
+   "triangles": 39131,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2828,17 +2828,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_open.gltf",
      "end": 25.3,
-     "triangles": 42835
+     "triangles": 39131
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_open_lod1.gltf",
      "end": 60.0,
-     "triangles": 11561
+     "triangles": 10560
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 5712
+     "triangles": 5604
     }
    ],
    "lod_fade": false
@@ -2847,7 +2847,7 @@
    "id": "PV_hatch_burnt",
    "name": "Хэтчбек, сгоревший",
    "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt.gltf",
-   "triangles": 29357,
+   "triangles": 26037,
    "materials": 4,
    "aabb": {
     "center": [
@@ -2871,17 +2871,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt.gltf",
      "end": 25.0,
-     "triangles": 29357
+     "triangles": 26037
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt_lod1.gltf",
      "end": 60.0,
-     "triangles": 7688
+     "triangles": 6785
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_burnt_lod2.gltf",
      "end": 520.0,
-     "triangles": 3553
+     "triangles": 3401
     }
    ],
    "lod_fade": false
@@ -2890,7 +2890,7 @@
    "id": "PV_hatch",
    "name": "Хэтчбек, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_hatch.gltf",
-   "triangles": 42835,
+   "triangles": 39131,
    "materials": 7,
    "aabb": {
     "center": [
@@ -2914,17 +2914,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch.gltf",
      "end": 25.0,
-     "triangles": 42835
+     "triangles": 39131
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_lod1.gltf",
      "end": 60.0,
-     "triangles": 11560
+     "triangles": 10559
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_hatch_lod2.gltf",
      "end": 520.0,
-     "triangles": 5310
+     "triangles": 5169
     }
    ],
    "lod_fade": false
@@ -2933,7 +2933,7 @@
    "id": "PV_wagon_wreck",
    "name": "Универсал, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck.gltf",
-   "triangles": 43589,
+   "triangles": 38885,
    "materials": 9,
    "aabb": {
     "center": [
@@ -2957,17 +2957,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck.gltf",
      "end": 25.3,
-     "triangles": 43589
+     "triangles": 38885
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck_lod1.gltf",
      "end": 60.0,
-     "triangles": 11677
+     "triangles": 10406
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_wreck_lod2.gltf",
      "end": 520.0,
-     "triangles": 5626
+     "triangles": 5661
     }
    ],
    "lod_fade": false
@@ -2976,7 +2976,7 @@
    "id": "PV_wagon_open",
    "name": "Универсал, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_wagon_open.gltf",
-   "triangles": 44210,
+   "triangles": 39506,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3014,17 +3014,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_open.gltf",
      "end": 28.8,
-     "triangles": 44210
+     "triangles": 39506
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_open_lod1.gltf",
      "end": 68.0,
-     "triangles": 11936
+     "triangles": 10661
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 5646
+     "triangles": 5688
     }
    ],
    "lod_fade": false
@@ -3033,7 +3033,7 @@
    "id": "PV_wagon_burnt",
    "name": "Универсал, сгоревший",
    "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt.gltf",
-   "triangles": 30143,
+   "triangles": 25823,
    "materials": 4,
    "aabb": {
     "center": [
@@ -3057,17 +3057,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt.gltf",
      "end": 25.5,
-     "triangles": 30143
+     "triangles": 25823
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt_lod1.gltf",
      "end": 60.2,
-     "triangles": 7902
+     "triangles": 6729
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_burnt_lod2.gltf",
      "end": 520.0,
-     "triangles": 3774
+     "triangles": 3704
     }
    ],
    "lod_fade": false
@@ -3076,7 +3076,7 @@
    "id": "PV_wagon",
    "name": "Универсал, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_wagon.gltf",
-   "triangles": 44210,
+   "triangles": 39506,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3100,17 +3100,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon.gltf",
      "end": 25.9,
-     "triangles": 44210
+     "triangles": 39506
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_lod1.gltf",
      "end": 61.2,
-     "triangles": 11935
+     "triangles": 10662
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_wagon_lod2.gltf",
      "end": 520.0,
-     "triangles": 5273
+     "triangles": 5274
     }
    ],
    "lod_fade": false
@@ -3119,7 +3119,7 @@
    "id": "PV_suv_wreck",
    "name": "Внедорожник, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck.gltf",
-   "triangles": 46157,
+   "triangles": 42485,
    "materials": 9,
    "aabb": {
     "center": [
@@ -3143,17 +3143,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck.gltf",
      "end": 26.3,
-     "triangles": 46157
+     "triangles": 42485
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck_lod1.gltf",
      "end": 62.1,
-     "triangles": 12352
+     "triangles": 11358
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_wreck_lod2.gltf",
      "end": 520.0,
-     "triangles": 6154
+     "triangles": 5930
     }
    ],
    "lod_fade": false
@@ -3162,7 +3162,7 @@
    "id": "PV_suv_open",
    "name": "Внедорожник, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_suv_open.gltf",
-   "triangles": 46658,
+   "triangles": 42986,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3200,17 +3200,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_open.gltf",
      "end": 33.1,
-     "triangles": 46658
+     "triangles": 42986
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_open_lod1.gltf",
      "end": 78.2,
-     "triangles": 12591
+     "triangles": 11600
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 6113
+     "triangles": 5903
     }
    ],
    "lod_fade": false
@@ -3219,7 +3219,7 @@
    "id": "PV_suv_burnt",
    "name": "Внедорожник, сгоревший",
    "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt.gltf",
-   "triangles": 30131,
+   "triangles": 26843,
    "materials": 4,
    "aabb": {
     "center": [
@@ -3243,17 +3243,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt.gltf",
      "end": 26.8,
-     "triangles": 30131
+     "triangles": 26843
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt_lod1.gltf",
      "end": 63.4,
-     "triangles": 7899
+     "triangles": 7003
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_burnt_lod2.gltf",
      "end": 520.0,
-     "triangles": 3616
+     "triangles": 3446
     }
    ],
    "lod_fade": false
@@ -3262,7 +3262,7 @@
    "id": "PV_suv",
    "name": "Внедорожник, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_suv.gltf",
-   "triangles": 46658,
+   "triangles": 42986,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3286,17 +3286,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv.gltf",
      "end": 26.9,
-     "triangles": 46658
+     "triangles": 42986
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_lod1.gltf",
      "end": 63.6,
-     "triangles": 12592
+     "triangles": 11600
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_suv_lod2.gltf",
      "end": 520.0,
-     "triangles": 5751
+     "triangles": 5510
     }
    ],
    "lod_fade": false
@@ -3305,7 +3305,7 @@
    "id": "PV_gazel_open",
    "name": "ГАЗель-маршрутка, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_gazel_open.gltf",
-   "triangles": 43843,
+   "triangles": 38863,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3343,17 +3343,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel_open.gltf",
      "end": 35.5,
-     "triangles": 43843
+     "triangles": 38863
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel_open_lod1.gltf",
      "end": 83.8,
-     "triangles": 13061
+     "triangles": 12505
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 9458
+     "triangles": 10409
     }
    ],
    "lod_fade": false
@@ -3362,7 +3362,7 @@
    "id": "PV_gazel",
    "name": "ГАЗель-маршрутка, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_gazel.gltf",
-   "triangles": 43843,
+   "triangles": 38863,
    "materials": 7,
    "aabb": {
     "center": [
@@ -3386,17 +3386,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel.gltf",
      "end": 31.4,
-     "triangles": 43843
+     "triangles": 38863
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel_lod1.gltf",
      "end": 74.2,
-     "triangles": 13053
+     "triangles": 12503
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_gazel_lod2.gltf",
      "end": 520.0,
-     "triangles": 7826
+     "triangles": 8746
     }
    ],
    "lod_fade": false
@@ -3405,7 +3405,7 @@
    "id": "PV_paz_open",
    "name": "ПАЗ, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_paz_open.gltf",
-   "triangles": 50529,
+   "triangles": 45111,
    "materials": 9,
    "aabb": {
     "center": [
@@ -3443,17 +3443,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz_open.gltf",
      "end": 41.3,
-     "triangles": 50529
+     "triangles": 45111
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz_open_lod1.gltf",
      "end": 97.7,
-     "triangles": 14481
+     "triangles": 13705
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 9680
+     "triangles": 10558
     }
    ],
    "lod_fade": false
@@ -3462,7 +3462,7 @@
    "id": "PV_paz",
    "name": "ПАЗ, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_paz.gltf",
-   "triangles": 50529,
+   "triangles": 45111,
    "materials": 9,
    "aabb": {
     "center": [
@@ -3486,17 +3486,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz.gltf",
      "end": 41.3,
-     "triangles": 50529
+     "triangles": 45111
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz_lod1.gltf",
      "end": 97.7,
-     "triangles": 14481
+     "triangles": 13707
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_paz_lod2.gltf",
      "end": 520.0,
-     "triangles": 9538
+     "triangles": 10356
     }
    ],
    "lod_fade": false
@@ -3505,7 +3505,7 @@
    "id": "PV_bus12_open",
    "name": "Автобус 12 м, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_bus12_open.gltf",
-   "triangles": 63066,
+   "triangles": 56766,
    "materials": 9,
    "aabb": {
     "center": [
@@ -3543,17 +3543,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_open.gltf",
      "end": 45.0,
-     "triangles": 63066
+     "triangles": 56766
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_open_lod1.gltf",
      "end": 120.0,
-     "triangles": 17398
+     "triangles": 16626
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 12043
+     "triangles": 12812
     }
    ],
    "lod_fade": false
@@ -3562,7 +3562,7 @@
    "id": "PV_bus12",
    "name": "Автобус 12 м, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_bus12.gltf",
-   "triangles": 63066,
+   "triangles": 56766,
    "materials": 9,
    "aabb": {
     "center": [
@@ -3586,17 +3586,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12.gltf",
      "end": 45.0,
-     "triangles": 63066
+     "triangles": 56766
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_lod1.gltf",
      "end": 120.0,
-     "triangles": 17398
+     "triangles": 16604
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_lod2.gltf",
      "end": 520.0,
-     "triangles": 11778
+     "triangles": 12452
     }
    ],
    "lod_fade": false
@@ -3609,7 +3609,7 @@
     "PV_bus12",
     "PV_bus12_open"
    ],
-   "triangles": 63066,
+   "triangles": 56766,
    "materials": 0,
    "aabb": {
     "center": [
@@ -3637,7 +3637,7 @@
     "PV_paz",
     "PV_paz_open"
    ],
-   "triangles": 50529,
+   "triangles": 45111,
    "materials": 0,
    "aabb": {
     "center": [
@@ -3665,7 +3665,7 @@
     "PV_gazel",
     "PV_gazel_open"
    ],
-   "triangles": 43843,
+   "triangles": 38863,
    "materials": 0,
    "aabb": {
     "center": [
@@ -6071,7 +6071,7 @@
    "id": "PV_taxi_wreck",
    "name": "Такси, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_taxi_wreck.gltf",
-   "triangles": 41561,
+   "triangles": 36857,
    "materials": 9,
    "aabb": {
     "center": [
@@ -6095,12 +6095,12 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_wreck.gltf",
      "end": 25.0,
-     "triangles": 41561
+     "triangles": 36857
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_wreck_lod1.gltf",
      "end": 60.0,
-     "triangles": 11134
+     "triangles": 9864
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_wreck_lod2.gltf",
@@ -6114,7 +6114,7 @@
    "id": "PV_taxi_open",
    "name": "Такси, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_taxi_open.gltf",
-   "triangles": 42372,
+   "triangles": 37668,
    "materials": 7,
    "aabb": {
     "center": [
@@ -6152,17 +6152,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_open.gltf",
      "end": 25.0,
-     "triangles": 42372
+     "triangles": 37668
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_open_lod1.gltf",
      "end": 60.0,
-     "triangles": 11439
+     "triangles": 10166
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 5405
+     "triangles": 5451
     }
    ],
    "lod_fade": false
@@ -6171,7 +6171,7 @@
    "id": "PV_taxi",
    "name": "Такси, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_taxi.gltf",
-   "triangles": 42372,
+   "triangles": 37668,
    "materials": 7,
    "aabb": {
     "center": [
@@ -6195,17 +6195,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi.gltf",
      "end": 25.0,
-     "triangles": 42372
+     "triangles": 37668
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_lod1.gltf",
      "end": 60.0,
-     "triangles": 11439
+     "triangles": 10165
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_taxi_lod2.gltf",
      "end": 520.0,
-     "triangles": 5100
+     "triangles": 5019
     }
    ],
    "lod_fade": false
@@ -6214,7 +6214,7 @@
    "id": "PV_police_wreck",
    "name": "Полиция, битый",
    "file": "res://assets/models/prospekt_vehicles/PV_police_wreck.gltf",
-   "triangles": 45497,
+   "triangles": 38025,
    "materials": 10,
    "aabb": {
     "center": [
@@ -6238,17 +6238,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_wreck.gltf",
      "end": 25.0,
-     "triangles": 45497
+     "triangles": 38025
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_wreck_lod1.gltf",
      "end": 60.0,
-     "triangles": 12139
+     "triangles": 10182
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_wreck_lod2.gltf",
      "end": 520.0,
-     "triangles": 6224
+     "triangles": 5321
     }
    ],
    "lod_fade": false
@@ -6257,7 +6257,7 @@
    "id": "PV_police_open",
    "name": "Полиция, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_police_open.gltf",
-   "triangles": 46188,
+   "triangles": 38716,
    "materials": 8,
    "aabb": {
     "center": [
@@ -6295,17 +6295,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_open.gltf",
      "end": 25.0,
-     "triangles": 46188
+     "triangles": 38716
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_open_lod1.gltf",
      "end": 60.0,
-     "triangles": 12407
+     "triangles": 10452
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 6236
+     "triangles": 5372
     }
    ],
    "lod_fade": false
@@ -6314,7 +6314,7 @@
    "id": "PV_police",
    "name": "Полиция, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_police.gltf",
-   "triangles": 46188,
+   "triangles": 38716,
    "materials": 8,
    "aabb": {
     "center": [
@@ -6338,17 +6338,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police.gltf",
      "end": 25.0,
-     "triangles": 46188
+     "triangles": 38716
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_lod1.gltf",
      "end": 60.0,
-     "triangles": 12407
+     "triangles": 10451
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_police_lod2.gltf",
      "end": 520.0,
-     "triangles": 5949
+     "triangles": 4935
     }
    ],
    "lod_fade": false
@@ -6357,7 +6357,7 @@
    "id": "PV_van_open",
    "name": "ГАЗель-фургон, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_van_open.gltf",
-   "triangles": 40871,
+   "triangles": 35891,
    "materials": 7,
    "aabb": {
     "center": [
@@ -6395,17 +6395,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van_open.gltf",
      "end": 35.5,
-     "triangles": 40871
+     "triangles": 35891
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van_open_lod1.gltf",
      "end": 83.8,
-     "triangles": 12235
+     "triangles": 11683
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 8711
+     "triangles": 9753
     }
    ],
    "lod_fade": false
@@ -6414,7 +6414,7 @@
    "id": "PV_van",
    "name": "ГАЗель-фургон, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_van.gltf",
-   "triangles": 40871,
+   "triangles": 35891,
    "materials": 7,
    "aabb": {
     "center": [
@@ -6438,17 +6438,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van.gltf",
      "end": 31.4,
-     "triangles": 40871
+     "triangles": 35891
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van_lod1.gltf",
      "end": 74.2,
-     "triangles": 12229
+     "triangles": 11681
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_van_lod2.gltf",
      "end": 520.0,
-     "triangles": 7164
+     "triangles": 8078
     }
    ],
    "lod_fade": false
@@ -6457,7 +6457,7 @@
    "id": "PV_ambulance_open",
    "name": "Скорая, двери открыты",
    "file": "res://assets/models/prospekt_vehicles/PV_ambulance_open.gltf",
-   "triangles": 44867,
+   "triangles": 39887,
    "materials": 9,
    "aabb": {
     "center": [
@@ -6495,17 +6495,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance_open.gltf",
      "end": 35.5,
-     "triangles": 44867
+     "triangles": 39887
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance_open_lod1.gltf",
      "end": 83.8,
-     "triangles": 13283
+     "triangles": 12739
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance_open_lod2.gltf",
      "end": 520.0,
-     "triangles": 9452
+     "triangles": 10503
     }
    ],
    "lod_fade": false
@@ -6514,7 +6514,7 @@
    "id": "PV_ambulance",
    "name": "Скорая, целый",
    "file": "res://assets/models/prospekt_vehicles/PV_ambulance.gltf",
-   "triangles": 44867,
+   "triangles": 39887,
    "materials": 9,
    "aabb": {
     "center": [
@@ -6538,17 +6538,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance.gltf",
      "end": 31.4,
-     "triangles": 44867
+     "triangles": 39887
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance_lod1.gltf",
      "end": 74.2,
-     "triangles": 13277
+     "triangles": 12737
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_ambulance_lod2.gltf",
      "end": 520.0,
-     "triangles": 7835
+     "triangles": 8732
     }
    ],
    "lod_fade": false
@@ -6557,7 +6557,7 @@
    "id": "PV_bus12_over",
    "name": "Автобус 12 м, перевёрнутый",
    "file": "res://assets/models/prospekt_vehicles/PV_bus12_over.gltf",
-   "triangles": 82267,
+   "triangles": 75967,
    "materials": 10,
    "aabb": {
     "center": [
@@ -6581,17 +6581,17 @@
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_over.gltf",
      "end": 45.0,
-     "triangles": 82267
+     "triangles": 75967
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_over_lod1.gltf",
      "end": 120.0,
-     "triangles": 20391
+     "triangles": 19577
     },
     {
      "file": "res://assets/models/prospekt_vehicles/PV_bus12_over_lod2.gltf",
      "end": 520.0,
-     "triangles": 14470
+     "triangles": 15414
     }
    ],
    "lod_fade": false
@@ -6605,7 +6605,7 @@
     "PV_taxi_open",
     "PV_taxi_wreck"
    ],
-   "triangles": 42372,
+   "triangles": 37668,
    "materials": 0,
    "aabb": {
     "center": [
@@ -6634,7 +6634,7 @@
     "PV_police_open",
     "PV_police_wreck"
    ],
-   "triangles": 46188,
+   "triangles": 38716,
    "materials": 0,
    "aabb": {
     "center": [
@@ -6662,7 +6662,7 @@
     "PV_van",
     "PV_van_open"
    ],
-   "triangles": 40871,
+   "triangles": 35891,
    "materials": 0,
    "aabb": {
     "center": [
@@ -6690,7 +6690,7 @@
     "PV_ambulance",
     "PV_ambulance_open"
    ],
-   "triangles": 44867,
+   "triangles": 39887,
    "materials": 0,
    "aabb": {
     "center": [
