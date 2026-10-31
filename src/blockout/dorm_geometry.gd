@@ -339,10 +339,13 @@ static func _palette(plan: Dictionary) -> Dictionary:
 
 
 const V3_DIR: String = "res://assets/textures/dorm_v3"
-## stair_landing — площадки лестницы (верх — мозаика), stair_tread — ступени маршей-модулей (dorm_modules.gd).
+## stair_landing — площадки лестницы (верх — бетон), stair_tread — ступени маршей-модулей (dorm_modules.gd).
 const V3_SHADERS: Dictionary = {"wall":"dorm_wall_v3","reveal":"dorm_wall_v3","ceiling":"dorm_wall_v3",
 	"floor":"dorm_parquet_v3","tile":"dorm_tiles_v3","tile_floor":"dorm_tiles_v3",
 	"stair_landing":"dorm_wall_v3","stair_tread":"dorm_wall_v3"}
+const CONCRETE_MAPS: Dictionary = {"concrete_albedo":"res://assets/textures/concrete_floor_worn_001/albedo.jpg",
+	"concrete_arm":"res://assets/textures/concrete_floor_worn_001/arm.jpg",
+	"concrete_normal":"res://assets/textures/concrete_floor_worn_001/normal.jpg"}
 const V3_MODES: Dictionary = {"wall":0,"reveal":1,"ceiling":2,"tile":0,"tile_floor":1,"stair_landing":3,"stair_tread":4}
 
 
@@ -393,6 +396,10 @@ static func _v3_textures() -> Dictionary:
 		if found.has(stem) or not ResourceLoader.exists(path):
 			continue
 		found[stem] = load(path) as Texture2D
+	# бетон лестницы — общий набор проекта (Poly Haven), не копия в dorm_v3
+	for stem: String in CONCRETE_MAPS:
+		if ResourceLoader.exists(String(CONCRETE_MAPS[stem])):
+			found[stem] = load(String(CONCRETE_MAPS[stem])) as Texture2D
 	for required: String in ["paint_peel_e","wash_peel_e","floor_wood","tile_masks","dorm_wear_noise"]:
 		if not found.has(required):
 			return {}

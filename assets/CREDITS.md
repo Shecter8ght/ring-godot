@@ -12,7 +12,7 @@
 - `assets/textures/brick_pavement_03/` — Brick Pavement 03, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/brick_pavement_03 — территория ТЦ: тротуарная плитка «волна» у дорог и вокруг здания
 - `assets/textures/concrete_block_wall_02/` — Concrete Block Wall 02, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_block_wall_02 — стены доков и ограждения
 - `assets/textures/concrete_floor_02/` — Concrete Floor 02, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/concrete_floor_02 — ступени, бордюры, плиты дорожек
-- `assets/textures/concrete_floor_worn_001/` — Concrete Floor Worn 001, Dimitrios Savva, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/concrete_floor_worn_001 — пол склада и служебных помещений
+- `assets/textures/concrete_floor_worn_001/` — Concrete Floor Worn 001, Dimitrios Savva, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/concrete_floor_worn_001 — пол склада и служебных помещений; ступени и площадки лестницы общежития (dorm_v3/concrete.gdshaderinc)
 - `assets/textures/concrete_panels/` — Concrete Panels, Amal Kumar, CC0 1.0, https://polyhaven.com/a/concrete_panels — внешняя стена здания
 - `assets/textures/concrete_wall_006/` — Concrete Wall 006, Dario Barresi, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_wall_006 — стены служебных коридоров
 - `assets/textures/concrete_wall_007/` — Concrete Wall 007, Dario Barresi, Rico Cilliers, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/concrete_wall_007 — хрущёвка: цоколь, торцы, бетонные плиты
@@ -53,7 +53,6 @@
 - Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпич под отвалившейся штукатуркой (brick_*)
 - Oak Veneer 01, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/oak_veneer_01 — дуб паркетных планок (floor_wood)
 - Painted Wood 008 A, ambientCG, CC0 1.0, https://ambientcg.com/view?id=PaintedWood008A — фактура и трещины краски на коробках, полотнах и окнах модулей (painted_wood_*, перекрашивается шейдером); сырьё — `_asset_src/dorm_textures/PaintedWood008A`
-- Terrazzo 005, ambientCG, CC0 1.0, https://ambientcg.com/view?id=Terrazzo005 — мозаичная крошка ступеней и площадок лестницы (terrazzo_*); сырьё — `_asset_src/dorm_textures/Terrazzo005`
 - Модули `assets/models/dorm` (коробка двери, полотно, окно, батарея, марши, ограждения, повороты поручня) — свои, Blender (tools/dorm_modules); краска батарей и ограждения — та же green_metal_rust (Poly Haven, CC0), поручень — Sapele Veneer (Poly Haven, CC0), перекрашенные шейдером
 - Следы `assets/textures/dorm_decals` (кровь, грязь, пыль, копоть) — из альфа-масок владельца `E:/Models Blender/Маски_АЛЬФА` (22_Кровь, 03, 04, 06, 21; маски не изменены, цвет и рельеф — tools/dorm_modules/gen_dorm_decals.py)
 - Оставленный свет `assets/models/dorm/found_*` (фонарь, налобник, химсвет, кемпинговый фонарь, свечи, мигалка) — свои, Blender (tools/dorm_modules/build_found_lights.py)

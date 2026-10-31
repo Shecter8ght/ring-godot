@@ -63,10 +63,8 @@ MAPS = {
     "painted_wood_rough": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_Roughness.jpg", (0,), 2048, "data"),
     "painted_wood_normal": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
     "painted_wood_ao": ("@PaintedWood008A", "PaintedWood008A_2K-JPG_AmbientOcclusion.jpg", (0,), 2048, "data"),
-    # мозаичные ступени и площадки лестницы (ambientCG Terrazzo005, CC0) — по миру, шаг 0,5 м
-    "terrazzo_albedo": ("@Terrazzo005", "Terrazzo005_2K-JPG_Color.jpg", (0, 1, 2), 2048, "color"),
-    "terrazzo_rough": ("@Terrazzo005", "Terrazzo005_2K-JPG_Roughness.jpg", (0,), 1024, "data"),
-    "terrazzo_normal": ("@Terrazzo005", "Terrazzo005_2K-JPG_NormalGL.jpg", (0, 1, 2), 2048, "normal"),
+    # ступени и площадки лестницы — бетон Concrete Floor Worn 001 из assets/textures (dorm_geometry.gd, CONCRETE_MAPS);
+    # мозаика Terrazzo005 снята 2026-10-31 по слову владельца
     # плитка
     "tile_masks": ("tiles_v3", "tile_masks.png", (0, 1, 2, 3), 4096, "data"),
     "tile_normal": ("tiles_v3", "tile_normal.png", (0, 1, 2), 2048, "normal"),

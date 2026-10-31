@@ -1,55 +1,55 @@
 {
-	"bake_sha256": "2760185777f4fd4270cb6ad4ae3fd253a8b59a14f9f4c9bbb5bc3a21b17ded46",
-	"diffuse_proxy": "dorm_v3_diffuse_proxy_7_stair_ground",
+	"bake_sha256": "70a8cc0f3dfe4bf9fc36ecaa5aff55ac4421381bff93d0b7dcedf4c2f93ef7bf",
+	"diffuse_proxy": "dorm_v3_diffuse_proxy_8_stair_concrete",
 	"engine": "4.7.2-stable (steam)",
 	"floors": [
 		{
-			"bytes": 858182,
-			"data_bytes": 2638368,
+			"bytes": 858789,
+			"data_bytes": 2638416,
 			"id": "floor_1",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_1.res",
-			"seconds": 2.832,
+			"seconds": 2.237,
 			"size": "(43.85, 3.801, 18.2)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 614699,
-			"data_bytes": 2131984,
+			"bytes": 620002,
+			"data_bytes": 2134384,
 			"id": "annex_1",
 			"octree_size": "(128.0, 64.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_1.res",
-			"seconds": 2.595,
+			"seconds": 1.684,
 			"size": "(9.95, 3.801, 30.14)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 781096,
-			"data_bytes": 2365792,
+			"bytes": 784504,
+			"data_bytes": 2367104,
 			"id": "floor_2",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_2.res",
-			"seconds": 2.442,
+			"seconds": 2.648,
 			"size": "(43.85, 3.101, 18.2)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 541025,
-			"data_bytes": 1906272,
+			"bytes": 543301,
+			"data_bytes": 1906688,
 			"id": "annex_2",
 			"octree_size": "(128.0, 32.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_2.res",
-			"seconds": 1.542,
+			"seconds": 1.505,
 			"size": "(9.95, 3.101, 30.14)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 784852,
-			"data_bytes": 2370016,
+			"bytes": 784905,
+			"data_bytes": 2370160,
 			"id": "floor_3",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_3.res",
-			"seconds": 2.545,
+			"seconds": 2.394,
 			"size": "(43.85, 3.101, 18.2)",
 			"subdiv": 2
 		},
@@ -59,12 +59,12 @@
 			"id": "annex_3",
 			"octree_size": "(128.0, 32.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_3.res",
-			"seconds": 1.765,
+			"seconds": 1.4,
 			"size": "(9.95, 3.101, 30.14)",
 			"subdiv": 2
 		}
 	],
 	"geometry_sha256": "f73088a5d2e4955cd5ca35f75287df609e2e45054e584e8f754aac03220f489d",
 	"lighting": "BAKE_DYNAMIC; no LightmapGI",
-	"total_sec": 13.721
+	"total_sec": 11.868
 }

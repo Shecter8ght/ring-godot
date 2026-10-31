@@ -7,6 +7,7 @@ const Walker = preload("res://src/blockout/study_walker.gd")
 const PlanMap = preload("res://src/blockout/dorm_map.gd")
 const LEVEL: String = "res://scenes/levels/dorm_study.tscn"
 const LightCapture = preload("res://tools/dorm_light_capture.gd")
+const LightPlacer = preload("res://tools/dorm_light_placer.gd")
 
 var plan: Dictionary = {}
 var world: Node3D
@@ -30,6 +31,8 @@ var lighting: Node3D
 ## F10 — весь интерфейс стенда скрыт (подсказки, панель света, план, подписи в мире): смотреть на свет без помех.
 var hud_hidden: bool = false
 var labels_before: bool = true
+## L — расстановка оставленного людьми света по месту (только прогулка).
+var placer: Node
 
 
 func _enter_tree() -> void:
@@ -70,6 +73,10 @@ func _ready() -> void:
 	await _frames(4)
 	_jump_to(current)
 	if mode == "walk":
+		placer = LightPlacer.new()
+		placer.name = "LightPlacer"
+		add_child(placer)
+		placer.call("setup",camera,world,hud.get_child(0) as Control)
 		if lighting!=null:
 			for index: int in range(plan.environment.cases.size()):
 				if String(plan.environment.cases[index].id)==String(plan.environment.default):
@@ -77,7 +84,7 @@ func _ready() -> void:
 					break
 			print("dorm: стартовый свет · ",plan.environment.cases[int(lighting.get("case_index"))].label)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 скрыть интерфейс · Esc мышь / FOV 60–110°")
+		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 скрыть интерфейс · L расставить свет · Esc мышь / FOV 60–110°")
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		walker.set("is_probe", true)
@@ -143,7 +150,7 @@ func _ui() -> void:
 	help.position = Vector2(28, -85)
 	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
 	help.text += " · F1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников · F8 ночная луна"
-	help.text += " · F9 как в Таркове · F10 скрыть интерфейс"
+	help.text += " · F9 как в Таркове · F10 скрыть интерфейс · L расставить свет"
 	help.add_theme_font_size_override("font_size", 18)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
@@ -188,6 +195,9 @@ func _refresh_fov() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if mode != "walk":
 		return
+	if placer!=null and bool(placer.call("handle",event)):
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if not (event is InputEventKey and (event as InputEventKey).pressed and not event.is_echo()):
@@ -206,6 +216,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			lighting.call("set_tarkov",not bool(lighting.get("tarkov")))
 		KEY_F10:
 			_toggle_hud()
+		KEY_L:
+			placer.call("toggle")
+		KEY_BRACKETLEFT, KEY_BRACKETRIGHT:
+			if bool(placer.get("active")):
+				placer.call("change_charge",-0.05 if key.physical_keycode==KEY_BRACKETLEFT else 0.05)
 		KEY_E:
 			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
 			if not hit.is_empty():

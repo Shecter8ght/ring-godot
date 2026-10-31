@@ -1,23 +1,14 @@
 {
- "about": "Свет в заброшенном общежитии (электричества нет): лампы плана не ставятся (remove_groups), вместо них — то, что оставили люди. kind — src/blockout/dorm_found_light.gd (KINDS), at — где лежит (низ предмета), yaw — поворот, градусы (у фонарей луч при 0 — в −Z), charge — заряд батареек фонаря, section — узел стенда.",
- "remove_groups": ["annex_corridor", "lounge", "main_corridor", "rooms", "services", "stairs", "watch", "wet_rooms"],
- "lights": [
-  {"id": "stair_f1_flashlight", "note": "уронили на нижней площадке, светит вверх по маршу", "kind": "flashlight", "section": "CentralStair", "at": [20.25, 0.48, -2.45], "yaw": 8, "charge": 0.55},
-  {"id": "f1_corridor_chem_1", "note": "метки пути от входа к лестнице", "kind": "chem_green", "section": "Floor1", "at": [6.2, 0.48, 0.5], "yaw": 30},
-  {"id": "f1_corridor_chem_2", "kind": "chem_green", "section": "Floor1", "at": [13.0, 0.48, -0.7], "yaw": -50},
-  {"id": "f1_toilet_chem", "note": "у первого туалета", "kind": "chem_orange", "section": "Floor1", "at": [2.4, 0.48, -5.0], "yaw": 75},
-  {"id": "f1_commandant_lantern", "note": "кто-то обыскивал стол коменданта", "kind": "lantern", "section": "Floor1", "at": [30.4, 1.23, -7.35], "yaw": 20},
-  {"id": "f1_backexit_beacon", "note": "дорожная мигалка у чёрного выхода — метка выхода", "kind": "beacon", "section": "Floor1", "at": [40.3, 0.48, -1.1], "yaw": 90},
-  {"id": "stair_half1_chem", "note": "на промежуточной площадке, видно с обоих этажей", "kind": "chem_yellow", "section": "CentralStair", "at": [20.35, 2.45, -8.2], "yaw": 70},
-  {"id": "stair_f2_chem", "kind": "chem_green", "section": "CentralStair", "at": [21.95, 4.42, -2.9], "yaw": -20},
-  {"id": "f2_room205_candles", "note": "лагерь мародёров в широкой комнате: свечи на подоконнике", "kind": "candles", "section": "Floor2", "at": [10.635, 5.27, -8.75], "yaw": 0},
-  {"id": "f2_room205_lantern", "note": "фонарь на нижней койке, батарейки подсели", "kind": "lantern", "section": "Floor2", "at": [8.75, 4.89, -6.6], "yaw": -35},
-  {"id": "f2_lounge_flashlight", "note": "забыт на столе гостиной, луч в стену", "kind": "flashlight", "section": "Floor2", "at": [25.2, 4.97, 4.7], "yaw": -100, "charge": 0.45},
-  {"id": "f2_corridor_chem", "kind": "chem_orange", "section": "Floor2", "at": [24.0, 4.42, -1.1], "yaw": 15},
-  {"id": "annex_wash_headlamp", "note": "налобник на полке умывальни между раковинами", "kind": "headlamp", "section": "NorthAnnex", "at": [36.765, 5.3, -17.75], "yaw": 80, "charge": 0.5},
-  {"id": "annex_kitchen_chem", "kind": "chem_yellow", "section": "NorthAnnex", "at": [37.6, 4.42, -12.0], "yaw": 40},
-  {"id": "f3_corridor_chem", "kind": "chem_green", "section": "Floor3", "at": [10.5, 7.66, 0.9], "yaw": 80},
-  {"id": "stair_f3_beacon", "note": "мигалка у решётки, закрывшей лестницу выше", "kind": "beacon", "section": "CentralStair", "at": [19.75, 7.66, -3.3], "yaw": 0},
-  {"id": "f3_room307_flashlight", "note": "почти севший фонарь на полу, светит в дверь", "kind": "flashlight", "section": "Floor3", "at": [16.2, 7.66, -5.5], "yaw": 180, "charge": 0.35}
- ]
+ "about": "Свет, оставленный людьми: расставляет владелец в прогулке по стенду (L — режим, колесо — вид, ЛКМ / ПКМ — поставить / убрать; tools/dorm_light_placer.gd), прежние 17 источников убраны 2026-10-31. Лампы плана не ставятся (remove_groups). kind — src/blockout/dorm_found_light.gd (KINDS), at — где лежит (низ предмета, в координатах узла section), yaw — поворот, градусы (у фонарей луч при 0 — в −Z), charge — заряд батареек фонаря.",
+ "remove_groups": [
+  "annex_corridor",
+  "lounge",
+  "main_corridor",
+  "rooms",
+  "services",
+  "stairs",
+  "watch",
+  "wet_rooms"
+ ],
+ "lights": []
 }

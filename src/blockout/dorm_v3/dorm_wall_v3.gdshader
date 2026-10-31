@@ -1,15 +1,15 @@
 shader_type spatial;
 // Стены, откосы и потолки общежития v03: mode 0 — стена (до 2/3 высоты этажа облупленная масляная краска, выше
 // побелка по штукатурке, отвал до кирпича, полоса-«филёнка», грязь у пола), 1 — откос (побелка), 2 — потолок
-// (побелка по бетону плиты, протечки сильнее), 3 — площадка лестницы (верх — мозаика, остальное — побелка по бетону),
-// 4 — ступени маршей (мозаика целиком: проступи и подступёнки модуля). Снаружи корпуса — серый фасад, как в черновике.
+// (побелка по бетону плиты, протечки сильнее), 3 — площадка лестницы (верх — гладкий бетон, остальное — побелка по
+// бетону), 4 — ступени маршей (бетон целиком: проступи и подступёнки модуля). Снаружи корпуса — серый фасад, как в черновике.
 // Оси карт привязаны к горизонтали; на наклонных гранях (низ марша) рельеф карт ложится на настоящую нормаль.
 
 #include "res://src/blockout/dorm_v3/common.gdshaderinc"
 #include "res://src/blockout/dorm_v3/floors.gdshaderinc"
 #include "res://src/blockout/dorm_v3/paint.gdshaderinc"
 #include "res://src/blockout/dorm_v3/wash.gdshaderinc"
-#include "res://src/blockout/dorm_v3/terrazzo.gdshaderinc"
+#include "res://src/blockout/dorm_v3/concrete.gdshaderinc"
 
 uniform int mode = 0;
 uniform float paint_wear_base = 0.08;
@@ -44,6 +44,10 @@ void fragment() {
 	float rel = p.y - base;
 	float line_h = height * paint_fraction;
 	vec2 w = wear_attr(rel, nz, line_h);
+	// Состояние стены по месту (владелец 2026-10-31: «не везде облезло, а то хоррор»): крупные пятна ~15 м, на каждом
+	// этаже свои. Больше половины стен — краска почти целая, сколы у пола; сильный износ — только в плохих местах.
+	float zone = smoothstep(0.52, 0.64, texture(wear_noise, vec2(p.x + 7.3 * p.y, p.z - 4.1 * p.y) / 40.0).r);
+	float k = mix(0.08, 1.0, zone);
 	vec3 color;
 	float rough;
 	vec3 nrm;
@@ -52,20 +56,20 @@ void fragment() {
 		rough = 0.95;
 		nrm = world_normal;
 	} else if (mode == 4 || (mode == 3 && n.y > 0.5)) {
-		terrazzo_layer(surface_uv(p, t, b, 2.0), nz, t, b, n, color, rough, nrm);
+		concrete_layer(surface_uv(p, t, b, 0.5), nz, n.y > 0.5, t, b, n, color, rough, nrm);
 	} else if (mode == 2 || mode == 3) {
-		float wash = clamp(0.12 + var_k * 0.3, 0.0, 1.0);
-		float loss = clamp(loss_wear_base + var_k * 0.06, 0.0, 1.0);
+		float wash = clamp((0.12 + var_k * 0.3) * mix(0.35, 1.0, zone), 0.0, 1.0);
+		float loss = clamp(loss_wear_base + var_k * 0.06 * zone, 0.0, 1.0);
 		wash_layer(p, inc, uv, wash, loss, t, b, n, true, 1.5, 1.0, color, rough, nrm);
 	} else {
 		float zz = rel + (nz.g - 0.5) * 0.12;
 		bool lower = mode == 0 && zz < line_h;
 		if (lower) {
-			float paint_wear = clamp(paint_wear_base + w.x * 0.45 + var_k * 0.4, 0.0, 1.0);
+			float paint_wear = clamp((paint_wear_base + w.x * 0.45 + var_k * 0.4) * k, 0.0, 1.0);
 			paint_layer(uv, paint_wear, t, b, n, color, rough, nrm);
 		} else {
-			float wash = clamp(wash_wear_base + w.x * 0.35 + var_k * 0.25, 0.0, 1.0);
-			float loss = clamp(loss_wear_base + w.y * 0.5 + var_k * 0.1, 0.0, 1.0);
+			float wash = clamp((wash_wear_base + w.x * 0.35 + var_k * 0.25) * k, 0.0, 1.0);
+			float loss = clamp(loss_wear_base + (w.y * 0.5 + var_k * 0.1) * k * k, 0.0, 1.0);
 			wash_layer(p, inc, uv, wash, loss, t, b, n, false, 1.0, 1.0, color, rough, nrm);
 		}
 		if (mode == 0) {
