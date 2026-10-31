@@ -72,6 +72,8 @@ var _tb_uid: String = ""
 var _sell_sel: Array = []
 ## Вкладка «Продать»: отмеченное к продаже — [[где, индекс], …] (сколько угодно предметов).
 var _sell_picks: Array = []
+## План рейда: в центре схема района ("region") или план выбранной локации ("local").
+var _exit_view: String = "region"
 
 ## Разделы ассортимента торговца: ключ, название, категории предметов ("misc" — всё прочее).
 const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]], ["mag", "Магазины", ["mag"]], ["ammo", "Патроны", ["ammo"]],
@@ -222,7 +224,7 @@ func _process(delta: float) -> void:
 	var plan_level: Node = get_tree().get_first_node_in_group("hideout_level")
 	sig += "|plan%s" % str(plan_level != null and bool(plan_level.get("raid_plan_accepted")))
 	sig += "|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % [_trader_tab, _tb_where, _tb_uid, _buy_to, _focus, _focus_only, _cat_tab, _sub_tab, _shop_sort, Settings.shop_loot]
-	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel) + "|" + str(_sell_picks)
+	sig += "|" + str(Profile.loadout_templates) + "|" + str(_sell_sel) + "|" + str(_sell_picks) + "|" + _exit_view
 	# собрание: кто в сети и где — окно выхода обновляется
 	sig += "|%s|%s|%s|%s|%s" % [Net.is_networked(), str(Net.player_names), str(Net.peer_scene), str(Net.host_conditions), Settings.shop_all()]
 	if sig == _sig:
@@ -2136,9 +2138,10 @@ func _build_upgrades() -> void:
 # ---------------------------------------------------------------- выход
 
 ## План рейда в светлом виде (владелец 2026-10-31: «переработать, чтобы там карту было видно», по образцу Таркова,
-## Arena Breakout: Infinite, ExfilZone): слева маршруты карточками, в центре — карта выбранного (снимок уровня,
-## граница участка, выходы и заходы с края; RaidMapPreview), под ней — что с собой и собрание; справа — условия
-## рейда (время, погода, электричество; риск и награда) и «Принять план».
+## Arena Breakout: Infinite, ExfilZone): слева маршруты карточками, в центре — схема района (убежище, участки,
+## пути от убежища; RegionMapView, клик по участку — его план) или план выбранной локации (снимок уровня, граница
+## участка, выходы и заходы с края; RaidMapPreview), под ней — что с собой и собрание; справа — условия рейда
+## (время, погода, электричество; риск и награда) и «Принять план».
 func _build_exit() -> void:
 	_title.text = "План рейда"
 	var page := VBoxContainer.new()
@@ -2179,20 +2182,45 @@ func _build_exit() -> void:
 	center.add_theme_constant_override("separation", 10)
 	body.add_child(center)
 	var sel := Floors.find(Profile.floor)
+	# вкладки над картой: район целиком или план выбранной локации
+	var views := HBoxContainer.new()
+	views.add_theme_constant_override("separation", 24)
+	center.add_child(views)
+	for pair: Array in [["region", "район"], ["local", "план локации"]]:
+		var key := String(pair[0])
+		var tab := LightUi.button(String(pair[1]).to_upper(), "tab_on" if _exit_view == key else "tab", func() -> void: _exit_view = key)
+		tab.add_theme_font_size_override("font_size", 16)
+		views.add_child(tab)
 	var stage := PanelContainer.new()
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	stage.add_theme_stylebox_override("panel", LightUi.box(Color("2a2c2e"), 8, 0))
 	center.add_child(stage)
-	var map := RaidMapPreview.new()
-	map.name = "RaidMap"
-	map.map_id = String(sel.get("id", ""))
-	map.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	map.custom_minimum_size.y = 320
-	stage.add_child(map)
+	var legend_items: Array
+	if _exit_view == "region":
+		var region := RegionMapView.new()
+		region.name = "RegionMap"
+		region.selected = String(sel.get("id", ""))
+		region.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		region.custom_minimum_size.y = 320
+		# клик по участку — выбрать маршрут и показать его план
+		region.picked.connect(func(id: String) -> void:
+			Floors.select(id)
+			_exit_view = "local")
+		stage.add_child(region)
+		legend_items = [["- - -", LightUi.TEXT2, "путь от убежища"], ["━━", LightUi.BAR, "ж/д насыпь"], ["- - -", RegionMapView.CORDON, "кордон — граница района"],
+			["■", RegionMapView.CLOSED, "закрыт"], ["", LightUi.MUTED, "нажми на участок — его план"]]
+	else:
+		var map := RaidMapPreview.new()
+		map.name = "RaidMap"
+		map.map_id = String(sel.get("id", ""))
+		map.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		map.custom_minimum_size.y = 320
+		stage.add_child(map)
+		legend_items = [["●", RaidMapPreview.EXIT, "выход"], ["◆", RaidMapPreview.EXIT_COND, "выход с условием — наведи на значок"], ["▲", RaidMapPreview.ENTRY, "заход с края"]]
 	var legend := HBoxContainer.new()
 	legend.add_theme_constant_override("separation", 18)
 	center.add_child(legend)
-	for l: Array in [["●", RaidMapPreview.EXIT, "выход"], ["◆", RaidMapPreview.EXIT_COND, "выход с условием — наведи на значок"], ["▲", RaidMapPreview.ENTRY, "заход с края"]]:
+	for l: Array in legend_items:
 		var h := HBoxContainer.new()
 		h.add_theme_constant_override("separation", 6)
 		h.add_child(LightUi.label(String(l[0]), 16, l[1] as Color))

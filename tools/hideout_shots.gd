@@ -2,6 +2,7 @@ extends Node
 ## Снимки убежища на тестовом профиле: общий вид, окно тайника, торговца, выхода —
 ## docs/screens/hideout_*.png. godot --path . res://tools/hideout_shots.tscn
 ## HIDEOUT_ONLY=sell — только вкладка «Продать»: сетки рядом, отметка нескольких предметов, продажа разом.
+## HIDEOUT_ONLY=exit — только план рейда: схема района, клик по участку — его план, вкладкой обратно.
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -29,6 +30,9 @@ func _ready() -> void:
 	await _frames(240)
 	if OS.get_environment("HIDEOUT_ONLY") == "sell":
 		await _sell_only()
+		return
+	if OS.get_environment("HIDEOUT_ONLY") == "exit":
+		await _exit_only()
 		return
 	_save("hideout")
 	var level := get_tree().current_scene
@@ -124,6 +128,41 @@ func _sell_only() -> void:
 		print("%s %s" % ["[ok]  " if bool(check[1]) else "[FAIL]", String(check[0])])
 	_save("hideout_trader_sell_done")
 	print("hideout_shots (sell): провалено %d" % fails)
+	get_tree().quit(1 if fails else 0)
+
+
+## План рейда: схема района (убежище, участки, пути), клик по участку выбирает маршрут и показывает его план,
+## вкладка «район» — обратно со схемой, где выбран новый маршрут.
+func _exit_only() -> void:
+	var level := get_tree().current_scene
+	var ui := level.get("_ui") as HideoutUI
+	Floors.select("mall")
+	for st in get_tree().get_nodes_in_group("interactables"):
+		if st is HideoutStation and (st as HideoutStation).kind == HideoutStation.Kind.EXIT:
+			level.call("open_station", st)
+			break
+	ui._exit_view = "region"
+	await _frames(40)
+	_save("hideout_exit_region")
+	var fails := 0
+	var region := ui.find_child("RegionMap", true, false) as RegionMapView
+	if region == null:
+		fails += 1
+		print("[FAIL] схема района в окне")
+	else:
+		region.picked.emit("zone01")
+	await _frames(40)
+	var map := ui.find_child("RaidMap", true, false)
+	for check in [["выбран Пригород", Profile.floor == "zone01"], ["показан план локации", ui._exit_view == "local"],
+			["план Пригорода", map != null and String(map.get("map_id")) == "zone01"]]:
+		if not bool(check[1]):
+			fails += 1
+		print("%s %s" % ["[ok]  " if bool(check[1]) else "[FAIL]", String(check[0])])
+	_save("hideout_exit_local")
+	ui._exit_view = "region"
+	await _frames(30)
+	_save("hideout_exit_region_zone01")
+	print("hideout_shots (exit): провалено %d" % fails)
 	get_tree().quit(1 if fails else 0)
 
 

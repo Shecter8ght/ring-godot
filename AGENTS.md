@@ -325,7 +325,10 @@ tools/godot.cmd --headless res://tools/compile_check.tscn    # все скрип
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/raid_map_bake.tscn [-- id …] # карты маршрутов для окна «План рейда»: каждая рейдовая сцена
                                                               # (data/floors.json) сверху ортокамерой днём → assets/maps/<id>.webp, выходы (условия) и заходы с края
                                                               # → data/raid_maps.json; затем --import (после правки уровня — снять заново)
+tools/godot.cmd --windowed --resolution 1920x1080 res://tools/region_map_shots.tscn # схема района в «Плане рейда» (RegionMapView): убежище, участки, пути
+                                                              # от убежища, кордон; раскладка — data/region_map.json (черновик) → docs/screens/region_map_<маршрут>.png
 tools/godot.cmd res://tools/hideout_shots.tscn               # снимки убежища и его окон в docs/screens/hideout_*.png
+                                                              # (HIDEOUT_ONLY=exit — план рейда: схема района, клик по участку — его план)
 tools/godot.cmd --headless res://tools/shooting_range_test.tscn # тир котельной: ствол стойки без расхода вещей, пробоина, кнопки ближе/дальше/лист, выход из зала
 tools/godot.cmd res://tools/boiler_hall_shots.tscn         # снимки котельной и тира в docs/screens/boiler_*.png (BOILER_ONLY=имя,имя — выборочно)
 # Пересборка убежища: python tools/shelter_boiler_materials.py [--fetch]; blender --background --factory-startup --python
