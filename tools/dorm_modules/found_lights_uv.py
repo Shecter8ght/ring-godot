@@ -29,7 +29,8 @@ def split_by_material(root, coll) -> list:
     to_root = root.matrix_world.inverted()
     by_mat = {}
     for ob in root.children_recursive:
-        if ob.type != "MESH":
+        # скрытые от рендера — резцы булевых вырезов, не детали
+        if ob.type != "MESH" or ob.hide_render:
             continue
         me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg), depsgraph=dg)
         me.transform(to_root @ ob.matrix_world)

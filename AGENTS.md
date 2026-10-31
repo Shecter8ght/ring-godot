@@ -219,6 +219,12 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
                                                               # мебель общежития, партия 1 (комнаты): кровати двух- и одноярусная с панцирной сеткой на пружинах,
                                                               # матрас, тумбочка, шкаф, стол, стул, табурет, полка; вещи жильцов — холодильник, диван-книжка, ковёр,
                                                               # телевизор с антенной, плитка → RING_Dorm_Furniture (preview — кадры самопроверки)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
+                                                              # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
+                                                              # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);
+                                                              # Painter — python -X utf8 tools/dorm_modules/furniture_sp.py projects|stack|variants (свой экземпляр,
+                                                              # FINISH_SP_JOBS=_asset_src/dorm_furniture/sp_jobs); просмотр — finish_review.py … furniture_uv, затем
+                                                              # furniture_review.py -- <карты> на том же файле (варианты отделки рядами)
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

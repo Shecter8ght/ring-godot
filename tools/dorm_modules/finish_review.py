@@ -28,7 +28,8 @@ def load(path, non_color):
     return img
 
 
-def material(name, maps_dir, glass=False, glow=False):
+def material(name, maps_dir, glass=False, glow=False, prefix=None):
+    """prefix — начало имён карт, если не совпадает с папкой (варианты отделки: папка <вещь>__<код>, карты <вещь>_*)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -37,7 +38,7 @@ def material(name, maps_dir, glass=False, glow=False):
         bsdf.inputs["Emission Color"].default_value = (1.0, 0.85, 0.6, 1.0)
         bsdf.inputs["Emission Strength"].default_value = 4.0
         return m
-    base = os.path.basename(maps_dir)
+    base = prefix or os.path.basename(maps_dir)
 
     def tex(kind, non_color):
         n = nt.nodes.new("ShaderNodeTexImage")
