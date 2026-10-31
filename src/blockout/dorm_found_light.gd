@@ -1,8 +1,9 @@
 extends Node3D
 ## Оставленный кем-то свет в заброшенном общежитии (электричества нет): фонарь на полу с садящимися батарейками,
-## налобник, химсвет-метка, кемпинговый фонарь, окопные свечи в банках, дорожная мигалка. Предметы — модели Blender
-## (tools/dorm_modules/build_found_lights.py → assets/models/dorm/found_*.glb, точки света — found_lights.json),
-## без них — простые формы кодом. Свет и его поведение — здесь же. Расстановка — data/blockouts/dorm_found_lights.json.
+## налобник, химсвет-метка, кемпинговый фонарь, окопные свечи в банках, дорожная мигалка. Предметы — игровые модели
+## с картами (tools/dorm_modules/game_props.py → assets/models/dorm/props/found_*.gltf), без них — формы Blender без
+## текстур (build_found_lights.py → assets/models/dorm/found_*.glb; точки света — found_lights.json, общие для обоих),
+## без тех — простые формы кодом. Свет и его поведение — здесь же. Расстановка — data/blockouts/dorm_found_lights.json.
 
 ## Вид: цвет, яркость, дальность, угол луча (0 — во все стороны), тень.
 const KINDS: Dictionary = {
@@ -22,6 +23,8 @@ const MODELS: Dictionary = {"flashlight": "found_flashlight", "headlamp": "found
 	"beacon": "found_beacon"}
 const PROP_SHADOW: Array[String] = ["flashlight", "headlamp"]
 const MODEL_DIR: String = "res://assets/models/dorm"
+## Игровые модели: материал «<модель>» — карты, «<модель>_стекло» — прозрачное, «<модель>_свет» — светится цветом света.
+const GAME_DIR: String = "res://assets/models/dorm/props"
 ## Слоты материалов Blender: цвет (линейный, как в .blend), шероховатость, металл; светящиеся — цветом света.
 const SLOTS: Dictionary = {
 	"Фонарь_корпус": [Color(0.05, 0.05, 0.055), 0.4, 0.6], "Фонарь_резина": [Color(0.02, 0.02, 0.02), 0.85, 0.0],
@@ -147,7 +150,10 @@ func _build_model(model: String) -> Variant:
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(MODEL_DIR + "/found_lights.json"))
 		if parsed is Dictionary:
 			_meta = parsed as Dictionary
-	var path: String = "%s/%s.glb" % [MODEL_DIR, model]
+	var path: String = "%s/%s.gltf" % [GAME_DIR, model]
+	var game: bool = ResourceLoader.exists(path)
+	if not game:
+		path = "%s/%s.glb" % [MODEL_DIR, model]
 	if model == "" or not _meta.has(model) or not ResourceLoader.exists(path):
 		return null
 	if not _meshes.has(model):
@@ -168,7 +174,9 @@ func _build_model(model: String) -> Variant:
 		var source: Material = mesh.surface_get_material(s)
 		var slot: String = source.resource_name if source != null else ""
 		var material: StandardMaterial3D
-		if slot in GLOWING:
+		if game:
+			material = _game_material(source, slot, color)
+		elif slot in GLOWING:
 			material = _emit(color)
 		elif slot.ends_with("_стекло"):
 			material = _mat(Color(0.9, 0.95, 1.0, 0.12), 0.02, 0.0)
@@ -180,6 +188,30 @@ func _build_model(model: String) -> Variant:
 	add_child(node)
 	var at: Array = (_meta[model] as Dictionary).light
 	return Vector3(float(at[0]), float(at[1]), float(at[2]))
+
+
+## Материал игровой модели: карты как есть; стекло — прозрачное с картами; светящееся — цветом света (у трубки
+## химсвета, рассеивателя лампы и линзы мигалки поверх их карт), яркость идёт за светом.
+func _game_material(source: Material, slot: String, color: Color) -> StandardMaterial3D:
+	var base: StandardMaterial3D = source as StandardMaterial3D
+	if base == null:
+		return _mat(Color(0.3, 0.3, 0.3), 0.7, 0.0)
+	if slot.ends_with("_стекло"):
+		var glass: StandardMaterial3D = base.duplicate() as StandardMaterial3D
+		glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		glass.albedo_color.a = 0.25
+		glass.metallic = 0.0
+		return glass
+	if slot.ends_with("_свет"):
+		if base.albedo_texture == null:
+			return _emit(color)
+		var lit: StandardMaterial3D = base.duplicate() as StandardMaterial3D
+		lit.emission_enabled = true
+		lit.emission = color
+		lit.emission_energy_multiplier = 2.5
+		_glow.append(lit)
+		return lit
+	return base
 
 
 ## Предмет простыми формами (без моделей); светящиеся части — свои материалы, их яркость идёт за светом.

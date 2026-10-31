@@ -222,6 +222,11 @@ python -X utf8 tools/dorm_modules/wear_zones.py [вещь …]     # общеж�
                                                               # (пыль сверху, грязь у пола, подтёк, сырость, кровь) → _asset_src/<набор>/wear; печать слоем —
                                                               # print_apply.py --layers; Painter: found_lights_sp.py|clutter_sp.py wear [вещь …] (группа «Этап 2 — износ»,
                                                               # построитель tools/dorm_modules/sp_dorm_wear.py — профили вещей, сила по возрасту)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<…_uv_v01.blend | RING_Dorm_Rubble_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/game_props.py -- props|rubble [вещь …]
+                                                              # общежитие, игровые версии (бюджет «экономно»): свет и мусор — упрощение той же развёртки, нормали с high-poly,
+                                                              # карты Painter уменьшены до 512 / 1K; обломки — скрытые грани прочь, новая развёртка, фотоматериалы запечены →
+                                                              # assets/models/dorm/props/*.gltf (стекло «_стекло», светящееся «_свет»); затем --import; расстановка мусора —
+                                                              # data/blockouts/dorm_props.json (dorm_geometry.gd: far, solid, tilt), свет — dorm_found_light.gd
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
                                                               # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
                                                               # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)

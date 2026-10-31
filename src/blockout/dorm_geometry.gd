@@ -14,6 +14,10 @@ const FOUND_LIGHTS_PATH: String = "res://data/blockouts/dorm_found_lights.json"
 ## Следы (кровь, грязь, пыль, копоть) — декали из масок владельца; без карт assets/textures/dorm_decals их нет.
 const DECALS_PATH: String = "res://data/blockouts/dorm_decals.json"
 const DECAL_DIR: String = "res://assets/textures/dorm_decals"
+## Мусор и обломки — игровые модели (tools/dorm_modules/game_props.py → assets/models/dorm/props), расстановка «по истории»;
+## мелочь не рисуется дальше far, у мешков и обломков (solid) — коробка столкновений. Без моделей их нет.
+const PROPS_PATH: String = "res://data/blockouts/dorm_props.json"
+const PROP_DIR: String = "res://assets/models/dorm/props"
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -111,6 +115,9 @@ func rebuild() -> void:
 	for item: Dictionary in _read_json(DECALS_PATH).get("decals",[]):
 		if String(item.get("section",""))==section_id:
 			_add_decal(item)
+	for item: Dictionary in _read_json(PROPS_PATH).get("props",[]):
+		if String(item.get("section",""))==section_id:
+			_add_prop(item)
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))
@@ -244,6 +251,45 @@ func _add_decal(item: Dictionary) -> void:
 	decal.distance_fade_length = 10.0
 	decal.add_to_group("dorm_decals")
 	add_child(decal)
+
+
+## Вещь лежит низом в at, повёрнута на yaw (градусы); tilt — наклон вокруг своей X до поворота (бутылка «лежит»: 90°,
+## её верх — бок, на котором износ положил пыль); стекло — прозрачное поверх своих карт.
+func _add_prop(item: Dictionary) -> void:
+	var path: String = "%s/%s.gltf" % [PROP_DIR,String(item.model)]
+	if not ResourceLoader.exists(path):
+		return
+	var prop: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+	prop.name = String(item.id)
+	prop.position = _vec(item.at)
+	prop.rotation_degrees = Vector3(float(item.get("tilt",0.0)),float(item.get("yaw",0.0)),0.0)
+	var far: float = float(item.get("far",10.0))
+	for node: Node in prop.find_children("*","MeshInstance3D",true,false):
+		var mesh_node: MeshInstance3D = node as MeshInstance3D
+		mesh_node.visibility_range_end = far
+		mesh_node.visibility_range_end_margin = 1.0
+		mesh_node.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		for s: int in range(mesh_node.mesh.get_surface_count()):
+			var source: StandardMaterial3D = mesh_node.mesh.surface_get_material(s) as StandardMaterial3D
+			if source!=null and source.resource_name.ends_with("_стекло"):
+				var glass: StandardMaterial3D = source.duplicate() as StandardMaterial3D
+				# смешение, а не пропускание: светлая карта прозрачного стекла при большой альфе «молочная»
+				glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				glass.albedo_color = Color(0.6,0.62,0.6,0.28)
+				glass.metallic = 0.0
+				mesh_node.set_surface_override_material(s,glass)
+		if bool(item.get("solid",false)):
+			var body: StaticBody3D = StaticBody3D.new()
+			var shape: CollisionShape3D = CollisionShape3D.new()
+			var box: BoxShape3D = BoxShape3D.new()
+			var aabb: AABB = mesh_node.get_aabb()
+			box.size = aabb.size
+			shape.shape = box
+			shape.position = aabb.get_center()
+			body.add_child(shape)
+			mesh_node.add_child(body)
+	prop.add_to_group("dorm_props")
+	add_child(prop)
 
 
 static func _vec(values: Array) -> Vector3:
