@@ -24,6 +24,16 @@ var dust: Array[FogVolume] = []
 var moon: DirectionalLight3D
 var night_exterior: bool = false
 var night_toggle: CheckButton
+## Проба «свет как в Таркове» (F9): у них в помещениях художник задаёт каждой зоне нижний уровень окружения, а окна
+## и проёмы — порталы уличного света (80.lv, разбор технологий EFT). Здесь то же своими средствами: в каждом помещении
+## и вдоль коридоров — невидимая слабая подсветка без теней и бликов, вне VoxelGI; окна ярче, свет неба и экспозиция
+## немного выше. Числа — пробы, при принятии — в tools/build_dorm.py (environment.tarkov).
+const TARKOV: Dictionary = {"room": 0.30, "corridor": 0.26, "wet": 0.22, "room_color": "fff0e0", "corridor_color": "e8eef5",
+	"height": 2.1, "range_scale": 0.62, "attenuation": 0.45, "corridor_step": 4.5, "window": 2.5, "ambient": 1.6,
+	"exposure": 1.1}
+var tarkov: bool = false
+var tarkov_toggle: CheckButton
+var tarkov_fills: Array[OmniLight3D] = []
 
 
 func _ready() -> void:
@@ -212,6 +222,13 @@ func create_controls(parent: Control) -> void:
 	night_toggle.button_pressed = night_exterior
 	night_toggle.toggled.connect(set_night_exterior)
 	parent.add_child(night_toggle)
+	tarkov_toggle = CheckButton.new()
+	tarkov_toggle.text = "F9 · Как в Таркове (зоны окружения)"
+	tarkov_toggle.position = Vector2(960,234)
+	tarkov_toggle.focus_mode = Control.FOCUS_NONE
+	tarkov_toggle.button_pressed = tarkov
+	tarkov_toggle.toggled.connect(set_tarkov)
+	parent.add_child(tarkov_toggle)
 	_update_label()
 
 
@@ -236,6 +253,64 @@ func set_night_exterior(enabled: bool) -> void:
 	if is_instance_valid(night_toggle):night_toggle.set_pressed_no_signal(enabled)
 	_apply()
 	await refresh_reflections()
+
+func set_tarkov(enabled: bool) -> void:
+	if tarkov==enabled:return
+	tarkov = enabled
+	if is_instance_valid(tarkov_toggle):tarkov_toggle.set_pressed_no_signal(enabled)
+	if tarkov and tarkov_fills.is_empty():
+		_create_tarkov_fills()
+	for fill: OmniLight3D in tarkov_fills:
+		fill.visible = tarkov
+	_apply()
+	await refresh_reflections()
+
+
+## Подсветка-«зона окружения»: по одной в каждом помещении плана и цепочкой вдоль коридоров каждого этажа.
+## Без теней (светит ровно, как окружение), без бликов (не выдаёт себя на глянце), не входит в VoxelGI (не
+## отражается от стен второй раз и не меняет запечённое).
+func _create_tarkov_fills() -> void:
+	var floors: Dictionary = {}
+	for space: Dictionary in plan.spaces:
+		var rect: Array = space.rect
+		var size: Vector2 = Vector2(float(rect[2])-float(rect[0]),float(rect[3])-float(rect[1]))
+		var kind: String = String(space.kind)
+		var wet: bool = kind in ["toilets","showers","wash","laundry"]
+		var energy: float = float(TARKOV.wet) if wet else float(TARKOV.room)
+		_tarkov_fill(Vector3((float(rect[0])+float(rect[2]))*.5,float(space.y)+float(TARKOV.height),(float(rect[1])+float(rect[3]))*.5),
+			size.length()*float(TARKOV.range_scale)+0.8,energy,Color(String(TARKOV.room_color)))
+		floors[int(space.floor)] = float(space.y)
+	# коридоры: основной — посередине основного корпуса вдоль X, пристройка — вдоль Z
+	var main: Array = plan.main_rect
+	var annex: Array = plan.annex_rect
+	for y: float in floors.values():
+		var x: float = float(main[0])+1.5
+		while x<float(main[2])-1.0:
+			_tarkov_fill(Vector3(x,y+float(TARKOV.height),0.0),4.2,float(TARKOV.corridor),Color(String(TARKOV.corridor_color)))
+			x += float(TARKOV.corridor_step)
+		var z: float = float(annex[1])+1.5
+		while z<float(annex[3])-0.5:
+			_tarkov_fill(Vector3((float(annex[0])+float(annex[2]))*.5,y+float(TARKOV.height),z),4.2,float(TARKOV.corridor),
+				Color(String(TARKOV.corridor_color)))
+			z += float(TARKOV.corridor_step)
+
+
+func _tarkov_fill(at: Vector3, light_range: float, energy: float, color: Color) -> void:
+	var fill: OmniLight3D = OmniLight3D.new()
+	fill.name = "TarkovFill%d" % tarkov_fills.size()
+	fill.position = at
+	fill.omni_range = light_range
+	fill.omni_attenuation = float(TARKOV.attenuation)
+	fill.light_energy = energy
+	fill.light_color = color
+	fill.light_specular = 0.0
+	fill.shadow_enabled = false
+	fill.light_bake_mode = Light3D.BAKE_DISABLED
+	fill.light_volumetric_fog_energy = 0.0
+	fill.add_to_group("dorm_tarkov_fill")
+	add_child(fill)
+	tarkov_fills.append(fill)
+
 
 func _apply_lamp_colors() -> void:
 	for node: Node in get_tree().get_nodes_in_group("dorm_lamps"):
@@ -282,11 +357,11 @@ func _apply() -> void:
 	environment.background_energy_multiplier = float(time.background_energy)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	environment.ambient_light_color = Color("718aa2")
-	environment.ambient_light_energy = float(time.ambient)
+	environment.ambient_light_energy = float(time.ambient)*(float(TARKOV.ambient) if tarkov else 1.0)
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	# The grading switch must not also change camera exposure or the highlight curve.
 	environment.tonemap_mode = int(config.effects.tonemap_mode)
-	environment.tonemap_exposure = float(time.exposure)
+	environment.tonemap_exposure = float(time.exposure)*(float(TARKOV.exposure) if tarkov else 1.0)
 	environment.ssao_enabled = true
 	environment.ssao_radius = float(config.effects.ssao_radius)
 	environment.ssao_intensity = float(config.effects.ssao_intensity)
@@ -348,7 +423,7 @@ func _apply() -> void:
 		# leaves room for the sun (Godot appends directionals after local lights).
 		local.light_bake_mode = Light3D.BAKE_DYNAMIC if local.shadow_enabled and not node.is_in_group("dorm_window_sky") else Light3D.BAKE_DISABLED
 		if node.is_in_group("dorm_window_sky"):
-			(node as Light3D).light_energy = float(time.window_energy)
+			(node as Light3D).light_energy = float(time.window_energy)*(float(TARKOV.window) if tarkov else 1.0)
 			(node as Light3D).visible = float(time.window_energy)>0
 		(node as Light3D).light_volumetric_fog_energy = 0.0 if node.is_in_group("dorm_window_sky") else .25
 	_apply_lamp_colors()
@@ -363,7 +438,8 @@ func _apply() -> void:
 
 func _update_label() -> void:
 	if is_instance_valid(state_label):
-		state_label.text = "Обновляется освещение…" if busy else "%s · %s · атлас %d" % [String(config.cases[case_index].label),"Filmic" if post else "без обработки",int(config.shadow_atlas)]
+		state_label.text = "Обновляется освещение…" if busy else "%s%s · %s · атлас %d" % [String(config.cases[case_index].label),
+			" · как в Таркове" if tarkov else "","Filmic" if post else "без обработки",int(config.shadow_atlas)]
 
 
 func refresh_reflections() -> void:

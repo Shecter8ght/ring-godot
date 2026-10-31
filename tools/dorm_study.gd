@@ -27,6 +27,9 @@ var fov_h: float = 80.0
 var fov_slider: HSlider
 var fov_label: Label
 var lighting: Node3D
+## F10 — весь интерфейс стенда скрыт (подсказки, панель света, план, подписи в мире): смотреть на свет без помех.
+var hud_hidden: bool = false
+var labels_before: bool = true
 
 
 func _enter_tree() -> void:
@@ -74,7 +77,7 @@ func _ready() -> void:
 					break
 			print("dorm: стартовый свет · ",plan.environment.cases[int(lighting.get("case_index"))].label)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · Esc мышь / FOV 60–110°")
+		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 скрыть интерфейс · Esc мышь / FOV 60–110°")
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		walker.set("is_probe", true)
@@ -140,6 +143,7 @@ func _ui() -> void:
 	help.position = Vector2(28, -85)
 	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
 	help.text += " · F1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников · F8 ночная луна"
+	help.text += " · F9 как в Таркове · F10 скрыть интерфейс"
 	help.add_theme_font_size_override("font_size", 18)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
@@ -198,6 +202,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			lighting.call("set_case",4+key.physical_keycode-KEY_F6)
 		KEY_F8:
 			lighting.call("set_night_exterior",not bool(lighting.get("night_exterior")))
+		KEY_F9:
+			lighting.call("set_tarkov",not bool(lighting.get("tarkov")))
+		KEY_F10:
+			_toggle_hud()
 		KEY_E:
 			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
 			if not hit.is_empty():
@@ -227,6 +235,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			_jump_to(key.physical_keycode - KEY_1 + 1)
 		KEY_0:
 			_jump_to(10)
+
+
+func _toggle_hud() -> void:
+	hud_hidden = not hud_hidden
+	hud.visible = not hud_hidden
+	var labels: Array[Node] = get_tree().get_nodes_in_group("dorm_study_labels")
+	if hud_hidden and not labels.is_empty():
+		labels_before = (labels[0] as Node3D).visible
+	for node: Node in labels:
+		(node as Node3D).visible = labels_before and not hud_hidden
 
 
 func _jump_to(index: int) -> void:
@@ -521,6 +539,9 @@ func _v3_shots() -> void:
 			if String(plan.environment.cases[index].id)==case_id:
 				await lighting.call("set_case",index)
 				break
+		# DORM_V3_TARKOV=1 — проба «свет как в Таркове» (F9 в прогулке)
+		if OS.get_environment("DORM_V3_TARKOV")!="":
+			await lighting.call("set_tarkov",true)
 	walker.set_physics_process(false)
 	hud.hide()
 	for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
