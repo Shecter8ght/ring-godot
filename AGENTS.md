@@ -210,6 +210,10 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
                                                               # (полный, лежит, полупустой; ~5 мин на мешок) → RING_Dorm_Bags
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_rubble.py -- <файл.blend>
                                                               # обломки стен: глыбы кладки со штукатуркой, кирпичи, обломок плиты ПК, штукатурка, крошка → RING_Dorm_Rubble
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_furniture.py -- <файл.blend> [preview <папка>]
+                                                              # мебель общежития, партия 1 (комнаты): кровати двух- и одноярусная с панцирной сеткой на пружинах,
+                                                              # матрас, тумбочка, шкаф, стол, стул, табурет, полка; вещи жильцов — холодильник, диван-книжка, ковёр,
+                                                              # телевизор с антенной, плитка → RING_Dorm_Furniture (preview — кадры самопроверки)
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
