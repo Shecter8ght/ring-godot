@@ -21,9 +21,48 @@ const ACCENT_SOFT := Color("fff3ea")
 const LOCK := Color("a85a12")
 const BAR := Color("2a2b2e")
 
+## Сетки, слоты и фигура снаряжения в светлом окне (GridView, SlotView, EquipDoll, PouchPlaces, BodySilhouette)
+const CELL_BG := Color("f7f6f3")
+const CELL_LINE := Color(0, 0, 0, 0.07)
+const ITEM := Color("ebe8e1")
+const ITEM_EDGE := Color(0, 0, 0, 0.16)
+const HALO := Color(1, 1, 1, 0.85)
+const DIM := Color(0.96, 0.95, 0.93, 0.72)
+const SLOT_EDGE := Color("cfcbc2")
+const GOOD := Color("2e7d32")
+const BAD := Color("b3361e")
+const BLUE := Color("2f5f8f")
+## Мета корня светлого окна: виджеты под ним рисуются светлыми.
+const META := "light_ui"
+
 static var _theme: Theme
 static var _head: Font
 static var _mono: Font
+
+
+## Стоит ли узел в светлом окне (у кого-то из предков мета META).
+static func inside(n: Node) -> bool:
+	var p: Node = n
+	while p != null:
+		if p.has_meta(META):
+			return bool(p.get_meta(META))
+		p = p.get_parent()
+	return false
+
+
+## Цвет надписи прежнего тёмного окна → светлого: золото и оранжевое — акцент, красноватое — предупреждение,
+## зелёное — «хорошо», синее — синее, светлое — основной текст, серое — приглушённый.
+static func tone(c: Color) -> Color:
+	var l := 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+	if c.r > 0.85 and c.g > 0.6 and c.b < 0.75 and c.r - c.b > 0.2:
+		return ACCENT_DARK
+	if c.r > 0.75 and c.g < 0.62 and c.b < 0.6:
+		return BAD
+	if c.g > c.r + 0.1 and c.g > c.b:
+		return GOOD
+	if c.b > c.r + 0.15:
+		return BLUE
+	return TEXT if l > 0.8 else (TEXT2 if l > 0.65 else MUTED)
 
 
 ## Узкий гротеск для заголовков и подписей капсом.

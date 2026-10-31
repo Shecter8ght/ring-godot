@@ -47,30 +47,31 @@ func _snap(id: String, half: int) -> int:
 
 
 func _draw() -> void:
+	var lt := LightUi.inside(self)
 	var n := places()
 	for p in range(n):
 		var r := Rect2(float(p) * 2.0 * HALF_W, 0.0, 2.0 * HALF_W, H)
-		draw_rect(r.grow(-1.0), Color(0.085, 0.087, 0.092, 0.86))
-		draw_rect(r.grow(-1.0), Color(1, 1, 1, 0.12), false, 1.0)
-		draw_dashed_line(Vector2(r.get_center().x, 4.0), Vector2(r.get_center().x, H - 4.0), Color(1, 1, 1, 0.1), 1.0, 3.0)
-		draw_string(_font, r.position + Vector2(4, 11), str(p + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.5, 0.52, 0.54))
+		draw_rect(r.grow(-1.0), LightUi.SURFACE if lt else Color(0.085, 0.087, 0.092, 0.86))
+		draw_rect(r.grow(-1.0), LightUi.SLOT_EDGE if lt else Color(1, 1, 1, 0.12), false, 1.0)
+		draw_dashed_line(Vector2(r.get_center().x, 4.0), Vector2(r.get_center().x, H - 4.0), Color(0, 0, 0, 0.12) if lt else Color(1, 1, 1, 0.1), 1.0, 3.0)
+		draw_string(_font, r.position + Vector2(4, 11), str(p + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, LightUi.MUTED if lt else Color(0.5, 0.52, 0.54))
 	# пары под большой — скобкой снизу
 	for pair: Variant in WeaponDb.vest(String(armor.get("id", ""))).get("pairs_big", []):
 		var a := int((pair as Array)[0]) - 1
 		var x0 := float(a) * 2.0 * HALF_W + 6.0
 		var x1 := float(a + 2) * 2.0 * HALF_W - 6.0
 		var y := H + 2.0 + float(a % 2) * 2.0
-		draw_line(Vector2(x0, y), Vector2(x1, y), Color(0.95, 0.82, 0.6, 0.3), 1.0)
+		draw_line(Vector2(x0, y), Vector2(x1, y), Color(LightUi.ACCENT, 0.5) if lt else Color(0.95, 0.82, 0.6, 0.3), 1.0)
 	for pv: Dictionary in ItemDb.pouch_list(armor):
 		var id := String(pv.id)
 		var r := Rect2((float(pv.at) - 1.0) * HALF_W, 0.0, float(ItemDb.pouch_half(id)) * HALF_W, H).grow(-3.0)
 		var col: Color = GridView.CAT_COLOR.get("armor", Color(0.3, 0.3, 0.3))
-		draw_rect(r, col)
+		draw_rect(r, LightUi.ITEM if lt else col)
 		ItemIcons.draw_entry(self, {"id": id, "n": 1}, r.grow(-2.0), false)
-		draw_rect(r, Color(1.0, 0.86, 0.6, 0.35), false, 1.0)
+		draw_rect(r, LightUi.ITEM_EDGE if lt else Color(1.0, 0.86, 0.6, 0.35), false, 1.0)
 		var label: String = {"pistol": "П", "rifle": "авт", "big": "большой"}.get(ItemDb.pouch_kind(id), "")
-		draw_string_outline(_font, Vector2(r.position.x + 2, r.end.y - 3), label, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 3, 10, 3, Color(0, 0, 0, 0.75))
-		draw_string(_font, Vector2(r.position.x + 2, r.end.y - 3), label, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 3, 10, Color(0.95, 0.93, 0.88))
+		draw_string_outline(_font, Vector2(r.position.x + 2, r.end.y - 3), label, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 3, 10, 3, LightUi.HALO if lt else Color(0, 0, 0, 0.75))
+		draw_string(_font, Vector2(r.position.x + 2, r.end.y - 3), label, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 3, 10, LightUi.TEXT if lt else Color(0.95, 0.93, 0.88))
 	if _hover_at > 0:
 		var hr := Rect2((float(_hover_at) - 1.0) * HALF_W, 0.0, float(_hover_n) * HALF_W, H)
 		draw_rect(hr, Color(0.3, 0.9, 0.4, 0.3) if _hover_ok else Color(0.95, 0.3, 0.25, 0.3))

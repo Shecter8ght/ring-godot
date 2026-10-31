@@ -47,7 +47,7 @@ func _ready() -> void:
 		if st is HideoutStation and (st as HideoutStation).kind == HideoutStation.Kind.TRADER:
 			level.call("open_station", st)
 			break
-	for tab in ["buy", "mods", "sell"]:
+	for tab in ["buy", "kits", "mods", "sell", "tasks"]:
 		ui._trader_tab = tab
 		await _frames(40)
 		_save("hideout_trader_%s" % tab)

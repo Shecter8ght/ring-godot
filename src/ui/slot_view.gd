@@ -36,8 +36,10 @@ func set_entry(e: Dictionary) -> void:
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
 	var slot_name := String(Inventory.SLOT_NAMES.get(slot, slot))
-	draw_rect(r, Color(0.085, 0.087, 0.092, 0.86))
-	var border := Color(1, 1, 1, 0.1)
+	# в светлом окне (LightUi): белый слот с тонкой рамкой, надетое — на светлой плашке, подписи тёмные
+	var lt := LightUi.inside(self)
+	draw_rect(r, LightUi.SURFACE if lt else Color(0.085, 0.087, 0.092, 0.86))
+	var border := LightUi.SLOT_EDGE if lt else Color(1, 1, 1, 0.1)
 	if _hover == 1:
 		border = Color(0.3, 0.9, 0.4, 0.8)
 	elif _hover == -1:
@@ -45,7 +47,7 @@ func _draw() -> void:
 	if entry.is_empty():
 		# пустой слот: только название по центру, приглушённо — не плита с рамкой
 		draw_rect(r, border, false, 1.0)
-		draw_string(_font, Vector2(0, size.y * 0.5 + 4.0), slot_name, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, Color(0.46, 0.48, 0.5))
+		draw_string(_font, Vector2(0, size.y * 0.5 + 4.0), slot_name, HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, LightUi.MUTED if lt else Color(0.46, 0.48, 0.5))
 		var low := _why if _hover == -1 and _why != "" else note
 		if low != "":
 			draw_string(_font, Vector2(3, size.y - 6.0), low, HORIZONTAL_ALIGNMENT_CENTER, size.x - 6.0, 9, Color(0.95, 0.45, 0.35) if low == _why else Color(0.6, 0.55, 0.45))
@@ -53,18 +55,21 @@ func _draw() -> void:
 	var cat := String(ItemDb.item(String(entry.id)).get("cat", "misc"))
 	var col: Color = GridView.CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
 	var has_icon := ItemIcons.get_icon(String(entry.id)) != null
-	draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
+	if lt:
+		draw_rect(r, LightUi.ITEM if has_icon else col.lightened(0.55))
+	else:
+		draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
 	# предмет — во весь слот; подписи поверх: чей слот (мелко, сверху) и что надето (снизу)
 	var art := r.grow(-3.0)
 	art.size.y -= 12.0
 	ItemIcons.draw_entry(self, entry, art, false)
-	draw_rect(r, border if _hover != 0 else Color(1.0, 0.86, 0.6, 0.28), false, 1.0)
-	draw_string(_font, Vector2(5, 12), slot_name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, 10, Color(1, 1, 1, 0.5))
+	draw_rect(r, border if _hover != 0 else (LightUi.SLOT_EDGE if lt else Color(1.0, 0.86, 0.6, 0.28)), false, 1.0)
+	draw_string(_font, Vector2(5, 12), slot_name, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, 10, LightUi.MUTED if lt else Color(1, 1, 1, 0.5))
 	var fs := 11 if size.x < 150.0 else 13
 	var label := ItemDb.label(entry)
 	var at := Vector2(4, size.y - 5.0)
-	draw_rect(Rect2(0, size.y - float(fs) - 7.0, size.x, float(fs) + 7.0), Color(0, 0, 0, 0.45))
-	draw_string(_font, at, label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, fs, Color(0.95, 0.93, 0.88))
+	draw_rect(Rect2(0, size.y - float(fs) - 7.0, size.x, float(fs) + 7.0), Color(1, 1, 1, 0.8) if lt else Color(0, 0, 0, 0.45))
+	draw_string(_font, at, label, HORIZONTAL_ALIGNMENT_LEFT, size.x - 8, fs, LightUi.TEXT if lt else Color(0.95, 0.93, 0.88))
 	if _hover == -1 and _why != "":
 		draw_rect(Rect2(0, 14, size.x, 14), Color(0, 0, 0, 0.6))
 		draw_string(_font, Vector2(3, 25), _why, HORIZONTAL_ALIGNMENT_CENTER, size.x - 6.0, 9, Color(0.95, 0.45, 0.35))

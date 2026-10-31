@@ -118,18 +118,24 @@ func index_at(pos: Vector2) -> int:
 # ---------------------------------------------------------------- рисование
 
 func _draw() -> void:
+	# в светлом окне (LightUi, тайник и Михалыч): светлые клетки, плашки предметов светлые с полосой категории снизу,
+	# подписи тёмные с белой обводкой
+	var lt := LightUi.inside(self)
 	var bg := Rect2(Vector2.ZERO, Vector2(grid) * CELL)
-	draw_rect(bg, Color(0.05, 0.055, 0.06, 0.9))
+	draw_rect(bg, LightUi.CELL_BG if lt else Color(0.05, 0.055, 0.06, 0.9))
+	var cell_line := LightUi.CELL_LINE if lt else Color(1, 1, 1, 0.07)
 	for x in range(grid.x + 1):
-		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, grid.y * CELL), Color(1, 1, 1, 0.07))
+		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, grid.y * CELL), cell_line)
 	for y in range(grid.y + 1):
-		draw_line(Vector2(0, y * CELL), Vector2(grid.x * CELL, y * CELL), Color(1, 1, 1, 0.07))
+		draw_line(Vector2(0, y * CELL), Vector2(grid.x * CELL, y * CELL), cell_line)
+	if lt:
+		draw_rect(bg, LightUi.SLOT_EDGE, false, 1.0)
 	for g: Variant in column_groups:
 		var ga: Array = g
 		var gx := float(int(ga[0])) * CELL
 		var gw := float(int(ga[1])) * CELL
-		draw_line(Vector2(gx, 0), Vector2(gx, grid.y * CELL), Color(1.0, 0.86, 0.6, 0.22), 1.5)
-		draw_string(_font, Vector2(gx + 2.0, grid.y * CELL - 4.0), String(ga[2]), HORIZONTAL_ALIGNMENT_CENTER, gw - 4.0, 10, Color(0.95, 0.82, 0.6, 0.45))
+		draw_line(Vector2(gx, 0), Vector2(gx, grid.y * CELL), Color(LightUi.ACCENT, 0.35) if lt else Color(1.0, 0.86, 0.6, 0.22), 1.5)
+		draw_string(_font, Vector2(gx + 2.0, grid.y * CELL - 4.0), String(ga[2]), HORIZONTAL_ALIGNMENT_CENTER, gw - 4.0, 10, Color(LightUi.ACCENT_DARK, 0.7) if lt else Color(0.95, 0.82, 0.6, 0.45))
 	for i in range(items.size()):
 		if int(_layout[i][0]) < 0:
 			continue
@@ -139,27 +145,33 @@ func _draw() -> void:
 		var col: Color = CAT_COLOR.get(cat, Color(0.3, 0.3, 0.3))
 		# с иконкой — тёмная подложка цвета категории, без неё — плашка ярче
 		var has_icon := ItemIcons.get_icon(String(it.id)) != null
-		draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
+		if lt:
+			draw_rect(r, LightUi.ITEM if has_icon else col.lightened(0.55))
+			draw_rect(Rect2(r.position.x, r.end.y - 3.0, r.size.x, 3.0), col)
+		else:
+			draw_rect(r, ItemIcons.backdrop(col) if has_icon else col)
 		ItemIcons.draw_entry(self, it, r.grow(-3.0), bool(_layout[i][2]))
-		draw_rect(r, Color(1, 1, 1, 0.18), false, 1.0)
+		draw_rect(r, LightUi.ITEM_EDGE if lt else Color(1, 1, 1, 0.18), false, 1.0)
+		var halo := LightUi.HALO if lt else Color(0, 0, 0, 0.7)
+		var ink := LightUi.TEXT if lt else Color(0.95, 0.93, 0.88)
 		# в маленькой клетке — короткая подпись (калибр, «Бинт»), полное имя — в подсказке
 		var name := ItemDb.item_name(String(it.id))
 		if r.size.x < 60:
 			name = String(ItemDb.item(String(it.id)).get("short", name))
 		var fs := 11 if has_icon else (12 if r.size.x > 60 else 11)
-		draw_string_outline(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, 3, Color(0, 0, 0, 0.7))
-		draw_string(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, Color(0.95, 0.93, 0.88))
+		draw_string_outline(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, 3, halo)
+		draw_string(_font, r.position + Vector2(4, fs + 2), name, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, fs, ink)
 		if int(it.n) > 1:
 			var t := str(int(it.n))
 			var w := _font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-			draw_string_outline(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, Color(0, 0, 0, 0.8))
-			draw_string(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1.0, 0.92, 0.6))
+			draw_string_outline(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, halo if lt else Color(0, 0, 0, 0.8))
+			draw_string(_font, r.end - Vector2(w + 4, 4), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, LightUi.ACCENT_DARK if lt else Color(1.0, 0.92, 0.6))
 		if it.has("dur"):
 			var mx := ItemDb.max_dur(String(it.id))
 			var k := clampf(float(it.dur) / maxf(1.0, mx), 0.0, 1.0)
 			draw_rect(Rect2(r.position + Vector2(3, r.size.y - 6), Vector2((r.size.x - 6) * k, 3)), Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.3, 0.2), 1.0 - k))
 		if it.has("mods") and not (it.mods as Dictionary).is_empty():
-			draw_string(_font, r.position + Vector2(4, r.size.y - 5), "+%d" % (it.mods as Dictionary).size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.6, 0.85, 1.0))
+			draw_string(_font, r.position + Vector2(4, r.size.y - 5), "+%d" % (it.mods as Dictionary).size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, LightUi.BLUE if lt else Color(0.6, 0.85, 1.0))
 		if it.get("op") is Dictionary:
 			_draw_op(r, it, it.op as Dictionary)
 		elif it.has("rounds"):
@@ -167,21 +179,24 @@ func _draw() -> void:
 			var tag := Gear.mag_tag(it)
 			if tag != "":
 				var tc := Color(0.55, 0.9, 0.55) if tag == "ПОЛН" else (Color(0.62, 0.62, 0.6) if tag == "ПУСТ" else Color(1.0, 0.82, 0.45))
-				draw_string_outline(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, 3, Color(0, 0, 0, 0.8))
+				if lt:
+					tc = LightUi.tone(tc)
+				draw_string_outline(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, 3, halo if lt else Color(0, 0, 0, 0.8))
 				draw_string(_font, r.position + Vector2(4, r.size.y - 5), tag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 11, tc)
 		if not marks.is_empty() and not marks.has(i) and i != selected and not picked.has(i):
-			draw_rect(r, Color(0, 0, 0, 0.55))
+			draw_rect(r, LightUi.DIM if lt else Color(0, 0, 0, 0.55))
 		if marks.has(i):
-			draw_rect(r.grow(0.5), marks[i] as Color, false, 2.5)
+			draw_rect(r.grow(0.5), (marks[i] as Color).darkened(0.35) if lt else marks[i] as Color, false, 2.5)
+		var sel_edge := LightUi.ACCENT if lt else Color(1.0, 0.95, 0.8)
 		if i == selected:
-			draw_rect(r.grow(1.0), Color(1.0, 0.95, 0.8), false, 3.0)
+			draw_rect(r.grow(1.0), sel_edge, false, 3.0)
 		if picked.has(i):
-			draw_rect(r, Color(1.0, 0.9, 0.6, 0.14))
-			draw_rect(r.grow(1.0), Color(1.0, 0.95, 0.8), false, 3.0)
+			draw_rect(r, Color(LightUi.ACCENT, 0.12) if lt else Color(1.0, 0.9, 0.6, 0.14))
+			draw_rect(r.grow(1.0), sel_edge, false, 3.0)
 			# галочка в углу
 			var tick := r.position + Vector2(r.size.x - 15.0, 5.0)
-			draw_rect(Rect2(tick - Vector2(2, 2), Vector2(14, 14)), Color(0.1, 0.1, 0.08, 0.85))
-			draw_polyline(PackedVector2Array([tick + Vector2(1, 5), tick + Vector2(4, 9), tick + Vector2(10, 1)]), Color(0.6, 1.0, 0.55), 2.0)
+			draw_rect(Rect2(tick - Vector2(2, 2), Vector2(14, 14)), LightUi.ACCENT if lt else Color(0.1, 0.1, 0.08, 0.85))
+			draw_polyline(PackedVector2Array([tick + Vector2(1, 5), tick + Vector2(4, 9), tick + Vector2(10, 1)]), Color.WHITE if lt else Color(0.6, 1.0, 0.55), 2.0)
 	if _hover.x >= 0:
 		var hr := Rect2(Vector2(_hover) * CELL, Vector2(_hover_size) * CELL)
 		draw_rect(hr, Color(0.3, 0.9, 0.4, 0.28) if _hover_ok else Color(0.95, 0.3, 0.25, 0.28))

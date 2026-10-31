@@ -51,17 +51,20 @@ class MountChip extends Control:
 	func _draw() -> void:
 		var r := Rect2(Vector2.ZERO, size)
 		var f := ThemeDB.fallback_font
+		var lt := LightUi.inside(self)
 		match state:
 			"on":
-				draw_rect(r, Color(1.0, 0.8, 0.48, 0.32))
-				draw_rect(r, Color(1.0, 0.8, 0.48, 0.9), false, 1.0)
+				draw_rect(r, Color(LightUi.ACCENT, 0.16) if lt else Color(1.0, 0.8, 0.48, 0.32))
+				draw_rect(r, LightUi.ACCENT if lt else Color(1.0, 0.8, 0.48, 0.9), false, 1.0)
 			"closed":
-				draw_rect(r, Color(0.05, 0.05, 0.06, 0.8))
-				draw_line(r.position, r.end, Color(1, 1, 1, 0.12), 1.0)
+				draw_rect(r, Color("ecebe7") if lt else Color(0.05, 0.05, 0.06, 0.8))
+				draw_line(r.position, r.end, Color(0, 0, 0, 0.15) if lt else Color(1, 1, 1, 0.12), 1.0)
 			_:
-				draw_rect(r, Color(0.085, 0.087, 0.092, 0.86))
-				draw_rect(r, Color(1, 1, 1, 0.22), false, 1.0)
+				draw_rect(r, LightUi.SURFACE if lt else Color(0.085, 0.087, 0.092, 0.86))
+				draw_rect(r, LightUi.SLOT_EDGE if lt else Color(1, 1, 1, 0.22), false, 1.0)
 		var c := Color(0.95, 0.93, 0.88) if state == "on" else Color(0.55, 0.57, 0.6, 0.6 if state == "closed" else 1.0)
+		if lt:
+			c = LightUi.ACCENT_DARK if state == "on" else Color(LightUi.MUTED, 0.6 if state == "closed" else 1.0)
 		draw_string(f, Vector2(0, size.y - 5.0), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 10, c)
 
 
@@ -146,4 +149,4 @@ func _draw() -> void:
 		for pair: Variant in v.get("pairs_big", []):
 			pairs.append("%d+%d" % [int((pair as Array)[0]), int((pair as Array)[1])])
 		text = "Места под подсумки: %d   ½ — пист · 1 — авт · 2 — большой: %s" % [n, ", ".join(pairs) if not pairs.is_empty() else "нет"]
-	draw_string(_font, Vector2(0, PLACES_AT.y - 5.0), text, HORIZONTAL_ALIGNMENT_LEFT, SIZE.x, 11, Color(0.95, 0.82, 0.6, 0.85))
+	draw_string(_font, Vector2(0, PLACES_AT.y - 5.0), text, HORIZONTAL_ALIGNMENT_LEFT, SIZE.x, 11, LightUi.TEXT2 if LightUi.inside(self) else Color(0.95, 0.82, 0.6, 0.85))

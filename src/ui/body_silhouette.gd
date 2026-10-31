@@ -6,9 +6,16 @@ extends Control
 ## на своих местах (половинки — как на полоске мест). Координаты — в рамке 244 × 258 (EquipDoll.FIGURE).
 
 const BOX := Vector2(244.0, 258.0)
-const LINE := Color(0.78, 0.74, 0.66, 0.5)
-const WORN := Color(1.0, 0.8, 0.48, 0.92)
-const FILL := Color(1.0, 0.8, 0.48, 0.07)
+const LINE_DARK := Color(0.78, 0.74, 0.66, 0.5)
+const WORN_DARK := Color(1.0, 0.8, 0.48, 0.92)
+const FILL_DARK := Color(1.0, 0.8, 0.48, 0.07)
+## в светлом окне (LightUi): контур тёмно-серый, надетое — акцентом
+const LINE_LIGHT := Color(0.42, 0.43, 0.45, 0.6)
+const WORN_LIGHT := Color(0.79, 0.31, 0.07, 0.95)
+const FILL_LIGHT := Color(0.79, 0.31, 0.07, 0.08)
+var LINE: Color = LINE_DARK
+var WORN: Color = WORN_DARK
+var FILL: Color = FILL_DARK
 ## Пунктир (true) или сплошная линия.
 var dashed: bool = true
 
@@ -71,6 +78,10 @@ func _id(slot: String) -> String:
 
 
 func _draw() -> void:
+	var lt := LightUi.inside(self)
+	LINE = LINE_LIGHT if lt else LINE_DARK
+	WORN = WORN_LIGHT if lt else WORN_DARK
+	FILL = FILL_LIGHT if lt else FILL_DARK
 	# рюкзак — за спиной: выступает из-за корпуса, лямки на плечах
 	if _has("backpack"):
 		var bp := Rect2(80, 60, 84, 96)

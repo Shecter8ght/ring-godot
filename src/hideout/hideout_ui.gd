@@ -58,6 +58,8 @@ var _shop_detail: VBoxContainer
 var _panel: PanelContainer
 var _panel_dark: StyleBoxFlat
 var _head_row: HBoxContainer
+## Окно сейчас светлое (Михалыч, тайник): надписи прежних сборщиков перекрашиваются (LightUi.tone)
+var _light: bool = false
 ## Где окну переносить строки само (у Михалыча — только тёмная вставка прежних вкладок; null — нигде)
 var _wrap_root: Control
 ## Кадр открытия: Tab, открывший окно, его же не закрывает.
@@ -237,10 +239,22 @@ func _process(delta: float) -> void:
 	_stash_slots.clear()
 	for c in _cols.get_children():
 		c.queue_free()
-	# Михалыч — светлое окно со своей шапкой (LightUi), остальные — прежние тёмные
-	var light := _kind == HideoutStation.Kind.TRADER
-	_panel.add_theme_stylebox_override("panel", LightUi.box(LightUi.BG, 6, 0) if light else _panel_dark)
-	_head_row.visible = not light
+	# Михалыч и тайник — светлое окно (LightUi): Михалыч со своей шапкой, у тайника — общая строка заголовка;
+	# остальные — прежние тёмные
+	var light := _kind in [HideoutStation.Kind.TRADER, HideoutStation.Kind.STASH]
+	_light = light
+	_panel.set_meta(LightUi.META, light)
+	_panel.theme = LightUi.theme() if light else null
+	var own_head := _kind == HideoutStation.Kind.TRADER
+	_panel.add_theme_stylebox_override("panel", (LightUi.box(LightUi.BG, 6, 0 if own_head else 18)) if light else _panel_dark)
+	_head_row.visible = not own_head
+	_title.add_theme_color_override("font_color", LightUi.TEXT if light else Color(1.0, 0.86, 0.6))
+	if light:
+		_title.add_theme_font_override("font", LightUi.head_font())
+		_title.add_theme_font_size_override("font_size", 30)
+	else:
+		_title.remove_theme_font_override("font")
+		_title.add_theme_font_size_override("font_size", 26)
 	match _kind:
 		HideoutStation.Kind.STASH:
 			_build_stash()
@@ -510,9 +524,16 @@ func _confirm_template(t: Dictionary) -> void:
 
 ## «Сортировать» над сеткой: крупное в начало, стопки добраны — место освобождается.
 func _sort_button(name: String) -> Button:
-	return InventoryUI.sort_button(func() -> void:
+	var b := InventoryUI.sort_button(func() -> void:
 		if not Profile.sort_grid(name):
 			toast("Не разложить — места впритык"))
+	if _light:
+		# светлое окно: обычная кнопка темы (белая с рамкой), не янтарная плашка
+		for st: String in ["normal", "hover", "pressed"]:
+			b.remove_theme_stylebox_override(st)
+		for c: String in ["font_color", "font_hover_color", "font_pressed_color"]:
+			b.remove_theme_color_override(c)
+	return b
 
 
 ## Тайник ↔ рюкзак (Ctrl+клик, двойной клик); не влезло — сказать.
@@ -748,20 +769,19 @@ func _build_trader() -> void:
 		"kits":
 			_trader_kits(page)
 		_:
-			# прежние вкладки — тёмной вставкой со своей (умалчиваемой) темой: их надписи светлые
+			# обвес, продажа, задания — прежние сборщики колонок на светлой странице: надписи перекрашиваются (_text),
+			# карточки, сетки и слоты сами рисуются светлыми (LightUi.inside)
 			var pad := MarginContainer.new()
 			pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			for side: String in ["left", "right", "top", "bottom"]:
-				pad.add_theme_constant_override("margin_" + side, 18)
+			for side: String in ["left", "right"]:
+				pad.add_theme_constant_override("margin_" + side, 28)
+			pad.add_theme_constant_override("margin_top", 18)
+			pad.add_theme_constant_override("margin_bottom", 20)
 			page.add_child(pad)
-			var inset := PanelContainer.new()
-			_wrap_root = inset
-			inset.theme = ThemeDB.get_default_theme()
-			inset.add_theme_stylebox_override("panel", LightUi.box(Color(0.075, 0.07, 0.065, 0.97), 8, 16))
-			pad.add_child(inset)
 			var row := HBoxContainer.new()
-			row.add_theme_constant_override("separation", 16)
-			inset.add_child(row)
+			row.add_theme_constant_override("separation", 20)
+			pad.add_child(row)
+			_wrap_root = row
 			var keep := _cols
 			_cols = row
 			match _trader_tab:
@@ -1725,6 +1745,15 @@ func _builder_card(parent: Control, weapon: Dictionary, where: String, idx: int,
 	icon.id = String(weapon.get("id", ""))
 	icon.entry = weapon
 	icon.custom_minimum_size = Vector2(0, 220)
+	if _light:
+		# светлое окно: крупный снимок сборки на светлой витрине
+		icon.studio = true
+		icon.light = true
+		icon.plate = LightUi.STAGE
+		icon.pad = 18.0
+		icon.frame = SHOWCASE_FRAME
+		icon.urgent = true
+		icon.custom_minimum_size.y = 300
 	parent.add_child(icon)
 	var open := _button("Открыть конструктор оружия", func() -> void: open_builder(where, idx, source))
 	open.custom_minimum_size.y = 44
@@ -2621,8 +2650,10 @@ func _column(title: String, ratio: float) -> VBoxContainer:
 	_cols.add_child(box)
 	var t := Label.new()
 	t.text = title
-	t.add_theme_font_size_override("font_size", 18)
-	t.add_theme_color_override("font_color", Color(0.95, 0.82, 0.6))
+	t.add_theme_font_size_override("font_size", 20 if _light else 18)
+	t.add_theme_color_override("font_color", LightUi.TEXT if _light else Color(0.95, 0.82, 0.6))
+	if _light:
+		t.add_theme_font_override("font", LightUi.head_font())
 	box.add_child(t)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -2653,7 +2684,7 @@ func _text(t: String, color: Color) -> Label:
 	var l := Label.new()
 	l.text = t
 	l.add_theme_font_size_override("font_size", 16)
-	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_color", LightUi.tone(color) if _light else color)
 	return l
 
 

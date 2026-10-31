@@ -17,6 +17,12 @@ const BIG_MAX_K := 1.35
 var controls: HBoxContainer
 ## Строка цены (нет цены — null): окно правит её на месте, когда меняют количество.
 var price_label: Label
+## Обычная карточка (make) в светлом окне перекрашивается, попав в дерево: её части и отметка
+var _icon: IconBox
+var _name_label: Label
+var _sub_label: Label
+var _mark: int = 0
+var _restyled: bool = false
 
 
 ## entry — запись предмета (id, n, состояние) или {id}; sub — подробности; price — "" без цены;
@@ -62,8 +68,11 @@ static func make(entry: Dictionary, sub: String, price: String, width: float = W
 	var title := ItemDb.item_name(String(entry.get("id", ""))) if plain else ItemDb.label(entry)
 	var name := _label(title + ("  ×%d" % n if n > 1 else ""), 18 if big else 14, Color(0.95, 0.95, 0.94) if big else Color(0.93, 0.91, 0.86))
 	v.add_child(name)
+	c._icon = icon
+	c._name_label = name
 	if sub != "":
-		v.add_child(_label(sub, 13 if big else 12, Color(0.6, 0.63, 0.66) if big else Color(0.66, 0.68, 0.66)))
+		c._sub_label = _label(sub, 13 if big else 12, Color(0.6, 0.63, 0.66) if big else Color(0.66, 0.68, 0.66))
+		v.add_child(c._sub_label)
 	if price != "":
 		c.price_label = _label(price, 18 if big else 14, Color(0.78, 0.9, 0.7) if big else Color(0.72, 0.87, 0.66))
 		v.add_child(c.price_label)
@@ -131,12 +140,34 @@ func popup_host() -> Node:
 
 ## Отметка: 1 — подходит (золотая рамка), -1 — не к месту (приглушить), 0 — как есть.
 func mark(k: int) -> void:
+	_mark = k
 	var sb := (get_theme_stylebox("panel") as StyleBoxFlat).duplicate() as StyleBoxFlat
 	if k > 0:
-		sb.border_color = Color(1.0, 0.8, 0.35, 0.95)
+		sb.border_color = LightUi.ACCENT if _restyled else Color(1.0, 0.8, 0.35, 0.95)
 		sb.set_border_width_all(2)
 	add_theme_stylebox_override("panel", sb)
 	modulate = Color(1, 1, 1, 0.35) if k < 0 else Color(1, 1, 1, 1)
+
+
+## Обычная карточка в светлом окне (LightUi): белая с тонкой рамкой, снимок на светлой плашке, подписи тёмные.
+func _ready() -> void:
+	if _restyled or _icon == null or not LightUi.inside(self):
+		return
+	_restyled = true
+	add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 6, 10, LightUi.LINE, 1))
+	_icon.studio = true
+	_icon.light = true
+	_icon.plate = LightUi.PLATE
+	_icon.pad = 6.0
+	_icon.frame = Vector2i(480, 200)
+	_icon.queue_redraw()
+	_name_label.add_theme_color_override("font_color", LightUi.TEXT)
+	if _sub_label:
+		_sub_label.add_theme_color_override("font_color", LightUi.MUTED)
+	if price_label:
+		price_label.add_theme_color_override("font_color", LightUi.GOOD)
+	if _mark != 0:
+		mark(_mark)
 
 
 static func _label(t: String, size: int, color: Color) -> Label:
