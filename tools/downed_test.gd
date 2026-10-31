@@ -31,6 +31,7 @@ func _ready() -> void:
 	await _player_rules(me)
 	await _mate_rules(me)
 	await _marauder_rules()
+	await _no_path_rule()
 	await _finish_rule()
 	print("downed_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
@@ -211,6 +212,73 @@ func _marauder_rules() -> void:
 	if is_instance_valid(a):
 		a.queue_free()
 	await get_tree().physics_frame
+
+
+## Раненый за стеной, на несвязанном участке сетки путей (замечено 2026-10-29, когда точки теста
+## попали в разные магазины ТЦ): товарища не зовут; позванный всё же — сдаётся, а не стоит в RESCUE.
+func _no_path_rule() -> void:
+	var street := SectorBuilder.polar(-108.0, STREET_R)
+	var map := (get_tree().get_first_node_in_group("players") as Node3D).get_world_3d().navigation_map
+	var walled := _walled_point(map, street)
+	_check("рядом с улицей есть место, куда по сетке путей не дойти", walled != Vector3.INF, str(walled))
+	if walled == Vector3.INF:
+		return
+	var scene := preload("res://scenes/ai/marauder.tscn")
+	var squad := Squad.new()
+	var a := scene.instantiate() as Marauder
+	a.name = "WalledA"
+	a.archetype = "gunner"
+	a.loadout_id = "scav_veteran"
+	a.weapon = "rifle"
+	var b := scene.instantiate() as Marauder
+	b.name = "MateB"
+	b.archetype = "gunner"
+	b.weapon = "rifle"
+	for m in [a, b]:
+		_level.get_node("Marauders").add_child(m)
+		squad.add(m)
+		(m as Marauder).patrol_point_provider = func() -> Vector3: return (m as Marauder).global_position
+	a.global_position = walled + Vector3(0, 0.1, 0)
+	b.global_position = street + Vector3(0, 0.1, 0)
+	await _wait(1.0)
+	a.last_known = SectorBuilder.polar(-90.0, 100.0)
+	# плита бывалого, повёрнутая к стрелку, остановила бы попадание — без брони лёг наверняка
+	a.equipment.erase("armor")
+	(a.get_node("Health") as Health).take_damage(300.0, a.last_known, "body")
+	await get_tree().physics_frame
+	_check("нет пути — товарища не зовут", a.state == Marauder.State.DOWNED and b.state != Marauder.State.RESCUE and a.rescuer == null,
+		"%s / %s, %.1f м по прямой" % [Marauder.State.keys()[a.state], Marauder.State.keys()[b.state], a.global_position.distance_to(b.global_position)])
+	# позвали всё же (так выбирали раньше — по прямой; сетка могла поменяться на бегу)
+	b.start_rescue(a)
+	var cfg: Dictionary = Balance.AI_RESCUE_GIVE_UP
+	var t0 := Time.get_ticks_msec()
+	while b.state == Marauder.State.RESCUE and Time.get_ticks_msec() - t0 < int((float(cfg.no_path_sec) + 3.0) * 1000.0):
+		await get_tree().physics_frame
+	var took := float(Time.get_ticks_msec() - t0) / 1000.0
+	_check("нет пути — товарищ не застревает в RESCUE", b.state != Marauder.State.RESCUE and a.rescuer == null and a._help_refused.has(b.get_instance_id()),
+		"%s через %.1f с, конец пути в %.1f м от раненого" % [Marauder.State.keys()[b.state], took, b._agent.get_final_position().distance_to(b._agent.target_position)])
+	# раненый зовёт снова (каждые 4 с) — сдавшегося больше не зовёт
+	await _wait(4.5)
+	_check("сдавшегося раненый снова не зовёт", b.state != Marauder.State.RESCUE and a.rescuer == null, Marauder.State.keys()[b.state])
+	for m in [a, b]:
+		(m as Node).queue_free()
+	await get_tree().physics_frame
+
+
+## Место на сетке путей рядом с улицей (по прямой до 20 м, тот же уровень пола), куда с улицы
+## по сетке не дойти: путь кончается далеко от него. Нет такого — Vector3.INF.
+func _walled_point(map: RID, street: Vector3) -> Vector3:
+	var from := NavigationServer3D.map_get_closest_point(map, street)
+	for a in range(-124, -91, 2):
+		for r in range(40, 92, 2):
+			var p := SectorBuilder.polar(float(a), float(r))
+			var on := NavigationServer3D.map_get_closest_point(map, p)
+			if Vector2(on.x - p.x, on.z - p.z).length() > 0.3 or absf(on.y - from.y) > 0.6 or on.distance_to(from) > 20.0:
+				continue
+			var path := NavigationServer3D.map_get_path(map, from, on, true)
+			if path.is_empty() or path[path.size() - 1].distance_to(on) > 2.0:
+				return on
+	return Vector3.INF
 
 
 ## Лежащего игрока мародёр добивает, только если другие не стреляют.

@@ -230,6 +230,13 @@ var _flanked: bool = false
 var _rescue_target: Marauder = null
 var _rescue_phase: int = 0
 var _rescue_t: float = 0.0
+## Пока бежит (Balance.AI_RESCUE_GIVE_UP): лучший остаток пути до раненого, сколько он не сокращается,
+## сколько путь кончается не у раненого.
+var _rescue_best_left: float = INF
+var _rescue_stall_t: float = 0.0
+var _rescue_no_path_t: float = 0.0
+## Раненый: кто сдался идти к нему за это ранение (id узла) — его больше не зовут.
+var _help_refused: Dictionary = {}
 ## Грабёж: куда идёт ведущий, сколько роется, что уже взял (сумка), где уже был.
 ## Метки «этот контейнер наш» — общие для всех: id контейнера -> [мародёр, время, мс].
 static var _loot_claims: Dictionary = {}
@@ -1923,6 +1930,7 @@ func _on_downed_changed(on: bool) -> void:
 		say("Меня зацепило!")
 		NoiseBus.emit(global_position, Balance.AI_RESCUE_RADIUS, "death")
 		_help_t = 0.0
+		_help_refused.clear()
 		_call_for_help()
 	else:
 		Audio.play("revive", global_position + Vector3.UP)
@@ -1938,25 +1946,40 @@ func _on_downed_changed(on: bool) -> void:
 		_try_cover(Balance.AI_COVER_RADIUS, false)
 
 
-## Раненый зовёт: ближайший живой товарищ, который слышит (свой отряд — в первую очередь), идёт спасать.
+## Раненый зовёт: ближайший живой товарищ, который слышит (свой отряд — в первую очередь) и может
+## дойти по сетке путей, идёт спасать. Кто уже сдался за это ранение — не зовётся.
 func _call_for_help() -> void:
-	var best: Marauder = null
-	var best_s := INF
+	var cands: Array = []
 	for n in get_tree().get_nodes_in_group("marauders"):
 		var m := n as Marauder
 		if m == self or m.state in [State.DEAD, State.DOWNED, State.RESCUE, State.RETREAT]:
+			continue
+		if _help_refused.has(m.get_instance_id()):
 			continue
 		var d := m.global_position.distance_to(global_position)
 		if d > Balance.AI_RESCUE_RADIUS:
 			continue
 		if m.faction != faction:
 			continue
-		var s := d * (1.0 if m.squad == squad else 1.8)
-		if s < best_s:
-			best = m
-			best_s = s
-	if best:
-		best.start_rescue(self)
+		cands.append([d * (1.0 if m.squad == squad else 1.8), m])
+	cands.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) < float(y[0]))
+	# путь ищется только по порядку, до первого, кто дойдёт: раненый за стеной на несвязанном
+	# участке сетки — путь обрывается у стены, такого не зовём
+	for c in cands:
+		var m := c[1] as Marauder
+		if m._path_reaches(global_position):
+			m.start_rescue(self)
+			return
+
+
+## Дойти до точки по сетке путей можно: путь кончается у неё. На несвязанном участке (другой магазин
+## за стеной) путь обрывается в ближайшем достижимом месте. Сетка ещё не готова — не судим.
+func _path_reaches(p: Vector3) -> bool:
+	if not _nav_ready:
+		return true
+	var goal := _snap(p)
+	var path := _profile_path(get_world_3d().navigation_map, goal)
+	return not path.is_empty() and path[path.size() - 1].distance_to(goal) <= float(Balance.AI_RESCUE_GIVE_UP.path_end_m)
 
 
 func start_rescue(who: Marauder) -> void:
@@ -1964,6 +1987,9 @@ func start_rescue(who: Marauder) -> void:
 	_rescue_target = who
 	_rescue_phase = 0
 	_rescue_t = 0.0
+	_rescue_best_left = INF
+	_rescue_stall_t = 0.0
+	_rescue_no_path_t = 0.0
 	state = State.RESCUE
 	crouched = false
 	_apply_shape()
@@ -2047,6 +2073,11 @@ func _rescue(delta: float) -> void:
 				else:
 					_rescue_phase = 2
 					_rescue_t = 0.0
+			# не дойти — сдаётся, а не стоит у стены вечно; раненый позовёт другого
+			elif _rescue_unreachable(delta):
+				t._help_refused[get_instance_id()] = true
+				say("Не пройти к тебе!")
+				_end_rescue()
 		1:
 			if _agent.is_navigation_finished() or d > 3.0:
 				t.dragged_by = null
@@ -2060,6 +2091,34 @@ func _rescue(delta: float) -> void:
 			if _rescue_t >= Balance.AI_REVIVE_SEC:
 				t._health.revive(Balance.REVIVE_HP)
 				_end_rescue()
+
+
+## Бежит к раненому, а дойти нельзя: путь агента кончается не у раненого (тот на несвязанном участке
+## сетки — путь 0,6 м, агент «дошёл» и стоит) дольше no_path_sec, или остаток пути не сокращается
+## на progress_m за stall_sec (упёрся, закрыто). Остаток — по пути, а не по прямой: обход не в счёт.
+func _rescue_unreachable(delta: float) -> bool:
+	if not _nav_ready:
+		return false
+	var cfg: Dictionary = Balance.AI_RESCUE_GIVE_UP
+	# путь мог ещё не пересчитаться под новую цель — кадр-другой расхождения гасит no_path_sec
+	var end := _agent.get_final_position()
+	var path := _agent.get_current_navigation_path()
+	if path.is_empty() or end.distance_to(_agent.target_position) > float(cfg.path_end_m):
+		_rescue_no_path_t += delta
+	else:
+		_rescue_no_path_t = 0.0
+	var i := _agent.get_current_navigation_path_index()
+	var left := 0.0
+	if i < path.size():
+		left = global_position.distance_to(path[i])
+		for k in range(i + 1, path.size()):
+			left += path[k - 1].distance_to(path[k])
+	if left < _rescue_best_left - float(cfg.progress_m):
+		_rescue_best_left = left
+		_rescue_stall_t = 0.0
+	else:
+		_rescue_stall_t += delta
+	return _rescue_no_path_t >= float(cfg.no_path_sec) or _rescue_stall_t >= float(cfg.stall_sec)
 
 
 func _end_rescue() -> void:
