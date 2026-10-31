@@ -4,6 +4,7 @@
   set FINISH_SP_JOBS=E:/Games/RING-godot/_asset_src/dorm_found_lights/sp_jobs
   python -X utf8 tools/dorm_modules/found_lights_sp.py projects [предмет …]   # создать, запечь, сохранить .spp
   python -X utf8 tools/dorm_modules/found_lights_sp.py stack [предмет …]      # стек по выбору владельца + выгрузка карт
+  python -X utf8 tools/dorm_modules/found_lights_sp.py wear [предмет …]       # этап 2: печать слоем и износ (sp_dorm_wear.py)
 
 Плотность набора (пикс/мм) — по развёртке предмета; отделки — sp_finish.build_set теми же числами, что на карточке.
 Детали набора — сетки по слотам (имя сетки = слот материала, у налобника с суффиксом .001).
@@ -94,7 +95,35 @@ def stack(names: list[str]) -> None:
         print(sp_run.wait(jobs / f"_stack_{name}.txt", 900))
 
 
+def wear(names: list[str]) -> None:
+    """Этап 2: слой печати и группа «Этап 2 — износ» (sp_dorm_wear.py) поверх заводской отделки, выгрузка карт
+    (печать и износ — уже в них), сохранение проекта."""
+    wait_shelves()
+    jobs = sp_run.SP_JOBS
+    here = Path(__file__).resolve().parent.as_posix()
+    for name in names:
+        (jobs / "_project_ready.txt").unlink(missing_ok=True)
+        (jobs / f"_wear_{name}.txt").unlink(missing_ok=True)
+        print(sp_run.run(f"print(sp_finish.open_project(r'{(SRC / 'sp' / (name + '.spp')).as_posix()}'))", 180, "open_" + name))
+        print(sp_run.wait(jobs / "_project_ready.txt", 400))
+        code = "\n".join([
+            "import sys",
+            f"sys.path.insert(0, r'{here}') if r'{here}' not in sys.path else None",
+            "import importlib, sp_dorm_wear",
+            "importlib.reload(sp_dorm_wear)",
+            "import substance_painter.textureset as TS",
+            "set_name = TS.all_texture_sets()[0].name()",
+            f"print(sp_dorm_wear.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}))",
+            "def _exp():",
+            f"    s, t = sp_lib.export(r'{(SRC / 'maps' / name).as_posix()}', set_name)",
+            f"    sp_finish.save_as(r'{(SRC / 'sp' / (name + '.spp')).as_posix()}')",
+            "    return str(s)",
+            f"sp_lib.when_idle(_exp, '_wear_{name}.txt')", ""])
+        print(sp_run.run(code, 600, "wear_" + name))
+        print(sp_run.wait(jobs / f"_wear_{name}.txt", 900))
+
+
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     names = rest or list(ITEMS)
-    {"projects": projects, "stack": stack}[mode](names)
+    {"projects": projects, "stack": stack, "wear": wear}[mode](names)

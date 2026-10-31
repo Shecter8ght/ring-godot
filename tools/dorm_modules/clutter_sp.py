@@ -27,4 +27,4 @@ S.PX = {k: v["px_mm"] for k, v in _dens.items()}
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     names = rest or list(S.ITEMS)
-    {"projects": S.projects, "stack": S.stack}[mode](names)
+    {"projects": S.projects, "stack": S.stack, "wear": S.wear}[mode](names)

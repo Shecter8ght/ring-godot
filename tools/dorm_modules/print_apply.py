@@ -3,7 +3,9 @@
 пачка по граням, надписи на оставленном свете — плоской наклейкой на свою деталь, этикетка тушёнки на банке свечи —
 выцветшая и рваная.
 
-  python -X utf8 tools/dorm_modules/print_apply.py [вещь …]
+  python -X utf8 tools/dorm_modules/print_apply.py [вещь …]            # печать прямо на карты (этап 1)
+  python -X utf8 tools/dorm_modules/print_apply.py --layers [вещь …]   # печать слоем для Painter → prints/uv (этап 2:
+                                                                        # Painter кладёт её между отделкой и износом)
 
 Карты Painter не теряются: первая же запись сохраняет их рядом как *_plain.png, печать всегда кладётся на них заново.
 Там, где печать краской по металлу (банки, фонарь, мигалка), металличность снимается, блеск — краски.
@@ -98,8 +100,38 @@ def bbox(g, mask):
     return p.min(axis=0), p.max(axis=0)
 
 
+LAYERS_ONLY = False  # --layers: печать слоем для Painter (prints/uv), карты не трогать
+
+
+def save_layer(base: Path, game: str, layers: list) -> None:
+    """Печать слоем в развёртке для стека Painter (между заводской отделкой и износом): цвет без тёмной каймы
+    (за краем — размытый цвет печати), прозрачность, блеск и металл краски (первые заданные)."""
+    out = base / "prints" / "uv"
+    out.mkdir(parents=True, exist_ok=True)
+    h, w = layers[0][0].shape[:2]
+    col, alpha = np.zeros((h, w, 3), np.float32), np.zeros((h, w, 1), np.float32)
+    for prn, _, _, opa in layers:
+        a = prn[..., 3:4] * opa
+        col = col * (1 - a) + prn[..., :3] * a
+        alpha = alpha * (1 - a) + a
+    un = np.where(alpha > 1e-3, col / np.maximum(alpha, 1e-3), 0)
+    blur_c = cv2.GaussianBlur(un * alpha, (0, 0), 24)
+    blur_a = cv2.GaussianBlur(alpha[..., 0], (0, 0), 24)[..., None]
+    fill = np.where(blur_a > 1e-4, blur_c / np.maximum(blur_a, 1e-4), 0.5)
+    un = np.where(alpha > 1e-3, un, fill)
+    cv2.imwrite(str(out / f"{game}_print_color.png"), cv2.cvtColor((np.clip(un, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR))
+    cv2.imwrite(str(out / f"{game}_print_alpha.png"), (np.clip(alpha[..., 0], 0, 1) * 255 + 0.5).astype(np.uint8))
+    rough = next((r for _, _, r, _ in layers if r is not None), None)
+    metal = next((m for _, m, _, _ in layers if m is not None), None)
+    (out / f"{game}_print.json").write_text(json.dumps({"rough": rough, "metal": metal}), encoding="utf-8")
+    print("LAYER", game, "блеск", rough, "металл", metal, flush=True)
+
+
 def compose(base: Path, game: str, layers: list) -> None:
     """layers: (печать RGBA, металличность под печатью или None — не трогать, блеск печати или None, непрозрачность)."""
+    if LAYERS_ONLY:
+        save_layer(base, game, layers)
+        return
     mdir = base / "maps" / game
     for k in ("baseColor", "occlusionRoughnessMetallic"):
         src, plain = mdir / f"{game}_{k}.png", mdir / f"{game}_{k}_plain.png"
@@ -224,7 +256,9 @@ def found(game: str) -> None:
 
 
 def main() -> None:
-    only = sys.argv[1:]
+    global LAYERS_ONLY
+    only = [a for a in sys.argv[1:] if not a.startswith("--")]
+    LAYERS_ONLY = "--layers" in sys.argv
     for game in ("clutter_can", "clutter_can_dented", "clutter_can_crushed", "clutter_bottle_vodka",
                  "clutter_bottle_vodka_worn", "clutter_bottle_beer", "clutter_bottle_broken", "clutter_butts"):
         if not only or game in only:
