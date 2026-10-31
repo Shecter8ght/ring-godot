@@ -94,10 +94,11 @@ func _clear_side(title: String) -> void:
 	_side.add_child(_label(title, 26, ACCENT))
 
 
-## Новая игра: имя сохранения — и в убежище со стартовым набором.
+## Новая игра: имя сохранения — и первый выход (пролог на «Проспекте», docs/design/prologue.md); «Пропустить
+## пролог» — сразу в убежище со стартовым набором в тайнике.
 func _show_new() -> void:
 	_clear_side("Новая игра")
-	_side.add_child(_label("Как назвать сохранение? Стартовый набор — в тайнике убежища, деньги — на счету.", 15, DIM))
+	_side.add_child(_label("Как назвать сохранение? Первый выход — через кордон закрытого района: снаряжение ждёт в закладке у входа. Пролог можно пропустить — тогда набор сразу в тайнике убежища.", 15, DIM))
 	var name_edit := LineEdit.new()
 	name_edit.placeholder_text = "Имя"
 	name_edit.text = "Выживший %d" % (Saves.list().size() + 1)
@@ -106,9 +107,14 @@ func _show_new() -> void:
 	_side.add_child(name_edit)
 	var start := _big("Начать", func() -> void:
 		var save_name: String = name_edit.text
-		Net.change_scene(Balance.HIDEOUT_SCENE, "Новая игра", func() -> void: Saves.create(save_name)))
+		Prologue.launch(func() -> void: Saves.create(save_name, true)))
 	start.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_side.add_child(start)
+	var skip := _big("Пропустить пролог", func() -> void:
+		var save_name: String = name_edit.text
+		Net.change_scene(Balance.HIDEOUT_SCENE, "Новая игра", func() -> void: Saves.create(save_name, false)))
+	skip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_side.add_child(skip)
 	name_edit.text_submitted.connect(func(_t: String) -> void: start.pressed.emit())
 
 
@@ -215,6 +221,10 @@ func _show_coop() -> void:
 
 
 func _play(path: String) -> void:
+	# пролог не пройден — снова в первый выход (после гибели — от контрольной точки у кофейни)
+	if Saves.prologue_pending(path):
+		Prologue.launch(func() -> void: Saves.open(path))
+		return
 	Net.change_scene(Balance.HIDEOUT_SCENE, "Продолжить игру", func() -> void: Saves.open(path))
 
 

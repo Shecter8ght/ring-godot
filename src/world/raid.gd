@@ -110,6 +110,12 @@ var _exit_receipt: Dictionary = {}
 ## Сигнал снабжения общий на рейд; хост хранит время и факт единственного сброса.
 var supply_state: Dictionary = {}
 var _supply_visual: Node3D
+## Строка итога сверху (пролог: «Пакет Михалычу — не донесён»), bad — красным; пусто — нет.
+var summary_note: String = ""
+var summary_note_bad: bool = false
+var _story_note: Label
+## Своя подсказка внизу итога вместо «Enter — в убежище» (пролог: «Enter — заново от кофейни»); пусто — обычная.
+var end_hint: String = ""
 
 
 func _ready() -> void:
@@ -2235,6 +2241,7 @@ func _use_med(peer_id: int, id: String) -> void:
 			return
 		if pl.inventory.remove(id, 1) == 0:
 			return
+		Quests.action_seen("heal")
 		Audio.play(med_sound, pl.global_position + Vector3.UP)
 		var wait := Balance.REVIVE_SELF_SEC if id == "medkit" else float(use.time)
 		get_tree().create_timer(wait).timeout.connect(func() -> void:
@@ -2250,6 +2257,8 @@ func _use_med(peer_id: int, id: String) -> void:
 		return
 	if pl.inventory.remove(id, 1) == 0:
 		return
+	# обучение: «лечиться» засчитывается группе (цель action heal)
+	Quests.action_seen("heal")
 	Audio.play(med_sound, pl.global_position + Vector3.UP)
 	get_tree().create_timer(float(use.time)).timeout.connect(func() -> void:
 		if is_instance_valid(pl) and pl.is_alive():
@@ -2386,6 +2395,17 @@ func spawn_loose(pl: Player, entry: Dictionary) -> void:
 		_drops.add_child(_make_drop(data))
 
 
+## Хост: вещь лежит сама по себе в точке pos (пакет на сумке в закладке пролога) — как сброшенный магазин.
+func spawn_item(pos: Vector3, entry: Dictionary, yaw: float = 0.0) -> void:
+	var data := {"name": "Drop_%d" % _drop_count, "pos": pos, "display": ItemDb.item_name(String(entry.id)), "items": [entry],
+		"look": int(LootContainer.Look.NONE), "toss": Vector3.ZERO, "fall_sec": 0.0, "loose": true, "yaw": yaw}
+	_drop_count += 1
+	if _drop_spawner:
+		_drop_spawner.spawn(data)
+	else:
+		_drops.add_child(_make_drop(data))
+
+
 ## Хост: ближайший мешок «Выброшено» в Balance.DROP_MERGE_M от pos — добавить в него list
 ## (сетка ящика растёт, ничего не теряется). Нет такого — false.
 func _merge_drop(pos: Vector3, list: Array) -> bool:
@@ -2448,7 +2468,9 @@ func _process(delta: float) -> void:
 		# в коопе Enter — чат, в убежище — пробелом
 		var go := Input.is_action_just_pressed("ui_accept") and not (Net.is_networked() and (Input.is_key_pressed(KEY_ENTER) or Input.is_key_pressed(KEY_KP_ENTER)))
 		if me != null and (not me.is_alive() or has_left(me.peer_id)) and go:
-			go_hideout()
+			# пролог: погибла вся группа — заново от контрольной точки (Prologue решает сам)
+			if Prologue.current == null or not Prologue.current.after_end():
+				go_hideout()
 	elif over and Input.is_action_just_pressed("reload"):
 		_restart()
 
@@ -2661,7 +2683,14 @@ func _update_summary(me: Player) -> void:
 		else:
 			lines.append("%s — ещё в рейде" % who)
 	lines.append("")
-	if Profile.pending_raid:
+	if summary_note != "" and not story:
+		lines.insert(0, summary_note)
+	_story_note.text = summary_note
+	_story_note.visible = summary_note != ""
+	_story_note.add_theme_color_override("font_color", Color(1.0, 0.42, 0.36) if summary_note_bad else Color(0.6, 0.95, 0.62))
+	if end_hint != "":
+		lines.append(end_hint)
+	elif Profile.pending_raid:
 		lines.append("Пробел — в убежище   ·   Enter — чат" if Net.is_networked() else "Enter — в убежище")
 	elif over:
 		lines.append("R — новый рейд" if _is_host() else "ждём хоста")
@@ -2702,6 +2731,9 @@ func _story_end(me: Player) -> void:
 func _save_profile(me: Player) -> void:
 	if _profile_saved or me == null or not me.loadout_mode or not is_extracted(me.peer_id):
 		return
+	# гость со своей кампанией идёт прологом хоста — его профиль не трогается
+	if Prologue.current and not Prologue.current.owns_profile():
+		return
 	if _exit_receipt.is_empty():
 		return
 	_profile_saved = true
@@ -2731,6 +2763,8 @@ func _save_death(me: Player) -> void:
 	if _death_saved or me == null or not me.loadout_mode or (me.is_alive() and not stranded.has(me.peer_id)):
 		return
 	_death_saved = true
+	if Prologue.current and not Prologue.current.owns_profile():
+		return
 	Profile.set_pocket(me.inventory.pocket)
 	Missions.on_death()
 
@@ -2946,6 +2980,11 @@ func _build_story_panel(root: Control) -> void:
 	_story_stats.add_theme_constant_override("v_separation", 3)
 	box.add_child(_story_stats)
 	box.add_child(HSeparator.new())
+	_story_note = Label.new()
+	_story_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_story_note.add_theme_font_size_override("font_size", 17)
+	_story_note.visible = false
+	box.add_child(_story_note)
 	_story_footer = Label.new()
 	_story_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_story_footer.add_theme_font_size_override("font_size", 15)

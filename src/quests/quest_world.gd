@@ -35,9 +35,15 @@ func _ready() -> void:
 	if _root and _root.is_in_group("hideout_level"):
 		level = "hideout"
 	Quests.world = self
+	# обучение по ходу дела: факты действий своего игрока и подсказка с клавишей (цели action, stage.coach)
+	var coach := QuestCoach.new()
+	coach.name = "Coach"
+	add_child(coach)
 	if raid:
 		Quests.begin_raid()
 	elif level == "hideout":
+		# погиб в прологе, а группа его прошла — стартовый набор в тайник (один раз)
+		Prologue.settle()
 		# обучение новой игры начинается само
 		Quests.auto_start()
 	Quests.changed.connect(_refresh)
@@ -50,6 +56,9 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if Quests.world == self:
 		Quests.world = null
+	# уровень уходит: итог рейда меняет состояние сюжета — места в уходящую сцену уже не ставим
+	if Quests.changed.is_connected(_refresh):
+		Quests.changed.disconnect(_refresh)
 	# хост (соло) уходит из рейда — итог сюжета за рейд: вынес кто-то — засчитано, нет — нет
 	if raid:
 		Quests.end_raid()

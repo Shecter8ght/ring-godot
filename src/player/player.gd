@@ -588,6 +588,11 @@ func body_yaw() -> float:
 	return _body.rotation.y
 
 
+## Повернуть корпус (появление на карте — лицом туда, куда идти); вид из глаз берёт его при входе.
+func face(yaw: float) -> void:
+	_body.rotation.y = yaw
+
+
 ## Сесть (убежище): встать на место, повернуться, присесть; шаг или C — встать.
 func sit(at: Vector3, yaw: float) -> void:
 	seated = true

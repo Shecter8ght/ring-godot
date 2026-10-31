@@ -200,6 +200,9 @@ var _route_dir: int = 1
 var watch_dir: Vector3 = Vector3.ZERO
 var watch_sector_deg: float = 0.0
 var hold_radius: float = -1.0
+## Занят делом на месте (пролог: вскрывает кассу, сидит у ворот склада спиной к залу): стоит у home и смотрит
+## вдоль watch_dir; шум и бой — как у всех, после — обратно на место.
+var stay: bool = false
 ## Насторожен (AI_NOISE_RESPONSE): шум проверяют другие — стоит и смотрит туда до этого времени, мс.
 var _alert_until: int = 0
 var _alert_at: Vector3 = Vector3.ZERO
@@ -928,8 +931,28 @@ func _foe_shout(foe: Marauder) -> String:
 
 
 ## Жильцы: игрок полез к ним — зашёл близко к их магазину (дом) или стрелял рядом / попал.
+## Бойцов у ворот кордона (GateWarden) по игрокам поднимают ворота: окрик, предупредительный, огонь.
 func _trespass(p: Player) -> bool:
+	if has_meta("gate_warden"):
+		return false
 	return home != Vector3.INF and p.global_position.distance_to(home) < float(Balance.RESIDENTS.trespass_m) + home_radius * 0.5
+
+
+## Ворота кордона (GateWarden), хост: предупредительный в воздух — звук и вспышка у всех, без пули.
+func warning_shot() -> void:
+	if _spec.is_empty() or state == State.DEAD:
+		return
+	var from := _eye() + Vector3.UP * 0.3
+	NoiseBus.emit(global_position, float(_spec.noise_m), "shot_ai")
+	var flash := float(_spec.get("flash", 1.0))
+	_shot_fx(from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound), float(_spec.get("db", 0.0)))
+	if Net.is_networked():
+		Net.broadcast_scene(self, &"_rpc_shot_fx", [from, String(_spec.sound), flash, _weapon_sound("mechanism"), String(_spec.cycle_sound), float(_spec.get("db", 0.0))], false)
+
+
+## Кто последним попал в бойца (peer игрока; 0 — никто из игроков).
+func last_attacker() -> int:
+	return _health.last_attacker
 
 
 ## Жильцы: вся группа стала враждебной игрокам.
@@ -1213,6 +1236,13 @@ func _patrol(delta: float) -> void:
 	if _agent.is_navigation_finished():
 		pause_timer -= delta
 		if _loot_tick(delta):
+			return
+		if stay and watch_dir != Vector3.ZERO and home != Vector3.INF:
+			if global_position.distance_to(home) > 1.2 and pause_timer <= 0.0:
+				_set_move_target(home, true)
+				pause_timer = 2.0
+			else:
+				_watch_sector(delta)
 			return
 		if _holds() and watch_dir != Vector3.ZERO:
 			_watch_sector(delta)

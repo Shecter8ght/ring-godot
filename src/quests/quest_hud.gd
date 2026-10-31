@@ -35,6 +35,8 @@ var _bar: ProgressBar
 var _bar_label: Label
 var _bar_seen: bool = false
 var _carry: Label
+## Подсказка-обучение (QuestCoach): одна строка с клавишей из текущих привязок, пока действие нужно.
+var _coach: Label
 var _journal: PanelContainer
 var _journal_text: Label
 ## Тестовые инструкции (Balance.QUEST_TEST_HINTS): что делать на текущем шаге — слева, после смены
@@ -146,6 +148,33 @@ func carry_hint(text: String) -> void:
 	_carry.visible = text != ""
 
 
+## Реплики в очереди и на экране — прочь (пролог заново после гибели: прошлая рация не доигрывается).
+func clear_subtitles() -> void:
+	_sub_queue.clear()
+	_sub_t = 0.0
+	_subs.visible = false
+
+
+## Подсказка-обучение: «{reload}» в тексте — клавиша действия reload по текущим привязкам; "" — погасить.
+func coach(text: String) -> void:
+	_coach.text = coach_text(text)
+	_coach.visible = _coach.text != "" and _in_game() and not PauseMenu.shown
+
+
+## Текущий текст подсказки (тесты).
+func coach_shown() -> String:
+	return _coach.text if _coach.visible else ""
+
+
+static func coach_text(text: String) -> String:
+	var out := text
+	var re := RegEx.create_from_string("\\{([a-z_]+)\\}")
+	for m in re.search_all(text):
+		var key := PauseMenu.key_name(m.get_string(1))
+		out = out.replace(m.get_string(0), key if key != "" else m.get_string(1))
+	return out
+
+
 # ---------------------------------------------------------------- разговор
 
 ## Разговор (убежище): реплики [[кто, текст], …]; дочитал — done.
@@ -216,6 +245,7 @@ func _process(delta: float) -> void:
 	if not game:
 		_journal.visible = false
 		_carry.visible = false
+		_coach.visible = false
 	if not _bar_seen:
 		_bar.visible = false
 		_bar_label.visible = false
@@ -372,6 +402,16 @@ func _build() -> void:
 	_carry.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_carry.visible = false
 	_root.add_child(_carry)
+
+	_coach = _label("", 19, Color(0.86, 0.95, 0.78))
+	_coach.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_coach.offset_left = -420
+	_coach.offset_right = 420
+	_coach.offset_top = -340
+	_coach.offset_bottom = -310
+	_coach.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_coach.visible = false
+	_root.add_child(_coach)
 
 	_journal = PanelContainer.new()
 	_journal.set_anchors_preset(Control.PRESET_CENTER)

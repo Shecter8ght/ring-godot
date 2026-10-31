@@ -188,6 +188,11 @@ func is_looting() -> bool:
 	return _searching != null or _looting != null
 
 
+## Ящик, который сейчас обыскивают или уже открыли; null — нет (обучение пролога: «обыскать сумку»).
+func looting() -> LootContainer:
+	return _looting if _looting != null else _searching
+
+
 ## F у контейнера: обыск (уже обысканный — сразу окно).
 func start_search(c: LootContainer) -> void:
 	if _searched.has(c.get_path()):

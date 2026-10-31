@@ -117,6 +117,11 @@ tools/godot.cmd --headless res://tools/quest_test.tscn     # сюжет «Не �
 tools/godot.cmd --headless res://tools/terminal_story_test.tscn # переписка в терминале: принять заказ, история, отчёт, оплата этапа один раз, гостю тоже, задание ждёт карту
 tools/godot.cmd --headless res://tools/quest_steps_test.tscn # шаги заказа машины в убежище: снимки, ранняя находка, пропуск шагов, сдача деталей без эвакуации, «не в карман»
 tools/godot.cmd --headless res://tools/tutorial_test.tscn   # обучение новой игры: пакет на ящиках → рюкзак → полка → терминал, рюкзак заранее, старые сохранения
+tools/godot.cmd --headless res://tools/prologue_test.tscn   # пролог «Первый выход» на «Проспекте» (docs/design/prologue.md): режим карты, вводный экран, сумка
+                                                              # и пакет, ворота → ЧВК (окрик, предупредительный, огонь) → заново от ворот, цели по порядку и ранние
+                                                              # действия, контрольная точка у кофейни, бой в зале → заново от кофейни, служебный коридор, засов,
+                                                              # выход без пакета, обучение в убежище после; кооп: «-- host» + «-- client» через 3 с (порт 17797) —
+                                                              # сумка каждому, пакет выносит гость, упавший напарник; с окном — снимки prologue_*
 tools/godot.cmd --headless res://tools/car_recovery_test.tscn # заказ «Вернуть машину» по данным: обычный путь, ранняя находка, общий отчёт, оплаты, тестовые инструкции
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/coupe_ilya/radiator_game.py -- lp|bake|pack|export|imports
                                                               # радиатор (предмет car_radiator) в игру: сетка ~16,5 тыс. треугольников тем же генератором,

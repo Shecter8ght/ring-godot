@@ -188,10 +188,40 @@ static func _starter() -> void:
 	loadout_templates = []
 	raid_history = []
 	story_recent = []
-	for pair in Balance.START_STASH:
-		ItemDb.add_to(stash, ItemDb.make(String(pair[0]), int(pair[1])), stash_grid())
+	for e in start_kit():
+		ItemDb.add_to(stash, e, stash_grid())
 	equipment["backpack"] = ItemDb.make(Balance.BACKPACK_START, 1)
 	flags["bp_slot"] = true
+
+
+## Стартовый набор записями (Balance.START_STASH; у ствола — обвес по точкам). without — [id, штук], что
+## из него вычесть (пролог: это игрок несёт с собой, остальное — в закладке).
+static func start_kit(without: Array = []) -> Array:
+	var less: Dictionary = {}
+	for pair in without:
+		less[String(pair[0])] = int(less.get(String(pair[0]), 0)) + int(pair[1])
+	var out: Array = []
+	for pair: Array in Balance.START_STASH:
+		var n := int(pair[1]) - int(less.get(String(pair[0]), 0))
+		if n <= 0:
+			continue
+		var e: Dictionary = ItemDb.make(String(pair[0]), n)
+		if pair.size() > 2 and e.has("mods"):
+			for mount: String in (pair[2] as Dictionary):
+				e.mods[mount] = {"id": String(pair[2][mount]), "dur": float(Balance.CONDITION.full)}
+		out.append(e)
+	return out
+
+
+## Новая игра с прологом (docs/design/prologue.md §2, §7): тайник пуст — набор ждёт в закладке у кордона;
+## с собой — рюкзак и немного медицины (Balance.PROLOGUE.carry).
+static func prologue_start() -> void:
+	ensure()
+	stash = []
+	backpack = []
+	for pair in Balance.PROLOGUE.carry:
+		ItemDb.add_to(backpack, ItemDb.make(String(pair[0]), int(pair[1])), grid_of("backpack"))
+	flags["prologue"] = true
 
 
 ## JSON отдаёт числа как float — количества делаем целыми.

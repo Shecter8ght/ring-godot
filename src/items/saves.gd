@@ -48,8 +48,10 @@ static func list() -> Array:
 	return out
 
 
-## Новая игра: файл со стартовым набором, имя — как назвал игрок.
-static func create(display_name: String) -> String:
+## Новая игра: файл со стартовым набором, имя — как назвал игрок. prologue — с первого рейда «Первый
+## выход» (docs/design/prologue.md): тайник пуст, набор ждёт в закладке, квест пролога начат; без него
+## («Пропустить пролог») — набор сразу в тайнике и короткое обучение в убежище.
+static func create(display_name: String, prologue: bool = false) -> String:
 	_ensure_dir()
 	var base := display_name.strip_edges().to_lower().validate_filename().replace(" ", "_")
 	if base == "":
@@ -63,9 +65,22 @@ static func create(display_name: String) -> String:
 	Profile.profile_name = display_name.strip_edges() if display_name.strip_edges() != "" else "Выживший"
 	# новая игра — с короткого обучения в убежище (data/quests/tutorial_basics.json)
 	Profile.flags["new_game"] = true
+	if prologue:
+		Profile.prologue_start()
 	Profile.save()
+	if prologue:
+		Quests.start(String(Balance.PROLOGUE.quest))
 	remember(path)
 	return path
+
+
+## Сохранение ждёт пролога (квест пролога начат и не пройден) — «Продолжить» ведёт в рейд, не в убежище.
+static func prologue_pending(path: String) -> bool:
+	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	if not d is Dictionary:
+		return false
+	var q: Variant = ((d as Dictionary).get("quests", {}) as Dictionary).get(String(Balance.PROLOGUE.quest), {})
+	return q is Dictionary and String((q as Dictionary).get("state", "")) == "ACTIVE"
 
 
 static func open(path: String) -> void:

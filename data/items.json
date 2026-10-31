@@ -2577,6 +2577,7 @@
    "stack": 1,
    "value": 0,
    "raid_only": true,
+   "no_pocket": true,
    "desc": "Папка с памяткой по убежищу. Отнести на приёмную полку у входа в зал.",
    "model": "res://assets/items/models/loot/clipboard.glb"
   },

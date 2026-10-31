@@ -492,6 +492,8 @@ story_height = 4.0
 
 label = "кофейня «Зерно»"
 
+entry_door = 1.2
+
 interior = "shop"
 
 loot_theme = "register"
@@ -831,6 +833,8 @@ floors = 1
 story_height = 6.0
 
 label = "супермаркет «Ярус»"
+
+staff_corridor = true
 
 interior = "supermarket"
 

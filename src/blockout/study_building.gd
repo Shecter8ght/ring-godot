@@ -47,6 +47,17 @@ const KEY_SCENE: PackedScene = preload("res://scenes/world/key_pickup.tscn")
 @export var key_item: String = ""
 ## Сейф в том же кабинете — таблица лута; пусто — нет.
 @export var safe_table: String = ""
+## Универсам: служебный коридор «Только для персонала» вдоль стены −X от входа до склада — дверь в зал у
+## фасада, проём в склад (пролог, «Ярус»: обход мимо мародёров в зале, docs/design/prologue.md §4.5).
+@export var staff_corridor: bool = false:
+	set(value):
+		staff_corridor = value
+		_request_rebuild()
+## Магазин: дверь в проёме входа, ширина, м (пролог: кофейня «Зерно» — закрыта, не заперта); 0 — открытый проём.
+@export var entry_door: float = 0.0:
+	set(value):
+		entry_door = value
+		_request_rebuild()
 
 var generated: Node3D
 var stair_origin: Vector2
@@ -248,6 +259,8 @@ func _hall_gaps(h: float) -> Dictionary:
 	var hx: float = footprint.x * 0.5
 	match interior:
 		"shop":
+			if entry_door > 0.0:
+				return {1.0: [[0.0, entry_door, 2.2]], -1.0: [[hx - 2.0, 1.2, 2.2]]}
 			return {1.0: [[0.0, 2.0, 2.4]], -1.0: [[hx - 2.0, 1.2, 2.2]]}
 		"pharmacy":
 			return {1.0: [[0.0, 2.0, 2.4]], -1.0: [[-hx + 2.0, 1.2, 2.2]]}
@@ -391,6 +404,8 @@ func _in_shop(g: RefCounted, h: float) -> void:
 	for z: float in [-footprint.y * 0.22, footprint.y * 0.22]:
 		_furniture(g, Vector3(-footprint.x * 0.12, 0.8, z), Vector3(unit, 1.6, 0.8), Vector3(0, 0, -signf(z)), "shelf_retail", _theme("shelf"), "", 0.3)
 	_furniture(g, Vector3(back - 1.6, 0.5, hz * 0.4), Vector3(0.7, 1.0, 3.0), Vector3(1, 0, 0), "checkout", "register")
+	if entry_door > 0.0:
+		_doors.append({"name": "EntryDoor", "at": Vector3(-entry_door * 0.5, 0.0, hz), "yaw": 0.0, "width": entry_door, "key": ""})
 	g.box(Vector3(hx - 0.45, 1.0, 0), Vector3(0.6, 2.0, footprint.y - 2.4), "accent")
 	_spot(Vector3(hx - 1.2, _lp(), -hz * 0.4), "shelf_warehouse", _theme("storage"))
 	_furniture(g, Vector3(back + 1.4, 0.6, hz - 1.4), Vector3(1.2, 1.2, 1.2), Vector3(0, 0, -1), "box_stack", _theme("storage"))
@@ -420,7 +435,15 @@ func _in_supermarket(g: RefCounted, h: float) -> void:
 	var hx: float = footprint.x * 0.5
 	var hz: float = footprint.y * 0.5
 	var zb: float = -hz + 6.0
-	_wall_x(g, zb, -hx, hx, 0.0, minf(h, 4.0), [[-hx * 0.5, 2.4, 2.6], [hx * 0.5, 2.4, 2.6]])
+	# служебный коридор: ширина в свету 2 м (правило масштаба E), стена до потолка; дверь у фасада, проём в склад
+	var xw: float = -hx + 2.3
+	var store_gaps: Array = [[-hx * 0.5, 2.4, 2.6], [hx * 0.5, 2.4, 2.6]]
+	if staff_corridor:
+		store_gaps.append([(-hx + xw) * 0.5, 1.2, 2.2])
+		var dz: float = hz - 2.6
+		_wall_z(g, xw, zb, hz, 0.0, h, [[dz, 1.2, 2.2]])
+		_doors.append({"name": "StaffDoor", "at": Vector3(xw, 0.0, dz - 0.6), "yaw": -PI * 0.5, "width": 1.2, "key": ""})
+	_wall_x(g, zb, -hx, hx, 0.0, minf(h, 4.0), store_gaps)
 	for x: float in [-hx + 6.0, -hx + 12.0, hx - 12.0, hx - 6.0]:
 		_furniture(g, Vector3(x, 0.7, -hz + 3.0), Vector3(1.2, 1.4, 1.2), Vector3(0, 0, 1), "pallet_boxes", _theme("grocery"))
 	for seg: Vector2 in [Vector2(-hx + 1.0, -3.0), Vector2(3.0, hx - 1.0)]:
@@ -441,6 +464,9 @@ func _in_supermarket(g: RefCounted, h: float) -> void:
 	var fz0: float = zb + 1.0
 	var fz1: float = hz - 4.0
 	for sx: float in [-1.0, 1.0]:
+		# у стены коридора холодильников нет — проход вдоль неё
+		if staff_corridor and sx < 0.0:
+			continue
 		g.box(Vector3(sx * (hx - 0.55), 1.0, (fz0 + fz1) * 0.5), Vector3(0.8, 2.0, fz1 - fz0), "steel")
 		_spot(Vector3(sx * (hx - 1.4), _lp(), (fz0 + fz1) * 0.5), "shelf_retail", _theme("grocery"), "Холодильник", 0, 0.3)
 	for x: float in [-13.0, -10.0, 10.0, 13.0]:

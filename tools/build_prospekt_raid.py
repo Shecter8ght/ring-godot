@@ -10,6 +10,9 @@
 Население слоями (docs/design/enemy_population.md): посты у мест добычи, кордон и штаб у палаток держат ЧВК
 «Периметр» (AIPost.arch = "pmc"), патрули по улицам, снайперы на крышах и каркасе, подход с краёв карты.
 Свет — tools/prospekt_light.py (окружение пишет build_prospekt.py), поправки к времени суток и дымка — в данных сектора.
+Пролог «Первый выход» (docs/design/prologue.md, узел Gameplay/Prologue): свой заход у ворот кордона, контрольная точка у
+кофейни, места сумок, трое мародёров руками (двое в зале «Яруса», один на складе у рампы); ворота кордона (GateWarden —
+и в обычных рейдах) и роллета рампы склада (RollGate: в обычных рейдах поднята, пролог её опускает).
 """
 from __future__ import annotations
 
@@ -137,6 +140,8 @@ lines = [
     '[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="12"]',
     '[ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="13"]',
     '[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="14"]',
+    '[ext_resource type="PackedScene" path="res://scenes/world/gate_warden.tscn" id="15"]',
+    '[ext_resource type="PackedScene" path="res://scenes/props/roll_gate.tscn" id="16"]',
     '',
     '[node name="Prospekt" type="Node3D"]',
     'script = ExtResource("1")',
@@ -273,6 +278,33 @@ for i, l in enumerate(plan.get("loot", [])):
     for k, key in KEY_BY_NOTE.items():
         if k in l["note"]:
             lines.append('required_key = "%s"' % key)
+# ворота кордона: бойцы поста Cordon_PMC не трогают ушедших от ворот; вернулся — окрик, предупредительный, огонь
+lines += ['', '[node name="Cordon_Gate" parent="Gameplay" instance=ExtResource("15")]', 'position = ' + v3(-210.0, 0.0, 0.0),
+          'post_name = "Cordon_PMC"']
+# роллета в проёме рампы склада «Яруса» (задняя стена, x −102): засов изнутри — с севера (−Z)
+lines += ['', '[node name="Yarus_RampGate" parent="Gameplay" instance=ExtResource("16")]', 'position = ' + v3(-102.0, 0.0, 88.0),
+          'width = 4.2', 'height = 3.8']
+# пролог: заход и контрольная точка — точки появления не для обычных рейдов (entry = false), сумки, трое руками
+PROLOGUE_SPOTS = [("Cordon", -200.0, 0.08, 0.0, "Кордон (пролог)"), ("Checkpoint", -184.0, 0.08, -12.5, "У кофейни (пролог)")]
+PROLOGUE_MARKS = [("Bags", -178.3, 0.1, -22.5), ("LateBags", -97.0, 0.1, 85.8)]
+# (имя, x, y, z, роль, тип, куда смотрит [x, z] или маршрут [[x, z], …])
+PROLOGUE_AI = [("Hall_Cart", -114.0, 0.05, 66.0, "cart", "gunner", [[-114.0, 57.5], [-114.0, 76.5]]),
+               ("Hall_Till", -124.0, 0.05, 53.0, "till", "scout", [-1.0, 0.0]),
+               ("Dock", -105.5, 0.05, 86.2, "dock", "gunner", [0.0, 1.0])]
+lines += ['', '[node name="Prologue" type="Node3D" parent="Gameplay"]']
+for (name, x, y, z, label) in PROLOGUE_SPOTS:
+    lines += ['', '[node name="%s" parent="Gameplay/Prologue" instance=ExtResource("4")]' % name, 'position = ' + v3(x, y, z),
+              'display_name = "%s"' % label]
+for (name, x, y, z) in PROLOGUE_MARKS:
+    lines += ['', '[node name="%s" type="Marker3D" parent="Gameplay/Prologue"]' % name, 'position = ' + v3(x, y, z)]
+for (name, x, y, z, role, arch, look) in PROLOGUE_AI:
+    lines += ['', '[node name="%s" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]' % name,
+              'position = ' + v3(x, y, z), 'metadata/role = "%s"' % role, 'metadata/arch = "%s"' % arch]
+    if isinstance(look[0], list):
+        for k, (px, pz) in enumerate(look):
+            lines += ['', '[node name="P%02d" type="Marker3D" parent="Gameplay/Prologue/%s"]' % (k + 1, name), 'position = ' + v3(px - x, 0.0, pz - z)]
+    else:
+        lines.append('metadata/watch = Vector3(%g, 0, %g)' % (look[0], look[1]))
 lines += ['', '[node name="AI_Spawns" type="Node3D" parent="Gameplay"]']
 for (name, x, y, z, *_rest) in POSTS:
     if _rest[2] == "pmc":

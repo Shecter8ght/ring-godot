@@ -13,6 +13,8 @@
 [ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="12"]
 [ext_resource type="PackedScene" path="res://scenes/world/power_switch.tscn" id="13"]
 [ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://scenes/world/gate_warden.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://scenes/props/roll_gate.tscn" id="16"]
 
 [node name="Prospekt" type="Node3D"]
 script = ExtResource("1")
@@ -2337,6 +2339,54 @@ table = "stash"
 search_s = 2.5
 look = 4
 stash = true
+
+[node name="Cordon_Gate" parent="Gameplay" instance=ExtResource("15")]
+position = Vector3(-210, 0, 0)
+post_name = "Cordon_PMC"
+
+[node name="Yarus_RampGate" parent="Gameplay" instance=ExtResource("16")]
+position = Vector3(-102, 0, 88)
+width = 4.2
+height = 3.8
+
+[node name="Prologue" type="Node3D" parent="Gameplay"]
+
+[node name="Cordon" parent="Gameplay/Prologue" instance=ExtResource("4")]
+position = Vector3(-200, 0.08, 0)
+display_name = "Кордон (пролог)"
+
+[node name="Checkpoint" parent="Gameplay/Prologue" instance=ExtResource("4")]
+position = Vector3(-184, 0.08, -12.5)
+display_name = "У кофейни (пролог)"
+
+[node name="Bags" type="Marker3D" parent="Gameplay/Prologue"]
+position = Vector3(-178.3, 0.1, -22.5)
+
+[node name="LateBags" type="Marker3D" parent="Gameplay/Prologue"]
+position = Vector3(-97, 0.1, 85.8)
+
+[node name="Hall_Cart" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]
+position = Vector3(-114, 0.05, 66)
+metadata/role = "cart"
+metadata/arch = "gunner"
+
+[node name="P01" type="Marker3D" parent="Gameplay/Prologue/Hall_Cart"]
+position = Vector3(0, 0, -8.5)
+
+[node name="P02" type="Marker3D" parent="Gameplay/Prologue/Hall_Cart"]
+position = Vector3(0, 0, 10.5)
+
+[node name="Hall_Till" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]
+position = Vector3(-124, 0.05, 53)
+metadata/role = "till"
+metadata/arch = "scout"
+metadata/watch = Vector3(-1, 0, 0)
+
+[node name="Dock" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]
+position = Vector3(-105.5, 0.05, 86.2)
+metadata/role = "dock"
+metadata/arch = "gunner"
+metadata/watch = Vector3(0, 0, 1)
 
 [node name="AI_Spawns" type="Node3D" parent="Gameplay"]
 

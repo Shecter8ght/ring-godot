@@ -20,6 +20,8 @@ extends Node
 ##   extracted {items, npcs} — эвакуация (reach_extraction, extract_with_item, extract_with_npc, survive)
 ##   kill {arch}             — добил мародёра (kill_targets, n штук, arch — тип или пусто)
 ##   hand_in {item}          — сдал предметы через терминал (контракт «Под заказ», hand_in)
+##   action {what}           — сделал действие (бег, присед, проверка магазина…; QuestCoach), как ui —
+##                              засчитывается и заранее (факт «act:<what>»)
 ##
 ## Заказ по переписке (via: "terminal") — заказчик и его люди пишут в терминал убежища: заказ
 ## принимают и отчёты (цели talk) отправляют там, история — в записи квеста (log). Цель с reward —
@@ -65,6 +67,8 @@ var _remote: Dictionary = {}
 var _cargo_claims: Dictionary = {}
 ## Места-источники (supply), чью деталь сейчас несёт кто-то из группы: считает хост, гостям — в снимке.
 var _supply_out: Dictionary = {}
+## Квесты, закрытые в этом рейде (хост): вынос напарника после закрытия ещё ставит их extract_flags.
+var _done_in_raid: Dictionary = {}
 
 
 func campaign_modules() -> Dictionary:
@@ -568,6 +572,8 @@ func _already_done(qid: String, o: Dictionary) -> bool:
 		return true
 	if String(o.get("type", "")) == "ui" and ("ui:" + String(o.get("what", ""))) in fs:
 		return true
+	if String(o.get("type", "")) == "action" and ("act:" + String(o.get("what", ""))) in fs:
+		return true
 	if String(o.get("id", "")) in (qstate(qid).get("durable", []) as Array):
 		return true
 	var need: Array = o.get("skip_if_facts", [])
@@ -619,6 +625,77 @@ func _ui_seen(what: String) -> void:
 	_commit_if_home()
 	_broadcast()
 	changed.emit()
+
+
+## Свой игрок сделал действие (QuestCoach: бег, присед, проверка магазина…): факт «act:<what>» у квестов
+## с такой целью action — засчитается и заранее. Гость — просит хост; действие любого — всей группе.
+func action_seen(what: String) -> void:
+	if is_client():
+		_rpc_action.rpc_id(1, what)
+	else:
+		_action_seen(what)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_action(what: String) -> void:
+	if multiplayer.is_server():
+		_action_seen(what)
+
+
+## Ждёт ли какой-нибудь активный квест действие what (QuestCoach не шлёт лишнего по сети).
+func wants_action(what: String) -> bool:
+	for qid in _order:
+		if state(qid) != "ACTIVE":
+			continue
+		for st in def(qid).get("stages", []):
+			for o: Dictionary in (st as Dictionary).get("objectives", []):
+				if String(o.get("type", "")) == "action" and String(o.get("what", "")) == what:
+					return not ("act:" + what) in facts(qid)
+	return false
+
+
+func _action_seen(what: String) -> void:
+	var noted := false
+	for qid in _order:
+		if state(qid) != "ACTIVE":
+			continue
+		for st in def(qid).get("stages", []):
+			for o: Dictionary in (st as Dictionary).get("objectives", []):
+				if String(o.get("type", "")) == "action" and String(o.get("what", "")) == what:
+					noted = _add_fact(qid, "act:" + what) or noted
+	if not noted:
+		return
+	_auto_all()
+	_commit_if_home()
+	_broadcast()
+	changed.emit()
+
+
+## Хост / соло: флаг мира — в текущее состояние (в рейде — в копию, в профиль при эвакуации).
+func set_flag(name: String, value: Variant) -> void:
+	if is_client():
+		return
+	if value == null:
+		_flags().erase(name)
+	else:
+		_flags()[name] = value
+	_commit_if_home()
+	_broadcast()
+	changed.emit()
+
+
+## Хост / соло: цели oids квеста qid сделаны без эвакуации — засчитываются сами и в следующем рейде
+## (контрольная точка пролога: погибли — заново от неё).
+func mark_durable(qid: String, oids: Array) -> void:
+	if is_client():
+		return
+	for oid in oids:
+		_durable_add(qid, String(oid))
+
+
+## Описание режима рейда квеста ("raid" в данных: заход, выходы, население) — пусто, если нет.
+func raid_def(qid: String) -> Dictionary:
+	return def(qid).get("raid", {})
 
 
 ## Хост / соло: задания с auto_start (обучение новой игры) начинаются сами, как только доступны.
@@ -780,6 +857,8 @@ func start(qid: String) -> bool:
 		return false
 	_quests()[qid] = {"state": "ACTIVE", "stage": 0, "obj": 0, "clues": [], "count": 0}
 	_tell("Новое задание: " + String(def(qid).title))
+	# шаги, не нужные в этой кампании (skip_if_flags: разговор после пролога, пакет с ящиков без него), — сразу мимо
+	_auto_all()
 	_commit_if_home()
 	_broadcast()
 	changed.emit()
@@ -875,6 +954,8 @@ func _matches(qid: String, o: Dictionary, type: String, p: Dictionary) -> bool:
 			return type == "site" and String(p.get("site", "")) == String(o.get("site", ""))
 		"ui":
 			return type == "ui" and String(p.get("what", "")) == String(o.get("what", ""))
+		"action":
+			return type == "action" and String(p.get("what", "")) == String(o.get("what", ""))
 		"pickup_item":
 			return type == "have_item" and String(p.get("item", "")) == String(o.get("item", ""))
 		"hand_in":
@@ -947,8 +1028,8 @@ func _complete_objective(qid: String, auto: bool = false) -> void:
 			_complete_quest(qid)
 			return
 	var nxt := objective(qid)
-	# и когда новая цель стала текущей
-	if not (nxt.get("say_start", []) as Array).is_empty():
+	# и когда новая цель стала текущей (сделанную заранее засчитают сразу — её реплики не к месту)
+	if not (nxt.get("say_start", []) as Array).is_empty() and not _already_done(qid, nxt):
 		_say(nxt.say_start)
 	var t := String(nxt.get("type", ""))
 	if t in ["reach_extraction", "extract_with_item", "extract_with_npc", "survive"]:
@@ -960,6 +1041,8 @@ func _complete_objective(qid: String, auto: bool = false) -> void:
 func _complete_quest(qid: String) -> void:
 	var s := qstate(qid)
 	s["state"] = "COMPLETED"
+	if not _live.is_empty():
+		_done_in_raid[qid] = true
 	var d := def(qid)
 	var fl: Dictionary = d.get("flags_on_complete", {})
 	for k in fl:
@@ -1038,6 +1121,7 @@ func begin_raid() -> void:
 	Profile.ensure()
 	_live = {"quests": Profile.quests.duplicate(true), "flags": Profile.flags.duplicate(true)}
 	_delivered = false
+	_done_in_raid = {}
 	# сдано в прошлом рейде без эвакуации — цель засчитывается сама
 	_auto_all()
 	_carry = {}
@@ -1053,6 +1137,15 @@ func begin_raid() -> void:
 func on_extracted(params: Dictionary) -> void:
 	if is_client() or _live.is_empty():
 		return
+	# вынес нужную вещь — флаги квеста (пакет Михалыча в прологе: extract_flags [{item, flags}]); группа выходит
+	# разом — квест мог закрыться выходом того, кто встал в зону первым
+	for qid in _order:
+		if state(qid) != "ACTIVE" and not _done_in_raid.has(qid):
+			continue
+		for rule: Dictionary in def(qid).get("extract_flags", []):
+			if String(rule.get("item", "")) in (params.get("items", []) as Array):
+				for k in (rule.get("flags", {}) as Dictionary):
+					_flags()[String(k)] = rule.flags[k]
 	event("extracted", params)
 	_delivered = true
 	_commit_host()
@@ -1170,6 +1263,12 @@ func _say(lines: Array) -> void:
 		_rpc_say.rpc(lines)
 
 
+## Хост / соло: реплики субтитрами себе и всей группе (рация Михалыча в прологе).
+func say(lines: Array) -> void:
+	if not is_client():
+		_say(lines)
+
+
 @rpc("authority", "call_remote", "reliable")
 func _rpc_tell(text: String) -> void:
 	notice.emit(text)
@@ -1279,6 +1378,10 @@ func sites_for(level: String) -> Array:
 					wanted[String(sid)] = true
 		for sid in wanted:
 			var sd: Dictionary = sites.get(sid, {})
+			# место шага, который в этой кампании не нужен (skip_if_flags), не ставится (пакет на ящиках после пролога)
+			var skip: Dictionary = sd.get("skip_if_flags", {})
+			if not skip.is_empty() and skip.keys().all(func(k: Variant) -> bool: return flag(String(k)) == skip[k]):
+				continue
 			if String(sd.get("level", "")) == level:
 				out.append({"quest": qid, "site": String(sid), "def": sd, "active": bool(wanted[sid])})
 	return out

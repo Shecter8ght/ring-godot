@@ -17,6 +17,10 @@ var definition: Dictionary = {}
 var level: Node
 ## Расставлено ли по слоям (на карте есть точки) — тогда работает и подход.
 var layered: bool = false
+## Население выключено (пролог, docs/design/prologue.md §8): только эти посты (кордон ЧВК — у ворот, рядом
+## с заходом можно), ни патрулей, ни гнёзд, ни подхода. Пусто — население как обычно.
+var keep_posts: Array = []
+var posts_only: bool = false
 ## Что расставлено: {posts: [имена], routes: [...], nests: [...], arrivals: [{t, at, n}], marauders: N}.
 var placed: Dictionary = {}
 ## Ждут входа: секунды от начала рейда по возрастанию.
@@ -131,6 +135,8 @@ func spawn_start() -> int:
 	var count := 0
 	var want := {"posts": group_count("posts"), "routes": group_count("routes"), "nests": group_count("nests"),
 		"arrivals": group_count("arrivals")}
+	if posts_only:
+		want = {"posts": keep_posts.size(), "routes": 0, "nests": 0, "arrivals": 0}
 	placed = {"posts": [], "routes": [], "nests": [], "arrivals": [], "marauders": 0, "party": party_size(), "want": want}
 	count += _spawn_posts(int(want.posts))
 	count += _spawn_routes(int(want.routes))
@@ -158,6 +164,8 @@ func _spawn_posts(want: int) -> int:
 	var tags: Dictionary = {}
 	# пост «не каждый рейд» (главарь): не выпал — в этом рейде его нет вовсе
 	all = all.filter(func(p: AIPost) -> bool: return p.chance >= 1.0 or _rng.randf() < p.chance)
+	if posts_only:
+		all = all.filter(func(p: AIPost) -> bool: return String(p.name) in keep_posts)
 	for p: AIPost in all:
 		if p.always_from > 0 and party >= p.always_from and _post_ok(p, tags):
 			chosen.append(p)
@@ -198,6 +206,9 @@ func _post_ok(p: AIPost, tags: Dictionary) -> bool:
 	if p.exclusive != "" and tags.has(p.exclusive):
 		return false
 	var at := _ground(p.global_position)
+	# ворота кордона при заходе через них (пролог): ЧВК не трогают ушедших от ворот — стоят рядом
+	if posts_only and String(p.name) in keep_posts:
+		return at != Vector3.INF
 	return at != Vector3.INF and _safe_start(at)
 
 

@@ -1,10 +1,10 @@
 {
 	"files": {
-		"res://data/blockouts/prospekt.json": "32c9783a25cc57c83c0bae6391a7818398b7242ad097002a823995ce53499139",
+		"res://data/blockouts/prospekt.json": "e6362ff72446aa0d65e2e8c10c3159908298be45f28cc0ce1849ee5a21a0605c",
 		"res://data/sectors/prospekt.json": "1891715482978ced42990dfb69df796a8236e103cd851f0cbb1ab279be06769b",
 		"res://data/urban95_models.json": "a2c21083dff8c7d61b3a87b42663afe3ba54cea6bcc4eae90342a37550ad082b",
-		"res://scenes/levels/prospekt.tscn": "abe45200543870ecc9254ba7afc952524e76dd008f50b3b6ebf9f0b2e38fa805",
-		"res://scenes/levels/prospekt_study.tscn": "7cf46108694dda7beb0bcd5f53b722221b96ee34f7a8a2237d689ba3bb3c3d64",
+		"res://scenes/levels/prospekt.tscn": "dbe935c6db3721b59e676a2f7a17fb833082c710adf483cb03f45054e2014f39",
+		"res://scenes/levels/prospekt_study.tscn": "a15f48ecb51dde54b1cda3cd485f1f76f22f6cec1ec1232b011e3b6e20ce4e3b",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
@@ -13,7 +13,7 @@
 		"res://src/blockout/mall_filler.gd": "1e82713ba9b91a17839d6ee64fb713eaac01d46f893654c04fbd3e003788d4ff",
 		"res://src/blockout/mall_landscape.gd": "a88a7438c463c44589438ea76d3eef2c7158cec913d3134e03406ea4a9c480d4",
 		"res://src/blockout/prospekt_landscape.gd": "ca1c2e127ffb4e7cda8b86e038755028791244bf9819ad7e200ed46ce4fdc01b",
-		"res://src/blockout/study_building.gd": "e96ac0821820ee59db18c6e75303097a845a0b8dfb0bed7e1c97239940bca270",
+		"res://src/blockout/study_building.gd": "ff4fee7613e4b0b11ce3778cca8fb7530277894d08a13f6732b874898e6d6275",
 		"res://src/blockout/study_geometry.gd": "159931c99cff4b85f89ff61b0ad8c82a119d7d98de8afed6ee049f6d83a985de",
 		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
 		"res://src/world/blockout_mesh.gd": "a7e5dfcc5fb8ce1c27c229ab5629e3525495a10c88e73d554fa7a3ae0124bc40",

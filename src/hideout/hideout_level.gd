@@ -153,7 +153,9 @@ func _tick_raid_start(delta: float) -> bool:
 		total += 1
 		if zone.contains(other.global_position):
 			inside += 1
-	if raid_plan_accepted and inside == total:
+	# кампания ждёт пролога (группа собралась до первого выхода): план не нужен — сразу к воротам
+	var accepted: bool = raid_plan_accepted or _prologue_pending()
+	if accepted and inside == total:
 		if _start_left < 0.0:
 			_start_left = float(Balance.SHELTER_YARD.countdown_sec)
 		_start_left -= delta
@@ -164,9 +166,14 @@ func _tick_raid_start(delta: float) -> bool:
 	_start_sync -= delta
 	if _start_sync <= 0.0:
 		_start_sync = 0.25
-		Net.broadcast_scene(self, &"_rpc_start_state", [raid_plan_accepted, inside, total, _start_left], false)
-	_show_start(raid_plan_accepted, inside, total, _start_left)
+		Net.broadcast_scene(self, &"_rpc_start_state", [accepted, inside, total, _start_left], false)
+	_show_start(accepted, inside, total, _start_left)
 	return false
+
+
+## Кампания (хоста) ждёт пролога «Первый выход»: группа собралась в убежище до первого выхода.
+func _prologue_pending() -> bool:
+	return Quests.state(String(Balance.PROLOGUE.quest)) == "ACTIVE"
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")
@@ -201,6 +208,15 @@ func _show_start(accepted: bool, inside: int, total: int, left: float) -> void:
 
 func _launch_raid() -> bool:
 	_start_left = -1.0
+	# первый выход — пролог на «Проспекте» всей группой (docs/design/prologue.md §6)
+	if _prologue_pending():
+		raid_plan_accepted = false
+		if Net.is_networked():
+			Profile.next_conditions = (Balance.PROLOGUE.conditions as Dictionary).duplicate()
+			Net.start_level.rpc(String(Balance.PROLOGUE.scene), (Balance.PROLOGUE.conditions as Dictionary).duplicate())
+		else:
+			Prologue.launch()
+		return true
 	var block: String = Floors.start_block(Profile.floor)
 	if block != "":
 		raid_plan_accepted = false

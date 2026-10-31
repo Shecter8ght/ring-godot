@@ -25,6 +25,7 @@ var _players_near: Array[Node3D] = []
 
 
 func _ready() -> void:
+	add_to_group("doors")
 	var box := BoxMesh.new()
 	box.size = Vector3(width, height, thickness)
 	_mesh.mesh = box

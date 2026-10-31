@@ -52,6 +52,8 @@ var _decks_hidden: Dictionary = {}
 var _visit_t: float = 0.0
 var _visited: Dictionary = {}
 var _sector_def: Dictionary = {}
+## Пролог «Первый выход» на этой карте (Prologue.attach): свой заход, один выход, население выключено.
+var _prologue: Prologue
 
 @onready var _camera_rig: CameraRig = $CameraRig
 @onready var _hud: Control = $HUD/Root
@@ -72,6 +74,8 @@ func _ready() -> void:
 	# условия рейда — до всего остального (от них зависит свет и зрение мародёров)
 	RaidConditions.current = RaidConditions.for_new_raid()
 	RaidConditions.from_host = {}
+	# пролог — до событий и чужих отрядов: он их выключает (docs/design/prologue.md §8)
+	_prologue = Prologue.attach(self)
 	# доп. сцены из данных сектора ("extras"): улица — фонари, подстанция, спуски в убежище (правятся
 	# в редакторе отдельно от сцены уровня). До сборки: спуски вырезают землю, точки появления — их
 	for path in SectorBuilder.load_def(sector_path).get("extras", []):
@@ -116,6 +120,8 @@ func _ready() -> void:
 	_population.name = "Population"
 	_population.definition = _sector_def
 	add_child(_population)
+	if _prologue:
+		_prologue.setup_population(_population)
 	var contacts := RaidContacts.new()
 	contacts.name = "Contacts"
 	add_child(contacts)
@@ -149,6 +155,8 @@ func _ready() -> void:
 		points = entries
 	if not points.is_empty():
 		_spawn = (points[_rng.randi_range(0, points.size() - 1)] as Node3D).global_position
+	if _prologue:
+		_spawn = _prologue.spawn_at(_spawn)
 	if _camera_rig and _ring.is_empty() and sector.has_meta("camera_yaw"):
 		# старый сектор: камера от атриума наружу — витрины галереи обращены к камере
 		_camera_rig.rotation_degrees.y = float(sector.get_meta("camera_yaw"))
@@ -169,7 +177,8 @@ func _ready() -> void:
 	if not Net.is_networked() or multiplayer.is_server():
 		var roll := RandomNumberGenerator.new()
 		roll.randomize()
-		var near_m := float(Balance.EXIT_RULES.near_spawn_m) if bool(_sector_def.get("exits_by_side", false)) else 0.0
+		# пролог: выход один и Михалыч сам скажет, куда идти — списка выходов на старте нет
+		var near_m := float(Balance.EXIT_RULES.near_spawn_m) if bool(_sector_def.get("exits_by_side", false)) and _prologue == null else 0.0
 		_raid.roll_exits(_spawn, near_m, roll)
 		_raid.roll_stashes(roll)
 
@@ -220,6 +229,8 @@ func _spawn_offline_player() -> void:
 	_apply_loadout(p)
 	_camera_rig.set_target(p)
 	_face_center(p.global_position)
+	if _prologue:
+		p.face(_prologue.spawn_yaw(p.global_position))
 
 
 ## У кольца камера на старте смотрит от игрока к центру — здание перед глазами. Считается у
@@ -361,9 +372,9 @@ func _spawn_networked_players() -> void:
 		_spawn_one_player(int(ids[i]), i)
 
 
-func _spawn_one_player(peer_id: int, index: int) -> void:
+func _spawn_one_player(peer_id: int, index: int, at: Vector3 = Vector3.INF) -> void:
 	var offset := Vector3(cos(index * TAU / 3.0), 0.0, sin(index * TAU / 3.0)) * 1.3
-	var pos := _spawn + offset + Vector3(0, 0.05, 0)
+	var pos := (_spawn if at == Vector3.INF else at) + offset + Vector3(0, 0.05, 0)
 	var node := _player_spawner.spawn({"peer_id": peer_id, "pos": pos}) as Player
 	_raid.register(peer_id, String(Net.player_names.get(peer_id, "Игрок %d" % peer_id)))
 
@@ -373,7 +384,8 @@ func _on_peer_connected_late(id: int) -> void:
 	if not multiplayer.is_server():
 		return
 	var count := _players_root.get_child_count()
-	_spawn_one_player(id, count)
+	# пролог: подключившийся позже появляется у группы (§6)
+	_spawn_one_player(id, count, _prologue.late_spawn(_spawn) if _prologue else Vector3.INF)
 
 
 func _on_peer_disconnected(id: int) -> void:
@@ -398,6 +410,8 @@ func _find_local_player_when_ready() -> void:
 			await get_tree().process_frame
 	_camera_rig.set_target(_local_player)
 	_face_center(_local_player.global_position)
+	if _prologue:
+		_local_player.face(_prologue.spawn_yaw(_local_player.global_position))
 	_apply_loadout(_local_player)
 
 
@@ -409,7 +423,8 @@ func _apply_loadout(p: Player) -> void:
 	p.weapon_id = ""
 	p.weapon_slot = ""
 	p.ammo = 0
-	_raid.submit_loadout(Profile.take_loadout())
+	# пролог: с собой через кордон — рюкзак и медицина; после гибели группы — набор с контрольной точки
+	_raid.submit_loadout(_prologue.loadout() if _prologue else Profile.take_loadout())
 
 
 ## Навмеш печётся из коллайдеров и мешей сектора (двери не считаются — их AI открывает сам),
@@ -476,6 +491,9 @@ func _on_nav_baked() -> void:
 func _spawn_marauders() -> void:
 	# навигация из кэша синхронизируется не сразу — точки спавна должны на неё встать
 	await _population.wait_navigation()
+	# пролог: трое руками — двое в зале «Яруса», один на складе у рампы
+	if _prologue:
+		_prologue.spawn_marauders()
 	if AIPopulation.has_points(get_tree()):
 		# хотя бы один — иначе ждущие «мародёры расставлены» (чужие отряды, охрана) не дождутся
 		_marauders_spawned = maxi(1, _population.spawn_start())
@@ -541,7 +559,7 @@ func _spawn_pending() -> void:
 ## Хост: один мародёр типа arch у точки at (на навигации); снаряжение — по выкладке типа
 ## (opts.loadout — задать явно), opts.home / home_r — держится у места. Клиентам его реплицирует спавнер.
 func spawn_marauder(at: Vector3, arch: String, opts: Dictionary = {}) -> Marauder:
-	var data := {"name": "Marauder%d" % _marauder_seq, "pos": at + Vector3(0, 0.1, 0),
+	var data := {"name": String(opts.get("name", "Marauder%d" % _marauder_seq)), "pos": at + Vector3(0, 0.1, 0),
 		"loadout": String(opts.get("loadout", Marauder.loadout_for(arch, _rng))), "arch": arch}
 	_marauder_seq += 1
 	if opts.has("home"):
