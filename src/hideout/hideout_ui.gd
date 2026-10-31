@@ -239,13 +239,13 @@ func _process(delta: float) -> void:
 	_stash_slots.clear()
 	for c in _cols.get_children():
 		c.queue_free()
-	# Михалыч и тайник — светлое окно (LightUi): Михалыч со своей шапкой, у тайника — общая строка заголовка;
-	# остальные — прежние тёмные
-	var light := _kind in [HideoutStation.Kind.TRADER, HideoutStation.Kind.STASH]
+	# светлые (LightUi) — Михалыч (оружие, со своей шапкой) и план рейда; тайник, рюкзак и остальные — прежние
+	# тёмные (владелец 2026-10-31: «рюкзак и тайник оставить в прежних цветах»)
+	var light := _kind in [HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT]
 	_light = light
 	_panel.set_meta(LightUi.META, light)
 	_panel.theme = LightUi.theme() if light else null
-	var own_head := _kind == HideoutStation.Kind.TRADER
+	var own_head := _kind in [HideoutStation.Kind.TRADER, HideoutStation.Kind.EXIT]
 	_panel.add_theme_stylebox_override("panel", (LightUi.box(LightUi.BG, 6, 0 if own_head else 18)) if light else _panel_dark)
 	_head_row.visible = not own_head
 	_title.add_theme_color_override("font_color", LightUi.TEXT if light else Color(1.0, 0.86, 0.6))
@@ -1905,6 +1905,8 @@ func _trader_sell() -> void:
 				rows = maxi(rows, int(e.get("y", 0)) + (sz.x if bool(e.get("r", false)) else sz.y) + 1)
 			grid = Vector2i(grid.x, mini(grid.y, rows))
 		var view := GridView.new(grid, from)
+		# сетки тайника и рюкзака — в прежних тёмных цветах и в светлом окне
+		view.set_meta(LightUi.META, false)
 		view.drag_enabled = false
 		view.set_items(list)
 		for p in _sell_picks:
@@ -2133,59 +2135,304 @@ func _build_upgrades() -> void:
 
 # ---------------------------------------------------------------- выход
 
+## План рейда в светлом виде (владелец 2026-10-31: «переработать, чтобы там карту было видно», по образцу Таркова,
+## Arena Breakout: Infinite, ExfilZone): слева маршруты карточками, в центре — карта выбранного (снимок уровня,
+## граница участка, выходы и заходы с края; RaidMapPreview), под ней — что с собой и собрание; справа — условия
+## рейда (время, погода, электричество; риск и награда) и «Принять план».
 func _build_exit() -> void:
 	_title.text = "План рейда"
-	var col := _column("С собой", 1.0)
-	for slot in Inventory.SLOTS:
+	var page := VBoxContainer.new()
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("separation", 0)
+	_cols.add_child(page)
+	page.add_child(_page_header("план рейда", "доверие Михалыча %d · выходов из рейда %d" % [Profile.trust_step(), Profile.extractions]))
+	var pad := MarginContainer.new()
+	pad.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side: String in ["left", "right"]:
+		pad.add_theme_constant_override("margin_" + side, 28)
+	pad.add_theme_constant_override("margin_top", 16)
+	pad.add_theme_constant_override("margin_bottom", 20)
+	page.add_child(pad)
+	var body := HBoxContainer.new()
+	body.add_theme_constant_override("separation", 20)
+	pad.add_child(body)
+	# маршруты
+	var left := VBoxContainer.new()
+	left.custom_minimum_size.x = 330
+	left.add_theme_constant_override("separation", 8)
+	body.add_child(left)
+	left.add_child(LightUi.caps("маршрут", 14))
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	left.add_child(scroll)
+	var routes := VBoxContainer.new()
+	routes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	routes.add_theme_constant_override("separation", 8)
+	scroll.add_child(routes)
+	for f: Dictionary in Floors.all():
+		routes.add_child(_route_card(f))
+	# карта и под ней — с собой, собрание
+	var center := VBoxContainer.new()
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center.add_theme_constant_override("separation", 10)
+	body.add_child(center)
+	var sel := Floors.find(Profile.floor)
+	var stage := PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.add_theme_stylebox_override("panel", LightUi.box(Color("2a2c2e"), 8, 0))
+	center.add_child(stage)
+	var map := RaidMapPreview.new()
+	map.name = "RaidMap"
+	map.map_id = String(sel.get("id", ""))
+	map.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	map.custom_minimum_size.y = 320
+	stage.add_child(map)
+	var legend := HBoxContainer.new()
+	legend.add_theme_constant_override("separation", 18)
+	center.add_child(legend)
+	for l: Array in [["●", RaidMapPreview.EXIT, "выход"], ["◆", RaidMapPreview.EXIT_COND, "выход с условием — наведи на значок"], ["▲", RaidMapPreview.ENTRY, "заход с края"]]:
+		var h := HBoxContainer.new()
+		h.add_theme_constant_override("separation", 6)
+		h.add_child(LightUi.label(String(l[0]), 16, l[1] as Color))
+		h.add_child(LightUi.label(String(l[2]), 13, LightUi.MUTED))
+		legend.add_child(h)
+	var how := LightUi.label("%s — %s" % [String(sel.get("route", "")), String(sel.get("how", ""))], 14, LightUi.TEXT2)
+	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	center.add_child(how)
+	var under := HBoxContainer.new()
+	under.add_theme_constant_override("separation", 14)
+	center.add_child(under)
+	var kit := _light_panel(under, "с собой")
+	_exit_kit(kit)
+	# у собрания своя подпись (_coop_block)
+	var coop := _light_panel(under, "")
+	_coop_block(coop)
+	# условия и выход
+	var side_panel := PanelContainer.new()
+	side_panel.custom_minimum_size.x = 400
+	side_panel.add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 8, 22, LightUi.LINE, 1))
+	body.add_child(side_panel)
+	var side := VBoxContainer.new()
+	side.add_theme_constant_override("separation", 10)
+	side_panel.add_child(side)
+	_exit_conditions(side)
+	var gap := Control.new()
+	gap.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side.add_child(gap)
+	_exit_go(side, sel)
+
+
+## Шапка светлой страницы: название капсом, подпись, деньги, закрыть.
+func _page_header(title: String, sub: String) -> Control:
+	var bar := PanelContainer.new()
+	var sb := LightUi.box(LightUi.SURFACE, 0, 0)
+	sb.border_color = LightUi.LINE
+	sb.border_width_bottom = 1
+	sb.content_margin_left = 28
+	sb.content_margin_right = 20
+	sb.content_margin_top = 12
+	sb.content_margin_bottom = 12
+	bar.add_theme_stylebox_override("panel", sb)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 16)
+	bar.add_child(h)
+	h.add_child(LightUi.caps(title, 30, LightUi.TEXT))
+	var s := LightUi.caps(sub, 14)
+	s.size_flags_vertical = Control.SIZE_SHRINK_END
+	h.add_child(s)
+	var g := Control.new()
+	g.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(g)
+	var money := LightUi.mono("%s ₽" % InventoryUI.money(Profile.money), 22)
+	money.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(money)
+	var close := Button.new()
+	close.text = "Закрыть · Esc"
+	close.focus_mode = Control.FOCUS_NONE
+	close.pressed.connect(close_ui)
+	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(close)
+	return bar
+
+
+## Белая панель с подписью капсом; возвращает список внутри.
+func _light_panel(parent: Control, caption: String) -> VBoxContainer:
+	var p := PanelContainer.new()
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p.add_theme_stylebox_override("panel", LightUi.box(LightUi.SURFACE, 8, 14, LightUi.LINE, 1))
+	parent.add_child(p)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	p.add_child(v)
+	if caption != "":
+		v.add_child(LightUi.caps(caption, 13))
+	return v
+
+
+## Карточка маршрута: название, что там, состояние (выбран, открыт, закрыт — почему, этаж не собран); клик —
+## выбрать открытый; закрытый — «Открыть за …» (доверие и плата Михалычу).
+func _route_card(f: Dictionary) -> Control:
+	var id := String(f.id)
+	var chosen := id == Profile.floor
+	var open := Floors.is_open(id)
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", LightUi.box(LightUi.ACCENT_SOFT if chosen else LightUi.SURFACE, 8, 14,
+		LightUi.ACCENT if chosen else LightUi.LINE, 2 if chosen else 1))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(v)
+	var name := LightUi.label(String(f.name), 20, LightUi.ACCENT_DARK if chosen else (LightUi.TEXT if open else LightUi.MUTED), LightUi.head_font())
+	name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(name)
+	var what := LightUi.label(String(f.get("what", "")), 13, LightUi.MUTED)
+	what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(what)
+	var state := ""
+	if not open:
+		var why := Floors.unlock_block(id)
+		state = "закрыт — " + (why if why != "" else "Михалыч готов показать дорогу")
+	elif not Floors.built(id):
+		state = "маршрут открыт, этаж ещё не собран"
+	if state != "":
+		var st := LightUi.label(state, 13, LightUi.LOCK)
+		st.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(st)
+	if not open:
+		var b := Button.new()
+		b.text = "Открыть за %s ₽" % InventoryUI.money(int(f.price))
+		b.focus_mode = Control.FOCUS_NONE
+		b.disabled = Floors.unlock_block(id) != ""
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		b.pressed.connect(func() -> void: Floors.unlock(id))
+		v.add_child(b)
+	elif not chosen:
+		card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		card.gui_input.connect(func(ev: InputEvent) -> void:
+			var mb := ev as InputEventMouseButton
+			if mb and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+				Floors.select(id))
+	return card
+
+
+## Что с собой: слоты одной строкой каждый, рюкзак, чего не хватает.
+func _exit_kit(v: VBoxContainer) -> void:
+	for slot in ["primary", "secondary", "sidearm", "armor", "helmet", "backpack"]:
 		var e: Dictionary = Profile.equipment.get(slot, {})
-		col.add_child(_text("%s:  %s" % [Inventory.SLOT_NAMES[slot], ItemDb.label(e) if not e.is_empty() else "—"], Color(0.85, 0.85, 0.82)))
-	col.add_child(_text("Рюкзак: %d / %d ячеек, продажа %s ₽" % [Profile.backpack_cells(), Profile.backpack_capacity(), InventoryUI.money(Profile.sell_value_of(Profile.backpack))], Color(0.85, 0.85, 0.82)))
+		var row := HBoxContainer.new()
+		var k := LightUi.label(String(Inventory.SLOT_NAMES.get(slot, slot)), 13, LightUi.MUTED)
+		k.custom_minimum_size.x = 110
+		row.add_child(k)
+		var val := LightUi.label(ItemDb.label(e) if not e.is_empty() else "—", 13, LightUi.TEXT if not e.is_empty() else LightUi.MUTED)
+		val.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		val.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(val)
+		v.add_child(row)
+	v.add_child(LightUi.label("Рюкзак: %d / %d ячеек · продажа %s ₽" % [Profile.backpack_cells(), Profile.backpack_capacity(), InventoryUI.money(Profile.sell_value_of(Profile.backpack))], 13, LightUi.TEXT2))
 	# чего из основного не хватает — видно заранее (выйти всё равно можно, спросим)
 	var gaps := Profile.raid_kit_gaps()
 	if not gaps.is_empty():
-		col.add_child(_text("Не хватает: " + "; ".join(gaps), Color(1.0, 0.55, 0.4)))
-	col.add_child(_text("Всё, что с собой, в рейде можно потерять.", Color(0.9, 0.75, 0.5)))
-	_floors_column()
-	_conditions_column()
-	var go := _column("Выход", 0.6)
-	var sel := Floors.find(Profile.floor)
-	var route := _text("%s — %s" % [String(sel.get("name", "")), String(sel.get("route", ""))], Color(0.95, 0.82, 0.6))
-	route.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	go.add_child(route)
+		var g := LightUi.label("Не хватает: " + "; ".join(gaps), 13, LightUi.BAD)
+		g.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(g)
+	v.add_child(LightUi.label("Всё, что с собой, в рейде можно потерять.", 13, LightUi.MUTED))
+
+
+## Условия рейда: время, погода, электричество — выбор вкладками; риск и награда за него; подсказки; случайные.
+func _exit_conditions(v: VBoxContainer) -> void:
+	v.add_child(LightUi.caps("условия рейда", 14))
+	var c := RaidConditions.normalized(Profile.next_conditions)
+	var guest := Net.is_networked() and not Net.is_host() and not Net.host_conditions.is_empty()
+	if guest:
+		# в коопе в рейд идут с условиями хоста — его выбор и за окнами
+		var hc := LightUi.label("В коопе условия выбирает хост: %s" % RaidConditions.title(RaidConditions.next_shared()), 14, LightUi.ACCENT_DARK)
+		hc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(hc)
+	for axis: Array in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество", Balance.RAID_POWER]]:
+		v.add_child(LightUi.label(String(axis[1]), 13, LightUi.MUTED))
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 6)
+		row.add_theme_constant_override("v_separation", 6)
+		for key in (axis[2] as Dictionary):
+			var k := String(key)
+			var ax := String(axis[0])
+			var b := LightUi.button(String((axis[2] as Dictionary)[key].name), "pill_on" if String(c[ax]) == k else "pill", func() -> void:
+				var nc := RaidConditions.normalized(Profile.next_conditions)
+				nc[ax] = k
+				Profile.next_conditions = nc
+				Profile.save())
+			b.custom_minimum_size.y = 34
+			b.add_theme_font_size_override("font_size", 15)
+			b.disabled = guest
+			row.add_child(b)
+		v.add_child(row)
+	var r := RaidConditions.risk(c)
+	var risk := LightUi.label("Риск %d · лут богаче: %d%% контейнеров · доплата Михалыча +%d%% от вынесенного" % [
+		r, int(RaidConditions.loot_bonus(c) * 100.0), int(RaidConditions.pay_bonus(c) * 100.0)], 13, LightUi.ACCENT_DARK)
+	risk.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(risk)
+	for h in RaidConditions.hints(c):
+		var l := LightUi.label("• " + h, 13, LightUi.TEXT2)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(l)
+	if not guest:
+		var rnd := Button.new()
+		rnd.text = "Случайные условия"
+		rnd.focus_mode = Control.FOCUS_NONE
+		rnd.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		rnd.pressed.connect(func() -> void:
+			var rng := RandomNumberGenerator.new()
+			rng.randomize()
+			Profile.next_conditions = RaidConditions.random(rng)
+			Profile.save())
+		v.add_child(rnd)
+
+
+## Принять план: выход пешком (дверь тамбура, двор, ворота), гостю — по плану хоста; принят — отменить.
+func _exit_go(v: VBoxContainer, sel: Dictionary) -> void:
 	var fee := int(sel.get("fee", 0))
 	if fee > 0:
-		go.add_child(_text("Вылет — %s ₽" % InventoryUI.money(fee), Color(0.9, 0.75, 0.5)))
+		v.add_child(LightUi.label("Вылет — %s ₽" % InventoryUI.money(fee), 14, LightUi.ACCENT_DARK))
 	var block := Floors.start_block(Profile.floor)
 	# в рейд выходят пешком: здесь план только принимают, а начинается рейд у ворот во дворе, когда
 	# все, кто в убежище, встанут в зону сбора (HideoutLevel._tick_raid_start)
 	var level: Node = get_tree().get_first_node_in_group("hideout_level")
 	var accepted: bool = level != null and bool(level.get("raid_plan_accepted"))
+	var note := ""
 	if Net.is_networked() and not Net.is_host():
-		go.add_child(_wrapped("План рейда принимает хост. Идёте по его маршруту и в его условия." if not accepted
-			else "Хост принял план. К воротам во дворе — рейд начнётся, когда все встанут в зону сбора.", Color(0.9, 0.8, 0.6)))
+		note = "План рейда принимает хост. Идёте по его маршруту и в его условия." if not accepted \
+			else "Хост принял план. К воротам во дворе — рейд начнётся, когда все встанут в зону сбора."
 	elif accepted:
-		go.add_child(_wrapped("План принят. Дверь тамбура, коридор, лестница — и к воротам во дворе. Рейд начнётся, когда все, кто в убежище, встанут в зону сбора.", Color(0.75, 1.0, 0.75)))
-		go.add_child(_button("Отменить план", func() -> void:
+		note = "План принят. Дверь тамбура, коридор, лестница — и к воротам во дворе. Рейд начнётся, когда все, кто в убежище, встанут в зону сбора."
+		var cancel := Button.new()
+		cancel.text = "Отменить план"
+		cancel.focus_mode = Control.FOCUS_NONE
+		cancel.custom_minimum_size.y = 40
+		cancel.pressed.connect(func() -> void:
 			level.call("accept_raid_plan", false)
-			_sig = ""))
+			_sig = "")
+		v.add_child(cancel)
 	else:
-		var accept := _button("Принять план (%d в сети)" % Net.player_names.size() if Net.is_networked() else "Принять план", func() -> void:
+		var accept := LightUi.button(("ПРИНЯТЬ ПЛАН · %d В СЕТИ" % Net.player_names.size()) if Net.is_networked() else "ПРИНЯТЬ ПЛАН", "primary", func() -> void:
 			_confirm_raid(func() -> void:
 				if level:
 					level.call("accept_raid_plan", true)
 				close_ui()))
 		accept.name = "AcceptRaidPlan"
-		accept.custom_minimum_size.y = 40
+		accept.custom_minimum_size.y = 54
+		accept.add_theme_font_size_override("font_size", 20)
 		accept.disabled = block != "" or level == null
-		accept.add_theme_stylebox_override("normal", UiTheme.face(Color(0.5, 0.36, 0.14), Color(1.0, 0.8, 0.45), 2))
-		accept.add_theme_stylebox_override("hover", UiTheme.face(Color(0.62, 0.45, 0.18), Color(1.0, 0.9, 0.65), 2))
-		accept.add_theme_stylebox_override("pressed", UiTheme.face(Color(0.4, 0.28, 0.1), Color(1.0, 0.8, 0.45), 0))
-		go.add_child(accept)
-		go.add_child(_wrapped("После этого — пешком: дверь тамбура, коридор, лестница, ворота во дворе.", Color(0.7, 0.72, 0.7)))
+		v.add_child(accept)
+		note = "После этого — пешком: дверь тамбура, коридор, лестница, ворота во дворе."
 	if block != "":
-		go.add_child(_text(block, Color(1.0, 0.55, 0.4)))
-	_coop_block(go)
-	go.add_child(_text("Доверие Михалыча: ступень %d   ·   выходов из рейда: %d" % [Profile.trust_step(), Profile.extractions], Color(0.7, 0.72, 0.7)))
+		var bl := LightUi.label(block, 14, LightUi.BAD)
+		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(bl)
+	var nl := LightUi.label(note, 13, LightUi.GOOD if accepted else LightUi.MUTED)
+	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(nl)
 
 
 ## Выход в рейд: чего из основного нет (Profile.raid_kit_gaps) — перечислить и спросить; не
@@ -2254,80 +2501,6 @@ func _coop_block(col: VBoxContainer) -> void:
 		Net.joined.connect(func() -> void: Net.change_scene(Balance.HIDEOUT_SCENE, "Загрузка общего убежища"), CONNECT_ONE_SHOT)
 		Net.join_failed.connect(func() -> void: status.text = "Не удалось подключиться", CONNECT_ONE_SHOT)))
 	col.add_child(status)
-
-
-## Условия рейда: время, погода, электричество — выбор; риск, награда за него и что взять с собой.
-func _conditions_column() -> void:
-	var col := _column("Условия рейда", 1.0)
-	var c := RaidConditions.normalized(Profile.next_conditions)
-	if Net.is_networked() and not Net.is_host() and not Net.host_conditions.is_empty():
-		# в коопе в рейд идут с условиями хоста — его выбор и за окнами
-		col.add_child(_text("В коопе условия выбирает хост: %s" % RaidConditions.title(RaidConditions.next_shared()), Color(1.0, 0.8, 0.5)))
-	for axis in [["time", "Время", Balance.RAID_TIME], ["weather", "Погода", Balance.RAID_WEATHER], ["power", "Электричество", Balance.RAID_POWER]]:
-		col.add_child(_text(String(axis[1]), Color(0.75, 0.75, 0.72)))
-		var row := HFlowContainer.new()
-		row.add_theme_constant_override("h_separation", 6)
-		for key in (axis[2] as Dictionary):
-			var k := String(key)
-			var ax := String(axis[0])
-			var chosen := String(c[ax]) == k
-			var b := _button(("▶ " if chosen else "") + String((axis[2] as Dictionary)[key].name), func() -> void:
-				var nc := RaidConditions.normalized(Profile.next_conditions)
-				nc[ax] = k
-				Profile.next_conditions = nc
-				Profile.save())
-			if chosen:
-				b.add_theme_color_override("font_color", Color(1.0, 0.86, 0.6))
-			row.add_child(b)
-		col.add_child(row)
-	var r := RaidConditions.risk(c)
-	col.add_child(_text("Риск: %d   ·   лут богаче: %d%% контейнеров   ·   доплата Михалыча: +%d%% от вынесенного" % [
-		r, int(RaidConditions.loot_bonus(c) * 100.0), int(RaidConditions.pay_bonus(c) * 100.0)], Color(1.0, 0.8, 0.5)))
-	for h in RaidConditions.hints(c):
-		var l := _text("• " + h, Color(0.82, 0.82, 0.78))
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		col.add_child(l)
-	col.add_child(_button("Случайные условия", func() -> void:
-		var rng := RandomNumberGenerator.new()
-		rng.randomize()
-		Profile.next_conditions = RaidConditions.random(rng)
-		Profile.save()))
-
-
-## Карты: этажи внутри здания отрезаны, у каждого свой путь снаружи. Открытый маршрут выбирается,
-## закрытый — открывается у Михалыча (доверие + плата за наводку).
-func _floors_column() -> void:
-	var col := _column("Маршрут", 1.1)
-	for f in Floors.all():
-		var id := String(f.id)
-		var box := VBoxContainer.new()
-		box.add_theme_constant_override("separation", 2)
-		var head := HBoxContainer.new()
-		var chosen := id == Profile.floor
-		var title := _text(("▶ " if chosen else "   ") + String(f.name), Color(1.0, 0.86, 0.6) if chosen else Color(0.9, 0.9, 0.86))
-		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		head.add_child(title)
-		if Floors.is_open(id):
-			if not chosen:
-				head.add_child(_button("Выбрать", func() -> void: Floors.select(id)))
-		else:
-			var b := _button("Открыть за %s ₽" % InventoryUI.money(int(f.price)), func() -> void: Floors.unlock(id))
-			b.disabled = Floors.unlock_block(id) != ""
-			head.add_child(b)
-		box.add_child(head)
-		var how := _text("   %s — %s" % [String(f.route), String(f.how)], Color(0.62, 0.64, 0.62))
-		how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(how)
-		var state := ""
-		if not Floors.is_open(id):
-			var why := Floors.unlock_block(id)
-			state = "закрыт — " + (why if why != "" else "Михалыч готов показать дорогу")
-		elif not Floors.built(id):
-			state = "маршрут открыт, этаж ещё не собран"
-		if state != "":
-			box.add_child(_text("   " + state, Color(0.85, 0.55, 0.45)))
-		col.add_child(box)
 
 
 # ---------------------------------------------------------------- верстак
