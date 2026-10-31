@@ -1,6 +1,10 @@
 class_name UrbanNavigation
 extends Node3D
 ## Навигация по тем же коллайдерам, что у SectorLevel, с заранее выпеченными тайлами.
+## Тайл — два региона: полоса у швов с соседними тайлами (Seam_x_z) и всё остальное (Tile_x_z). Края тайлов
+## по разные стороны шва бывают разбиты по-разному, их сшивают связи по краю, а их сервер сверяет попарно по
+## всем свободным рёбрам карты: у ТЦ 45 тыс. рёбер — 6–9 с на каждую синхронизацию. Связи по краю включены
+## только у полос (~2 тыс. рёбер, десятки мс), связность та же (tools/nav_seams_test.tscn).
 
 signal ready_for_agents
 
@@ -68,7 +72,7 @@ func _prepare() -> void:
 	var cached: bool = not save_cache and _cache_valid()
 	for x in range(columns):
 		for z in range(rows):
-			cached = cached and ResourceLoader.exists(_path(x, z))
+			cached = cached and ResourceLoader.exists(_path(x, z)) and ResourceLoader.exists(_seam_path(x, z))
 	var source := NavigationMeshSourceGeometryData3D.new()
 	if not cached:
 		# Дети сцены уже построили статические коллайдеры; физика догоняет их через кадр.
@@ -87,11 +91,12 @@ func _prepare() -> void:
 	var regions: Array[NavigationRegion3D] = []
 	for x in range(columns):
 		for z in range(rows):
-			var mesh: NavigationMesh
+			# [полоса у швов, остальное]
+			var parts: Array[NavigationMesh] = []
 			if cached:
-				mesh = load(_path(x, z)) as NavigationMesh
+				parts = [load(_seam_path(x, z)) as NavigationMesh, load(_path(x, z)) as NavigationMesh]
 			else:
-				mesh = _settings()
+				var mesh: NavigationMesh = _settings()
 				var border: float = float(cfg.nav_border)
 				mesh.border_size = border
 				mesh.filter_baking_aabb = AABB(Vector3(float(bounds[0]) + float(x) * tile - border, -16, float(bounds[1]) + float(z) * tile - border), Vector3(tile + border * 2, 54, tile + border * 2))
@@ -100,18 +105,25 @@ func _prepare() -> void:
 				while not _bake_done:
 					await get_tree().process_frame
 				_remove_submerged(mesh)
+				_fix_unset_heights(mesh, mesh.filter_baking_aabb.end.y)
+				parts = _split_seams(mesh, x, z, columns, rows)
 				if save_cache:
-					var error: Error = ResourceSaver.save(mesh, _path(x, z))
-					if error != OK:
-						push_error("навигация: не сохранён " + _path(x, z))
-				print("навигация: тайл %d/%d, полигонов %d" % [x * rows + z + 1, columns * rows, mesh.get_polygon_count()])
-			var region := NavigationRegion3D.new()
-			region.name = "Tile_%d_%d" % [x, z]
-			region.navigation_mesh = mesh
-			regions.append(region)
-			if mesh.get_polygon_count() > 0:
-				var polygon: PackedInt32Array = mesh.get_polygon(mesh.get_polygon_count() / 2)
-				var vertices: PackedVector3Array = mesh.get_vertices()
+					var paths: Array[String] = [_seam_path(x, z), _path(x, z)]
+					for index in range(paths.size()):
+						if ResourceSaver.save(parts[index], paths[index]) != OK:
+							push_error("навигация: не сохранён " + paths[index])
+				print("навигация: тайл %d/%d, полигонов %d, у швов %d" % [x * rows + z + 1, columns * rows, mesh.get_polygon_count(), parts[0].get_polygon_count()])
+			for index in range(parts.size()):
+				var region := NavigationRegion3D.new()
+				region.name = ("Seam_%d_%d" if index == 0 else "Tile_%d_%d") % [x, z]
+				region.navigation_mesh = parts[index]
+				# связи по краю нужны только на швах (см. описание класса)
+				region.use_edge_connections = index == 0
+				regions.append(region)
+			var sample_mesh: NavigationMesh = parts[1] if parts[1].get_polygon_count() > 0 else parts[0]
+			if sample_mesh.get_polygon_count() > 0:
+				var polygon: PackedInt32Array = sample_mesh.get_polygon(sample_mesh.get_polygon_count() / 2)
+				var vertices: PackedVector3Array = sample_mesh.get_vertices()
 				if not polygon.is_empty():
 					synchronization_samples.append(vertices[polygon[0]])
 	for region: NavigationRegion3D in regions:
@@ -162,6 +174,10 @@ func _cache_dir() -> String:
 
 func _path(x: int, z: int) -> String:
 	return "%s/tile_%d_%d.res" % [_cache_dir(), x, z]
+
+
+func _seam_path(x: int, z: int) -> String:
+	return "%s/seam_%d_%d.res" % [_cache_dir(), x, z]
 
 
 func _cache_valid() -> bool:
@@ -245,6 +261,100 @@ func _remove_submerged(mesh: NavigationMesh) -> void:
 	mesh.clear_polygons()
 	for polygon in polygons:
 		mesh.add_polygon(polygon)
+
+
+## Recast изредка оставляет точке детальной сетки «высоту не задана» (0xFFFF клеток — у ТЦ 16 368 м): многоугольник
+## с ней тянется в небо, путь через него уводит точку пути вверх. Такой точке — среднюю высоту соседей по многоугольникам;
+## соседей нет — многоугольник убираем.
+func _fix_unset_heights(mesh: NavigationMesh, top: float) -> void:
+	var vertices: PackedVector3Array = mesh.get_vertices()
+	var sums: Dictionary = {}
+	var counts: Dictionary = {}
+	for index in range(mesh.get_polygon_count()):
+		var polygon: PackedInt32Array = mesh.get_polygon(index)
+		for vertex in polygon:
+			if vertices[vertex].y <= top:
+				continue
+			for other in polygon:
+				if vertices[other].y <= top:
+					sums[vertex] = float(sums.get(vertex, 0.0)) + vertices[other].y
+					counts[vertex] = int(counts.get(vertex, 0)) + 1
+	var fixed: int = 0
+	for vertex: int in counts:
+		var point: Vector3 = vertices[vertex]
+		point.y = float(sums[vertex]) / float(counts[vertex])
+		vertices[vertex] = point
+		fixed += 1
+	var polygons: Array[PackedInt32Array] = []
+	for index in range(mesh.get_polygon_count()):
+		var polygon: PackedInt32Array = mesh.get_polygon(index)
+		var sane: bool = true
+		for vertex in polygon:
+			sane = sane and vertices[vertex].y <= top
+		if sane:
+			polygons.append(polygon)
+	if fixed == 0 and polygons.size() == mesh.get_polygon_count():
+		return
+	print("навигация: точек без высоты %d, убрано многоугольников %d" % [fixed, mesh.get_polygon_count() - polygons.size()])
+	mesh.vertices = vertices
+	mesh.clear_polygons()
+	for polygon in polygons:
+		mesh.add_polygon(polygon)
+
+
+## Тайл → [многоугольники у швов с соседними тайлами (хоть одна точка ближе nav_seam_band), остальные],
+## у каждой части только свои точки.
+func _split_seams(mesh: NavigationMesh, x: int, z: int, columns: int, rows: int) -> Array[NavigationMesh]:
+	var cfg: Dictionary = _config()
+	var bounds: Array = definition.get("bounds", [-750, -625, 750, 625])
+	var tile: float = float(cfg.nav_tile)
+	var band: float = float(cfg.nav_seam_band)
+	var x0: float = float(bounds[0]) + float(x) * tile
+	var z0: float = float(bounds[1]) + float(z) * tile
+	# швы с соседями: (ось, координата линии)
+	var seams: Array[Vector2] = []
+	if x > 0:
+		seams.append(Vector2(Vector3.AXIS_X, x0))
+	if x < columns - 1:
+		seams.append(Vector2(Vector3.AXIS_X, x0 + tile))
+	if z > 0:
+		seams.append(Vector2(Vector3.AXIS_Z, z0))
+	if z < rows - 1:
+		seams.append(Vector2(Vector3.AXIS_Z, z0 + tile))
+	var vertices: PackedVector3Array = mesh.get_vertices()
+	var near := PackedByteArray()
+	near.resize(vertices.size())
+	for index in range(vertices.size()):
+		for seam: Vector2 in seams:
+			if absf(vertices[index][int(seam.x)] - seam.y) < band:
+				near[index] = 1
+	var part_vertices: Array[PackedVector3Array] = [PackedVector3Array(), PackedVector3Array()]
+	var part_polygons: Array = [[], []]
+	var remap: Array[PackedInt32Array] = [PackedInt32Array(), PackedInt32Array()]
+	for part in range(2):
+		remap[part].resize(vertices.size())
+		remap[part].fill(-1)
+	for index in range(mesh.get_polygon_count()):
+		var polygon: PackedInt32Array = mesh.get_polygon(index)
+		var part: int = 1
+		for vertex in polygon:
+			if near[vertex] == 1:
+				part = 0
+		var local := PackedInt32Array()
+		for vertex in polygon:
+			if remap[part][vertex] < 0:
+				remap[part][vertex] = part_vertices[part].size()
+				part_vertices[part].append(vertices[vertex])
+			local.append(remap[part][vertex])
+		(part_polygons[part] as Array).append(local)
+	var parts: Array[NavigationMesh] = []
+	for part in range(2):
+		var piece: NavigationMesh = _settings()
+		piece.vertices = part_vertices[part]
+		for polygon: PackedInt32Array in part_polygons[part]:
+			piece.add_polygon(polygon)
+		parts.append(piece)
+	return parts
 
 
 func _settings() -> NavigationMesh:

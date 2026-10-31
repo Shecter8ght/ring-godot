@@ -2073,6 +2073,9 @@ const URBAN_WORLD := {
 	"nav_radius": 0.5, "nav_agent_height": 1.8, "nav_climb": 0.4, "nav_slope": 40.0,
 	"nav_merge_scale": 0.125,
 	"nav_detail_error": 2.0,
+	# полоса у шва тайлов, м: её многоугольники — отдельный регион со связями по краю (UrbanNavigation);
+	# не меньше запаса связей карты (navigation/3d/default_edge_connection_margin, 0,25 м)
+	"nav_seam_band": 1.0,
 	"extract_seconds": 8.0,
 }
 
