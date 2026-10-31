@@ -218,6 +218,10 @@ python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи 
 python -X utf8 tools/dorm_modules/print_designs.py             # печать мусора и маркировка оставленного света: вымышленные марки → _asset_src/dorm_clutter/prints;
                                                               # blender --background <…_uv_v01.blend> --python tools/dorm_modules/print_bake.py -- <папка geo> clutter_uv|found_lights_uv
                                                               # (положение/нормаль/деталь в развёртку) → python -X utf8 tools/dorm_modules/print_apply.py [вещь …]
+python -X utf8 tools/dorm_modules/wear_zones.py [вещь …]     # общежитие, износ (этап 2): места в развёртке по картам геометрии print_bake.py
+                                                              # (пыль сверху, грязь у пола, подтёк, сырость, кровь) → _asset_src/<набор>/wear; печать слоем —
+                                                              # print_apply.py --layers; Painter: found_lights_sp.py|clutter_sp.py wear [вещь …] (группа «Этап 2 — износ»,
+                                                              # построитель tools/dorm_modules/sp_dorm_wear.py — профили вещей, сила по возрасту)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_FoundLights_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/found_lights_uv.py
                                                               # оставленный свет, текстуры: развёртка принятой формы и FBX для Painter; дальше
                                                               # python -X utf8 tools/dorm_modules/found_lights_sp.py projects|stack (стек по finish-spec.json)
