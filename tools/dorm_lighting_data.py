@@ -128,6 +128,13 @@ def add_lighting(p):
                 {"id":f"annex_{f+1}","at":[38.655,levels[f]+(heights[f]+.099)/2,-24.15],"size":[9.95,heights[f]+.101,30.14],
                  "cache":f"res://data/blockouts/dorm_voxel/annex_{f+1}.res"}]]},
         "cool_corridors":{"kelvin":4400,"color":cct_srgb_hex(4400),"default":False},
+        # Свет «как в Таркове» (основной с 2026-10-31, F9 — выключить): подсветка-«зона окружения» в каждом помещении
+        # и цепочкой вдоль коридоров (без теней и бликов, вне VoxelGI), окна, небо и экспозиция — множители времени
+        # суток. Ночью подсветка тусклая и холодная, в окнах — слабый лунный свет вместо нуля.
+        "tarkov":{"default":True,"room":.30,"corridor":.26,"wet":.22,"room_color":"fff0e0","corridor_color":"e8eef5",
+                  "height":2.1,"range_scale":.62,"attenuation":.45,"corridor_step":4.5,"window":2.5,"ambient":1.6,"exposure":1.1,
+                  "times":{"evening":{"fill":1.},"overcast":{"fill":1.},
+                           "night":{"fill":.18,"color":"aebcd4","window":.06,"window_color":"abc4e6"}}},
         "effects":{"ssao":True,"ssao_radius":1.2,"ssao_intensity":1.5,"ssil":False,"ssil_radius":2.,"ssil_intensity":.6,
                    "fog":True,"fog_density":0.,"fog_length":32.,"fog_anisotropy":.15,"sun_fog_energy":8.,
                    "dust_density":.025,"dust_volumes":[

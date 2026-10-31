@@ -129731,6 +129731,35 @@
       "color": "ffdcb8",
       "default": false
     },
+    "tarkov": {
+      "default": true,
+      "room": 0.3,
+      "corridor": 0.26,
+      "wet": 0.22,
+      "room_color": "fff0e0",
+      "corridor_color": "e8eef5",
+      "height": 2.1,
+      "range_scale": 0.62,
+      "attenuation": 0.45,
+      "corridor_step": 4.5,
+      "window": 2.5,
+      "ambient": 1.6,
+      "exposure": 1.1,
+      "times": {
+        "evening": {
+          "fill": 1.0
+        },
+        "overcast": {
+          "fill": 1.0
+        },
+        "night": {
+          "fill": 0.18,
+          "color": "aebcd4",
+          "window": 0.06,
+          "window_color": "abc4e6"
+        }
+      }
+    },
     "effects": {
       "ssao": true,
       "ssao_radius": 1.2,

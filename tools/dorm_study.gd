@@ -539,9 +539,9 @@ func _v3_shots() -> void:
 			if String(plan.environment.cases[index].id)==case_id:
 				await lighting.call("set_case",index)
 				break
-		# DORM_V3_TARKOV=1 — проба «свет как в Таркове» (F9 в прогулке)
+		# DORM_V3_TARKOV=0 — без света «как в Таркове» (он основной, F9 в прогулке)
 		if OS.get_environment("DORM_V3_TARKOV")!="":
-			await lighting.call("set_tarkov",true)
+			await lighting.call("set_tarkov",OS.get_environment("DORM_V3_TARKOV")!="0")
 	walker.set_physics_process(false)
 	hud.hide()
 	for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
@@ -596,6 +596,8 @@ func _v3_shots() -> void:
 
 func _shots() -> void:
 	if lighting!=null:
+		# матрица r6.1 сравнивается с архивами — свет той редакции, без «как в Таркове»
+		await lighting.call("set_tarkov",false)
 		var capture: RefCounted = LightCapture.new()
 		await capture.call("run",self)
 		return

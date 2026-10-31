@@ -180,7 +180,7 @@ python -X utf8 tools/build_prospekt.py                        # карта «П�
                                                               # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
 python -X utf8 tools/build_dorm.py                            # общежитие, пробный свет r6.1 на принятой геометрии r4, пороги и порталы r5 сохранены →
                                                               # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; режимы и замеры — docs/design/dorm_light_test.md
-tools/dorm_study.cmd                                         # старт — выбранный владельцем вечер Б (VoxelGI); F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников, F8 — пробная ночная луна (при старте выключена); F9 — свет «как в Таркове» (зоны окружения), F10 — скрыть весь интерфейс;
+tools/dorm_study.cmd                                         # старт — выбранный владельцем вечер Б (VoxelGI) со светом «как в Таркове»; F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников, F8 — пробная ночная луна (при старте выключена); F9 — выключить / включить свет «как в Таркове» (зоны окружения, основной), F10 — скрыть весь интерфейс;
                                                               # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
 tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 117 проверок: 68 помещений пешком, лестница, двери, оба выхода и новые порталы хозкрыла
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # r6.1: 42 затронутых вида + шесть ночных пар с луной; 36 новых серий FPS/GPU → light_* / light61_*; «до» — light6_*; общая матрица 149 кадров / 83 серии
@@ -189,7 +189,7 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dor
                                                               # src/blockout/dorm_v3) при свете «вечер Б»: снимки docs/screens/dorm/v3 и время кадра на видеокарте
                                                               # (DORM_V3_VIEWS=01_corridor,04_wash — выборочно; архивы пробы света не трогает);
                                                               # с модулями Blender (dorm_modules.gd: двери, окна, батареи); свои кадры —
-                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*); DORM_V3_CASE=overcast_A — другой свет; DORM_V3_FILL=1 — свет от камеры; DORM_V3_TARKOV=1 — «как в Таркове»
+                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*); DORM_V3_CASE=overcast_A — другой свет; DORM_V3_FILL=1 — свет от камеры; DORM_V3_TARKOV=0 — без «как в Таркове»
 tools/godot.cmd --headless --script res://tools/dorm_v3_check.gd # материалы v03 в движке: карты и форматы (поля EXR без сжатия), шейдеры, палитра стенда, модули и их места
 python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 из комплекта модулей → assets/textures/dorm_v3 (+ .import, шум износа); затем --import
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Dorm_Modules/models/RING_Dorm_Modules_v03.blend" --python-exit-code 1 --python tools/dorm_modules/godot_export.py
