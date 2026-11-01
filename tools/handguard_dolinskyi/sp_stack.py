@@ -193,9 +193,14 @@ def base(st):
     fx = L.insert_filter_effect(L.InsertPosition.inside_node(mf, L.NodeStack.Content),
                                 sp_lib.rid("matfinish_powder_coated/matfinish_powder_coated", "u:filter"))
     # у автора Scale 6 (видно) — при его плотности развёртки; у нас 6,6 пикс/мм, и 6 даёт ячейку ~1,2 мм — кляксы.
-    # На его кадре маски (6:00) зерно ~0,15 мм — у нас это тексель: Scale 40
-    fx.get_source().set_parameters({"tile": 40, "Normal_Slope_Max": 0.5})
+    # На его кадре маски (6:00) зерно ~0,15 мм; у нас ячейка в тексель (Scale 40) крупным планом — квадраты и песок
+    # (владелец 01.11: «шумная, грязная, как будто поломанная»): Scale 24 — ячейка ~2 текселя (0,3 мм)
+    fx.get_source().set_parameters({"tile": 24, "Normal_Slope_Max": 0.5})
     anc = L.insert_anchor_point_effect(L.InsertPosition.above_node(fx), "MatFinish Powder Coated")
+    # в нормаль зерно — на четверть: на крупном плане автора (12:46) грань гладкая, зерно у него уходит через якорь
+    # в блеск и цвет (якорь берёт выход фильтра до прозрачности слоя — «noise» ниже не меняется)
+    for c in (CH.Normal, CH.Height):
+        mf.set_opacity(0.25, c)
     n = fill("noise", inside(g), opacity=0.44, diff="#3F4145", gloss=0.6704)       # 44 %, видно
     m = Mask(n)
     _, src = m.fill(anc)
@@ -225,7 +230,7 @@ def height_normal(st):
     mil = group("milling", inside(g))
     # следы торцевой фрезы на площадках и торцах (у автора — десятки заливок «milling» в Linear Dodge по местам)
     for nm, png in (("milling left", "milling_arcs"), ("milling top", "milling_arcs")):
-        f = fill(nm, inside(mil), height=-0.006 if nm == "milling left" else -0.004)
+        f = fill(nm, inside(mil), height=-0.003 if nm == "milling left" else -0.002)
         m = Mask(f)
         m.fill(mask_png(png), BM.LinearDodge)
         m.paint("места следов фрезы", BM.Multiply)
@@ -276,7 +281,7 @@ def height_normal(st):
 
 def decals(st):
     g = group("decals", top(st))
-    d = fill("decal", inside(g), diff="#5E5340", gloss=0.42, height=-0.04)          # ободок: тёмно-жёлтый (фото 3:16)
+    d = fill("decal", inside(g), diff="#5E5340", gloss=0.42, height=-0.02)          # ободок: тёмно-жёлтый (фото 3:16)
     m = Mask(d)
     m.fill(mask_png("decal_mask"))
     anc = m.anchor("decal mask")

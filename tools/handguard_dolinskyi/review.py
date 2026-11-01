@@ -175,10 +175,14 @@ def main():
         except Exception:      # noqa: BLE001
             continue
     sc.cycles.samples = 96
-    sc.cycles.preview_samples = 32
+    sc.cycles.preview_samples = 64
     sc.cycles.use_denoising = True
     sc.cycles.denoising_use_gpu = False           # видеопамять держит Painter
-    sc.cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
+    # во вьюпорте тоже: без шумоподавления 32 сэмпла давали «песок» поверх текстуры (владелец 01.11: «шумная»);
+    # по цвету и нормалям — иначе шумодав смывает мелкое зерно покрытия вместе с шумом рендера
+    sc.cycles.use_preview_denoising = True
+    for pre in ("", "preview_"):
+        setattr(sc.cycles, pre + "denoising_input_passes", "RGB_ALBEDO_NORMAL")
     sc.view_settings.view_transform = "Standard"  # тонкривая Linear, как у автора в Painter
     sc.render.resolution_x, sc.render.resolution_y = 1600, 900
     sc.render.film_transparent = False
