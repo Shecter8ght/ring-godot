@@ -496,6 +496,13 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
                                                               # AR-15, рендеры для владельца: две винтовки на полевом столе в палатке (разобранная — физикой
                                                               # жёстких тел), 26 кадров: 5 общих, 11 собранной, 4 — разряжание, 6 средних планов; окружение — tools/ar15/tent_scene.py;
                                                               # на раскладушке — tools/ar15/render_tent.py -- <out.blend> <out.png> [ширина высота сэмплы] [вид]
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/handguard_dolinskyi/build.py
+                                                              # цевьё по ролику Dolinskyi (эксперимент 2026-11-01, docs/assets/handguard_dolinskyi_plan.md): high- и low-poly
+                                                              # → «Цевьё_Dolinskyi_форма_v01.blend»; затем на нём uv.py (развёртка 2K, FBX для Painter), на развёртке mesh_dump.py,
+                                                              # python -X utf8 tools/handguard_dolinskyi/masks.py (маски вместо мазков кистью: надписи, места касаний, износ планок);
+                                                              # Painter — python -X utf8 tools/handguard_dolinskyi/sp_run.py start, -c "sp_handguard.create()" / "…bake()" /
+                                                              # "import sp_stack; sp_stack.build()" / "sp_handguard.export(<папка>)" (без неявных слоёв Vulkan: с RivaTuner падал);
+                                                              # просмотр и сравнение с кадрами — review.py; открыть проект руками — tools/handguard_dolinskyi/painter_open.cmd
 # ГРАНЬ-15 (AR-15) в игру (blender … --python): tools/ar15/game_lp.py (сетка ~40 тыс. из AR-15_износ_этап2_v1.blend: подвижные детали — свои узлы
 #   по моверам, рукоять — вокселями; развёртка asset_kit, планки Picatinny с пазами) → game_bake.py -- [атлас …] [--cpu] (с high-poly, каждая
 #   деталь — со своих) → python -X utf8 tools/ar15/game_pack.py → game_export.py (assets/models/weapons/ar15: ar15.gltf, ar15_mag30.gltf,
