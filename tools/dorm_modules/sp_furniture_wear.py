@@ -33,7 +33,7 @@ PROFILES = {
     "furn_fridge": dict(appliance=["Холодильник_эмаль"], rust=["Холодильник_эмаль", "Чёрная_краска"],
                         yellowed=["Холодильник_эмаль"], gasket=["Уплотнитель"], touch="grime", handles=["Хром"]),
     "furn_sofa": dict(fabric=["Диван_ткань"], fade=0.16, stains=True, greasy=True, touch="fabric", lacquer=["Диван_дерево"]),
-    "furn_carpet": dict(fabric=["Ковёр_шерсть"], fade=0.10, rust=["Гвоздь_сталь"]),
+    "furn_carpet": dict(fabric=["Ковёр_шерсть"], fade=0.14, fade_zone=True, greasy=True, rust=["Гвоздь_сталь"]),
     "furn_tv": dict(polish=["Телевизор_корпус"], glass=["Кинескоп"], plastic=["Телевизор_панель", "Телевизор_задняя_крышка"],
                     touch="grime", handles=["Хром"]),
     "furn_hotplate": dict(appliance=["Плитка_корпус"], chips=False, heat=True, grease=True, touch="grime"),
@@ -154,12 +154,16 @@ def build(setname, base, game, bbox_mm):
     if p.get("fade"):
         # краски гаснут (насыщенность серым) и чуть светлеют нейтральным тоном; Screen светлым цветом тянул тёмную
         # рогожку к бежевому (медиана 62/42/28 → 92/76/60, проба 2026-11-01)
+        # fade_zone — место плавной картой (ковёр: от окна), иначе пятнами
         lf = add(_layer("Выгорело: краски", nxt(), color=(0.5, 0.5, 0.5), cmode=L.BlendingMode.Saturation,
                         cop=min(p["fade"] * 1.2, 0.3), rough=0.04, rmode="add", rop=0.5), fabric)
-        _first_tri(lf, f"{MK}/cloudy.png", 600, bbox_mm, rot=0.2)
         lf2 = add(_layer("Выгорело: светлее", nxt(), color=(0.22, 0.21, 0.19), cmode=L.BlendingMode.Screen, cop=p["fade"] * 0.5),
                   fabric)
-        _first_tri(lf2, f"{MK}/cloudy.png", 600, bbox_mm, rot=0.2)
+        for lay in (lf, lf2):
+            if p.get("fade_zone"):
+                _zone(lay, base, game, "fade")
+            else:
+                _first_tri(lay, f"{MK}/cloudy.png", 600, bbox_mm, rot=0.2)
     # 8. пятна с ободком, засаленность
     if p.get("stains"):
         lw = add(_layer("Пятна с ободком", nxt(), color=(0.80, 0.66, 0.42), cmode=L.BlendingMode.Multiply, cop=0.85,

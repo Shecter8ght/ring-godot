@@ -131,6 +131,15 @@ def zones(game: str) -> None:
         maps["rings"] = rings(g, RINGS[game])
     if game in RINGS_WATER:
         maps["rings_water"] = rings(g, RINGS_WATER[game], seed=4)
+    if game == "furn_carpet":
+        # выгорел плавно — окно слева, левый верх светлее; без пятен: маска «облака» по ворсу давала розовые разводы
+        # «как крашеный пластик» (владелец 2026-11-01)
+        x, z = pos[..., 0], pos[..., 2]
+        ramp = np.clip(0.5 - x / 1.5 + 0.2 * (z - 1.0), 0, 1)
+        wave = 0.88 + 0.12 * np.sin(x * 2.3 + 0.7) * np.sin(z * 1.7 + 1.9)
+        maps["fade"] = (0.3 + 0.7 * ramp) * wave
+        # низ у изголовья — сидят на кровати, прислонившись: плечи и голова
+        maps["greasy"] = np.exp(-(((x + 0.35) / 0.42) ** 2 + ((z - 0.42) / 0.2) ** 2)) * (nrm[..., 1] < -0.5)
     if game == "furn_hotplate":  # эмаль вокруг диска пожелтела и побурела от жара
         rr = np.linalg.norm(pos[..., :2], axis=-1)
         maps["heat"] = (np.exp(-((rr - 0.1) / 0.018) ** 2)) * (pos[..., 2] > 0.068) * (0.7 + 0.3 * noise(*h.shape, 32, 5))

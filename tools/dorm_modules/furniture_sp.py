@@ -28,6 +28,8 @@ SRC = ROOT / "_asset_src" / "dorm_furniture"
 LIB = Path("E:/Models Blender/ENVIRONMENT/RING_Dorm_Furniture")
 SPEC = LIB / "finish-spec.json"
 RES = 2048
+# свой размер набора (как furniture_uv.RES — им же запечены карты геометрии): ковёр — 4K
+RES_ITEM = {"furn_carpet": 4096}
 # предмет: наибольший размер, мм (трёхпроекционные узоры, плотность развёртки — оценка по нему)
 ITEMS = {"furn_bunk_bed": 2000, "furn_bed": 2000, "furn_mattress": 1900, "furn_nightstand": 650, "furn_wardrobe": 2100,
          "furn_table": 1000, "furn_chair": 830, "furn_stool": 450, "furn_shelf": 800, "furn_fridge": 850,
@@ -50,7 +52,8 @@ def projects(names: list[str]) -> None:
     for name in names:
         for mark in ("_project_ready.txt", "_bake_done.txt"):
             (jobs / mark).unlink(missing_ok=True)
-        print(sp_run.run(f"print(sp_finish.create(r'{(SRC / 'sp' / (name + '.fbx')).as_posix()}', {RES}))", 180, "create_" + name))
+        res = RES_ITEM.get(name, RES)
+        print(sp_run.run(f"print(sp_finish.create(r'{(SRC / 'sp' / (name + '.fbx')).as_posix()}', {res}))", 180, "create_" + name))
         print(sp_run.wait(jobs / "_project_ready.txt", 600))
         print(sp_run.run("print(sp_finish.bake())", 60, "bake_" + name))
         print(sp_run.wait(jobs / "_bake_done.txt", 2400))
@@ -93,7 +96,7 @@ def open_and_meshes(name: str) -> list[str]:
 def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool, wear: bool = False) -> None:
     """Стек отделок (sp_finish.build_set), печать этапа 1 слоем сверху (если есть) — или (wear) печать и группа
     «Этап 2 — износ» (sp_furniture_wear.py) над отделкой; выгрузка карт, сохранение."""
-    px_mm = RES / ITEMS[name] * 0.55
+    px_mm = RES_ITEM.get(name, RES) / ITEMS[name] * 0.55
     top = ([f"print(sp_furniture_wear.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}))"] if wear else [
         "st = sp_lib.stack_by_name(set_name)",
         "for n in L.get_root_layer_nodes(st):",

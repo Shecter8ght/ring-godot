@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 RES = 2048
 
 
-def bake_item(coll, game, out_dir) -> None:
+def bake_item(coll, game, out_dir, res=RES) -> None:
     sc = bpy.context.scene
     objs = [o for o in coll.objects if o.type == "MESH"]
     coll.hide_viewport = False
@@ -48,7 +48,7 @@ def bake_item(coll, game, out_dir) -> None:
     img_node = nt.nodes.new("ShaderNodeTexImage")
     nt.nodes.active = img_node
     for kind, sock in (("pos", geo.outputs["Position"]), ("nrm", geo.outputs["Normal"]), ("part", comb.outputs["Vector"])):
-        img = bpy.data.images.new(f"{game}_{kind}", RES, RES, float_buffer=True, alpha=False)
+        img = bpy.data.images.new(f"{game}_{kind}", res, res, float_buffer=True, alpha=False)
         img.colorspace_settings.name = "Non-Color"
         img_node.image = img
         for l in list(emit.inputs["Color"].links):
@@ -83,7 +83,8 @@ def main() -> None:
             continue
         coll = bpy.data.collections.get(game)
         if coll is not None:
-            bake_item(coll, game, out_dir)
+            # разрешение набора — как у проекта Painter (модуль развёртки может задать своё: RES = {вещь: 4096})
+            bake_item(coll, game, out_dir, getattr(U, "RES", {}).get(game, RES))
 
 
 if __name__ == "__main__":

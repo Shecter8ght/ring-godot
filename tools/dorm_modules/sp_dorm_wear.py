@@ -135,8 +135,18 @@ def _print_layer(setname, base, game, pos):
         ch["rough"] = info["rough"]
     if info.get("metal") is not None:
         ch["metal"] = info["metal"]
+    if info.get("rough_map"):
+        ch["rough"] = 0.9
+    if info.get("normal_map"):
+        ch["height"] = 0.5  # рельеф отделки под печатью гасится: нормаль печати — целиком (ворс ковра)
     f = fill(PRINT, pos, **ch)
     f.set_source(CH.BaseColor, S._bitmap(f"{base}/prints/uv/{game}_print_color.png"))
+    if info.get("rough_map"):
+        f.set_source(CH.SpecularRoughness, S._bitmap(f"{base}/prints/uv/{info['rough_map']}"))
+    if info.get("normal_map"):
+        f.active_channels = set(f.active_channels) | {CH.Normal}
+        f.set_source(CH.Normal, S._bitmap(f"{base}/prints/uv/{info['normal_map']}"))
+        f.set_blending_mode(L.BlendingMode.Normal, CH.Normal)
     S._uv(f)
     S._bmask(f, f"{base}/prints/uv/{game}_print_alpha.png")
     return L.InsertPosition.above_node(f)

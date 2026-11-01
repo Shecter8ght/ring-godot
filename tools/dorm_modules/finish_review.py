@@ -28,8 +28,9 @@ def load(path, non_color):
     return img
 
 
-def material(name, maps_dir, glass=False, glow=False, prefix=None):
-    """prefix — начало имён карт, если не совпадает с папкой (варианты отделки: папка <вещь>__<код>, карты <вещь>_*)."""
+def material(name, maps_dir, glass=False, glow=False, prefix=None, sheen=None):
+    """prefix — начало имён карт, если не совпадает с папкой (варианты отделки: папка <вещь>__<код>, карты <вещь>_*);
+    sheen — блеск ворса ткани (вес, шероховатость): в картах его нет, в Godot — rim (поле godot карточки)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -54,6 +55,9 @@ def material(name, maps_dir, glass=False, glow=False, prefix=None):
     nm = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(tex("normal", True).outputs["Color"], nm.inputs["Color"])
     nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+    if sheen:
+        bsdf.inputs["Sheen Weight"].default_value = sheen[0]
+        bsdf.inputs["Sheen Roughness"].default_value = sheen[1]
     if glass:
         bsdf.inputs["Transmission Weight"].default_value = 1.0
         bsdf.inputs["IOR"].default_value = 1.5
@@ -95,7 +99,7 @@ def main() -> None:
                 continue
             if have or glow:
                 ob.data.materials.append(material(f"{game}_{'свет' if glow else 'стекло' if glass else 'карты'}",
-                                                  maps_dir, glass, glow))
+                                                  maps_dir, glass, glow, sheen=getattr(U, "SHEEN", {}).get(game)))
             print("REVIEW", game, ob.name, "glass" if glass else "glow" if glow else "maps" if have else "НЕТ КАРТ", flush=True)
         # исходная форма — скрыта
         for o in [root] + list(root.children_recursive):

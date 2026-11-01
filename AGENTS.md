@@ -229,6 +229,14 @@ python -X utf8 tools/dorm_modules/furniture_wear_zones.py [предмет …] #
                                                               # засалено, пятна, прожоги, кольца от кружек, жар) → _asset_src/dorm_furniture/wear; Painter —
                                                               # furniture_sp.py wear [предмет …] (группа «Этап 2 — износ», построитель sp_furniture_wear.py,
                                                               # варианты тоже) → maps_worn; просмотр — finish_review.py / furniture_review.py с maps_worn
+python -X utf8 tools/dorm_modules/carpet_maps.py              # ковёр общежития, карты 4K без Painter: ворс генератором (furniture_prints.py furn_carpet —
+                                                              # пучки 2,4 × 2 мм, край узора вперемешку, нормаль, шероховатость) и износ по зонам →
+                                                              # maps/ и maps_worn/furn_carpet; развёртка ковра — furniture_uv.py -- furn_carpet в файле развёртки
+                                                              # (лицо — 75 % карты), карты геометрии 4K — print_bake.py (RES модуля развёртки)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_worn_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/carpet_render.py -- <выход.blend> [<папка кадров> [1 2 3]]
+                                                              # ковёр с настоящим ворсом (carpet_pile.py: волокна Geometry Nodes на объекте-волосах, Principled
+                                                              # Hair, цвет из карты по корню) в углу комнаты общежития под вечерним солнцем: три камеры, Cycles
+                                                              # (CARPET_QUICK=1 — проба вдвое меньше и мало выборок)
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

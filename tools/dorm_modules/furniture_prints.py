@@ -5,16 +5,22 @@
 
 Карты геометрии в развёртку — print_bake.py (furniture_uv) в _asset_src/dorm_furniture/prints/geo. Слой кладёт Painter
 над заводской отделкой (sp_dorm_wear._print_layer — тот же слой «Печать (этап 1)» и у износа). Марки выдуманы, шрифты
-DejaVu (как у мусора). Орнамент ковра — свой: стёганая сетка узлов 6 мм, медальон-ромб со ступенчатым краем,
-угловые четвертинки, звёзды по полю, кайма с розетками — по мотивам ковров 70-х, не копия какого-то ковра.
+DejaVu (как у мусора). Орнамент ковра — свой: медальон-ромб со ступенчатым краем, угловые четвертинки, звёзды по
+полю, кайма с розетками — по мотивам ковров 70-х, не копия какого-то ковра. Ковёр — не печать, а ворс целиком
+(владелец 2026-11-01: «на кусок пластика похож, а не ткань и ворс»): пучки рядами, кончики волокон соседних пучков
+вперемешку (край узора мохнатый), купола и ложбинки — карта нормалей и шероховатости рядом с цветом.
 """
 from __future__ import annotations
 
+import json
 import math
+import os
 import sys
 from pathlib import Path
 
-import numpy as np
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"  # карты геометрии — EXR; до первого import cv2
+import cv2  # noqa: E402
+import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -68,11 +74,14 @@ FIELD, NAVY, IVORY, OCHRE, DARK, GREEN = ((148, 30, 28), (30, 33, 56), (214, 198
                                          (52, 84, 66))
 
 
-def carpet_design(w_mm: int = 1500, h_mm: int = 2000, knot: float = 6.0) -> np.ndarray:
-    """Рисунок ковра 1 пикс/мм: узлы по сетке knot мм (ступенчатый край узора), цвета чуть гуляют по узлам."""
-    ys, xs = np.mgrid[0:h_mm, 0:w_mm].astype(np.float32)
-    kx, ky = (np.floor(xs / knot) + 0.5) * knot, (np.floor(ys / knot) + 0.5) * knot
-    col = np.empty((h_mm, w_mm, 3), np.float32)
+# машинный шерстяной ковёр: пучки ворса рядами — поперёк 2,4 мм, вдоль основы 2 мм (~210 тыс. точек на м²); прежняя
+# сетка узлов 6 мм при 0,7 пикс/мм давала узор пиксельными ступенями
+KNOT_X, KNOT_Y = 2.4, 2.0
+
+
+def carpet_design(kx: np.ndarray, ky: np.ndarray, w_mm: int = 1500, h_mm: int = 2000) -> np.ndarray:
+    """Цвет орнамента в середине пучка: kx, ky — мм от левого верхнего угла лица (массивы любой формы), sRGB."""
+    col = np.empty(kx.shape + (3,), np.float32)
     col[:] = srgb(FIELD)
     edge = np.minimum.reduce([kx, w_mm - kx, ky, h_mm - ky])
 
@@ -132,16 +141,77 @@ def carpet_design(w_mm: int = 1500, h_mm: int = 2000, knot: float = 6.0) -> np.n
     gx = np.where(row % 2 == 0, gx, (kx - cx + 85) % 170 - 85)
     gy = (ky - cy) % 170 - 85
     st = np.minimum((np.abs(gx) + np.abs(gy)) / 1.3, np.maximum(np.abs(gx), np.abs(gy)))
-    free = field & (d >= 1.06) & (qd >= 1.08)
+    # звезда целиком или никак: место проверяется по её середине (по краю медальона и четвертинок торчали обрезки)
+    sx, sy = kx - gx, ky - gy
+    sd = np.abs(sx - cx) / 420 + np.abs(sy - cy) / 600
+    sq = np.minimum.reduce([np.abs(sx - fx0) / 300 + np.abs(sy - fy0) / 300, np.abs(sx - fx1) / 300 + np.abs(sy - fy0) / 300,
+                            np.abs(sx - fx0) / 300 + np.abs(sy - fy1) / 300, np.abs(sx - fx1) / 300 + np.abs(sy - fy1) / 300])
+    sedge = np.minimum.reduce([sx, w_mm - sx, sy, h_mm - sy])
+    free = field & (sd >= 1.12) & (sq >= 1.14) & (sedge >= 225)
     put(free & (st < 26), OCHRE)
     put(free & (st < 12), NAVY)
-    # узлы: тон чуть гуляет, шерсть с годами неровно окрашена (крупные «абраши» — полосы по горизонтали)
-    rng = np.random.default_rng(11)
-    kn = rng.normal(1.0, 0.035, (int(h_mm / knot) + 1, int(w_mm / knot) + 1)).astype(np.float32)
-    col *= kn[(ys / knot).astype(int), (xs / knot).astype(int)][..., None]
-    abrash = 1.0 + 0.04 * np.sin(ys / 2000.0 * math.pi * 7.0 + 1.3) * np.sin(ys / 2000.0 * math.pi * 2.0)
-    col *= abrash[..., None]
-    return np.clip(col, 0, 1)
+    return col
+
+
+def cell_hash(i: np.ndarray, j: np.ndarray, seed: int) -> np.ndarray:
+    """Случайное 0…1 на пучок — одно у всех пикселей пучка."""
+    h = (i.astype(np.int64) * 73856093) ^ (j.astype(np.int64) * 19349663) ^ (seed * 83492791)
+    h = (h ^ (h >> 13)) * 1274126177
+    h = h ^ (h >> 16)
+    return (h & 0xFFFFFF).astype(np.float32) / float(0xFFFFFF)
+
+
+def pile_face(X: np.ndarray, Y: np.ndarray, rng) -> tuple:
+    """Ворс лица; X, Y — мм на лице у пикселей развёртки (вправо, вниз). Кончики волокон каждого пикселя сдвинуты от
+    узла случайно (соседние пучки перемешаны — край узора мохнатый, без ступенек) и чуть вниз (ворс приглажен); пучок —
+    купол, между рядами ложбинка глубже, чем между пучками ряда; пряжа пучка чуть другого тона.
+    Возврат: цвет sRGB, высота (мм), шероховатость."""
+    jx = rng.normal(0.0, 0.45 * KNOT_X, X.shape).astype(np.float32)
+    jy = rng.normal(0.25 * KNOT_Y, 0.5 * KNOT_Y, X.shape).astype(np.float32)
+    i, j = np.floor((X + jx) / KNOT_X), np.floor((Y + jy) / KNOT_Y)
+    col = carpet_design((i + 0.5) * KNOT_X, (j + 0.5) * KNOT_Y)
+    tone = 1.0 + 0.10 * (cell_hash(i, j, 1) - 0.5)
+    tint = 1.0 + 0.05 * (np.stack([cell_hash(i, j, s) for s in (2, 3, 4)], -1) - 0.5)
+    fx = (X / KNOT_X) % 1.0 - 0.5
+    fy = (Y / KNOT_Y) % 1.0 - 0.5
+    dome = np.maximum(np.cos(np.pi * fx), 0) ** 0.7 * np.maximum(np.cos(np.pi * fy), 0) ** 1.2
+    tuft = 1.0 + 0.25 * (cell_hash(np.floor(X / KNOT_X), np.floor(Y / KNOT_Y), 5) - 0.5)
+    fibre = rng.normal(0.0, 1.0, X.shape).astype(np.float32)
+    height = 0.45 * dome * tuft + 0.12 * fibre
+    # в глубине ворса темнее (свет туда не доходит), кончики волокон — каждый своей яркости
+    shade = (0.78 + 0.22 * dome) * (1.0 + 0.07 * fibre)
+    # абраш: пряжа разных партий — пологие полосы поперёк основы
+    abrash = 1.0 + 0.04 * np.sin(Y / 2000.0 * math.pi * 7.0 + 1.3) * np.sin(Y / 2000.0 * math.pi * 2.0)
+    col = col * (tone * shade * abrash)[..., None] * tint
+    rough = 0.9 + 0.06 * rng.random(X.shape, dtype=np.float32) - 0.05 * dome
+    return np.clip(col, 0, 1), height, rough
+
+
+def pile_back(X: np.ndarray, Y: np.ndarray, rng) -> tuple:
+    """Изнанка (X — как на лице, уже зеркально): узор рядами пучков, тусклее, по хлопковой основе; рубчик — ряды утка
+    и нити основы."""
+    i, j = np.floor(X / KNOT_X), np.floor(Y / KNOT_Y)
+    col = carpet_design((i + 0.5) * KNOT_X, (j + 0.5) * KNOT_Y) * 0.5 + srgb((150, 132, 104)) * 0.35
+    rib = np.cos(np.pi * ((Y / KNOT_Y) % 1.0 - 0.5)) ** 2
+    warp = np.cos(np.pi * ((X / (KNOT_X * 0.5)) % 1.0 - 0.5)) ** 2
+    fibre = rng.normal(0.0, 1.0, X.shape).astype(np.float32)
+    col = col * ((0.85 + 0.15 * rib) * (1.0 + 0.05 * fibre))[..., None]
+    return np.clip(col, 0, 1), 0.25 * rib + 0.08 * warp + 0.05 * fibre, np.full(X.shape, 0.93, np.float32)
+
+
+def uv_normal(h: np.ndarray, ok: np.ndarray, pos: np.ndarray) -> np.ndarray:
+    """Нормаль в касательном пространстве развёртки (OpenGL: зелёный — вверх по v) из высоты h (мм) по пикселям
+    развёртки: поворот островов учтён сам — касательные идут по осям развёртки; шаг пикселя в мм — по карте положения
+    (у лица, изнанки и торцов он разный)."""
+    def d(a, axis):
+        return np.roll(a, -1, axis) - np.roll(a, 1, axis)
+    okn = ok & np.roll(ok, 1, 0) & np.roll(ok, -1, 0) & np.roll(ok, 1, 1) & np.roll(ok, -1, 1)
+    sx = np.linalg.norm(d(pos, 1), axis=-1) * 1000.0
+    sy = np.linalg.norm(d(pos, 0), axis=-1) * 1000.0
+    gx = np.where(okn, d(h, 1) / np.maximum(sx, 1e-4), 0.0)
+    gy = np.where(okn, d(h, 0) / np.maximum(sy, 1e-4), 0.0)
+    n = np.stack([-gx, gy, np.ones_like(gx)], -1).astype(np.float32)
+    return n / np.linalg.norm(n, axis=-1, keepdims=True)
 
 
 def carpet() -> None:
@@ -149,21 +219,41 @@ def carpet() -> None:
     g = A.load_geo(BASE, game)
     mask = A.part_mask(g, "Ковёр_шерсть")
     p, n = g["pos"], g["nrm"]
-    img = carpet_design()
-    h, w = img.shape[:2]
-    rgba = np.concatenate([img, np.ones((h, w, 1), np.float32)], axis=-1)
-    u = (p[..., 0] + 0.75) / 1.5
-    v = (2.0 - p[..., 2]) / 2.0
+    rng = np.random.default_rng(11)
+    X = (p[..., 0] + 0.75) * 1000.0
+    Y = (2.0 - p[..., 2]) * 1000.0
     front = mask & (n[..., 1] < -0.5)
     back = mask & (n[..., 1] > 0.5)
-    out = A.sample(rgba, np.clip(u, 0, 1), np.clip(v, 0, 1), front)
-    # изнанка: тот же узор зеркально, тусклее — видны узлы
-    b = A.sample(rgba, np.clip(1 - u, 0, 1), np.clip(v, 0, 1), back)
-    b[..., :3] = b[..., :3] * 0.55 + 0.08
-    out = np.where(back[..., None], b, out)
     edge = mask & ~front & ~back
-    out[edge] = np.concatenate([srgb(DARK), [1.0]])
-    A.save_layer(BASE, game, [(out.astype(np.float32), None, None, 1.0)])
+    shape = mask.shape
+    col = np.zeros(shape + (3,), np.float32)
+    hgt = np.zeros(shape, np.float32)
+    rough = np.full(shape, 0.9, np.float32)
+    for sel, fn, xs in ((front, pile_face, X[front]), (back, pile_back, 1500.0 - X[back])):
+        c, h, r = fn(xs, Y[sel], rng)
+        col[sel], hgt[sel], rough[sel] = c, h, r
+    # торцы — обмётка тёмной пряжей: витки наискось через 1,5 мм
+    t = (p[..., 0] + p[..., 2])[edge] * 1000.0
+    fibre = rng.normal(0.0, 1.0, t.shape).astype(np.float32)
+    wrap = np.cos(np.pi * ((t / 1.5) % 1.0 - 0.5)) ** 2
+    col[edge] = srgb(DARK) * ((0.8 + 0.2 * wrap) * (1.0 + 0.08 * fibre))[..., None]
+    hgt[edge] = 0.3 * wrap + 0.05 * fibre
+    rough[edge] = 0.92
+    alpha = mask.astype(np.float32)[..., None]
+    A.save_layer(BASE, game, [(np.concatenate([col, alpha], -1), None, None, 1.0)])
+    nrm = np.where(mask[..., None], uv_normal(hgt, mask, p), np.array([0.0, 0.0, 1.0], np.float32))
+    out = BASE / "prints" / "uv"
+    cv2.imwrite(str(out / f"{game}_print_normal.png"),
+                ((nrm[..., ::-1] * 0.5 + 0.5) * 65535 + 0.5).clip(0, 65535).astype(np.uint16))
+    cv2.imwrite(str(out / f"{game}_print_rough.png"), (np.clip(rough, 0, 1) * 255 + 0.5).astype(np.uint8))
+    # высота — и для настоящего ворса волокнами в Blender (carpet_pile.py: длина волокон по пучкам)
+    cv2.imwrite(str(out / f"{game}_print_height.png"),
+                (np.clip(hgt / 1.2 + 0.5, 0, 1) * 65535 + 0.5).astype(np.uint16))
+    js = out / f"{game}_print.json"
+    info = json.loads(js.read_text(encoding="utf-8"))
+    info.update(normal_map=f"{game}_print_normal.png", rough_map=f"{game}_print_rough.png")
+    js.write_text(json.dumps(info), encoding="utf-8")
+    print("PILE", game, "лицо", int(front.sum()), "изнанка", int(back.sum()), "торцы", int(edge.sum()), flush=True)
 
 
 # ---------------------------------------------------------------- холодильник, телевизор, плитка
