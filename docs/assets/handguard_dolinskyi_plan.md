@@ -203,4 +203,5 @@ Substance 3D Community Assets: для этого ролика не нужны �
 `E:/Models Blender/WEAPONS/Цевьё — Dolinskyi, анодирование 2026-11-01/asset-state.md`; разбор ролика и чего нам не
 хватало — навык `weapon-asset-texturing/references/hard-anodized-dolinskyi.md`. Проект Painter открывать
 `tools/handguard_dolinskyi/painter_open.cmd`. Отклонения от плана: Scale фильтра MatFinish 24 вместо 6 (масштаб под нашу
-развёртку; в нормаль — 25 %), окна 15,5 × 6 мм с наклоном 25° (по рендеру автора сбоку), «Fill layer 9» не сделан (в ролике не показан).
+развёртку; в нормаль — 25 %), окна 15,5 × 6 мм с наклоном 25° (по рендеру автора сбоку), «Fill layer 9» не сделан (в ролике не показан). Карта нормалей сетки — из Blender (Painter-карта
+из FBX рябила вокруг окон), окна low-poly — 12 сегментов на полукруг.

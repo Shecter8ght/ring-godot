@@ -117,9 +117,11 @@ def merge(objs, name):
 
 
 def build(tag, coll, hp):
-    seg_tube = 192 if hp else 64
-    seg_win = 16 if hp else 6
-    seg_hole = 48 if hp else 20
+    # low-poly: окна 12 сегментов на полукруг, гнёзда 32, труба 96 — при 6 / 20 / 64 гранёные края окон не совпадали
+    # с круглыми скруглёнными у high-poly, и карта нормалей рябила полосами вокруг окон (владелец 01.11)
+    seg_tube = 192 if hp else 96
+    seg_win = 16 if hp else 12
+    seg_hole = 48 if hp else 32
     mat = "Alu_anodized"
     body = L.lathe(f"{tag}_body", [(BODY_X[0], R_IN), (BODY_X[0], R_OUT), (BODY_X[1], R_OUT), (BODY_X[1], R_IN)],
                    coll, mat, seg=seg_tube, cz=0.0)

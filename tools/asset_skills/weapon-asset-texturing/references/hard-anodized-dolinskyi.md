@@ -109,6 +109,14 @@ https://www.artstation.com/a/53609385 — числа большинства сл
   Normal OpenGL, AO). В Blender: цвет = Diffuse, металличность 0, шероховатость = 1 − Glossiness,
   IOR Level = Specular (линейный) / 0.08; окружение «как Camera alignment» — направление мира в оси камеры
   (Mapping «Texture» с поворотом камеры), затем поворот (90°, 0, азимут) — `tools/handguard_dolinskyi/review.py`.
+- **Карта нормалей Painter из FBX Blender не подходит для Blender и Godot.** Painter 12.1 читает FBX своим импортёром
+  (кэш `.assbin`) и сам пересчитывает нормали low-poly. Жёсткие рёбра, разрез по ним (Edge Split) и нормали из файла до
+  него не доходят: запекание с FBX «по граням» и с разрезом совпало до пикселя. Его карта компенсирует его нормали
+  (разброс 0,24 против 0,03 у той же пары в Blender), а на нормалях Blender даёт рябь полосами вокруг окон и отверстий.
+  Проверка — запечь ту же пару в Blender и сравнить разброс карт. Лечение — нормаль сетки печь в Blender
+  (`bake_normal.py`: 4096 → 2048, лучи 0,7–1,5 мм) и подставить в набор: `TextureSet.set_mesh_map_resource(
+  MeshMapUsage.Normal, ресурс)`; AO, кривизна, позиция — от Painter. OBJ и glTF как замена FBX не помогли: лучи
+  промахивались мимо high-poly (AO = 0). Отверстия в low-poly — не грубее 12 сегментов на полукруг.
 - Painter падал в nvoglv64.dll на первом кадре 3D-вида (создание и открытие любого проекта) при запущенном RivaTuner
   (MSI Afterburner), оверлеях Steam и Epic. Лечится запуском с `VK_LOADER_LAYERS_DISABLE=~implicit~` и
   `DISABLE_RTSS_LAYER=1` (`tools/handguard_dolinskyi/sp_run.py`, `painter_open.cmd`).

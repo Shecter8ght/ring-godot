@@ -508,6 +508,8 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
                                                               # python -X utf8 tools/handguard_dolinskyi/masks.py (маски вместо мазков кистью: надписи, места касаний, износ планок);
                                                               # Painter — python -X utf8 tools/handguard_dolinskyi/sp_run.py start, -c "sp_handguard.create()" / "…bake()" /
                                                               # "import sp_stack; sp_stack.build()" / "sp_handguard.export(<папка>)" (без неявных слоёв Vulkan: с RivaTuner падал);
+                                                              # нормаль сетки — в Blender: на развёртке tools/handguard_dolinskyi/bake_normal.py, затем в Painter
+                                                              # "sp_handguard.use_blender_normal()" после bake() (его карта из FBX рябит вокруг окон в Blender / Godot);
                                                               # просмотр и сравнение с кадрами — review.py; открыть проект руками — tools/handguard_dolinskyi/painter_open.cmd
 # ГРАНЬ-15 (AR-15) в игру (blender … --python): tools/ar15/game_lp.py (сетка ~40 тыс. из AR-15_износ_этап2_v1.blend: подвижные детали — свои узлы
 #   по моверам, рукоять — вокселями; развёртка asset_kit, планки Picatinny с пазами) → game_bake.py -- [атлас …] [--cpu] (с high-poly, каждая

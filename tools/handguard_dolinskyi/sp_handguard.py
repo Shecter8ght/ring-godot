@@ -96,14 +96,15 @@ def view():
 
 def bake():
     """Карты сетки с high-poly: нормаль, нормаль в мире, ID, AO, кривизна, положение, толщина (у автора в фильтрах
-    видны handguard_position и handguard_normalobj). Луч — 1 % габарита вперёд и назад: фаски high-poly 0.4 мм."""
+    видны handguard_position и handguard_normalobj). Луч — 0,3 % габарита (~0,7 мм) вперёд и назад: фаски high-poly
+    0,4 мм; при 1 % (2,4 мм) лучи на перемычках между окнами (~3 мм) цепляли соседние стенки — полосы вокруг окон."""
     unmark("_bake_done.txt")
     t = TS.all_texture_sets()[0]
     bp = B.BakingParameters.from_texture_set(t)
     bp.set_enabled_bakers([U.Normal, U.WorldSpaceNormal, U.ID, U.AO, U.Curvature, U.Position, U.Thickness])
     c = bp.common()
     vals = {c["OutputSize"]: (RES_LOG2, RES_LOG2), c["LowAsHigh"]: False, c["HipolyMesh"]: "file:///" + HIGH,
-            c["SubSampling"]: 2, c["RelativeScale"]: True, c["MaxHeight"]: 0.01, c["MaxDepth"]: 0.01,
+            c["SubSampling"]: 2, c["RelativeScale"]: True, c["MaxHeight"]: 0.003, c["MaxDepth"]: 0.003,
             c["IgnoreBackface"]: True}
     vals[bp.baker(U.ID)["ColorSource"]] = 3
     B.BakingParameters.set(vals)
@@ -169,3 +170,17 @@ def find(name):
                     return r
         return None
     return walk(L.get_root_layer_nodes(st))
+
+
+BLENDER_NORMAL = SP_DIR + "/handguard_normal_blender.png"
+
+
+def use_blender_normal():
+    """Карта нормалей сетки — из Blender (bake_normal.py) вместо своей: Painter сам пересчитывает нормали low-poly из FBX
+    (жёсткие рёбра и разрез до него не доходят), и его карта на нормалях Blender / Godot рябит вокруг окон. AO, кривизна,
+    позиция, толщина и прочие — от его запекания (от нормалей low-poly не зависят)."""
+    import substance_painter.resource as R
+    t = TS.all_texture_sets()[0]
+    res = R.import_project_resource(BLENDER_NORMAL, R.Usage.TEXTURE)
+    t.set_mesh_map_resource(U.Normal, res.identifier())
+    return str(t.get_mesh_map_resource(U.Normal))

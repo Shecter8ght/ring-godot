@@ -38,6 +38,9 @@ def main():
     hp = bpy.data.objects["handguard_high"]
     for c in bpy.data.collections:
         c.hide_viewport = False
+    if "export" in sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else False:
+        export_fbx(lp, hp)          # развёртка уже есть (на файле развёртки) — только FBX
+        return
     bpy.ops.object.select_all(action="DESELECT")
     lp.select_set(True)
     bpy.context.view_layer.objects.active = lp
@@ -53,16 +56,28 @@ def main():
     with open(os.path.join(SP_DIR, "uv_report.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(report, f, ensure_ascii=False, indent=1)
     bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
-    # FBX для Painter: один low-poly и один high-poly, без преобразования осей (как у ВСС-М / AR-15)
+    export_fbx(lp, hp)
+    print("SAVED", OUT_BLEND)
+
+
+def export_fbx(lp, hp):
+    """FBX для Painter: один low-poly и один high-poly, без преобразования осей (как у ВСС-М / AR-15). Low-poly разрезан
+    по жёстким рёбрам (Edge Split по пометке sharp, только на время выгрузки): со сглаживанием «по граням» без разреза
+    Painter считал нормали через прямой угол края окна сглаженными, Blender — жёсткими, и запечённая под одни нормали
+    карта на других рябила полосами вокруг окон (владелец 01.11). Жёсткие рёбра — только на швах развёртки, так что
+    разрез развёртку не меняет."""
+    es = lp.modifiers.new("export_split", "EDGE_SPLIT")
+    es.use_edge_angle = False
+    es.use_edge_sharp = True
     for o, name in ((lp, "handguard_low.fbx"), (hp, "handguard_high.fbx")):
         bpy.ops.object.select_all(action="DESELECT")
         o.select_set(True)
         bpy.context.view_layer.objects.active = o
         bpy.ops.export_scene.fbx(filepath=os.path.join(SP_DIR, name), use_selection=True, object_types={"MESH"},
-                                 mesh_smooth_type="FACE", use_tspace=(o is lp), apply_unit_scale=True,
+                                 mesh_smooth_type="OFF", use_tspace=(o is lp), apply_unit_scale=True,
                                  use_mesh_modifiers=True, add_leaf_bones=False, bake_anim=False)
         print("FBX", name)
-    print("SAVED", OUT_BLEND)
+    lp.modifiers.remove(es)
 
 
 if __name__ == "__main__":
