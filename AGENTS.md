@@ -243,6 +243,11 @@ python -X utf8 tools/dorm_modules/carpet_maps.py              # ковёр об�
                                                               # assets/models/dorm/furniture (+ варианты отделки, furniture.json); --import, python -X utf8
                                                               # tools/dorm_modules/furniture_imports.py, --import; расстановка — python -X utf8
                                                               # tools/dorm_modules/furnish_rooms.py → data/blockouts/dorm_furniture.json (по виду комнаты)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_electrics.py -- <файл.blend> [preview <папка>]
+                                                              # электрика общежития, партия 1 (форма): люминесцентные — открытый на две трубки ЛБ-40 и с рассеивателем
+                                                              # (варианты: трубки, обломок, рассеиватель висит / сорван), плафон, патрон на витом шнуре с лампой А60,
+                                                              # выключатели и розетки — накладные круглые из карболита и белые утопленные, распаечная коробка,
+                                                              # провод плоский на гвоздиках и витой на роликах модулями → RING_Dorm_Electrics
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
