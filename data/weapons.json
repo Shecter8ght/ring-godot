@@ -530,7 +530,8 @@
      "rail_z": [
       0.4043,
       0.4343
-     ]
+     ],
+     "overhang": true
     },
     "side_right": {
      "pos": [
@@ -542,7 +543,8 @@
      "rail_z": [
       0.4043,
       0.4343
-     ]
+     ],
+     "overhang": true
     },
     "underbarrel": {
      "pos": [
@@ -5934,6 +5936,7 @@
    "mods": {
     "optic_primary": "optic_holo_01",
     "side_left": "tac_flashlight_01",
+    "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
     "stock": "stock_perimeter_01"
    },
@@ -5959,6 +5962,7 @@
    "mods": {
     "optic_primary": "optic_lpvo_01",
     "side_left": "tac_flashlight_hp_01",
+    "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
     "muzzle": "muzzle_supp_gran_01",
     "stock": "stock_perimeter_01"

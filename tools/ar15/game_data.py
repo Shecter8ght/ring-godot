@@ -58,8 +58,10 @@ def model() -> dict:
         r = rg[key]
         seg = r['z'][0]
         rz = rail(r['slots_z'], seg[0], seg[1])
+        # боковые планки короткие (30 мм): по слову владельца ставится любой обвес — длиннее планки встаёт
+        # посередине и свисает с концов (overhang, WeaponBuild.overhangs)
         socks[point] = {'pos': [r5(r['line_xy'][0]), r5(r['line_xy'][1]), r5(0.5 * (rz[0] + rz[1]))], 'side': True,
-                        'rail_z': rz}
+                        'rail_z': rz, 'overhang': True}
     b = rg['RailBottom']
     seg = b['z'][0]
     rz = rail(b['slots_z'], seg[0], seg[1])

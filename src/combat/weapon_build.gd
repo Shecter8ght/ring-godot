@@ -144,6 +144,9 @@ static func geo(model_key: String, mods: Dictionary, key: String) -> Dictionary:
 		elif sk.has("rail_len"):
 			var half: float = float(sk.rail_len) * 0.5
 			out.rail = [out.z - half, out.z + half]
+		# короткая планка (overhang в сокете): третьим элементом — устройство длиннее неё встаёт посередине
+		if bool(sk.get("overhang", false)) and not (out.rail as Array).is_empty():
+			(out.rail as Array).append(true)
 		return out
 	if not mods.has(parent) or depth(key) > MAX_DEPTH:
 		return {}
@@ -171,13 +174,23 @@ static func clamp_of(att_id: String) -> float:
 	return float(WeaponDb.attachment(att_id).get("clamp_m", DEFAULT_CLAMP))
 
 
+## Короткая планка, на которую ставят любое устройство (сокет с overhang, владелец 2026-11-01: боковые планки
+## ГРАНЬ-15 по 30 мм): зажиму хватает пары пазов, корпус длиннее планки свисает с обоих концов — одно место посередине.
+static func overhangs(rail: Array, clamp: float) -> bool:
+	return rail.size() > 2 and bool(rail[2]) and float(rail[1]) - float(rail[0]) < clamp - 0.0001
+
+
 ## Середина зажима устройства в пазу slot планки rail.
 static func slot_z(rail: Array, clamp: float, slot: int) -> float:
+	if overhangs(rail, clamp):
+		return (float(rail[0]) + float(rail[1])) * 0.5
 	return float(rail[0]) + clamp * 0.5 + float(slot) * SLOT_M
 
 
 ## Сколько пазов у устройства длиной clamp на планке rail (0 — не помещается).
 static func slot_count(rail: Array, clamp: float) -> int:
+	if overhangs(rail, clamp):
+		return 1
 	var room: float = float(rail[1]) - float(rail[0]) - clamp
 	return int(floor(room / SLOT_M + 0.0001)) + 1 if room >= -0.0001 else 0
 
@@ -264,7 +277,7 @@ static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -
 			return "не хватает длины планки"
 		var mine: Vector2 = span(model_key, mods, key)
 		var z: float = placed_z(model_key, mods, key)
-		if z - c * 0.5 < float(pt.rail[0]) - 0.0001 or z + c * 0.5 > float(pt.rail[1]) + 0.0001:
+		if not overhangs(pt.rail, c) and (z - c * 0.5 < float(pt.rail[0]) - 0.0001 or z + c * 0.5 > float(pt.rail[1]) + 0.0001):
 			return "не помещается на планке"
 		for other: String in siblings(mods, key):
 			var o: Vector2 = span(model_key, mods, other)

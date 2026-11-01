@@ -97,6 +97,19 @@ func _ready() -> void:
 			print("ar15_check: планка ", point, " ", rz, " длина ", snappedf(float(rz[1]) - float(rz[0]), 0.001), " м")
 			if float(rz[1]) - float(rz[0]) < 0.029:
 				_fail("планка %s короче зажима" % point)
+	# короткие боковые планки (overhang, владелец 2026-11-01): встаёт любой обвес под RAIL_SIDE, длиннее планки — посередине
+	var side_bad: Array[String] = []
+	for raw_att: Variant in WeaponDb.ids("attachments"):
+		var att_id: String = String(raw_att)
+		if not "RAIL_SIDE" in (WeaponDb.attachment(att_id).get("fits", []) as Array):
+			continue
+		for side: String in ["side_left", "side_right"]:
+			var why: String = WeaponBuild.block({"id": ID, "n": 1, "dur": 100.0, "mods": {}}, side, att_id)
+			if why != "":
+				side_bad.append("%s %s: %s" % [side, att_id, why])
+	print("ar15_check: на боковые планки не встаёт — ", side_bad)
+	if not side_bad.is_empty():
+		_fail("на боковую планку не встаёт: " + ", ".join(side_bad))
 	# обвесы на планках: коллиматор на ресивере, фонарь слева, рукоятка снизу — модель собирается
 	var mods := {"optic_primary": {"id": "optic_rd_01", "dur": 100.0, "slot": 2},
 		"side_left": {"id": "tac_flashlight_01", "dur": 100.0, "slot": 0},
