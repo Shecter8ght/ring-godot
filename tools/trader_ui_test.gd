@@ -70,6 +70,21 @@ func _ready() -> void:
 	# глушитель ГРАНЬ — быстросъёмный под тормоз ГРАНЬ-15 (крепление QD_GRAN15): у Михалыча и только к нему
 	_check("глушитель «ГРАНЬ»: в продаже и подходит только к ГРАНЬ-15", "muzzle_supp_gran_01" in ui._trader_stock()
 		and ui._fits_of("muzzle_supp_gran_01") == ["wpn_ar_09"], str(ui._fits_of("muzzle_supp_gran_01")))
+	# витрина ствола — всё, что подходит, без предела в шесть плиток (глушитель ГРАНЬ раньше не помещался)
+	var gran_fits: Array = ui._fits_of("wpn_ar_09")
+	_check("витрина ГРАНЬ-15: глушитель «ГРАНЬ» среди подходящих", "muzzle_supp_gran_01" in gran_fits, "%d поз." % gran_fits.size())
+	_check("витрина ГРАНЬ-15: плиток столько, сколько подходит (> 6)", gran_fits.size() > 6 and _fit_tiles(ui) == gran_fits.size(),
+		"%d плиток, %d подходит" % [_fit_tiles(ui), gran_fits.size()])
+	var gran_groups: Array = []
+	for g: Array in ui._fit_groups(gran_fits):
+		gran_groups.append("%s %d" % [String(g[0]), (g[1] as Array).size()])
+	print("  витрина ГРАНЬ-15: ", ", ".join(gran_groups))
+	# снимок витрины, прокрученной к глушителям
+	await _frames(4)
+	for sc in ui._shop_center.find_children("*", "ScrollContainer", true, false):
+		(sc as ScrollContainer).scroll_vertical = int((sc as ScrollContainer).get_v_scroll_bar().max_value * 0.4)
+	await _frames(4)
+	_save("trader_gran15_fits")
 	var gran_before: int = Profile.money
 	ui._buy("wpn_ar_09", "backpack")
 	_check("ГРАНЬ-15 куплен (деньги списаны)", Profile.money == gran_before - Profile.buy_price("wpn_ar_09"), "%d → %d" % [gran_before, Profile.money])
@@ -163,6 +178,15 @@ func _ready() -> void:
 
 	print("trader_ui_test: провалов %d" % _fails)
 	get_tree().quit(_fails)
+
+
+## Плиток «что подходит» на витрине: снимки в центре, кроме большого.
+func _fit_tiles(ui: HideoutUI) -> int:
+	var n := 0
+	for c in ui._shop_center.find_children("*", "", true, false):
+		if c is ItemCard.IconBox:
+			n += 1
+	return n - 1
 
 
 func _cards(ui: HideoutUI) -> int:

@@ -1122,40 +1122,56 @@ func _fill_showcase() -> void:
 	stage.add_child(shot)
 	var fits := _fits_of(_sel)
 	if not fits.is_empty():
-		_shop_center.add_child(LightUi.caps("подходит к нему" if WeaponDb.is_weapon(_sel) else "к чему подходит", 13))
-		var grid := GridContainer.new()
-		grid.columns = 3
-		grid.add_theme_constant_override("h_separation", 12)
-		grid.add_theme_constant_override("v_separation", 12)
-		_shop_center.add_child(grid)
-		for fid: String in fits:
-			grid.add_child(_fit_tile(fid))
+		var head := "подходит к нему" if WeaponDb.is_weapon(_sel) else "к чему подходит"
+		_shop_center.add_child(LightUi.caps("%s  ·  %d" % [head, fits.size()], 13))
+		# всё, что подходит, без предела: больше двух рядов — в прокрутке, большой снимок уступает ей часть места
+		var holder: Container = _shop_center
+		if fits.size() > SHOWCASE_COLUMNS * 2:
+			var scroll := ScrollContainer.new()
+			scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scroll.size_flags_stretch_ratio = 1.4
+			scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+			_shop_center.add_child(scroll)
+			holder = VBoxContainer.new()
+			holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			holder.add_theme_constant_override("separation", 8)
+			scroll.add_child(holder)
+		var groups := _fit_groups(fits)
+		for g: Array in groups:
+			if groups.size() > 1:
+				holder.add_child(LightUi.label("%s  %d" % [String(g[0]), (g[1] as Array).size()], 12, LightUi.MUTED))
+			var grid := GridContainer.new()
+			grid.columns = SHOWCASE_COLUMNS
+			grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			grid.add_theme_constant_override("h_separation", 12)
+			grid.add_theme_constant_override("v_separation", 12)
+			holder.add_child(grid)
+			for fid: String in g[1]:
+				grid.add_child(_fit_tile(fid))
 	_fill_detail()
 
 
 ## Кадр большого снимка на витрине (пропорции витрины ~2,4 : 1).
 const SHOWCASE_FRAME := Vector2i(1280, 536)
-## Сколько показывать «что подходит».
-const SHOWCASE_FITS := 6
+## Плиток «что подходит» в ряд.
+const SHOWCASE_COLUMNS := 3
 
 
-## Что подходит к выбранному из того, что продаётся: к стволу — магазины (штатный первым), патроны, обвес;
-## к магазину, патрону, обвесу — стволы. Закрытое доверием не показывается.
+## Что подходит к выбранному из того, что продаётся, — всё, без предела: к стволу — магазины (штатный первым),
+## патроны (штатный первым), обвес; к магазину, патрону, обвесу — стволы. Закрытое доверием не показывается.
 func _fits_of(sid: String) -> Array:
 	var out: Array = []
 	var stock := _trader_stock()
 	var avail := func(id: String) -> bool: return not _trust_blocked(id, maxi(TraderStock.catalog_of(id), 1))
 	if WeaponDb.is_weapon(sid):
 		var w := WeaponDb.weapon(sid)
-		var first: Array = [String(w.get("default_mag", "")), WeaponDb.default_ammo(String(w.get("caliber", "")))]
-		for id: String in first:
-			if id in stock and avail.call(id) and _fits(sid, id):
-				out.append(id)
+		var first := {"mag": String(w.get("default_mag", "")), "ammo": WeaponDb.default_ammo(String(w.get("caliber", "")))}
 		for kind: String in ["mag", "ammo", "mod"]:
+			var lead := String(first.get(kind, ""))
+			if lead in stock and avail.call(lead) and _fits(sid, lead):
+				out.append(lead)
 			for id in stock:
 				var s := String(id)
-				if out.size() >= SHOWCASE_FITS:
-					return out
 				if s in out or _cat_of(s) != kind or not avail.call(s):
 					continue
 				if _fits(sid, s):
@@ -1163,10 +1179,35 @@ func _fits_of(sid: String) -> Array:
 		return out
 	for id in stock:
 		var s := String(id)
-		if out.size() >= SHOWCASE_FITS:
-			break
 		if WeaponDb.is_weapon(s) and avail.call(s) and _fits(s, sid):
 			out.append(s)
+	return out
+
+
+## «Что подходит» по группам витрины: [[подпись, [id…]]…]. К стволу — магазины, патроны, затем обвес по видам
+## (прицелы, дульные, глушители…); к прочему — стволы по классам. Внутри группы — порядок _fits_of.
+func _fit_groups(fits: Array) -> Array:
+	var rank := {}
+	var by := {}
+	for fid: String in fits:
+		var key: Array
+		match _cat_of(fid):
+			"mag":
+				key = [-2, "Магазины"]
+			"ammo":
+				key = [-1, "Патроны"]
+			_:
+				key = _subgroup(fid)
+		var gname := String(key[1])
+		if not by.has(gname):
+			by[gname] = []
+			rank[gname] = int(key[0])
+		(by[gname] as Array).append(fid)
+	var names: Array = by.keys()
+	names.sort_custom(func(a: String, b: String) -> bool: return int(rank[a]) < int(rank[b]))
+	var out: Array = []
+	for n: String in names:
+		out.append([n, by[n]])
 	return out
 
 
