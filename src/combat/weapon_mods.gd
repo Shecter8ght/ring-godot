@@ -357,8 +357,6 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_compensator(root, m)
 		"grip_vertical":
 			_scaled(root, m, float(a.get("scale", 1.0)), _grip_vertical)
-		"grip_angled":
-			_scaled(root, m, float(a.get("scale", 1.0)), _grip_angled)
 		"grip_offset":
 			_grip_offset(root, m)
 		"stock_tele":
@@ -371,8 +369,6 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 			_laser(root, m)
 		"combo":
 			_combo(root, m, a)
-		"bipod":
-			_bipod(root, m)
 
 
 ## Обвес готовой моделью: a.model = {scene, offset [x, y, z] от точки, length_m — длина дульной насадки,
@@ -899,16 +895,6 @@ static func _grip_offset(root: Node3D, m: Dictionary) -> void:
 	_grip_vertical(n, mm)
 
 
-## Угловая рукоятка: клин вдоль цевья — упор для ладони, без выступа вниз.
-static func _grip_angled(root: Node3D, m: Dictionary) -> void:
-	var p: Vector3 = m.pos
-	WeaponModels._cbox(root, Vector3(0, p.y - 0.003, p.z), Vector3(0.02, 0.006, 0.08), _mat("anodized"), 0.001)
-	# верх — вплотную по планке (низ планки rb), толщина растёт назад: скос под ладонь
-	var rb := p.y - 0.006
-	WeaponModels._sweep(root, [Vector3(0, rb - 0.003, p.z + 0.042), Vector3(0, rb - 0.009, p.z + 0.01), Vector3(0, rb - 0.017, p.z - 0.022), Vector3(0, rb - 0.02, p.z - 0.036)] as Array[Vector3],
-		[Vector2(0.024, 0.006), Vector2(0.025, 0.018), Vector2(0.026, 0.034), Vector2(0.026, 0.04)] as Array[Vector2], _mat("polymer"), 0.3)
-
-
 # ---------------------------------------------------------------- приклад, магазин
 
 ## Телескопический приклад: переходник к коробке, буферная трубка, приклад на трубке, затыльник.
@@ -1032,7 +1018,7 @@ static func _mag_pistol_ext(root: Node3D, m: Dictionary) -> void:
 	base.basis = tilt
 
 
-# ---------------------------------------------------------------- фонарь, ЛЦУ, сошки
+# ---------------------------------------------------------------- фонарь, ЛЦУ
 
 ## Узел тактического устройства: под рамкой (пистолет) или на боковой планке (длинные стволы).
 static func _tac_body(root: Node3D, m: Dictionary) -> Node3D:
@@ -1122,18 +1108,3 @@ static func _combo(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 	WeaponModels._cyl(t, Vector3(0, 0.009, 0.036), 0.003, 0.002, _mat("reticle"))
 	_light_node(t, m, a, Vector3(0, -0.004, 0.038))
 	_beam_node(t, m, Vector3(0, 0.009, 0.037))
-
-
-## Сошки: хомут под цевьём, ось, две сложенные вперёд ноги с резиновыми пятками.
-static func _bipod(root: Node3D, m: Dictionary) -> void:
-	var p: Vector3 = m.pos
-	var al := _mat("anodized")
-	# хомут-скоба охватывает цевьё снизу и с боков (цевьё здесь ~0.04 шириной)
-	WeaponModels._cbox(root, Vector3(0, p.y - 0.004, p.z), Vector3(0.048, 0.008, 0.03), al, 0.002)
-	for sx in [-1.0, 1.0]:
-		WeaponModels._cbox(root, Vector3(sx * 0.0225, p.y + 0.008, p.z), Vector3(0.004, 0.022, 0.03), al, 0.001)
-	WeaponModels._cyl_x(root, Vector3(0, p.y - 0.012, p.z), 0.0045, 0.04, _mat("gunmetal"))
-	for sx in [-1.0, 1.0]:
-		var leg := WeaponModels._cyl(root, Vector3(sx * 0.013, p.y - 0.016, p.z + 0.085), 0.0042, 0.17, al)
-		leg.rotation = Vector3(PI * 0.5 + deg_to_rad(-3.0), 0, 0)
-		WeaponModels._sphere(root, Vector3(sx * 0.013, p.y - 0.02, p.z + 0.172), 0.006, _mat("rubber"))

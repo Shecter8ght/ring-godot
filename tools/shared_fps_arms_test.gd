@@ -24,7 +24,7 @@ func _ready() -> void:
 	for raw: Variant in WeaponDb.ids("weapons"):
 		var id: String = String(raw)
 		await _weapon(id, {})
-	for grip: String in ["grip_vertical_01", "grip_angled_01", "grip_compact_01"]:
+	for grip: String in ["grip_vertical_01", "grip_offset_01"]:
 		await _weapon("wpn_ar_02", {"underbarrel": {"id": grip}})
 	var grenade: GrenadeModel = GrenadeModel.create(true)
 	add_child(grenade)

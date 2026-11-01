@@ -172,7 +172,7 @@ func _insert() -> void:
 ## Удлинитель на нижней планке и рукоятка на нём: кисть держит рукоятку там, где она теперь стоит
 ## (ниже планки на высоту удлинителя и дальше по его пазам), а не остаётся на цевье.
 func _extender() -> void:
-	for pair: Array in [["v1", "grip_vertical_01", 0], ["v2", "grip_offset_01", 0], ["v1_far", "grip_vertical_01", 3], ["angled", "grip_angled_01", 1]]:
+	for pair: Array in [["v1", "grip_vertical_01", 0], ["v2", "grip_offset_01", 0], ["v1_far", "grip_vertical_01", 3]]:
 		await _equip({"underbarrel": {"id": "mount_rail_ext_01", "slot": 2}, "underbarrel/rail": {"id": pair[1], "slot": pair[2]}})
 		await get_tree().create_timer(0.6).timeout
 		var vm := _camera._viewmodel as ViewmodelClips

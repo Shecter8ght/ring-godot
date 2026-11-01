@@ -8,7 +8,7 @@ const BUILDS := {
 	"offset_left": {"optic_primary": {"id": "optic_lpvo_01", "slot": 1}, "optic_primary#2": {"id": "mount_offset45_01", "slot": 7, "flip": true},
 		"optic_primary#2/rail": {"id": "optic_holo_01"}, "side_right": {"id": "tac_flashlight_01"}},
 	"riser": {"optic_primary": {"id": "mount_riser_01", "slot": 2}, "optic_primary/rail": {"id": "optic_4x_01"},
-		"top_front": {"id": "optic_holo_01", "slot": 0}, "underbarrel": {"id": "grip_angled_01", "slot": 0}},
+		"top_front": {"id": "optic_holo_01", "slot": 0}, "underbarrel": {"id": "grip_offset_01", "slot": 0}},
 	"adjustable": {"optic_primary": {"id": "optic_rd_01", "slot": 2}, "optic_primary#2": {"id": "mount_adjustable_01", "slot": 7, "angle": 30.0},
 		"optic_primary#2/rail": {"id": "optic_holo_01"}, "underbarrel": {"id": "grip_vertical_01", "slot": 0}, "underbarrel#2": {"id": "tac_combo_01", "slot": 4}},
 }

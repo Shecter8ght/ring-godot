@@ -6,7 +6,7 @@ extends Node
 ## Muzzle/SightFront/SightRear — дульный срез и линия прицеливания (по meta модели).
 ## Отдельно — автомат с каждым обвесом, который меняет хват левой руки.
 
-const GRIP_MODS: Array[String] = ["grip_vertical_01", "grip_angled_01", "grip_compact_01", "grip_heavy_01", "grip_handstop_01", "tac_flashlight_01"]
+const GRIP_MODS: Array[String] = ["grip_vertical_01", "grip_offset_01", "tac_flashlight_01"]
 const GRIP_WEAPON: String = "wpn_ar_02"
 
 

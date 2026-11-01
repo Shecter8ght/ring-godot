@@ -2083,8 +2083,7 @@
      "wear": 0.02
     },
     "mounts": {
-     "muzzle": "THREAD_338",
-     "underbarrel": "BIPOD_CLAMP"
+     "muzzle": "THREAD_338"
     },
     "mag_if": "MAG_AWM338",
     "default_mag": "mag_338_awm5",
@@ -2141,9 +2140,7 @@
      "reliability": 0.985,
      "wear": 0.02
     },
-    "mounts": {
-     "underbarrel": "BIPOD_CLAMP"
-    },
+    "mounts": {},
     "mag_if": "MAG_M82",
     "default_mag": "mag_50_m82_10",
     "sound": "shot_bolt",
@@ -2375,8 +2372,7 @@
     },
     "mounts": {
      "optic_primary": "RAIL_TOP",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "BIPOD_CLAMP"
+     "side_right": "RAIL_SIDE"
     },
     "mag_if": "MAG_PKM",
     "default_mag": "mag_pkm_100",
@@ -5781,39 +5777,6 @@
    },
    "flavor": "Полезна тому, кто ведёт цель очередью и не хочет ловить прицел после каждого выстрела."
   },
-  "grip_angled_01": {
-   "name": "Рукоятка угловая",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 8000,
-   "stack": 1,
-   "weight": 0.08,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "Рук. угл.",
-   "attach": {
-    "type": "ANGLED_GRIP",
-    "fits": [
-     "RAIL_BOTTOM"
-    ],
-    "look": "grip_angled",
-    "fx": {
-     "kick": 0.93,
-     "aim": 1.18,
-     "ergo": 8
-    },
-    "desc": "Быстрее вскидка и довод в прицел.",
-    "clamp_m": 0.05
-   },
-   "flavor": "Хороша для первого номера: быстрее поднял оружие — раньше решил исход встречи."
-  },
   "grip_offset_01": {
    "name": "Рукоятка ВАРН V2, 45° влево",
    "cat": "mod",
@@ -5851,142 +5814,6 @@
     "clamp_m": 0.04
    },
    "flavor": "Рукоятка смотрит влево-вниз, под естественный поворот кисти: держать удобнее, чем прямую."
-  },
-  "grip_compact_01": {
-   "name": "Рукоятка короткая",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 5000,
-   "stack": 1,
-   "weight": 0.06,
-   "tier": 1,
-   "rarity": "common",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "short": "Рук. кор.",
-   "attach": {
-    "type": "COMPACT_GRIP",
-    "fits": [
-     "RAIL_BOTTOM"
-    ],
-    "look": "grip_vertical",
-    "fx": {
-     "kick": 0.88,
-     "kick_h": 0.92,
-     "aim": 1.06,
-     "ergo": 5
-    },
-    "scale": 0.65,
-    "clamp_m": 0.03
-   },
-   "flavor": "Небольшая помощь без большого штрафа; свободное место иногда важнее максимальных процентов."
-  },
-  "grip_heavy_01": {
-   "name": "Рукоятка массивная",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 7000,
-   "stack": 1,
-   "weight": 0.32,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "MILITARY"
-   ],
-   "short": "Рук. тяж.",
-   "attach": {
-    "type": "HEAVY_GRIP",
-    "fits": [
-     "RAIL_BOTTOM"
-    ],
-    "look": "grip_vertical",
-    "fx": {
-     "kick": 0.68,
-     "kick_h": 0.78,
-     "ergo": -6,
-     "aim": 0.92
-    },
-    "scale": 1.2,
-    "desc": "Сильно гасит отдачу, но ствол тяжелеет.",
-    "clamp_m": 0.05
-   },
-   "flavor": "Ствол спорит с отдачей меньше, зато с руками стрелка — заметно больше."
-  },
-  "grip_handstop_01": {
-   "name": "Упор для руки",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 3000,
-   "stack": 1,
-   "weight": 0.03,
-   "tier": 1,
-   "rarity": "common",
-   "tags": [
-    "MILITARY",
-    "PERIMETER",
-    "POLICE"
-   ],
-   "short": "Упор",
-   "attach": {
-    "type": "HAND_STOP",
-    "fits": [
-     "RAIL_BOTTOM",
-     "RAIL_SIDE"
-    ],
-    "look": "grip_angled",
-    "fx": {
-     "kick": 0.95,
-     "aim": 1.1,
-     "ergo": 7
-    },
-    "scale": 0.6,
-    "clamp_m": 0.03
-   },
-   "flavor": "Не творит чудес, но делает лёгкий карабин ещё быстрее в коротких переносах."
-  },
-  "bipod_01": {
-   "name": "Сошки",
-   "cat": "mod",
-   "size": [
-    2,
-    1
-   ],
-   "value": 9000,
-   "stack": 1,
-   "weight": 0.4,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "HUNTING",
-    "MILITARY"
-   ],
-   "short": "Сошки",
-   "attach": {
-    "type": "BIPOD",
-    "fits": [
-     "BIPOD_CLAMP",
-     "RAIL_BOTTOM"
-    ],
-    "look": "bipod",
-    "fx": {
-     "braced_kick": 0.5,
-     "braced_spread": 0.7,
-     "ergo": -8
-    },
-    "clamp_m": 0.03
-   },
-   "flavor": "Разложись до выстрела: с упора оружие становится точнее, но отходить придётся не мгновенно."
   },
   "stock_fixed_heavy_ak": {
    "name": "Приклад деревянный тяжёлый",
@@ -7023,7 +6850,7 @@
     "optic_primary": "optic_holo_01",
     "side_left": "tac_flashlight_hp_01",
     "side_right": "tac_laser_01",
-    "underbarrel": "grip_angled_01",
+    "underbarrel": "grip_offset_01",
     "stock": "stock_perimeter_01"
    },
    "ammo": [
@@ -7250,7 +7077,7 @@
    "mods": {
     "optic_primary": "optic_holo_01",
     "side_right": "tac_flashlight_01",
-    "underbarrel": "grip_angled_01",
+    "underbarrel": "grip_offset_01",
     "stock": "stock_tele_ar_01"
    },
    "ammo": [
@@ -7357,7 +7184,7 @@
     "optic_primary": "optic_rd_01",
     "side_left": "tac_flashlight_hp_01",
     "side_right": "tac_laser_01",
-    "underbarrel": "grip_compact_01",
+    "underbarrel": "grip_vertical_01",
     "muzzle": "muzzle_fh_545_01"
    },
    "ammo": [
@@ -7382,7 +7209,7 @@
    "mods": {
     "optic_primary": "optic_holo_01",
     "side_left": "tac_combo_01",
-    "underbarrel": "grip_angled_01",
+    "underbarrel": "grip_offset_01",
     "muzzle": "muzzle_supp_545_01"
    },
    "ammo": [
@@ -7433,7 +7260,7 @@
     "optic_primary": "optic_holo_01",
     "side_left": "tac_flashlight_01",
     "side_right": "tac_laser_01",
-    "underbarrel": "grip_angled_01",
+    "underbarrel": "grip_offset_01",
     "muzzle": "muzzle_comp_556_01",
     "stock": "stock_perimeter_01"
    },
@@ -7460,7 +7287,7 @@
     "optic_primary": "optic_lpvo_01",
     "side_left": "tac_flashlight_hp_01",
     "side_right": "tac_laser_01",
-    "underbarrel": "grip_angled_01",
+    "underbarrel": "grip_offset_01",
     "muzzle": "muzzle_supp_556_01",
     "stock": "stock_perimeter_01"
    },
@@ -7485,7 +7312,7 @@
    "weapon": "wpn_ar_05",
    "mods": {
     "optic_primary": "optic_4x_01",
-    "underbarrel": "grip_heavy_01",
+    "underbarrel": "grip_vertical_01",
     "stock": "stock_perimeter_01"
    },
    "ammo": [
@@ -7521,7 +7348,6 @@
    "weapon": "wpn_dmr_02",
    "mods": {
     "optic_primary": "optic_4x_01",
-    "underbarrel": "bipod_01",
     "stock": "stock_tele_ar_01"
    },
    "ammo": [
@@ -7542,7 +7368,6 @@
    "mods": {
     "optic_primary": "optic_lpvo_01",
     "side_right": "tac_laser_01",
-    "underbarrel": "bipod_01",
     "muzzle": "muzzle_supp_762_01",
     "stock": "stock_perimeter_01"
    },
@@ -7567,7 +7392,6 @@
    "weapon": "wpn_dmr_01",
    "mods": {
     "optic_primary": "optic_8x_01",
-    "underbarrel": "bipod_01",
     "muzzle": "muzzle_supp_762_01",
     "stock": "stock_perimeter_01"
    },
@@ -7602,9 +7426,7 @@
   },
   "SR_02_BASE": {
    "weapon": "wpn_sr_02",
-   "mods": {
-    "underbarrel": "bipod_01"
-   },
+   "mods": {},
    "ammo": [
     [
      "ammo_50_ball",
@@ -8084,14 +7906,14 @@
   "mod_supp_762": "muzzle_supp_762_01",
   "mod_comp": "muzzle_comp_545_01",
   "mod_grip": "grip_vertical_01",
-  "mod_grip_angled": "grip_angled_01",
+  "mod_grip_angled": "grip_offset_01",
   "mod_grip_offset": "grip_offset_01",
   "mod_stock_tele": "stock_tele_ak_01",
   "mod_mag_ext": "mag_545_45",
   "mod_mag_pistol": "mag_919_33",
   "mod_flashlight": "tac_flashlight_01",
   "mod_laser": "tac_laser_01",
-  "mod_bipod": "bipod_01",
+  "mod_bipod": "grip_vertical_01",
   "wpn_hg_04": "wpn_hg_02",
   "wpn_sg_04": "wpn_sg_02",
   "wpn_ar_06": "wpn_ar_01",
@@ -8125,6 +7947,11 @@
   "vest_heavy": "armor_mid",
   "helmet": "helmet_simple",
   "optic_offset_rd_01": "optic_zorin_k1",
-  "optic_rmr_01": "optic_zorin_k1"
+  "optic_rmr_01": "optic_zorin_k1",
+  "grip_compact_01": "grip_vertical_01",
+  "grip_heavy_01": "grip_vertical_01",
+  "bipod_01": "grip_vertical_01",
+  "grip_angled_01": "grip_offset_01",
+  "grip_handstop_01": "grip_offset_01"
  }
 }

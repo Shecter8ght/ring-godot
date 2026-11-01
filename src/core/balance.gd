@@ -399,7 +399,7 @@ const TRADER_KITS := [
 		"backpack": [["mag_545_30", 4], ["ammo_545_std", 150], ["mag_919_17", 2], ["ammo_919_fmj", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 1], ["grenade", 2]]},
 	{"name": "Штурмовик", "about": "M4A1 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
 		"slots": {
-			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_angled_01", "side_right": "tac_combo_01"}},
+			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_offset_01", "side_right": "tac_combo_01"}},
 			"sidearm": {"id": "wpn_hg_02", "mods": {"underbarrel": "tac_flashlight_01"}},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
@@ -407,10 +407,10 @@ const TRADER_KITS := [
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
 		"backpack": [["mag_556_30", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
-	{"name": "Снайпер", "about": "MR762 с оптикой 8×, глушителем и сошками, Vector на ближний бой, лучшая броня.",
+	{"name": "Снайпер", "about": "MR762 с оптикой 8× и глушителем, Vector на ближний бой, лучшая броня.",
 		"slots": {
-			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01", "underbarrel": "bipod_01"}},
-			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_angled_01"}},
+			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01"}},
+			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_offset_01"}},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_military", "back": "plate_military"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_top"},
 			"ears": {"id": "headset_tactical"},
@@ -469,7 +469,6 @@ const TRADER_BUY_PRICES := {
 	"bearing_set": 12000,
 	"bench_vice": 4700,
 	"binoculars": 11000,
-	"bipod_01": 40000,
 	"bp_daypack": 12000,
 	"bp_raid": 180000,
 	"bp_tourist": 35000,
@@ -513,10 +512,6 @@ const TRADER_BUY_PRICES := {
 	"gpu_compute": 120000,
 	"gpu_gaming": 70000,
 	"grenade": 10000,
-	"grip_angled_01": 35000,
-	"grip_compact_01": 17000,
-	"grip_handstop_01": 10000,
-	"grip_heavy_01": 31000,
 	"grip_offset_01": 40000,
 	"grip_vertical_01": 20000,
 	"hammer": 1400,
@@ -2206,7 +2201,7 @@ const CIVILIAN_LOOT := {
 	]},
 	"sport": {"rolls": [1, 1], "entries": [
 		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
-		["bipod_01", 0.2, [1, 1]], ["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
+		["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
 		["work_gloves", 1, [1, 1]], ["nothing", 4, [0, 0]], ["pouch_pistol", 0.6, [1, 1]], ["pouch_rifle", 0.3, [1, 1]]
 	]},
 	"home": {"rolls": [1, 2], "entries": [

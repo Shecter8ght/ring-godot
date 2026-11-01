@@ -35,9 +35,7 @@ func _ready() -> void:
 		["ВАРН V1", {"underbarrel": {"id": "grip_vertical_01"}}],
 		["ВАРН V2", {"underbarrel": {"id": "grip_offset_01"}}],
 		["ВАРН V2, другой паз", {"underbarrel": {"id": "grip_offset_01", "slot": 0}}],
-		["угловая", {"underbarrel": {"id": "grip_angled_01"}}],
-		["угловая, другой паз", {"underbarrel": {"id": "grip_angled_01", "slot": 0}}],
-		["рукоятка на удлинителе", {"underbarrel": {"id": "mount_rail_ext_01", "slot": 2}, "underbarrel/rail": {"id": "grip_angled_01", "slot": 1}}],
+		["рукоятка на удлинителе", {"underbarrel": {"id": "mount_rail_ext_01", "slot": 2}, "underbarrel/rail": {"id": "grip_offset_01", "slot": 1}}],
 	]
 	for pair: Array in setups:
 		await _run(String(pair[0]), pair[1] as Dictionary)

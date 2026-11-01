@@ -85,13 +85,13 @@ func _cases() -> Array[Dictionary]:
 		result.append({"id": id, "label": "base", "mods": {}})
 		var entry: Dictionary = {"id": id, "mods": {}}
 		for attachment: String in data.attachments:
-			if quick and not attachment in ["grip_vertical_01", "grip_angled_01", "grip_compact_01", "optic_holo_01"]:
+			if quick and not attachment in ["grip_vertical_01", "grip_offset_01", "optic_holo_01"]:
 				continue
 			for mount: String in WeaponDb.MOUNTS:
 				if WeaponDb.attach_block(entry, mount, attachment) == "":
 					result.append({"id": id, "label": mount + "_" + attachment, "mods": {mount: {"id": attachment}}})
 		# Полные комплекты: каждая рукоятка вместе с прицелом, дульным, светом и прикладом.
-		for grip: String in ["grip_vertical_01", "grip_angled_01", "grip_compact_01", "grip_heavy_01", "grip_handstop_01", "bipod_01"]:
+		for grip: String in ["grip_vertical_01", "grip_offset_01"]:
 			entry = {"id": id, "mods": {}}
 			if WeaponDb.attach_block(entry, "underbarrel", grip) != "":
 				continue

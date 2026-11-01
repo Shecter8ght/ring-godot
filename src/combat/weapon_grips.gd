@@ -44,7 +44,7 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 	if grip == "grip_offset":
 		# у рукоятки под 45° своей позы контакта нет — пальцы как на вертикальной
 		contact_attachment = "grip_vertical_01"
-	elif not attachment.is_empty() and not grip in ["grip_vertical", "grip_angled"]:
+	elif not attachment.is_empty() and grip != "grip_vertical":
 		contact_attachment = "tac_flashlight_01"
 	if model == "pistol":
 		contact_attachment = ""
@@ -59,12 +59,9 @@ static func fit(root: Node3D, model: String, weapon: Dictionary, mods: Dictionar
 			profile.left = (_profiles[grip] as Dictionary).duplicate(true)
 			profile.left["scale"] = float(attachment.get("scale", 1.0))
 			profile.left["offset"] = under_pos
-			if contact_attachment == "grip_compact_01":
-				# Короткую рукоятку держим выше: указательный опирается у цевья.
-				profile.left.pos[1] = -0.030
 	elif not attachment.is_empty() and profile.has("underbarrel_clearance"):
 		if not under_socket.is_empty():
-			# Фонарь и сошки занимают низ цевья: ладонь переносится за их крепление.
+			# Фонарь занимает низ цевья: ладонь переносится за его крепление.
 			profile.left.pos[2] = minf(float(profile.left.pos[2]), under_pos.z - float(profile.underbarrel_clearance))
 	for side: String in ["right", "left"]:
 		if not profile.has(side):

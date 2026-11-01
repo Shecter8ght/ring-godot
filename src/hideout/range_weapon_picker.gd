@@ -222,7 +222,7 @@ func _variant_button(text: String, wid: String, preset_id: String) -> Button:
 	return b
 
 
-## Подпись сборки по её обвесу: прицел, глушитель или ДТК, сошки.
+## Подпись сборки по её обвесу: прицел, глушитель или ДТК.
 func _variant_name(preset_id: String) -> String:
 	var mods: Dictionary = WeaponDb.preset(preset_id).get("mods", {})
 	if mods.is_empty():
@@ -233,8 +233,6 @@ func _variant_name(preset_id: String) -> String:
 		parts.append(String(optic.get("short", optic.get("name", "прицел"))))
 	if mods.has("muzzle"):
 		parts.append("глушитель" if String(mods.muzzle).contains("supp") else "ДТК")
-	if String(mods.get("underbarrel", "")).begins_with("bipod"):
-		parts.append("сошки")
 	if parts.is_empty():
 		parts.append("тактический")
 	return " + ".join(parts)

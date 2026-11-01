@@ -81,7 +81,7 @@ const CAT_TABS := [["all", "Всё", []], ["weapon", "Оружие", ["weapon"]]
 	["throw", "Гранаты и свет", ["throw"]], ["misc", "Разное", []]]
 
 const MOD_SLOT_NAMES := {"optic": "Прицел", "muzzle": "Дульное устройство", "grip": "Рукоятка",
-	"stock": "Приклад", "mag": "Магазин", "tac": "Фонарь / ЛЦУ", "bipod": "Сошки"}
+	"stock": "Приклад", "mag": "Магазин", "tac": "Фонарь / ЛЦУ"}
 const FX_NAMES := {"kick": "отдача", "shake": "тряска", "spread": "разброс", "ads_spread": "разброс в прицеле",
 	"hip_spread": "разброс от бедра (вкл.)", "noise": "шум", "damage": "урон", "braced_kick": "отдача лёжа/сидя",
 	"braced_spread": "разброс лёжа/сидя"}
@@ -1598,7 +1598,7 @@ func _subgroup(id: String) -> Array:
 				return [6, "Кронштейны и планки"]
 		if "FLASHLIGHT" in kind or "LASER" in kind:
 			return [4, "Фонари и ЛЦУ"]
-		return [3, "Рукоятки и сошки"]
+		return [3, "Рукоятки"]
 	if not WeaponDb.helmet(id).is_empty():
 		return [0, "Шлемы"]
 	if not WeaponDb.vest(id).is_empty():

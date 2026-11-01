@@ -34,7 +34,7 @@ func _ready() -> void:
 	var ids: Array = ["pistol", "rifle", "shotgun", "bolt"]
 	ids.append_array(weapons.keys())
 	for id: String in ids:
-		for att: String in ["", "grip_vertical_01", "grip_angled_01", "grip_compact_01", "grip_heavy_01", "grip_handstop_01", "tac_flashlight_01"]:
+		for att: String in ["", "grip_vertical_01", "tac_flashlight_01"]:
 			var weapon: Dictionary = WeaponDb.weapon(id)
 			var model: String = String(weapon.get("model", id))
 			if model == "pistol" and att != "":
