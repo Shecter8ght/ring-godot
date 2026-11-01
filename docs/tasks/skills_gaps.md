@@ -33,7 +33,13 @@
   [Polycount — MikkTSpace](https://polycount.com/discussion/comment/2762295),
   [Polycount — cage и skew](https://polycount.com/discussion/comment/2716577/).
 
+**Сделано 2026-11-01:** стенд `tools/normal_probe.tscn` (Blender → Godot, без Painter) — навык
+`godot-asset-preparation`, `mesh-bake.md`, «Нормали Blender → Godot». Не проверено: Painter с «per fragment» и без.
+
 ## 3. Импорт карт в Godot
+
+**Сделано 2026-11-01:** `godot-checks.md`, «импорт карт» — RGTC у нормалей, `roughness/mode` (у ORM — 3; значение 8
+от автоопределения Godot 4.7.2 фильтр выключает; 122 карты проекта с 8 на 2026-11-01 — исправлять по решению владельца).
 
 В навыках ничего нет. По документации Godot (`ResourceImporterTexture`):
 - нормали — сжатие RGTC (`compress/normal_map`), синий канал не нужен;

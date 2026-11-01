@@ -379,6 +379,11 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
                                                               # общий модуль игровой развёртки оружия (tools/asset_kit/uv.py, укладка uv_pack.py) на копиях готовых сеток:
                                                               # заполнение, плотность видимого / у глаза / вдали, отступы проверены растром; слои KitUV* —
                                                               # в _asset_src/<ствол>/uv_kit/*_UVKit.blend, игровые файлы и карты не меняются
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/asset_kit/normal_probe.py -- <папка>
+                                                              # стенд нормалей: пять пар high/low запекаются как у оружия (Cycles, 8 бит), low в glTF с тангентами
+                                                              # и без, снимки Eevee; затем NORMAL_PROBE_DIR=<папка> tools/godot.cmd --windowed --resolution 512x512
+                                                              # res://tools/normal_probe.tscn (тангенты файла / свои, сжатие карты S3TC / RGTC / BPTC, бинормаль в пикселе)
+                                                              # и python -X utf8 tools/asset_kit/normal_probe_report.py <папка> — ошибка против high; выводы — навык godot-asset-preparation
 "D:/ПРОГРАММЫ/RizomUV 2024.1/rizomuv.exe"                      # RizomUV (владелец, 2026-10-27): развёртка и упаковка UV — для норм заполнения 80 % (кузова машин,
                                                               # новые стволы); управляется скриптами — Lua из командной строки или Python через RizomUVLink
                                                               # (папка программы); в конвейер ещё не подключён
