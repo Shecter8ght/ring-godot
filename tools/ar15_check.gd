@@ -2,9 +2,11 @@ extends Node
 ## AR-15 «ГРАНЬ-15» в движке (tools/ar15/game_*.py): узлы игровой модели — подвижные и съёмные детали отдельно, метки,
 ## карты атласов, треугольники в руках, габарит; ствол из данных (WeaponModels.build): ход рамы, шторка, магазин и приклад
 ## помечены, сокеты планок Picatinny (models.ar15.sockets) есть у каждого крепления ствола и планки длиннее зажима.
+## Глушитель ГРАНЬ (muzzle_supp_gran_01): модель и карты, встаёт только на ГРАНЬ-15, торец на тормозе, срез на переднем торце.
 ## tools/godot.cmd --headless res://tools/ar15_check.tscn — код выхода 1, если есть ошибки.
 
 const ID := "wpn_ar_09"
+const SUPP := "muzzle_supp_gran_01"
 const DIR := "res://assets/models/weapons/ar15/"
 const NODES := ["Upper_Receiver", "Upper_Handguard", "Upper_Steel", "Lower_Receiver", "Lower_Polymer", "BoltCarrier_Steel",
 	"Bolt_Steel", "ChargingHandle_Receiver", "ChLatchL_Receiver", "ChLatchR_Receiver", "DustCover_Receiver",
@@ -116,7 +118,60 @@ func _ready() -> void:
 		print("ar15_check: ", leaf, " с прицелом повёрнут на ", snappedf(turn, 0.1), "°")
 		if absf(turn - 90.0) > 1.0:
 			_fail("%s не сложился (%.1f°)" % [leaf, turn])
+	_check_suppressor(gun, tris)
 	_finish()
+
+
+## Глушитель ГРАНЬ (tools/ar15/supp_game.py): модель и карты, встаёт только на своё крепление QD_GRAN15 (дульный тормоз
+## ГРАНЬ-15), задний торец — на тормозе, срез выстрела — на переднем торце, ствол помечен как с глушителем.
+func _check_suppressor(gun: Node3D, rifle_tris: int) -> void:
+	var a: Dictionary = WeaponDb.attachment(SUPP)
+	var spec: Dictionary = a.get("model", {})
+	var scene: PackedScene = load(String(spec.get("scene", ""))) as PackedScene if not spec.is_empty() else null
+	if scene == null:
+		_fail("нет модели глушителя")
+		return
+	var raw: Node3D = scene.instantiate() as Node3D
+	add_child(raw)
+	var tris: int = 0
+	for n: String in ["Body", "Body_Latch", "Body_LOD1"]:
+		var mi: MeshInstance3D = raw.find_child(n, true, false) as MeshInstance3D
+		if mi == null:
+			_fail("у глушителя нет узла " + n)
+			continue
+		if n != "Body_LOD1":
+			for s in range(mi.mesh.get_surface_count()):
+				tris += (mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+	print("ar15_check: глушитель — треугольников ", tris, ", в руках с ним ", rifle_tris + tris)
+	var prefix: String = String(spec.scene).get_basename() + "_100_"
+	for kind: String in ["base_color", "roughness", "metallic", "normal"]:
+		if not ResourceLoader.exists(prefix + kind + ".png"):
+			_fail("нет карты глушителя " + kind)
+	var entry := {"id": ID, "n": 1, "dur": 100.0, "mods": {}}
+	var why: String = WeaponBuild.block(entry, "muzzle", SUPP)
+	if why != "":
+		_fail("глушитель не встаёт на ГРАНЬ-15: " + why)
+	if WeaponBuild.block({"id": "wpn_ar_02", "n": 1, "dur": 100.0, "mods": {}}, "muzzle", SUPP) == "":
+		_fail("глушитель ГРАНЬ встаёт на M4A1 — крепление только у ГРАНЬ-15")
+	print("ar15_check: глушитель 5.56 на ГРАНЬ-15 — ", WeaponBuild.block(entry, "muzzle", "muzzle_supp_556_01"))
+	var muzzle: Vector3 = gun.get_meta("muzzle", Vector3.ZERO)
+	var fitted: Node3D = WeaponModels.build(ID, {"muzzle": {"id": SUPP, "dur": 100.0}})
+	add_child(fitted)
+	var latch: Node3D = fitted.find_child("Body_Latch", true, false) as Node3D
+	if latch == null:
+		_fail("глушитель не встал на модель")
+		return
+	var body: Node3D = latch.get_parent() as Node3D
+	var rear: Vector3 = fitted.to_local(body.global_position)
+	var front: Vector3 = fitted.get_meta("muzzle", Vector3.ZERO)
+	print("ar15_check: срез тормоза ", muzzle, ", задний торец глушителя ", rear.snapped(Vector3.ONE * 0.0001), ", срез выстрела ",
+		front.snapped(Vector3.ONE * 0.0001), ", с глушителем: ", fitted.get_meta("suppressed", false))
+	if absf(rear.z - (muzzle.z - 0.0497)) > 0.001 or absf(rear.y - muzzle.y) > 0.001:
+		_fail("задний торец глушителя не на тормозе: %s" % rear)
+	if absf(front.z - (rear.z + 0.172)) > 0.001:
+		_fail("срез выстрела не на переднем торце глушителя: %s" % front)
+	if not bool(fitted.get_meta("suppressed", false)):
+		_fail("ствол с глушителем не помечен suppressed")
 
 
 func _fail(msg: String) -> void:

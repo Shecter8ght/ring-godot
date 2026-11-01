@@ -183,6 +183,9 @@
   SurfaceImperfections008, Scratches002; ShareTextures (https://www.sharetextures.com, лицензия
   https://www.sharetextures.com/p/license) — grunge_3, grunge_5. Сырьё — `E:/Models Blender/Маски_АЛЬФА/
   50_Скачанные_CC0_ambientCG_ShareTextures` (там же лицензия и каталог).
+- `assets/models/attachments/supp_gran/` (глушитель `supp_gran.glb`, карты `supp_gran_100_*`),
+  `assets/icons/muzzle_supp_gran_01.png` — глушитель той же модели (отделка этапа 1 «песок» v7), игровая сетка и карты —
+  `tools/ar15/supp_game.py`, `tools/ar15/supp_pack.py`.
 <!-- AR15_END -->
 
 <!-- VSS_OPTICS_START -->

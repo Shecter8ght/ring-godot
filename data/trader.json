@@ -18,7 +18,7 @@
    "n": 3,
    "step": 20,
    "name": "Армейское",
-   "what": "M4A1, ГРАНЬ-15, Benelli, «Вереск», P90. Оптика 4×, глушители, армейская броня и керамика, ПНВ."
+   "what": "M4A1, ГРАНЬ-15 и его глушитель, Benelli, «Вереск», P90. Оптика 4×, глушители, армейская броня и керамика, ПНВ."
   },
   {
    "n": 4,
@@ -143,6 +143,7 @@
   "muzzle_supp_545_01",
   "muzzle_supp_556_01",
   "muzzle_supp_9_01",
+  "muzzle_supp_gran_01",
   "muzzle_supp_pm_01",
   "optic_4x_01",
   "tac_combo_01",
@@ -324,6 +325,7 @@
   "muzzle_supp_545_01": 3,
   "muzzle_supp_556_01": 3,
   "muzzle_supp_9_01": 3,
+  "muzzle_supp_gran_01": 3,
   "muzzle_supp_pm_01": 3,
   "optic_4x_01": 3,
   "tac_combo_01": 3,

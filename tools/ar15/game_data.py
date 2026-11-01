@@ -2,7 +2,8 @@
 (assets/models/weapons/ar15/ar15.json, game_export.py).
 
 python -X utf8 tools/ar15/game_data.py
-Пишет в data/weapons.json (models.ar15, weapons.wpn_ar_09, magazines.mag_556_30_gran, presets.GRAN15_BASE) и
+Пишет в data/weapons.json (models.ar15, weapons.wpn_ar_09, magazines.mag_556_30_gran, presets.GRAN15_BASE,
+attachments.muzzle_supp_gran_01 — глушитель, tools/ar15/supp_game.py) и
 data/weapon_grips.json (ar15); формат weapons.json не меняется (json с отступом 1, как у файла). Повторный запуск
 перезаписывает те же ключи.
 Планки (weapon_build.gd): обвес встаёт с шагом SLOT_M = 20 мм от начала rail_z, серединой зажима (clamp_m, по умолчанию
@@ -108,7 +109,7 @@ WEAPON = {
                   'noise': 80, 'reliability': 0.978, 'wear': 0.02},
         'fire_modes': ['semi', 'auto'],
         'mounts': {'optic_primary': 'RAIL_TOP', 'top_front': 'RAIL_TOP', 'side_left': 'RAIL_SIDE',
-                   'side_right': 'RAIL_SIDE', 'underbarrel': 'RAIL_BOTTOM', 'muzzle': 'THREAD_556',
+                   'side_right': 'RAIL_SIDE', 'underbarrel': 'RAIL_BOTTOM', 'muzzle': 'QD_GRAN15',
                    'stock': 'STOCK_AR'},
         'mag_if': 'MAG_STANAG', 'default_mag': 'mag_556_30_gran', 'sound': 'shot_rifle', 'reload_sound': 'reload_rifle',
         'cycle_sound': '', 'asset': ASSET + 'ar15.gltf', 'asset_kind': 'static', 'viewmodel': {'ads_z': ADS_Z},
@@ -122,6 +123,20 @@ MAG = {
             'asset': ASSET + 'ar15_mag30.gltf', 'asset_detail': ASSET + 'ar15_mag30.gltf'},
     'flavor': 'Полимерный STANAG с окнами остатка: видно, сколько осталось, не вынимая магазин.',
     'model': ASSET + 'ar15_mag30.gltf',
+}
+# Глушитель ГРАНЬ (supp_game.py): быстросъёмный — надевается на дульный тормоз и защёлкивается на храповой муфте, поэтому
+# у дула ГРАНЬ-15 своё крепление QD_GRAN15 (резьбовые насадки 5.56 сели бы перед тормозом, которого в модели не снять).
+# Начало модели — задний торец: на тормозе он на 49,7 мм позади среза (part_muzzle: торец 290,3 мм, срез тормоза — 340 мм,
+# метка Muzzle); длина 172 мм — срез выстрела на переднем торце. Действие — как у глушителя 5.56 (muzzle_supp_556_01).
+SUPP_DIR = 'res://assets/models/attachments/supp_gran/'
+SUPP = {
+    'name': 'Глушитель «ГРАНЬ» 5.56', 'cat': 'mod', 'size': [2, 1], 'value': 28000, 'stack': 1, 'weight': 0.5, 'tier': 3,
+    'rarity': 'rare', 'tags': ['MILITARY', 'PERIMETER'], 'short': 'Глуш. ГРАНЬ',
+    'attach': {'type': 'SUPPRESSOR', 'fits': ['QD_GRAN15'], 'look': 'suppressor',
+               'model': {'scene': SUPP_DIR + 'supp_gran.glb', 'offset': [0, 0, -0.0497], 'length_m': 0.172},
+               'fx': {'noise': 0.35, 'db': -14, 'damage': 0.96, 'suppressed': True, 'ergo': -8, 'kick': 0.88, 'flash': 0},
+               'size_m': [0.020, 0.172]},
+    'flavor': 'Быстросъёмный: надевается на дульный тормоз ГРАНЬ-15 и защёлкивается на храповой муфте. На другие стволы не встаёт.',
 }
 PRESET = {'weapon': 'wpn_ar_09', 'mods': {}, 'ammo': [['ammo_556_std', 1]], 'dur': [70, 100], 'sight': 'primary',
           'mag': 'mag_556_30_gran'}
@@ -139,6 +154,7 @@ def main():
     d['weapons']['wpn_ar_09'] = w
     d['magazines']['mag_556_30_gran'] = MAG
     d['presets']['GRAN15_BASE'] = PRESET
+    d['attachments']['muzzle_supp_gran_01'] = SUPP
     WEAPONS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
     # хват рук: правая — как у винтовок (рукоять в начале осей), левая — на цевье за его началом, ниже оси ствола
     g = GRIPS.read_text(encoding='utf-8')

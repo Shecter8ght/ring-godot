@@ -78,5 +78,7 @@ def pack(atlas: str) -> None:
     print('AR15_PACK', atlas, 'запечено', round(float(mask.mean()), 3), flush=True)
 
 
-for a in (sys.argv[1:] or ATLASES):
-    pack(a)
+# push_pull и чтение / запись карт берёт и глушитель (supp_pack.py)
+if __name__ == '__main__':
+    for a in (sys.argv[1:] or ATLASES):
+        pack(a)

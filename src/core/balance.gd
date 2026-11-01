@@ -609,6 +609,7 @@ const TRADER_BUY_PRICES := {
 	"muzzle_supp_68_01": 592000,
 	"muzzle_supp_762_01": 273000,
 	"muzzle_supp_9_01": 129000,
+	"muzzle_supp_gran_01": 195000,
 	"muzzle_supp_pm_01": 100000,
 	"nvg": 300000,
 	"nvg_tube": 114000,

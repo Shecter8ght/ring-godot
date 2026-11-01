@@ -471,11 +471,16 @@ tools/ar15/mark_server.cmd                                   # AR-15, разме
 #   деталь — со своих) → python -X utf8 tools/ar15/game_pack.py → game_export.py (assets/models/weapons/ar15: ar15.gltf, ar15_mag30.gltf,
 #   отчёт ar15.json) → python -X utf8 tools/ar15/game_data.py (models.ar15 — сокеты планок по пазам, откидные прицельные, ход рамы и шторка;
 #   wpn_ar_09, mag_556_30_gran, хват) → --import → python -X utf8 tools/ar15/game_imports.py → --import; иконки — icon_bake -- wpn_ar_09 mag_556_30_gran
+#   Глушитель ГРАНЬ (обвес muzzle_supp_gran_01, крепление QD_GRAN15 — только у ГРАНЬ-15): blender … --python tools/ar15/supp_game.py -- lp
+#   (сетка ~2,6 тыс. с той же high-poly, атлас 2K) → supp_game.py -- bake [--cpu] → python -X utf8 tools/ar15/supp_pack.py → supp_game.py -- export
+#   → assets/models/attachments/supp_gran; --import, game_imports.py, --import; данные — game_data.py; иконка — icon_bake -- muzzle_supp_gran_01
 tools/godot.cmd --headless res://tools/ar15_check.tscn         # ГРАНЬ-15 в движке: узлы и метки, треугольники, карты, габарит, ход рамы и шторка, сокет у каждого
-                                                              # крепления, планки длиннее зажима, обвесы встают, с прицелом сверху целик и мушка сложены (90°)
+                                                              # крепления, планки длиннее зажима, обвесы встают, с прицелом сверху целик и мушка сложены (90°);
+                                                              # глушитель ГРАНЬ: встаёт только на ГРАНЬ-15, торец на тормозе, срез выстрела на переднем торце
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/ar15_shots.tscn # ГРАНЬ-15 в руках (Пригород): механический, коллиматор + фонарь + рукоятка,
                                                               # фонарь слева / справа — от бедра, в прицел, на отдаче, сбоку; выстрел (ход рамы в лог), рама отведена
-                                                              # и шторка откинута; снимки ar15_* (AR15_ONLY=iron,optic); без окна — только лог отвода ствола
+                                                              # и шторка откинута; снимки ar15_* (AR15_ONLY=iron,optic; supp, supprail — с глушителем ГРАНЬ);
+                                                              # без окна — только лог отвода ствола
 tools/godot.cmd --headless res://tools/dust_cover_test.tscn    # шторка ГРАНЬ-15: у нового ствола закрыта; выстрел, перезарядка с пустым магазином, задержка —
                                                               # откинута и такой остаётся (перезарядка, убрал-достал), в руках — до упора с отскоком, хосту в запись ствола
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]

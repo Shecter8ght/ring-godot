@@ -1,7 +1,8 @@
 extends Node
 ## AR-15 «ГРАНЬ-15» в руках днём под небом (Пригород, ясно): игровая модель (assets/models/weapons/ar15, общие руки по
 ## меткам хвата data/weapon_grips.json), обвесы на планках Picatinny. Наборы: iron — откидные механические прицельные;
-## rail — коллиматор на планке ресивера, фонарь на левой планке цевья, рукоятка на нижней. Каждый — от бедра (у iron —
+## rail — коллиматор на планке ресивера, фонарь на левой планке цевья, рукоятка на нижней; supp — глушитель ГРАНЬ на тормозе,
+## supprail — глушитель с коллиматором и рукояткой. Каждый — от бедра (у iron —
 ## ещё на выстреле, рама отошла: _hip_fire), в прицеливании, на отдаче и модель сбоку справа и слева; у iron справа —
 ## ещё рама отведена до упора (_side_r_bolt_open: шторка откинута, окно открыто, затвор провёрнут).
 ## Сделано по tools/vss_shots.gd (ВСС-М).
@@ -19,6 +20,10 @@ const SETS: Array = [
 	["grip", {"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 3}}, "mag_556_30_gran"],
 	["light", {"side_left": {"id": "tac_flashlight_01", "dur": 100.0, "slot": 0}}, "mag_556_30_gran"],
 	["lightr", {"side_right": {"id": "tac_flashlight_01", "dur": 100.0, "slot": 0}}, "mag_556_30_gran"],
+	["supp", {"muzzle": {"id": "muzzle_supp_gran_01", "dur": 100.0}}, "mag_556_30_gran"],
+	["supprail", {"muzzle": {"id": "muzzle_supp_gran_01", "dur": 100.0},
+		"optic_primary": {"id": "optic_rd_01", "dur": 100.0, "slot": 2},
+		"underbarrel": {"id": "grip_vertical_01", "dur": 100.0, "slot": 3}}, "mag_556_30_gran"],
 ]
 
 var _player: Player
@@ -154,10 +159,11 @@ func _side(label: String, mods: Dictionary) -> void:
 	fill.omni_range = 4.0
 	fill.light_energy = 1.6
 	holder.add_child(fill)
+	# модель дулом по +Z, −X — правая сторона стрелка; середина модели — 0.13 м перед хватом, с глушителем (+0,12 м) — 0.19
+	var mid_z: float = 0.19 if mods.has("muzzle") else 0.13
 	for side: Array in [["r", -1.0], ["l", 1.0]]:
-		# модель дулом по +Z, −X — правая сторона стрелка; середина модели — 0.13 м перед хватом
-		cam.global_position = holder.global_position + Vector3(float(side[1]) * 1.15, 0.12, 0.13)
-		cam.look_at(holder.global_position + Vector3(0, 0.07, 0.13))
+		cam.global_position = holder.global_position + Vector3(float(side[1]) * 1.15, 0.12, mid_z)
+		cam.look_at(holder.global_position + Vector3(0, 0.07, mid_z))
 		fill.global_position = holder.global_position + Vector3(float(side[1]) * 0.9, 0.6, -0.2)
 		cam.current = true
 		await get_tree().create_timer(0.3).timeout

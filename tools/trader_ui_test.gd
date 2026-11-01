@@ -67,6 +67,9 @@ func _ready() -> void:
 	await _frames(4)
 	_check("ГРАНЬ-15: к нему подходит магазин «ГРАНЬ»", "mag_556_30_gran" in ui._fits_of("wpn_ar_09"), str(ui._fits_of("wpn_ar_09")))
 	_check("магазин «ГРАНЬ»: подходит к ГРАНЬ-15", "wpn_ar_09" in ui._fits_of("mag_556_30_gran"), str(ui._fits_of("mag_556_30_gran")))
+	# глушитель ГРАНЬ — быстросъёмный под тормоз ГРАНЬ-15 (крепление QD_GRAN15): у Михалыча и только к нему
+	_check("глушитель «ГРАНЬ»: в продаже и подходит только к ГРАНЬ-15", "muzzle_supp_gran_01" in ui._trader_stock()
+		and ui._fits_of("muzzle_supp_gran_01") == ["wpn_ar_09"], str(ui._fits_of("muzzle_supp_gran_01")))
 	var gran_before: int = Profile.money
 	ui._buy("wpn_ar_09", "backpack")
 	_check("ГРАНЬ-15 куплен (деньги списаны)", Profile.money == gran_before - Profile.buy_price("wpn_ar_09"), "%d → %d" % [gran_before, Profile.money])

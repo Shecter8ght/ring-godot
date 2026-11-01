@@ -2737,7 +2737,7 @@
      "side_left": "RAIL_SIDE",
      "side_right": "RAIL_SIDE",
      "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_556",
+     "muzzle": "QD_GRAN15",
      "stock": "STOCK_AR"
     },
     "mag_if": "MAG_STANAG",
@@ -6843,6 +6843,54 @@
    },
    "desc": "Площадка под мини-коллиматор на поворотном основании: угол от 0 до 90° с шагом 15°, любая сторона. Можно подобрать наклон под свою стойку.",
    "flavor": "Каждый держит автомат по-своему; этот кронштейн подстраивается под руки, а не наоборот."
+  },
+  "muzzle_supp_gran_01": {
+   "name": "Глушитель «ГРАНЬ» 5.56",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 28000,
+   "stack": 1,
+   "weight": 0.5,
+   "tier": 3,
+   "rarity": "rare",
+   "tags": [
+    "MILITARY",
+    "PERIMETER"
+   ],
+   "short": "Глуш. ГРАНЬ",
+   "attach": {
+    "type": "SUPPRESSOR",
+    "fits": [
+     "QD_GRAN15"
+    ],
+    "look": "suppressor",
+    "model": {
+     "scene": "res://assets/models/attachments/supp_gran/supp_gran.glb",
+     "offset": [
+      0,
+      0,
+      -0.0497
+     ],
+     "length_m": 0.172
+    },
+    "fx": {
+     "noise": 0.35,
+     "db": -14,
+     "damage": 0.96,
+     "suppressed": true,
+     "ergo": -8,
+     "kick": 0.88,
+     "flash": 0
+    },
+    "size_m": [
+     0.02,
+     0.172
+    ]
+   },
+   "flavor": "Быстросъёмный: надевается на дульный тормоз ГРАНЬ-15 и защёлкивается на храповой муфте. На другие стволы не встаёт."
   }
  },
  "presets": {

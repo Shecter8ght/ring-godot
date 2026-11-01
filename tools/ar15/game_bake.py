@@ -31,13 +31,6 @@ CHANNELS = ('color', 'rough', 'metal', 'normal', 'ao')
 EXTRUSION, RAY = 0.003, 0.006                    # м: сетка упрощена — отклонение до 1–2 мм
 log = lambda *a: print('AR15_BAKE', *a, flush=True)
 
-ap = argparse.ArgumentParser()
-ap.add_argument('atlases', nargs='*')
-ap.add_argument('--channels', default=','.join(CHANNELS))
-ap.add_argument('--samples', type=int, default=0)
-ap.add_argument('--cpu', action='store_true', help='печь процессором (видеокарта занята другой работой)')
-args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
-REC = json.loads((WORK / 'lp/parts.json').read_text(encoding='utf-8'))
 
 
 def image(name, size, data):
@@ -90,6 +83,13 @@ def emission_restore(mat, keep):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('atlases', nargs='*')
+    ap.add_argument('--channels', default=','.join(CHANNELS))
+    ap.add_argument('--samples', type=int, default=0)
+    ap.add_argument('--cpu', action='store_true', help='печь процессором (видеокарта занята другой работой)')
+    args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
+    REC = json.loads((WORK / 'lp/parts.json').read_text(encoding='utf-8'))
     bpy.ops.wm.open_mainfile(filepath=REC['source'])
     hp = {o.name: o for o in bpy.data.objects if o.type == 'MESH'}
     with bpy.data.libraries.load(str(WORK / 'lp/AR15_Game_LP.blend'), link=False) as (src, dst):
@@ -177,4 +177,6 @@ def main():
     log('готово', atlases, channels)
 
 
-main()
+# помощники (свечение канала, цель запекания) берёт и глушитель (supp_game.py)
+if __name__ == '__main__':
+    main()
