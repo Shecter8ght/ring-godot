@@ -90,24 +90,28 @@ def open_and_meshes(name: str) -> list[str]:
     return meshes.split("\n", 1)[1].strip().split("|") if "\n" in meshes else []
 
 
-def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool) -> None:
-    """Стек отделок (sp_finish.build_set), печать этапа 1 слоем сверху (если есть), выгрузка карт, сохранение."""
+def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool, wear: bool = False) -> None:
+    """Стек отделок (sp_finish.build_set), печать этапа 1 слоем сверху (если есть) — или (wear) печать и группа
+    «Этап 2 — износ» (sp_furniture_wear.py) над отделкой; выгрузка карт, сохранение."""
     px_mm = RES / ITEMS[name] * 0.55
+    top = ([f"print(sp_furniture_wear.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}))"] if wear else [
+        "st = sp_lib.stack_by_name(set_name)",
+        "for n in L.get_root_layer_nodes(st):",
+        "    if n.get_name() == sp_dorm_wear.PRINT:",
+        "        L.delete_node(n)",
+        f"sp_dorm_wear._print_layer(set_name, r'{SRC.as_posix()}', '{name}', L.InsertPosition.from_textureset_stack(st))"])
     code = "\n".join([
         "import json",
         f"sys.path.insert(0, r'{HERE}') if r'{HERE}' not in sys.path else None",
-        "import importlib, sp_dorm_wear",
+        "import importlib, sp_dorm_wear, sp_furniture_wear",
         "importlib.reload(sp_dorm_wear)",
+        "importlib.reload(sp_furniture_wear)",
         "import substance_painter.textureset as TS",
         "import substance_painter.layerstack as L",
         "set_name = TS.all_texture_sets()[0].name()",
         f"parts = json.loads(r'''{json.dumps(parts, ensure_ascii=False)}''')",
         f"print(sp_finish.build_set(set_name, parts, {px_mm:.3f}, {ITEMS[name]}))",
-        "st = sp_lib.stack_by_name(set_name)",
-        "for n in L.get_root_layer_nodes(st):",
-        "    if n.get_name() == sp_dorm_wear.PRINT:",
-        "        L.delete_node(n)",
-        f"sp_dorm_wear._print_layer(set_name, r'{SRC.as_posix()}', '{name}', L.InsertPosition.from_textureset_stack(st))",
+        *top,
         "def _exp():",
         f"    s, t = sp_lib.export(r'{out_dir.as_posix()}', set_name)",
         (f"    sp_finish.save_as(r'{(SRC / 'sp' / (name + '.spp')).as_posix()}')" if save else "    pass"),
@@ -160,7 +164,41 @@ def variants(names: list[str]) -> None:
         build_and_export(name, parts, SRC / "maps" / name, marker, save=True)
 
 
+def variant_swaps(spec: dict, name: str, meshes: list[str]) -> list[tuple[str, dict]]:
+    """Варианты предмета: (код, {слот: код}); ДСП и её кромка меняются парой «орех» ↔ «бук»."""
+    slots = {s["id"]: s for m in meshes if (s := slot_for(spec, name, m)) is not None and s.get("variants")}
+    pairs = {"chip_walnut": "edge_walnut", "chip_beech": "edge_beech"}
+    out = []
+    for sid, slot in slots.items():
+        if sid in pairs.values():
+            continue
+        for i, code in enumerate(slot["variants"]):
+            swap = {sid: code}
+            if sid in pairs and pairs[sid] in slots:
+                swap[pairs[sid]] = slots[pairs[sid]]["variants"][i]
+            out.append((code, swap))
+    return out
+
+
+def wear(names: list[str]) -> None:
+    """Этап 2: отделка + печать + износ (sp_furniture_wear.py) для каждого варианта и для основного набора; карты —
+    в maps_worn (карты принятого этапа 1 в maps не трогаются), основной стек с износом сохраняется в проект."""
+    wait_shelves()
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    for name in names:
+        meshes = open_and_meshes(name)
+        for code, swap in variant_swaps(spec, name, meshes):
+            parts, _ = parts_for(spec, name, meshes, swap)
+            marker = f"_wear_{name}_{code}.txt"
+            (sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+            build_and_export(name, parts, SRC / "maps_worn" / f"{name}__{code}", marker, save=False, wear=True)
+        parts, _ = parts_for(spec, name, meshes)
+        marker = f"_wear_{name}.txt"
+        (sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+        build_and_export(name, parts, SRC / "maps_worn" / name, marker, save=True, wear=True)
+
+
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     todo = rest or list(ITEMS)
-    {"projects": projects, "stack": stack, "variants": variants}[mode](todo)
+    {"projects": projects, "stack": stack, "variants": variants, "wear": wear}[mode](todo)

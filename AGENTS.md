@@ -225,6 +225,10 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
                                                               # Painter — python -X utf8 tools/dorm_modules/furniture_sp.py projects|stack|variants (свой экземпляр,
                                                               # FINISH_SP_JOBS=_asset_src/dorm_furniture/sp_jobs); просмотр — finish_review.py … furniture_uv, затем
                                                               # furniture_review.py -- <карты> на том же файле (варианты отделки рядами)
+python -X utf8 tools/dorm_modules/furniture_wear_zones.py [предмет …] # мебель, износ (этап 2): места в развёртке (пыль, грязь у пола, удары по раме, касания,
+                                                              # засалено, пятна, прожоги, кольца от кружек, жар) → _asset_src/dorm_furniture/wear; Painter —
+                                                              # furniture_sp.py wear [предмет …] (группа «Этап 2 — износ», построитель sp_furniture_wear.py,
+                                                              # варианты тоже) → maps_worn; просмотр — finish_review.py / furniture_review.py с maps_worn
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
