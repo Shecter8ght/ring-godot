@@ -16,6 +16,8 @@ func _check(label: String, ok: bool, detail: String = "") -> void:
 
 func _ready() -> void:
 	_legacy()
+	_retired()
+	_presets()
 	_rails()
 	_adapters()
 	_model()
@@ -52,6 +54,66 @@ func _legacy() -> void:
 	_check("миграция сохранения тоже переводит", not ((mig[0] as Dictionary).mods as Dictionary).has("optic_offset") and (mig[1] as Array).is_empty())
 	var again: Array = WeaponDb.migrate(mig[0])
 	_check("повторная миграция ничего не меняет", JSON.stringify(again[0].mods) == JSON.stringify(mig[0].mods))
+
+
+## Убранные дубли арсенала (2026-11-01) в старом сохранении: ствол — оставшийся по псевдониму, чужой магазин,
+## патроны чужого калибра и сверх ёмкости, обвес без своей точки — в тайник.
+func _retired() -> void:
+	var lmg: Array = _old({"id": "wpn_lmg_02", "n": 1, "dur": 90.0, "mods": {}, "chamber": 1, "chamber_ammo": "ammo_556_std",
+		"mag": {"id": "mag_m249_100", "ammo": "ammo_556_std", "rounds": 100}})
+	_check("M249 → ПКМ: короб ПКМ пустой, 5.56 из ленты и патронника — в тайник", String(lmg[0].id) == "wpn_lmg_01"
+		and String(lmg[0].mag.id) == "mag_pkm_100" and int(lmg[0].mag.rounds) == 0 and int(lmg[0].get("chamber", 0)) == 0
+		and _rounds(lmg[1], "ammo_556_std") == 101, "%s %s" % [JSON.stringify(lmg[0].mag), str(lmg[1])])
+	var pdw: Array = _old({"id": "wpn_smg_02", "n": 1, "dur": 90.0, "chamber": 1, "chamber_ammo": "ammo_57_std",
+		"mods": {"optic_primary": {"id": "optic_rd_01", "dur": 90.0}}, "mag": {"id": "mag_57_p90_50", "ammo": "ammo_57_std", "rounds": 50}})
+	_check("P90 → «Вереск»: 30 патронов 9×21 в магазине, 20 лишних — в тайник, коллиматор на месте", String(pdw[0].id) == "wpn_smg_05"
+		and String(pdw[0].mag.id) == "mag_921_sr2_30" and int(pdw[0].mag.rounds) == 30 and String(pdw[0].mag.ammo) == "ammo_921_std"
+		and String(pdw[0].chamber_ammo) == "ammo_921_std" and _rounds(pdw[1], "ammo_921_std") == 20 and (pdw[0].mods as Dictionary).has("optic_primary"),
+		"%s %s" % [JSON.stringify(pdw[0].mag), str(pdw[1])])
+	var quiet: Array = _old({"id": "wpn_ar_03", "n": 1, "dur": 90.0, "mods": {"optic_primary": {"id": "optic_rd_01", "dur": 80.0}},
+		"mag": {"id": "mag_300_30", "ammo": "ammo_300_sup", "rounds": 30}})
+	_check("MCX → «Шорох-9»: коллиматору нет планки — в тайник, магазин 9×39 полный", String(quiet[0].id) == "wpn_sp_02"
+		and not (quiet[0].mods as Dictionary).has("optic_primary") and String(quiet[0].mag.id) == "mag_939_30" and int(quiet[0].mag.rounds) == 30
+		and (quiet[1] as Array).size() == 1 and String(quiet[1][0].id) == "optic_rd_01", str(quiet[1]))
+	var dmr: Array = _old({"id": "wpn_dmr_02", "n": 1, "dur": 90.0, "mods": {}, "mag": {"id": "mag_556_20", "ammo": "ammo_556_std", "rounds": 20}})
+	_check("MK12 → MR762: магазин 5.56 с патронами — в тайник целиком", String(dmr[0].id) == "wpn_dmr_01" and String(dmr[0].mag.id) == ""
+		and (dmr[1] as Array).size() == 1 and String(dmr[1][0].id) == "mag_556_30_gran" and int(dmr[1][0].rounds) == 20, str(dmr[1]))
+	var drum: Array = _old({"id": "mag_556_60", "n": 1, "ammo": "ammo_556_std", "rounds": 60})
+	_check("магазин STANAG на 60 → «ГРАНЬ» на 30, лишние 30 — в тайник", String(drum[0].id) == "mag_556_30_gran" and int(drum[0].rounds) == 30
+		and _rounds(drum[1], "ammo_556_std") == 30, str(drum[1]))
+	_check("перенесённый ствол при следующей загрузке не меняется", (WeaponDb.migrate(pdw[0])[1] as Array).is_empty()
+		and JSON.stringify(WeaponDb.migrate(pdw[0])[0].mag) == JSON.stringify(pdw[0].mag))
+
+
+## Готовые сборки ботов и песочницы: каждый обвес и магазин встают на свой ствол (пресеты убранных стволов
+## перенесены на оставшиеся, 2026-11-01, — у ГРАНЬ-15, например, боковые планки короче).
+func _presets() -> void:
+	var bad: Array[String] = []
+	var rng := RandomNumberGenerator.new()
+	for raw: Variant in WeaponDb.ids("presets"):
+		var e: Dictionary = WeaponDb.make_weapon(String(raw), rng)
+		for key: String in WeaponBuild.sorted_keys(e.get("mods", {})):
+			var why: String = WeaponBuild.block(e, key, WeaponDb.mod_id(e.mods[key]))
+			if why != "":
+				bad.append("%s %s: %s" % [String(raw), key, why])
+		var mid: String = String((e.get("mag", {}) as Dictionary).get("id", ""))
+		if mid != "" and not WeaponDb.mag_fits(String(e.id), mid):
+			bad.append("%s: магазин %s" % [String(raw), mid])
+	_check("пресеты: каждый обвес и магазин встают на свой ствол", bad.is_empty(), str(bad))
+
+
+## Запись старого сохранения как при загрузке профиля: псевдонимы id, затем WeaponDb.migrate — [запись, в тайник].
+func _old(e: Dictionary) -> Array:
+	ItemDb.canon_entry(e)
+	return WeaponDb.migrate(e)
+
+
+func _rounds(spill: Array, ammo_id: String) -> int:
+	var n: int = 0
+	for s: Variant in spill:
+		if s is Dictionary and String((s as Dictionary).id) == ammo_id and not (s as Dictionary).has("rounds"):
+			n += int((s as Dictionary).n)
+	return n
 
 
 ## Пазы планки: шаг 20 мм, длина зажима, соседи, выход за край.

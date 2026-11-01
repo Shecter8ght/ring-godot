@@ -8,7 +8,7 @@ var _fails: int = 0
 
 func _ready() -> void:
 	Profile.use_file("user://stickers_test.json", true)
-	var rifle: Dictionary = ItemDb.make("wpn_ar_02", 1)
+	var rifle: Dictionary = ItemDb.make("wpn_ar_09", 1)
 	WeaponMark.identify(rifle)
 	Profile.equipment = {"primary": rifle}
 	Profile.stash.clear()
@@ -16,7 +16,7 @@ func _ready() -> void:
 	for pair: Array in [["sticker_skull", 3], ["sticker_tally", 2], ["sticker_shark", 1], ["sticker_perimeter", 1]]:
 		ItemDb.add_to(Profile.stash, ItemDb.make(String(pair[0]), int(pair[1])), Profile.stash_grid())
 	var uid: String = String(rifle.uid)
-	var sites: Array[Dictionary] = WeaponMark.positions("wpn_ar_02")
+	var sites: Array[Dictionary] = WeaponMark.positions("wpn_ar_09")
 	_check("наклейки найдены у игрока", Stickers.owned().size() == 4, str(Stickers.owned().size()))
 	_check("наклеена «Счёт»", _stick("sticker_tally", String(sites[5].id), 1.0) == "")
 	_check("предмет потрачен: осталась одна «Счёт»", _count("sticker_tally") == 1, str(_count("sticker_tally")))
@@ -37,7 +37,7 @@ func _ready() -> void:
 	_check("снятая наклейка пропадает", Stickers.remove("equip:primary", -1, uid, 1) == "" and Stickers.of(Profile.equipment.primary).size() == 2 and _count("sticker_skull") == skulls)
 	_check("после снятия место свободно", _stick("sticker_shark", String(sites[6].id), 0.7) == "")
 	# модель: наклейки — узлы на стволе, с окном — и сами проекции
-	var model: Node3D = WeaponModels.build("wpn_ar_02", {}, 0, 100.0, "*", WeaponMark.marks(Profile.equipment.primary))
+	var model: Node3D = WeaponModels.build("wpn_ar_09", {}, 0, 100.0, "*", WeaponMark.marks(Profile.equipment.primary))
 	add_child(model)
 	_check("в модели ствола три узла наклеек", model.find_children("Sticker*", "Node3D", true, false).size() == 3, str(model.find_children("Sticker*", "Node3D", true, false).size()))
 	if DisplayServer.get_name() != "headless":

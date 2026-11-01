@@ -75,11 +75,11 @@ func _mag_kinds() -> void:
 	var pm := ItemDb.make("mag_918_8", 1)
 	var ak := ItemDb.make("mag_545_30", 1)
 	var big := ItemDb.make("mag_545_60", 1)
-	var p90 := ItemDb.make("mag_57_p90_50", 1)
+	var wide := ItemDb.make("mag_pkm_100", 1)
 	_check("пистолетный — пистолетный магазин, не автоматный", ItemDb.rig_accepts_at(eq, pm, 0, 0, false) and not ItemDb.rig_accepts_at(eq, ak, 0, 0, false))
 	_check("автоматный — обычный, не крупный", ItemDb.rig_accepts_at(eq, ak, 1, 0, false) and not ItemDb.rig_accepts_at(eq, big, 1, 0, false))
 	_check("большой — крупный и обычный", ItemDb.rig_accepts_at(eq, big, 2, 0, false) and ItemDb.rig_accepts_at(eq, ak, 3, 0, false))
-	_check("широкий магазин — только на две колонки большого", ItemDb.rig_accepts_at(eq, p90, 2, 0, false) and not ItemDb.rig_accepts_at(eq, p90, 1, 0, false))
+	_check("широкий магазин — только на две колонки большого", ItemDb.rig_accepts_at(eq, wide, 2, 0, false) and not ItemDb.rig_accepts_at(eq, wide, 1, 0, false))
 	_check("подписи колонок", str(ItemDb.rig_column_groups(eq)) == str([[0, 1, "пист"], [1, 1, "авт"], [2, 2, "большой"]]), str(ItemDb.rig_column_groups(eq)))
 	var placed: Array = []
 	for m: Dictionary in [ItemDb.make("mag_545_60", 1), ItemDb.make("mag_918_8", 1), ItemDb.make("mag_545_30", 1)]:

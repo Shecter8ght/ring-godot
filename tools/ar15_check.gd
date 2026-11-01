@@ -151,9 +151,9 @@ func _check_suppressor(gun: Node3D, rifle_tris: int) -> void:
 	var why: String = WeaponBuild.block(entry, "muzzle", SUPP)
 	if why != "":
 		_fail("глушитель не встаёт на ГРАНЬ-15: " + why)
-	if WeaponBuild.block({"id": "wpn_ar_02", "n": 1, "dur": 100.0, "mods": {}}, "muzzle", SUPP) == "":
-		_fail("глушитель ГРАНЬ встаёт на M4A1 — крепление только у ГРАНЬ-15")
-	print("ar15_check: глушитель 5.56 на ГРАНЬ-15 — ", WeaponBuild.block(entry, "muzzle", "muzzle_supp_556_01"))
+	if WeaponBuild.block({"id": "wpn_ar_01", "n": 1, "dur": 100.0, "mods": {}}, "muzzle", SUPP) == "":
+		_fail("глушитель ГРАНЬ встаёт на ВЕРАС-54 — крепление только у ГРАНЬ-15")
+	print("ar15_check: глушитель 5.45 на ГРАНЬ-15 — ", WeaponBuild.block(entry, "muzzle", "muzzle_supp_545_01"))
 	var muzzle: Vector3 = gun.get_meta("muzzle", Vector3.ZERO)
 	var fitted: Node3D = WeaponModels.build(ID, {"muzzle": {"id": SUPP, "dur": 100.0}})
 	add_child(fitted)

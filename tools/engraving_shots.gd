@@ -8,7 +8,7 @@ func _ready() -> void:
 	Profile.modules["generator"] = 1
 	Profile.flags["engraver_installed"] = true
 	Profile.stash = []
-	for id: String in ["wpn_ar_01", "wpn_hg_01", "wpn_hg_02", "wpn_hg_03", "wpn_ar_03", "wpn_sg_01", "wpn_sr_01"]:
+	for id: String in ["wpn_ar_01", "wpn_hg_01", "wpn_hg_02", "wpn_ar_09", "wpn_sg_02", "wpn_sr_01"]:
 		if not WeaponDb.weapon(id).is_empty():
 			ItemDb.add_to(Profile.stash, ItemDb.make(id, 1), Profile.stash_grid())
 	ItemDb.add_to(Profile.stash, ItemDb.make("laser_head", 1), Profile.stash_grid())

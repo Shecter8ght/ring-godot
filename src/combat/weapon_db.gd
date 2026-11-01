@@ -565,6 +565,7 @@ static func migrate(e: Dictionary) -> Array:
 		if not out.has("rounds"):
 			out["rounds"] = 0
 			out["ammo"] = default_ammo(mag_caliber(id))
+		_fit_rounds(out, mag_caliber(id), int(magazine(id).get("capacity", 0)), spill)
 	elif not vest(id).is_empty():
 		var v := vest(id)
 		if v.get("soft") != null:
@@ -574,6 +575,11 @@ static func migrate(e: Dictionary) -> Array:
 			out.erase("dur")
 		if not (v.get("plates", []) as Array).is_empty() and not out.has("plates"):
 			out["plates"] = {}
+		for part: String in ["mags", "dump"]:
+			for inner: Variant in out.get(part, []):
+				if inner is Dictionary and (inner as Dictionary).has("rounds"):
+					var mid := String((inner as Dictionary).id)
+					_fit_rounds(inner as Dictionary, mag_caliber(mid), int(magazine(mid).get("capacity", 0)), spill)
 	elif not helmet(id).is_empty():
 		var mx := float(helmet(id).durability)
 		out["dur"] = clampf(float(out.get("dur", mx)), 0.0, mx)
@@ -591,6 +597,7 @@ static func migrate(e: Dictionary) -> Array:
 				var removed: Array = WeaponBuild.extract(out, key)
 				out = removed[0]
 				spill.append(removed[1])
+		out = _fit_retired(out, spill)
 	elif not attachment(id).is_empty() and out.get("mods") is Dictionary:
 		var provided: Dictionary = attachment(id).get("provides", {})
 		for key: String in (out.mods as Dictionary).keys():
@@ -601,3 +608,73 @@ static func migrate(e: Dictionary) -> Array:
 				spill.append(WeaponCondition.mod_entry(out.mods[key]))
 				out.mods.erase(key)
 	return [out, spill]
+
+
+## Ствол сменился по псевдониму (убранные дубли арсенала, 2026-11-01): обвес, которому на новом стволе нет точки
+## или не подходит крепление, чужой магазин, патроны чужого калибра и сверх ёмкости — в тайник. У обычной записи
+## всё подходит, и она не меняется.
+static func _fit_retired(out: Dictionary, spill: Array) -> Dictionary:
+	var id := String(out.id)
+	for key: String in WeaponBuild.sorted_keys(out.get("mods", {})):
+		if not (out.mods as Dictionary).has(key):
+			continue
+		var pt: Dictionary = WeaponBuild.point(id, out.mods, key)
+		if pt.is_empty() or not String(pt.get("iface", "")) in attachment(mod_id(out.mods[key])).get("fits", []):
+			var removed: Array = WeaponBuild.extract(out, key)
+			out = removed[0]
+			spill.append(removed[1])
+	var w := weapon(id)
+	var cal := String(w.get("caliber", ""))
+	if out.get("mag") is Dictionary:
+		var mag: Dictionary = out.mag
+		var mid := String(mag.get("id", ""))
+		if mid != "" and (w.has("internal_mag") or not mag_fits(id, mid)):
+			var loose: Dictionary = mag.duplicate(true)
+			loose["n"] = 1
+			_fit_rounds(loose, mag_caliber(mid), int(magazine(mid).get("capacity", 0)), spill)
+			spill.append(loose)
+			mag = {"id": "", "ammo": default_ammo(cal), "rounds": 0}
+			mid = ""
+		var cap: int = int(w.internal_mag) if w.has("internal_mag") else (int(magazine(mid).get("capacity", 0)) if mid != "" else 0)
+		_fit_rounds(mag, cal, cap, spill)
+		out["mag"] = mag
+	if out.has("chamber_ammo"):
+		var ch := canonical(String(out.chamber_ammo))
+		out["chamber_ammo"] = ch
+		if String(ammo(ch).get("caliber", "")) != cal:
+			if int(out.get("chamber", 0)) > 0:
+				_spill_rounds(spill, ch, int(out.chamber))
+			out["chamber"] = 0
+			out.erase("chamber_ammo")
+	return out
+
+
+## Патроны магазина: чужого калибра (убранный калибр стал другим) и сверх ёмкости — россыпью в тайник,
+## лишние — сверху; остальные слои остаются в прежнем порядке.
+static func _fit_rounds(mag: Dictionary, cal: String, cap: int, spill: Array) -> void:
+	if cal == "":
+		return
+	var keep: Array = []
+	var room: int = cap
+	for layer: Variant in Gear.mag_layers(mag):
+		var aid := canonical(String(layer[0]))
+		var n: int = int(layer[1])
+		var take: int = mini(n, room) if String(ammo(aid).get("caliber", "")) == cal else 0
+		if take > 0:
+			keep.append([aid, take])
+			room -= take
+		if n > take:
+			_spill_rounds(spill, aid, n - take)
+	var top := canonical(String(mag.get("ammo", "")))
+	Gear.mag_apply(mag, keep)
+	if keep.is_empty():
+		mag["ammo"] = top if String(ammo(top).get("caliber", "")) == cal else default_ammo(cal)
+
+
+## Россыпь патронов в тайник стопками не больше предельной.
+static func _spill_rounds(spill: Array, ammo_id: String, n: int) -> void:
+	var size: int = maxi(1, ItemDb.stack(ammo_id))
+	while n > 0:
+		var k: int = mini(n, size)
+		spill.append({"id": ammo_id, "n": k})
+		n -= k

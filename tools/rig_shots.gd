@@ -12,7 +12,7 @@ func _ready() -> void:
 	Profile.use_file("user://rig_shots.json", true)
 	Profile.money = 900000
 	Profile.trust = 49
-	for id: String in ["wpn_ar_02", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "nvg"]:
+	for id: String in ["wpn_ar_09", "wpn_hg_02", "armor_top", "helmet_mid", "headset_tactical", "bp_tourist", "nvg"]:
 		Profile.buy(id, 1, "stash", true)
 	# подсумки — на места брони половинками (equip_doll_v2): два пистолетных делят место 1, автоматный — место 2,
 	# большой — 3+4, автоматный — 5
@@ -22,23 +22,23 @@ func _ready() -> void:
 	_check("пять подсумков висят на броне по местам", ItemDb.pouch_list(Profile.equipment.armor).size() == 5, str(ItemDb.pouch_list(Profile.equipment.armor)))
 	_check("колонки подсумков: пист, пист, авт, большой, авт", Profile.grid_of("rig").x == 6, str(ItemDb.rig_column_groups(Profile.equipment)))
 	for i: int in range(5):
-		Profile.buy("mag_556_30", 1, "backpack", false)
+		Profile.buy("mag_556_30_gran", 1, "backpack", false)
 	Profile.buy("mag_919_17", 1, "backpack", false)
 	Profile.buy("ammo_556_std", 60, "backpack", false)
 	Profile.buy("bandage", 3, "backpack", false)
 	# автоматные — в автоматный и большой, пистолетный — в пистолетный, один пустой — в сумку сброса
 	var moved := 0
 	for x: int in [2, 3, 4]:
-		var i2 := _find("mag_556_30")
+		var i2 := _find("mag_556_30_gran")
 		(Profile.backpack[i2] as Dictionary)["rounds"] = 30
 		(Profile.backpack[i2] as Dictionary)["ammo"] = "ammo_556_std"
 		if Profile.transfer("backpack", i2, "rig", x, 0, false):
 			moved += 1
 	_check("магазины легли в подсумки", moved == 3 and Profile.list_of("rig").size() == 3, str(moved))
-	_check("автоматный в пистолетный подсумок не кладётся", not Profile.transfer("backpack", _find("mag_556_30"), "rig", 0, 0, false))
+	_check("автоматный в пистолетный подсумок не кладётся", not Profile.transfer("backpack", _find("mag_556_30_gran"), "rig", 0, 0, false))
 	_check("пистолетный — в пистолетный", Profile.transfer("backpack", _find("mag_919_17"), "rig", 0, 0, false))
 	_check("в подсумки не кладётся бинт", not Profile.transfer("backpack", _find("bandage"), "rig", 5, 0, false))
-	_check("пустой магазин — в сумку сброса", Profile.transfer("backpack", _find("mag_556_30"), "dump", 0, 0, false))
+	_check("пустой магазин — в сумку сброса", Profile.transfer("backpack", _find("mag_556_30_gran"), "dump", 0, 0, false))
 	Profile.save()
 	get_tree().change_scene_to_file(Balance.HIDEOUT_SCENE)
 	for i in range(200):

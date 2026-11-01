@@ -47,7 +47,7 @@ func _ready() -> void:
 	print("ui_shots: меню закрыто — пауза снята: ", not get_tree().paused)
 	# рюкзак и лут в рейде: в рюкзаке — немного вещей, рядом — сейф
 	var me := get_tree().get_first_node_in_group("players") as Player
-	for pair in [["ammo_545_std", 90], ["bandage", 3], ["medkit", 1], ["wpn_hg_03", 1], ["armor_mid", 1], ["mag_545_30", 1], ["gold_chain", 2]]:
+	for pair in [["ammo_545_std", 90], ["bandage", 3], ["medkit", 1], ["wpn_hg_02", 1], ["armor_mid", 1], ["mag_545_30", 1], ["gold_chain", 2]]:
 		me.inventory.add(String(pair[0]), int(pair[1]))
 	var safe := inst.get_node("Interactables/JewelrySafe") as LootContainer
 	safe.roll()

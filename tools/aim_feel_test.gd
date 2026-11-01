@@ -135,7 +135,7 @@ func _pure() -> void:
 	_check("поставил прицел — ноль сбит", String(fitted[2]) == "" and Gear.zero_offset(fitted[0]).length() >= float(Balance.ZEROING.sight_moa[0]) - 0.2, str((fitted[0] as Dictionary).get("zero")))
 	_check("купленный ствол пристрелян", Gear.zero_offset(ItemDb.make(ID, 1)) == Vector2.ZERO)
 	# карточка оружия: через прицел одной пулей — без разброса, дробь расходится
-	var shotgun: Dictionary = WeaponStats.compute(ItemDb.make("wpn_sg_01", 1))
+	var shotgun: Dictionary = WeaponStats.compute(ItemDb.make("wpn_sg_02", 1))
 	_check("карточка: у автомата в прицеле разброса нет", WeaponStats.ads_spread_deg(WeaponStats.compute(ItemDb.make(ID, 1))) == 0.0)
 	_check("карточка: дробь в прицеле расходится (%d дробин)" % int(shotgun.pellets), int(shotgun.pellets) > 1 and WeaponStats.ads_spread_deg(shotgun) > 0.5)
 

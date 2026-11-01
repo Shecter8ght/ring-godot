@@ -397,16 +397,16 @@ const TRADER_KITS := [
 			"ears": {"id": "headset_active"},
 			"backpack": {"id": "bp_tourist"}},
 		"backpack": [["mag_545_30", 4], ["ammo_545_std", 150], ["mag_919_17", 2], ["ammo_919_fmj", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 1], ["grenade", 2]]},
-	{"name": "Штурмовик", "about": "M4A1 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
+	{"name": "Штурмовик", "about": "ГРАНЬ-15 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
 		"slots": {
-			"primary": {"id": "wpn_ar_02", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_556_01", "underbarrel": "grip_offset_01", "side_right": "tac_combo_01"}},
+			"primary": {"id": "wpn_ar_09", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_gran_01", "underbarrel": "grip_offset_01", "side_right": "tac_flashlight_hp_01"}},
 			"sidearm": {"id": "wpn_hg_02", "mods": {"underbarrel": "tac_flashlight_01"}},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
-		"backpack": [["mag_556_30", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
+		"backpack": [["mag_556_30_gran", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
 	{"name": "Снайпер", "about": "MR762 с оптикой 8× и глушителем, Vector на ближний бой, лучшая броня.",
 		"slots": {
 			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01"}},
@@ -427,23 +427,17 @@ const TRADER_BUY_PRICES := {
 	"ammo_12_buck": 100,
 	"ammo_12_hbuck": 150,
 	"ammo_12_slug": 190,
-	"ammo_300_sub": 410,
-	"ammo_300_sup": 310,
 	"ammo_338_ap": 5500,
 	"ammo_338_match": 1300,
 	"ammo_45_ap": 890,
 	"ammo_45_fmj": 120,
 	"ammo_45_jhp": 170,
-	"ammo_50_api": 11000,
-	"ammo_50_ball": 2800,
 	"ammo_545_ap": 960,
 	"ammo_545_old": 80,
 	"ammo_545_std": 120,
 	"ammo_556_ap": 1300,
 	"ammo_556_civ": 120,
 	"ammo_556_std": 150,
-	"ammo_57_ap": 1300,
-	"ammo_57_std": 190,
 	"ammo_68_ap": 3100,
 	"ammo_68_std": 640,
 	"ammo_76251_ap": 2400,
@@ -538,22 +532,13 @@ const TRADER_BUY_PRICES := {
 	"laser_head": 60000,
 	"laser_rangefinder": 21000,
 	"lighter": 260,
-	"mag_300_30": 3000,
 	"mag_338_awm5": 8000,
-	"mag_45_ump25": 2500,
-	"mag_45_usp12": 1800,
 	"mag_45_vector13": 1800,
 	"mag_45_vector30": 5000,
-	"mag_50_m82_10": 15000,
 	"mag_545_30": 2000,
 	"mag_545_45": 3500,
 	"mag_545_60": 5500,
-	"mag_556_20": 2000,
-	"mag_556_30": 2500,
 	"mag_556_30_gran": 3000,
-	"mag_556_40": 4500,
-	"mag_556_60": 10000,
-	"mag_57_p90_50": 5000,
 	"mag_68_spear20": 8000,
 	"mag_76251_10": 3500,
 	"mag_76251_20": 5500,
@@ -567,8 +552,6 @@ const TRADER_BUY_PRICES := {
 	"mag_939_20": 5000,
 	"mag_939_30": 7000,
 	"mag_loader": 35000,
-	"mag_m249_100": 5000,
-	"mag_m249_200": 12000,
 	"mag_pkm_100": 6000,
 	"mag_pkm_200": 16000,
 	"mag_s12_20": 20000,
@@ -590,17 +573,12 @@ const TRADER_BUY_PRICES := {
 	"muzzle_brake_68_01": 146000,
 	"muzzle_brake_762_01": 35000,
 	"muzzle_comp_545_01": 30000,
-	"muzzle_comp_556_01": 35000,
 	"muzzle_comp_9_01": 29000,
 	"muzzle_fh_545_01": 10000,
-	"muzzle_fh_556_01": 12000,
 	"muzzle_supp_12_01": 157000,
-	"muzzle_supp_300_01": 291000,
 	"muzzle_supp_338_01": 819000,
 	"muzzle_supp_45_01": 157000,
 	"muzzle_supp_545_01": 172000,
-	"muzzle_supp_556_01": 186000,
-	"muzzle_supp_57_01": 237000,
 	"muzzle_supp_68_01": 592000,
 	"muzzle_supp_762_01": 273000,
 	"muzzle_supp_9_01": 129000,
@@ -627,7 +605,6 @@ const TRADER_BUY_PRICES := {
 	"pack_545_std": 7200,
 	"pack_556_ap": 52000,
 	"pack_556_std": 9000,
-	"pack_57_ap": 52000,
 	"pack_76251_std": 14400,
 	"pack_918_ap": 11200,
 	"pack_918_pst": 2000,
@@ -730,51 +707,31 @@ const TRADER_BUY_PRICES := {
 	"wires": 1000,
 	"work_gloves": 650,
 	"wpn_ar_01": 180000,
-	"wpn_ar_02": 300000,
 	"wpn_ar_09": 315000,
-	"wpn_ar_03": 500000,
-	"wpn_ar_04": 550000,
 	"wpn_ar_05": 1100000,
 	"wpn_dmr_01": 850000,
-	"wpn_dmr_02": 600000,
 	"wpn_hg_01": 10000,
 	"wpn_hg_02": 60000,
-	"wpn_hg_03": 85000,
 	"wpn_lmg_01": 1150000,
-	"wpn_lmg_02": 1250000,
-	"wpn_sg_01": 250000,
 	"wpn_sg_02": 145000,
 	"wpn_sg_03": 35000,
-	"wpn_smg_01": 120000,
-	"wpn_smg_02": 290000,
 	"wpn_smg_03": 450000,
 	"wpn_smg_04": 95000,
 	"wpn_smg_05": 220000,
-	"wpn_sp_01": 620000,
 	"wpn_sp_02": 700000,
 	"wpn_sr_01": 1350000,
-	"wpn_sr_02": 2100000,
 }
 ## Явная цена продажи единицы: переоценены магазины и базовая медицина.
 ## Остальные находки — прежняя оценка × TRADER_SELL_MULT, с износом и содержимым.
 const TRADER_SELL_MULT := 0.55
 const TRADER_SELL_PRICES := {
 	"bandage": 270,
-	"mag_300_30": 1200,
 	"mag_338_awm5": 3200,
-	"mag_45_ump25": 1000,
-	"mag_45_usp12": 720,
 	"mag_45_vector13": 720,
 	"mag_45_vector30": 2000,
-	"mag_50_m82_10": 6000,
 	"mag_545_30": 800,
 	"mag_545_45": 1400,
 	"mag_545_60": 2200,
-	"mag_556_20": 800,
-	"mag_556_30": 1000,
-	"mag_556_40": 1800,
-	"mag_556_60": 4000,
-	"mag_57_p90_50": 2000,
 	"mag_68_spear20": 3200,
 	"mag_76251_10": 1400,
 	"mag_76251_20": 2200,
@@ -787,8 +744,6 @@ const TRADER_SELL_PRICES := {
 	"mag_939_10": 1400,
 	"mag_939_20": 2000,
 	"mag_939_30": 2800,
-	"mag_m249_100": 2000,
-	"mag_m249_200": 4800,
 	"mag_pkm_100": 2400,
 	"mag_pkm_200": 6400,
 	"mag_s12_20": 8000,
@@ -2323,7 +2278,6 @@ const VALUABLE_LOOT_VALUES := {
 	"pack_919_fmj": 3000,
 	"pack_919_ap": 4800,
 	"pack_45_fmj": 2700,
-	"pack_57_ap": 12000,
 	"pack_921_ap": 8400,
 	"pack_545_std": 5400,
 	"pack_545_ap": 10400,
@@ -2368,12 +2322,6 @@ const LOOT_PACKS := {
 		[
 			"ammo_45_fmj",
 			30
-		]
-	],
-	"pack_57_ap": [
-		[
-			"ammo_57_ap",
-			40
 		]
 	],
 	"pack_921_ap": [
@@ -3026,10 +2974,6 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"pack_57_ap",
-			0.5
-		],
-		[
 			"pack_921_ap",
 			1
 		],
@@ -3170,10 +3114,6 @@ const VALUABLE_LOOT := {
 		[
 			"pack_45_fmj",
 			1
-		],
-		[
-			"pack_57_ap",
-			0.5
 		],
 		[
 			"pack_921_ap",
@@ -3584,10 +3524,6 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"pack_57_ap",
-			0.5
-		],
-		[
 			"pack_921_ap",
 			1
 		],
@@ -3720,10 +3656,6 @@ const VALUABLE_LOOT := {
 		[
 			"pack_45_fmj",
 			1
-		],
-		[
-			"pack_57_ap",
-			0.5
 		],
 		[
 			"pack_921_ap",
@@ -4182,10 +4114,6 @@ const VALUABLE_LOOT := {
 		[
 			"pack_45_fmj",
 			1
-		],
-		[
-			"pack_57_ap",
-			0.5
 		],
 		[
 			"pack_921_ap",

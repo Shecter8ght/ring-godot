@@ -9,7 +9,7 @@ func _ready() -> void:
 	get_tree().current_scene = null
 	Profile.use_file("user://profile_shots.json", true)
 	# немного снаряжения — чтобы окна были не пустыми
-	for id in ["wpn_ar_03", "wpn_hg_03", "armor_mid"]:
+	for id in ["wpn_ar_09", "wpn_hg_02", "armor_mid"]:
 		Profile.equip_from_stash(_idx(id))
 	Profile.stash_to_backpack(_idx("ammo_545_std"), 90)
 	Profile.stash_to_backpack(_idx("bandage"), 4)

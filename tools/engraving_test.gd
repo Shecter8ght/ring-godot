@@ -20,11 +20,11 @@ func _ready() -> void:
 	var head: Dictionary = ItemDb.make("laser_head", 1)
 	ItemDb.add_to(Profile.stash, head, Profile.stash_grid())
 	for index: int in range(4):
-		ItemDb.add_to(Profile.stash, ItemDb.make("wpn_ar_03", 1), Profile.stash_grid())
+		ItemDb.add_to(Profile.stash, ItemDb.make("wpn_ar_05", 1), Profile.stash_grid())
 	check("головки не складываются", not ItemDb.can_merge(head, ItemDb.make("laser_head", 1)))
 	var uid: String = String(Profile.stash[1].uid)
 	check("10 мест на двуручном и 6 на пистолетах", WeaponMark.positions("wpn_ar_01").size() == 10 and WeaponMark.positions("wpn_hg_01").size() == 6 and WeaponMark.positions("wpn_hg_02").size() == 6)
-	for pistol_id: String in ["wpn_hg_01", "wpn_hg_02", "wpn_hg_03"]:
+	for pistol_id: String in ["wpn_hg_01", "wpn_hg_02"]:
 		var grips: int = 0
 		var slides: int = 0
 		for site: Dictionary in WeaponMark.positions(pistol_id):

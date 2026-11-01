@@ -64,7 +64,7 @@ func _shots() -> void:
 	if panel == null:
 		return
 	# второй ствол без надписи: выбрано место слева, образец виден крупно
-	ItemDb.add_to(Profile.stash, ItemDb.make("wpn_ar_02", 1), Profile.stash_grid())
+	ItemDb.add_to(Profile.stash, ItemDb.make("wpn_ar_09", 1), Profile.stash_grid())
 	panel._refresh()
 	for idx: int in range(panel._weapons.size()):
 		if (panel._weapons[idx].entry.get("engraving", {}) as Dictionary).is_empty():

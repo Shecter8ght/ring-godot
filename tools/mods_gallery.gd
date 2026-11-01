@@ -8,7 +8,7 @@ extends Node3D
 const KITS := {
 	"pistol": "HG_03_TAC",
 	"pm": "PM_TAC",
-	"rifle": "AR_04_TAC",
+	"rifle": "AR_05_TAC",
 	"rifle_b": "AR_06_MARKSMAN",
 	"rifle_c": "AR_06_PATROL",
 	"shotgun": "SG_04_BREACH",

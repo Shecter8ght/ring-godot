@@ -42,7 +42,7 @@ func _ready() -> void:
 	_camera._look_yaw = 0.0
 	_camera._look_pitch = 0.0
 	_player.health.hp = 100000.0
-	for id: String in ["wpn_ar_01", "wpn_ar_03", "wpn_hg_01", "wpn_hg_02", "wpn_sr_01"]:
+	for id: String in ["wpn_ar_01", "wpn_ar_05", "wpn_hg_01", "wpn_hg_02", "wpn_sr_01"]:
 		await _weapon(id, {})
 		await _case(id + "_free", Vector3(0, .02, -2), Player.Stance.STAND, false)
 		_check(id + " free pose", _player.weapon_obstruction < .001 and _camera._viewmodel.visible)
@@ -58,13 +58,13 @@ func _ready() -> void:
 		await _case(id + "_return", Vector3(0, .02, -2), Player.Stance.STAND, true)
 		_check(id + " returns to aim", _player.weapon_obstruction < .001)
 	var mods: Dictionary = {}
-	var entry: Dictionary = {"id":"wpn_ar_03", "mods":{}}
+	var entry: Dictionary = {"id":"wpn_ar_05", "mods":{}}
 	var weapons: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/weapons.json")) as Dictionary
 	for att: String in weapons.attachments:
 		if String(WeaponDb.attachment(att).get("look", "")) == "suppressor" and WeaponDb.attach_block(entry, "muzzle", att) == "":
 			mods["muzzle"] = {"id":att}
 			break
-	await _weapon("wpn_ar_03", mods)
+	await _weapon("wpn_ar_05", mods)
 	_check("compatible suppressor present", not mods.is_empty())
 	await _case("rifle_suppressor_wall", Vector3(0, .02, .05), Player.Stance.STAND, true)
 	await _case("rifle_crouch", Vector3(0, .02, .05), Player.Stance.CROUCH, false)
@@ -93,7 +93,7 @@ func _ready() -> void:
 		await _case(id + "_reload_insert", Vector3(0, .02, .05), Player.Stance.STAND, false)
 		_player.cancel_weapon_action()
 	await _fallback()
-	await _weapon("wpn_ar_03", mods)
+	await _weapon("wpn_ar_05", mods)
 	# Другой вид использует настоящий скелет целиком и ту же геометрию препятствий.
 	CameraRig.first_person_mode = false
 	Input.action_release("aim")

@@ -12,7 +12,7 @@ func _check(label: String, ok: bool) -> void:
 
 func _ready() -> void:
 	Profile.use_file("user://weapon_condition_test.json", true)
-	var weapon: Dictionary = ItemDb.make("wpn_ar_02", 1)
+	var weapon: Dictionary = ItemDb.make("wpn_ar_09", 1)
 	var optic: Dictionary = ItemDb.make("optic_holo_01", 1)
 	optic["dur"] = 20.0
 	optic["fir"] = true
@@ -23,7 +23,7 @@ func _ready() -> void:
 	var replaced: Array = Gear.fit(weapon, ItemDb.make("optic_holo_01", 1), "optic_primary")
 	_check("замена возвращает изношенный экземпляр", float(replaced[1].dur) == 20.0 and float(replaced[0].mods.optic_primary.dur) == 100.0)
 	_check("разные состояния не сливаются", not ItemDb.can_merge(optic, ItemDb.make("optic_holo_01", 1)))
-	var old: Dictionary = WeaponDb.migrate({"id": "wpn_ar_02", "n": 1, "mods": {"optic_primary": "optic_holo_01"}})[0]
+	var old: Dictionary = WeaponDb.migrate({"id": "wpn_ar_09", "n": 1, "mods": {"optic_primary": "optic_holo_01"}})[0]
 	_check("старые сохранения получают полный ресурс обвеса", float(old.mods.optic_primary.dur) == 100.0)
 	_check("пороги 60/20 и ноль", WeaponCondition.stage({"dur": 60.01}) == 100 and WeaponCondition.stage({"dur": 60.0}) == 60 and WeaponCondition.stage({"dur": 20.0}) == 20 and WeaponCondition.broken({"dur": 0}))
 	var full: Dictionary = replaced[0]
@@ -77,21 +77,21 @@ func _ready() -> void:
 	actor._fire(actor.spec())
 	_check("сломанное оружие не расходует патроны", actor.ammo == 10 and int(actor.weapon_entry().mag.rounds) == 10)
 	actor.queue_free()
-	var model: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": 0.0}})
+	var model: Node3D = WeaponModels.build("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": 0.0}})
 	add_child(model)
 	var markers: Array[Node] = model.find_children("Reticle", "MeshInstance3D", true, false)
 	_check("ЛУМАР загружен, марка на нуле погашена", model.find_child("LUMAR_H1", true, false) != null and not markers.is_empty() and not (markers[0] as MeshInstance3D).visible)
 	# вид один (решение владельца 2026-10-19): карты 100 и прежнее стекло при любой прочности
 	for state_value: int in [100, 60, 20]:
-		var sample: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": state_value}})
+		var sample: Node3D = WeaponModels.build("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": state_value}})
 		var sample_body: MeshInstance3D = sample.find_child("Body", true, false) as MeshInstance3D
 		var sample_lens: MeshInstance3D = sample.find_child("Lens", true, false) as MeshInstance3D
 		var body_material: StandardMaterial3D = sample_body.material_override as StandardMaterial3D
 		_check("состояние %d%% — карты 100 и стекло" % state_value,
 				body_material.albedo_texture.resource_path.ends_with("lumar_100_base_color.png") and sample_lens.material_override is ShaderMaterial)
 		sample.free()
-	_check("ключ модели не зависит от прочности", WeaponCondition.model_key("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": 20.0}}, 20.0)
-			== WeaponCondition.model_key("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": 100.0}}, 100.0))
+	_check("ключ модели не зависит от прочности", WeaponCondition.model_key("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": 20.0}}, 20.0)
+			== WeaponCondition.model_key("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": 100.0}}, 100.0))
 	var compatible: int = 0
 	for raw_id: Variant in WeaponDb.items():
 		var id: String = String(raw_id)
@@ -102,7 +102,7 @@ func _ready() -> void:
 		compatible += 1
 		mounted.free()
 	_check("совместимость ограничена креплением", compatible > 0 and WeaponDb.attach_block({"id": "wpn_hg_01", "mods": {}}, "optic_primary", "optic_holo_01") != "")
-	var world_model: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": 100.0}}, 1)
+	var world_model: Node3D = WeaponModels.build("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": 100.0}}, 1)
 	var lod: MeshInstance3D = world_model.find_child("Body_LOD1", true, false) as MeshInstance3D
 	var body: MeshInstance3D = world_model.find_child("Body", true, false) as MeshInstance3D
 	_check("мировая модель выбирает облегчённую сетку", lod != null and lod.visible and body != null and not body.visible and lod.mesh.get_faces().size() < body.mesh.get_faces().size())

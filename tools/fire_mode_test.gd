@@ -33,7 +33,7 @@ func _ready() -> void:
 	# --- данные
 	_check("ВЕРАС-54: режимы АВ → 2 → ОД", WeaponDb.fire_modes(ID) == ["auto", "burst", "semi"], str(WeaponDb.fire_modes(ID)))
 	_check("пистолет без переводчика — один режим «одиночный»", WeaponDb.fire_modes("wpn_hg_01") == ["semi"], str(WeaponDb.fire_modes("wpn_hg_01")))
-	_check("автомат без fire_modes в данных — один режим «АВ»", WeaponDb.fire_modes("wpn_smg_01") == ["auto"], str(WeaponDb.fire_modes("wpn_smg_01")))
+	_check("автомат без fire_modes в данных — один режим «АВ»", WeaponDb.fire_modes("wpn_smg_04") == ["auto"], str(WeaponDb.fire_modes("wpn_smg_04")))
 	_check("клавиша режима огня — X", _key_of("fire_mode") == KEY_X, str(_key_of("fire_mode")))
 	_check("тащить раненого — B", _key_of("drag") == KEY_B, str(_key_of("drag")))
 

@@ -9,9 +9,9 @@ var _ui: HideoutUI
 
 func _ready() -> void:
 	Profile.use_file("user://workbench_repair_test.json", true)
-	var rifle: Dictionary = ItemDb.make("wpn_ar_02", 1)
+	var rifle: Dictionary = ItemDb.make("wpn_ar_09", 1)
 	rifle.dur = 20.0
-	rifle.mods = {"optic_primary": {"id": "optic_holo_01", "dur": 0.0}, "muzzle": {"id": "muzzle_supp_556_01", "dur": 55.0}}
+	rifle.mods = {"optic_primary": {"id": "optic_holo_01", "dur": 0.0}, "muzzle": {"id": "muzzle_supp_gran_01", "dur": 55.0}}
 	Profile.equipment = {"primary": rifle}
 	Profile.stash.clear()
 	Profile.backpack.clear()

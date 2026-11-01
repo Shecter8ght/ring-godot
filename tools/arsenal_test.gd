@@ -276,7 +276,7 @@ func _data_cases(rng: RandomNumberGenerator) -> void:
 	# CASE 12: новый прицел и новый ствол — только данными (интерфейс RAIL_TOP), без кода
 	var att := {"name": "Коллиматор тестовый", "cat": "mod", "size": [1, 1], "value": 1000, "stack": 1, "weight": 0.2, "tier": 1, "rarity": "common", "tags": [],
 		"attach": {"type": "OPTIC_RED_DOT", "fits": ["RAIL_TOP"], "look": "red_dot", "fx": {"ads_spread": 0.5, "ergo": -1}, "role": "PRIMARY", "zoom": 0.0, "aim_k": 1.1}}
-	var gun: Dictionary = (WeaponDb._w.weapons.wpn_ar_04 as Dictionary).duplicate(true)
+	var gun: Dictionary = (WeaponDb._w.weapons.wpn_ar_05 as Dictionary).duplicate(true)
 	gun["name"] = "Автомат тестовый"
 	gun["code"] = "AR_99"
 	WeaponDb._w.attachments["optic_test_99"] = att

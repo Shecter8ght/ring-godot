@@ -261,7 +261,7 @@ func _test_transfer() -> void:
 		and _lab._hand_draft == unchanged and _lab._dirty == dirty_before)
 	var pm: int = _index("wpn_hg_01")
 	var glock: int = _index("wpn_hg_02")
-	var third_pistol: int = _index("wpn_hg_03")
+	var third_pistol: int = _index("signal_launcher")
 	_check("PM and two target pistols exist", pm >= 0 and glock >= 0 and third_pistol >= 0)
 	if pm < 0 or glock < 0 or third_pistol < 0:
 		return
@@ -306,8 +306,9 @@ func _test_transfer() -> void:
 	_lab._select_weapon(third_pistol)
 	await _frames(35)
 	_lab._panel.grip.paste_grip.pressed.emit()
-	_check("reuse buffer on third pistol without linked edits", HandGripProfiles.values(_lab._hand_draft, "wpn_hg_03", "Left") == expected.Left
-		and HandGripProfiles.values(_lab._hand_draft, "wpn_hg_03", "Right") == expected.Right and _lab._hand_buffer.hands == expected)
+	# третьего двуручного пистолета нет (USP убран 2026-11-01): ракетница однорукая — вставляется только правая кисть
+	_check("reuse buffer on the one-handed launcher: right hand only, without linked edits",
+		HandGripProfiles.values(_lab._hand_draft, "signal_launcher", "Right") == expected.Right and _lab._hand_buffer.hands == expected)
 	_lab._select_weapon(pm)
 	_lab._panel.grip.transfer_scope.select(2)
 	_lab._panel.grip.copy_grip.pressed.emit()

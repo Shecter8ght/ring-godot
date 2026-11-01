@@ -29,13 +29,13 @@ func _raid(outcome: String, overrides: Dictionary = {}) -> RaidAnalytics:
 	a.started_ms = 0
 	a.ended_ms = 600000
 	a.loadout = true
-	a.start_weapons = ["wpn_ar_03"]
+	a.start_weapons = ["wpn_ar_09"]
 	a.start_kit_value = 90000
 	a.outcome = outcome
 	a.extract_name = "Грузовой шлюз" if outcome == "extract" else ""
 	a.end_value = 120000 if outcome == "extract" else 0
 	if outcome == "death":
-		a.death = {"cause": "ai", "arch": "gunner", "faction": "marauder", "weapon": "wpn_ar_03"}
+		a.death = {"cause": "ai", "arch": "gunner", "faction": "marauder", "weapon": "wpn_ar_09"}
 		a.death_extract_dist = 140.0
 	for k in overrides:
 		var v: Variant = overrides[k]
@@ -87,7 +87,7 @@ func _check_self_grenade() -> void:
 	Profile.raid_history = []
 	for i in range(2):
 		RaidStory.make(_raid("death", {"start_kit_value": 180000, "death": {"cause": "bleed"} if i == 0 else {"cause": "grenade"}}), true, _rng(10 + i))
-	var c := _raid("death", {"start_kit_value": 210000, "death": {"cause": "ai", "arch": "scout", "faction": "marauder", "weapon": "wpn_hg_03"}})
+	var c := _raid("death", {"start_kit_value": 210000, "death": {"cause": "ai", "arch": "scout", "faction": "marauder", "weapon": "wpn_hg_02"}})
 	var st3 := RaidStory.make(c, true, _rng(3))
 	_check("третий дорогой комплект подряд — вердикт про серию", _in_pool(st3.verdict, RaidStory.data().verdicts.loss_streak), st3.verdict)
 	_check("история: три рейда, новее первым", Profile.raid_history.size() == 3 and int(Profile.raid_history[0].kit) == 210000, str(Profile.raid_history.size()))
@@ -97,8 +97,8 @@ func _check_pistol_hero() -> void:
 	Profile.raid_history = []
 	var kills: Array = []
 	for i in range(5):
-		kills.append({"t": 60.0 + i * 5.0, "arch": "gunner", "faction": "marauder", "weapon": "wpn_hg_03", "grenade": false, "leader": false})
-	var a := _raid("extract", {"start_weapons": ["wpn_hg_03"], "start_kit_value": 20000, "kills": kills, "shots": 30, "hits": 20})
+		kills.append({"t": 60.0 + i * 5.0, "arch": "gunner", "faction": "marauder", "weapon": "wpn_hg_02", "grenade": false, "leader": false})
+	var a := _raid("extract", {"start_weapons": ["wpn_hg_02"], "start_kit_value": 20000, "kills": kills, "shots": 30, "hits": 20})
 	var st := RaidStory.make(a, true, _rng(4))
 	_check("с пистолетом пять убийств и вышел — вердикт «не ствол делает рейдера»", _in_pool(st.verdict, RaidStory.data().verdicts.pistol_hero), st.verdict)
 	var tags := st.tags.map(func(t: Dictionary) -> String: return String(t.tag))
@@ -113,7 +113,7 @@ func _check_variety() -> void:
 	var same_style := 0
 	var texts := {}
 	for i in range(6):
-		var st := RaidStory.make(_raid("extract", {"kills": [{"t": 50.0, "arch": "scout", "faction": "marauder", "weapon": "wpn_ar_03", "grenade": false}]}), true, _rng(100 + i))
+		var st := RaidStory.make(_raid("extract", {"kills": [{"t": 50.0, "arch": "scout", "faction": "marauder", "weapon": "wpn_ar_09", "grenade": false}]}), true, _rng(100 + i))
 		if st.style == prev_style:
 			same_style += 1
 		prev_style = st.style
@@ -134,13 +134,13 @@ func _check_fuzz() -> void:
 		var kills: Array = []
 		for k in range(r.randi_range(0, 14)):
 			kills.append({"t": r.randf_range(0, 900), "arch": ["scout", "gunner", "heavy", "sniper"][r.randi() % 4],
-				"faction": ["marauder", "pmc", "resident"][r.randi() % 3], "weapon": ["wpn_hg_03", "wpn_ar_03", "", "wpn_sg_02"][r.randi() % 4],
+				"faction": ["marauder", "pmc", "resident"][r.randi() % 3], "weapon": ["wpn_hg_02", "wpn_ar_09", "", "wpn_sg_02"][r.randi() % 4],
 				"grenade": r.randf() < 0.1, "leader": r.randf() < 0.1})
 		kills.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return float(x.t) < float(y.t))
 		var causes := ["ai", "grenade", "self_grenade", "friendly", "bleed", "give_up"]
 		var shots := r.randi_range(0, 300)
 		var a := _raid(outcome, {
-			"ended_ms": r.randi_range(20, 2400) * 1000, "start_weapons": [["wpn_hg_03"], ["wpn_ar_03"], [], ["wpn_sg_02", "wpn_hg_03"]][r.randi() % 4],
+			"ended_ms": r.randi_range(20, 2400) * 1000, "start_weapons": [["wpn_hg_02"], ["wpn_ar_09"], [], ["wpn_sg_02", "wpn_hg_02"]][r.randi() % 4],
 			"weapons_used": ["wpn_sr_01"] if r.randf() < 0.3 else [], "start_kit_value": 0 if r.randf() < 0.15 else r.randi_range(1000, 400000), "kills": kills,
 			"shots": shots, "hits": r.randi_range(0, shots), "damage_taken": r.randf_range(0, 300) if r.randf() < 0.8 else 0.0,
 			"friendly_hits": r.randi_range(0, 2), "downs": r.randi_range(0, 2), "low_hp_moments": r.randi_range(0, 3),
@@ -150,7 +150,7 @@ func _check_fuzz() -> void:
 			"best_find": {"id": "gold_chain", "value": 45000} if r.randf() < 0.3 else {},
 			"extract_name": "Парковка" + (Raid.CARRIED_SUFFIX if r.randf() < 0.2 and outcome == "extract" else "") if not died else "",
 			"death": {"cause": causes[r.randi() % causes.size()], "arch": ["scout", "sniper", "pmc", ""][r.randi() % 4],
-				"faction": ["marauder", "pmc", "resident"][r.randi() % 3], "weapon": ["wpn_ar_03", ""][r.randi() % 2]} if died else {},
+				"faction": ["marauder", "pmc", "resident"][r.randi() % 3], "weapon": ["wpn_ar_09", ""][r.randi() % 2]} if died else {},
 			"death_extract_dist": r.randf_range(0, 200) if died else INF})
 		var st := RaidStory.make(a, true, r)
 		var t := _text(st)

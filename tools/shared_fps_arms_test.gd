@@ -25,7 +25,7 @@ func _ready() -> void:
 		var id: String = String(raw)
 		await _weapon(id, {})
 	for grip: String in ["grip_vertical_01", "grip_offset_01"]:
-		await _weapon("wpn_ar_02", {"underbarrel": {"id": grip}})
+		await _weapon("wpn_ar_09", {"underbarrel": {"id": grip}})
 	var grenade: GrenadeModel = GrenadeModel.create(true)
 	add_child(grenade)
 	_arms.unbind_weapon()
@@ -106,7 +106,7 @@ func _weapon(id: String, mods: Dictionary) -> void:
 		if id == "wpn_hg_02":
 			_independent_hands(model)
 	await _capture(tag)
-	if id in ["wpn_hg_01", "wpn_hg_02", "wpn_ar_02", "wpn_sg_01", "wpn_sr_01"]:
+	if id in ["wpn_hg_01", "wpn_hg_02", "wpn_ar_09", "wpn_sg_02", "wpn_sr_01"]:
 		var marker: Node3D = model.find_child("RightGrip", true, false) as Node3D
 		if marker:
 			_camera.position = marker.global_position + Vector3(0.24, 0.09, 0.16)

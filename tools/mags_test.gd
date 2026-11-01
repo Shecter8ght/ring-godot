@@ -157,12 +157,12 @@ func _ready() -> void:
 	var eq := inv.equipment.duplicate(true)
 	eq.erase("primary")
 	inv.equipment = eq
-	var gun := ItemDb.make("wpn_ar_03", 1)
+	var gun := ItemDb.make("wpn_ar_09", 1)
 	c.items = [gun]
 	c.place_all()
 	_raid.request_equip_from("loot", 0, c)
 	await get_tree().physics_frame
-	_check("из ящика — сразу в пустой слот", String((inv.equipment.get("primary", {}) as Dictionary).get("id", "")) == "wpn_ar_03" and c.items.is_empty(), str(inv.equipment.get("primary", {}).get("id", "")))
+	_check("из ящика — сразу в пустой слот", String((inv.equipment.get("primary", {}) as Dictionary).get("id", "")) == "wpn_ar_09" and c.items.is_empty(), str(inv.equipment.get("primary", {}).get("id", "")))
 
 	# --- закрыть ящик с вещами в буфере: спросить; «остаться» — окно открыто; «закрыть» — буфер пуст
 	c.items = [ItemDb.make("gold_chain", 1)]
@@ -242,7 +242,7 @@ func _check_words() -> void:
 	_check("словами: пустой … полный", bad.is_empty(), str(bad))
 	_check("точно: «7 из 17»", Gear.ammo_estimate(7, 17, true) == "7 из 17", "")
 	_check("точно — пистолет и болтовка, словами — автомат и дробовик",
-		Gear.exact_count("wpn_hg_03") and Gear.exact_count("wpn_sr_01") and not Gear.exact_count("wpn_ar_03") and not Gear.exact_count("wpn_sg_02"), "")
+		Gear.exact_count("wpn_hg_02") and Gear.exact_count("wpn_sr_01") and not Gear.exact_count("wpn_ar_09") and not Gear.exact_count("wpn_sg_02"), "")
 
 
 func _wait(sec: float) -> void:

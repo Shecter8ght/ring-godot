@@ -10,7 +10,7 @@ func _ready() -> void:
 	get_tree().current_scene = null
 	Profile.use_file("user://engraving_raid_test.json", true)
 	RaidEvents.enabled = false
-	gun = ItemDb.make("wpn_ar_03", 1)
+	gun = ItemDb.make("wpn_ar_05", 1)
 	gun["engraving"] = WeaponMark.make(gun, "Вернусь")
 	gun["mods"] = {"optic_primary": {"id": "optic_rd_01", "dur": 63.0}}
 	gun["dur"] = 61.0

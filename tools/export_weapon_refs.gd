@@ -7,7 +7,7 @@ extends Node
 ## Отдельно — автомат с каждым обвесом, который меняет хват левой руки.
 
 const GRIP_MODS: Array[String] = ["grip_vertical_01", "grip_offset_01", "tac_flashlight_01"]
-const GRIP_WEAPON: String = "wpn_ar_02"
+const GRIP_WEAPON: String = "wpn_ar_09"
 
 
 func _ready() -> void:

@@ -10,9 +10,6 @@
   "45acp": {
    "name": ".45 ACP"
   },
-  "57x28": {
-   "name": "5.7×28"
-  },
   "9x21": {
    "name": "9×21"
   },
@@ -25,9 +22,6 @@
   "556x45": {
    "name": "5.56×45"
   },
-  "300blk": {
-   "name": ".300 AAC Blackout"
-  },
   "68x51": {
    "name": "6.8×51"
   },
@@ -36,9 +30,6 @@
   },
   "338lm": {
    "name": ".338 Lapua Magnum"
-  },
-  "50bmg": {
-   "name": ".50 BMG"
   },
   "12x76": {
    "name": "12/76"
@@ -1055,179 +1046,6 @@
    },
    "flavor": "Не самый редкий трофей, зато тот, который почти никогда не подводит в дверном проёме."
   },
-  "wpn_hg_03": {
-   "name": "HK USP .45",
-   "cat": "weapon",
-   "size": [
-    2,
-    1
-   ],
-   "value": 38000,
-   "stack": 1,
-   "weight": 0.89,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "code": "USP45",
-   "desc": "Тяжёлый служебный пистолет .45 ACP. Сильнее бьёт по мягкой цели и особенно хорош с глушителем.",
-   "weapon": {
-    "slot": "sidearm",
-    "class": "PISTOL",
-    "caliber": "45acp",
-    "model": "pistol",
-    "scale": 1,
-    "length": 0.24,
-    "stats": {
-     "spread": 1.45,
-     "ads_spread": 0.47,
-     "ads_fov": 62,
-     "kick": 0.063,
-     "kick_h": 0.016,
-     "kick_bias": 0.2,
-     "recover": 0.74,
-     "shake": 0.15,
-     "ergo": 67,
-     "rpm": 360,
-     "auto": false,
-     "reload": 1.75,
-     "range": 55,
-     "noise": 64,
-     "reliability": 0.985,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "SLIDE_RMR",
-     "underbarrel": "PISTOL_RAIL",
-     "muzzle": "THREAD_45"
-    },
-    "mag_if": "MAG_USP45",
-    "default_mag": "mag_45_usp12",
-    "sound": "shot_hg_03",
-    "reload_sound": "reload_pistol",
-    "cycle_sound": ""
-   },
-   "flavor": "Тяжёлая пуля прощает неточный выстрел по цели без брони, но не торопливый палец."
-  },
-  "wpn_smg_01": {
-   "name": "HK UMP45",
-   "cat": "weapon",
-   "size": [
-    3,
-    2
-   ],
-   "value": 55000,
-   "stack": 1,
-   "weight": 2.3,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "code": "UMP45",
-   "desc": "Неторопливый и легко контролируемый пистолет-пулемёт под тяжёлый .45 ACP.",
-   "weapon": {
-    "slot": "primary",
-    "class": "SMG",
-    "caliber": "45acp",
-    "model": "rifle",
-    "scale": 0.7666666666666666,
-    "length": 0.69,
-    "stats": {
-     "spread": 2.15,
-     "ads_spread": 0.4,
-     "ads_fov": 58,
-     "kick": 0.026,
-     "kick_h": 0.013,
-     "kick_bias": 0.3,
-     "recover": 0.43,
-     "shake": 0.08,
-     "ergo": 63,
-     "rpm": 600,
-     "auto": true,
-     "reload": 2.15,
-     "range": 65,
-     "noise": 68,
-     "reliability": 0.98,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_45",
-     "stock": "STOCK_SMG"
-    },
-    "mag_if": "MAG_UMP45",
-    "default_mag": "mag_45_ump25",
-    "sound": "shot_smg",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Спокойный темп помогает держать очередь в силуэте, пока противник пытается пережить .45 ACP."
-  },
-  "wpn_smg_02": {
-   "name": "FN P90",
-   "cat": "weapon",
-   "size": [
-    3,
-    2
-   ],
-   "value": 95000,
-   "stack": 1,
-   "weight": 2.6,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "POLICE",
-    "MILITARY",
-    "RARE"
-   ],
-   "code": "P90",
-   "desc": "Компактный PDW с магазином на 50 патронов и настильным малокалиберным боеприпасом.",
-   "weapon": {
-    "slot": "primary",
-    "class": "PDW",
-    "caliber": "57x28",
-    "model": "rifle",
-    "scale": 0.68,
-    "length": 0.505,
-    "stats": {
-     "spread": 2,
-     "ads_spread": 0.36,
-     "ads_fov": 58,
-     "kick": 0.014,
-     "kick_h": 0.009,
-     "kick_bias": 0.3,
-     "recover": 0.48,
-     "shake": 0.06,
-     "ergo": 70,
-     "rpm": 900,
-     "auto": true,
-     "reload": 2.45,
-     "range": 80,
-     "noise": 64,
-     "reliability": 0.98,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "muzzle": "THREAD_57"
-    },
-    "mag_if": "MAG_P90",
-    "default_mag": "mag_57_p90_50",
-    "sound": "shot_smg",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Пятьдесят лёгких патронов позволяют зачистить тесный магазин, не считая каждую короткую очередь."
-  },
   "wpn_smg_03": {
    "name": "KRISS Vector",
    "cat": "weapon",
@@ -1546,68 +1364,6 @@
    },
    "flavor": "Ствол на каждый день: не лучший ни в одной крайности, зато почти везде уместен."
   },
-  "wpn_sp_01": {
-   "name": "AS VAL",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 160000,
-   "stack": 1,
-   "weight": 2.6,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "MILITARY",
-    "PERIMETER",
-    "RARE"
-   ],
-   "code": "ASVAL",
-   "desc": "Специальный автомат со встроенным глушителем. Тихий и тяжёлый патрон, но небольшая дальность.",
-   "weapon": {
-    "slot": "primary",
-    "class": "SPECIAL",
-    "caliber": "9x39",
-    "model": "rifle",
-    "scale": 0.9722222222222222,
-    "length": 0.875,
-    "stats": {
-     "spread": 1.9,
-     "ads_spread": 0.34,
-     "ads_fov": 58,
-     "kick": 0.024,
-     "kick_h": 0.012,
-     "kick_bias": 0.3,
-     "recover": 0.42,
-     "shake": 0.08,
-     "ergo": 58,
-     "rpm": 800,
-     "auto": true,
-     "reload": 2.2,
-     "range": 75,
-     "noise": 28,
-     "reliability": 0.975,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM"
-    },
-    "mag_if": "MAG_VSS",
-    "default_mag": "mag_939_20",
-    "sound": "shot_sup939",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": "",
-    "integral": {
-     "suppressed": true,
-     "db": -14
-    }
-   },
-   "flavor": "Если всё сделано правильно, соседний отряд поймёт, что бой начался, только по телам."
-  },
   "wpn_sp_02": {
    "name": "Шорох-9",
    "cat": "weapon",
@@ -1679,184 +1435,6 @@
     }
    },
    "flavor": "Выбирай голову и дистанцию: тихая точность винтовки «Шорох-9» важнее возможности удерживать спуск."
-  },
-  "wpn_ar_02": {
-   "name": "M4A1",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 90000,
-   "stack": 1,
-   "weight": 2.9,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "code": "M4A1",
-   "desc": "Лёгкий универсальный карабин 5.56: быстрый, удобный и совместим с распространёнными магазинами STANAG.",
-   "weapon": {
-    "slot": "primary",
-    "class": "CARBINE",
-    "caliber": "556x45",
-    "model": "rifle",
-    "scale": 0.9333333333333332,
-    "length": 0.84,
-    "stats": {
-     "spread": 1.65,
-     "ads_spread": 0.32,
-     "ads_fov": 58,
-     "kick": 0.017,
-     "kick_h": 0.009,
-     "kick_bias": 0.3,
-     "recover": 0.43,
-     "shake": 0.08,
-     "ergo": 61,
-     "rpm": 800,
-     "auto": true,
-     "reload": 2.15,
-     "range": 105,
-     "noise": 80,
-     "reliability": 0.977,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_556",
-     "stock": "STOCK_AR"
-    },
-    "mag_if": "MAG_STANAG",
-    "default_mag": "mag_556_30",
-    "sound": "shot_rifle",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Лёгкость и обвесы поощряют движение; стоять с ним на месте — терять главное преимущество."
-  },
-  "wpn_ar_03": {
-   "name": "SIG MCX Virtus",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 125000,
-   "stack": 1,
-   "weight": 3.4,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "POLICE",
-    "RARE"
-   ],
-   "code": "MCXV",
-   "desc": "Модульный карабин .300 Blackout. Тяжёлый патрон эффективен из короткого ствола и с глушителем.",
-   "weapon": {
-    "slot": "primary",
-    "class": "CARBINE",
-    "caliber": "300blk",
-    "model": "rifle",
-    "scale": 0.9222222222222222,
-    "length": 0.83,
-    "stats": {
-     "spread": 1.7,
-     "ads_spread": 0.32,
-     "ads_fov": 58,
-     "kick": 0.024,
-     "kick_h": 0.011,
-     "kick_bias": 0.3,
-     "recover": 0.41,
-     "shake": 0.09,
-     "ergo": 58,
-     "rpm": 800,
-     "auto": true,
-     "reload": 2.2,
-     "range": 100,
-     "noise": 82,
-     "reliability": 0.98,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_300",
-     "stock": "STOCK_MCX"
-    },
-    "mag_if": "MAG_STANAG_300",
-    "default_mag": "mag_300_30",
-    "sound": "shot_rifle",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "С дозвуком и глушителем превращает короткие дистанции в очень тихую одностороннюю беседу."
-  },
-  "wpn_ar_04": {
-   "name": "FN SCAR-L",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 135000,
-   "stack": 1,
-   "weight": 3.6,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "RARE"
-   ],
-   "code": "SCARL",
-   "desc": "Тяжелее M4, зато мягче в очереди и надёжен. Использует обычные магазины 5.56 STANAG.",
-   "weapon": {
-    "slot": "primary",
-    "class": "ASSAULT_RIFLE",
-    "caliber": "556x45",
-    "model": "rifle",
-    "scale": 1,
-    "length": 0.9,
-    "stats": {
-     "spread": 1.55,
-     "ads_spread": 0.31,
-     "ads_fov": 58,
-     "kick": 0.016,
-     "kick_h": 0.0085,
-     "kick_bias": 0.3,
-     "recover": 0.44,
-     "shake": 0.075,
-     "ergo": 54,
-     "rpm": 625,
-     "auto": true,
-     "reload": 2.25,
-     "range": 110,
-     "noise": 80,
-     "reliability": 0.985,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_556",
-     "stock": "STOCK_SCAR"
-    },
-    "mag_if": "MAG_STANAG",
-    "default_mag": "mag_556_30",
-    "sound": "shot_rifle",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Тяжелее карабина, зато длинная очередь меньше спорит с тем, куда смотрит прицел."
   },
   "wpn_ar_05": {
    "name": "SIG MCX Spear",
@@ -1978,66 +1556,6 @@
    },
    "flavor": "Держи дистанцию и ритм: второй точный выстрел приходит раньше, чем цель успевает спрятаться."
   },
-  "wpn_dmr_02": {
-   "name": "BCM MK12",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 135000,
-   "stack": 1,
-   "weight": 4,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PRECISION",
-    "RARE"
-   ],
-   "code": "MK12",
-   "desc": "Марксманская 5.56 с длинным стволом: точнее карабина и легче тяжёлых 7.62-мм систем.",
-   "weapon": {
-    "slot": "primary",
-    "class": "DMR",
-    "caliber": "556x45",
-    "model": "rifle",
-    "scale": 1.1111111111111112,
-    "length": 1,
-    "stats": {
-     "spread": 1.15,
-     "ads_spread": 0.1,
-     "ads_fov": 50,
-     "kick": 0.018,
-     "kick_h": 0.008,
-     "kick_bias": 0.15,
-     "recover": 0.56,
-     "shake": 0.11,
-     "ergo": 45,
-     "rpm": 300,
-     "auto": false,
-     "reload": 2.45,
-     "range": 155,
-     "noise": 88,
-     "reliability": 0.982,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_556",
-     "stock": "STOCK_AR"
-    },
-    "mag_if": "MAG_STANAG",
-    "default_mag": "mag_556_20",
-    "sound": "shot_rifle",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Хорошая позиция превращает мягкую отдачу в серию быстрых и очень неприятных поправок."
-  },
   "wpn_sr_01": {
    "name": "Accuracy International AWM",
    "cat": "weapon",
@@ -2095,118 +1613,6 @@
     }
    },
    "flavor": "Один спокойный вдох экономит второй дорогой патрон и долгую работу затвора."
-  },
-  "wpn_sr_02": {
-   "name": "Barrett M82A1",
-   "cat": "weapon",
-   "size": [
-    5,
-    2
-   ],
-   "value": 420000,
-   "stack": 1,
-   "weight": 13.5,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "PRECISION",
-    "PERIMETER",
-    "RARE"
-   ],
-   "code": "M82A1",
-   "desc": "Полуавтоматическая антиматериальная винтовка .50 BMG. Огромная мощность и почти неподъёмная масса.",
-   "weapon": {
-    "slot": "primary",
-    "class": "SNIPER",
-    "caliber": "50bmg",
-    "model": "bolt",
-    "scale": 1.15,
-    "length": 1.45,
-    "stats": {
-     "spread": 1.25,
-     "ads_spread": 0.025,
-     "ads_fov": 14,
-     "kick": 0.11,
-     "kick_h": 0.016,
-     "kick_bias": 0,
-     "recover": 0.7,
-     "shake": 0.48,
-     "ergo": 10,
-     "rpm": 90,
-     "auto": false,
-     "reload": 3.4,
-     "range": 260,
-     "noise": 140,
-     "reliability": 0.985,
-     "wear": 0.02
-    },
-    "mounts": {},
-    "mag_if": "MAG_M82",
-    "default_mag": "mag_50_m82_10",
-    "sound": "shot_bolt",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": "",
-    "integral": {
-     "zoom": 10
-    }
-   },
-   "flavor": "Это не оружие для обхода комнат — это способ отменить укрытие на другом конце галереи."
-  },
-  "wpn_sg_01": {
-   "name": "Benelli M4",
-   "cat": "weapon",
-   "size": [
-    4,
-    2
-   ],
-   "value": 75000,
-   "stack": 1,
-   "weight": 3.5,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "code": "BENELLIM4",
-   "desc": "Премиальный полуавтоматический дробовик с трубчатым магазином. Быстр, надёжен и мягок в работе.",
-   "weapon": {
-    "slot": "primary",
-    "class": "SHOTGUN",
-    "caliber": "12x76",
-    "model": "shotgun",
-    "scale": 1.1222222222222222,
-    "length": 1.01,
-    "stats": {
-     "spread": 5,
-     "ads_spread": 0.8,
-     "ads_fov": 62,
-     "kick": 0.085,
-     "kick_h": 0.02,
-     "kick_bias": 0.1,
-     "recover": 0.62,
-     "shake": 0.3,
-     "ergo": 49,
-     "rpm": 300,
-     "auto": false,
-     "reload": 3.2,
-     "range": 40,
-     "noise": 78,
-     "reliability": 0.985,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_right": "RAIL_SIDE",
-     "muzzle": "THREAD_12",
-     "stock": "STOCK_SG"
-    },
-    "internal_mag": 5,
-    "sound": "shot_shotgun",
-    "reload_sound": "reload_shotgun",
-    "cycle_sound": ""
-   },
-   "flavor": "Пять зарядов требуют дисциплины, зато автоматика оставляет время исправить первый промах."
   },
   "wpn_sg_02": {
    "name": "Saiga-12K",
@@ -2381,66 +1787,6 @@
     "cycle_sound": ""
    },
    "flavor": "Выбери проход, разложись и сделай так, чтобы противник пожалел о самом намерении его пересечь."
-  },
-  "wpn_lmg_02": {
-   "name": "M249 SAW",
-   "cat": "weapon",
-   "size": [
-    5,
-    2
-   ],
-   "value": 250000,
-   "stack": 1,
-   "weight": 8,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "MILITARY",
-    "PERIMETER",
-    "RARE"
-   ],
-   "code": "M249",
-   "desc": "Модульный ручной пулемёт 5.56. Легче контролировать, много обвеса и ленты на 100 или 200 патронов.",
-   "weapon": {
-    "slot": "primary",
-    "class": "LMG",
-    "caliber": "556x45",
-    "model": "rifle",
-    "scale": 1.15,
-    "length": 1.04,
-    "stats": {
-     "spread": 2.2,
-     "ads_spread": 0.38,
-     "ads_fov": 58,
-     "kick": 0.024,
-     "kick_h": 0.012,
-     "kick_bias": 0.3,
-     "recover": 0.33,
-     "shake": 0.11,
-     "ergo": 18,
-     "rpm": 800,
-     "auto": true,
-     "reload": 5.2,
-     "range": 135,
-     "noise": 94,
-     "reliability": 0.98,
-     "wear": 0.02
-    },
-    "mounts": {
-     "optic_primary": "RAIL_TOP",
-     "side_left": "RAIL_SIDE",
-     "side_right": "RAIL_SIDE",
-     "underbarrel": "RAIL_BOTTOM",
-     "muzzle": "THREAD_556",
-     "stock": "STOCK_LMG"
-    },
-    "mag_if": "MAG_M249",
-    "default_mag": "mag_m249_100",
-    "sound": "shot_rifle",
-    "reload_sound": "reload_rifle",
-    "cycle_sound": ""
-   },
-   "flavor": "Лента покупает отряду время для манёвра, а стрелку — обязанность не отстать с восемью килограммами."
   },
   "signal_launcher": {
    "name": "Компактная сигнальная ракетница",
@@ -3004,68 +2350,6 @@
    },
    "flavor": "Редкий случай, когда тяжёлый пистолетный калибр может всерьёз поговорить с бронёй."
   },
-  "ammo_57_std": {
-   "name": "Патроны 5.7×28",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 130,
-   "stack": 50,
-   "weight": 0.007,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "short": "5.7",
-   "ammo": {
-    "caliber": "57x28",
-    "pellets": 1,
-    "range_k": 1,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 26,
-    "pen": 23,
-    "armor_dmg": 20,
-    "velocity": 650
-   },
-   "flavor": "Малая отдача и высокая скорость любят короткие контролируемые очереди."
-  },
-  "ammo_57_ap": {
-   "name": "Патроны 5.7×28 бронебойные",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 300,
-   "stack": 50,
-   "weight": 0.007,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "5.7 БП",
-   "ammo": {
-    "caliber": "57x28",
-    "pellets": 1,
-    "range_k": 1,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 24,
-    "pen": 35,
-    "armor_dmg": 28,
-    "velocity": 715
-   },
-   "flavor": "Пятьдесят шансов быстро разобрать лёгкую броню — если не растратить их в потолок."
-  },
   "ammo_921_std": {
    "name": "Патроны 9×21",
    "cat": "ammo",
@@ -3378,69 +2662,6 @@
    },
    "flavor": "Короткие очереди окупаются лучше: каждый потерянный патрон стоил как небольшой трофей."
   },
-  "ammo_300_sup": {
-   "name": "Патроны .300 BLK",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 180,
-   "stack": 40,
-   "weight": 0.016,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "short": ".300",
-   "ammo": {
-    "caliber": "300blk",
-    "pellets": 1,
-    "range_k": 1,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 52,
-    "pen": 36,
-    "armor_dmg": 32,
-    "velocity": 650
-   },
-   "flavor": "Сильный удар из короткого ствола — полезно там, где длинная винтовка цепляется за стены."
-  },
-  "ammo_300_sub": {
-   "name": "Патроны .300 BLK дозвуковые",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 240,
-   "stack": 40,
-   "weight": 0.019,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": ".300 SUB",
-   "ammo": {
-    "caliber": "300blk",
-    "pellets": 1,
-    "range_k": 0.75,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 58,
-    "pen": 24,
-    "armor_dmg": 28,
-    "velocity": 320
-   },
-   "desc": "Тихие с глушителем, но быстро теряют силу на дальности.",
-   "flavor": "С глушителем слышно мало; на дальней дистанции от его энергии тоже остаётся немного."
-  },
   "ammo_68_std": {
    "name": "Патроны 6.8×51",
    "cat": "ammo",
@@ -3658,69 +2879,6 @@
     "velocity": 915
    },
    "flavor": "Редкая цель действительно требует такой пробиваемости; ещё реже она переживает попадание."
-  },
-  "ammo_50_ball": {
-   "name": "Патроны .50 BMG",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 1400,
-   "stack": 10,
-   "weight": 0.115,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "MILITARY",
-    "PERIMETER",
-    "RARE"
-   ],
-   "short": ".50",
-   "ammo": {
-    "caliber": "50bmg",
-    "pellets": 1,
-    "range_k": 1.4,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 220,
-    "pen": 80,
-    "armor_dmg": 80,
-    "velocity": 880
-   },
-   "flavor": "Каждый выстрел меняет бой и положение стрелка — скрытность после него заканчивается."
-  },
-  "ammo_50_api": {
-   "name": "Патроны .50 BMG API",
-   "cat": "ammo",
-   "size": [
-    1,
-    1
-   ],
-   "value": 2200,
-   "stack": 10,
-   "weight": 0.115,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "short": ".50 API",
-   "ammo": {
-    "caliber": "50bmg",
-    "pellets": 1,
-    "range_k": 1.35,
-    "accuracy": 1,
-    "ricochet": 0.1,
-    "frag": 0,
-    "damage": 200,
-    "pen": 95,
-    "armor_dmg": 92,
-    "velocity": 890
-   },
-   "flavor": "Если обычный .50 кажется недостаточным, проблема, вероятно, уже больше человека."
   },
   "ammo_12_buck": {
    "name": "Картечь 12/76",
@@ -4043,85 +3201,6 @@
    },
    "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
   },
-  "mag_45_usp12": {
-   "name": "Магазин HK USP .45 на 12",
-   "cat": "mag",
-   "size": [
-    1,
-    1
-   ],
-   "value": 2200,
-   "stack": 1,
-   "weight": 0.14,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "short": "12",
-   "mag": {
-    "if": "MAG_USP45",
-    "capacity": 12,
-    "reload_k": 1,
-    "ergo": 0,
-    "reliability": 1
-   },
-   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться."
-  },
-  "mag_45_ump25": {
-   "name": "Магазин UMP45 на 25",
-   "cat": "mag",
-   "size": [
-    1,
-    2
-   ],
-   "value": 3200,
-   "stack": 1,
-   "weight": 0.28,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "POLICE",
-    "MILITARY"
-   ],
-   "short": "25",
-   "mag": {
-    "if": "MAG_UMP45",
-    "capacity": 25,
-    "reload_k": 1,
-    "ergo": 0,
-    "reliability": 1
-   },
-   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
-  },
-  "mag_57_p90_50": {
-   "name": "Магазин P90 на 50",
-   "cat": "mag",
-   "size": [
-    2,
-    1
-   ],
-   "value": 6500,
-   "stack": 1,
-   "weight": 0.28,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "POLICE",
-    "MILITARY",
-    "RARE"
-   ],
-   "short": "50",
-   "mag": {
-    "if": "MAG_P90",
-    "capacity": 50,
-    "reload_k": 1.12,
-    "ergo": -3,
-    "reliability": 0.98
-   },
-   "flavor": "Редко требует перезарядки в бою, зато заметно утяжеляет оружие и ошибки обращения."
-  },
   "mag_45_vector13": {
    "name": "Магазин Vector .45 на 13",
    "cat": "mag",
@@ -4429,139 +3508,6 @@
    "model": "res://assets/models/weapons/vss_m/vss_mag30.gltf",
    "flavor": "Длинный магазин под 9×39: меньше перезарядок в затяжном бою, но ниже лечь с ним труднее."
   },
-  "mag_556_20": {
-   "name": "Магазин STANAG 5.56 на 20",
-   "cat": "mag",
-   "size": [
-    1,
-    1
-   ],
-   "value": 2200,
-   "stack": 1,
-   "weight": 0.13,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "short": "20",
-   "mag": {
-    "if": "MAG_STANAG",
-    "capacity": 20,
-    "reload_k": 1,
-    "ergo": 0,
-    "reliability": 1
-   },
-   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться."
-  },
-  "mag_556_30": {
-   "name": "Магазин STANAG 5.56 на 30",
-   "cat": "mag",
-   "size": [
-    1,
-    2
-   ],
-   "value": 2500,
-   "stack": 1,
-   "weight": 0.16,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY",
-    "PERIMETER",
-    "POLICE"
-   ],
-   "short": "30",
-   "mag": {
-    "if": "MAG_STANAG",
-    "capacity": 30,
-    "reload_k": 1,
-    "ergo": 0,
-    "reliability": 1
-   },
-   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
-  },
-  "mag_556_40": {
-   "name": "Магазин STANAG 5.56 на 40",
-   "cat": "mag",
-   "size": [
-    1,
-    2
-   ],
-   "value": 8000,
-   "stack": 1,
-   "weight": 0.23,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "40",
-   "mag": {
-    "if": "MAG_STANAG",
-    "capacity": 40,
-    "reload_k": 1.12,
-    "ergo": -5,
-    "reliability": 0.98,
-    "look": "mag_ak45"
-   },
-   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
-  },
-  "mag_556_60": {
-   "name": "Магазин STANAG 5.56 на 60",
-   "cat": "mag",
-   "size": [
-    1,
-    2
-   ],
-   "value": 18000,
-   "stack": 1,
-   "weight": 0.5,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "short": "60",
-   "mag": {
-    "if": "MAG_STANAG",
-    "capacity": 60,
-    "reload_k": 1.3,
-    "ergo": -10,
-    "reliability": 0.95,
-    "look": "mag_ak45"
-   },
-   "flavor": "Редко требует перезарядки в бою, зато заметно утяжеляет оружие и ошибки обращения."
-  },
-  "mag_300_30": {
-   "name": "Магазин .300 BLK на 30",
-   "cat": "mag",
-   "size": [
-    1,
-    2
-   ],
-   "value": 3200,
-   "stack": 1,
-   "weight": 0.18,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "short": "30",
-   "mag": {
-    "if": "MAG_STANAG_300",
-    "capacity": 30,
-    "reload_k": 1,
-    "ergo": 0,
-    "reliability": 1
-   },
-   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
-  },
   "mag_68_spear20": {
    "name": "Магазин MCX Spear на 20",
    "cat": "mag",
@@ -4668,32 +3614,6 @@
    },
    "flavor": "Малый запас дисциплинирует: считай выстрелы и держи ещё один магазин рядом."
   },
-  "mag_50_m82_10": {
-   "name": "Магазин M82A1 на 10",
-   "cat": "mag",
-   "size": [
-    2,
-    2
-   ],
-   "value": 24000,
-   "stack": 1,
-   "weight": 1.2,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "short": "10",
-   "mag": {
-    "if": "MAG_M82",
-    "capacity": 10,
-    "reload_k": 1.2,
-    "ergo": -8,
-    "reliability": 1
-   },
-   "flavor": "Дополнительные патроны полезны, но торчащий магазин делает оружие менее послушным."
-  },
   "mag_s12_8": {
    "name": "Магазин Saiga-12 12/76 на 8",
    "cat": "mag",
@@ -4795,58 +3715,6 @@
     "reload_k": 1.35,
     "ergo": -20,
     "reliability": 0.96
-   },
-   "flavor": "Двести выстрелов закрывают проход надолго, но такой короб сам просится в отдельный рюкзак."
-  },
-  "mag_m249_100": {
-   "name": "Мягкий короб M249 с лентой на 100",
-   "cat": "mag",
-   "size": [
-    2,
-    2
-   ],
-   "value": 16000,
-   "stack": 1,
-   "weight": 2.5,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "100",
-   "mag": {
-    "if": "MAG_M249",
-    "capacity": 100,
-    "reload_k": 1,
-    "ergo": -8,
-    "reliability": 1
-   },
-   "flavor": "Можно вести бой, а не считать остаток, пока вес ленты не заставит остановиться."
-  },
-  "mag_m249_200": {
-   "name": "Короб M249 с лентой на 200",
-   "cat": "mag",
-   "size": [
-    3,
-    2
-   ],
-   "value": 30000,
-   "stack": 1,
-   "weight": 5,
-   "tier": 4,
-   "rarity": "legendary",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "short": "200",
-   "mag": {
-    "if": "MAG_M249",
-    "capacity": 200,
-    "reload_k": 1.3,
-    "ergo": -18,
-    "reliability": 0.97
    },
    "flavor": "Двести выстрелов закрывают проход надолго, но такой короб сам просится в отдельный рюкзак."
   },
@@ -5426,69 +4294,6 @@
    },
    "flavor": "Удерживает тяжёлый ствол на цели ценой звука, который услышит половина сектора."
   },
-  "muzzle_comp_556_01": {
-   "name": "Компенсатор 5.56",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 8000,
-   "stack": 1,
-   "weight": 0.1,
-   "tier": 2,
-   "rarity": "common",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "Компенс.",
-   "attach": {
-    "type": "COMPENSATOR",
-    "fits": [
-     "THREAD_556"
-    ],
-    "look": "compensator",
-    "fx": {
-     "kick": 0.74,
-     "kick_h": 0.85,
-     "shake": 0.8,
-     "noise": 1.1,
-     "ergo": -2
-    }
-   },
-   "flavor": "Очередь собирается плотнее, но противник быстрее понимает, откуда раздался громкий ответ."
-  },
-  "muzzle_fh_556_01": {
-   "name": "Пламегаситель 5.56",
-   "cat": "mod",
-   "size": [
-    1,
-    1
-   ],
-   "value": 3500,
-   "stack": 1,
-   "weight": 0.06,
-   "tier": 1,
-   "rarity": "common",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "short": "ПГ",
-   "attach": {
-    "type": "FLASH_HIDER",
-    "fits": [
-     "THREAD_556"
-    ],
-    "look": "flash_hider",
-    "fx": {
-     "kick": 0.96,
-     "flash": 0.35
-    }
-   },
-   "flavor": "Ночью первая очередь выдаёт меньше, а второй шанс сменить позицию становится реальнее."
-  },
   "muzzle_supp_9_01": {
    "name": "Глушитель 9 мм",
    "cat": "mod",
@@ -5607,45 +4412,6 @@
      ],
      "length_m": 0.18
     },
-    "fx": {
-     "noise": 0.35,
-     "db": -14,
-     "damage": 0.96,
-     "suppressed": true,
-     "ergo": -8,
-     "kick": 0.88,
-     "flash": 0
-    },
-    "size_m": [
-     0.019,
-     0.175
-    ]
-   },
-   "flavor": "Не делает выстрел бесшумным — только оставляет соседним отрядам меньше подсказок."
-  },
-  "muzzle_supp_556_01": {
-   "name": "Глушитель 5.56",
-   "cat": "mod",
-   "size": [
-    2,
-    1
-   ],
-   "value": 26000,
-   "stack": 1,
-   "weight": 0.45,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "short": "Глуш. 5.56",
-   "attach": {
-    "type": "SUPPRESSOR",
-    "fits": [
-     "THREAD_556"
-    ],
-    "look": "suppressor",
     "fx": {
      "noise": 0.35,
      "db": -14,
@@ -6259,82 +5025,6 @@
    },
    "flavor": "Не делает выстрел бесшумным — только оставляет соседним отрядам меньше подсказок."
   },
-  "muzzle_supp_57_01": {
-   "name": "Глушитель 5.7",
-   "cat": "mod",
-   "size": [
-    1,
-    2
-   ],
-   "value": 26000,
-   "stack": 1,
-   "weight": 0.38,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "RARE"
-   ],
-   "attach": {
-    "type": "SUPPRESSOR",
-    "fits": [
-     "THREAD_57"
-    ],
-    "look": "suppressor",
-    "fx": {
-     "noise": 0.36,
-     "db": -14,
-     "damage": 0.96,
-     "suppressed": true,
-     "ergo": -7,
-     "kick": 0.9,
-     "flash": 0
-    },
-    "size_m": [
-     0.018,
-     0.16
-    ]
-   },
-   "flavor": "Не делает выстрел бесшумным — только оставляет соседним отрядам меньше подсказок."
-  },
-  "muzzle_supp_300_01": {
-   "name": "Глушитель .300 BLK",
-   "cat": "mod",
-   "size": [
-    1,
-    2
-   ],
-   "value": 32000,
-   "stack": 1,
-   "weight": 0.52,
-   "tier": 3,
-   "rarity": "rare",
-   "tags": [
-    "MILITARY",
-    "PERIMETER"
-   ],
-   "attach": {
-    "type": "SUPPRESSOR",
-    "fits": [
-     "THREAD_300"
-    ],
-    "look": "suppressor",
-    "fx": {
-     "noise": 0.32,
-     "db": -16,
-     "damage": 0.97,
-     "suppressed": true,
-     "ergo": -9,
-     "kick": 0.86,
-     "flash": 0
-    },
-    "size_m": [
-     0.021,
-     0.19
-    ]
-   },
-   "flavor": "Не делает выстрел бесшумным — только оставляет соседним отрядам меньше подсказок."
-  },
   "muzzle_brake_68_01": {
    "name": "Дульный тормоз 6.8",
    "cat": "mod",
@@ -6754,11 +5444,11 @@
    "mag": "mag_919_17"
   },
   "HG_03_BASE": {
-   "weapon": "wpn_hg_03",
+   "weapon": "wpn_hg_02",
    "mods": {},
    "ammo": [
     [
-     "ammo_45_fmj",
+     "ammo_919_fmj",
      1
     ]
    ],
@@ -6767,16 +5457,16 @@
     95
    ],
    "sight": "primary",
-   "mag": "mag_45_usp12"
+   "mag": "mag_919_17"
   },
   "HG_03_TAC": {
-   "weapon": "wpn_hg_03",
+   "weapon": "wpn_hg_02",
    "mods": {
     "underbarrel": "tac_flashlight_01"
    },
    "ammo": [
     [
-     "ammo_45_fmj",
+     "ammo_919_fmj",
      1
     ]
    ],
@@ -6785,7 +5475,7 @@
     95
    ],
    "sight": "primary",
-   "mag": "mag_45_usp12"
+   "mag": "mag_919_17"
   },
   "HG_04_BASE": {
    "weapon": "wpn_hg_02",
@@ -6810,11 +5500,11 @@
    "mag": "mag_919_17"
   },
   "SMG_01_BASE": {
-   "weapon": "wpn_smg_01",
+   "weapon": "wpn_smg_04",
    "mods": {},
    "ammo": [
     [
-     "ammo_45_fmj",
+     "ammo_919_fmj",
      1
     ]
    ],
@@ -6823,17 +5513,17 @@
     80
    ],
    "sight": "primary",
-   "mag": "mag_45_ump25"
+   "mag": "mag_919_vityaz30"
   },
   "SMG_02_TAC": {
-   "weapon": "wpn_smg_02",
+   "weapon": "wpn_smg_05",
    "mods": {
     "optic_primary": "optic_rd_01",
     "side_right": "tac_flashlight_01"
    },
    "ammo": [
     [
-     "ammo_57_std",
+     "ammo_921_std",
      1
     ]
    ],
@@ -6842,7 +5532,7 @@
     90
    ],
    "sight": "primary",
-   "mag": "mag_57_p90_50"
+   "mag": "mag_921_sr2_30"
   },
   "SMG_03_CQB": {
    "weapon": "wpn_smg_03",
@@ -6865,21 +5555,6 @@
    ],
    "sight": "primary",
    "mag": "mag_45_vector13"
-  },
-  "SG_01_BASE": {
-   "weapon": "wpn_sg_01",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_12_buck",
-     1
-    ]
-   ],
-   "dur": [
-    40,
-    90
-   ],
-   "sight": "primary"
   },
   "SG_02_BASE": {
    "weapon": "wpn_sg_02",
@@ -7003,7 +5678,7 @@
    "mag": "mag_545_30"
   },
   "AR_02_BASE": {
-   "weapon": "wpn_ar_02",
+   "weapon": "wpn_ar_09",
    "mods": {},
    "ammo": [
     [
@@ -7016,14 +5691,14 @@
     75
    ],
    "sight": "primary",
-   "mag": "mag_556_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_03_BASE": {
-   "weapon": "wpn_ar_03",
+   "weapon": "wpn_ar_09",
    "mods": {},
    "ammo": [
     [
-     "ammo_300_sup",
+     "ammo_556_std",
      1
     ]
    ],
@@ -7032,16 +5707,16 @@
     80
    ],
    "sight": "primary",
-   "mag": "mag_300_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_03_RD": {
-   "weapon": "wpn_ar_03",
+   "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_rd_01"
    },
    "ammo": [
     [
-     "ammo_300_sup",
+     "ammo_556_std",
      1
     ]
    ],
@@ -7050,10 +5725,10 @@
     85
    ],
    "sight": "primary",
-   "mag": "mag_300_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_04_BASE": {
-   "weapon": "wpn_ar_04",
+   "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_rd_01",
     "underbarrel": "grip_vertical_01",
@@ -7070,10 +5745,10 @@
     90
    ],
    "sight": "primary",
-   "mag": "mag_556_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_04_TAC": {
-   "weapon": "wpn_ar_04",
+   "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_holo_01",
     "side_right": "tac_flashlight_01",
@@ -7091,7 +5766,7 @@
     92
    ],
    "sight": "primary",
-   "mag": "mag_556_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_05_BASE": {
    "weapon": "wpn_ar_05",
@@ -7255,13 +5930,11 @@
    "mag": "mag_545_30"
   },
   "AR_07_PATROL": {
-   "weapon": "wpn_ar_02",
+   "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_holo_01",
     "side_left": "tac_flashlight_01",
-    "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
-    "muzzle": "muzzle_comp_556_01",
     "stock": "stock_perimeter_01"
    },
    "ammo": [
@@ -7279,16 +5952,15 @@
     100
    ],
    "sight": "primary",
-   "mag": "mag_556_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_07_LEADER": {
-   "weapon": "wpn_ar_02",
+   "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_lpvo_01",
     "side_left": "tac_flashlight_hp_01",
-    "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
-    "muzzle": "muzzle_supp_556_01",
+    "muzzle": "muzzle_supp_gran_01",
     "stock": "stock_perimeter_01"
    },
    "ammo": [
@@ -7306,7 +5978,7 @@
     100
    ],
    "sight": "primary",
-   "mag": "mag_556_30"
+   "mag": "mag_556_30_gran"
   },
   "AR_08_BASE": {
    "weapon": "wpn_ar_05",
@@ -7345,14 +6017,14 @@
    "mag": "mag_76251_20"
   },
   "DMR_02_BASE": {
-   "weapon": "wpn_dmr_02",
+   "weapon": "wpn_dmr_01",
    "mods": {
     "optic_primary": "optic_4x_01",
     "stock": "stock_tele_ar_01"
    },
    "ammo": [
     [
-     "ammo_556_std",
+     "ammo_76251_std",
      1
     ]
    ],
@@ -7361,7 +6033,7 @@
     90
    ],
    "sight": "primary",
-   "mag": "mag_556_20"
+   "mag": "mag_76251_20"
   },
   "DMR_03_MARKSMAN": {
    "weapon": "wpn_dmr_01",
@@ -7424,44 +6096,6 @@
    "sight": "primary",
    "mag": "mag_338_awm5"
   },
-  "SR_02_BASE": {
-   "weapon": "wpn_sr_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_50_ball",
-     1
-    ]
-   ],
-   "dur": [
-    85,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_50_m82_10"
-  },
-  "SP_01_BASE": {
-   "weapon": "wpn_sp_01",
-   "mods": {
-    "optic_primary": "optic_rd_01"
-   },
-   "ammo": [
-    [
-     "ammo_939_sp5",
-     0.7
-    ],
-    [
-     "ammo_939_sp6",
-     0.3
-    ]
-   ],
-   "dur": [
-    75,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_939_20"
-  },
   "PM_BASE": {
    "weapon": "wpn_hg_01",
    "mods": {},
@@ -7513,54 +6147,6 @@
    ],
    "sight": "primary",
    "mag": "mag_919_17"
-  },
-  "USP45_BASE": {
-   "weapon": "wpn_hg_03",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_45_fmj",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_45_usp12"
-  },
-  "UMP45_BASE": {
-   "weapon": "wpn_smg_01",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_45_fmj",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_45_ump25"
-  },
-  "P90_BASE": {
-   "weapon": "wpn_smg_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_57_std",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_57_p90_50"
   },
   "VECTOR45_BASE": {
    "weapon": "wpn_smg_03",
@@ -7626,70 +6212,6 @@
    "sight": "primary",
    "mag": "mag_545_30"
   },
-  "ASVAL_BASE": {
-   "weapon": "wpn_sp_01",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_939_sp5",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_939_20"
-  },
-  "M4A1_BASE": {
-   "weapon": "wpn_ar_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_556_std",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_556_30"
-  },
-  "MCXV_BASE": {
-   "weapon": "wpn_ar_03",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_300_sup",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_300_30"
-  },
-  "SCARL_BASE": {
-   "weapon": "wpn_ar_04",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_556_std",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_556_30"
-  },
   "SPEAR_BASE": {
    "weapon": "wpn_ar_05",
    "mods": {},
@@ -7722,22 +6244,6 @@
    "sight": "primary",
    "mag": "mag_76251_20"
   },
-  "MK12_BASE": {
-   "weapon": "wpn_dmr_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_556_std",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_556_20"
-  },
   "AWM_BASE": {
    "weapon": "wpn_sr_01",
    "mods": {},
@@ -7753,37 +6259,6 @@
    ],
    "sight": "primary",
    "mag": "mag_338_awm5"
-  },
-  "M82A1_BASE": {
-   "weapon": "wpn_sr_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_50_ball",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_50_m82_10"
-  },
-  "BENELLI_M4_BASE": {
-   "weapon": "wpn_sg_01",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_12_buck",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary"
   },
   "SAIGA12_BASE": {
    "weapon": "wpn_sg_02",
@@ -7831,22 +6306,6 @@
    ],
    "sight": "primary",
    "mag": "mag_pkm_100"
-  },
-  "M249_BASE": {
-   "weapon": "wpn_lmg_02",
-   "mods": {},
-   "ammo": [
-    [
-     "ammo_556_std",
-     1
-    ]
-   ],
-   "dur": [
-    70,
-    100
-   ],
-   "sight": "primary",
-   "mag": "mag_m249_100"
   },
   "VSS_BASE": {
    "weapon": "wpn_sp_02",
@@ -7917,7 +6376,7 @@
   "wpn_hg_04": "wpn_hg_02",
   "wpn_sg_04": "wpn_sg_02",
   "wpn_ar_06": "wpn_ar_01",
-  "wpn_ar_07": "wpn_ar_02",
+  "wpn_ar_07": "wpn_ar_09",
   "wpn_ar_08": "wpn_ar_05",
   "wpn_dmr_03": "wpn_dmr_01",
   "ammo_76239_std": "ammo_545_old",
@@ -7952,6 +6411,40 @@
   "grip_heavy_01": "grip_vertical_01",
   "bipod_01": "grip_vertical_01",
   "grip_angled_01": "grip_offset_01",
-  "grip_handstop_01": "grip_offset_01"
+  "grip_handstop_01": "grip_offset_01",
+  "wpn_ar_02": "wpn_ar_09",
+  "wpn_ar_04": "wpn_ar_09",
+  "wpn_dmr_02": "wpn_dmr_01",
+  "wpn_ar_03": "wpn_sp_02",
+  "wpn_sp_01": "wpn_sp_02",
+  "wpn_smg_01": "wpn_smg_04",
+  "wpn_smg_02": "wpn_smg_05",
+  "wpn_hg_03": "wpn_hg_02",
+  "wpn_sg_01": "wpn_sg_02",
+  "wpn_lmg_02": "wpn_lmg_01",
+  "wpn_sr_02": "wpn_sr_01",
+  "mag_556_20": "mag_556_30_gran",
+  "mag_556_30": "mag_556_30_gran",
+  "mag_556_40": "mag_556_30_gran",
+  "mag_556_60": "mag_556_30_gran",
+  "mag_300_30": "mag_939_30",
+  "mag_57_p90_50": "mag_921_sr2_30",
+  "mag_45_ump25": "mag_919_vityaz30",
+  "mag_45_usp12": "mag_919_17",
+  "mag_m249_100": "mag_pkm_100",
+  "mag_m249_200": "mag_pkm_200",
+  "mag_50_m82_10": "mag_338_awm5",
+  "ammo_57_std": "ammo_921_std",
+  "ammo_57_ap": "ammo_921_ap",
+  "ammo_300_sup": "ammo_939_sp5",
+  "ammo_300_sub": "ammo_939_sp5",
+  "ammo_50_ball": "ammo_338_match",
+  "ammo_50_api": "ammo_338_ap",
+  "muzzle_supp_556_01": "muzzle_supp_gran_01",
+  "muzzle_comp_556_01": "muzzle_comp_545_01",
+  "muzzle_fh_556_01": "muzzle_fh_545_01",
+  "muzzle_supp_57_01": "muzzle_supp_9_01",
+  "muzzle_supp_300_01": "muzzle_supp_9_01",
+  "pack_57_ap": "pack_921_ap"
  }
 }

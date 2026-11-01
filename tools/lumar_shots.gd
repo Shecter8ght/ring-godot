@@ -39,7 +39,7 @@ func _ready() -> void:
 		var state: int = [100, 60, 20][i]
 		var holder: Node3D = Node3D.new()
 		row.add_child(holder)
-		WeaponMods.fit(holder, String(WeaponDb.weapon("wpn_ar_02").model), {"optic_primary": {"id": "optic_holo_01", "dur": state}})
+		WeaponMods.fit(holder, String(WeaponDb.weapon("wpn_ar_09").model), {"optic_primary": {"id": "optic_holo_01", "dur": state}})
 		holder.position.x = (i - 1) * 0.15
 		holder.rotation.y = 0.55
 	_camera.fov = 28.0
@@ -62,7 +62,7 @@ func _ready() -> void:
 	labels.queue_free()
 	await get_tree().process_frame
 	for state: int in [100, 60, 20, 0]:
-		var model: Node3D = WeaponModels.build("wpn_ar_02", {"optic_primary": {"id": "optic_holo_01", "dur": state}}, 0, state)
+		var model: Node3D = WeaponModels.build("wpn_ar_09", {"optic_primary": {"id": "optic_holo_01", "dur": state}}, 0, state)
 		add_child(model)
 		var height: float = float(model.get_meta("sight_h"))
 		_camera.fov = 45.0
@@ -92,7 +92,7 @@ func _ready() -> void:
 			await _capture("lumar_rifle")
 		model.queue_free()
 		await get_tree().process_frame
-	var entry: Dictionary = ItemDb.make("wpn_ar_02", 1)
+	var entry: Dictionary = ItemDb.make("wpn_ar_09", 1)
 	entry.dur = 20.0
 	entry.mods = {"optic_primary": {"id": "optic_holo_01", "dur": 0.0}}
 	Profile.equipment = {"primary": entry}

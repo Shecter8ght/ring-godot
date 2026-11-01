@@ -34,7 +34,7 @@ func _ready() -> void:
 	var views := {"right": Vector3(0.62, 0.0, 0.0), "left": Vector3(-0.62, 0.0, 0.0), "top": Vector3(0.001, 0.6, 0.0),
 		"34": Vector3(0.38, 0.22, 0.38), "back": Vector3(0.18, 0.12, -0.45)}
 	for kit in [{}, WeaponDb.preset("HG_03_TAC").get("mods", {})]:
-		var w := WeaponModels.build("wpn_hg_03", kit)
+		var w := WeaponModels.build("wpn_hg_02", kit)
 		add_child(w)
 		for v in views:
 			if not kit.is_empty() and v != "right" and v != "34":
