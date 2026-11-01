@@ -259,6 +259,13 @@ python -X utf8 tools/dorm_modules/electrics_wear_zones.py [набор …]  # э
                                                               # в колбе, закраска) → _asset_src/dorm_electrics/wear; Painter — electrics_sp.py wear [набор …]
                                                               # (построитель sp_electrics_wear.py; каждый вариант отделки, у настенного ещё «краска» /
                                                               # «побелка») → maps_worn; просмотр — electrics_review.py -- <maps_worn> <выход.blend>
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Electrics_uv_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/electrics_game.py
+                                                              # электрика, игровые версии (бюджет «средне»: светильники 1K, настенное и провода 512, тяжёлое
+                                                              # упрощено с запеканием нормали): модели собраны из наборов как в форме (ЛСП 2/1/0 трубок, ЛПО закрыт /
+                                                              # висит / сорван, плафон, патрон, выключатели с рычажком и клавишей, модули провода с портами) →
+                                                              # assets/models/dorm/electrics (+ electrics.json); --import, python -X utf8 tools/dorm_modules/furniture_imports.py
+                                                              # electrics, --import; расстановка — python -X utf8 tools/dorm_modules/electrify.py → data/blockouts/dorm_electrics.json
+                                                              # (стенд: src/blockout/dorm_electrics.gd, мигающие — dorm_flicker_light.gd)
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

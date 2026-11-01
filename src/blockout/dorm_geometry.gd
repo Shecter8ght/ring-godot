@@ -24,6 +24,9 @@ const PROP_DIR: String = "res://assets/models/dorm/props"
 const FURNITURE_PATH: String = "res://data/blockouts/dorm_furniture.json"
 const FURNITURE_DIR: String = "res://assets/models/dorm/furniture"
 const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress"]
+## Электрика — светильники, выключатели, розетки, коробки, провода и 1–2 мигающих на этаж (dorm_electrics.gd); без
+## моделей её нет.
+const Electrics = preload("res://src/blockout/dorm_electrics.gd")
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -139,6 +142,10 @@ func rebuild() -> void:
 	for item: Dictionary in furniture.get("furniture",[]):
 		if String(item.get("section",""))==section_id:
 			_add_furniture(item,index.get(String(item.model),{}))
+	if Electrics.available():
+		var electrics: RefCounted = Electrics.new()
+		electrics.call("build",self,section_id,Electrics.data())
+		electrics.call("free_scenes")
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))

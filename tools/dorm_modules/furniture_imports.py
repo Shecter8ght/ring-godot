@@ -1,17 +1,20 @@
 """Мебель общежития: настройки импорта карт после первого `tools/godot.cmd --headless --import`.
 
-    python -X utf8 tools/dorm_modules/furniture_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
+    python -X utf8 tools/dorm_modules/furniture_imports.py [furniture|electrics], затем ещё раз `tools/godot.cmd --headless --import`.
 
 Карты assets/models/dorm/furniture/textures — сжатие VRAM и mip-уровни сразу (мебели в общежитии много, без mip-уровней
 дальняя рябит), у нормалей — флаг карты нормалей (RGTC), у ORM — сглаживание шероховатости по нормали, канал явно
 (зелёный: значение 8, которое пишет редактор, фильтр выключает — навык godot-asset-preparation). Варианты отделки
-(<предмет>__<код>_*) — так же, со своей нормалью; плитка панцирной сетки (net_*) — тоже.
+(<предмет>__<код>_*) — так же, со своей нормалью; плитка панцирной сетки (net_*) — тоже. Электрика (electrics) — те же
+настройки; у её вариантов нормали нет — шероховатость сглаживается по нормали набора.
 """
 import re
+import sys
 from pathlib import Path
 
-D = Path(__file__).resolve().parents[2] / "assets/models/dorm/furniture/textures"
-RES = "res://assets/models/dorm/furniture/textures/"
+KIND = sys.argv[1] if len(sys.argv) > 1 else "furniture"
+D = Path(__file__).resolve().parents[2] / f"assets/models/dorm/{KIND}/textures"
+RES = f"res://assets/models/dorm/{KIND}/textures/"
 
 
 def setp(text: str, key: str, val: str) -> str:
@@ -32,7 +35,10 @@ for f in sorted(D.glob("*.webp.import")):
         t = setp(t, "roughness/mode", "1")
     elif base.endswith("_occlusionRoughnessMetallic.webp"):
         t = setp(t, "roughness/mode", "3")             # Detect, Disabled, Red, Green… — шероховатость в G
-        t = setp(t, "roughness/src_normal", f'"{RES}{base.replace("_occlusionRoughnessMetallic", "_normal")}"')
+        normal = base.replace("_occlusionRoughnessMetallic", "_normal")
+        if not (D / normal).exists():
+            normal = normal.split("__")[0] + "_normal.webp"
+        t = setp(t, "roughness/src_normal", f'"{RES}{normal}"')
     f.write_text(t, encoding="utf-8", newline="\n")
     n += 1
-print("FURNITURE_IMPORTS", n)
+print("IMPORTS", KIND, n)

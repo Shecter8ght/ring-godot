@@ -1,0 +1,628 @@
+{
+ "el_lsp_2": {
+  "file": "res://assets/models/dorm/electrics/el_lsp_2.gltf",
+  "kind": "ceiling",
+  "triangles": 5368,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.0566,
+    0.0
+   ],
+   "size": [
+    1.24,
+    0.1113,
+    0.2366
+   ]
+  },
+  "sets": [
+   "el_lsp",
+   "el_tube"
+  ],
+  "tubes": 2,
+  "variants": {
+   "el_lsp": [
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_lsp_1": {
+  "file": "res://assets/models/dorm/electrics/el_lsp_1.gltf",
+  "kind": "ceiling",
+  "triangles": 5146,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.0566,
+    0.0
+   ],
+   "size": [
+    1.24,
+    0.1113,
+    0.2366
+   ]
+  },
+  "sets": [
+   "el_lsp",
+   "el_tube"
+  ],
+  "tubes": 1,
+  "variants": {
+   "el_lsp": [
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_lsp_0": {
+  "file": "res://assets/models/dorm/electrics/el_lsp_0.gltf",
+  "kind": "ceiling",
+  "triangles": 2176,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.0565,
+    0.0
+   ],
+   "size": [
+    1.24,
+    0.111,
+    0.2366
+   ]
+  },
+  "sets": [
+   "el_lsp"
+  ],
+  "tubes": 0,
+  "variants": {
+   "el_lsp": [
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_lpo_closed": {
+  "file": "res://assets/models/dorm/electrics/el_lpo_closed.gltf",
+  "kind": "ceiling",
+  "triangles": 4360,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.0644,
+    0.0
+   ],
+   "size": [
+    1.29,
+    0.1267,
+    0.188
+   ]
+  },
+  "sets": [
+   "el_lpo",
+   "el_tube"
+  ],
+  "tubes": 2,
+  "variants": {
+   "el_lpo": [
+    "PL-PRZ",
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_lpo_hanging": {
+  "file": "res://assets/models/dorm/electrics/el_lpo_hanging.gltf",
+  "kind": "ceiling",
+  "triangles": 4360,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.1346,
+    -0.0091
+   ],
+   "size": [
+    1.29,
+    0.2672,
+    0.2061
+   ]
+  },
+  "sets": [
+   "el_lpo",
+   "el_tube"
+  ],
+  "tubes": 2,
+  "variants": {
+   "el_lpo": [
+    "PL-PRZ",
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_lpo_torn": {
+  "file": "res://assets/models/dorm/electrics/el_lpo_torn.gltf",
+  "kind": "ceiling",
+  "triangles": 4100,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.047,
+    0.0
+   ],
+   "size": [
+    1.29,
+    0.092,
+    0.188
+   ]
+  },
+  "sets": [
+   "el_lpo",
+   "el_tube"
+  ],
+  "tubes": 2,
+  "variants": {
+   "el_lpo": [
+    "PL-PRZ",
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_plafond_glass": {
+  "file": "res://assets/models/dorm/electrics/el_plafond_glass.gltf",
+  "kind": "ceiling",
+  "triangles": 3709,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.0425,
+    0.0
+   ],
+   "size": [
+    0.25,
+    0.085,
+    0.25
+   ]
+  },
+  "sets": [
+   "el_plafond",
+   "el_bulb"
+  ],
+  "variants": {
+   "el_plafond": [
+    "CB-BLK-SAT",
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_plafond_open": {
+  "file": "res://assets/models/dorm/electrics/el_plafond_open.gltf",
+  "kind": "ceiling",
+  "triangles": 2557,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.03,
+    0.0
+   ],
+   "size": [
+    0.25,
+    0.06,
+    0.25
+   ]
+  },
+  "sets": [
+   "el_plafond",
+   "el_bulb"
+  ],
+  "variants": {
+   "el_plafond": [
+    "CB-BLK-SAT",
+    "PW-WHT-MAT"
+   ]
+  }
+ },
+ "el_pendant_bulb": {
+  "file": "res://assets/models/dorm/electrics/el_pendant_bulb.gltf",
+  "kind": "ceiling",
+  "triangles": 2574,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.4062,
+    0.0
+   ],
+   "size": [
+    0.06,
+    0.8125,
+    0.06
+   ]
+  },
+  "sets": [
+   "el_pendant",
+   "el_bulb"
+  ],
+  "variants": {
+   "el_pendant": [
+    "CB-BLK-SAT",
+    "FB-BRD-BLK",
+    "PL-BLK-SMO"
+   ]
+  }
+ },
+ "el_pendant_broken": {
+  "file": "res://assets/models/dorm/electrics/el_pendant_broken.gltf",
+  "kind": "ceiling",
+  "triangles": 2070,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.387,
+    0.0
+   ],
+   "size": [
+    0.0524,
+    0.7739,
+    0.0524
+   ]
+  },
+  "sets": [
+   "el_pendant",
+   "el_bulb"
+  ],
+  "variants": {
+   "el_pendant": [
+    "CB-BLK-SAT",
+    "FB-BRD-BLK",
+    "PL-BLK-SMO"
+   ]
+  }
+ },
+ "el_pendant_empty": {
+  "file": "res://assets/models/dorm/electrics/el_pendant_empty.gltf",
+  "kind": "ceiling",
+  "triangles": 1280,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.366,
+    0.0
+   ],
+   "size": [
+    0.0524,
+    0.732,
+    0.0524
+   ]
+  },
+  "sets": [
+   "el_pendant"
+  ],
+  "variants": {
+   "el_pendant": [
+    "CB-BLK-SAT",
+    "FB-BRD-BLK",
+    "PL-BLK-SMO"
+   ]
+  }
+ },
+ "el_switch_round": {
+  "file": "res://assets/models/dorm/electrics/el_switch_round.gltf",
+  "kind": "wall",
+  "triangles": 1026,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0,
+    0.0198
+   ],
+   "size": [
+    0.058,
+    0.058,
+    0.0395
+   ]
+  },
+  "sets": [
+   "el_switch_round"
+  ],
+  "mover": {
+   "node": "рычажок",
+   "axis": "x",
+   "on_deg": 60.0
+  },
+  "variants": {
+   "el_switch_round": [
+    "CB-BLK-SAT",
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_switch_white": {
+  "file": "res://assets/models/dorm/electrics/el_switch_white.gltf",
+  "kind": "wall",
+  "triangles": 1552,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0,
+    0.0072
+   ],
+   "size": [
+    0.08,
+    0.08,
+    0.0144
+   ]
+  },
+  "sets": [
+   "el_switch_white"
+  ],
+  "mover": {
+   "node": "клавиша",
+   "axis": "x",
+   "on_deg": 4.0
+  },
+  "variants": {
+   "el_switch_white": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_socket_round": {
+  "file": "res://assets/models/dorm/electrics/el_socket_round.gltf",
+  "kind": "wall",
+  "triangles": 686,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0,
+    0.0117
+   ],
+   "size": [
+    0.058,
+    0.058,
+    0.0234
+   ]
+  },
+  "sets": [
+   "el_socket_round"
+  ],
+  "variants": {
+   "el_socket_round": [
+    "CB-BLK-SAT",
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_socket_white": {
+  "file": "res://assets/models/dorm/electrics/el_socket_white.gltf",
+  "kind": "wall",
+  "triangles": 1308,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0,
+    0.006
+   ],
+   "size": [
+    0.08,
+    0.08,
+    0.012
+   ]
+  },
+  "sets": [
+   "el_socket_white"
+  ],
+  "variants": {
+   "el_socket_white": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_box": {
+  "file": "res://assets/models/dorm/electrics/el_box.gltf",
+  "kind": "wall",
+  "triangles": 808,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0,
+    0.015
+   ],
+   "size": [
+    0.092,
+    0.092,
+    0.03
+   ]
+  },
+  "sets": [
+   "el_box"
+  ],
+  "variants": {
+   "el_box": [
+    "CB-BRN-GLS",
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_wire_1m": {
+  "file": "res://assets/models/dorm/electrics/el_wire_1m.gltf",
+  "kind": "wire",
+  "triangles": 860,
+  "aabb": {
+   "center": [
+    0.5,
+    -0.0001,
+    0.0023
+   ],
+   "size": [
+    1.0001,
+    0.0105,
+    0.0046
+   ]
+  },
+  "sets": [
+   "el_wire_flat"
+  ],
+  "ports": {
+   "end": [
+    1.0,
+    0,
+    0
+   ],
+   "out": [
+    1,
+    0,
+    0
+   ]
+  },
+  "length": 1.0,
+  "variants": {
+   "el_wire_flat": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_wire_05m": {
+  "file": "res://assets/models/dorm/electrics/el_wire_05m.gltf",
+  "kind": "wire",
+  "triangles": 477,
+  "aabb": {
+   "center": [
+    0.25,
+    0.0003,
+    0.0023
+   ],
+   "size": [
+    0.5,
+    0.0092,
+    0.0046
+   ]
+  },
+  "sets": [
+   "el_wire_flat"
+  ],
+  "ports": {
+   "end": [
+    0.5,
+    0,
+    0
+   ],
+   "out": [
+    1,
+    0,
+    0
+   ]
+  },
+  "length": 0.5,
+  "variants": {
+   "el_wire_flat": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_wire_fold": {
+  "file": "res://assets/models/dorm/electrics/el_wire_fold.gltf",
+  "kind": "wire",
+  "triangles": 660,
+  "aabb": {
+   "center": [
+    0.1276,
+    -0.1475,
+    0.0041
+   ],
+   "size": [
+    0.2552,
+    0.305,
+    0.0082
+   ]
+  },
+  "sets": [
+   "el_wire_flat"
+  ],
+  "ports": {
+   "end": [
+    0.2506,
+    -0.3,
+    -0.0
+   ],
+   "out": [
+    0,
+    -1,
+    0
+   ]
+  },
+  "variants": {
+   "el_wire_flat": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_wire_ceiling": {
+  "file": "res://assets/models/dorm/electrics/el_wire_ceiling.gltf",
+  "kind": "wire",
+  "triangles": 740,
+  "aabb": {
+   "center": [
+    0.0,
+    0.175,
+    0.1751
+   ],
+   "size": [
+    0.0082,
+    0.35,
+    0.35
+   ]
+  },
+  "sets": [
+   "el_wire_flat"
+  ],
+  "ports": {
+   "end": [
+    0.0,
+    0.35,
+    0.3501
+   ],
+   "out": [
+    0,
+    0,
+    1
+   ]
+  },
+  "variants": {
+   "el_wire_flat": [
+    "paint",
+    "whitewash"
+   ]
+  }
+ },
+ "el_wire_twisted": {
+  "file": "res://assets/models/dorm/electrics/el_wire_twisted.gltf",
+  "kind": "wire",
+  "triangles": 4108,
+  "aabb": {
+   "center": [
+    0.7773,
+    -0.2211,
+    0.0191
+   ],
+   "size": [
+    1.5771,
+    0.473,
+    0.0382
+   ]
+  },
+  "sets": [
+   "el_wire_twisted"
+  ],
+  "length": 1.5,
+  "variants": {
+   "el_wire_twisted": [
+    "FB-BRD-BLK",
+    "paint",
+    "whitewash"
+   ]
+  }
+ }
+}
