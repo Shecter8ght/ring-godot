@@ -37,14 +37,17 @@ ITEMS = {"furn_bunk_bed": 2000, "furn_bed": 2000, "furn_mattress": 1900, "furn_n
 HERE = Path(__file__).resolve().parent.as_posix()
 # слоты, меняющиеся в варианте вместе: ДСП и её кромка — «орех» ↔ «бук» одной парой (электрика задаёт свои)
 PAIRS = {"chip_walnut": "edge_walnut", "chip_beech": "edge_beech"}
+# построитель износа внутри Painter (модуль в tools/dorm_modules): у мебели — свой, у электрики — sp_electrics_wear
+WEAR = "sp_furniture_wear"
 
 
 def wait_shelves(tries: int = 60) -> None:
-    """Свежий Painter ещё обходит полки: генераторы масок находятся не сразу — ждать снаружи."""
+    """Свежий Painter ещё обходит полки: генераторы масок и процедуры находятся не сразу — ждать снаружи (генераторы
+    бывают раньше процедур: стек падал на «нет ресурса noise_clouds_1»)."""
+    code = "import substance_painter.resource as R\nprint(len(R.search('u:generator')), len(R.search('u:procedural')))"
     for _ in range(tries):
-        out = sp_run.run("import substance_painter.resource as R\nprint(len(R.search('u:generator')))", 30, "shelves")
-        n = out.strip().split("\n")[-1]
-        if n.isdigit() and int(n) > 5:
+        n = sp_run.run(code, 30, "shelves").strip().split("\n")[-1].split()
+        if len(n) == 2 and all(x.isdigit() for x in n) and int(n[0]) > 5 and int(n[1]) > 20:
             return
         time.sleep(3)
 
@@ -95,11 +98,12 @@ def open_and_meshes(name: str) -> list[str]:
     return meshes.split("\n", 1)[1].strip().split("|") if "\n" in meshes else []
 
 
-def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool, wear: bool = False) -> None:
+def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool, wear: bool = False,
+                     wear_args: str = "") -> None:
     """Стек отделок (sp_finish.build_set), печать этапа 1 слоем сверху (если есть) — или (wear) печать и группа
     «Этап 2 — износ» (sp_furniture_wear.py) над отделкой; выгрузка карт, сохранение."""
     px_mm = RES_ITEM.get(name, RES) / ITEMS[name] * 0.55
-    top = ([f"print(sp_furniture_wear.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}))"] if wear else [
+    top = ([f"print({WEAR}.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}{wear_args}))"] if wear else [
         "st = sp_lib.stack_by_name(set_name)",
         "for n in L.get_root_layer_nodes(st):",
         "    if n.get_name() == sp_dorm_wear.PRINT:",
@@ -108,9 +112,9 @@ def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: b
     code = "\n".join([
         "import json",
         f"sys.path.insert(0, r'{HERE}') if r'{HERE}' not in sys.path else None",
-        "import importlib, sp_dorm_wear, sp_furniture_wear",
+        f"import importlib, sp_dorm_wear, {WEAR}",
         "importlib.reload(sp_dorm_wear)",
-        "importlib.reload(sp_furniture_wear)",
+        f"importlib.reload({WEAR})",
         "import substance_painter.textureset as TS",
         "import substance_painter.layerstack as L",
         "set_name = TS.all_texture_sets()[0].name()",

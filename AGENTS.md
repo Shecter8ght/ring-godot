@@ -254,6 +254,11 @@ python -X utf8 tools/dorm_modules/carpet_maps.py              # ковёр об�
                                                               # python -X utf8 tools/dorm_modules/electrics_prints.py; Painter — python -X utf8 tools/dorm_modules/electrics_sp.py
                                                               # projects|stack|variants (драйвер мебели furniture_sp.py, свои папки); просмотр — electrics_review.py
                                                               # -- <карты> <выход.blend> на файле развёртки
+python -X utf8 tools/dorm_modules/electrics_wear_zones.py [набор …]  # электрика, износ (этап 2): места в развёртке (пыль сверху, почерневшие
+                                                              # концы трубок, мухи и пыль в рассеивателе и плафоне, захватано, копоть у гнёзд, налёт
+                                                              # в колбе, закраска) → _asset_src/dorm_electrics/wear; Painter — electrics_sp.py wear [набор …]
+                                                              # (построитель sp_electrics_wear.py; каждый вариант отделки, у настенного ещё «краска» /
+                                                              # «побелка») → maps_worn; просмотр — electrics_review.py -- <maps_worn> <выход.blend>
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

@@ -28,7 +28,36 @@ F.ITEMS = {"el_tube": 1214, "el_bulb": 240, "el_lsp": 1240, "el_lpo": 1290, "el_
            "el_switch_round": 60, "el_socket_round": 60, "el_switch_white": 80, "el_socket_white": 80, "el_box": 95,
            "el_wire_flat": 1900, "el_wire_twisted": 1600}
 
+F.WEAR = "sp_electrics_wear"
+WALL = ("el_switch_round", "el_socket_round", "el_switch_white", "el_socket_white", "el_box", "el_wire_flat",
+        "el_wire_twisted")
+
+
+def wear(names: list[str]) -> None:
+    """Этап 2: износ на каждом варианте отделки, у настенного — ещё «закрашено краской» и «побелкой» (интервью:
+    вперемешку) → maps_worn/<набор>[__<код>|__краска|__побелка]; основной набор с износом — последним, в проект."""
+    import json
+    F.wait_shelves()
+    spec = json.loads(F.SPEC.read_text(encoding="utf-8"))
+    for name in names:
+        meshes = F.open_and_meshes(name)
+        for code, swap in F.variant_swaps(spec, name, meshes):
+            parts, _ = F.parts_for(spec, name, meshes, swap)
+            marker = f"_wear_{name}_{code}.txt"
+            (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+            F.build_and_export(name, parts, F.SRC / "maps_worn" / f"{name}__{code}", marker, save=False, wear=True)
+        parts, _ = F.parts_for(spec, name, meshes)
+        for paint in (("краска", "побелка") if name in WALL else ()):
+            marker = f"_wear_{name}_{paint}.txt"
+            (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+            F.build_and_export(name, parts, F.SRC / "maps_worn" / f"{name}__{paint}", marker, save=False, wear=True,
+                               wear_args=f", paint='{paint}'")
+        marker = f"_wear_{name}.txt"
+        (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+        F.build_and_export(name, parts, F.SRC / "maps_worn" / name, marker, save=True, wear=True)
+
+
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     todo = rest or list(F.ITEMS)
-    {"projects": F.projects, "stack": F.stack, "variants": F.variants, "wear": F.wear}[mode](todo)
+    {"projects": F.projects, "stack": F.stack, "variants": F.variants, "wear": wear}[mode](todo)

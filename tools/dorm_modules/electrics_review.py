@@ -30,6 +30,8 @@ PLACE = {"el_lsp": ("ceil", 0, 1.45), "el_lpo": ("ceil", 0, 1.5), "el_tube": ("c
          "el_wire_twisted": ("wall", 1.0, 1.9)}
 # полупрозрачность по слоту (имя сетки до «__»): (пропускание, прозрачное стекло)
 SEE = {"Лампа_стекло": (1.0, True), "Плафон_стекло": (0.55, False), "Рассеиватель_опал": (0.5, False)}
+# варианты износа без карточки каталога: настенное, закрашенное при ремонте (electrics_sp.py wear)
+PAINTED = {"краска": "закрашено краской стены", "побелка": "забелено побелкой"}
 
 
 def seethrough(mat, transmission, clear):
@@ -83,6 +85,7 @@ def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:]
     maps_root, out = argv[0], argv[1]
     titles = {f["code"]: f["title"] for f in json.load(open(CATALOG, encoding="utf-8"))["finishes"]}
+    titles.update(PAINTED)
     for o in list(bpy.data.objects):
         if not any(c.name in PLACE or c.name == "Развёртка_v01" for c in o.users_collection):
             bpy.data.objects.remove(o)
