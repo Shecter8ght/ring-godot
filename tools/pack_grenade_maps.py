@@ -33,7 +33,7 @@ for path in OUT.glob('*.png.import'):
     atlas = 'body' if '_body_' in path.name else 'mechanism'
     if '_normal.' in path.name:
         settings = settings.replace('compress/normal_map=0', 'compress/normal_map=1')
-    roughness_mode = '8' if '_orm.' in path.name else '1'
+    roughness_mode = '3' if '_orm.' in path.name else '1'  # 3 — канал G у ORM; 8 от редактора Godot фильтр выключает
     settings = settings.replace('roughness/mode=0', 'roughness/mode=' + roughness_mode)
     settings = settings.replace('roughness/src_normal=""', f'roughness/src_normal="res://assets/models/weapons/grenade/grenade_{atlas}_normal.png"')
     path.write_text(settings, encoding='utf8')

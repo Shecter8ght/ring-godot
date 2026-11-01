@@ -396,6 +396,8 @@ tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же с
                                                               # и без, снимки Eevee; затем NORMAL_PROBE_DIR=<папка> tools/godot.cmd --windowed --resolution 512x512
                                                               # res://tools/normal_probe.tscn (тангенты файла / свои, сжатие карты S3TC / RGTC / BPTC, бинормаль в пикселе)
                                                               # и python -X utf8 tools/asset_kit/normal_probe_report.py <папка> — ошибка против high; выводы — навык godot-asset-preparation
+python -X utf8 tools/asset_kit/roughness_imports.py [--fix]   # фильтр шероховатости в .import карт: roughness/mode за перечнем (8 пишет редактор Godot 4.7.2 —
+                                                              # фильтр молчит), фильтр без карты нормалей или mip-уровней; --fix — канал по имени карты (ORM — 3), затем --import
 "D:/ПРОГРАММЫ/RizomUV 2024.1/rizomuv.exe"                      # RizomUV (владелец, 2026-10-27): развёртка и упаковка UV — для норм заполнения 80 % (кузова машин,
                                                               # новые стволы); управляется скриптами — Lua из командной строки или Python через RizomUVLink
                                                               # (папка программы); в конвейер ещё не подключён

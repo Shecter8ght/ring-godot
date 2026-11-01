@@ -105,3 +105,6 @@ Claude Code: `/blender-asset-workflow`, `/weapon-asset-texturing`, `/weapon-asse
 бинормаль в вершинах, запекание Blender — в пикселе, поэтому рёбра игровой сетки круче 60° — жёсткие и со швом;
 карты нормалей — `compress/normal_map=1` (RGTC); у ORM `roughness/mode=3` — значение 8, которое пишет редактор
 Godot 4.7.2, фильтр шероховатости выключает. Поставлено Codex, архив для claude.ai пересобран.
+
+Обновление 2026-11-01, позже (Claude): по слову владельца фильтр шероховатости включён у 122 карт ORM и в шести скриптах
+импорта оружия; `godot-asset-preparation` ссылается на проверку `tools/asset_kit/roughness_imports.py` после импорта.

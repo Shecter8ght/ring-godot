@@ -45,7 +45,7 @@ for d in DIRS:
             t = setp(t, 'roughness/mode', '1')
             t = setp(t, 'roughness/src_normal', f'"{res}{base}"')
         elif base.endswith('_orm.png'):
-            t = setp(t, 'roughness/mode', '8')
+            t = setp(t, 'roughness/mode', '3')  # G — шероховатость ORM; 8 от редактора Godot фильтр выключает
             t = setp(t, 'roughness/src_normal', f'"{res}{base.replace("_orm.png", "_normal.png")}"')
         f.write_text(t, encoding='utf-8', newline='\n')
         print('AR15_IMPORTS', d, f.name)

@@ -157,9 +157,11 @@ def write_import(dest: Path, asset_id: str, name: str) -> None:
     if imp.exists():
         return
     normal = name == "normal"
+    # ARM: шероховатость в G (3) — фильтр по своей карте нормалей; «Detect» редактор Godot 4.7 заменяет на 8, и фильтр молчит
+    arm = name == "arm"
     imp.write_text(IMPORT_TEX.format(asset=asset_id, name=name, normal_map=1 if normal else 0,
-                                     rough_mode=1 if normal else 0,
-                                     rough_src=f"res://assets/textures/{asset_id}/normal.jpg" if normal else ""),
+                                     rough_mode=1 if normal else 3 if arm else 0,
+                                     rough_src=f"res://assets/textures/{asset_id}/normal.jpg" if normal or arm else ""),
                    encoding="utf-8", newline="\n")
 
 
