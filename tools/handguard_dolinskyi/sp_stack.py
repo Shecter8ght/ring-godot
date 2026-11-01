@@ -31,15 +31,11 @@ def hexc(s):
 
 
 def tex(path):
-    """Картинка проекта (маска, фото) — один раз на проект."""
-    if path in _TEX:
-        return _TEX[path]
-    name = os.path.splitext(os.path.basename(path))[0]
-    for r in R.search("u:texture"):
-        if r.identifier().name == name and "project" in r.identifier().url():
-            _TEX[path] = r.identifier()
-            return _TEX[path]
-    _TEX[path] = R.import_project_resource(path, R.Usage.TEXTURE).identifier()
+    """Картинка проекта (маска, фото): при каждой сборке стека — заново из файла, один раз на сборку (_TEX сбрасывается
+    перезагрузкой модуля). Поиск уже импортированной по имени отдавал первую версию: обновлённые masks.py картинки
+    в проект не попадали (01.11 кольца в гнёздах и риски остались старыми после правки масок)."""
+    if path not in _TEX:
+        _TEX[path] = R.import_project_resource(path, R.Usage.TEXTURE).identifier()
     return _TEX[path]
 
 
@@ -242,10 +238,10 @@ def height_normal(st):
     m.paint("где рисок нет")
     m.gen("mg_curvature/mg_curvature", BM.Subtract, 0.4)
     m.fill("grunge_dust_wide/grunge_dust_wide", BM.Subtract, 0.3, tri=3.0)
-    f = fill("lines", inside(ln), height=-0.005)
+    f = fill("lines", inside(ln), height=-0.0015)
     Mask(f).fill(mask_png("milling_lines"))
     ln2 = group("lines 02", inside(mil))
-    f = fill("lines 02", inside(ln2), height=-0.003)
+    f = fill("lines 02", inside(ln2), height=-0.001)
     m = Mask(f)
     m.fill(mask_png("milling_lines"))
     m.fill("noise_clouds_2/clouds_2", BM.Multiply, tri=2.0)
@@ -348,7 +344,7 @@ def weathering(st):
     m = Mask(c, white=True)
     m.paint("где колец нет")
     m.gen("mg_curvature/mg_curvature", BM.Subtract, 0.3)
-    f = fill("circles", inside(c), gloss=0.68)
+    f = fill("circles", inside(c), opacity=0.6, gloss=0.62)
     Mask(f).fill(mask_png("circles"))
     f = fill("High_matte", inside(g), diff="#2A1814", gloss=0.12)                 # тёмно-красный в диффузе (12:00)
     m = Mask(f)
@@ -438,6 +434,7 @@ def finals(st):
 
 
 def build():
+    _TEX.clear()
     st = TS.all_texture_sets()[0].get_stack()
     for n in L.get_root_layer_nodes(st):
         L.delete_node(n)

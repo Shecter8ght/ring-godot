@@ -207,15 +207,18 @@ def make_milling(P, N, cov):
     pads = np.zeros(x.shape, bool)
     for a, b in PADS:
         pads |= (x >= a - 0.1) & (x <= b + 0.1) & (np.abs(z) <= PAD_HZ + 0.2) & (np.abs(y) >= 18.0)
-    # риски вдоль X на гранях, параллельных оси (бока и верх зубьев, бока площадок): шаг 0.6–0.9 мм, глубина
-    # меняется полосами — фреза шла несколькими проходами
+    # риски вдоль X на гранях, параллельных оси (бока и верх зубьев, бока площадок): прямые, шаг 0.8 мм (шаг фрезы),
+    # мягкий синус; сила меняется полосами — фреза шла несколькими проходами. Раньше фаза шла «волной» по шуму и риски
+    # выходили острыми (cos³): волнистые горизонтали, «слоистость», как у 3D-печати (владелец 01.11)
     cross = np.where(np.abs(N[..., 1]) > np.abs(N[..., 2]), z, y)
-    pitch = 0.75
-    ph = noise(P, 9.0, 3, 2) * 2 * math.pi
-    lines = 0.5 + 0.5 * np.cos(2 * math.pi * cross / pitch + 1.5 * ph)
-    band = np.clip((noise(P, 14.0, 4, 2) - 0.35) * 2.5, 0, 1)
-    sel = (rails | pads) & (nx < 0.3)
-    save("milling_lines", np.where(sel, lines ** 3 * band, 0.0))
+    pitch = 0.8
+    lines = 0.5 + 0.5 * np.cos(2 * math.pi * cross / pitch)
+    band = np.clip((noise(P, 18.0, 4, 2) - 0.3) * 2.0, 0, 1)
+    holes = np.zeros(x.shape, bool)       # стенки гнёзд QD — сверлёные: прямые риски легли бы на цилиндр кольцами
+    for a, b in PADS:
+        holes |= np.sqrt((x - (a + b) / 2) ** 2 + z ** 2) < HOLE_R + 0.3
+    sel = (rails | pads) & (nx < 0.3) & ~holes
+    save("milling_lines", np.where(sel, lines * band * 0.6, 0.0))
     # дуги торцевой фрезы: на наружных гранях площадок (центр фрезы сбоку) и на торцах
     face = pads & (np.abs(np.abs(y) - PAD_FACE) < 0.3) & (np.abs(N[..., 1]) > 0.8)
     arcs = np.zeros(x.shape, np.float32)
@@ -280,11 +283,19 @@ def make_circles(P, N, cov):
         xc = (a + b) / 2
         rho = np.sqrt((x - xc) ** 2 + z ** 2)
         wall = cov & (rho < HOLE_R + 0.25) & (np.abs(y) > 17.5) & (np.abs(N[..., 1]) < 0.4)
-        out[wall] = (0.5 + 0.5 * np.cos(2 * math.pi * np.abs(y[wall]) / 0.6)) ** 2
-        ring = cov & (np.abs(np.abs(y) - PAD_FACE) < 0.3) & (rho >= HOLE_R) & (rho < HOLE_R + 2.6)
-        fade = np.clip(1.0 - (rho - HOLE_R) / 2.6, 0, 1)
-        out[ring] = np.maximum(out[ring], (0.5 + 0.5 * np.cos(2 * math.pi * rho[ring] / 0.45)) * fade[ring])
-    save("circles", out * (0.55 + 0.45 * noise(P, 3.0, 31)))
+        # кольца от защёлки антабки QD: несколько неровных колец там, где шарики ходят по стенке, а не частая
+        # «резьба» (шаг 0,6 мм на полную силу читался слоями, владелец 01.11)
+        depth = np.abs(y[wall])
+        v = np.zeros(depth.shape, np.float32)
+        for _ in range(4):
+            d0, w, k = RNG.uniform(20.5, 25.5), RNG.uniform(0.15, 0.35), RNG.uniform(0.35, 1.0)
+            v = np.maximum(v, k * np.exp(-((depth - d0) / w) ** 2))
+        out[wall] = v
+        # у входа — притёртый поясок шириной ~1,5 мм, без полос
+        ring = cov & (np.abs(np.abs(y) - PAD_FACE) < 0.3) & (rho >= HOLE_R) & (rho < HOLE_R + 1.6)
+        fade = np.clip(1.0 - (rho - HOLE_R) / 1.6, 0, 1)
+        out[ring] = np.maximum(out[ring], 0.5 * fade[ring])
+    save("circles", out * (0.6 + 0.4 * noise(P, 3.0, 31)))
 
 
 def make_chips(P, N, cov):
