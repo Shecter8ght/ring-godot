@@ -78,7 +78,8 @@ def main() -> None:
     sc.render.bake.margin = 8
     top = bpy.data.collections["Развёртка_v01"]
     top.hide_viewport = False
-    for game in U.ITEMS.values():
+    # модуль развёртки: ITEMS «корень → набор» (мебель, мусор) или GAMES — список наборов (электрика)
+    for game in (getattr(U, "GAMES", None) or U.ITEMS.values()):
         if only and game not in only:
             continue
         coll = bpy.data.collections.get(game)

@@ -248,6 +248,12 @@ python -X utf8 tools/dorm_modules/carpet_maps.py              # ковёр об�
                                                               # (варианты: трубки, обломок, рассеиватель висит / сорван), плафон, патрон на витом шнуре с лампой А60,
                                                               # выключатели и розетки — накладные круглые из карболита и белые утопленные, распаечная коробка,
                                                               # провод плоский на гвоздиках и витой на роликах модулями → RING_Dorm_Electrics
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Electrics_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/electrics_uv.py
+                                                              # электрика, текстуры этап 1: развёртка по наборам деталей (трубка и лампа общие, отдельные игровые узлы —
+                                                              # сетки «<слот>__<метка>») и FBX → _asset_src/dorm_electrics/sp; печать — print_bake.py (electrics_uv) и
+                                                              # python -X utf8 tools/dorm_modules/electrics_prints.py; Painter — python -X utf8 tools/dorm_modules/electrics_sp.py
+                                                              # projects|stack|variants (драйвер мебели furniture_sp.py, свои папки); просмотр — electrics_review.py
+                                                              # -- <карты> <выход.blend> на файле развёртки
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

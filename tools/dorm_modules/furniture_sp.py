@@ -35,6 +35,8 @@ ITEMS = {"furn_bunk_bed": 2000, "furn_bed": 2000, "furn_mattress": 1900, "furn_n
          "furn_table": 1000, "furn_chair": 830, "furn_stool": 450, "furn_shelf": 800, "furn_fridge": 850,
          "furn_sofa": 1940, "furn_carpet": 2000, "furn_tv": 1000, "furn_hotplate": 410}
 HERE = Path(__file__).resolve().parent.as_posix()
+# слоты, меняющиеся в варианте вместе: ДСП и её кромка — «орех» ↔ «бук» одной парой (электрика задаёт свои)
+PAIRS = {"chip_walnut": "edge_walnut", "chip_beech": "edge_beech"}
 
 
 def wait_shelves(tries: int = 60) -> None:
@@ -62,7 +64,7 @@ def projects(names: list[str]) -> None:
 
 
 def slot_for(spec: dict, game: str, mesh: str) -> dict | None:
-    base = mesh.split(".")[0].replace("__sp", "")
+    base = mesh.split(".")[0].split("__")[0]  # «__метка» — отдельный игровой узел той же отделки
     for slot in spec["slots"]:
         if base in slot.get("parts", []) and (not slot.get("items") or game in slot["items"]):
             return slot
@@ -146,8 +148,7 @@ def variants(names: list[str]) -> None:
         slots = {s["id"]: s for m in meshes if (s := slot_for(spec, name, m)) is not None and s.get("variants")}
         if not slots:
             continue
-        # ДСП и её кромка меняются вместе: «орех» ↔ «бук» — одной парой
-        pairs = {"chip_walnut": "edge_walnut", "chip_beech": "edge_beech"}
+        pairs = PAIRS
         done = set()
         for sid, slot in slots.items():
             if sid in done or sid in pairs.values():
@@ -170,7 +171,7 @@ def variants(names: list[str]) -> None:
 def variant_swaps(spec: dict, name: str, meshes: list[str]) -> list[tuple[str, dict]]:
     """Варианты предмета: (код, {слот: код}); ДСП и её кромка меняются парой «орех» ↔ «бук»."""
     slots = {s["id"]: s for m in meshes if (s := slot_for(spec, name, m)) is not None and s.get("variants")}
-    pairs = {"chip_walnut": "edge_walnut", "chip_beech": "edge_beech"}
+    pairs = PAIRS
     out = []
     for sid, slot in slots.items():
         if sid in pairs.values():
