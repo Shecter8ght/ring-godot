@@ -237,6 +237,12 @@ python -X utf8 tools/dorm_modules/carpet_maps.py              # ковёр об�
                                                               # ковёр с настоящим ворсом (carpet_pile.py: волокна Geometry Nodes на объекте-волосах, Principled
                                                               # Hair, цвет из карты по корню) в углу комнаты общежития под вечерним солнцем: три камеры, Cycles
                                                               # (CARPET_QUICK=1 — проба вдвое меньше и мало выборок)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_uv_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_game.py -- [предмет …]
+                                                              # мебель, игровые версии (бюджет «подробнее»): карты износа 2K (ковёр 4K) как есть, тяжёлое упрощено
+                                                              # с запеканием в нормали, панцирная сетка — плоскость с плиткой ячеек (в стенде — alpha hash) →
+                                                              # assets/models/dorm/furniture (+ варианты отделки, furniture.json); --import, python -X utf8
+                                                              # tools/dorm_modules/furniture_imports.py, --import; расстановка — python -X utf8
+                                                              # tools/dorm_modules/furnish_rooms.py → data/blockouts/dorm_furniture.json (по виду комнаты)
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py

@@ -1,0 +1,274 @@
+{
+ "furn_bed": {
+  "file": "res://assets/models/dorm/furniture/furn_bed.gltf",
+  "triangles": 11184,
+  "aabb": {
+   "center": [
+    0.0,
+    0.483,
+    0.0
+   ],
+   "size": [
+    0.912,
+    0.966,
+    2.028
+   ]
+  },
+  "material": "furn_bed",
+  "variants": [
+   "EN-DGR-SAT",
+   "EN-GBL-SAT"
+  ]
+ },
+ "furn_mattress": {
+  "file": "res://assets/models/dorm/furniture/furn_mattress.gltf",
+  "triangles": 4896,
+  "aabb": {
+   "center": [
+    -0.0,
+    0.041,
+    0.0
+   ],
+   "size": [
+    0.8,
+    0.1558,
+    1.9
+   ]
+  },
+  "material": "furn_mattress",
+  "variants": []
+ },
+ "furn_bunk_bed": {
+  "file": "res://assets/models/dorm/furniture/furn_bunk_bed.gltf",
+  "triangles": 21072,
+  "aabb": {
+   "center": [
+    0.0,
+    0.892,
+    0.0
+   ],
+   "size": [
+    0.912,
+    1.784,
+    2.028
+   ]
+  },
+  "material": "furn_bunk_bed",
+  "variants": [
+   "EN-DGR-SAT",
+   "EN-WHT-SAT"
+  ]
+ },
+ "furn_nightstand": {
+  "file": "res://assets/models/dorm/furniture/furn_nightstand.gltf",
+  "triangles": 1236,
+  "aabb": {
+   "center": [
+    -0.0001,
+    0.325,
+    0.0242
+   ],
+   "size": [
+    0.4001,
+    0.65,
+    0.4485
+   ]
+  },
+  "material": "furn_nightstand",
+  "variants": [
+   "LM-BCH-SAT"
+  ]
+ },
+ "furn_wardrobe": {
+  "file": "res://assets/models/dorm/furniture/furn_wardrobe.gltf",
+  "triangles": 2232,
+  "aabb": {
+   "center": [
+    0.0019,
+    1.05,
+    0.0242
+   ],
+   "size": [
+    1.0037,
+    2.1,
+    0.5985
+   ]
+  },
+  "material": "furn_wardrobe",
+  "variants": [
+   "LM-BCH-SAT"
+  ]
+ },
+ "furn_table": {
+  "file": "res://assets/models/dorm/furniture/furn_table.gltf",
+  "triangles": 840,
+  "aabb": {
+   "center": [
+    0.0,
+    0.375,
+    0.0
+   ],
+   "size": [
+    1.0,
+    0.75,
+    0.6
+   ]
+  },
+  "material": "furn_table",
+  "variants": [
+   "LM-WAL-GLS"
+  ]
+ },
+ "furn_chair": {
+  "file": "res://assets/models/dorm/furniture/furn_chair.gltf",
+  "triangles": 5872,
+  "aabb": {
+   "center": [
+    0.0,
+    0.4153,
+    -0.0219
+   ],
+   "size": [
+    0.425,
+    0.8333,
+    0.4681
+   ]
+  },
+  "material": "furn_chair",
+  "variants": [
+   "EN-GBL-SAT"
+  ]
+ },
+ "furn_stool": {
+  "file": "res://assets/models/dorm/furniture/furn_stool.gltf",
+  "triangles": 960,
+  "aabb": {
+   "center": [
+    0.0,
+    0.225,
+    0.0
+   ],
+   "size": [
+    0.32,
+    0.45,
+    0.32
+   ]
+  },
+  "material": "furn_stool",
+  "variants": []
+ },
+ "furn_shelf": {
+  "file": "res://assets/models/dorm/furniture/furn_shelf.gltf",
+  "triangles": 336,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.141,
+    0.11
+   ],
+   "size": [
+    0.8,
+    0.318,
+    0.22
+   ]
+  },
+  "material": "furn_shelf",
+  "variants": [
+   "LM-WAL-GLS"
+  ]
+ },
+ "furn_fridge": {
+  "file": "res://assets/models/dorm/furniture/furn_fridge.gltf",
+  "triangles": 7512,
+  "aabb": {
+   "center": [
+    0.0187,
+    0.425,
+    -0.0034
+   ],
+   "size": [
+    0.5173,
+    0.85,
+    0.6453
+   ]
+  },
+  "material": "furn_fridge",
+  "variants": []
+ },
+ "furn_sofa": {
+  "file": "res://assets/models/dorm/furniture/furn_sofa.gltf",
+  "triangles": 7600,
+  "aabb": {
+   "center": [
+    0.0,
+    0.4561,
+    0.0036
+   ],
+   "size": [
+    1.94,
+    0.9123,
+    0.6728
+   ]
+  },
+  "material": "furn_sofa",
+  "variants": []
+ },
+ "furn_tv": {
+  "file": "res://assets/models/dorm/furniture/furn_tv.gltf",
+  "triangles": 3378,
+  "aabb": {
+   "center": [
+    0.0,
+    0.4806,
+    0.0026
+   ],
+   "size": [
+    0.5929,
+    0.9612,
+    0.4887
+   ]
+  },
+  "material": "furn_tv",
+  "variants": []
+ },
+ "furn_hotplate": {
+  "file": "res://assets/models/dorm/furniture/furn_hotplate.gltf",
+  "triangles": 3400,
+  "aabb": {
+   "center": [
+    0.0,
+    0.0427,
+    -0.204
+   ],
+   "size": [
+    0.25,
+    0.0853,
+    0.702
+   ]
+  },
+  "material": "furn_hotplate",
+  "variants": []
+ },
+ "furn_carpet": {
+  "file": "res://assets/models/dorm/furniture/furn_carpet.gltf",
+  "triangles": 6240,
+  "aabb": {
+   "center": [
+    0.0,
+    1.0,
+    -0.0013
+   ],
+   "size": [
+    1.5,
+    2.0,
+    0.0373
+   ]
+  },
+  "material": "furn_carpet",
+  "variants": [],
+  "rim": [
+   0.6,
+   0.5
+  ]
+ }
+}

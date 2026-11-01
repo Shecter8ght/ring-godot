@@ -342,16 +342,20 @@ func _verify() -> void:
 		var passed: bool = await _walk_path(points)
 		_check(String(route.label)+" — пешком",passed,route_detail.duplicate())
 	# Каждый путь начинается на площадке лестницы. Точки внутри помещений достигаются без телепортации.
+	# Мебель (furnish_rooms.py) может стоять на точке плана — стол у окна, баррикада: точку сдвигает к середине комнаты
+	# до свободного места (комната должна оставаться проходимой, а не точка — пустой).
+	var furniture: Array[AABB] = _furniture_boxes()
 	for space: Dictionary in plan.spaces:
 		if not bool(space.open):
 			continue
 		var y: float = float(space.y)
 		var points: Array[Vector3] = [_vec(plan.floor_routes[int(space.floor)-1].start)]
-		for at: Array in space.path:
-			points.append(_vec(at))
+		var middle: Vector3 = _vec(space.path[space.path.size()-1])
+		for k: int in range(space.path.size()):
+			points.append(_vec(space.path[k]) if k==0 else _free_point(_vec(space.path[k]),middle,furniture))
 		if space.has("probe_points"):
 			for at: Array in space.probe_points:
-				points.append(_vec(at))
+				points.append(_free_point(_vec(at),middle,furniture))
 		elif String(space.kind)!="stairs":
 			var rect: Array = space.rect
 			points.append(Vector3(float(rect[0])+0.8,y,float(rect[1])+0.8))
@@ -498,6 +502,37 @@ func _open_nearby_doors() -> void:
 		var delta: Vector3 = (leaf as Node3D).global_position-walker.position
 		if absf(delta.y)<0.3 and Vector2(delta.x,delta.z).length()<2.2 and not bool(leaf.get("is_open")):
 			leaf.call("set_open",true,false)
+
+
+## Коробки столкновений мебели в мире (по их узлам; наклонённые — описанным прямоугольником).
+func _furniture_boxes() -> Array[AABB]:
+	var boxes: Array[AABB] = []
+	for node: Node in get_tree().get_nodes_in_group("dorm_furniture"):
+		for found: Node in node.find_children("*","CollisionShape3D",true,false):
+			var shape: CollisionShape3D = found as CollisionShape3D
+			var box: BoxShape3D = shape.shape as BoxShape3D
+			if box!=null:
+				boxes.append(shape.global_transform*AABB(-box.size*0.5,box.size))
+	return boxes
+
+
+## Точка плана, на которой стоит мебель (с запасом на ширину идущего), — ближайшая свободная в сторону середины.
+func _free_point(at: Vector3, middle: Vector3, boxes: Array[AABB]) -> Vector3:
+	var p: Vector3 = at
+	for step: int in range(50):
+		var blocked: bool = false
+		for box: AABB in boxes:
+			if p.x>box.position.x-0.45 and p.x<box.end.x+0.45 and p.z>box.position.z-0.45 and p.z<box.end.z+0.45 \
+					and box.position.y<p.y+1.0 and box.end.y>p.y+0.05:
+				blocked = true
+				break
+		if not blocked:
+			return p
+		var to: Vector3 = Vector3(middle.x-p.x,0.0,middle.z-p.z)
+		if to.length()<0.1:
+			return p
+		p += to.normalized()*0.1
+	return p
 
 
 func _walk_path(points: Array[Vector3]) -> bool:

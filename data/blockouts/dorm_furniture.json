@@ -1,0 +1,6358 @@
+{
+ "version": 1,
+ "source": "tools/dorm_modules/furnish_rooms.py",
+ "furniture": [
+  {
+   "id": "f1_room_-1_1_0_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_1_bed",
+   "section": "Floor1",
+   "model": "furn_bed",
+   "at": [
+    7.434,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_2_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    7.434,
+    0.905,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    5.6575,
+    0.48,
+    -6.38
+   ],
+   "yaw": 180.28,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_4_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    5.344,
+    0.48,
+    -5.98
+   ],
+   "yaw": 295.55,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_5_wardrobe",
+   "section": "Floor1",
+   "model": "furn_wardrobe",
+   "at": [
+    7.66,
+    0.48,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_6_table",
+   "section": "Floor1",
+   "model": "furn_table",
+   "at": [
+    5.9437,
+    0.48,
+    -8.13
+   ],
+   "yaw": 168.46,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_7_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    6.5072,
+    0.6922,
+    -7.08
+   ],
+   "yaw": 287.45,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_1_8_stool",
+   "section": "Floor1",
+   "model": "furn_stool",
+   "at": [
+    6.3711,
+    0.64,
+    -3.669
+   ],
+   "yaw": 520.67,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_1_0_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    0.48,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_1_1_bed",
+   "section": "Floor1",
+   "model": "furn_bed",
+   "at": [
+    7.35,
+    0.48,
+    7.18
+   ],
+   "yaw": -0.58,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_2_0_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_2_1_bed",
+   "section": "Floor1",
+   "model": "furn_bed",
+   "at": [
+    12.57,
+    0.48,
+    -7.18
+   ],
+   "yaw": 185.65,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_2_2_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    10.239,
+    0.6922,
+    -5.2297
+   ],
+   "yaw": 404.73,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_0_wardrobe",
+   "section": "Floor1",
+   "model": "furn_wardrobe",
+   "at": [
+    11.685,
+    0.755,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_1_table",
+   "section": "Floor1",
+   "model": "furn_table",
+   "at": [
+    10.835,
+    0.78,
+    7.88
+   ],
+   "yaw": 181.46,
+   "tilt": 90.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_2_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    0.48,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    12.47,
+    0.48,
+    6.68
+   ],
+   "yaw": 15.16,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_4_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    10.135,
+    0.48,
+    7.18
+   ],
+   "yaw": 193.18,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_2_5_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    12.955,
+    0.48,
+    2.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_0_wardrobe",
+   "section": "Floor1",
+   "model": "furn_wardrobe",
+   "at": [
+    17.1,
+    0.755,
+    -8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_1_table",
+   "section": "Floor1",
+   "model": "furn_table",
+   "at": [
+    16.25,
+    0.78,
+    -7.88
+   ],
+   "yaw": -1.36,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_2_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    18.08,
+    0.48,
+    -6.68
+   ],
+   "yaw": 193.98,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_4_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    15.55,
+    0.48,
+    -7.18
+   ],
+   "yaw": 338.73,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_3_5_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    18.565,
+    0.48,
+    -2.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_3_0_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    15.2,
+    0.48,
+    6.6914
+   ],
+   "yaw": -1.04,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_3_1_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    16.05,
+    0.48,
+    6.8885
+   ],
+   "yaw": 5.56,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_3_2_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    16.9,
+    0.48,
+    6.7028
+   ],
+   "yaw": -6.84,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_0_bed",
+   "section": "Floor1",
+   "model": "furn_bed",
+   "at": [
+    23.196,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_1_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    23.196,
+    0.905,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_2_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    28.014,
+    0.48,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    28.014,
+    0.835,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_4_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    28.014,
+    1.785,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_5_carpet",
+   "section": "Floor1",
+   "model": "furn_carpet",
+   "at": [
+    22.7149,
+    1.08,
+    -7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_6_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    22.8951,
+    0.48,
+    -8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_7_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    28.315,
+    0.48,
+    -8.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_8_shelf",
+   "section": "Floor1",
+   "model": "furn_shelf",
+   "at": [
+    22.695,
+    2.13,
+    -3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f1_room_-1_5_9_wardrobe",
+   "section": "Floor1",
+   "model": "furn_wardrobe",
+   "at": [
+    28.24,
+    0.48,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_10_fridge",
+   "section": "Floor1",
+   "model": "furn_fridge",
+   "at": [
+    28.189,
+    0.48,
+    -3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_11_table",
+   "section": "Floor1",
+   "model": "furn_table",
+   "at": [
+    25.605,
+    0.48,
+    -8.435
+   ],
+   "yaw": 0.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_12_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    25.385,
+    0.48,
+    -7.8
+   ],
+   "yaw": 184.88,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_13_stool",
+   "section": "Floor1",
+   "model": "furn_stool",
+   "at": [
+    25.905,
+    0.48,
+    -7.75
+   ],
+   "yaw": 215.49,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_-1_5_14_tv",
+   "section": "Floor1",
+   "model": "furn_tv",
+   "at": [
+    22.9367,
+    1.13,
+    -8.58
+   ],
+   "yaw": 90.71,
+   "far": 25.0
+  },
+  {
+   "id": "f1_room_-1_5_15_sofa",
+   "section": "Floor1",
+   "model": "furn_sofa",
+   "at": [
+    23.0278,
+    0.48,
+    -4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_6_0_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    29.196,
+    0.48,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_6_1_bed",
+   "section": "Floor1",
+   "model": "furn_bed",
+   "at": [
+    33.15,
+    0.48,
+    7.18
+   ],
+   "yaw": 13.02,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_6_2_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    32.5196,
+    0.6922,
+    4.5993
+   ],
+   "yaw": 227.24,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_0_wardrobe",
+   "section": "Floor1",
+   "model": "furn_wardrobe",
+   "at": [
+    36.9,
+    0.755,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_1_table",
+   "section": "Floor1",
+   "model": "furn_table",
+   "at": [
+    36.05,
+    0.78,
+    7.88
+   ],
+   "yaw": 178.51,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_2_bunk_bed",
+   "section": "Floor1",
+   "model": "furn_bunk_bed",
+   "at": [
+    34.416,
+    0.48,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    37.1,
+    0.48,
+    6.68
+   ],
+   "yaw": 10.54,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_4_chair",
+   "section": "Floor1",
+   "model": "furn_chair",
+   "at": [
+    35.35,
+    0.48,
+    7.18
+   ],
+   "yaw": 188.7,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_7_5_nightstand",
+   "section": "Floor1",
+   "model": "furn_nightstand",
+   "at": [
+    37.5849,
+    0.48,
+    2.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_8_0_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    39.405,
+    0.48,
+    7.1128
+   ],
+   "yaw": -3.55,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_8_1_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    40.255,
+    0.48,
+    7.2288
+   ],
+   "yaw": -2.32,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_8_2_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    41.105,
+    0.48,
+    6.9357
+   ],
+   "yaw": -5.24,
+   "far": 60.0
+  },
+  {
+   "id": "f1_room_1_8_3_mattress",
+   "section": "Floor1",
+   "model": "furn_mattress",
+   "at": [
+    41.955,
+    0.48,
+    7.2755
+   ],
+   "yaw": 3.35,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_1_0_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    4.42,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_1_1_bed",
+   "section": "Floor2",
+   "model": "furn_bed",
+   "at": [
+    7.35,
+    4.42,
+    -7.18
+   ],
+   "yaw": 166.56,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_0_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    7.05,
+    4.6951,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_1_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    6.2,
+    4.72,
+    7.88
+   ],
+   "yaw": 179.71,
+   "tilt": 90.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_2_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    7.25,
+    4.42,
+    6.68
+   ],
+   "yaw": -3.29,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_4_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    5.5,
+    4.42,
+    7.18
+   ],
+   "yaw": 198.54,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_1_5_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    7.7349,
+    4.42,
+    2.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_0_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    11.685,
+    4.6951,
+    -8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_1_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    10.835,
+    4.72,
+    -7.88
+   ],
+   "yaw": 1.92,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_2_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    4.42,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    12.47,
+    4.42,
+    -6.68
+   ],
+   "yaw": 164.32,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_4_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    10.135,
+    4.42,
+    -7.18
+   ],
+   "yaw": 389.96,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_2_5_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    12.955,
+    4.42,
+    -2.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_2_0_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    9.36,
+    4.42,
+    6.8297
+   ],
+   "yaw": -0.51,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_2_1_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    10.21,
+    4.42,
+    6.7592
+   ],
+   "yaw": 3.13,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_2_2_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    11.06,
+    4.42,
+    7.0119
+   ],
+   "yaw": 7.47,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_2_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    11.91,
+    4.42,
+    7.1803
+   ],
+   "yaw": 5.95,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_2_4_stool",
+   "section": "Floor2",
+   "model": "furn_stool",
+   "at": [
+    11.1306,
+    4.42,
+    4.08
+   ],
+   "yaw": 56.99,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_3_0_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    15.2,
+    4.42,
+    -6.8156
+   ],
+   "yaw": 174.68,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_3_1_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    16.05,
+    4.42,
+    -6.741
+   ],
+   "yaw": 184.3,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_3_2_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    16.9,
+    4.42,
+    -6.9449
+   ],
+   "yaw": 172.09,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_0_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_1_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    13.836,
+    4.775,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_2_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    13.836,
+    5.725,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_3_bed",
+   "section": "Floor2",
+   "model": "furn_bed",
+   "at": [
+    18.264,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_4_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    18.264,
+    4.845,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_5_carpet",
+   "section": "Floor2",
+   "model": "furn_carpet",
+   "at": [
+    18.745,
+    5.02,
+    7.28
+   ],
+   "yaw": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_6_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    13.5351,
+    4.42,
+    8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_7_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    18.565,
+    4.42,
+    8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_8_shelf",
+   "section": "Floor2",
+   "model": "furn_shelf",
+   "at": [
+    13.335,
+    6.07,
+    3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_3_9_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    18.49,
+    4.42,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_10_fridge",
+   "section": "Floor2",
+   "model": "furn_fridge",
+   "at": [
+    18.439,
+    4.42,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_11_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    16.05,
+    4.42,
+    8.435
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_12_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    15.83,
+    4.42,
+    7.8
+   ],
+   "yaw": -0.96,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_13_stool",
+   "section": "Floor2",
+   "model": "furn_stool",
+   "at": [
+    16.35,
+    4.42,
+    7.75
+   ],
+   "yaw": 5.88,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_3_14_hotplate",
+   "section": "Floor2",
+   "model": "furn_hotplate",
+   "at": [
+    16.35,
+    5.17,
+    8.18
+   ],
+   "yaw": 187.48,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_3_15_tv",
+   "section": "Floor2",
+   "model": "furn_tv",
+   "at": [
+    18.5233,
+    5.07,
+    8.58
+   ],
+   "yaw": -85.45,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_3_16_sofa",
+   "section": "Floor2",
+   "model": "furn_sofa",
+   "at": [
+    13.6678,
+    4.42,
+    4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_0_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    23.196,
+    4.42,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_1_bed",
+   "section": "Floor2",
+   "model": "furn_bed",
+   "at": [
+    28.014,
+    4.42,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_2_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    25.3229,
+    4.42,
+    -6.38
+   ],
+   "yaw": 185.92,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    26.2437,
+    4.42,
+    -4.78
+   ],
+   "yaw": 275.18,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_4_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    24.2084,
+    4.42,
+    -5.98
+   ],
+   "yaw": 220.03,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_5_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    28.24,
+    4.42,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_6_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    25.6313,
+    4.42,
+    -8.13
+   ],
+   "yaw": 160.1,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_7_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    25.4641,
+    4.6322,
+    -7.08
+   ],
+   "yaw": 189.28,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_-1_5_8_stool",
+   "section": "Floor2",
+   "model": "furn_stool",
+   "at": [
+    26.7142,
+    4.58,
+    -3.8298
+   ],
+   "yaw": 337.84,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_0_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    32.265,
+    4.6951,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_1_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    31.415,
+    4.72,
+    7.88
+   ],
+   "yaw": 186.07,
+   "tilt": 90.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_2_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    29.196,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    33.05,
+    4.42,
+    6.68
+   ],
+   "yaw": 2.26,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_4_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    30.715,
+    4.42,
+    7.18
+   ],
+   "yaw": 189.34,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_6_5_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    33.535,
+    4.42,
+    2.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_7_0_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    34.575,
+    4.42,
+    7.0722
+   ],
+   "yaw": 6.72,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_7_1_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    35.425,
+    4.42,
+    7.0788
+   ],
+   "yaw": 2.69,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_7_2_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    36.275,
+    4.42,
+    7.0232
+   ],
+   "yaw": -7.07,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_7_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    37.125,
+    4.42,
+    6.9339
+   ],
+   "yaw": 6.1,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_7_4_stool",
+   "section": "Floor2",
+   "model": "furn_stool",
+   "at": [
+    36.799,
+    4.42,
+    4.08
+   ],
+   "yaw": 77.04,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_0_bed",
+   "section": "Floor2",
+   "model": "furn_bed",
+   "at": [
+    38.466,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_1_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    38.466,
+    4.845,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_2_bunk_bed",
+   "section": "Floor2",
+   "model": "furn_bunk_bed",
+   "at": [
+    42.894,
+    4.42,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_3_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    42.894,
+    4.775,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_4_mattress",
+   "section": "Floor2",
+   "model": "furn_mattress",
+   "at": [
+    42.894,
+    5.725,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_5_carpet",
+   "section": "Floor2",
+   "model": "furn_carpet",
+   "at": [
+    37.985,
+    5.02,
+    7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_6_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    38.1651,
+    4.42,
+    8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_7_nightstand",
+   "section": "Floor2",
+   "model": "furn_nightstand",
+   "at": [
+    43.1949,
+    4.42,
+    8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_8_shelf",
+   "section": "Floor2",
+   "model": "furn_shelf",
+   "at": [
+    37.965,
+    6.07,
+    3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_8_9_wardrobe",
+   "section": "Floor2",
+   "model": "furn_wardrobe",
+   "at": [
+    43.1199,
+    4.42,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_10_fridge",
+   "section": "Floor2",
+   "model": "furn_fridge",
+   "at": [
+    43.0689,
+    4.42,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_11_table",
+   "section": "Floor2",
+   "model": "furn_table",
+   "at": [
+    40.68,
+    4.42,
+    8.435
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_12_chair",
+   "section": "Floor2",
+   "model": "furn_chair",
+   "at": [
+    40.46,
+    4.42,
+    7.8
+   ],
+   "yaw": 8.2,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_13_stool",
+   "section": "Floor2",
+   "model": "furn_stool",
+   "at": [
+    40.98,
+    4.42,
+    7.75
+   ],
+   "yaw": 32.68,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_room_1_8_14_hotplate",
+   "section": "Floor2",
+   "model": "furn_hotplate",
+   "at": [
+    40.98,
+    5.17,
+    8.18
+   ],
+   "yaw": 170.85,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_8_15_tv",
+   "section": "Floor2",
+   "model": "furn_tv",
+   "at": [
+    38.2067,
+    5.07,
+    8.58
+   ],
+   "yaw": 83.98,
+   "far": 25.0
+  },
+  {
+   "id": "f2_room_1_8_16_sofa",
+   "section": "Floor2",
+   "model": "furn_sofa",
+   "at": [
+    38.2978,
+    4.42,
+    4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_0_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    7.05,
+    7.9351,
+    -8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_1_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    6.2,
+    7.96,
+    -7.88
+   ],
+   "yaw": 4.85,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_2_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    7.66,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    7.25,
+    7.66,
+    -6.68
+   ],
+   "yaw": 181.79,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_4_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    5.5,
+    7.66,
+    -7.18
+   ],
+   "yaw": 337.85,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_1_5_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    7.7349,
+    7.66,
+    -2.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_1_0_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    4.725,
+    7.66,
+    6.8592
+   ],
+   "yaw": -7.41,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_1_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    5.575,
+    7.66,
+    6.8018
+   ],
+   "yaw": -1.13,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_1_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    6.425,
+    7.66,
+    6.9977
+   ],
+   "yaw": 5.68,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_1_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    7.275,
+    7.66,
+    7.1463
+   ],
+   "yaw": -4.12,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_1_4_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    6.2107,
+    7.66,
+    4.08
+   ],
+   "yaw": 61.95,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_2_0_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    9.785,
+    7.66,
+    -6.9229
+   ],
+   "yaw": 172.3,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_2_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    10.635,
+    7.66,
+    -7.0551
+   ],
+   "yaw": 186.01,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_2_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    11.485,
+    7.66,
+    -7.0994
+   ],
+   "yaw": 179.81,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_0_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    8.616,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    8.616,
+    8.085,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_2_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    12.654,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    12.654,
+    8.015,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_4_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    12.654,
+    8.965,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_5_carpet",
+   "section": "Floor3",
+   "model": "furn_carpet",
+   "at": [
+    8.1349,
+    8.26,
+    7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_6_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    8.315,
+    7.66,
+    8.58
+   ],
+   "yaw": 90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_7_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    12.955,
+    7.66,
+    8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_8_shelf",
+   "section": "Floor3",
+   "model": "furn_shelf",
+   "at": [
+    8.115,
+    9.31,
+    3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_2_9_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    12.88,
+    7.66,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_10_fridge",
+   "section": "Floor3",
+   "model": "furn_fridge",
+   "at": [
+    12.8289,
+    7.66,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_11_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    10.635,
+    7.66,
+    8.435
+   ],
+   "yaw": 180.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_12_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    10.415,
+    7.66,
+    7.8
+   ],
+   "yaw": -11.28,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_13_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    10.935,
+    7.66,
+    7.75
+   ],
+   "yaw": 74.58,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_2_14_hotplate",
+   "section": "Floor3",
+   "model": "furn_hotplate",
+   "at": [
+    10.935,
+    8.41,
+    8.18
+   ],
+   "yaw": 185.25,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_2_15_tv",
+   "section": "Floor3",
+   "model": "furn_tv",
+   "at": [
+    8.3567,
+    8.31,
+    8.58
+   ],
+   "yaw": 86.94,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_2_16_sofa",
+   "section": "Floor3",
+   "model": "furn_sofa",
+   "at": [
+    8.4478,
+    7.66,
+    4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_0_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    7.66,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    13.836,
+    8.015,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    13.836,
+    8.965,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_3_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    18.264,
+    7.66,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_4_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    18.264,
+    8.085,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_5_carpet",
+   "section": "Floor3",
+   "model": "furn_carpet",
+   "at": [
+    18.745,
+    8.26,
+    -7.28
+   ],
+   "yaw": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_6_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    13.5351,
+    7.66,
+    -8.58
+   ],
+   "yaw": 90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_7_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    18.565,
+    7.66,
+    -8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_8_shelf",
+   "section": "Floor3",
+   "model": "furn_shelf",
+   "at": [
+    13.335,
+    9.31,
+    -3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_-1_3_9_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    18.49,
+    7.66,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_10_fridge",
+   "section": "Floor3",
+   "model": "furn_fridge",
+   "at": [
+    18.439,
+    7.66,
+    -3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_11_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    16.05,
+    7.66,
+    -8.435
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_12_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    15.83,
+    7.66,
+    -7.8
+   ],
+   "yaw": 170.83,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_13_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    16.35,
+    7.66,
+    -7.75
+   ],
+   "yaw": 209.03,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_3_14_hotplate",
+   "section": "Floor3",
+   "model": "furn_hotplate",
+   "at": [
+    16.35,
+    8.41,
+    -8.18
+   ],
+   "yaw": -6.76,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_-1_3_15_tv",
+   "section": "Floor3",
+   "model": "furn_tv",
+   "at": [
+    18.5233,
+    8.31,
+    -8.58
+   ],
+   "yaw": -96.35,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_-1_3_16_sofa",
+   "section": "Floor3",
+   "model": "furn_sofa",
+   "at": [
+    13.6678,
+    7.66,
+    -4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_0_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_1_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    18.264,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    18.264,
+    8.085,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    15.6915,
+    7.66,
+    6.38
+   ],
+   "yaw": -16.76,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_4_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    16.5183,
+    7.66,
+    4.78
+   ],
+   "yaw": 101.81,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_5_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    14.5671,
+    7.66,
+    5.98
+   ],
+   "yaw": 125.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_6_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    18.49,
+    7.66,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_7_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    15.9012,
+    7.66,
+    8.13
+   ],
+   "yaw": 171.26,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_8_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    15.5339,
+    7.8722,
+    7.08
+   ],
+   "yaw": 251.21,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_3_9_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    17.7726,
+    7.82,
+    3.5657
+   ],
+   "yaw": 342.15,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_5_0_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    23.196,
+    7.66,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_-1_5_1_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    27.93,
+    7.66,
+    -7.18
+   ],
+   "yaw": 189.73,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_6_0_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    29.94,
+    7.66,
+    6.6819
+   ],
+   "yaw": 2.06,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_6_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    30.79,
+    7.66,
+    6.863
+   ],
+   "yaw": 3.47,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_6_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    31.64,
+    7.66,
+    7.0983
+   ],
+   "yaw": -7.82,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_6_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    32.49,
+    7.66,
+    6.7554
+   ],
+   "yaw": 2.15,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_0_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    34.416,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_1_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    34.416,
+    8.015,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    34.416,
+    8.965,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_3_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    37.284,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_4_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    37.284,
+    8.085,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_5_carpet",
+   "section": "Floor3",
+   "model": "furn_carpet",
+   "at": [
+    37.765,
+    8.26,
+    7.28
+   ],
+   "yaw": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_6_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    34.115,
+    7.66,
+    8.58
+   ],
+   "yaw": 90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_7_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    37.5849,
+    7.66,
+    8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_8_shelf",
+   "section": "Floor3",
+   "model": "furn_shelf",
+   "at": [
+    33.915,
+    9.31,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_7_9_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    37.5099,
+    7.66,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_10_fridge",
+   "section": "Floor3",
+   "model": "furn_fridge",
+   "at": [
+    37.4589,
+    7.66,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_11_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    35.85,
+    7.66,
+    8.435
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_12_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    35.63,
+    7.66,
+    7.8
+   ],
+   "yaw": 5.63,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_13_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    36.15,
+    7.66,
+    7.75
+   ],
+   "yaw": 43.63,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_7_14_hotplate",
+   "section": "Floor3",
+   "model": "furn_hotplate",
+   "at": [
+    36.15,
+    8.41,
+    8.18
+   ],
+   "yaw": 173.78,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_7_15_tv",
+   "section": "Floor3",
+   "model": "furn_tv",
+   "at": [
+    37.5433,
+    8.31,
+    8.58
+   ],
+   "yaw": -87.93,
+   "far": 25.0
+  },
+  {
+   "id": "f3_room_1_8_0_bunk_bed",
+   "section": "Floor3",
+   "model": "furn_bunk_bed",
+   "at": [
+    38.466,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_1_bed",
+   "section": "Floor3",
+   "model": "furn_bed",
+   "at": [
+    42.894,
+    7.66,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_2_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    42.894,
+    8.085,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_3_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    40.3661,
+    7.66,
+    6.38
+   ],
+   "yaw": -16.03,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_4_mattress",
+   "section": "Floor3",
+   "model": "furn_mattress",
+   "at": [
+    41.167,
+    7.66,
+    4.78
+   ],
+   "yaw": 91.69,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_5_nightstand",
+   "section": "Floor3",
+   "model": "furn_nightstand",
+   "at": [
+    39.4848,
+    7.66,
+    5.98
+   ],
+   "yaw": 73.1,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_6_wardrobe",
+   "section": "Floor3",
+   "model": "furn_wardrobe",
+   "at": [
+    43.1199,
+    7.66,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_7_table",
+   "section": "Floor3",
+   "model": "furn_table",
+   "at": [
+    40.8834,
+    7.66,
+    8.13
+   ],
+   "yaw": 193.73,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_8_chair",
+   "section": "Floor3",
+   "model": "furn_chair",
+   "at": [
+    41.0469,
+    7.8722,
+    7.08
+   ],
+   "yaw": 61.78,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_9_stool",
+   "section": "Floor3",
+   "model": "furn_stool",
+   "at": [
+    41.6453,
+    7.82,
+    3.4907
+   ],
+   "yaw": 28.32,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f3_room_1_8_10_shelf",
+   "section": "Floor3",
+   "model": "furn_shelf",
+   "at": [
+    37.965,
+    9.31,
+    3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_1_0_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    4.725,
+    10.9,
+    -6.9172
+   ],
+   "yaw": 178.76,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_1_1_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    5.575,
+    10.9,
+    -7.0836
+   ],
+   "yaw": 173.07,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_1_2_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    6.425,
+    10.9,
+    -6.8834
+   ],
+   "yaw": 183.94,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_1_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    7.275,
+    10.9,
+    -6.6803
+   ],
+   "yaw": 174.5,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_0_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    4.566,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_1_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    4.566,
+    11.325,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_2_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    7.434,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    7.434,
+    11.255,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_4_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    7.434,
+    12.205,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_5_carpet",
+   "section": "Floor4",
+   "model": "furn_carpet",
+   "at": [
+    4.085,
+    11.5,
+    7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_6_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    4.265,
+    10.9,
+    8.58
+   ],
+   "yaw": 90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_7_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    7.7349,
+    10.9,
+    8.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_8_shelf",
+   "section": "Floor4",
+   "model": "furn_shelf",
+   "at": [
+    4.065,
+    12.55,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_1_9_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    7.66,
+    10.9,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_10_fridge",
+   "section": "Floor4",
+   "model": "furn_fridge",
+   "at": [
+    7.609,
+    10.9,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_11_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    6.0,
+    10.9,
+    8.435
+   ],
+   "yaw": 180.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_12_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    5.78,
+    10.9,
+    7.8
+   ],
+   "yaw": 4.09,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_13_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    6.3,
+    10.9,
+    7.75
+   ],
+   "yaw": 2.48,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_1_14_hotplate",
+   "section": "Floor4",
+   "model": "furn_hotplate",
+   "at": [
+    6.3,
+    11.65,
+    8.18
+   ],
+   "yaw": 182.57,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_1_15_tv",
+   "section": "Floor4",
+   "model": "furn_tv",
+   "at": [
+    4.3068,
+    11.55,
+    8.58
+   ],
+   "yaw": 96.57,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_2_0_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    8.616,
+    10.9,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_1_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    8.616,
+    11.325,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_2_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    12.654,
+    10.9,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    12.654,
+    11.255,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_4_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    12.654,
+    12.205,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_5_carpet",
+   "section": "Floor4",
+   "model": "furn_carpet",
+   "at": [
+    8.1349,
+    11.5,
+    -7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_6_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    8.315,
+    10.9,
+    -8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_7_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    12.955,
+    10.9,
+    -8.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_8_shelf",
+   "section": "Floor4",
+   "model": "furn_shelf",
+   "at": [
+    8.115,
+    12.55,
+    -3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_2_9_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    12.88,
+    10.9,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_10_fridge",
+   "section": "Floor4",
+   "model": "furn_fridge",
+   "at": [
+    12.8289,
+    10.9,
+    -3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_11_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    10.635,
+    10.9,
+    -8.435
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_12_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    10.415,
+    10.9,
+    -7.8
+   ],
+   "yaw": 172.09,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_13_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    10.935,
+    10.9,
+    -7.75
+   ],
+   "yaw": 267.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_2_14_hotplate",
+   "section": "Floor4",
+   "model": "furn_hotplate",
+   "at": [
+    10.935,
+    11.65,
+    -8.18
+   ],
+   "yaw": 6.15,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_2_15_tv",
+   "section": "Floor4",
+   "model": "furn_tv",
+   "at": [
+    8.3567,
+    11.55,
+    -8.58
+   ],
+   "yaw": 94.65,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_2_16_sofa",
+   "section": "Floor4",
+   "model": "furn_sofa",
+   "at": [
+    8.4478,
+    10.9,
+    -4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_0_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_1_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    12.654,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_2_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    10.4052,
+    10.9,
+    6.38
+   ],
+   "yaw": -6.15,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_3_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    9.4332,
+    10.9,
+    5.98
+   ],
+   "yaw": 139.08,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_4_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    12.88,
+    10.9,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_5_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    10.545,
+    10.9,
+    8.13
+   ],
+   "yaw": 165.34,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_6_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    10.1004,
+    11.1121,
+    7.08
+   ],
+   "yaw": 12.22,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_7_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    12.0541,
+    11.06,
+    3.382
+   ],
+   "yaw": 140.32,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_2_8_shelf",
+   "section": "Floor4",
+   "model": "furn_shelf",
+   "at": [
+    8.115,
+    12.55,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_-1_3_0_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    10.9,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_1_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    18.264,
+    10.9,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_2_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    15.8271,
+    10.9,
+    -6.38
+   ],
+   "yaw": 177.1,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    16.4857,
+    10.9,
+    -4.78
+   ],
+   "yaw": 273.49,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_4_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    14.6415,
+    10.9,
+    -5.98
+   ],
+   "yaw": 329.21,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_5_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    18.49,
+    10.9,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_6_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    15.9408,
+    10.9,
+    -8.13
+   ],
+   "yaw": 190.02,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_7_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    16.3154,
+    11.1121,
+    -7.08
+   ],
+   "yaw": 524.85,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_3_8_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    17.044,
+    11.06,
+    -3.6145
+   ],
+   "yaw": 228.55,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_3_0_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_3_1_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    18.18,
+    10.9,
+    7.18
+   ],
+   "yaw": -12.81,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_0_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    26.655,
+    11.1751,
+    -8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_1_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    25.805,
+    11.2,
+    -7.88
+   ],
+   "yaw": 7.73,
+   "tilt": 90.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_2_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    23.196,
+    10.9,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    27.83,
+    10.9,
+    -6.68
+   ],
+   "yaw": 174.62,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_4_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    25.105,
+    10.9,
+    -7.18
+   ],
+   "yaw": 389.05,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_-1_5_5_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    28.315,
+    10.9,
+    -2.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_0_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    29.196,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_1_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    29.196,
+    11.325,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_2_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    33.234,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_3_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    33.234,
+    11.255,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_4_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    33.234,
+    12.205,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_5_carpet",
+   "section": "Floor4",
+   "model": "furn_carpet",
+   "at": [
+    28.7149,
+    11.5,
+    7.28
+   ],
+   "yaw": 90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_6_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    28.8951,
+    10.9,
+    8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_7_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    33.535,
+    10.9,
+    8.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_8_shelf",
+   "section": "Floor4",
+   "model": "furn_shelf",
+   "at": [
+    28.695,
+    12.55,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_6_9_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    33.4599,
+    10.9,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_10_fridge",
+   "section": "Floor4",
+   "model": "furn_fridge",
+   "at": [
+    33.4089,
+    10.9,
+    3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_11_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    31.215,
+    10.9,
+    8.435
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_12_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    30.995,
+    10.9,
+    7.8
+   ],
+   "yaw": -4.44,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_13_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    31.515,
+    10.9,
+    7.75
+   ],
+   "yaw": 53.89,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_6_14_hotplate",
+   "section": "Floor4",
+   "model": "furn_hotplate",
+   "at": [
+    31.515,
+    11.65,
+    8.18
+   ],
+   "yaw": 174.48,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_6_15_tv",
+   "section": "Floor4",
+   "model": "furn_tv",
+   "at": [
+    28.9367,
+    11.55,
+    8.58
+   ],
+   "yaw": 89.48,
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_6_16_sofa",
+   "section": "Floor4",
+   "model": "furn_sofa",
+   "at": [
+    29.0278,
+    10.9,
+    4.73
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_0_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    34.416,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_1_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    37.284,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_2_mattress",
+   "section": "Floor4",
+   "model": "furn_mattress",
+   "at": [
+    35.4152,
+    10.9,
+    6.38
+   ],
+   "yaw": 17.36,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_3_nightstand",
+   "section": "Floor4",
+   "model": "furn_nightstand",
+   "at": [
+    35.116,
+    10.9,
+    5.98
+   ],
+   "yaw": 38.03,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_4_wardrobe",
+   "section": "Floor4",
+   "model": "furn_wardrobe",
+   "at": [
+    37.5099,
+    10.9,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_5_table",
+   "section": "Floor4",
+   "model": "furn_table",
+   "at": [
+    35.7153,
+    10.9,
+    8.13
+   ],
+   "yaw": 194.68,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_6_chair",
+   "section": "Floor4",
+   "model": "furn_chair",
+   "at": [
+    35.4601,
+    11.1121,
+    7.08
+   ],
+   "yaw": 99.38,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_7_stool",
+   "section": "Floor4",
+   "model": "furn_stool",
+   "at": [
+    36.7043,
+    11.06,
+    3.4633
+   ],
+   "yaw": 115.78,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_7_8_shelf",
+   "section": "Floor4",
+   "model": "furn_shelf",
+   "at": [
+    33.915,
+    12.55,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f4_room_1_8_0_bunk_bed",
+   "section": "Floor4",
+   "model": "furn_bunk_bed",
+   "at": [
+    38.466,
+    10.9,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_room_1_8_1_bed",
+   "section": "Floor4",
+   "model": "furn_bed",
+   "at": [
+    42.81,
+    10.9,
+    7.18
+   ],
+   "yaw": -7.86,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    14.14,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_1_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    4.566,
+    14.495,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_2_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    4.566,
+    15.445,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_3_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    7.434,
+    14.14,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_4_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    7.434,
+    14.565,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_5_carpet",
+   "section": "Floor5",
+   "model": "furn_carpet",
+   "at": [
+    7.9151,
+    14.74,
+    -7.28
+   ],
+   "yaw": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_6_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    4.265,
+    14.14,
+    -8.58
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_7_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    7.7349,
+    14.14,
+    -8.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_8_shelf",
+   "section": "Floor5",
+   "model": "furn_shelf",
+   "at": [
+    4.065,
+    15.79,
+    -3.98
+   ],
+   "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f5_room_-1_1_9_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    7.66,
+    14.14,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_10_fridge",
+   "section": "Floor5",
+   "model": "furn_fridge",
+   "at": [
+    7.609,
+    14.14,
+    -3.58
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_11_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    6.0,
+    14.14,
+    -8.435
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_12_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    5.78,
+    14.14,
+    -7.8
+   ],
+   "yaw": 176.24,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_13_stool",
+   "section": "Floor5",
+   "model": "furn_stool",
+   "at": [
+    6.3,
+    14.14,
+    -7.75
+   ],
+   "yaw": 242.67,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_1_14_hotplate",
+   "section": "Floor5",
+   "model": "furn_hotplate",
+   "at": [
+    6.3,
+    14.89,
+    -8.18
+   ],
+   "yaw": 7.02,
+   "far": 25.0
+  },
+  {
+   "id": "f5_room_-1_1_15_tv",
+   "section": "Floor5",
+   "model": "furn_tv",
+   "at": [
+    7.6932,
+    14.79,
+    -8.58
+   ],
+   "yaw": -92.17,
+   "far": 25.0
+  },
+  {
+   "id": "f5_room_1_1_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    4.566,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    7.434,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_2_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    7.434,
+    14.565,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_3_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    5.598,
+    14.14,
+    6.38
+   ],
+   "yaw": 5.57,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_4_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    6.5803,
+    14.14,
+    4.78
+   ],
+   "yaw": 92.26,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_5_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    5.4511,
+    14.14,
+    5.98
+   ],
+   "yaw": 74.17,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_6_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    7.66,
+    14.14,
+    2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_7_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    5.7991,
+    14.14,
+    8.13
+   ],
+   "yaw": 185.68,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_8_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    5.9872,
+    14.3521,
+    7.08
+   ],
+   "yaw": 302.09,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_1_9_stool",
+   "section": "Floor5",
+   "model": "furn_stool",
+   "at": [
+    6.5828,
+    14.3,
+    3.6379
+   ],
+   "yaw": 61.49,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    14.14,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-WHT-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    12.654,
+    14.14,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_2_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    12.654,
+    14.565,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_3_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    10.2621,
+    14.14,
+    -6.38
+   ],
+   "yaw": 183.3,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_4_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    11.1602,
+    14.14,
+    -4.78
+   ],
+   "yaw": 292.51,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_5_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    9.4562,
+    14.14,
+    -5.98
+   ],
+   "yaw": 234.49,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_6_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    12.88,
+    14.14,
+    -2.78
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_7_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    10.8583,
+    14.14,
+    -8.13
+   ],
+   "yaw": 172.54,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_8_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    10.4063,
+    14.3521,
+    -7.08
+   ],
+   "yaw": 253.3,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_2_9_stool",
+   "section": "Floor5",
+   "model": "furn_stool",
+   "at": [
+    11.1876,
+    14.3,
+    -3.4061
+   ],
+   "yaw": 349.05,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_2_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    8.616,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_2_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    12.57,
+    14.14,
+    7.18
+   ],
+   "yaw": -6.08,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_3_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    14.14,
+    -7.28
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_3_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    18.18,
+    14.14,
+    -7.18
+   ],
+   "yaw": 178.97,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_3_2_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    17.1082,
+    14.3521,
+    -4.5004
+   ],
+   "yaw": 321.12,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_0_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    17.1,
+    14.4151,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_1_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    16.25,
+    14.44,
+    7.88
+   ],
+   "yaw": 176.0,
+   "tilt": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_2_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    13.836,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_3_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    18.08,
+    14.14,
+    6.68
+   ],
+   "yaw": 11.01,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_4_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    15.55,
+    14.14,
+    7.18
+   ],
+   "yaw": 191.09,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_3_5_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    18.565,
+    14.14,
+    2.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_5_0_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    24.755,
+    14.14,
+    -7.2573
+   ],
+   "yaw": 179.12,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_5_1_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    25.605,
+    14.14,
+    -7.0874
+   ],
+   "yaw": 186.74,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_5_2_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    26.455,
+    14.14,
+    -6.6883
+   ],
+   "yaw": 183.33,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_-1_5_3_stool",
+   "section": "Floor5",
+   "model": "furn_stool",
+   "at": [
+    26.1186,
+    14.14,
+    -4.08
+   ],
+   "yaw": 230.18,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    29.196,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    33.234,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_2_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    33.234,
+    14.565,
+    7.28
+   ],
+   "yaw": 180.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_3_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    30.9565,
+    14.14,
+    6.38
+   ],
+   "yaw": -1.61,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_4_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    31.7676,
+    14.14,
+    4.78
+   ],
+   "yaw": 85.67,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_5_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    30.2456,
+    14.14,
+    5.98
+   ],
+   "yaw": 47.2,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_6_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    33.4599,
+    14.14,
+    2.78
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_7_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    31.1116,
+    14.14,
+    8.13
+   ],
+   "yaw": 158.98,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_8_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    31.1643,
+    14.3521,
+    7.08
+   ],
+   "yaw": 121.37,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_9_stool",
+   "section": "Floor5",
+   "model": "furn_stool",
+   "at": [
+    31.7981,
+    14.3,
+    3.875
+   ],
+   "yaw": 167.18,
+   "tilt": -90.0,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_6_10_shelf",
+   "section": "Floor5",
+   "model": "furn_shelf",
+   "at": [
+    28.695,
+    15.79,
+    3.98
+   ],
+   "yaw": 90.0,
+   "variant": "LM-WAL-GLS",
+   "far": 25.0
+  },
+  {
+   "id": "f5_room_1_7_0_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    34.416,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_7_1_bed",
+   "section": "Floor5",
+   "model": "furn_bed",
+   "at": [
+    37.2,
+    14.14,
+    7.18
+   ],
+   "yaw": -3.75,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_7_2_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    35.5419,
+    14.3521,
+    5.4615
+   ],
+   "yaw": 306.31,
+   "tilt": 90.0,
+   "variant": "EN-GBL-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_0_wardrobe",
+   "section": "Floor5",
+   "model": "furn_wardrobe",
+   "at": [
+    41.73,
+    14.4151,
+    8.26
+   ],
+   "yaw": 90.0,
+   "tilt": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_1_table",
+   "section": "Floor5",
+   "model": "furn_table",
+   "at": [
+    40.88,
+    14.44,
+    7.88
+   ],
+   "yaw": 186.08,
+   "tilt": 90.0,
+   "variant": "LM-WAL-GLS",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_2_bunk_bed",
+   "section": "Floor5",
+   "model": "furn_bunk_bed",
+   "at": [
+    38.466,
+    14.14,
+    7.28
+   ],
+   "yaw": 180.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_3_mattress",
+   "section": "Floor5",
+   "model": "furn_mattress",
+   "at": [
+    42.71,
+    14.14,
+    6.68
+   ],
+   "yaw": -1.43,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_4_chair",
+   "section": "Floor5",
+   "model": "furn_chair",
+   "at": [
+    40.18,
+    14.14,
+    7.18
+   ],
+   "yaw": 176.67,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f5_room_1_8_5_nightstand",
+   "section": "Floor5",
+   "model": "furn_nightstand",
+   "at": [
+    43.1949,
+    14.14,
+    2.58
+   ],
+   "yaw": -90.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  }
+ ],
+ "clear": [
+  {
+   "section": "Floor1",
+   "min": [
+    4.14,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    5.14,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    6.86,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    7.86,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    4.14,
+    0.47,
+    6.23
+   ],
+   "max": [
+    5.14,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    6.86,
+    0.47,
+    6.23
+   ],
+   "max": [
+    7.86,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    8.19,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    9.19,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    12.08,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    13.08,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    8.19,
+    0.47,
+    6.23
+   ],
+   "max": [
+    9.19,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    12.08,
+    0.47,
+    6.23
+   ],
+   "max": [
+    13.08,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    13.41,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    14.41,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    17.69,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    18.69,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    13.41,
+    0.47,
+    6.23
+   ],
+   "max": [
+    14.41,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    17.69,
+    0.47,
+    6.23
+   ],
+   "max": [
+    18.69,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    22.77,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    23.77,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    27.44,
+    0.47,
+    -8.33
+   ],
+   "max": [
+    28.44,
+    2.38,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    28.77,
+    0.47,
+    6.23
+   ],
+   "max": [
+    29.77,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    32.66,
+    0.47,
+    6.23
+   ],
+   "max": [
+    33.66,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    33.99,
+    0.47,
+    6.23
+   ],
+   "max": [
+    34.99,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    36.71,
+    0.47,
+    6.23
+   ],
+   "max": [
+    37.71,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    38.04,
+    0.47,
+    6.23
+   ],
+   "max": [
+    39.04,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    42.32,
+    0.47,
+    6.23
+   ],
+   "max": [
+    43.32,
+    2.38,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    4.14,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    5.14,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    6.86,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    7.86,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    4.14,
+    4.41,
+    6.23
+   ],
+   "max": [
+    5.14,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    6.86,
+    4.41,
+    6.23
+   ],
+   "max": [
+    7.86,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    8.19,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    9.19,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    12.08,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    13.08,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    8.19,
+    4.41,
+    6.23
+   ],
+   "max": [
+    9.19,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    12.08,
+    4.41,
+    6.23
+   ],
+   "max": [
+    13.08,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    13.41,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    14.41,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    17.69,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    18.69,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    13.41,
+    4.41,
+    6.23
+   ],
+   "max": [
+    14.41,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    17.69,
+    4.41,
+    6.23
+   ],
+   "max": [
+    18.69,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    22.77,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    23.77,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    27.44,
+    4.41,
+    -8.33
+   ],
+   "max": [
+    28.44,
+    6.32,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    28.77,
+    4.41,
+    6.23
+   ],
+   "max": [
+    29.77,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    32.66,
+    4.41,
+    6.23
+   ],
+   "max": [
+    33.66,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    33.99,
+    4.41,
+    6.23
+   ],
+   "max": [
+    34.99,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    36.71,
+    4.41,
+    6.23
+   ],
+   "max": [
+    37.71,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    38.04,
+    4.41,
+    6.23
+   ],
+   "max": [
+    39.04,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    42.32,
+    4.41,
+    6.23
+   ],
+   "max": [
+    43.32,
+    6.32,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    4.14,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    5.14,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    6.86,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    7.86,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    4.14,
+    7.65,
+    6.23
+   ],
+   "max": [
+    5.14,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    6.86,
+    7.65,
+    6.23
+   ],
+   "max": [
+    7.86,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    8.19,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    9.19,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    12.08,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    13.08,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    8.19,
+    7.65,
+    6.23
+   ],
+   "max": [
+    9.19,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    12.08,
+    7.65,
+    6.23
+   ],
+   "max": [
+    13.08,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    13.41,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    14.41,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    17.69,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    18.69,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    13.41,
+    7.65,
+    6.23
+   ],
+   "max": [
+    14.41,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    17.69,
+    7.65,
+    6.23
+   ],
+   "max": [
+    18.69,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    22.77,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    23.77,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    27.44,
+    7.65,
+    -8.33
+   ],
+   "max": [
+    28.44,
+    9.56,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    28.77,
+    7.65,
+    6.23
+   ],
+   "max": [
+    29.77,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    32.66,
+    7.65,
+    6.23
+   ],
+   "max": [
+    33.66,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    33.99,
+    7.65,
+    6.23
+   ],
+   "max": [
+    34.99,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    36.71,
+    7.65,
+    6.23
+   ],
+   "max": [
+    37.71,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    38.04,
+    7.65,
+    6.23
+   ],
+   "max": [
+    39.04,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    42.32,
+    7.65,
+    6.23
+   ],
+   "max": [
+    43.32,
+    9.56,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    4.14,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    5.14,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    6.86,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    7.86,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    4.14,
+    10.89,
+    6.23
+   ],
+   "max": [
+    5.14,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    6.86,
+    10.89,
+    6.23
+   ],
+   "max": [
+    7.86,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    8.19,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    9.19,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    12.08,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    13.08,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    8.19,
+    10.89,
+    6.23
+   ],
+   "max": [
+    9.19,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    12.08,
+    10.89,
+    6.23
+   ],
+   "max": [
+    13.08,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    13.41,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    14.41,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    17.69,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    18.69,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    13.41,
+    10.89,
+    6.23
+   ],
+   "max": [
+    14.41,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    17.69,
+    10.89,
+    6.23
+   ],
+   "max": [
+    18.69,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    22.77,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    23.77,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    27.44,
+    10.89,
+    -8.33
+   ],
+   "max": [
+    28.44,
+    12.8,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    28.77,
+    10.89,
+    6.23
+   ],
+   "max": [
+    29.77,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    32.66,
+    10.89,
+    6.23
+   ],
+   "max": [
+    33.66,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    33.99,
+    10.89,
+    6.23
+   ],
+   "max": [
+    34.99,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    36.71,
+    10.89,
+    6.23
+   ],
+   "max": [
+    37.71,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    38.04,
+    10.89,
+    6.23
+   ],
+   "max": [
+    39.04,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    42.32,
+    10.89,
+    6.23
+   ],
+   "max": [
+    43.32,
+    12.8,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    4.14,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    5.14,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    6.86,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    7.86,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    4.14,
+    14.13,
+    6.23
+   ],
+   "max": [
+    5.14,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    6.86,
+    14.13,
+    6.23
+   ],
+   "max": [
+    7.86,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    8.19,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    9.19,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    12.08,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    13.08,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    8.19,
+    14.13,
+    6.23
+   ],
+   "max": [
+    9.19,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    12.08,
+    14.13,
+    6.23
+   ],
+   "max": [
+    13.08,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    13.41,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    14.41,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    17.69,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    18.69,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    13.41,
+    14.13,
+    6.23
+   ],
+   "max": [
+    14.41,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    17.69,
+    14.13,
+    6.23
+   ],
+   "max": [
+    18.69,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    22.77,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    23.77,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    27.44,
+    14.13,
+    -8.33
+   ],
+   "max": [
+    28.44,
+    16.04,
+    -6.23
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    28.77,
+    14.13,
+    6.23
+   ],
+   "max": [
+    29.77,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    32.66,
+    14.13,
+    6.23
+   ],
+   "max": [
+    33.66,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    33.99,
+    14.13,
+    6.23
+   ],
+   "max": [
+    34.99,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    36.71,
+    14.13,
+    6.23
+   ],
+   "max": [
+    37.71,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    38.04,
+    14.13,
+    6.23
+   ],
+   "max": [
+    39.04,
+    16.04,
+    8.33
+   ]
+  },
+  {
+   "section": "Floor5",
+   "min": [
+    42.32,
+    14.13,
+    6.23
+   ],
+   "max": [
+    43.32,
+    16.04,
+    8.33
+   ]
+  }
+ ]
+}

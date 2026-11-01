@@ -18,6 +18,12 @@ const DECAL_DIR: String = "res://assets/textures/dorm_decals"
 ## мелочь не рисуется дальше far, у мешков и обломков (solid) — коробка столкновений. Без моделей их нет.
 const PROPS_PATH: String = "res://data/blockouts/dorm_props.json"
 const PROP_DIR: String = "res://assets/models/dorm/props"
+## Мебель — игровые модели (tools/dorm_modules/furniture_game.py → assets/models/dorm/furniture, index furniture.json:
+## варианты отделки, блеск ворса), расстановка по комнатам (furnish_rooms.py). Серые кровати плана в прямоугольниках
+## clear снимаются, только если модели на месте: без assets/models стоит серый план.
+const FURNITURE_PATH: String = "res://data/blockouts/dorm_furniture.json"
+const FURNITURE_DIR: String = "res://assets/models/dorm/furniture"
+const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress"]
 
 @export var section_id: String = "Site"
 @export_file("*.json") var plan_path: String = "res://data/blockouts/dorm.json"
@@ -27,6 +33,10 @@ var floor_levels: Array = []
 var gi_footprints: Array[Rect2] = []
 ## Модули Blender этапа 2 (dorm_modules.gd) — null, если их файлов нет.
 var modules: RefCounted = null
+## Где серые кровати плана уступили место мебели (в осях этажа).
+var furniture_clear: Array[AABB] = []
+## Материалы мебели на модель, вариант и поверхность: 387 вещей не плодят копий.
+var _furniture_mats: Dictionary = {}
 
 
 func _ready() -> void:
@@ -54,6 +64,13 @@ func rebuild() -> void:
 		return
 	var palette: Dictionary = _palette(plan)
 	modules = DormModules.new(plan,section_id,palette) if DormModules.available() else null
+	var furniture: Dictionary = _read_json(FURNITURE_PATH) if ResourceLoader.exists(FURNITURE_DIR+"/furn_bed.gltf") else {}
+	furniture_clear.clear()
+	_furniture_mats.clear()
+	for item: Dictionary in furniture.get("clear",[]):
+		if String(item.section)==section_id:
+			var lo: Vector3 = _vec(item.min)
+			furniture_clear.append(AABB(lo,_vec(item.max)-lo))
 	_build_geometry(self,section,palette)
 	for group_name: String in section.get("groups",{}):
 		var group: Node3D = Node3D.new()
@@ -118,6 +135,10 @@ func rebuild() -> void:
 	for item: Dictionary in _read_json(PROPS_PATH).get("props",[]):
 		if String(item.get("section",""))==section_id:
 			_add_prop(item)
+	var index: Dictionary = _read_json(FURNITURE_DIR+"/furniture.json")
+	for item: Dictionary in furniture.get("furniture",[]):
+		if String(item.get("section",""))==section_id:
+			_add_furniture(item,index.get(String(item.model),{}))
 	for item: Dictionary in section.get("probes", []):
 		var probe: ReflectionProbe = ReflectionProbe.new()
 		probe.name = String(item.get("id","BathroomReflection"))
@@ -138,6 +159,8 @@ func rebuild() -> void:
 func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> void:
 	var builder: RefCounted = Geometry.new(target,palette)
 	for item: Dictionary in data.get("boxes",[]):
+		if _cleared(String(item.mat),_vec(item.at)):
+			continue
 		if String(item.mat)=="mirror":
 			# Отдельная поверхность получает пробу своей комнаты, а не всего этажа.
 			var surface: MeshInstance3D = MeshInstance3D.new()
@@ -162,6 +185,8 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 	for item: Dictionary in data.get("beams",[]):
 		var start: Vector3 = _vec(item.start)
 		var end: Vector3 = _vec(item.end)
+		if _cleared(String(item.mat),(start+end)*0.5):
+			continue
 		# перила лестницы с маршами-модулями — модулем ограждения (dorm_modules.gd), здесь остаётся коллизия
 		var visual: bool = modules==null or not bool(modules.call("rail_beam",item))
 		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
@@ -290,6 +315,94 @@ func _add_prop(item: Dictionary) -> void:
 			mesh_node.add_child(body)
 	prop.add_to_group("dorm_props")
 	add_child(prop)
+
+
+## Брусок серой кровати (стойка, рама, матрас, перекладина) в месте, где теперь стоит мебель.
+func _cleared(mat: String, at: Vector3) -> bool:
+	if mat not in FURNITURE_GREYBOX:
+		return false
+	for box: AABB in furniture_clear:
+		if box.has_point(at):
+			return true
+	return false
+
+
+## Мебель: модель стоит низом в at (наклон tilt вокруг своей X — до поворота yaw, подъём уже в at). Вариант отделки —
+## карты textures/<модель>__<код>_* вместо карт материала модели; solid — коробка столкновений по габариту.
+func _add_furniture(item: Dictionary, info: Dictionary) -> void:
+	var model: String = String(item.model)
+	var path: String = "%s/%s.gltf" % [FURNITURE_DIR,model]
+	if not ResourceLoader.exists(path):
+		return
+	var node: Node3D = (load(path) as PackedScene).instantiate() as Node3D
+	node.name = String(item.id)
+	node.position = _vec(item.at)
+	node.rotation_degrees = Vector3(float(item.get("tilt",0.0)),float(item.get("yaw",0.0)),0.0)
+	var variant: String = String(item.get("variant",""))
+	var far: float = float(item.get("far",60.0))
+	for found: Node in node.find_children("*","MeshInstance3D",true,false):
+		var mesh_node: MeshInstance3D = found as MeshInstance3D
+		mesh_node.visibility_range_end = far
+		mesh_node.visibility_range_end_margin = 2.0
+		mesh_node.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		for s: int in range(mesh_node.mesh.get_surface_count()):
+			var source: StandardMaterial3D = mesh_node.mesh.surface_get_material(s) as StandardMaterial3D
+			if source==null:
+				continue
+			var mat: StandardMaterial3D = _furniture_material(source,model,variant,info)
+			if mat!=source:
+				mesh_node.set_surface_override_material(s,mat)
+		if bool(item.get("solid",false)):
+			var body: StaticBody3D = StaticBody3D.new()
+			var shape: CollisionShape3D = CollisionShape3D.new()
+			var box: BoxShape3D = BoxShape3D.new()
+			var aabb: AABB = mesh_node.get_aabb()
+			box.size = aabb.size
+			shape.shape = box
+			shape.position = aabb.get_center()
+			body.add_child(shape)
+			mesh_node.add_child(body)
+	node.add_to_group("dorm_furniture")
+	add_child(node)
+
+
+## Панцирная сетка («_сетка») — прозрачность шумом: отсечение по порогу на mip-уровнях съедает проволоку 1,8 мм, шум
+## держит ячейки и издали; стекло («_стекло») — прозрачное; вариант — свои карты; у ковра — блеск ворса (rim из index).
+func _furniture_material(source: StandardMaterial3D, model: String, variant: String, info: Dictionary) -> StandardMaterial3D:
+	var name_id: String = source.resource_name
+	var key: String = "%s|%s|%s" % [model,variant,name_id]
+	if _furniture_mats.has(key):
+		return _furniture_mats[key] as StandardMaterial3D
+	var mat: StandardMaterial3D = source
+	if name_id.ends_with("_сетка"):
+		mat = source.duplicate() as StandardMaterial3D
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_HASH
+		mat.alpha_hash_scale = 1.0
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	elif name_id.ends_with("_стекло"):
+		mat = source.duplicate() as StandardMaterial3D
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color = Color(0.6,0.62,0.6,0.28)
+		mat.metallic = 0.0
+	elif name_id==model and (variant!="" or info.has("rim")):
+		mat = source.duplicate() as StandardMaterial3D
+		if variant!="":
+			var base: String = "%s/textures/%s__%s_" % [FURNITURE_DIR,model,variant]
+			var color: Texture2D = load(base+"baseColor.webp") as Texture2D
+			var orm: Texture2D = load(base+"occlusionRoughnessMetallic.webp") as Texture2D
+			var normal: Texture2D = load(base+"normal.webp") as Texture2D
+			if color!=null:mat.albedo_texture = color
+			if orm!=null:
+				mat.roughness_texture = orm
+				mat.metallic_texture = orm
+				if mat.ao_enabled:mat.ao_texture = orm
+			if normal!=null:mat.normal_texture = normal
+		if info.has("rim"):
+			mat.rim_enabled = true
+			mat.rim = float(info.rim[0])
+			mat.rim_tint = float(info.rim[1])
+	_furniture_mats[key] = mat
+	return mat
 
 
 static func _vec(values: Array) -> Vector3:
