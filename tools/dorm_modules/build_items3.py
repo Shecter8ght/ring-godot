@@ -71,6 +71,10 @@ def mats() -> dict:
         "screen": L.material("Экран", (0.01, 0.01, 0.012), 0.08),
         "keycap": L.material("Клавиши", (0.025, 0.025, 0.025), 0.55),
         "laptop_alu": L.material("Корпус_ноутбук", (0.35, 0.35, 0.37), 0.35, 0.8),
+        "tube_plastic": L.material("Тубус_пластик", (0.05, 0.05, 0.055), 0.4),
+        "book_cover": L.material("Переплёт", (0.2, 0.25, 0.4), 0.6),
+        "book_pages": L.material("Обрез", (0.85, 0.83, 0.77), 0.8),
+        "notebook_cover": L.material("Обложка_тетради", (0.3, 0.5, 0.35), 0.5),
     }
 
 
@@ -1747,6 +1751,289 @@ ITEMS_C = [
 ]
 
 
+
+# ---------------------------------------------------------------- группа Г: тубус, тетради, учебники
+
+def extrude_profile(bm, prof: list, y0: float, y1: float, caps: bool = True) -> None:
+    """Замкнутое сечение в плоскости XZ, вытянутое вдоль Y от y0 до y1."""
+    a = [bm.verts.new((x, y0, z)) for x, z in prof]
+    b = [bm.verts.new((x, y1, z)) for x, z in prof]
+    n = len(prof)
+    for i in range(n):
+        j = (i + 1) % n
+        bm.faces.new((a[i], a[j], b[j], b[i]))
+    if caps:
+        bm.faces.new(a[::-1])
+        bm.faces.new(b)
+
+
+def book_closed(bm_cover, bm_block, W: float, Lb: float, T: float, at=(0.0, 0.0, 0.0), yaw: float = 0.0, upright: bool = False,
+                lean: float = 0.0) -> None:
+    """Книга в твёрдом переплёте лежит (корешок — к −X): крышки 2,5 мм с канавками у корешка, скруглённый корешок,
+    выступ крышек 3 мм над блоком, блок со слегка вогнутым передним обрезом. upright — стоит корешком наружу (к −Y)."""
+    tb, sq = 0.0025, 0.003
+    hz = T / 2
+    rs = T / 2
+    # наружный контур сечения: верхняя крышка → канавка → дуга корешка → нижняя крышка → передний край
+    x_f, x_j = W / 2, -W / 2 + 0.008
+    outer = [(x_f, T), (x_j + 0.004, T), (x_j, T - 0.0012), (x_j - 0.003, T)]
+    for k in range(9):
+        a = math.pi / 2 + math.pi * k / 8
+        outer.append((-W / 2 + 0.002 + rs * 0.35 * math.cos(a) - 0.0, hz + rs * math.sin(a)))
+    outer += [(x_j - 0.003, 0.0), (x_j, 0.0012), (x_j + 0.004, 0.0), (x_f, 0.0)]
+    # внутренний контур — параллельно наружному на толщину картона
+    inner = [(x_f, T - tb), (x_j + 0.004, T - tb), (x_j, T - tb - 0.0006), (x_j - 0.003, T - tb)]
+    for k in range(9):
+        a = math.pi / 2 + math.pi * k / 8
+        inner.append((-W / 2 + 0.002 + tb + (rs - tb) * 0.35 * math.cos(a), hz + (rs - tb) * math.sin(a)))
+    inner += [(x_j - 0.003, tb), (x_j, tb + 0.0006), (x_j + 0.004, tb), (x_f, tb)]
+    cover = outer + inner[::-1]
+    tmp = bmesh.new()
+    extrude_profile(tmp, cover, -Lb / 2, Lb / 2)
+    blk = bmesh.new()
+    bx0 = -W / 2 + 0.006
+    prof = [(bx0, tb + 0.0003), (W / 2 - sq - 0.002, tb + 0.0003)]
+    for k in range(7):
+        t = k / 6
+        prof.append((W / 2 - sq - 0.0035 * math.sin(math.pi * t), tb + 0.0003 + (T - 2 * tb - 0.0006) * t))
+    prof += [(W / 2 - sq - 0.002, T - tb - 0.0003), (bx0, T - tb - 0.0003)]
+    extrude_profile(blk, prof, -Lb / 2 + sq, Lb / 2 - sq)
+    m_ = Matrix.Translation(V(at)) @ Matrix.Rotation(yaw, 4, "Z")
+    if upright:
+        # стоит на нижнем обрезе, корешок наружу (к −Y): книга повёрнута так, что её Y → Z, корешок (−X) → −Y
+        m_ = m_ @ Matrix.Rotation(lean, 4, "Y") @ Matrix.Translation((0, 0, Lb / 2)) @ Matrix.Rotation(math.pi / 2, 4, "Z") @ \
+            Matrix.Rotation(math.pi / 2, 4, "X") @ Matrix.Translation((0, 0, -T / 2))
+    placed_bm(bm_cover, tmp, m_)
+    placed_bm(bm_block, blk, m_)
+
+
+def book_open(bm_cover, bm_block, W: float, Lb: float, T: float) -> None:
+    """Раскрытая книга на столе: крышки плашмя, корешок вогнут снизу, блок — две половины, листы горбом от корешка."""
+    tb = 0.0025
+    for s in (-1, 1):
+        tmp = bmesh.new()
+        L.bm_box(tmp, (min(0.004 * s, s * (W + 0.004)), -Lb / 2, 0.0), (max(0.004 * s, s * (W + 0.004)), Lb / 2, tb))
+        placed_bm(bm_cover, tmp, Matrix.Identity(4))
+        blk = bmesh.new()
+        half = (T - 2 * tb) / 2
+        prof = []
+        for k in range(13):
+            t = k / 12
+            x = s * (0.006 + (W - 0.012) * t)
+            z = tb + half * (0.35 + 0.65 * (1 - math.exp(-t * 7))) * (1 - 0.15 * t)
+            prof.append((x, z))
+        prof += [(s * (W - 0.004), tb + 0.0004), (s * 0.006, tb + 0.0004)]
+        if s > 0:
+            prof = prof[::-1]
+        extrude_profile(blk, prof, -Lb / 2 + 0.003, Lb / 2 - 0.003)
+        placed_bm(bm_block, blk, Matrix.Identity(4))
+    sp = bmesh.new()
+    L.bm_box(sp, (-0.008, -Lb / 2, -0.0015), (0.008, Lb / 2, 0.0006))
+    placed_bm(bm_cover, sp, Matrix.Identity(4))
+
+
+def textbook(coll, m, at, rng, state: str = "закрыт"):
+    """Учебник 170 × 240 × 22 в твёрдом переплёте. state: «закрыт», «раскрыт», «стопка» (четыре книги разного формата
+    вразнобой), «ряд» (шесть книг стоят корешками наружу, крайняя завалилась на соседнюю)."""
+    r = L.root("УЧ_учебник" + ("" if state == "закрыт" else "_" + state), coll, at)
+    cb, bb = bmesh.new(), bmesh.new()
+    if state == "закрыт":
+        book_closed(cb, bb, 0.17, 0.24, 0.022)
+    elif state == "раскрыт":
+        book_open(cb, bb, 0.17, 0.24, 0.022)
+    elif state == "стопка":
+        z = 0.0
+        for W, Lb, T in ((0.2, 0.26, 0.02), (0.17, 0.24, 0.03), (0.15, 0.21, 0.014), (0.145, 0.2, 0.018)):
+            book_closed(cb, bb, W, Lb, T, at=(rng.uniform(-0.012, 0.012), rng.uniform(-0.012, 0.012), z), yaw=math.radians(rng.uniform(-8, 8)))
+            z += T
+    else:
+        x = -0.07
+        sizes = [(0.17, 0.24, 0.022), (0.15, 0.21, 0.016), (0.17, 0.24, 0.03), (0.145, 0.2, 0.018), (0.2, 0.26, 0.02), (0.17, 0.24, 0.025)]
+        for k, (W, Lb, T) in enumerate(sizes):
+            # крайняя завалилась на соседку: верх к ней (−X), низ отъехал от ряда
+            lean = -math.radians(18) if k == len(sizes) - 1 else 0.0
+            book_closed(cb, bb, W, Lb, T, at=(x + T / 2 + (Lb * math.sin(-lean) * 0.95 if lean else 0.0), 0.0, 0.0), upright=True, lean=lean)
+            x += T + 0.001
+    obj(cb, "УЧ_переплёт", coll, [m["book_cover"]], r, smooth=40)
+    obj(bb, "УЧ_блок", coll, [m["book_pages"]], r, smooth=30)
+    return r
+
+
+def notebook_closed(bm_cover, bm_block, bm_staple, W: float, Lb: float, T: float, m_: Matrix, curl_corner: bool = False) -> None:
+    """Тетрадь лежит (сгиб — к −X): обложка — тонкий лист вокруг блока, две скрепки на сгибе, угол чуть загнут."""
+    tc = 0.0003
+    cv = bmesh.new()
+
+    def corner(x, y, z):
+        if curl_corner and x > W / 2 - 0.04 and y < -Lb / 2 + 0.04:
+            d = ((x - (W / 2 - 0.04)) / 0.04) * ((-Lb / 2 + 0.04 - y) / 0.04)
+            return z + 0.006 * d
+        return z
+
+    rows = []
+    for j in range(9):
+        y = -Lb / 2 + Lb * j / 8
+        rows.append([V((x, y, corner(x, y, T))) for x in [-W / 2 + W * i / 8 for i in range(9)]])
+    strip(cv, rows)
+    rows2 = [[V((x, -Lb / 2 + Lb * j / 8, 0.0)) for x in [-W / 2 + W * i / 8 for i in range(9)][::-1]] for j in range(9)]
+    strip(cv, rows2)
+    # сгиб обложки — полукольцо по корешку
+    rows3 = []
+    for k in range(7):
+        a = math.pi / 2 + math.pi * k / 6
+        rows3.append([V((-W / 2 + (T / 2) * 0.6 * math.cos(a), y, T / 2 + (T / 2) * math.sin(a))) for y in (-Lb / 2, Lb / 2)])
+    strip(cv, rows3)
+    placed_bm(bm_cover, cv, m_)
+    bl = bmesh.new()
+    rounded_box(bl, (W - 0.003, Lb - 0.002, T - 2 * tc - 0.0004), 0.0005, cuts=1, center=(0.0005, 0, T / 2))
+    placed_bm(bm_block, bl, m_)
+    st = bmesh.new()
+    for y in (-Lb / 4, Lb / 4):
+        pipe(st, [(-W / 2 - T * 0.3 + 0.0006, y - 0.006, T * 0.55), (-W / 2 - T * 0.3, y - 0.006, T / 2), (-W / 2 - T * 0.3, y + 0.006, T / 2),
+                  (-W / 2 - T * 0.3 + 0.0006, y + 0.006, T * 0.55)], 0.00035, segs=4)
+    placed_bm(bm_staple, st, m_)
+
+
+def notebook_open(bm_cover, bm_block, bm_staple, W: float, Lb: float, T: float) -> None:
+    """Раскрытая тетрадь: обложка плашмя, листы двумя половинами горбом от сгиба, на развороте видны скрепки."""
+    half = T / 2
+    for s in (-1, 1):
+        tmp = bmesh.new()
+        rows = [[V((s * W * i / 8, -Lb / 2 + Lb * j / 8, 0.0)) for i in range(9)] for j in range(9)]
+        if s < 0:
+            rows = [r_[::-1] for r_ in rows]
+        strip(tmp, rows)
+        placed_bm(bm_cover, tmp, Matrix.Identity(4))
+        blk = bmesh.new()
+        prof = []
+        for k in range(11):
+            t = k / 10
+            prof.append((s * (0.001 + (W - 0.004) * t), 0.0003 + half * (0.4 + 0.6 * (1 - math.exp(-t * 9))) + 0.0015 * math.sin(math.pi * t)))
+        prof += [(s * (W - 0.003), 0.0003), (s * 0.001, 0.0003)]
+        if s > 0:
+            prof = prof[::-1]
+        extrude_profile(blk, prof, -Lb / 2 + 0.001, Lb / 2 - 0.001)
+        placed_bm(bm_block, blk, Matrix.Identity(4))
+    st = bmesh.new()
+    for y in (-Lb / 4, Lb / 4):
+        pipe(st, [(-0.0006, y - 0.006, half * 0.5 + 0.0006), (0.0, y - 0.006, half * 0.5 + 0.0012), (0.0, y + 0.006, half * 0.5 + 0.0012),
+                  (-0.0006, y + 0.006, half * 0.5 + 0.0006)], 0.00035, segs=4)
+    placed_bm(bm_staple, st, Matrix.Identity(4))
+
+
+def notebook(coll, m, at, rng, kind: str = "школьная", state: str = "закрыта"):
+    """Тетрадь: школьная 12 л (170 × 205 × 2,5) или общая 48 л (165 × 205 × 6). state: «закрыта» (угол чуть загнут),
+    «раскрыта», «стопка» (пять школьных вразнобой)."""
+    name = "ТТ_тетрадь" if kind == "школьная" else "ТО_тетрадь_общая"
+    r = L.root(name + ("" if state == "закрыта" else "_" + state), coll, at)
+    W, Lb, T = (0.17, 0.205, 0.0025) if kind == "школьная" else (0.165, 0.205, 0.006)
+    cb, bb, sb = bmesh.new(), bmesh.new(), bmesh.new()
+    if state == "закрыта":
+        notebook_closed(cb, bb, sb, W, Lb, T, Matrix.Identity(4), curl_corner=True)
+    elif state == "раскрыта":
+        notebook_open(cb, bb, sb, W, Lb, T)
+    else:
+        z = 0.0
+        for k in range(5):
+            m_ = Matrix.Translation((rng.uniform(-0.015, 0.015), rng.uniform(-0.015, 0.015), z)) @ \
+                Matrix.Rotation(math.radians(rng.uniform(-14, 14)), 4, "Z")
+            notebook_closed(cb, bb, sb, W, Lb, T, m_, curl_corner=k == 4)
+            z += T + 0.0002
+    obj(cb, f"{name}_обложка", coll, [m["notebook_cover"]], r, smooth=40)
+    obj(bb, f"{name}_листы", coll, [m["paper"]], r, smooth=30)
+    obj(sb, f"{name}_скрепки", coll, [m["pin_metal"]], r, smooth=40)
+    return r
+
+
+def drawing_tube(coll, m, at, rng, opened: bool = False):
+    """Тубус для чертежей телескопический: корпус Ø 90 × 650 с рёбрами, внутренняя труба Ø 84 выдвинута на 60 мм,
+    донце и крышка с насечкой, клипсы и ремень (лежит петлёй). Открытый — крышка снята и лежит рядом, из горловины
+    торчат свёрнутые листы."""
+    r = L.root("ТБ_тубус" + ("_открыт" if opened else ""), coll, at)
+    R, Lt = 0.045, 0.65
+    tb = bmesh.new()
+    x0 = -Lt / 2
+    # корпус (ось вдоль X, лежит): кольцевые рёбра у концов
+    prof = [(R - 0.002, 0.0), (R, 0.002)]
+    for k in range(3):
+        zz = 0.02 + k * 0.012
+        prof += [(R, zz), (R + 0.0015, zz + 0.002), (R + 0.0015, zz + 0.006), (R, zz + 0.008)]
+    prof += [(R, Lt * 0.62 - 0.03)]
+    for k in range(3):
+        zz = Lt * 0.62 - 0.028 + k * 0.012
+        prof += [(R, zz), (R + 0.0015, zz + 0.002), (R + 0.0015, zz + 0.006), (R, zz + 0.008)]
+    prof += [(R, Lt * 0.62), (R - 0.002, Lt * 0.62 + 0.001), (R - 0.004, Lt * 0.62), (R - 0.004, 0.003), (R - 0.002, 0.0)]
+    lathe(tb, prof, segs=48, origin=(x0, 0, R), axis=(1, 0, 0), closed=True)
+    # внутренняя труба: из корпуса до горловины
+    lathe(tb, [(R - 0.0045, Lt * 0.55), (R - 0.0045, Lt + 0.01), (R - 0.0065, Lt + 0.01), (R - 0.0065, Lt * 0.55)], segs=48,
+          origin=(x0, 0, R), axis=(1, 0, 0), closed=True)
+    obj(tb, "ТБ_корпус", coll, [m["tube_plastic"]], r, smooth=40)
+    cpb = bmesh.new()
+    cap_prof = [(0.0, -0.012), (R + 0.002, -0.012), (R + 0.003, -0.01)]
+    for k in range(10):
+        cap_prof += [(R + 0.003, -0.01 + k * 0.0026), (R + 0.0022, -0.01 + k * 0.0026 + 0.0013)]
+    cap_prof += [(R + 0.003, 0.016), (R + 0.0005, 0.018), (0.0, 0.018)]
+    lathe(cpb, cap_prof, segs=48, origin=(x0 - 0.006, 0, R), axis=(1, 0, 0))
+    obj(cpb, "ТБ_донце", coll, [m["tube_plastic"]], r, smooth=40)
+    lid_prof = [(0.0, 0.026), (R - 0.0015, 0.026), (R - 0.0005, 0.024)]
+    for k in range(10):
+        lid_prof += [(R - 0.0005, 0.024 - k * 0.0024), (R - 0.0013, 0.024 - k * 0.0024 - 0.0012)]
+    lid_prof += [(R - 0.0005, 0.0), (R - 0.0045, 0.0), (R - 0.0045, 0.022), (0.0, 0.022)]
+    lb = bmesh.new()
+    xe = x0 + Lt + 0.01
+    lathe(lb, lid_prof, segs=48, origin=(0, 0, 0), axis=(1, 0, 0))
+    if opened:
+        # крышка лежит рядом на боку, горловиной вниз
+        mL = Matrix.Translation((xe + 0.09, -0.12, R + 0.0015)) @ Matrix.Rotation(math.radians(70), 4, "Z")
+    else:
+        mL = Matrix.Translation((xe - 0.022, 0, R))
+    bmesh.ops.transform(lb, matrix=mL, verts=lb.verts)
+    obj(lb, "ТБ_крышка", coll, [m["tube_plastic"]], r, smooth=40)
+    # клипсы и ремень: от клипс у концов — петлёй по полу рядом
+    sb = bmesh.new()
+    clips = [V((x0 + 0.05, 0.0, 2 * R + 0.002)), V((x0 + Lt * 0.62 - 0.04, 0.0, 2 * R + 0.002))]
+    for c_ in clips:
+        rounded_box(sb, (0.03, 0.02, 0.006), 0.002, cuts=2, center=tuple(c_))
+    path = [clips[0] + V((0, -0.012, 0)), clips[0] + V((-0.03, -0.06, -0.06)), V((x0 - 0.04, -0.13, 0.002)), V((0.0, -0.22, 0.002)),
+            V((x0 + Lt * 0.75, -0.14, 0.002)), clips[1] + V((0.03, -0.06, -0.06)), clips[1] + V((0, -0.012, 0))]
+    flat = [V((q.x, q.y, max(q.z, 0.0015))) for q in smooth_path(path, 8)]
+    L.bm_sweep(sb, flat, [(-0.0125, 0.0), (0.0125, 0.0), (0.0125, 0.0018), (-0.0125, 0.0018)], up=(0, 0, 1))
+    obj(sb, "ТБ_ремень", coll, [m["webbing"]], r, smooth=35)
+    if opened:
+        # свёрнутые листы торчат из горловины: рулоны спиралью
+        pb = bmesh.new()
+        for k, (dy, dz, rr, out) in enumerate(((-0.012, R - 0.008, 0.016, 0.12), (0.014, R + 0.004, 0.014, 0.08), (0.0, R + 0.016, 0.012, 0.15))):
+            prof = []
+            turns = 1.6
+            n_ = 40
+            for i in range(n_):
+                a = TAU * turns * i / (n_ - 1)
+                rad = rr * (0.45 + 0.55 * i / (n_ - 1))
+                prof.append((rad * math.cos(a), rad * math.sin(a)))
+            rows = []
+            for xx in (x0 + 0.2, x0 + Lt + out):
+                rows.append([V((xx, dy + py, dz + pz)) for py, pz in prof])
+            strip(pb, rows)
+        pp = obj(pb, "ТБ_чертежи", coll, [m["paper"]], r, smooth=50)
+        so = pp.modifiers.new("Бумага", "SOLIDIFY")
+        so.thickness = 0.0003
+    return r
+
+
+ITEMS_D = [
+    ("Тубус", lambda c, m, at, rng: drawing_tube(c, m, at, rng, False), 0.85),
+    ("Тубус открыт", lambda c, m, at, rng: drawing_tube(c, m, at, rng, True), 0.95),
+    ("Тетрадь", lambda c, m, at, rng: notebook(c, m, at, rng, "школьная", "закрыта"), 0.25),
+    ("Тетрадь раскрыта", lambda c, m, at, rng: notebook(c, m, at, rng, "школьная", "раскрыта"), 0.4),
+    ("Тетради стопкой", lambda c, m, at, rng: notebook(c, m, at, rng, "школьная", "стопка"), 0.3),
+    ("Тетрадь общая", lambda c, m, at, rng: notebook(c, m, at, rng, "общая", "закрыта"), 0.25),
+    ("Учебник", lambda c, m, at, rng: textbook(c, m, at, rng, "закрыт"), 0.25),
+    ("Учебник раскрыт", lambda c, m, at, rng: textbook(c, m, at, rng, "раскрыт"), 0.4),
+    ("Учебники стопкой", lambda c, m, at, rng: textbook(c, m, at, rng, "стопка"), 0.3),
+    ("Учебники в ряд", lambda c, m, at, rng: textbook(c, m, at, rng, "ряд"), 0.3),
+]
+
+
 # ---------------------------------------------------------------- состав группы А
 
 ITEMS_A = [
@@ -1780,9 +2067,9 @@ def build(out: str) -> list:
     x = 0.0
     placed = []
     for top_name, items, wall in (("Партия3_А_ящики_вещи_v01", ITEMS_A, False), ("Партия3_Б_плакаты_картины_v01", ITEMS_B, True),
-                                  ("Партия3_В_компьютеры_v01", ITEMS_C, False)):
+                                  ("Партия3_В_компьютеры_v01", ITEMS_C, False), ("Партия3_Г_учебное_v01", ITEMS_D, False)):
         top = L.collection(top_name)
-        rng = random.Random({ITEMS_A[0][0]: 33, ITEMS_B[0][0]: 34}.get(items[0][0], 35))
+        rng = random.Random({ITEMS_A[0][0]: 33, ITEMS_B[0][0]: 34, ITEMS_D[0][0]: 36}.get(items[0][0], 35))
         for label, fn, width in items:
             c = L.collection(label, top)
             at = (x + width / 2, WALL_Y, TOP_Z.get(label, 2.0)) if wall else (x + width / 2, 0.0, 0.0)
