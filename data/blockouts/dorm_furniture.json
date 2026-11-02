@@ -730,20 +730,6 @@
    "far": 60.0
   },
   {
-   "id": "f2_room_-1_1_1_bed",
-   "section": "Floor2",
-   "model": "furn_bed",
-   "at": [
-    7.35,
-    4.42,
-    -7.18
-   ],
-   "yaw": 166.56,
-   "variant": "EN-DGR-SAT",
-   "solid": true,
-   "far": 60.0
-  },
-  {
    "id": "f2_room_1_1_0_wardrobe",
    "section": "Floor2",
    "model": "furn_wardrobe",
@@ -851,20 +837,6 @@
    ],
    "yaw": 1.92,
    "tilt": 90.0,
-   "solid": true,
-   "far": 60.0
-  },
-  {
-   "id": "f2_room_-1_2_2_bunk_bed",
-   "section": "Floor2",
-   "model": "furn_bunk_bed",
-   "at": [
-    8.616,
-    4.42,
-    -7.28
-   ],
-   "yaw": 0.0,
-   "variant": "EN-DGR-SAT",
    "solid": true,
    "far": 60.0
   },
@@ -1230,18 +1202,6 @@
    "yaw": 180.0,
    "variant": "EN-DGR-SAT",
    "solid": true,
-   "far": 60.0
-  },
-  {
-   "id": "f2_room_1_6_3_mattress",
-   "section": "Floor2",
-   "model": "furn_mattress",
-   "at": [
-    33.05,
-    4.42,
-    6.68
-   ],
-   "yaw": 2.26,
    "far": 60.0
   },
   {
@@ -2900,19 +2860,6 @@
    "yaw": 140.32,
    "tilt": -90.0,
    "far": 60.0
-  },
-  {
-   "id": "f4_room_1_2_8_shelf",
-   "section": "Floor4",
-   "model": "furn_shelf",
-   "at": [
-    8.115,
-    12.55,
-    3.98
-   ],
-   "yaw": 90.0,
-   "variant": "LM-WAL-GLS",
-   "far": 25.0
   },
   {
    "id": "f4_room_-1_3_0_bed",

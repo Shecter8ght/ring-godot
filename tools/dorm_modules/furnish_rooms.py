@@ -221,6 +221,11 @@ def main() -> None:
         r = Room(s)
         r.breaches = [b for b in plan.get("breaches", []) if s["id"] in (b["room_below"], b["room_above"])]
         STATES[s["state"]](r)
+        # у проломов в перегородках (plan.wall_breaches) мебель не стоит: проход должен быть открыт
+        for wb in plan.get("wall_breaches", []):
+            if wb["floor"] != s["floor"]:
+                continue
+            r.items = [i for i in r.items if not (abs(i["at"][0] - wb["x"]) < 1.15 and abs(i["at"][2] - wb["z"]) < wb["width"] / 2 + .75)]
         items += r.items
         clears += r.clear()
     OUT.write_text(json.dumps({"version": 1, "source": "tools/dorm_modules/furnish_rooms.py", "furniture": items,

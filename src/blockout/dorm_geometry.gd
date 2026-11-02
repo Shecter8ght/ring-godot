@@ -205,9 +205,17 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		else:
 			builder.call("beam",start,end,float(item.width),float(item.depth),_batch_material(String(item.mat),(start.y+end.y)*.5,palette),bool(item.solid),visual)
 	for item: Dictionary in data.get("stairs",[]):
-		var visual: bool = modules==null or not bool(modules.call("flight",item))
+		# "visual": false — только наклонная коллизия (у пожарных лестниц ступени из просечного листа — отдельными брусками)
+		var visual: bool = (modules==null or not bool(modules.call("flight",item))) and bool(item.get("visual",true))
 		builder.call("stairs",_vec(item.start),_vec(item.end),float(item.width),int(item.count),_batch_material(String(item.mat),(float(item.start[1])+float(item.end[1]))*.5,palette),visual)
 	builder.call("finish")
+	# вертикальные стальные лестницы (люк на крышу): настоящая Ladder игры — лезут игрок и мародёры (связка навигации)
+	for item: Dictionary in data.get("ladders",[]):
+		var ladder: Node3D = (load(LADDER_SCENE) as PackedScene).instantiate() as Node3D
+		ladder.set("height",float(item.height))
+		target.add_child(ladder)
+		ladder.position = _vec(item.at)
+		ladder.rotation_degrees.y = float(item.get("yaw",0.0))
 	if split_gi_batches:ExteriorBatches.separate(target,gi_footprints)
 	for item: Dictionary in data.get("labels",[]):
 		var plaque: Label3D = Label3D.new()
@@ -425,7 +433,9 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		"door_green":"596350", "door_wood":"75634f", "panel":"656a65", "fire_cabinet":"824b43",
 		# вертикальные пути и техэтаж (docs/design/dorm_routes.md): сталь пожарных лестниц и стремянок, обломки
 		# под проломами, короба, трубы и баки 5-го этажа — серые заглушки до моделей Blender
-		"steel_stair":"4f5559", "rubble":"8a8579", "duct":"9a9fa2", "pipe":"5d6366", "tank":"6f7a74"}
+		"steel_stair":"6a3b2c", "rubble":"8a8579", "duct":"9a9fa2", "pipe":"5d6366", "tank":"6f7a74",
+		# пожарные лестницы — сурик с ржавчиной, настил темнее; сетка-рабица выгородок техэтажа; арматура
+		"grating":"4a3a32", "mesh":"8a8f8c", "rebar":"5a3a2a"}
 	for key: String in colors:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = Color(String(colors[key]))
@@ -438,7 +448,13 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		if key == "mirror":
 			material.metallic = 1.0
 			material.roughness = 0.025
+		if key == "mesh":
+			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			material.albedo_color.a = 0.32
+			material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		result[key] = material
+	_porch_tile(result)
+	result["brick"] = _photo_material("res://assets/textures/red_bricks_04",1.2,Color("8a4a3a"))
 	var levels: Array = plan.scale.floor_y
 	var heights: Array = plan.scale.ceiling_clear
 	for key: String in ["wall", "tile", "tile_floor"]:
@@ -459,6 +475,42 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		result[key] = finish
 	_apply_v3(result,plan)
 	return result
+
+
+## Крыльца: крупная разбитая плитка — фототекстура Worn Tile Floor (Poly Haven, CC0; 4 × 4 плитки на карте),
+## мировые координаты, плитка ~0,4 м. Без карт — тёмно-серая заглушка (проект запускается и без assets/textures).
+const PORCH_TILE_DIR: String = "res://assets/textures/worn_tile_floor"
+const LADDER_SCENE: String = "res://scenes/world/ladder.tscn"
+const PORCH_TILE_SIZE_M: float = 1.6
+
+
+static func _porch_tile(result: Dictionary) -> void:
+	result["porch_tile"] = _photo_material(PORCH_TILE_DIR,PORCH_TILE_SIZE_M,Color("5d5a54"))
+
+
+## Фототекстура Poly Haven (albedo / normal / arm) в мировых координатах, size_m — метров на повтор; без карт —
+## заглушка цветом fallback.
+static func _photo_material(dir: String, size_m: float, fallback: Color) -> StandardMaterial3D:
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.albedo_color = fallback
+	material.roughness = 0.9
+	if not ResourceLoader.exists(dir + "/albedo.jpg"):
+		return material
+	material.albedo_color = Color.WHITE
+	material.albedo_texture = load(dir + "/albedo.jpg") as Texture2D
+	material.normal_enabled = true
+	material.normal_texture = load(dir + "/normal.jpg") as Texture2D
+	var arm: Texture2D = load(dir + "/arm.jpg") as Texture2D
+	material.ao_enabled = true
+	material.ao_texture = arm
+	material.ao_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
+	material.roughness = 1.0
+	material.roughness_texture = arm
+	material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GREEN
+	material.uv1_triplanar = true
+	material.uv1_world_triplanar = true
+	material.uv1_scale = Vector3.ONE / size_m
+	return material
 
 
 const V3_DIR: String = "res://assets/textures/dorm_v3"

@@ -37,25 +37,44 @@ DOOR_W, DOOR_H = 1.17, 2.415
 WINDOW_W = 2 * .82 * 1.15 + .21
 SILL = .85
 STATES = ["жилая", "разграбленная", "сгоревшая", "баррикада у окна", "пустая с матрасами"]
-# Вертикальные пути (владелец 2026-11-02, docs/design/dorm_routes.md): дыра в перекрытии этажа floor (номер
-# этажа, в полу которого она) — прямоугольник x0, z0, x1, z1; скат под ней — от start до end по оси комнаты
-# (куча обломков / штабель мебели; в блокауте ступенями с наклонной коллизией, не круче 40°), у люков —
-# стальная стремянка 45°; провал С1 — без ската, внизу невысокая куча (наверх не забраться).
+# Вертикальные пути (владелец 2026-11-02, docs/design/dorm_routes.md). Проломы стихийные, без лестниц (вторая редакция
+# того же дня): slab — кусок перекрытия обломился у края hinge и лежит скатом (по нему заходят пешком, боты тоже; у П1
+# под низом ещё куча — 1-й этаж выше), pile — куча обломков ступенями под краем edge, наверх — подтянуться на руках
+# (Climb, 1,6 м: с перегрузом не залезть; ботам не по силам), drop — провал вниз (на кучу, обратно не залезть),
+# hatch — люк на крышу с вертикальной стальной лестницей (Ladder). floor — этаж, в полу которого дыра; hole — x0, z0,
+# x1, z1; start / end / width — где скат или куча (по ним мебель держится в стороне).
 BREACHES = [
-    {"id": "П1", "kind": "rubble", "floor": 2, "room_below": "f1_room_1_2", "room_above": "f2_room_1_2",
-     "hole": [9.885, 4.5, 11.385, 7.9], "start": [10.635, 2.9], "end": [10.635, 7.9], "width": 1.4},
-    {"id": "П2", "kind": "rubble", "floor": 3, "room_below": "f2_room_-1_5", "room_above": "f3_room_-1_5",
-     "hole": [24.855, -7.1, 26.355, -3.65], "start": [25.605, -2.9], "end": [25.605, -7.1], "width": 1.4},
-    {"id": "П3", "kind": "furniture", "floor": 4, "room_below": "f3_room_1_7", "room_above": "f4_room_1_7",
-     "hole": [36.1, 3.75, 37.6, 7.1], "start": [36.85, 2.9], "end": [36.85, 7.1], "width": 1.3},
-    {"id": "П4", "kind": "ladder", "floor": 5, "room_below": "f4_storage_-1_6", "room_above": "f5_storage_-1_6",
-     "hole": [32.0, -6.3, 33.2, -3.35], "start": [32.6, -2.9], "end": [32.6, -6.3], "width": 1.0},
-    {"id": "Л", "kind": "ladder", "floor": 6, "room_below": "f5_storage_1_0", "room_above": "roof",
-     "hole": [2.2, 3.4, 3.4, 6.4], "start": [2.8, 3.0], "end": [2.8, 6.4], "width": 1.0},
+    {"id": "П1", "kind": "slab", "floor": 2, "room_below": "f1_room_1_2", "room_above": "f2_room_1_2",
+     "hole": [9.935, 2.6, 11.335, 7.7], "hinge": "z0", "mound": .8, "start": [10.635, 8.3], "end": [10.635, 2.6], "width": 1.3},
+    {"id": "П2", "kind": "pile", "floor": 3, "room_below": "f2_room_-1_5", "room_above": "f3_room_-1_5",
+     "hole": [25.4, -6.7, 27.0, -4.9], "edge": "z1", "start": [26.2, -7.8], "end": [26.2, -4.9], "width": 1.6},
+    {"id": "П3", "kind": "slab", "floor": 4, "room_below": "f3_room_1_7", "room_above": "f4_room_1_7",
+     "hole": [36.15, 2.6, 37.55, 7.7], "hinge": "z0", "mound": 0.0, "start": [36.85, 6.6], "end": [36.85, 2.6], "width": 1.3},
+    {"id": "П4", "kind": "pile", "floor": 5, "room_below": "f4_storage_-1_6", "room_above": "roof_hall",
+     "hole": [31.6, -6.7, 33.2, -4.9], "edge": "z1", "start": [32.4, -7.8], "end": [32.4, -4.9], "width": 1.6},
+    {"id": "Л", "kind": "hatch", "floor": 6, "room_below": "f5_tech_hall", "room_above": "roof",
+     "hole": [2.25, 3.4, 3.35, 4.6]},
     {"id": "С1", "kind": "drop", "floor": 4, "room_below": "f3_room_-1_3", "room_above": "f4_room_-1_3",
      "hole": [15.3, -6.2, 17.0, -4.4]},
 ]
-BREACH_ROOMS = {b[k] for b in BREACHES for k in ("room_below", "room_above") if b[k] != "roof"}
+# Проломы в перегородках между соседними помещениями (обход дверей и коридора): этаж, сторона корпуса, отсек слева.
+WALL_BREACHES = [(1, 1, 1), (1, -1, 2), (2, -1, 1), (2, 1, 6), (3, 1, 2), (3, -1, 5), (4, -1, 2), (4, 1, 1)]
+WALL_BREACH_W, WALL_BREACH_H, WALL_BREACH_V = 1.3, 2.15, 3.2
+# Мусор, расставленный по истории (data/blockouts/dorm_props.json, ведётся руками): пролом в стене сдвигается вдоль
+# неё, чтобы твёрдая вещь не перегородила проход.
+_PROPS_PATH = Path(__file__).resolve().parents[1] / "data/blockouts/dorm_props.json"
+SOLID_PROPS = [it["at"] for it in (json.loads(_PROPS_PATH.read_text(encoding="utf-8")).get("props", []) if _PROPS_PATH.exists() else [])
+               if it.get("solid")]
+
+
+def wall_breach_v(x, side, y):
+    """Отступ пролома от стены коридора: первый из вариантов, у которого рядом нет твёрдого мусора."""
+    for v in [WALL_BREACH_V, 2.6, 3.8, 4.4, 5.0, 2.1]:
+        zc = side * (2.08 + v)
+        if not any(abs(a[1] - y) < .6 and abs(a[0] - x) < 1.3 and abs(a[2] - zc) < WALL_BREACH_W / 2 + .6 for a in SOLID_PROPS):
+            return v
+    return WALL_BREACH_V
+BREACH_ROOMS = {b[k] for b in BREACHES for k in ("room_below", "room_above") if b[k] not in ("roof", "roof_hall", "f5_tech_hall")}
 
 
 def subtract(rect, holes):
@@ -125,6 +144,10 @@ def make_plan():
         # Верх стены нижнего этажа не совпадает с полом следующего: краска проступала у порогов.
         # Только скрытый торец уходит на 5 мм внутрь плиты; чистые размеры и проёмы прежние.
         if mat=="wall" and any(abs(y1-floor)<.00001 for floor in LEVELS):
+            y1-=.005
+        # То же под кровлей: перегородки и стены коридора 5-го этажа доходили верхом ровно до верха плиты крыши и мерцали.
+        roof_top=LEVELS[-1]+HEIGHTS[-1]+SLAB
+        if abs(y1-roof_top)<.00001 and y0<roof_top-SLAB-.001:
             y1-=.005
         section(key,group)["boxes"].append({"id": name, "at": [(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],
                                       "size": [x1-x0,y1-y0,z1-z0], "mat": mat, "solid": solid, "yaw": 0})
@@ -234,9 +257,12 @@ def make_plan():
                               "to":[(x0+x1)/2,y,center-.85],"point":[(x0+x1)/2,y,center],"normal":[0,0,1]})
 
     def fire_escape(name, door_xz, out, along):
-        """Маршевая пожарная лестница у торца: площадка у двери каждого этажа и на уровне крыши (два ряда маршей по
-        1,0 м: внутренний к стене и наружный), между этажами — два марша по 10 ступеней через промежуточную площадку,
-        к земле — три ступени, стойки до земли, поручни. Сталь, решётчатый настил."""
+        """Наружная маршевая пожарная лестница — каркасная башня (владелец 2026-11-02; образцы — серийные П2 и лестницы
+        3-го типа, ограждение 1,2 м по ГОСТ Р 53254): стойки из трубы по углам, обвязка швеллером по краю каждой
+        площадки, связи крест-накрест по наружной грани, площадки — решётчатый настил в раме, марши — два косоура из
+        швеллера и ступени из просечного листа (видны; ходят по наклонной плоскости), ограждение — поручень, средний
+        ряд, стойки и бортик. Площадка у двери каждого этажа и у крыши, между этажами — два марша по 10 ступеней через
+        промежуточную площадку, к земле — три ступени. Окраска — сурик с ржавчиной."""
         key="FireEscapes"
         ox,oz=door_xz
         def P(a,o):   # вдоль стены a, от стены o → x, z
@@ -244,101 +270,289 @@ def make_plan():
         def R(a0,o0,a1,o1):
             (x0,z0),(x1,z1)=P(a0,o0),P(a1,o1)
             return [min(x0,x1),min(z0,z1),max(x0,x1),max(z0,z1)]
+        def B(a0,o0,y0,a1,o1,y1,w=.045,d=.045,mat="steel_stair",solid=False):
+            (x0,z0),(x1,z1)=P(a0,o0),P(a1,o1)
+            beam(key,[x0,y0,z0],[x1,y1,z1],w,d,mat,solid)
+        def rail(a0,o0,y0,a1,o1,y1,height,posts=1.0,solid=True):
+            """Ограждение по прямой: поручень (держит от падения), средний ряд, стойки через ~1 м, бортик 0,1 м."""
+            B(a0,o0,y0+height,a1,o1,y1+height,.045,.045,"steel_stair",solid)
+            B(a0,o0,y0+height*.5,a1,o1,y1+height*.5,.03,.03)
+            B(a0,o0,y0+.06,a1,o1,y1+.06,.012,.1)
+            n=max(1,int(round(math.hypot(a1-a0,o1-o0)/posts)))
+            for i in range(n+1):
+                k=i/n
+                aa,oo,yb=a0+(a1-a0)*k,o0+(o1-o0)*k,y0+(y1-y0)*k
+                B(aa,oo,yb,aa,oo,yb+height,.035,.035)
         levels=LEVELS+[LEVELS[-1]+HEIGHTS[-1]+SLAB]
         run=2.5
+        a_far=-1.0-run
+        a_end=a_far-1.2
+        W=2.3
+        def deck(rect_a0,rect_a1,y):
+            box(key,name+"_deck",R(rect_a0,.08,rect_a1,W),y-.035,y,"grating")
+            for a0,o0,a1,o1 in [(rect_a0,.08,rect_a1,.08),(rect_a0,W,rect_a1,W),(rect_a0,.08,rect_a0,W),(rect_a1,.08,rect_a1,W)]:
+                B(a0,o0,y-.105,a1,o1,y-.105,.06,.14)
+        def flight(a0,a1,o,y0,y1,count=10):
+            x0,z0=P(a0,o)
+            x1,z1=P(a1,o)
+            section(key)["stairs"].append({"start":[x0,y0,z0],"end":[x1,y1,z1],"width":1.0,"count":count,"mat":"steel_stair","visual":False})
+            for i in range(count):
+                k0,k1=i/count,(i+1)/count
+                yt=y0+(y1-y0)*k1
+                aa,ab=a0+(a1-a0)*k0,a0+(a1-a0)*k1
+                box(key,name+"_tread",R(min(aa,ab)+.01,o-.48,max(aa,ab)+.03,o+.48),yt-.03,yt,"grating",False)
+            for side in [-.52,.52]:
+                B(a0,o+side,y0-.1,a1,o+side,y1-.1,.06,.2)
         for k,y in enumerate(levels):
-            box(key,name+"_landing",R(-1.0,0.0,1.0,2.3),y-.08,y,"steel_stair")
-            if k==len(levels)-1:
+            deck(-1.0,1.0,y)
+            top=k==len(levels)-1
+            # ограждение площадки у двери: наружная грань и торец; у 1-го этажа в торце — выход к земле
+            rail(-1.0,W,y,1.0,W,y,1.2)
+            if k==0:
+                rail(1.0,1.75,y,1.0,W,y,1.2)
+            else:
+                rail(1.0,.08,y,1.0,W,y,1.2)
+            if top:
+                rail(-1.0,.08,y,-1.0,1.12,y,1.2)
                 break
             yy=levels[k+1]
             ym=(y+yy)/2
-            a_far=-1.0-run
-            box(key,name+"_half_landing",R(a_far-1.2,0.0,a_far,2.3),ym-.08,ym,"steel_stair")
-            x0,z0=P(-1.0,.6)
-            x1,z1=P(a_far,.6)
-            section(key)["stairs"].append({"start":[x0,y,z0],"end":[x1,ym,z1],"width":1.0,"count":10,"mat":"steel_stair"})
-            x0,z0=P(a_far,1.7)
-            x1,z1=P(-1.0,1.7)
-            section(key)["stairs"].append({"start":[x0,ym,z0],"end":[x1,yy,z1],"width":1.0,"count":10,"mat":"steel_stair"})
-            for o in [2.3]:
-                for a0,a1,h0,h1 in [(-1.0,a_far,y,ym),(a_far,-1.0,ym,yy)]:
-                    (bx0,bz0),(bx1,bz1)=P(a0,o),P(a1,o)
-                    beam(key,[bx0,h0+1.0,bz0],[bx1,h1+1.0,bz1],.05,.05,"steel_stair")
-            (bx0,bz0),(bx1,bz1)=P(-1.0,1.15),P(a_far,1.15)
-            beam(key,[bx0,y+1.0,bz0],[bx1,ym+1.0,bz1],.05,.05,"steel_stair",False)
-        # стойки до земли
-        for a in [1.0,-1.0,-1.0-run,-1.0-run-1.2]:
-            for o in [0.0,2.3]:
+            deck(a_end,a_far,ym)
+            rail(a_end,.08,ym,a_end,W,ym,1.2)
+            rail(a_end,W,ym,a_far,W,ym,1.2)
+            rail(a_end,.08,ym,a_far,.08,ym,1.2)
+            flight(-1.0,a_far,.6,y,ym)
+            flight(a_far,-1.0,1.7,ym,yy)
+            # между маршами — общий поручень, снаружи второго марша — ограждение марша
+            rail(-1.0,1.15,y,a_far,1.15,ym,1.0,1.25,False)
+            rail(a_far,W,ym,-1.0,W,yy,1.0,1.25)
+        # каркас: стойки до верха ограждения у крыши, связи крест-накрест по наружной грани между этажами
+        top_y=levels[-1]+1.2
+        for a in [1.0,-1.0,a_far,a_end]:
+            for o in [.12,W]:
+                if o<1 and a in [-1.0,a_far]:
+                    continue
                 x,z=P(a,o)
-                beam(key,[x,0.0,z],[x,levels[-1],z],.08,.08,"steel_stair")
+                beam(key,[x,0.0,z],[x,top_y,z],.12,.12,"steel_stair",True)
+        for k in range(len(levels)-1):
+            y,yy=levels[k],levels[k+1]
+            for a0,a1 in [(1.0,-1.0),(a_far,a_end)]:
+                B(a0,W+.07,y,a1,W+.07,yy,.05,.05)
+                B(a1,W+.07,y,a0,W+.07,yy,.05,.05)
+            B(a_end-.07,.12,y,a_end-.07,W,yy,.05,.05)
+            B(a_end-.07,W,y,a_end-.07,.12,yy,.05,.05)
+        # анкеры площадок в стену
+        for k,y in enumerate(levels):
+            for a in [-.8,.8]:
+                B(a,0.0,y-.18,a,.08,y-.18,.08,.08)
         # три ступени к земле с площадки 1-го этажа (наружу, вдоль стены)
         x0,z0=P(1.0,1.15)
         x1,z1=P(1.9,1.15)
-        section(key)["stairs"].append({"start":[x0,LEVELS[0],z0],"end":[x1,0.0,z1],"width":1.0,"count":3,"mat":"steel_stair"})
+        section(key)["stairs"].append({"start":[x0,LEVELS[0],z0],"end":[x1,0.0,z1],"width":1.0,"count":3,"mat":"steel_stair","visual":False})
+        for i in range(3):
+            yt=LEVELS[0]*(1-(i+1)/3)
+            box(key,name+"_tread",R(1.0+i*.3,.65,1.0+(i+1)*.3,1.65),max(yt-.03,0.0),yt+(0.0 if yt>0 else .03),"grating",False)
+        for o in [.6,1.7]:
+            B(1.0,o,LEVELS[0]+1.0,1.9,o,1.0)
+            B(1.9,o,0.0,1.9,o,1.0,.035,.035)
         # маршрут проверки: от земли до крыши по всем площадкам
-        pts=[[*[P(2.6,1.15)[0]],0.0,P(2.6,1.15)[1]]]
         pts=[[P(2.6,1.15)[0],0.0,P(2.6,1.15)[1]],[P(1.0,1.15)[0],LEVELS[0],P(1.0,1.15)[1]],
              [P(0.0,.6)[0],LEVELS[0],P(0.0,.6)[1]]]
         for k,y in enumerate(levels[:-1]):
-            yy=levels[k+1]; ym=(y+yy)/2; a_far=-1.0-run
-            pts+=[[*P(-1.0,.6)[:1],y,P(-1.0,.6)[1]],[P(a_far,.6)[0],ym,P(a_far,.6)[1]],
+            yy=levels[k+1]; ym=(y+yy)/2
+            pts+=[[P(-1.0,.6)[0],y,P(-1.0,.6)[1]],[P(a_far,.6)[0],ym,P(a_far,.6)[1]],
                   [P(a_far-.6,1.15)[0],ym,P(a_far-.6,1.15)[1]],[P(a_far,1.7)[0],ym,P(a_far,1.7)[1]],
                   [P(-1.0,1.7)[0],yy,P(-1.0,1.7)[1]],[P(0.0,1.15)[0],yy,P(0.0,1.15)[1]]]
         pts.append([P(0.0,-1.2)[0],levels[-1],P(0.0,-1.2)[1]])
         p["routes"].append({"id":"fire_"+name,"label":f"Пожарная лестница {name}: земля → все площадки → крыша","points":pts})
         p["routes"].append({"id":"fire_"+name+"_down","label":f"Пожарная лестница {name}: крыша → земля","points":list(reversed(pts))})
 
+    def rebar(key,hole,y,skip=""):
+        """Рваный край дыры: торчащая и загнутая вниз арматура по краям (кроме края skip — у ската он сломан иначе)."""
+        x0,z0,x1,z1=hole
+        edges={"z0":[(x,z0,0,-1) for x in [x0+.12+i*.22 for i in range(int((x1-x0-.2)/.22)+1)]],
+               "z1":[(x,z1,0,1) for x in [x0+.12+i*.22 for i in range(int((x1-x0-.2)/.22)+1)]],
+               "x0":[(x0,z,-1,0) for z in [z0+.12+i*.22 for i in range(int((z1-z0-.2)/.22)+1)]],
+               "x1":[(x1,z,1,0) for z in [z0+.12+i*.22 for i in range(int((z1-z0-.2)/.22)+1)]]}
+        for edge,bars in edges.items():
+            if edge==skip:
+                continue
+            for i,(x,z,nx,nz) in enumerate(bars):
+                if (i*7+len(edge))%5==3:
+                    continue
+                reach=.18+((i*37)%11)/40
+                drop=.12+((i*53)%7)/25
+                # стержень торчит из среза плиты внутрь дыры и загнут вниз
+                beam(key,[x+nx*.02,y-.08,z+nz*.02],[x-nx*reach,y-.08-drop,z-nz*reach],.014,.014,"rebar",False)
+        # обломки бетона по краю: висят и лежат у кромки
+        for i,(xa,za) in enumerate([(x0,z0),(x1,z1),(x0,z1),(x1,z0)]):
+            cx,cz=xa+(.15 if xa==x0 else -.15),za+(.15 if za==z0 else -.15)
+            box(key,"slab_chunk",[cx-.14,cz-.1,cx+.14,cz+.1],y-.22,y-.05,"slab",False)
+            section(key)["boxes"][-1]["yaw"]=17+i*31
+
+    def rubble(key,cx,cz,y,spread,count,seed):
+        """Россыпь обломков на полу — низкие куски (не мешают ходить)."""
+        for i in range(count):
+            a=(seed*13+i*2.399)%6.283
+            r=spread*(.35+((seed+i*7)%10)/14)
+            x,z=cx+math.cos(a)*r,cz+math.sin(a)*r
+            s=.08+((seed+i*5)%6)/30
+            box(key,"rubble_chunk",[x-s,z-s*.8,x+s,z+s*.8],y,y+min(.16,s*.9),"rubble",False)
+            section(key)["boxes"][-1]["yaw"]=(seed*41+i*67)%180
+
     def vertical_routes():
-        """Проломы, люки и провал: скаты-кучи и стремянки под дырами, маршруты проверки по ним."""
+        """Стихийные проломы: плита скатом, куча и залезть, провал; люк на крышу с вертикальной лестницей."""
         roof_top=LEVELS[-1]+HEIGHTS[-1]+SLAB
         levels=LEVELS+[roof_top]
-        for b_ in BREACHES:
+        for n,b_ in enumerate(BREACHES):
             f_above=b_["floor"]-1          # индекс уровня с дырой в полу
             y1=levels[f_above]
             y0=levels[f_above-1]
             key=f"Floor{f_above}"
-            if b_["kind"]=="drop":
-                x0,z0,x1,z1=b_["hole"]
+            x0,z0,x1,z1=b_["hole"]
+            cx,cz=(x0+x1)/2,(z0+z1)/2
+            kind=b_["kind"]
+            upper="крыша" if f_above==5 else f"{f_above+1} этаж"
+            if kind=="hatch":
+                # люк на крышу: стальная вертикальная лестница у края z0 (лезут со стороны +Z, крыша — за лестницей)
+                section(key).setdefault("ladders",[]).append({"at":[cx,y0,z0+.23],"height":y1-y0,"yaw":0.0})
+                p["routes"].append({"id":"breach_"+b_["id"],"label":f"Люк {b_['id']}: техэтаж → крыша по вертикальной лестнице",
+                                    "ladder":True,"points":[[cx,y0,z1+.5],[cx,y0,z0+.75],[cx,y1,z0-.6]]})
+                continue
+            rebar(key,b_["hole"],y1,b_.get("hinge",""))
+            rubble(key,cx,cz,y0,1.2,9,n+3)
+            if kind=="drop":
                 box(key,"rubble_pile",[x0+.1,z0+.1,x1-.1,z1-.1],y0,y0+1.1,"rubble")
-                cx,cz=(x0+x1)/2,(z0+z1)/2
+                for i,(a,b,h) in enumerate([(.3,.2,.5),(-.4,.3,.35),(.1,-.45,.6)]):
+                    box(key,"rubble_pile",[cx+a-.35,cz+b-.3,cx+a+.35,cz+b+.3],y0+1.1,y0+1.1+h*.4,"rubble",False)
+                    section(key)["boxes"][-1]["yaw"]=23+i*41
                 p["routes"].append({"id":"drop_"+b_["id"],"label":f"Провал {b_['id']}: {f_above+1} → {f_above} этаж (вниз)",
                                     "points":[[cx,y1,z1+.7],[cx,y0+1.1,cz],[cx+1.2,y0,cz]]})
                 continue
-            (sx,sz),(ex,ez)=b_["start"],b_["end"]
-            run=abs(ez-sz)
-            count=max(10,int(math.ceil((y1-y0)/.2)))
-            mat="steel_stair" if b_["kind"]=="ladder" else ("rubble" if b_["kind"]=="rubble" else "wood")
-            section(key)["stairs"].append({"start":[sx,y0,sz],"end":[ex,y1,ez],"width":b_["width"],"count":count,"mat":mat})
-            if b_["kind"]=="ladder":
-                for side in [-1,1]:
-                    xx=sx+side*b_["width"]/2
-                    beam(key,[xx,y0+1.0,sz],[xx,y1+1.0,ez],.04,.04,"steel_stair",False)
-            sgn=1 if ez>sz else -1
-            p["routes"].append({"id":"breach_"+b_["id"],"label":f"{b_['id']}: {f_above} → {'крыша' if f_above==5 else str(f_above+1)+' этаж'} по {'стремянке' if b_['kind']=='ladder' else 'завалу'}",
-                                "points":[[sx,y0,sz-sgn*.6],[sx,y0,sz],[ex,y1,ez],[ex,y1,ez+sgn*.3]]})
+            if kind=="slab":
+                # кусок плиты обломился у края hinge и лёг низом на пол (у П1 — на кучу высотой mound)
+                sgn=1 if b_["hinge"]=="z0" else -1        # куда от шарнира идёт плита (по z)
+                z_h=z0 if sgn>0 else z1
+                L=z1-z0
+                y_f=y0+b_["mound"]
+                dy=y1-(y_f+.04)
+                dz=math.sqrt(max(L*L-dy*dy,.01))
+                z_f=z_h+sgn*dz
+                length=math.hypot(dz,dy)
+                # верхняя грань — от низа (z_f, y_f+.04) к шарниру (z_h, y1); ось бруса ниже на полтолщины
+                vy,vz=dz/length,sgn*dy/length
+                off=SLAB/2
+                w=b_["width"]
+                beam(key,[cx,y_f+.04-vy*off,z_f-vz*off],[cx,y1-vy*off,z_h-vz*off],w,SLAB,"slab",True)
+                # арматура из слома у шарнира: висит вниз вдоль плиты
+                for i in range(6):
+                    xx=cx-w/2+.1+i*(w-.2)/5
+                    beam(key,[xx,y1-.1,z_h],[xx+.03,y1-.55-(i%3)*.12,z_h+sgn*.12],.014,.014,"rebar",False)
+                start_z=z_f
+                if b_["mound"]>0:
+                    # куча под низом плиты — пологий скат обломков
+                    run_m=b_["mound"]/math.tan(math.radians(27))
+                    zs=z_f+sgn*run_m
+                    ml=math.hypot(run_m,b_["mound"])
+                    my,mz=run_m/ml,sgn*b_["mound"]/ml
+                    beam(key,[cx,y0+.02-my*.15,zs-mz*.15],[cx,y_f+.02-my*.15,z_f-mz*.15],w+.4,.3,"rubble",True)
+                    rubble(key,cx,zs,y0,.9,7,n+11)
+                    start_z=zs
+                p["routes"].append({"id":"breach_"+b_["id"],"label":f"{b_['id']}: {f_above} этаж → {upper} по обрушенной плите",
+                                    "points":([[x0-.75,y0,start_z-sgn*.35],[cx,y0+.04,start_z-sgn*.25]] if b_["mound"]>0
+                                              else [[x0-.75,y0,z_f+sgn*.45],[cx,y0,z_f+sgn*.3]])+
+                                             [[cx,y_f+.04,z_f],[cx,y1,z_h],[x0-.75,y1,z_h-sgn*.1]]})
+                continue
+            # pile: куча ступенями к краю edge; верх — на 1,6 м ниже пола сверху (подтянуться на руках)
+            sgn=1 if b_["edge"]=="z1" else -1
+            z_e=z1 if sgn>0 else z0
+            top_h=(y1-y0)-1.6
+            tiers=[(top_h/3,.9,1.0),(top_h*2/3,.8,.9),(top_h,.95,.8)]  # высота, глубина вдоль z, доля ширины
+            zc=z_e-sgn*.05
+            pile_pts=[]
+            for i,(hh,depth,share) in enumerate(reversed(tiers)):
+                za,zb=sorted([zc,zc-sgn*depth])
+                half=(x1-x0)*share/2
+                box(key,"rubble_pile",[cx-half,za,cx+half,zb],y0,y0+hh,"rubble")
+                section(key)["boxes"][-1]["yaw"]=(-4,3,-2)[i]
+                pile_pts.append([cx,y0+hh,(za+zb)/2])
+                zc=zc-sgn*depth
+            # сверху кучи — пара кусков плиты и кирпичи (не мешают стоять)
+            box(key,"slab_chunk",[cx-.35,z_e-sgn*.6-.25,cx+.15,z_e-sgn*.6+.25],y0+top_h,y0+top_h+.06,"slab",False)
+            section(key)["boxes"][-1]["yaw"]=11
+            rubble(key,cx,zc,y0,.8,8,n+21)
+            p["routes"].append({"id":"breach_"+b_["id"],"label":f"{b_['id']}: {f_above} этаж → {upper} по куче, наверх — на руках",
+                                "climb":True,"points":[[cx,y0,zc-sgn*.6]]+list(reversed(pile_pts))+[[cx,y1,z_e+sgn*.6]]})
 
     def tech_floor():
-        """Техэтаж: вентиляционный короб под потолком коридора, трубы по стенам, баки и венткамеры в помещениях."""
+        """Техэтаж — открытый зал (владелец 2026-11-02): вместо стен коридора — колонны под ригелями, поперечные балки
+        по осям отсеков, короб вентиляции и трубы на подвесах, баки и венткамеры; щитовая и кладовая — выгородки из
+        сетки-рабицы. Лестница к будке на крыше — в своей клетке, люк Л — вертикальная лестница."""
         f=4
         key="Floor5"
         y,h=LEVELS[f],HEIGHTS[f]
-        for x0,x1 in [(.6,SC0-.3),(SC1+.3,LENGTH-.6)]:
-            box(key,"tech_duct",[x0,-.95,x1,-.15],y+h-.62,y+h-.2,"duct")
+        top=y+h
+        core_axes=[BAYS[3]["x1"]+.075,BAYS[4]["x1"]+.075]
+        axes=[BAYS[b]["x1"]+.075 for b in range(len(BAYS)-1)]
         for side in [-1,1]:
-            zz=side*(HALF-.12)
-            for yy,r in [(2.35,.06),(2.15,.045)]:
-                beam(key,[.3,y+yy,zz],[LENGTH-.3,y+yy,zz],r*2,r*2,"pipe")
+            zc=side*(HALF+LOAD/2)
+            for xx in axes:
+                if side<0 and xx in core_axes:
+                    continue
+                box(key,"tech_column",[xx-.2,zc-.2,xx+.2,zc+.2],y,top-.45,"wall")
+            spans=[(0.0,SC0-.15),(SC1+.15,LENGTH)] if side<0 else [(0.0,LENGTH)]
+            for a,b in spans:
+                box(key,"tech_girder",[a,zc-.2,b,zc+.2],top-.45,top,"ceiling")
+        for xx in axes:
+            if xx in core_axes:
+                continue
+            for z_a,z_b in [(-FACADE,-HALF-LOAD),(-HALF,HALF),(HALF+LOAD,FACADE)]:
+                box(key,"tech_beam",[xx-.15,z_a,xx+.15,z_b],top-.35,top,"ceiling")
+        # короб вентиляции вдоль зала под балками, на подвесах
+        for x0,x1 in [(.6,SC0-.4),(SC1+.4,LENGTH-.6)]:
+            box(key,"tech_duct",[x0,-1.05,x1,-.25],top-.9,top-.5,"duct")
+            xx=x0+.5
+            while xx<x1:
+                for zz in [-1.0,-.3]:
+                    beam(key,[xx,top-.5,zz],[xx,top,zz],.02,.02,"rail",False)
+                xx+=2.4
+        # трубы отопления и водопровода на подвесах вдоль зала
+        for zz,r,yy in [(1.25,.06,2.4),(1.0,.045,2.25),(-1.45,.05,2.35)]:
+            beam(key,[.3,y+yy,zz],[LENGTH-.3,y+yy,zz],r*2,r*2,"pipe")
+            xx=1.0
+            while xx<LENGTH-.5:
+                beam(key,[xx,y+yy+r,zz],[xx,top,zz],.016,.016,"rail",False)
+                xx+=3.0
         tanks=[(BAYS[2],-1),(BAYS[3],-1),(BAYS[6],1)]
         for bay,side in tanks:
             cx=(bay["x0"]+bay["x1"])/2
             za,zb=sorted([side*(FACADE-.6),side*(FACADE-2.4)])
             box(key,"tech_tank",[cx-.9,za,cx+.9,zb],y,y+1.45,"tank")
-            beam(key,[cx,y+1.45,(za+zb)/2],[cx,y+h-.02,(za+zb)/2],.12,.12,"pipe")
-        for bay,side in [(BAYS[1],1),(BAYS[5],-1),(BAYS[7],1)]:
+            beam(key,[cx,y+1.45,(za+zb)/2],[cx,top-.02,(za+zb)/2],.12,.12,"pipe")
+        for bay,side in [(BAYS[5],-1),(BAYS[7],1),(BAYS[1],1)]:
             cx=(bay["x0"]+bay["x1"])/2
             za,zb=sorted([side*(FACADE-.5),side*(FACADE-1.9)])
             box(key,"tech_fan",[cx-.8,za,cx+.8,zb],y,y+1.9,"duct")
 
+        def cage(name,rect,door_edge,door_at,label_at):
+            """Выгородка из сетки-рабицы на стальных стойках, проём двери 1 м."""
+            x0,z0,x1,z1=rect
+            for edge,(a0,a1,const,axis) in {"z0":(x0,x1,z0,"z"),"z1":(x0,x1,z1,"z"),"x0":(z0,z1,x0,"x"),"x1":(z0,z1,x1,"x")}.items():
+                holes=[(door_at,1.0,0,2.1)] if edge==door_edge else []
+                wall(key,"cage_mesh",a0,a1,const,.03,y,2.5,holes,axis,"mesh")
+                pos=a0
+                while pos<=a1+.01:
+                    at=[pos,const] if axis=="z" else [const,pos]
+                    beam(key,[at[0],y,at[1]],[at[0],y+2.55,at[1]],.05,.05,"steel_stair",False)
+                    pos+=1.5
+                ends=[[a0,const],[a1,const]] if axis=="z" else [[const,a0],[const,a1]]
+                beam(key,[ends[0][0],y+2.52,ends[0][1]],[ends[1][0],y+2.52,ends[1][1]],.04,.04,"steel_stair",False)
+            label(key,name,label_at,0,None,True)
+        cage("ЭЛЕКТРОЩИТОВАЯ",[34.1,-8.6,37.6,-4.2],"z1",35.0,[35.0,y+2.3,-4.15])
+        box(key,"switchboard",[34.3,-8.5,37.3,-8.1],y,y+2.0,"panel")
+        cage("КЛАДОВАЯ",[38.15,-8.6,40.6,-4.2],"z1",39.4,[39.4,y+2.3,-4.15])
+        for i,(a,b) in enumerate([(38.35,-8.4),(39.3,-8.4),(38.35,-7.4)]):
+            box(key,"crate",[a,b,a+.8,b+.8],y,y+.6,"wood")
     def add_details():
         # Все новые категории отделены от несущей коробки. На этапе 2 их заменят модули Blender.
         def strip(key,name,lo,hi,constant,depth,y0,y1,axis,mat,group):
@@ -366,6 +580,8 @@ def make_plan():
                   (BAYS[6]["x1"]+BAYS[7]["x0"])/2]
         for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
             key=f"Floor{f+1}"
+            if f==4:
+                continue   # техэтаж — зал без коридора (tech_floor)
             for i,xx in enumerate(stations):
                 uid=f"f{f+1}_portal_{i}"
                 box(key,uid,[xx-.2,-HALF-LOAD,xx+.2,HALF+LOAD],y+h-.4,y+h,"ceiling",True,"beams")
@@ -496,6 +712,8 @@ def make_plan():
         # Хозкрыло: порталы по стенам между службами, через два модуля (8,6 м).
         annex_stations=[-FACADE-EXT-.2-4.15-.075,-FACADE-EXT-.2-4.15-.075-8.6]
         for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
+            if f==4:
+                continue
             for i,zz in enumerate(annex_stations):
                 uid=f"f{f+1}_annex_portal_{i}"
                 box("NorthAnnex",uid,[ANNEX_CORRIDOR-LOAD,zz-.2,LENGTH+EXT,zz+.2],y+h-.4,y+h,"ceiling",True,"beams")
@@ -505,7 +723,7 @@ def make_plan():
                     skirt("NorthAnnex",zz-.225,zz+.225,xx+inward*.18,inward,y,"x")
                 p["portals"].append({"id":uid,"floor":f+1,"at":[TURN_X,y,zz],"ceiling":h,
                                      "clear_height":h-.4,"clear_width":3.0,"kind":"transverse","travel_axis":"z"})
-        for y in LEVELS:
+        for y in LEVELS[:4]:
             for x,inward in [(ANNEX_CORRIDOR,1),(LENGTH,-1)]:
                 holes=[(d["at"][2],d["width"]+.02) for d in p["doors"] if d["axis"]=="x" and abs(d["at"][1]-y)<.01 and abs(d["at"][0]-x)<LOAD/2+.02]
                 holes += [(zz,.45) for zz in annex_stations]
@@ -518,12 +736,29 @@ def make_plan():
     box("Site","ground",[-14,-49,LENGTH+15,26],-.3,0,"ground")
     box("Site","main_plinth",[-EXT,-FACADE-EXT,LENGTH+EXT,FACADE+EXT],0,BASE-SLAB,"slab")
     box("Site","front_apron",[-1,FACADE+EXT,LENGTH+1,FACADE+EXT+1.2],-.04,.025,"paving")
-    box("Site","entry_porch",[-.35,FACADE+EXT,4.25,PORCH_END],0,BASE,"floor")
+    # Крыльца — крупная разбитая плитка (владелец 2026-11-02: «не ламинат»), кромки ступеней — стальной уголок.
+    box("Site","entry_porch",[-.35,FACADE+EXT,4.25,PORCH_END],0,BASE,"porch_tile")
     for i in range(3):
-        box("Site","entry_step",[-.1,PORCH_END+i*.3,4,PORCH_END+(i+1)*.3],0,BASE-i*.16,"floor")
-    box("Site","rear_porch",[LENGTH+EXT,-1.7,LENGTH+2.2,1.7],0,BASE,"floor")
+        box("Site","entry_step",[-.1,PORCH_END+i*.3,4,PORCH_END+(i+1)*.3],0,BASE-i*.16,"porch_tile")
+        z=PORCH_END+i*.3
+        box("Site","step_nosing",[-.1,z-.004,4,z+.036],BASE-i*.16-.036,BASE-i*.16+.004,"rail",False)
+    box("Site","step_nosing",[-.35,PORCH_END-.004,4.25,PORCH_END+.036],BASE-.036,BASE+.004,"rail",False)
+    # Козырёк входа (владелец 2026-11-02): железобетонная плита на двух кирпичных столбах по углам крыльца,
+    # отлив по краю, лампа под плитой; перила из трубы вдоль ступеней.
+    cy=BASE+3.05
+    box("Site","canopy_slab",[-.75,FACADE+EXT,4.65,PORCH_END+.45],cy,cy+.18,"slab")
+    box("Site","canopy_edge",[-.75,PORCH_END+.37,4.65,PORCH_END+.45],cy-.1,cy,"slab")
+    for xa in [-.35,3.87]:
+        box("Site","canopy_pillar",[xa,PORCH_END-.38,xa+.38,PORCH_END],BASE,cy,"brick")
+    box("Site","canopy_lamp",[1.8,FACADE+EXT+1.1,2.1,FACADE+EXT+1.4],cy-.1,cy,"frame",False)
+    for xr in [.12,3.78]:
+        beam("Site",[xr,BASE+.9,PORCH_END],[xr,.9,PORCH_END+.9],.045,.045,"rail")
+        beam("Site",[xr,0,PORCH_END+.9],[xr,.92,PORCH_END+.9],.04,.04,"rail")
+    box("Site","rear_porch",[LENGTH+EXT,-1.7,LENGTH+2.2,1.7],0,BASE,"porch_tile")
     for i in range(3):
-        box("Site","rear_step",[LENGTH+2.2+i*.3,-1.5,LENGTH+2.5+i*.3,1.5],0,BASE-i*.16,"floor")
+        box("Site","rear_step",[LENGTH+2.2+i*.3,-1.5,LENGTH+2.5+i*.3,1.5],0,BASE-i*.16,"porch_tile")
+        x=LENGTH+2.2+i*.3
+        box("Site","step_nosing",[x-.004,-1.5,x+.036,1.5],BASE-i*.16-.036,BASE-i*.16+.004,"rail",False)
     for x,z in [(-6,-13),(LENGTH-7,17)]:
         box("Site","tree_trunk",[x-.18,z-.18,x+.18,z+.18],0,5,"tree")
         box("Site","tree_crown",[x-1.6,z-1.6,x+1.6,z+1.6],3.1,8,"tree",False)
@@ -562,6 +797,8 @@ def make_plan():
                         door(key,"ВХОД",cx,side*(FACADE+EXT/2),y,1,w=2.4,dh=2.7,thick=EXT,inward=-1)
                     else:
                         window(key,cx,side*(FACADE+EXT/2),y+SILL,f+1)
+                if f==4:
+                    continue   # техэтаж — открытый зал (tech_floor): без комнат, дверей и перегородок
                 if side==1 and b in [4,5]:
                     if b==4:
                         a,big = BAYS[4]["x0"]+.12,BAYS[5]["x1"]-.12
@@ -632,9 +869,36 @@ def make_plan():
                     box(key,"facade_pier",[x1,side*(FACADE+EXT/2)-EXT/2,next_x,side*(FACADE+EXT/2)+EXT/2],y-offset,y+h+SLAB)
                     if side==1 and b==4:
                         continue
+                    # техэтаж: остаются только стены лестничной клетки
+                    if f==4 and not (side<0 and b in [3,4]):
+                        continue
                     za,zb=sorted([side*ROOM_EDGE,side*FACADE])
-                    box(key,"partition",[x1,za,next_x,zb],y,y+h+SLAB)
+                    if (f+1,side,b) in WALL_BREACHES:
+                        # пролом в перегородке: рваный проём у середины комнат, по краям — сколы, внизу — обломки
+                        zc=side*(ROOM_EDGE+wall_breach_v((x1+next_x)/2,side,y))
+                        hz0,hz1=zc-WALL_BREACH_W/2,zc+WALL_BREACH_W/2
+                        box(key,"partition",[x1,za,next_x,hz0],y,y+h+SLAB)
+                        box(key,"partition",[x1,hz1,next_x,zb],y,y+h+SLAB)
+                        box(key,"partition",[x1,hz0,next_x,hz1],y+WALL_BREACH_H,y+h+SLAB)
+                        for dz,w_,top_ in [(.18,.32,.2),(.62,.22,.1),(1.0,.26,.16)]:
+                            box(key,"partition",[x1,hz0+dz-w_/2,next_x,hz0+dz+w_/2],y+WALL_BREACH_H-top_,y+WALL_BREACH_H)
+                        for z_,lo,hi in [(hz0,.35,1.15),(hz1,.6,1.5)]:
+                            sgn_=1 if z_==hz0 else -1
+                            box(key,"partition",[x1,z_ if sgn_>0 else z_-.12,next_x,z_+.12 if sgn_>0 else z_],y+lo,y+hi)
+                        xm=(x1+next_x)/2
+                        rubble(key,xm-.55,zc,y,.5,6,b*7+f)
+                        rubble(key,xm+.55,zc,y,.5,6,b*11+f)
+                        p.setdefault("wall_breaches",[]).append({"floor":f+1,"x":xm,"z":zc,"width":WALL_BREACH_W,"height":WALL_BREACH_H})
+                        p["routes"].append({"id":f"wall_f{f+1}_{side}_{b}","label":f"{f+1} этаж: пролом в стене между комнатами (отсеки {b} и {b+1})",
+                                            "points":[[x1-.9,y,zc],[next_x+.9,y,zc]]})
+                    else:
+                        box(key,"partition",[x1,za,next_x,zb],y,y+h+SLAB)
         for side in [-1,1]:
+            if f==4:
+                # техэтаж: от несущей стены коридора — только перед лестничной клеткой (с её проёмом)
+                if side<0:
+                    wall(key,"corridor_load",SC0-.15,SC1+.15,side*(HALF+LOAD/2),LOAD,y,h+SLAB,[(SCX,2.4,0,h-.4)],portal_centers=[SCX])
+                continue
             niches=[(xx,.6,.9,.9) for xx in [12.6,26.0,39.8]] if side<0 else []
             centers=[SCX] if side<0 else [(BAYS[4]["x0"]+.12+BAYS[5]["x1"]-.12)/2]
             wall(key,"corridor_load",0,LENGTH,side*(HALF+LOAD/2),LOAD,y,h+SLAB,corridor_holes[side]+niches,portal_centers=centers)
@@ -651,19 +915,24 @@ def make_plan():
             window(key,LENGTH+EXT/2,0,y+SILL,f+1,"x",1.8)
         # Общая зона напротив лестницы: окно в широком объёме и неглубокая боковая ниша.
         a,b,c=BAYS[4]["x0"],BAYS[5]["x0"],BAYS[5]["x1"]
-        poly=[[a,ROOM_EDGE],[c,ROOM_EDGE],[c,FACADE],[b,FACADE],[b,5.6],[a,5.6]]
-        space(f"f{f+1}_lounge",*(("ГОСТИНАЯ","lounge") if f<4 else ("ТЕХ. ЗАЛ","tech")),f,[a,ROOM_EDGE,c,FACADE],
-              [[SCX,y,0],[SCX,y,3.8],[b+1.4,y,3.8],[b+1.4,y,7.1]],
-              [[c-1.4,y,FACADE-1.0],[b+1.4,y,FACADE-1.0],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
-        wall(key,"lounge_store",a,SC1,5.675,PART,y,h,[(SCX,DOOR_W,0,DOOR_H)])
-        door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=True,thick=PART)
-        # Кладовка ограничена только шириной своего модуля.
-        box(key,"lounge_store_side",[SC1,5.6,b,FACADE],y,y+h+SLAB)
-        space(f"f{f+1}_lounge_store","КЛАДОВАЯ ПРИ ГОСТИНОЙ","storage",f,[a,5.75,SC1,FACADE],
-              [[SCX,y,0],[SCX,y,3.8],[SCX,y,7.4]],[[SCX,y,FACADE-.8]])
-        for xx in [b+.7,c-.7]:
-            box(key,"seat_scale",[xx-.25,FACADE-3.78,xx+.25,FACADE-1.98],y,y+.45,"wood")
-        box(key,"lounge_table",[b+2.0,FACADE-4.48,c-2.0,FACADE-3.58],y,y+.55,"wood")
+        if f<4:
+            poly=[[a,ROOM_EDGE],[c,ROOM_EDGE],[c,FACADE],[b,FACADE],[b,5.6],[a,5.6]]
+            space(f"f{f+1}_lounge","ГОСТИНАЯ","lounge",f,[a,ROOM_EDGE,c,FACADE],
+                  [[SCX,y,0],[SCX,y,3.8],[b+1.4,y,3.8],[b+1.4,y,7.1]],
+                  [[c-1.4,y,FACADE-1.0],[b+1.4,y,FACADE-1.0],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
+            wall(key,"lounge_store",a,SC1,5.675,PART,y,h,[(SCX,DOOR_W,0,DOOR_H)])
+            door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=True,thick=PART)
+            # Кладовка ограничена только шириной своего модуля.
+            box(key,"lounge_store_side",[SC1,5.6,b,FACADE],y,y+h+SLAB)
+            space(f"f{f+1}_lounge_store","КЛАДОВАЯ ПРИ ГОСТИНОЙ","storage",f,[a,5.75,SC1,FACADE],
+                  [[SCX,y,0],[SCX,y,3.8],[SCX,y,7.4]],[[SCX,y,FACADE-.8]])
+            for xx in [b+.7,c-.7]:
+                box(key,"seat_scale",[xx-.25,FACADE-3.78,xx+.25,FACADE-1.98],y,y+.45,"wood")
+            box(key,"lounge_table",[b+2.0,FACADE-4.48,c-2.0,FACADE-3.58],y,y+.55,"wood")
+        else:
+            space("f5_tech_hall","ТЕХНИЧЕСКИЙ ЭТАЖ","tech",f,[0,-FACADE,LENGTH,FACADE],
+                  [[SCX,y,0],[SCX+3,y,0],[12,y,0],[12,y,5.5]],
+                  [[3,y,-5.5],[16,y,-3.6],[16,y,0],[30,y,0],[30,y,-5.0],[30,y,0],[35.85,y,0],[35.85,y,5.5],[40,y,5.5],[24,y,6.0]])
         # Входной контроль оставлен открытым; новые игровые правила турникета не вводятся.
         if f==0:
             wall(key,"vestibule",0,WIDTHS[0],7.075,PART,y,h,[(ENTRY_X,2.4,0,2.7)])
@@ -767,9 +1036,11 @@ def make_plan():
         for i,(kind,name) in enumerate(service_kinds):
             sid=f"f{f+1}_annex_{kind}"
             if f==4:
-                # техэтаж: над службами — инженерные помещения
-                kind,name=("tech",["ВЕНТКАМЕРА","БОЙЛЕРНАЯ","НАСОСНАЯ","ЭЛЕКТРОЩИТОВАЯ"][i])
-                sid=f"f5_annex_tech_{i}"
+                # техэтаж: хозкрыло — часть открытого зала, окна прежние
+                zc=-FACADE-EXT-.2-i*4.3-4.15/2
+                wh.append((zc,WINDOW_W,SILL,1.65))
+                window(key,ANNEX_X-EXT/2,zc,y+SILL,f+1,"x")
+                continue
             z1=-FACADE-EXT-.2-i*4.3
             z0=z1-4.15
             zc=(z0+z1)/2
@@ -792,18 +1063,27 @@ def make_plan():
         # Конец хозкрыла за службами — склад (прежде закрытая часть): дверь из коридора, два окна.
         store_z1=-FACADE-EXT-.2-3*4.3-4.15-PART
         store_zc=(ANNEX_END+store_z1)/2
-        dh.append((store_zc,DOOR_W,0,DOOR_H))
-        door(key,"СКЛАД",store_zc,ANNEX_WALL,y,axis="x",opened=True,inward=-1)
         for zz in [store_zc+2.9,store_zc-2.9]:
             wh.append((zz,WINDOW_W,SILL,1.65))
             window(key,ANNEX_X-EXT/2,zz,y+SILL,f+1,"x")
-        srect=[ANNEX_X,ANNEX_END,ANNEX_CORRIDOR-LOAD,store_z1]
-        space(f"f{f+1}_annex_store","СКЛАД","storage",f,srect,
-              [[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,store_zc],[(srect[0]+srect[2])/2,y,store_zc]],
-              [[ANNEX_X+.9,y,ANNEX_END+.9],[(srect[0]+srect[2])/2,y,store_z1-.9]])
+        if f<4:
+            dh.append((store_zc,DOOR_W,0,DOOR_H))
+            door(key,"СКЛАД",store_zc,ANNEX_WALL,y,axis="x",opened=True,inward=-1)
+            srect=[ANNEX_X,ANNEX_END,ANNEX_CORRIDOR-LOAD,store_z1]
+            space(f"f{f+1}_annex_store","СКЛАД","storage",f,srect,
+                  [[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,store_zc],[(srect[0]+srect[2])/2,y,store_zc]],
+                  [[ANNEX_X+.9,y,ANNEX_END+.9],[(srect[0]+srect[2])/2,y,store_z1-.9]])
+        else:
+            space("f5_annex_hall","ТЕХНИЧЕСКИЙ ЭТАЖ · ХОЗКРЫЛО","tech",f,[ANNEX_X,ANNEX_END,LENGTH,-FACADE-EXT],
+                  [[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,-20],[36,y,-20]],[[36,y,-12],[36,y,-31]])
+            # вместо стены коридора — колонны под ригелем
+            for zz in [-12.5,-17.0,-21.5,-26.0,-30.5,-35.0]:
+                box(key,"tech_column",[ANNEX_WALL-.2,zz-.2,ANNEX_WALL+.2,zz+.2],y,y+h-.45,"wall")
+            box(key,"tech_girder",[ANNEX_WALL-.2,ANNEX_END,ANNEX_WALL+.2,-FACADE-EXT],y+h-.45,y+h,"ceiling")
         wall(key,"annex_facade",ANNEX_END,-FACADE-EXT,ANNEX_X-EXT/2,EXT,y,h+SLAB,wh,"x")
         wall(key,"annex_east",ANNEX_END,-FACADE-EXT,LENGTH+EXT/2,EXT,y,h+SLAB,axis="x")
-        wall(key,"annex_corridor",ANNEX_END,-FACADE-EXT,ANNEX_WALL,LOAD,y,h+SLAB,dh,"x")
+        if f<4:
+            wall(key,"annex_corridor",ANNEX_END,-FACADE-EXT,ANNEX_WALL,LOAD,y,h+SLAB,dh,"x")
         # пожарный выход к наружной лестнице Б — в торце коридора хозкрыла на каждом этаже
         wall(key,"annex_end",ANNEX_X,LENGTH,ANNEX_END-EXT/2,EXT,y,h+SLAB,[(TURN_X,DOOR_W,0,DOOR_H)])
         door(key,"ПОЖАРНЫЙ ВЫХОД",TURN_X,ANNEX_END-EXT/2,y,-1,thick=EXT,leaf=False)
@@ -867,7 +1147,8 @@ def make_plan():
         ("15_fire_a","Пожарная лестница А у торца",[-4.5,0,4.5],[-1.5,8.0,-2.0]),
         ("16_roof","Крыша: будка и люк",[10.0,LEVELS[-1]+HEIGHTS[-1]+SLAB,3.0],[SCX,LEVELS[-1]+HEIGHTS[-1]+SLAB+1.5,-4.0]),
         ("17_tech","Техэтаж: короб и трубы",[ENTRY_X+2,LEVELS[4],0],[LENGTH-1,LEVELS[4]+1.62,0]),
-        ("18_breach","Пролом П1 снизу",[9.0,BASE,3.0],[10.635,BASE+3.0,6.5]),
+        ("18_breach","Пролом П1: плита скатом",[8.8,BASE,8.3],[10.635,BASE+2.2,4.0]),
+        ("19_canopy","Вход: козырёк и крыльцо",[1.95,0,15.5],[1.95,1.8,10.5]),
     ]
     for i,(sid,name,foot,look) in enumerate(views,1):
         p["locations"].append({"id":i,"label":name,"foot":foot,"look":look})

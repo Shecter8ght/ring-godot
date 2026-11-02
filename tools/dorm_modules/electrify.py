@@ -403,11 +403,13 @@ def main() -> None:
     broken = {b["room_below"] for b in plan.get("breaches", [])}
     for s in plan["spaces"]:
         kind = KIND.get(s["kind"])
-        if kind is None or s["id"] in broken:
+        if kind is None or s["id"] in broken or s["kind"] == "tech":
             continue
         f = int(s["floor"])
         room_wiring(W, s, doors, clears[f - 1], f"Floor{f}", kind)
     for f, y in enumerate(floors_y, start=1):
+        if f == 5:
+            continue  # техэтаж — открытый зал без коридора (свет — своими светильниками потом)
         corridor_wiring(W, plan, f, clears[f - 1], y, f"Floor{f}")
     OUT.write_text(json.dumps({"version": 1, "source": "tools/dorm_modules/electrify.py", "items": W.items,
                                "lights": W.lights}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")

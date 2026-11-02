@@ -320,7 +320,7 @@ func _verify() -> void:
 				rooms[int(space.floor)-1] += 1
 			tech += 1 if String(space.kind)=="tech" else 0
 	var living: Array[int] = rooms.slice(0,4)
-	_check("Пять этажей открыты: 1–4 по 8–10 жилых комнат, 5-й технический",plan.scale.floor_y.size()==5 and living.min()>=8 and living.max()<=10 and rooms[4]==0 and tech>=10,
+	_check("Пять этажей открыты: 1–4 по 8–10 жилых комнат, 5-й — технический зал",plan.scale.floor_y.size()==5 and living.min()>=8 and living.max()<=10 and rooms[4]==0 and tech>=2,
 		{"rooms":rooms,"tech":tech,"open_spaces":spaces})
 	_check("Капсула, глаз и скорость соответствуют игроку",is_equal_approx(camera.position.y,Balance.ADS_EYE.stand),
 		{"capsule_height":Balance.STANCE_HEIGHT.stand,"capsule_radius":Balance.CAPSULE_RADIUS,"eye":camera.position.y,"walk_m_s":Balance.PLAYER_WALK_SPEED,"jump":false,"flight":false})
@@ -330,6 +330,8 @@ func _verify() -> void:
 		var ceiling_hit: Dictionary = _ray(Vector3(probe_x,y+0.1,0),Vector3(probe_x,y+8,0))
 		var clearance: float = (ceiling_hit.position as Vector3).y-y if not ceiling_hit.is_empty() else INF
 		_check("Высота потолка %d-го этажа" % (f+1),absf(clearance-float(plan.scale.ceiling_clear[f]))<0.03,{"clear_m":clearance})
+		if f==4:
+			continue   # 5-й этаж — открытый технический зал, коридора нет
 		var left: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,-4))
 		var right: Dictionary = _ray(Vector3(probe_x,y+1.3,0),Vector3(probe_x,y+1.3,4))
 		var width_m: float = (right.position as Vector3).z-(left.position as Vector3).z if not left.is_empty() and not right.is_empty() else INF
@@ -349,6 +351,9 @@ func _verify() -> void:
 		var points: Array[Vector3] = []
 		for at: Array in route.points:
 			points.append(_vec(at))
+		if bool(route.get("climb",false)) or bool(route.get("ladder",false)):
+			_check_climb_route(route,points)
+			continue
 		var passed: bool = await _walk_path(points)
 		_check(String(route.label)+" — пешком",passed,route_detail.duplicate())
 	# Каждый путь начинается на площадке лестницы. Точки внутри помещений достигаются без телепортации.
@@ -430,6 +435,31 @@ func _verify() -> void:
 	get_tree().quit(mini(fails,255))
 
 
+## Пути на руках (куча под проломом — подтянуться) и по вертикальной лестнице ходок прогулки пройти не может:
+## проверяются высоты — каждая ступень кучи стоит на полу, до края сверху не выше Balance.CLIMB.max_h (и выше
+## max_h_loaded: с перегрузом не залезть); у люка — лестница игры на месте и над ней открыто небо.
+func _check_climb_route(route: Dictionary, points: Array[Vector3]) -> void:
+	if bool(route.get("ladder",false)):
+		var ladders: int = get_tree().get_nodes_in_group(Ladder.LINK_GROUP).size()
+		var top: Vector3 = points[points.size()-1]
+		var below: Vector3 = points[1]
+		var sky: Dictionary = _ray(Vector3(below.x,below.y+1.0,top.z+.85),Vector3(below.x,top.y+6.0,top.z+.85))
+		_check(String(route.label)+" — лестница на месте, над люком открыто",ladders>0 and sky.is_empty(),{"ladders":ladders,"hit":str(sky.get("position",""))})
+		return
+	var ok: bool = true
+	var detail: Dictionary = {}
+	for i: int in range(1,points.size()):
+		var at: Vector3 = points[i]
+		var hit: Dictionary = _ray(at+Vector3.UP*0.6,at+Vector3.DOWN*0.5)
+		var ground: float = (hit.position as Vector3).y if not hit.is_empty() else -INF
+		ok = ok and absf(ground-at.y)<0.08
+		detail["p%d" % i] = snappedf(ground,0.01)
+	var reach: float = points[points.size()-1].y-points[points.size()-2].y
+	ok = ok and reach<=float(Balance.CLIMB.max_h) and reach>float(Balance.CLIMB.max_h_loaded)
+	detail["climb_m"] = snappedf(reach,0.01)
+	_check(String(route.label)+" — высоты кучи и края",ok,detail)
+
+
 func _verify_details() -> void:
 	var portal_errors: Array[String] = []
 	var min_height: float = INF
@@ -452,7 +482,7 @@ func _verify_details() -> void:
 			portal_errors.append(String(portal.id))
 	_check("Порталы: от 2,6 м под балкой и 3,0 м между пилястрами с плинтусами",portal_errors.is_empty(),
 		{"minimum_height_m":min_height,"minimum_width_m":min_width,"failed":portal_errors})
-	_check("В хозкрыле по два портала на каждом открытом этаже",annex_portals==10,{"annex_portals":annex_portals})
+	_check("В хозкрыле по два портала на каждом жилом этаже",annex_portals==8,{"annex_portals":annex_portals})
 	var bad_leaves: Array[String] = []
 	var poses: Dictionary = {}
 	var grilles: int = 0

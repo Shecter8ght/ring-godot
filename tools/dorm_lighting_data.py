@@ -83,6 +83,8 @@ def add_lighting(p):
         elif s["kind"] in ["kitchen","commandant","hall"]:
             lamp("services",key,[cx,y+h-.25,cz],1.2,3.5)
     lamp("watch","Floor1",[1.15,2.35,4.5],.6,4.2,True)
+    # лампа под козырьком входа (build_dorm.py: canopy_lamp)
+    lamp("services","Site",[1.95,.48+2.9,p["main_rect"][3]+.64+1.25],1.1,6.0,True)
     p["lights"]["watch"][-1].update({"source_size":0.,"shadow_blur":3.0,"falloff":1.0})
     # Широкий источник в плоскости окна приближает рассеянный свет неба.
     # Короткая дальность и тени стен сохраняют тёмную глубину комнаты и закрытые углы.

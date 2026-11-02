@@ -731,6 +731,18 @@ func _check_run() -> void:
 		var path: PackedVector3Array = _path(ground,to)
 		var ok: bool = path.size()>1 and path[path.size()-1].distance_to(to)<1.0
 		_check("Путь ботов от входа: "+label,ok,"%d точек, конец %s" % [path.size(),str(path[path.size()-1]) if path.size()>0 else "—"])
+	# люк Л: вертикальная лестница игры даёт ботам связку навигации — с техэтажа на крышу коротко, не через будку
+	var hatch: Dictionary = {}
+	for item: Dictionary in plan.breaches:
+		if String(item.kind)=="hatch":
+			hatch = item
+	var hx: float = (float(hatch.hole[0])+float(hatch.hole[2]))*0.5
+	var ladder_path: PackedVector3Array = _path(Vector3(hx,float(plan.scale.floor_y[4]),float(hatch.hole[3])+1.2),Vector3(hx,roof_y,float(hatch.hole[1])-1.0))
+	var ladder_len: float = 0.0
+	for i: int in range(1,ladder_path.size()):
+		ladder_len += ladder_path[i].distance_to(ladder_path[i-1])
+	_check("Боты: с техэтажа на крышу — по лестнице люка",ladder_path.size()>1 and ladder_path[ladder_path.size()-1].y>roof_y-0.3 and ladder_len<12.0,
+		"%.1f м пути" % ladder_len)
 	# расстановка в полёте: бот на крыше, на техэтаже и в комнате 2 этажа замерли, в игре — живут
 	fly_cam.global_position = Vector3(10.0,roof_y+6.0,8.0)
 	_fly_look_at(Vector3(10.0,roof_y,3.0))
