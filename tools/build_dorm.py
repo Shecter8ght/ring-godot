@@ -124,6 +124,36 @@ def ragged(b):
     return clipped, teeth
 
 
+def cut_outline(rects):
+    """Контур объединения прямоугольников дыры (дыра и её выбоины) — тонкие полосы по внутренней стороне каждого
+    отрезка границы: сетка по их же координатам, клетка внутри — центр в одном из прямоугольников."""
+    if not rects:
+        return []
+    xs = sorted({round(v, 4) for r in rects for v in (r[0], r[2])})
+    zs = sorted({round(v, 4) for r in rects for v in (r[1], r[3])})
+    def inside(i, j):
+        if i < 0 or j < 0 or i >= len(xs) - 1 or j >= len(zs) - 1:
+            return False
+        cx, cz = (xs[i] + xs[i + 1]) / 2, (zs[j] + zs[j + 1]) / 2
+        return any(r[0] < cx < r[2] and r[1] < cz < r[3] for r in rects)
+    t = .008
+    out = []
+    for i in range(len(xs) - 1):
+        for j in range(len(zs) - 1):
+            if not inside(i, j):
+                continue
+            x0, x1, z0, z1 = xs[i], xs[i + 1], zs[j], zs[j + 1]
+            if not inside(i - 1, j):
+                out.append([x0, z0, x0 + t, z1])
+            if not inside(i + 1, j):
+                out.append([x1 - t, z0, x1, z1])
+            if not inside(i, j - 1):
+                out.append([x0, z0, x1, z0 + t])
+            if not inside(i, j + 1):
+                out.append([x0, z1 - t, x1, z1])
+    return out
+
+
 def subtract(rect, holes):
     """Прямоугольник без дыр — набор прямоугольников (перекрытие с проломами и люками)."""
     out = [rect]
@@ -430,7 +460,7 @@ def make_plan():
                 a,b=[x0-.02,y-.12,c],[x0+r,y-.12-d,c]
             else:
                 a,b=[x1+.02,y-.12,c],[x1-r,y-.12-d,c]
-            beam(key,a,b,w,.2,"slab",False)
+            beam(key,a,b,w,.2,"concrete",False)
             beam(key,[a[0],a[1]+.112,a[2]],[b[0],b[1]+.112,b[2]],w-.04,.025,"floor",False)
 
     def rebar(key,hole,y,skip=""):
@@ -453,7 +483,7 @@ def make_plan():
         # обломки бетона по краю: висят и лежат у кромки
         for i,(xa,za) in enumerate([(x0,z0),(x1,z1),(x0,z1),(x1,z0)]):
             cx,cz=xa+(.15 if xa==x0 else -.15),za+(.15 if za==z0 else -.15)
-            box(key,"slab_chunk",[cx-.14,cz-.1,cx+.14,cz+.1],y-.22,y-.05,"slab",False)
+            box(key,"slab_chunk",[cx-.14,cz-.1,cx+.14,cz+.1],y-.22,y-.05,"concrete",False)
             section(key)["boxes"][-1]["yaw"]=17+i*31
 
     def rubble(key,cx,cz,y,spread,count,seed):
@@ -517,7 +547,7 @@ def make_plan():
                     return [pa[0]+shift,pa[1]+(pb[1]-pa[1])*k+vy*lift,pa[2]+(pb[2]-pa[2])*k+vz*lift]
                 # куски вдоль ската: (от, до, ширина, сдвиг вбок, просадка)
                 for i,(k0,k1,ww,sh,sag) in enumerate([(0,.31,w-.06,.04,-.035),(.325,.68,w,-.03,0.0),(.695,1.0,w-.14,.06,-.02)]):
-                    beam(key,at(k0,sag,sh),at(k1,sag,sh),ww,SLAB,"slab",False)
+                    beam(key,at(k0,sag,sh),at(k1,sag,sh),ww,SLAB,"concrete",False)
                     # паркет пола, с которого упала плита; в среднем куске выбит клок — виден бетон
                     top=off+.0125+sag
                     if i==1:
@@ -529,7 +559,7 @@ def make_plan():
                 # отбитые углы — куски бетона у краёв плиты
                 for k,sh in [(.12,w/2-.05),(.52,-w/2+.04),(.86,w/2-.1)]:
                     p_=at(k,off+.02,sh)
-                    box(key,"slab_chunk",[p_[0]-.12,p_[2]-.09,p_[0]+.12,p_[2]+.09],p_[1]-.05,p_[1]+.08,"slab",False)
+                    box(key,"slab_chunk",[p_[0]-.12,p_[2]-.09,p_[0]+.12,p_[2]+.09],p_[1]-.05,p_[1]+.08,"concrete",False)
                     section(key)["boxes"][-1]["yaw"]=int(k*300)%90
                 # арматура из слома у шарнира: висит вниз вдоль плиты
                 for i in range(6):
@@ -565,7 +595,7 @@ def make_plan():
                 pile_pts.append([cx,y0+hh,(za+zb)/2])
                 zc=zc-sgn*depth
             # сверху кучи — пара кусков плиты и кирпичи (не мешают стоять)
-            box(key,"slab_chunk",[cx-.35,z_e-sgn*.6-.25,cx+.15,z_e-sgn*.6+.25],y0+top_h,y0+top_h+.06,"slab",False)
+            box(key,"slab_chunk",[cx-.35,z_e-sgn*.6-.25,cx+.15,z_e-sgn*.6+.25],y0+top_h,y0+top_h+.06,"concrete",False)
             section(key)["boxes"][-1]["yaw"]=11
             rubble(key,cx,zc,y0,.8,8,n+21)
             p["routes"].append({"id":"breach_"+b_["id"],"label":f"{b_['id']}: {f_above} этаж → {upper} по куче, наверх — на руках",
@@ -835,8 +865,8 @@ def make_plan():
     # Козырёк входа (владелец 2026-11-02): железобетонная плита на двух кирпичных столбах по углам крыльца,
     # отлив по краю, лампа под плитой; перила из трубы вдоль ступеней.
     cy=BASE+3.05
-    box("Site","canopy_slab",[-.75,FACADE+EXT,4.65,PORCH_END+.45],cy,cy+.18,"slab")
-    box("Site","canopy_edge",[-.75,PORCH_END+.37,4.65,PORCH_END+.45],cy-.1,cy,"slab")
+    box("Site","canopy_slab",[-.75,FACADE+EXT,4.65,PORCH_END+.45],cy,cy+.18,"concrete")
+    box("Site","canopy_edge",[-.75,PORCH_END+.37,4.65,PORCH_END+.45],cy-.1,cy,"concrete")
     for xa in [-.35,3.87]:
         box("Site","canopy_pillar",[xa,PORCH_END-.38,xa+.38,PORCH_END],BASE,cy,"brick")
     box("Site","canopy_lamp",[1.8,FACADE+EXT+1.1,2.1,FACADE+EXT+1.4],cy-.1,cy,"frame",False)
@@ -866,6 +896,9 @@ def make_plan():
         for rect in [[0,-FACADE,SC0,FACADE],[SC1,-FACADE,LENGTH,FACADE],[SC0,-ROOM_EDGE,SC1,FACADE]]:
             for piece_rect in subtract(rect,holes):
                 box(key,"floor",piece_rect,y-SLAB,y,"floor")
+        # Срез перекрытия по рваному контуру дыры — бетон (у куска пола паркет и на боках), паркет — только верхние 2 см.
+        for seg in cut_outline(holes):
+            box(key,"slab_cut",seg,y-SLAB+.004,y-.022,"concrete",False)
         if f==0:
             box(key,"stair_ground",[SC0,-FACADE,SC1,-ROOM_EDGE],y-SLAB,y,"floor")
         corridor_holes = {-1:[],1:[]}
@@ -971,14 +1004,31 @@ def make_plan():
                         # пролом в перегородке: рваный проём у середины комнат, по краям — сколы, внизу — обломки
                         zc=side*(ROOM_EDGE+wall_breach_v((x1+next_x)/2,side,y))
                         hz0,hz1=zc-WALL_BREACH_W/2,zc+WALL_BREACH_W/2
-                        box(key,"partition",[x1,za,next_x,hz0],y,y+h+SLAB)
-                        box(key,"partition",[x1,hz1,next_x,zb],y,y+h+SLAB)
-                        box(key,"partition",[x1,hz0,next_x,hz1],y+WALL_BREACH_H,y+h+SLAB)
+                        H=WALL_BREACH_H
+                        top=y+h+SLAB
+                        # Вокруг проёма штукатурка с краской отлетела полосой: голый кирпич на 1,5 см глубже краски, срезы
+                        # проёма и сколы — тоже кирпич (владелец 2026-11-02: «на срезах не краска»).
+                        e=.015
+                        sd=b*13+f*7
+                        bl,br,bt=.15+(sd%5)*.03,.12+(sd%3)*.045,.1+(sd%4)*.035
+                        box(key,"partition",[x1,za,next_x,hz0-bl],y,top)
+                        box(key,"partition",[x1,hz1+br,next_x,zb],y,top)
+                        box(key,"partition",[x1,hz0-bl,next_x,hz1+br],y+H+bt,top)
+                        box(key,"breach_brick",[x1+e,hz0-bl,next_x-e,hz0],y,y+H+bt,"brick")
+                        box(key,"breach_brick",[x1+e,hz1,next_x-e,hz1+br],y,y+H+bt,"brick")
+                        box(key,"breach_brick",[x1+e,hz0,next_x-e,hz1],y+H,y+H+bt,"brick")
                         for dz,w_,top_ in [(.18,.32,.2),(.62,.22,.1),(1.0,.26,.16)]:
-                            box(key,"partition",[x1,hz0+dz-w_/2,next_x,hz0+dz+w_/2],y+WALL_BREACH_H-top_,y+WALL_BREACH_H)
+                            box(key,"breach_brick",[x1+e,hz0+dz-w_/2,next_x-e,hz0+dz+w_/2],y+H-top_,y+H,"brick")
                         for z_,lo,hi in [(hz0,.35,1.15),(hz1,.6,1.5)]:
                             sgn_=1 if z_==hz0 else -1
-                            box(key,"partition",[x1,z_ if sgn_>0 else z_-.12,next_x,z_+.12 if sgn_>0 else z_],y+lo,y+hi)
+                            box(key,"breach_brick",[x1+e,z_ if sgn_>0 else z_-.12,next_x-e,z_+.12 if sgn_>0 else z_],y+lo,y+hi,"brick")
+                        # край краски рваный: островки уцелевшей штукатурки заходят в полосу кирпича
+                        for k,(zz,dw,y0_,dh_) in enumerate([(hz0-bl,.07,.4,.5),(hz0-bl,.1,1.4,.35),(hz1+br,-.09,.7,.6),
+                                                            (hz1+br,-.06,1.7,.3)]):
+                            za_,zb_=sorted([zz,zz+dw])
+                            box(key,"partition",[x1,za_,next_x,zb_],y+y0_,y+y0_+dh_)
+                        for xx_,dw,dh_ in [(hz0+.3,.35,-.06),(hz1-.45,.25,-.08)]:
+                            box(key,"partition",[x1,xx_,next_x,xx_+dw],y+H+bt+dh_,y+H+bt)
                         xm=(x1+next_x)/2
                         rubble(key,xm-.55,zc,y,.5,6,b*7+f)
                         rubble(key,xm+.55,zc,y,.5,6,b*11+f)

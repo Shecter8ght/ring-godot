@@ -492,6 +492,8 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		result[key] = material
 	_porch_tile(result)
 	result["brick"] = _photo_material("res://assets/textures/red_bricks_04",1.2,Color("8a4a3a"))
+	# срезы и куски перекрытий у проломов, козырёк входа — бетон фототекстурой (Rough Concrete, Poly Haven, CC0)
+	result["concrete"] = _photo_material("res://assets/textures/rough_concrete",1.5,Color("7d817f"))
 	var levels: Array = plan.scale.floor_y
 	var heights: Array = plan.scale.ceiling_clear
 	for key: String in ["wall", "tile", "tile_floor"]:
