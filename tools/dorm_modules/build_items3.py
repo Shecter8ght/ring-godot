@@ -64,6 +64,13 @@ def mats() -> dict:
         "frame_wood": L.material("Багет_дерево", (0.35, 0.22, 0.12), 0.45),
         "frame_plastic": L.material("Рама_пластик", (0.55, 0.45, 0.25), 0.35),
         "glass": L.material("Стекло", (0.8, 0.85, 0.85), 0.05, 0.0, 0.3),
+        "steel_pc": L.material("Сталь_корпус", (0.04, 0.04, 0.045), 0.45, 0.6),
+        "mesh_pc": L.material("Сетка_фасад", (0.03, 0.03, 0.03), 0.6),
+        "pcb": L.material("Плата", (0.03, 0.05, 0.04), 0.45),
+        "glass_tint": L.material("Стекло_тёмное", (0.2, 0.22, 0.24), 0.04, 0.0, 0.45),
+        "screen": L.material("Экран", (0.01, 0.01, 0.012), 0.08),
+        "keycap": L.material("Клавиши", (0.025, 0.025, 0.025), 0.55),
+        "laptop_alu": L.material("Корпус_ноутбук", (0.35, 0.35, 0.37), 0.35, 0.8),
     }
 
 
@@ -1226,6 +1233,520 @@ ITEMS_B = [
 ]
 
 
+
+# ---------------------------------------------------------------- группа В: техника 2020-х
+
+def placed_bm(bm, src, m: Matrix) -> None:
+    """Перенос временной сетки в bm с преобразованием."""
+    bmesh.ops.transform(src, matrix=m, verts=src.verts)
+    me = bpy.data.meshes.new("tmp")
+    src.to_mesh(me)
+    src.free()
+    bm.from_mesh(me)
+    bpy.data.meshes.remove(me)
+
+
+def axis_matrix(center, axis) -> Matrix:
+    """Матрица: локальная Z → axis, начало — center."""
+    q = V(axis).normalized().to_track_quat("Z", "Y")
+    return Matrix.Translation(V(center)) @ q.to_matrix().to_4x4()
+
+
+def fan(bm_frame, bm_blades, center, axis, size: float = 0.12, depth: float = 0.025, blades: int = 7) -> None:
+    """Корпусный вентилятор: рамка — скруглённый квадрат с круглым окном (лофт кольцами), ступица, лопасти с закруткой."""
+    mtx = axis_matrix(center, axis)
+    a = size / 2
+    n = 48
+    sq = B2.superellipse(a, a, 0, 0, 10.0, n)
+    ci = [(a * 0.95 * math.cos(TAU * i / n - math.pi / 2), a * 0.95 * math.sin(TAU * i / n - math.pi / 2)) for i in range(n)]
+    fb = bmesh.new()
+    rings = [(-depth / 2, sq), (depth / 2, sq), (depth / 2, ci), (-depth / 2, ci)]
+    vr = [[fb.verts.new((x, y, z)) for x, y in pts] for z, pts in rings]
+    for k in range(4):
+        r0, r1 = vr[k], vr[(k + 1) % 4]
+        for i in range(n):
+            j = (i + 1) % n
+            fb.faces.new((r0[i], r0[j], r1[j], r1[i]))
+    # стойки к моторчику сзади
+    for k in range(4):
+        ang = TAU * k / 4 + math.pi / 4
+        p0 = V((math.cos(ang) * a * 0.33, math.sin(ang) * a * 0.33, depth / 2 - 0.002))
+        p1 = V((math.cos(ang) * a * 0.95, math.sin(ang) * a * 0.95, depth / 2 - 0.002))
+        L.bm_sweep(fb, [p0, p1], [(-0.0018, -0.002), (0.0018, -0.002), (0.0018, 0.002), (-0.0018, 0.002)], up=(0, 0, 1))
+    L.bm_cyl(fb, (0, 0, depth / 2 - 0.004), (0, 0, depth / 2), a * 0.36, segs=24)
+    placed_bm(bm_frame, fb, mtx)
+    bb = bmesh.new()
+    hub = a * 0.33
+    lathe(bb, [(0.0, -depth / 2 + 0.003), (hub * 0.95, -depth / 2 + 0.003), (hub, -depth / 2 + 0.006), (hub, depth / 2 - 0.005),
+               (0.0, depth / 2 - 0.005)], segs=24)
+    for k in range(blades):
+        base = TAU * k / blades
+        rows = []
+        for j in range(4):
+            rr = hub + (a * 0.93 - hub) * j / 3
+            sweep_ = 0.5 + 0.15 * j / 3
+            row = []
+            for i in range(3):
+                t = (i / 2 - 0.5) * sweep_
+                ang = base + t
+                zz = -t * depth * 0.55
+                row.append(V((math.cos(ang) * rr, math.sin(ang) * rr, zz)))
+            rows.append(row)
+        strip(bb, rows)
+    placed_bm(bm_blades, bb, mtx)
+
+
+def pc_tower(coll, m, at, rng, opened: bool = False):
+    """Системный блок midi-tower 210 × 420 × 460 (+ ножки 15): стальной каркас, сетчатый фасад в пластиковой рамке, порты
+    и кнопки сверху спереди, сзади — заглушка разъёмов платы, планки слотов, блок питания с решёткой и разъёмом, решётка
+    вентилятора; слева — каленое стекло на четырёх винтах (узел), за ним видно: плата, башенный кулер с вентилятором,
+    видеокарта с двумя вентиляторами, четыре планки памяти, кожух блока питания, три вентилятора на вдув за фасадом и
+    один на выдув. Вскрытый — стекло снято и прислонено к корпусу, видеокарты и памяти нет."""
+    r = L.root("ПК_системный_блок" + ("_вскрыт" if opened else ""), coll, at)
+    W, D, H, ft = 0.21, 0.42, 0.46, 0.015
+    z0, z1 = ft, ft + H
+    hw, hd = W / 2, D / 2
+    bm = bmesh.new()
+    # каркас: правая стенка, верх, низ, задняя стенка — листом 1 мм
+    rounded_box(bm, (0.001, D - 0.02, H - 0.004), 0.0008, cuts=1, center=(hw - 0.0005, 0.01, (z0 + z1) / 2))
+    L.bm_box(bm, (-hw + 0.004, -hd + 0.02, z1 - 0.001), (hw, hd, z1))
+    L.bm_box(bm, (-hw + 0.004, -hd + 0.02, z0), (hw, hd, z0 + 0.001))
+    L.bm_box(bm, (-hw + 0.004, hd - 0.001, z0), (hw, hd, z1))
+    # сверху — ниша фильтра (сетка в рамке, утоплена)
+    L.bm_box(bm, (-hw + 0.02, -0.12, z1), (hw - 0.02, hd - 0.03, z1 + 0.003))
+    # сзади: заглушка разъёмов платы, планки слотов, проём под блок питания, кольцо решётки вентилятора
+    L.bm_box(bm, (-hw + 0.018, hd, z1 - 0.2), (-hw + 0.063, hd + 0.002, z1 - 0.038))
+    for k in range(7):
+        zz = z1 - 0.215 - k * 0.0203
+        L.bm_box(bm, (-hw + 0.03, hd, zz - 0.0085), (hw - 0.07, hd + 0.0018, zz + 0.0085))
+    L.bm_box(bm, (-hw + 0.012, hd, z0 + 0.005), (hw - 0.012, hd + 0.003, z0 + 0.09))
+    obj(bm, "ПК_каркас", coll, [m["steel_pc"]], r, bevel=0.0006, segs=1)
+    # фасад: пластиковая рамка и сетка, утопленная на 4 мм
+    fb = bmesh.new()
+    rounded_box(fb, (W, 0.012, H + 0.002), 0.004, cuts=3, center=(0, -hd + 0.006, (z0 + z1) / 2))
+    fr = obj(fb, "ПК_фасад", coll, [m["plastic_black"]], r, smooth=35)
+    cb = bmesh.new()
+    L.bm_box(cb, (-hw + 0.014, -hd - 0.01, z0 + 0.018), (hw - 0.014, -hd + 0.004, z1 - 0.018))
+    B.cut(fr, coll, r, "ПК_окно_сетки", cb)
+    mb = bmesh.new()
+    L.bm_box(mb, (-hw + 0.014, -hd + 0.004, z0 + 0.018), (hw - 0.014, -hd + 0.005, z1 - 0.018))
+    obj(mb, "ПК_сетка_фасада", coll, [m["mesh_pc"]], r)
+    # порты и кнопки сверху спереди
+    pb = bmesh.new()
+    yp = -hd + 0.03
+    lathe(pb, [(0.0, 0.0), (0.0065, 0.0), (0.0065, 0.0015), (0.0055, 0.002), (0.0, 0.002)], segs=24, origin=(0.06, yp, z1))
+    lathe(pb, [(0.0, 0.0), (0.0025, 0.0), (0.0025, 0.001), (0.0, 0.001)], segs=12, origin=(0.035, yp, z1))
+    for k, x in enumerate((-0.07, -0.05)):
+        L.bm_box(pb, (x - 0.0065, yp - 0.0025, z1 - 0.001), (x + 0.0065, yp + 0.0025, z1 + 0.0005))
+    L.bm_box(pb, (-0.033, yp - 0.0016, z1 - 0.001), (-0.024, yp + 0.0016, z1 + 0.0005))
+    for x in (-0.01, 0.003):
+        L.bm_cyl(pb, (x, yp, z1 - 0.002), (x, yp, z1 + 0.0004), 0.0032, segs=14)
+    obj(pb, "ПК_порты_кнопки", coll, [m["plastic_black"]], r, smooth=40)
+    # ножки
+    lb = bmesh.new()
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            rounded_box(lb, (0.035, 0.05, ft), 0.004, cuts=2, center=(sx * (hw - 0.025), sy * (hd - 0.04), ft / 2))
+    obj(lb, "ПК_ножки", coll, [m["rubber"]], r, smooth=40)
+    # блок питания сзади: решётка кольцами, разъём и клавиша
+    gb = bmesh.new()
+    pc = V((-hw + 0.055, hd + 0.003, z0 + 0.047))
+    for k in range(5):
+        pipe(gb, [pc + V((math.cos(t) * (0.01 + k * 0.008), 0, math.sin(t) * (0.01 + k * 0.008))) for t in [TAU * i / 24 for i in range(24)]],
+             0.0008, segs=6, closed=True)
+    L.bm_box(gb, (0.035, hd + 0.003, z0 + 0.03), (0.062, hd + 0.012, z0 + 0.052))
+    L.bm_box(gb, (0.068, hd + 0.003, z0 + 0.034), (0.08, hd + 0.009, z0 + 0.05))
+    rc = V((-hw + 0.065, hd + 0.002, z1 - 0.075))
+    for k in range(5):
+        pipe(gb, [rc + V((math.cos(t) * (0.012 + k * 0.011), 0, math.sin(t) * (0.012 + k * 0.011))) for t in [TAU * i / 28 for i in range(28)]],
+             0.0008, segs=6, closed=True)
+    obj(gb, "ПК_решётки", coll, [m["steel_pc"]], r, smooth=50)
+    # нутро: плата на поддоне у правой стенки, кулер, память, видеокарта, кожух БП, вентиляторы
+    ib = bmesh.new()
+    xb = hw - 0.025
+    L.bm_box(ib, (xb - 0.0016, -0.1, z1 - 0.305), (xb, 0.144 + 0.05, z1 - 0.012))
+    # радиаторы цепей питания и чипсета — бруски на плате
+    L.bm_box(ib, (xb - 0.022, 0.03, z1 - 0.06), (xb - 0.0016, 0.13, z1 - 0.035))
+    L.bm_box(ib, (xb - 0.02, 0.105, z1 - 0.14), (xb - 0.0016, 0.13, z1 - 0.05))
+    L.bm_box(ib, (xb - 0.012, -0.05, z1 - 0.27), (xb - 0.0016, 0.0, z1 - 0.22))
+    # кожух блока питания
+    rounded_box(ib, (W - 0.006, D - 0.06, 0.09), 0.004, cuts=2, center=(0.0, 0.025, z0 + 0.046))
+    obj(ib, "ПК_плата_кожух", coll, [m["pcb"]], r, bevel=0.0005, segs=1)
+    kb = bmesh.new()
+    cpu = V((xb - 0.0016, 0.06, z1 - 0.11))
+    L.bm_box(kb, (cpu.x - 0.006, cpu.y - 0.03, cpu.z - 0.03), (cpu.x, cpu.y + 0.03, cpu.z + 0.03))
+    for k in range(40):
+        x = cpu.x - 0.025 - k * 0.0028
+        if x < -hw + 0.03:
+            break
+        L.bm_box(kb, (x - 0.0004, cpu.y - 0.065, cpu.z - 0.075), (x, cpu.y + 0.065, cpu.z + 0.08))
+    for k in range(4):
+        y = cpu.y - 0.03 + k * 0.006
+        pipe(kb, [(cpu.x - 0.005, y, cpu.z - 0.02), (cpu.x - 0.025, y, cpu.z - 0.02), (cpu.x - 0.12, y, cpu.z - 0.05)], 0.003, segs=8, bend=0.01)
+    obj(kb, "ПК_кулер", coll, [m["alu"]], r, smooth=40)
+    fanf, fanb = bmesh.new(), bmesh.new()
+    fan(fanf, fanb, (cpu.x - 0.065, cpu.y + 0.08, cpu.z), (0, 1, 0))   # на заднем торце рёбер — память спереди свободна
+    for k in range(3):
+        fan(fanf, fanb, (0.0, -hd + 0.03, z0 + 0.13 + k * 0.125), (0, 1, 0))
+    fan(fanf, fanb, (-hw + 0.065 + 0.0, hd - 0.02, z1 - 0.075), (0, 1, 0))
+    obj(fanf, "ПК_вентиляторы", coll, [m["plastic_black"]], r, smooth=35)
+    obj(fanb, "ПК_лопасти", coll, [m["plastic_black"]], r, smooth=35)
+    if not opened:
+        # память: четыре планки у кулера ближе к фасаду
+        rb = bmesh.new()
+        for k in range(4):
+            y = cpu.y - 0.075 - k * 0.0095
+            L.bm_box(rb, (xb - 0.033, y - 0.0035, cpu.z - 0.066), (xb - 0.0016, y + 0.0035, cpu.z + 0.067))
+        obj(rb, "ПК_память", coll, [m["pcb"]], r, bevel=0.0006, segs=1)
+        # видеокарта: от слота к стеклу, вентиляторы снизу, пластина сверху
+        gpu = bmesh.new()
+        gz = z1 - 0.235
+        rounded_box(gpu, (0.055, 0.29, 0.12), 0.004, cuts=2, center=(xb - 0.03, -0.005, gz - 0.06))
+        obj(gpu, "ПК_видеокарта", coll, [m["plastic_black"]], r, smooth=35)
+        gf, gbl = bmesh.new(), bmesh.new()
+        for y in (-0.075, 0.065):
+            fan(gf, gbl, (xb - 0.03, y, gz - 0.122), (0, 0, -1), size=0.092, depth=0.012, blades=9)
+        obj(gf, "ПК_видеокарта_вент", coll, [m["plastic_black"]], r, smooth=35)
+        obj(gbl, "ПК_видеокарта_лопасти", coll, [m["plastic_black"]], r, smooth=35)
+    # стекло слева на четырёх винтах (узел): у вскрытого снято и прислонено к корпусу
+    glb = bmesh.new()
+    L.bm_box(glb, (-hw, -hd + 0.012, z0 + 0.005), (-hw + 0.004, hd - 0.004, z1 - 0.005))
+    gl = part_at(glb, "ПК_стекло", coll, [m["glass_tint"]], r, (-hw, 0.0, z0), bevel=0.0008, segs=1)
+    sb = bmesh.new()
+    for y in (-hd + 0.03, hd - 0.025):
+        for z in (z0 + 0.02, z1 - 0.02):
+            lathe(sb, [(0.0, 0.0), (0.0055, 0.0), (0.0055, -0.006), (0.004, -0.0075), (0.0, -0.0078)], segs=16,
+                  origin=(-hw, y, z), axis=(1, 0, 0))
+    screws = obj(sb, "ПК_винты", coll, [m["steel_pc"]], gl, smooth=40)
+    screws.data.transform(Matrix.Translation(-V((-hw, 0.0, z0))))
+    screws.matrix_parent_inverse = Matrix.Identity(4)
+    if opened:
+        # стоит на полу у левого бока, верхом опирается на корпус
+        gl.location = (-hw - 0.11, -0.02, 0.0)
+        gl.rotation_euler = (0, math.radians(13.5), math.radians(4))
+    return r
+
+
+def monitor(coll, m, at, rng, cracked: bool = False):
+    """Монитор 24″ (экран 531 × 299): тонкие рамки, подбородок 17 мм, корпус — тонкая панель и горб сзади с креплением
+    VESA и разъёмами снизу, стойка-шея к овальному основанию, наклон 5°. Разбитый — экран лучами от удара, мелкие
+    осколки сдвинуты, у удара — выбитый кусок."""
+    r = L.root("МН_монитор" + ("_разбит" if cracked else ""), coll, at)
+    Wp, Hp, tp = 0.541, 0.322, 0.009
+    sw, sh = 0.531, 0.299
+    panel = bpy.data.objects.new("МН_панель", None)
+    coll.objects.link(panel)
+    panel.parent = r
+    panel.location = (0, 0.012, 0.105)
+    panel.rotation_euler = (math.radians(5), 0, 0)
+    bm = bmesh.new()
+    rounded_box(bm, (Wp, tp, Hp), 0.003, cuts=3, center=(0, tp / 2, Hp / 2))
+    # горб сзади: скруглённая коробка по нижней половине
+    rounded_box(bm, (0.36, 0.035, 0.2), 0.03, cuts=5, center=(0, tp + 0.0175 - 0.004, 0.115))
+    obj(bm, "МН_корпус", coll, [m["plastic_black"]], panel, smooth=35)
+    xb = bmesh.new()
+    for x in (-0.05, 0.05):
+        for z in (0.065, 0.165):
+            L.bm_cyl(xb, (x, tp + 0.031, z), (x, tp + 0.0325, z), 0.003, segs=12)
+    for k, x in enumerate((-0.06, -0.03, 0.0, 0.035)):
+        L.bm_box(xb, (x - 0.008, tp + 0.008, 0.012), (x + 0.008, tp + 0.02, 0.0155))
+    obj(xb, "МН_винты_разъёмы", coll, [m["steel_pc"]], panel, smooth=40)
+    sb = bmesh.new()
+    zc = 0.017 + sh / 2
+    if not cracked:
+        L.bm_box(sb, (-sw / 2, -0.0006, zc - sh / 2), (sw / 2, 0.0004, zc + sh / 2))
+    else:
+        P = V((sw * 0.18, 0.0, zc - sh * 0.12))
+        n_r = 9
+        angs = sorted(rng.uniform(0, TAU) for _ in range(n_r))
+        rr = 0.03
+
+        def border(a):
+            dx, dz = math.cos(a), math.sin(a)
+            ts = [lim / d for lim, d in ((sw / 2 - P.x, dx), (-sw / 2 - P.x, dx), (zc + sh / 2 - P.z, dz), (zc - sh / 2 - P.z, dz))
+                  if abs(d) > 1e-6 and lim / d > 0]
+            t = min(ts)
+            return V((P.x + dx * t, 0.0, P.z + dz * t))
+        for i in range(n_r):
+            a0 = angs[i]
+            a1 = angs[(i + 1) % n_r] + (TAU if i == n_r - 1 else 0)
+            arc = [P + V((math.cos(a0 + (a1 - a0) * q / 4), 0, math.sin(a0 + (a1 - a0) * q / 4))) * rr for q in range(5)]
+            far = [border(a0 + (a1 - a0) * q / 8) for q in range(9)]
+            for k, piece in enumerate(([P] + arc, arc[::-1] + far)):
+                if k == 0 and i in (2, 5):
+                    continue          # у удара кусков нет — видна подложка
+                dep = 0.0008 if k == 0 else 0.0002
+                jit = Matrix.Translation((rng.uniform(-0.0004, 0.0004), dep + rng.uniform(0, 0.0003), rng.uniform(-0.0004, 0.0004)))
+                vs = [sb.verts.new(jit @ V((p.x, -0.0006, p.z))) for p in piece]
+                vb = [sb.verts.new(jit @ V((p.x, 0.0004, p.z))) for p in piece]
+                try:
+                    sb.faces.new(vs)
+                    sb.faces.new(vb[::-1])
+                    for q in range(len(vs)):
+                        sb.faces.new((vs[q], vs[(q + 1) % len(vs)], vb[(q + 1) % len(vs)], vb[q]))
+                except ValueError:
+                    pass
+        # подложка под выбитым — матрица, тёмная
+        L.bm_box(sb, (P.x - rr, 0.0012, P.z - rr), (P.x + rr, 0.002, P.z + rr))
+    obj(sb, "МН_экран", coll, [m["screen"]], panel, smooth=10)
+    # стойка: шея от горба к основанию, основание-овал
+    nb = bmesh.new()
+    loft(nb, [(0.012, B2.superellipse(0.034, 0.016, 0, 0.065, 2.6, 24)), (0.23, B2.superellipse(0.03, 0.014, 0, 0.055, 2.6, 24))],
+         cap_first=True, cap_last=True)
+    lathe(nb, [(0.0, 0.0), (0.112, 0.0), (0.115, 0.004), (0.11, 0.012), (0.0, 0.0125)], segs=48, origin=(0, 0.03, 0))
+    for v in nb.verts:
+        if v.co.z <= 0.0126 and abs(v.co.y - 0.03) > 0.001:
+            v.co.y = 0.03 + (v.co.y - 0.03) * 0.82
+    obj(nb, "МН_стойка", coll, [m["plastic_black"]], r, smooth=40)
+    return r
+
+
+KEY_ROWS = [
+    # (ряд, [(ширина в u, зазор перед в u)…]) — основной блок, стрелки и цифровой блок вынесены отдельно
+    (0, [(1, 0)] + [(1, 1 if i == 0 else (0.5 if i in (4, 8) else 0)) for i in range(12)]),
+    (1, [(1, 0)] * 13 + [(2, 0)]),
+    (2, [(1.5, 0)] + [(1, 0)] * 12 + [(1.5, 0)]),
+    (3, [(1.75, 0)] + [(1, 0)] * 11 + [(2.25, 0)]),
+    (4, [(2.25, 0)] + [(1, 0)] * 10 + [(2.75, 0)]),
+    (5, [(1.25, 0)] * 3 + [(6.25, 0)] + [(1.25, 0)] * 4),
+]
+
+
+def keycap(bm, x: float, y: float, z: float, wu: float, hu: float = 1.0, u: float = 0.019, h: float = 0.0075) -> None:
+    """Колпачок: сужается кверху, верх чуть вогнут; x, y — середина низа, z — низ."""
+    bw, bd = wu * u - 0.0012, hu * u - 0.0012
+    tw, td = bw - 0.0055, bd - 0.0045
+    rings = [(z, L.rrect(bw, bd, 0.0012, 2, x, y)), (z + h * 0.85, L.rrect(tw + 0.001, td + 0.001, 0.0018, 2, x, y + 0.0006)),
+             (z + h, L.rrect(tw, td, 0.0018, 2, x, y + 0.0006))]
+    faces = loft(bm, rings, cap_first=False, cap_last=True)
+    top = faces[-1]
+    c = top.calc_center_median()
+    res = bmesh.ops.poke(bm, faces=[top])
+    for v in res["verts"]:
+        v.co.z = c.z - 0.0006
+
+
+def keyboard(coll, m, at, rng):
+    """Клавиатура полноразмерная 440 × 135: корпус клином (спереди 18 мм, сзади 26), 104 колпачка раскладкой: основной
+    блок, стрелки и блок управления, цифровой; ножки сзади, провод в оплётке с утолщением."""
+    r = L.root("КВ_клавиатура", coll, at)
+    W, Dk = 0.44, 0.135
+    bm = bmesh.new()
+    rounded_box(bm, (W, Dk, 0.026), 0.006, cuts=4, center=(0, 0, 0.013))
+    for v in bm.verts:
+        t = (v.co.y + Dk / 2) / Dk          # спереди 0 → сзади 1
+        if v.co.z > 0.013:
+            v.co.z = 0.013 + (v.co.z - 0.013) * (0.4 + 0.6 * t)
+    obj(bm, "КВ_корпус", coll, [m["plastic_black"]], r, smooth=35)
+    kb = bmesh.new()
+    u = 0.019
+    x0 = -W / 2 + 0.012
+
+    def zk(y):
+        return 0.0185 + 0.0075 * (y + Dk / 2) / Dk
+
+    for row, keys in KEY_ROWS:
+        y = Dk / 2 - 0.015 - row * u - (0.006 if row > 0 else 0)
+        x = x0
+        for wu, gap in keys:
+            x += gap * u
+            keycap(kb, x + wu * u / 2, y, zk(y), wu)
+            x += wu * u
+    # блок управления и стрелки
+    xn = x0 + 15.25 * u
+    for row in (0,):
+        for i in range(3):
+            keycap(kb, xn + (i + 0.5) * u, Dk / 2 - 0.015, zk(Dk / 2 - 0.015), 1)
+    for row in (1, 2):
+        y = Dk / 2 - 0.015 - row * u - 0.006
+        for i in range(3):
+            keycap(kb, xn + (i + 0.5) * u, y, zk(y), 1)
+    for row, cols in ((4, (1,)), (5, (0, 1, 2))):
+        y = Dk / 2 - 0.015 - row * u - 0.006
+        for i in cols:
+            keycap(kb, xn + (i + 0.5) * u, y, zk(y), 1)
+    # цифровой блок
+    xp = xn + 3.5 * u
+    for row in range(1, 6):
+        y = Dk / 2 - 0.015 - row * u - 0.006
+        for i in range(4):
+            if i == 3 and row in (3, 5):
+                continue
+            if row == 5 and i == 1:
+                continue
+            if i == 3 and row in (2, 4):
+                keycap(kb, xp + (i + 0.5) * u, y - u / 2, zk(y), 1, hu=2)
+                continue
+            wu = 2 if (row == 5 and i == 0) else 1
+            keycap(kb, xp + i * u + wu * u / 2, y, zk(y), wu)
+    obj(kb, "КВ_клавиши", coll, [m["keycap"]], r, smooth=35)
+    cb = bmesh.new()
+    for sx in (-1, 1):
+        L.bm_box(cb, (sx * (W / 2 - 0.05) - 0.02, Dk / 2 - 0.025, -0.006), (sx * (W / 2 - 0.05) + 0.02, Dk / 2 - 0.006, 0.0005))
+    rounded_box(cb, (0.012, 0.022, 0.008), 0.003, cuts=2, center=(0.0, Dk / 2 + 0.008, 0.01))
+    path = smooth_path([(0, Dk / 2 + 0.018, 0.01), (0, Dk / 2 + 0.06, 0.004), (0.06, Dk / 2 + 0.12, 0.0035), (0.2, Dk / 2 + 0.1, 0.0035),
+                        (0.26, Dk / 2 + 0.2, 0.0035)], 6)
+    pipe(cb, [V((p.x, p.y, max(p.z, 0.0035))) for p in path], 0.0018, segs=8)
+    obj(cb, "КВ_ножки_провод", coll, [m["rubber"]], r, smooth=50)
+    return r
+
+
+def mouse(coll, m, at, rng):
+    """Мышь 120 × 66 × 40: тело лофтом по сечениям (горб ближе к хвосту), щель между кнопками, колесо в прорези, две
+    боковые кнопки слева, провод спереди."""
+    r = L.root("МШ_мышь", coll, at)
+    Lm = 0.12
+    secs = []
+    for k in range(13):
+        t = k / 12                                   # 0 — нос (−Y), 1 — хвост
+        y = -Lm / 2 + Lm * t
+        wdt = 0.028 + 0.005 * math.sin(math.pi * min(1.0, t * 1.3)) + (0.002 if t > 0.5 else 0.0)
+        wdt *= (0.35 + 0.65 * math.sin(math.pi * min(t * 1.1 + 0.08, 1.0)) ** 0.4)
+        hgt = 0.04 * (0.55 + 0.45 * math.sin(math.pi * min(1.0, 0.15 + t * 0.9))) * (0.3 + 0.7 * math.sin(math.pi * min(t * 1.05 + 0.04, 1.0)) ** 0.5)
+        ring = []
+        n = 32
+        for i in range(n):
+            a = TAU * i / n
+            c, s = math.cos(a), math.sin(a)
+            x = wdt * math.copysign(abs(c) ** 0.8, c)
+            z = (hgt * math.copysign(abs(s) ** 0.9, s) if s > 0 else 0.002 * s) + 0.002
+            ring.append((x, y, max(z, 0.0)))
+        secs.append(ring)
+    bm = bmesh.new()
+    vr = [[bm.verts.new(p) for p in ring] for ring in secs]
+    n = 32
+    for j in range(len(vr) - 1):
+        for i in range(n):
+            k = (i + 1) % n
+            bm.faces.new((vr[j][i], vr[j][k], vr[j + 1][k], vr[j + 1][i]))
+    bm.faces.new(vr[0][::-1])
+    bm.faces.new(vr[-1])
+    body = obj(bm, "МШ_корпус", coll, [m["plastic_black"]], r, smooth=60)
+    md = body.modifiers.new("Гладкость", "SUBSURF")
+    md.levels = 1
+    md.render_levels = 2
+    cb = bmesh.new()
+    L.bm_box(cb, (-0.0004, -Lm / 2 - 0.01, 0.01), (0.0004, -0.005, 0.06))
+    B.cut(body, coll, r, "МШ_щель", cb)
+    sl = bmesh.new()
+    L.bm_box(sl, (-0.0045, -0.035, 0.02), (0.0045, -0.012, 0.06))
+    B.cut(body, coll, r, "МШ_прорезь", sl)
+    wb = bmesh.new()
+    lathe(wb, [(0.0, -0.0035), (0.0105, -0.0035), (0.011, -0.002), (0.011, 0.002), (0.0105, 0.0035), (0.0, 0.0035)], segs=28,
+          origin=(0, -0.0235, 0.026), axis=(1, 0, 0))
+    for y in (-0.01, 0.01):
+        rounded_box(wb, (0.004, 0.016, 0.006), 0.0015, cuts=2, center=(-0.0325, y - 0.0, 0.017))
+    path = smooth_path([(0, -Lm / 2, 0.012), (0, -Lm / 2 - 0.03, 0.004), (-0.04, -Lm / 2 - 0.1, 0.0025), (-0.02, -Lm / 2 - 0.2, 0.0025)], 6)
+    pipe(wb, [V((p.x, p.y, max(p.z, 0.0025))) for p in path], 0.0016, segs=8)
+    obj(wb, "МШ_колесо_провод", coll, [m["rubber"]], r, smooth=50)
+    return r
+
+
+def laptop(coll, m, at, rng, state: str = "открыт"):
+    """Ноутбук 15,6″ (358 × 245 × 19): основание клином, клавиатура-островки с цифровым блоком, тачпад, порты по бокам,
+    ножки-полосы снизу, петли сзади; крышка (узел с осью в петлях) — экран 344 × 194 в тонкой рамке, глазок камеры.
+    state: «закрыт», «открыт» (115°), «разбит» (открыт, экран лучами от удара)."""
+    r = L.root("НБ_ноутбук" + ("" if state == "открыт" else "_" + state), coll, at)
+    W, Dn, hb = 0.358, 0.245, 0.018
+    bm = bmesh.new()
+    rounded_box(bm, (W, Dn, hb), 0.006, cuts=4, center=(0, 0, hb / 2))
+    for v in bm.verts:
+        t = (v.co.y + Dn / 2) / Dn
+        if v.co.z > hb / 2:
+            v.co.z = hb / 2 + (v.co.z - hb / 2) * (0.75 + 0.25 * t)
+    base = obj(bm, "НБ_основание", coll, [m["laptop_alu"]], r, smooth=35)
+    cut_b = bmesh.new()
+    top_z = hb * (0.75 + 0.25 * 0.6)
+    L.bm_box(cut_b, (-W / 2 + 0.012, -0.02, top_z - 0.0006), (W / 2 - 0.012, Dn / 2 - 0.015, top_z + 0.01))
+    L.bm_box(cut_b, (-0.07 - 0.06, -Dn / 2 + 0.012, top_z - 0.0005), (-0.07 + 0.06, -Dn / 2 + 0.088, top_z + 0.01))
+    B.cut(base, coll, r, "НБ_ниши", cut_b)
+    kb = bmesh.new()
+    u = 0.0185
+    rows = [(0.75, [1] * 16), (1, [1] * 13 + [1.5] + [1] * 4), (1, [1.5] + [1] * 12 + [1.0] + [1] * 4), (1, [1.75] + [1] * 11 + [1.75] + [1] * 4),
+            (1, [2.3] + [1] * 10 + [2.2] + [1] * 4), (1, [1] * 4 + [5.0] + [1] * 4 + [1] * 4)]
+    y = Dn / 2 - 0.028
+    for hgt, keys in rows:
+        x = -W / 2 + 0.017
+        for wu in keys:
+            bw, bd = wu * u - 0.0032, hgt * u - 0.0032
+            rounded_box(kb, (bw, bd, 0.0016), 0.0006, cuts=1, center=(x + wu * u / 2, y - hgt * u / 2, top_z - 0.0004))
+            x += wu * u
+        y -= hgt * u
+    obj(kb, "НБ_клавиши", coll, [m["keycap"]], r, smooth=30)
+    pb = bmesh.new()
+    for k, (x, wdt) in enumerate(((-W / 2, 0.012), (-W / 2, 0.009))):
+        L.bm_box(pb, (x - 0.0003, -0.03 - k * 0.025 - wdt / 2, 0.006), (x + 0.0012, -0.03 - k * 0.025 + wdt / 2, 0.0105))
+    L.bm_box(pb, (W / 2 - 0.0012, 0.0, 0.006), (W / 2 + 0.0003, 0.014, 0.0115))
+    L.bm_box(pb, (W / 2 - 0.0012, 0.025, 0.0065), (W / 2 + 0.0003, 0.034, 0.0095))
+    for y in (-Dn / 2 + 0.02, Dn / 2 - 0.02):
+        rounded_box(pb, (W - 0.07, 0.008, 0.0025), 0.0012, cuts=2, center=(0, y, -0.0005))
+    for sx in (-1, 1):
+        L.bm_cyl(pb, (sx * 0.1 - 0.025, Dn / 2 - 0.004, hb - 0.004), (sx * 0.1 + 0.025, Dn / 2 - 0.004, hb - 0.004), 0.0045, segs=16)
+    obj(pb, "НБ_порты_ножки_петли", coll, [m["plastic_black"]], r, smooth=40)
+    # крышка в закрытом положении: лежит на основании экраном вниз; узел — ось петель
+    pivot = V((0, Dn / 2 - 0.004, hb - 0.004))
+    lb = bmesh.new()
+    Dl, tl = 0.235, 0.0055
+    rounded_box(lb, (W, Dl, tl), 0.005, cuts=3, center=(0, Dn / 2 - 0.006 - Dl / 2, hb + tl / 2 + 0.0004))
+    lid = part_at(lb, "НБ_крышка", coll, [m["laptop_alu"]], r, tuple(pivot), smooth=35)
+    sb = bmesh.new()
+    sw, sh = 0.344, 0.194
+    ysc = Dn / 2 - 0.006 - 0.012 - sh / 2
+    zs = hb + 0.0004 - 0.0001
+    if state != "разбит":
+        L.bm_box(sb, (-sw / 2, ysc - sh / 2, zs - 0.0002), (sw / 2, ysc + sh / 2, zs + 0.0003))
+    else:
+        P = V((-sw * 0.2, ysc + sh * 0.1, 0.0))
+        n_r = 8
+        angs = sorted(rng.uniform(0, TAU) for _ in range(n_r))
+        rr = 0.02
+
+        def border(a):
+            dx, dy = math.cos(a), math.sin(a)
+            ts = [lim / d for lim, d in ((sw / 2 - P.x, dx), (-sw / 2 - P.x, dx), (ysc + sh / 2 - P.y, dy), (ysc - sh / 2 - P.y, dy))
+                  if abs(d) > 1e-6 and lim / d > 0]
+            t = min(ts)
+            return V((P.x + dx * t, P.y + dy * t, 0.0))
+        for i in range(n_r):
+            a0 = angs[i]
+            a1 = angs[(i + 1) % n_r] + (TAU if i == n_r - 1 else 0)
+            arc = [P + V((math.cos(a0 + (a1 - a0) * q / 4), math.sin(a0 + (a1 - a0) * q / 4), 0)) * rr for q in range(5)]
+            far = [border(a0 + (a1 - a0) * q / 8) for q in range(9)]
+            for k, piece in enumerate(([P] + arc, arc[::-1] + far)):
+                if k == 0 and i == 3:
+                    continue
+                jit = Matrix.Translation((rng.uniform(-0.0003, 0.0003), rng.uniform(-0.0003, 0.0003), 0.0002 if k == 0 else 0.0))
+                vs = [sb.verts.new(jit @ V((p.x, p.y, zs - 0.0002))) for p in piece]
+                vt = [sb.verts.new(jit @ V((p.x, p.y, zs + 0.0003))) for p in piece]
+                try:
+                    sb.faces.new(vs[::-1])
+                    sb.faces.new(vt)
+                    for q in range(len(vs)):
+                        sb.faces.new((vs[q], vs[(q + 1) % len(vs)], vt[(q + 1) % len(vs)], vt[q]))
+                except ValueError:
+                    pass
+    L.bm_cyl(sb, (0, Dn / 2 - 0.0125, zs - 0.0002), (0, Dn / 2 - 0.0125, zs + 0.0002), 0.0012, segs=12)
+    scr = obj(sb, "НБ_экран", coll, [m["screen"]], lid, smooth=10)
+    scr.data.transform(Matrix.Translation(-pivot))
+    scr.matrix_parent_inverse = Matrix.Identity(4)
+    if state != "закрыт":
+        lid.rotation_euler = (-math.radians(115), 0, 0)
+    return r
+
+
+ITEMS_C = [
+    ("Системный блок", lambda c, m, at, rng: pc_tower(c, m, at, rng, False), 0.4),
+    ("Системный блок вскрыт", lambda c, m, at, rng: pc_tower(c, m, at, rng, True), 0.6),
+    ("Монитор", lambda c, m, at, rng: monitor(c, m, at, rng, False), 0.7),
+    ("Монитор разбит", lambda c, m, at, rng: monitor(c, m, at, rng, True), 0.7),
+    ("Клавиатура", lambda c, m, at, rng: keyboard(c, m, at, rng), 0.6),
+    ("Мышь", lambda c, m, at, rng: mouse(c, m, at, rng), 0.3),
+    ("Ноутбук", lambda c, m, at, rng: laptop(c, m, at, rng, "открыт"), 0.5),
+    ("Ноутбук закрыт", lambda c, m, at, rng: laptop(c, m, at, rng, "закрыт"), 0.5),
+    ("Ноутбук разбит", lambda c, m, at, rng: laptop(c, m, at, rng, "разбит"), 0.5),
+]
+
+
 # ---------------------------------------------------------------- состав группы А
 
 ITEMS_A = [
@@ -1258,9 +1779,10 @@ def build(out: str) -> list:
     m = mats()
     x = 0.0
     placed = []
-    for top_name, items, wall in (("Партия3_А_ящики_вещи_v01", ITEMS_A, False), ("Партия3_Б_плакаты_картины_v01", ITEMS_B, True)):
+    for top_name, items, wall in (("Партия3_А_ящики_вещи_v01", ITEMS_A, False), ("Партия3_Б_плакаты_картины_v01", ITEMS_B, True),
+                                  ("Партия3_В_компьютеры_v01", ITEMS_C, False)):
         top = L.collection(top_name)
-        rng = random.Random(33 if not wall else 34)
+        rng = random.Random({ITEMS_A[0][0]: 33, ITEMS_B[0][0]: 34}.get(items[0][0], 35))
         for label, fn, width in items:
             c = L.collection(label, top)
             at = (x + width / 2, WALL_Y, TOP_Z.get(label, 2.0)) if wall else (x + width / 2, 0.0, 0.0)
