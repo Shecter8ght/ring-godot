@@ -134,7 +134,7 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0,
 			# дополнительный прицел или устройство на переходнике — в рамке своей точки; у рамки +Y —
 			# от оружия наружу: прицел строится вверх, подвесное (рукоятка, фонарь) — вниз, поэтому разворот
 			var xf: Transform3D = _mount_frame(model_key, base, m, frame, top_level)
-			if not optic:
+			if not optic and not a.has("dozor_variant"):
 				xf = xf * Transform3D(Basis(Vector3(0, 0, 1), PI), Vector3.ZERO)
 			pivot = _pivot(part, xf)
 			var sub: Dictionary = m.duplicate(true)
@@ -283,6 +283,10 @@ static func _socket_rail(root: Node3D, model_key: String, base: String) -> float
 ## поверхности планки. Точки, которые он даёт, — по данным provides (WeaponBuild.geo), крен —
 ## m.rolls (сторона и угол из записи). Пока процедурный; модель из Blender — attach.asset.
 static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
+	if String(a.get("look", "")) == "dozor_mount":
+		pivot.add_child(DozorAsset.mount())
+		pivot.set_meta("asset_loaded", true)
+		return
 	var al := _mat("anodized")
 	var clamp: float = float(a.get("clamp_m", WeaponBuild.DEFAULT_CLAMP))
 	var spec: Dictionary = (a.get("provides", {}) as Dictionary).get("rail", {})
@@ -333,6 +337,12 @@ static func _adapter(pivot: Node3D, m: Dictionary, a: Dictionary) -> void:
 
 
 static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
+	if a.has("dozor_variant"):
+		var model: Node3D = DozorAsset.flashlight(String(a.dozor_variant), true)
+		root.add_child(model)
+		_light_node(model, m, a, Vector3(0, 0, 0.0805))
+		root.set_meta("asset_loaded", true)
+		return
 	# готовая модель обвеса (tools/prepare_veras_attachments.py); нет файла — процедурный вид ниже
 	if a.has("model") and _model_part(root, m, a):
 		return
@@ -436,6 +446,13 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 ## null — у обвеса нет модели или файла.
 static func standalone(id: String) -> Node3D:
 	var a: Dictionary = WeaponDb.attachment(id)
+	if DozorGear.is_flashlight(id) or id == DozorGear.MOUNT:
+		var own: Node3D = DozorAsset.mount() if id == DozorGear.MOUNT else DozorAsset.flashlight(String(DozorGear.VARIANTS[id]))
+		var wrapper: Node3D = Node3D.new()
+		wrapper.name = "Item_" + id
+		wrapper.add_child(own)
+		own.position -= ItemModels.bounds(wrapper).get_center()
+		return wrapper
 	if a.is_empty() or not a.has("model"):
 		return null
 	var root: Node3D = Node3D.new()
@@ -568,7 +585,9 @@ static func update_condition(root: Node3D, mods: Dictionary) -> void:
 		if not light.has_meta("condition_energy"):
 			light.set_meta("condition_energy", light.light_energy)
 		if mods.has(mount):
-			light.light_energy = float(light.get_meta("condition_energy")) * WeaponCondition.effectiveness(WeaponCondition.mod_entry(mods[mount]))
+			var k: float = WeaponCondition.effectiveness(WeaponCondition.mod_entry(mods[mount]))
+			light.set_meta("condition_k", k)
+			light.light_energy = float(light.get_meta("condition_energy")) * k
 
 
 static func _scaled(root: Node3D, m: Dictionary, k: float, build: Callable) -> void:
@@ -1049,7 +1068,7 @@ static func _flashlight(root: Node3D, m: Dictionary, a: Dictionary, size_k: floa
 static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) -> void:
 	var ls: Dictionary = a.get("light", {})
 	var light := SpotLight3D.new()
-	light.name = "Flashlight_" + String(m.get("mount", ""))
+	light.name = "Flashlight_" + WeaponBuild.node_name(String(m.get("mount", "")))
 	light.set_meta("mount", String(m.get("mount", "")))
 	light.position = at
 	light.rotation.y = PI
@@ -1057,6 +1076,8 @@ static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) ->
 	light.set_meta("soft", true)
 	light.light_color = Color(0.96, 0.98, 1.0)
 	light.light_energy = float(ls.get("energy", 3.2))
+	light.set_meta("condition_energy", light.light_energy)
+	light.set_meta("condition_k", 1.0)
 	light.spot_range = float(ls.get("range", 30.0))
 	light.spot_angle = float(ls.get("angle", 28.0))
 	light.spot_attenuation = 0.8
@@ -1076,6 +1097,12 @@ static func _light_node(t: Node3D, m: Dictionary, a: Dictionary, at: Vector3) ->
 	light.add_child(WetBounce.new())
 	# сам фонарь светится: видно издали и в оптике (у своего в руках — смотрит от камеры, не мешает)
 	LampGlow.attach(light)
+	if float(ls.get("strobe_hz", 0.0)) > 0.0:
+		var pulse: FlashlightPulse = FlashlightPulse.new()
+		pulse.name = "Pulse"
+		pulse.hz = float(ls.strobe_hz)
+		pulse.duty = float(ls.get("strobe_duty", 0.5))
+		light.add_child(pulse)
 	t.add_child(light)
 
 

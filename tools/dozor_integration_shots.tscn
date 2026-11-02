@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/dozor_integration_shots.gd" id="1"]
+
+[node name="DozorIntegrationShots" type="Node"]
+script = ExtResource("1")

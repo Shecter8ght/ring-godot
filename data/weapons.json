@@ -4778,7 +4778,7 @@
    "flavor": "Дорогой способ сделать тяжёлое оружие послушнее; трофей, который стоит снять первым."
   },
   "tac_flashlight_01": {
-   "name": "Тактический фонарь",
+   "name": "ДОЗОР Ф-1",
    "cat": "mod",
    "size": [
     1,
@@ -4794,15 +4794,13 @@
     "MILITARY",
     "SCAV"
    ],
-   "short": "Фонарь",
+   "short": "Ф-1",
    "attach": {
     "type": "FLASHLIGHT",
     "fits": [
-     "RAIL_SIDE",
-     "PISTOL_RAIL",
-     "RAIL_BOTTOM"
+     "DOZOR_TUBE25"
     ],
-    "look": "flashlight",
+    "look": "dozor_flashlight",
     "fx": {
      "ergo": -1
     },
@@ -4815,13 +4813,13 @@
      "fog": 2,
      "view": 1
     },
-    "desc": "Светит в тёмных помещениях — и выдаёт тебя.",
-    "clamp_m": 0.025
+    "desc": "Светит в тёмных помещениях — и выдаёт тебя. Установка на Picatinny — через отдельный ДОЗОР-П.",
+    "dozor_variant": "f1"
    },
    "flavor": "Луч находит цель в темноте и одновременно рисует противнику направление к тебе."
   },
   "tac_flashlight_hp_01": {
-   "name": "Фонарь светодиодный мощный",
+   "name": "ДОЗОР Ф-1М",
    "cat": "mod",
    "size": [
     1,
@@ -4836,15 +4834,13 @@
     "MILITARY",
     "PERIMETER"
    ],
-   "short": "Фонарь HP",
+   "short": "Ф-1М",
    "attach": {
     "type": "FLASHLIGHT",
     "fits": [
-     "RAIL_SIDE",
-     "PISTOL_RAIL",
-     "RAIL_BOTTOM"
+     "DOZOR_TUBE25"
     ],
-    "look": "flashlight_hp",
+    "look": "dozor_flashlight",
     "fx": {
      "ergo": -2
     },
@@ -4857,8 +4853,8 @@
      "fog": 3.5,
      "view": 1.6
     },
-    "desc": "Узкий пучок вдвое дальше и ярче. Слепит — и видно его издалека.",
-    "clamp_m": 0.025
+    "desc": "Узкий пучок вдвое дальше и ярче. Слепит — и видно его издалека. Установка на Picatinny — через отдельный ДОЗОР-П.",
+    "dozor_variant": "f1m"
    },
    "flavor": "Луч находит цель в темноте и одновременно рисует противнику направление к тебе."
   },
@@ -5410,6 +5406,94 @@
     ]
    },
    "flavor": "Быстросъёмный: надевается на дульный тормоз ГРАНЬ-15 и защёлкивается на храповой муфте. На другие стволы не встаёт."
+  },
+  "tac_flashlight_strobe_01": {
+   "name": "ДОЗОР Ф-1С",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 10000,
+   "stack": 1,
+   "weight": 0.12,
+   "tier": 3,
+   "rarity": "uncommon",
+   "tags": [
+    "POLICE",
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "Ф-1С",
+   "attach": {
+    "type": "FLASHLIGHT",
+    "fits": [
+     "DOZOR_TUBE25"
+    ],
+    "look": "dozor_flashlight",
+    "fx": {
+     "ergo": -1
+    },
+    "light": {
+     "range": 30,
+     "angle": 28,
+     "energy": 3.2,
+     "indirect": 0.8,
+     "specular": 0.4,
+     "fog": 2,
+     "view": 1,
+     "strobe_hz": 6.0,
+     "strobe_duty": 0.5
+    },
+    "desc": "Стробоскопический свет, 6 вспышек в секунду. Для установки на Picatinny нужен отдельный ДОЗОР-П.",
+    "dozor_variant": "f1s"
+   },
+   "flavor": "Ритм вспышек режет темноту, но каждую вспышку видит и противник."
+  },
+  "mount_dozor_p": {
+   "name": "ДОЗОР-П — крепёж фонаря",
+   "cat": "mod",
+   "size": [
+    1,
+    1
+   ],
+   "value": 2000,
+   "stack": 1,
+   "weight": 0.07,
+   "tier": 1,
+   "rarity": "common",
+   "tags": [
+    "CIVILIAN",
+    "POLICE",
+    "MILITARY",
+    "SCAV"
+   ],
+   "short": "ДОЗОР-П",
+   "attach": {
+    "type": "ADAPTER_FLASHLIGHT",
+    "fits": [
+     "RAIL_TOP",
+     "RAIL_SIDE",
+     "RAIL_BOTTOM"
+    ],
+    "look": "dozor_mount",
+    "clamp_m": 0.035,
+    "fx": {
+     "ergo": -1
+    },
+    "provides": {
+     "light": {
+      "if": "DOZOR_TUBE25",
+      "pos": [
+       0,
+       0.024,
+       0
+      ]
+     }
+    }
+   },
+   "desc": "Разъёмное кольцо для ДОЗОР Ф-1, Ф-1М и Ф-1С. Устанавливается на планку Picatinny длинноствольного оружия. Фонарь покупается отдельно.",
+   "flavor": "Кольцо держит корпус, зажим держит планку — фонарь можно переставить на другой ствол."
   }
  },
  "presets": {
@@ -5463,9 +5547,7 @@
   },
   "HG_03_TAC": {
    "weapon": "wpn_hg_02",
-   "mods": {
-    "underbarrel": "tac_flashlight_01"
-   },
+   "mods": {},
    "ammo": [
     [
      "ammo_919_fmj",
@@ -5481,9 +5563,7 @@
   },
   "HG_04_BASE": {
    "weapon": "wpn_hg_02",
-   "mods": {
-    "underbarrel": "tac_flashlight_01"
-   },
+   "mods": {},
    "ammo": [
     [
      "ammo_919_fmj",
@@ -5521,7 +5601,8 @@
    "weapon": "wpn_smg_05",
    "mods": {
     "optic_primary": "optic_rd_01",
-    "side_right": "tac_flashlight_01"
+    "side_right": "mount_dozor_p",
+    "side_right/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5540,10 +5621,11 @@
    "weapon": "wpn_smg_03",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_left": "tac_flashlight_hp_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
-    "stock": "stock_perimeter_01"
+    "stock": "stock_perimeter_01",
+    "side_left/light": "tac_flashlight_hp_01"
    },
    "ammo": [
     [
@@ -5582,7 +5664,8 @@
    "weapon": "wpn_sg_02",
    "mods": {
     "optic_primary": "optic_rd_01",
-    "side_right": "tac_flashlight_01"
+    "side_right": "mount_dozor_p",
+    "side_right/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5626,9 +5709,10 @@
    "weapon": "wpn_sg_02",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_left": "tac_flashlight_hp_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
-    "underbarrel": "grip_vertical_01"
+    "underbarrel": "grip_vertical_01",
+    "side_left/light": "tac_flashlight_hp_01"
    },
    "ammo": [
     [
@@ -5753,9 +5837,10 @@
    "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_right": "tac_flashlight_01",
+    "side_right": "mount_dozor_p",
     "underbarrel": "grip_offset_01",
-    "stock": "stock_tele_ar_01"
+    "stock": "stock_tele_ar_01",
+    "side_right/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5793,10 +5878,11 @@
    "weapon": "wpn_ar_05",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_left": "tac_flashlight_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_vertical_01",
-    "stock": "stock_tele_ar_01"
+    "stock": "stock_tele_ar_01",
+    "side_left/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5833,10 +5919,11 @@
    "weapon": "wpn_ar_01",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_left": "tac_flashlight_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_vertical_01",
-    "muzzle": "muzzle_comp_545_01"
+    "muzzle": "muzzle_comp_545_01",
+    "side_left/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5859,10 +5946,11 @@
    "weapon": "wpn_ar_01",
    "mods": {
     "optic_primary": "optic_rd_01",
-    "side_left": "tac_flashlight_hp_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_vertical_01",
-    "muzzle": "muzzle_fh_545_01"
+    "muzzle": "muzzle_fh_545_01",
+    "side_left/light": "tac_flashlight_hp_01"
    },
    "ammo": [
     [
@@ -5935,10 +6023,11 @@
    "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_holo_01",
-    "side_left": "tac_flashlight_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
-    "stock": "stock_perimeter_01"
+    "stock": "stock_perimeter_01",
+    "side_left/light": "tac_flashlight_01"
    },
    "ammo": [
     [
@@ -5961,11 +6050,12 @@
    "weapon": "wpn_ar_09",
    "mods": {
     "optic_primary": "optic_lpvo_01",
-    "side_left": "tac_flashlight_hp_01",
+    "side_left": "mount_dozor_p",
     "side_right": "tac_laser_01",
     "underbarrel": "grip_offset_01",
     "muzzle": "muzzle_supp_gran_01",
-    "stock": "stock_perimeter_01"
+    "stock": "stock_perimeter_01",
+    "side_left/light": "tac_flashlight_hp_01"
    },
    "ammo": [
     [

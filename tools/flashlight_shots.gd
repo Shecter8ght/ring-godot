@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_dir))
 	me.loadout_mode = false
 	key = String(me.weapon_keys()[0])
-	me.set_sandbox_mods(key, {"side_right": "tac_flashlight_01"})
+	me.set_sandbox_mods(key, {"side_right": "mount_dozor_p", "side_right/light": "tac_flashlight_01"})
 	me._switch(key, false)
 	me.carry_low = false
 	CameraRig.first_person_mode = true
@@ -140,7 +140,10 @@ func _legacy(enabled: bool) -> void:
 
 
 func _attachment(id: String, mount: String) -> void:
-	me.set_sandbox_mods(key, {mount: id})
+	var mods: Dictionary = {mount: id}
+	if DozorGear.is_flashlight(id):
+		mods = {mount: DozorGear.MOUNT, mount + "/light": id}
+	me.set_sandbox_mods(key, mods)
 	await _frames(60)
 	if not me.light_on:
 		me._toggle_tac("light")

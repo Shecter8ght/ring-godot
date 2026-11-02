@@ -19,7 +19,7 @@ const MULTI := "#"
 const MAX_DEPTH := 3
 ## Длина зажима, если у обвеса не задана (clamp_m), м.
 const DEFAULT_CLAMP := 0.03
-const POINT_NAMES := {"rail": "планка переходника"}
+const POINT_NAMES := {"rail": "планка переходника", "light": "кольцо фонаря"}
 
 
 # ---------------------------------------------------------------- ключи
@@ -251,6 +251,8 @@ static func block(entry: Dictionary, key: String, att: String, slot: int = -1) -
 	if a.is_empty():
 		return "это не обвес"
 	var id: String = String(entry.get("id", ""))
+	if String(WeaponDb.weapon(id).get("class", "")) == "PISTOL" and (att == DozorGear.MOUNT or DozorGear.is_flashlight(att)):
+		return "с пистолетом фонарь держат в левой руке (T)"
 	var model_key: String = model_of(id)
 	slot = resolve_slot(entry, key, att, slot)
 	# заменяемое устройство и всё, что на нём, в проверке не участвует

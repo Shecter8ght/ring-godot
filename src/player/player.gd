@@ -58,6 +58,13 @@ var weapon_engraving: Dictionary = {}
 ## Горит фонарь / ЛЦУ на оружии в руках (выдаёт, слепит) — видят все.
 var light_on: bool = false
 var laser_on: bool = false
+## DOZOR hand pose is authored by the owner; binding does not alter the FPS rig.
+signal handheld_flashlight_requested(id: String, on: bool)
+var handheld_light_id: String = ""
+var handheld_light_on: bool = false
+var handheld_light_condition: float = 1.0
+var handheld_flashlight: HandheldFlashlight
+
 ## Песочница: стволы по ключам (пресеты WeaponDb.sandbox()) — записи оружия.
 var sandbox_weapons: Dictionary = {}
 ## Прицеливание «с завалом»: автомат повёрнут на 45° затвором к глазам (СКМ в прицеле, Balance.AIM_CANT).
@@ -268,6 +275,11 @@ var inventory: Inventory
 @onready var _camera_rig: Node3D = get_tree().get_first_node_in_group("camera_rig")
 
 
+## Called by the owner after Player.ready with an authored socket; +Z follows the beam.
+func bind_handheld_flashlight(socket: Node3D) -> void:
+	handheld_flashlight.bind(socket)
+
+
 func _ready() -> void:
 	add_to_group("players")
 	# "players" — кто сейчас в мире (его видят мародёры); "all_players" — все, включая ушедших
@@ -302,6 +314,10 @@ func _ready() -> void:
 	inventory = Inventory.new()
 	inventory.name = "Inventory"
 	add_child(inventory)
+	handheld_flashlight = HandheldFlashlight.new()
+	handheld_flashlight.name = "HandheldFlashlight"
+	handheld_flashlight.actor = self
+	add_child(handheld_flashlight)
 	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
@@ -362,7 +378,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:on_ladder", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:handheld_light_id", ".:handheld_light_on", ".:handheld_light_condition", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:on_ladder", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -519,6 +535,8 @@ func has_light_on() -> bool:
 ## Насколько дальше видно светящего (мощный фонарь — дальше): наибольшее у включённых.
 func light_view() -> float:
 	var k := 1.0
+	if handheld_flashlight and handheld_flashlight.emitting():
+		k = maxf(k, float((WeaponDb.attachment(handheld_light_id).get("light", {}) as Dictionary).get("view", 1.0)))
 	for m in weapon_mods:
 		var md: Dictionary = weapon_mods[m] if weapon_mods[m] is Dictionary else {}
 		if bool(md.get("light", false)):
@@ -1220,7 +1238,7 @@ func _physics_process(delta: float) -> void:
 		var mag_look: String = WeaponMods.mag_state(we)
 		if mag_look != weapon_mag:
 			weapon_mag = mag_look
-		var lit := false
+		var lit: bool = handheld_flashlight.emitting()
 		var las := false
 		for m in mods:
 			lit = lit or (not WeaponCondition.broken(mods[m]) and bool((mods[m] as Dictionary).get("light", false)))
@@ -2147,6 +2165,13 @@ func _accept_pm_result(sequence: int, result: Dictionary) -> void:
 
 ## T / L: все фонари (kind light) или лазеры (laser) на оружии в руках — вкл/выкл разом.
 func _toggle_tac(kind: String) -> void:
+	if kind == "light" and String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL":
+		var result: String = handheld_flashlight.toggle()
+		if result == "нет":
+			_say("Нет фонаря в вещах")
+		else:
+			Audio.play("tac_click", global_position, -14.0)
+		return
 	var e := weapon_entry()
 	var mods: Dictionary = e.get("mods", {})
 	var mounts: Array = []
@@ -2387,6 +2412,7 @@ func _loadout_tick() -> void:
 
 ## Убрать оружие из рук (за спину / в кобуру): состояние уходит хосту, как при смене; слот остаётся.
 func _holster() -> void:
+	handheld_flashlight.stow()
 	if weapon_id == "":
 		return
 	cancel_weapon_action()
@@ -2410,6 +2436,7 @@ func hands_free() -> bool:
 func _switch(key: String, sound: bool = true) -> void:
 	if key == weapon_slot and weapon_id != "" and not _base_entry(key).is_empty():
 		return
+	handheld_flashlight.stow()
 	grenade_equipped = false
 	grenade_in_hand = false
 	_cancel_grenade_prepare()

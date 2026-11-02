@@ -23,7 +23,8 @@ func _ready() -> void:
 	# снаряжение: AK-12 (LPVO + угловой коллиматор + ЛЦУ справа) + фонарь слева,
 	# плитоносец с плитами спереди и сзади
 	var w := WeaponDb.make_weapon("AR_06_MARKSMAN", rng, [100, 100])
-	w = Gear.fit(w, ItemDb.make("tac_flashlight_01", 1), "side_left")[0]
+	w = Gear.fit(w, ItemDb.make(DozorGear.MOUNT, 1), "side_left")[0]
+	w = Gear.fit(w, ItemDb.make("tac_flashlight_01", 1), "side_left/light")[0]
 	Profile.equipment = {"primary": w, "armor": WeaponDb.make_vest("armor_top", {"front": "plate_ceramic", "back": "plate_steel"}),
 		"helmet": ItemDb.make("helmet_mid", 1), "ears": ItemDb.make("headset_active", 1),
 		"backpack": ItemDb.make(Balance.BACKPACK_START, 1)}
@@ -49,22 +50,22 @@ func _ready() -> void:
 	_check("в руках AK-12 из снаряжения", pl.weapon_id == "wpn_ar_01" and pl.weapon_slot == "primary", pl.weapon_id)
 
 	# CASE 4: фонарь слева и ЛЦУ справа — оба на модели одновременно
-	var lights := pl.find_children("Flashlight_side_left", "SpotLight3D", true, false)
+	var lights := pl.find_children("Flashlight_side_left__light", "SpotLight3D", true, false)
 	var beams := pl.find_children("LaserBeam_side_right", "Node3D", true, false)
 	_check("CASE 4: фонарь (слева) и ЛЦУ (справа) стоят одновременно", not lights.is_empty() and not beams.is_empty(), "фонарей %d, лучей %d" % [lights.size(), beams.size()])
 	# CASE 5: только фонарь
 	await _tac("light")
-	_check("CASE 5: включён только фонарь", _on(pl, "side_left", "light") and not _on(pl, "side_right", "laser") and pl.light_on and not pl.laser_on, str(pl.weapon_mods))
+	_check("CASE 5: включён только фонарь", _on(pl, "side_left/light", "light") and not _on(pl, "side_right", "laser") and pl.light_on and not pl.laser_on, str(pl.weapon_mods))
 	# CASE 6: только ЛЦУ
 	await _tac("light")
 	await _tac("laser")
-	_check("CASE 6: включён только ЛЦУ", not _on(pl, "side_left", "light") and _on(pl, "side_right", "laser") and not pl.light_on and pl.laser_on, str(pl.weapon_mods))
+	_check("CASE 6: включён только ЛЦУ", not _on(pl, "side_left/light", "light") and _on(pl, "side_right", "laser") and not pl.light_on and pl.laser_on, str(pl.weapon_mods))
 	# CASE 7: оба
 	await _tac("light")
-	_check("CASE 7: включены оба", _on(pl, "side_left", "light") and _on(pl, "side_right", "laser") and pl.light_on and pl.laser_on, "")
+	_check("CASE 7: включены оба", _on(pl, "side_left/light", "light") and _on(pl, "side_right", "laser") and pl.light_on and pl.laser_on, "")
 	var lit := 0
 	# от первого лица фонарь светит с модели в руках у камеры, на теле — у напарников
-	for n in get_tree().root.find_children("Flashlight_side_left", "SpotLight3D", true, false):
+	for n in get_tree().root.find_children("Flashlight_side_left__light", "SpotLight3D", true, false):
 		lit += 1 if (n as SpotLight3D).visible else 0
 	_check("…фонарь на модели светит", lit > 0, "")
 
@@ -98,9 +99,9 @@ func _ready() -> void:
 		"приближение %.2f / %.2f" % [float(sp.iso_zoom), float(so.iso_zoom)])
 
 	# CASE 8: снял фонарь — ЛЦУ работает
-	Raid.current.request_strip("equip:primary", -1, "mod:side_left")
+	Raid.current.request_strip("equip:primary", -1, "mod:side_left/light")
 	await _frames(6)
-	_check("CASE 8: фонарь снят в рюкзак — ЛЦУ светит", not pl.weapon_mods.has("side_left") and _on(pl, "side_right", "laser") and pl.laser_on
+	_check("CASE 8: фонарь снят в рюкзак — ЛЦУ светит", not pl.weapon_mods.has("side_left/light") and _on(pl, "side_right", "laser") and pl.laser_on
 		and pl.inventory.has("tac_flashlight_01"), str(pl.weapon_mods.keys()))
 	# CASE 11: снял LPVO в рейде — угловой остался и им можно целиться
 	Raid.current.request_strip("equip:primary", -1, "mod:optic_primary")
@@ -198,11 +199,11 @@ func _ready() -> void:
 	# вернуть LPVO и фонарь на свои точки, выбрать угловой, включить фонарь и ЛЦУ
 	Raid.current.request_fit("equip:primary", -1, _bi(pl, "optic_lpvo_01"), "optic_primary")
 	await _frames(4)
-	Raid.current.request_fit("equip:primary", -1, _bi(pl, "tac_flashlight_01"), "side_left")
+	Raid.current.request_fit("equip:primary", -1, _bi(pl, "tac_flashlight_01"), "side_left/light")
 	await _frames(6)
 	if String(WeaponStats.compute(pl.weapon_entry()).sight) != _angled(pl.weapon_entry()):
 		pl._toggle_sight()
-	if not _on(pl, "side_left", "light"):
+	if not _on(pl, "side_left/light", "light"):
 		await _tac("light")
 	await _wait(1.0)
 	var mods_before := {}
@@ -219,7 +220,7 @@ func _ready() -> void:
 	# CASE 9: после эвакуации — основной, угловой, фонарь, ЛЦУ и их состояние
 	var pw: Dictionary = Profile.equipment.get("primary", {})
 	_check("CASE 9: после эвакуации обвес и состояния на месте", _mods_ok(pw, mods_before) and String(pw.get("sight", "")) == _angled(pw)
-		and bool((pw.mods.side_left as Dictionary).get("light", false)) and bool((pw.mods.side_right as Dictionary).get("laser", false)),
+		and bool((pw.mods["side_left/light"] as Dictionary).get("light", false)) and bool((pw.mods.side_right as Dictionary).get("laser", false)),
 		"%s, прицел %s" % [str(pw.get("mods", {})), String(pw.get("sight", ""))])
 	# CASE 20: трофей в профиле — как был
 	_check("CASE 20: трофей после эвакуации — в том же состоянии", has_meta("trophy") and _find(Profile.backpack, get_meta("trophy")) >= 0, "")
@@ -227,7 +228,7 @@ func _ready() -> void:
 	Profile.use_file(TEST_PROFILE, false)
 	var rw: Dictionary = Profile.equipment.get("primary", {})
 	_check("CASE 10: после перезагрузки профиля прицел «угловой», обвес и фонарь / ЛЦУ целы", String(WeaponStats.compute(rw).sight) == _angled(rw) and _mods_ok(rw, mods_before)
-		and bool((rw.mods.side_left as Dictionary).get("light", false)) and bool((rw.mods.side_right as Dictionary).get("laser", false)), String(rw.get("sight", "")))
+		and bool((rw.mods["side_left/light"] as Dictionary).get("light", false)) and bool((rw.mods.side_right as Dictionary).get("laser", false)), String(rw.get("sight", "")))
 	print("arsenal_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
 

@@ -456,6 +456,7 @@ static func _from_preset(p: Dictionary, rng: RandomNumberGenerator, dur_range: A
 		mods[String(mount)] = {"id": String(p.mods[mount]), "dur": roundf(rng.randf_range(float(dr[0]), float(dr[1])))}
 	e["mods"] = mods
 	# старые пресеты с угловым прицелом — кронштейн на планке
+	e = DozorGear.upgrade(e)[0]
 	e = AttachmentRemote.upgrade(e)[0]
 	e = WeaponBuild.upgrade(e)[0]
 	var ammo_id := pick_ammo(p.get("ammo", []), rng, String(weapon(wid).caliber))
@@ -541,6 +542,9 @@ static func migrate(e: Dictionary) -> Array:
 			else:
 				spill.append({"id": mid, "n": 1})
 		out["mods"] = mods
+		var lights: Array = DozorGear.upgrade(out)
+		out = lights[0]
+		spill.append_array(lights[1])
 		# Некомплектный старый ЛЦУ не должен мешать переносу независимого углового прицела.
 		var before_remotes: Array = AttachmentRemote.upgrade(out)
 		out = before_remotes[0]

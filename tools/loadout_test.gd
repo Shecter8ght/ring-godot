@@ -95,8 +95,8 @@ func _ready() -> void:
 		"%d ₽, доверие %d" % [Profile.money - mm, Profile.trust - tr])
 	Profile.trust = 0
 	# этажи: первый открыт и выбран, второй закрыт до доверия
-	_check("этажи: 1F открыт и выбран, 2F закрыт по доверию", Floors.is_open("f1") and Profile.floor == "f1" and not Floors.is_open("f2") and Floors.unlock_block("f2").begins_with("доверие")
-		and Floors.start_block("f1") == "", Floors.unlock_block("f2"))
+	_check("этажи: ТЦ открыт и выбран, 2F закрыт по доверию", Floors.is_open("mall") and Profile.floor == "mall" and not Floors.is_open("f2") and Floors.unlock_block("f2").begins_with("доверие")
+		and Floors.start_block("mall") == "", Floors.unlock_block("f2"))
 
 	# --- соло-рейд со снаряжением (на выбранный этаж — как кнопка в убежище)
 	Profile.pending_raid = true
@@ -118,6 +118,13 @@ func _ready() -> void:
 	await _wait(float(pl.spec().reload) * Balance.RELOAD_TOPUP_K + 0.5)
 	_check("перезарядка из рюкзака (досыпка)", pl.ammo == 45 and pl.inventory.count("ammo_545_std") == 35, "магазин %d, в рюкзаке %d" % [pl.ammo, pl.inventory.count("ammo_545_std")])
 	# обвес прямо в рейде: фонарь из рюкзака — на автомат, потом снять обратно
+	pl.inventory.add(DozorGear.MOUNT, 1)
+	var mi: int = -1
+	for i: int in range(pl.inventory.items.size()):
+		if String(pl.inventory.items[i].id) == DozorGear.MOUNT:
+			mi = i
+	Raid.current.request_install_mod("primary", "backpack", mi)
+	await _frames(3)
 	pl.inventory.add("mod_flashlight", 1)
 	var fi := -1
 	for i in range(pl.inventory.items.size()):
@@ -125,7 +132,10 @@ func _ready() -> void:
 			fi = i
 	Raid.current.request_install_mod("primary", "backpack", fi)
 	await _frames(3)
-	var light_mount := "side_left" if WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get("side_left", "")) == "tac_flashlight_01" else "side_right"
+	var light_mount := ""
+	for key: String in pl.inventory.equipment.primary.mods:
+		if WeaponDb.mod_id(pl.inventory.equipment.primary.mods[key]) == "tac_flashlight_01":
+			light_mount = key
 	_check("в рейде: фонарь поставлен на боковую планку, модель в руках с ним", WeaponDb.mod_id(pl.inventory.equipment.primary.mods.get(light_mount, "")) == "tac_flashlight_01" and pl.weapon_mods.has(light_mount) and not pl.inventory.has("tac_flashlight_01"),
 		str(pl.weapon_mods))
 	Raid.current.request_remove_mod("primary", light_mount)
@@ -148,7 +158,7 @@ func _ready() -> void:
 	for m in get_tree().get_nodes_in_group("marauders"):
 		(m as Node).queue_free()
 	pl.health.hp = 1e9
-	var bus := get_tree().current_scene.get_node("Extractions/Bus") as ExtractionPoint
+	var bus := get_tree().current_scene.get_node("Gameplay/Extraction_0") as ExtractionPoint
 	pl.global_position = bus.global_position + Vector3(0, 0.1, 0)
 	await _wait(bus.channel_s + 1.0)
 	_check("эвакуирован", Raid.current.is_extracted(1), "")

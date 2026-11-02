@@ -65,7 +65,11 @@ func _update() -> bool:
 	_spot.global_position = at + n * 0.06
 	_spot.look_at(at + n * 0.06 + out, Vector3.UP if absf(out.y) < 0.99 else Vector3.FORWARD)
 	_spot.light_color = src.light_color
-	_spot.light_energy = src.light_energy * wet * fres * float(cfg.energy)
+	# The raycast is throttled; a strobe gates this node every rendered frame instead.
+	var source_energy: float = src.light_energy
+	if src.has_node("Pulse"):
+		source_energy = float(src.get_meta("condition_energy", 0.0)) * float(src.get_meta("condition_k", 1.0))
+	_spot.light_energy = source_energy * wet * fres * float(cfg.energy)
 	_spot.spot_range = left
 	# мокрый асфальт — не зеркало: пятно шире исходного
 	_spot.spot_angle = minf(src.spot_angle * float(cfg.spread), 60.0)

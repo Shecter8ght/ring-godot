@@ -352,7 +352,7 @@ const STASH_GRID := Vector2i(10, 30)
 const START_MONEY := 60000
 ## Третье значение у ствола — обвес по точкам крепления: тактический фонарь на планке автомата (пролог,
 ## docs/design/prologue.md §9.9 — набор в закладке и в тайнике без пролога одинаковый).
-const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1, {"side_right": "tac_flashlight_01"}], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
+const START_STASH := [["wpn_hg_02", 1], ["wpn_ar_01", 1, {"side_right": "mount_dozor_p", "side_right/light": "tac_flashlight_01"}], ["ammo_919_fmj", 100], ["ammo_545_std", 120],
 	["mag_545_30", 1], ["mag_919_17", 1], ["bandage", 4], ["painkillers", 2], ["armor_mid", 1], ["helmet_simple", 1], ["grenade", 2]]
 ## Пролог «Первый выход» (docs/design/prologue.md): квест и его рейд; что игрок несёт с собой через кордон
 ## (carry — из стартового набора, остальное ждёт в закладке: сумка в подсобке кофейни); подпись сумки (бирка —
@@ -390,7 +390,7 @@ const TRADER_KITS := [
 		"backpack": [["ammo_12_buck", 30], ["ammo_12_slug", 10], ["mag_918_8", 2], ["ammo_918_pst", 32], ["bandage", 3], ["medkit", 1], ["water", 1]]},
 	{"name": "Патрульный", "about": "ВЕРАС-54 с коллиматором и Glock, плитоносец со стальными плитами.",
 		"slots": {
-			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "tac_flashlight_01"}},
+			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "mount_dozor_p", "side_right/light": "tac_flashlight_01"}},
 			"sidearm": {"id": "wpn_hg_02"},
 			"armor": {"id": "armor_mid", "plates": {"front": "plate_steel", "back": "plate_steel"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
@@ -400,13 +400,13 @@ const TRADER_KITS := [
 	{"name": "Штурмовик", "about": "ГРАНЬ-15 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
 		"slots": {
 			"primary": {"id": "wpn_ar_09", "mods": {"optic_primary": "optic_4x_01", "muzzle": "muzzle_supp_gran_01", "underbarrel": "grip_offset_01", "side_right": "tac_combo_01"}},
-			"sidearm": {"id": "wpn_hg_02", "mods": {"underbarrel": "tac_flashlight_01"}},
+			"sidearm": {"id": "wpn_hg_02"},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
 			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
-		"backpack": [["mag_556_30_gran", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
+		"backpack": [["tac_flashlight_01", 1], ["mag_556_30_gran", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
 	{"name": "Снайпер", "about": "MR762 с оптикой 8× и глушителем, Vector на ближний бой, лучшая броня.",
 		"slots": {
 			"primary": {"id": "wpn_dmr_01", "mods": {"optic_primary": "optic_8x_01", "muzzle": "muzzle_supp_762_01"}},
@@ -688,6 +688,8 @@ const TRADER_BUY_PRICES := {
 	"tac_combo_01": 126000,
 	"tac_flashlight_01": 15000,
 	"tac_flashlight_hp_01": 80000,
+	"tac_flashlight_strobe_01": 55000,
+	"mount_dozor_p": 6000,
 	"tac_laser_01": 35000,
 	"thermal_imager": 101000,
 	"thermos": 2200,

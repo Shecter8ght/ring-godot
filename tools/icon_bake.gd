@@ -60,6 +60,8 @@ func _bake(id: String) -> void:
 	var dir := Vector3(-1.0, 0.1, 0.0).normalized() if side else Vector3(0.75, 0.95, 1.0).normalized()
 	if id == Metka4Model.ID:
 		dir = Vector3(-0.7, 1.2, 1.0).normalized()
+	if id == DozorGear.MOUNT:
+		dir = Vector3(-0.8, 0.5, 1.0).normalized()
 	cam.look_at_from_position(c + dir * 3.0, c, Vector3.UP)
 	# вписать: габарит в осях камеры, запас 8 %
 	var inv := cam.global_transform.affine_inverse()
