@@ -56,6 +56,14 @@ def mats() -> dict:
         "cardboard": L.material("Картон", (0.55, 0.4, 0.25), 0.85),
         "cardboard_cut": L.material("Картон_срез", (0.62, 0.5, 0.34), 0.9),
         "tape": L.material("Скотч", (0.6, 0.48, 0.3), 0.25),
+        "paper": L.material("Бумага", (0.85, 0.84, 0.8), 0.8),
+        "tape_clear": L.material("Скотч_прозрачный", (0.8, 0.8, 0.75), 0.2),
+        "pin_metal": L.material("Кнопка_сталь", (0.6, 0.6, 0.58), 0.35, 1.0),
+        "pin_plastic": L.material("Кнопка_пластик", (0.7, 0.1, 0.08), 0.3),
+        "wood_slat": L.material("Рейка_дерево", (0.55, 0.42, 0.28), 0.6),
+        "frame_wood": L.material("Багет_дерево", (0.35, 0.22, 0.12), 0.45),
+        "frame_plastic": L.material("Рама_пластик", (0.55, 0.45, 0.25), 0.35),
+        "glass": L.material("Стекло", (0.8, 0.85, 0.85), 0.05, 0.0, 0.3),
     }
 
 
@@ -851,6 +859,373 @@ def duffel(coll, m, at, rng, half: bool = False):
     return r
 
 
+
+# ---------------------------------------------------------------- группа Б: бумага на стене, рамы
+
+def sheet(bm, w: float, h: float, step: float, place, keep=None) -> None:
+    """Лист сеткой (шаг step): place(x, z) → точка; x — поперёк (−w/2…w/2), z — от верха вниз (0…−h); keep(x, z) —
+    оставить ли клетку (рваный край)."""
+    nx, nz = max(2, round(w / step)), max(2, round(h / step))
+    vs = {}
+
+    def vert(i, j):
+        if (i, j) not in vs:
+            vs[(i, j)] = bm.verts.new(place(-w / 2 + w * i / nx, -h * j / nz))
+        return vs[(i, j)]
+
+    for j in range(nz):
+        for i in range(nx):
+            xc, zc = -w / 2 + w * (i + 0.5) / nx, -h * (j + 0.5) / nz
+            if keep is not None and not keep(xc, zc):
+                continue
+            bm.faces.new((vert(i, j), vert(i + 1, j), vert(i + 1, j + 1), vert(i, j + 1)))
+
+
+def buckle(x: float, z: float, w: float, h: float, pins: list, amp: float, seed: float) -> float:
+    """Волна бумаги от сырости: плавные бугры (отход от стены, м), у кнопок и скотча — ноль."""
+    a = math.sin(x * 9.0 + seed) * math.sin(z * 7.0 + seed * 1.7) * 0.6 + math.sin(x * 4.1 - z * 3.3 + seed * 0.7) * 0.4
+    hold = 1.0
+    for px, pz in pins:
+        hold *= 1.0 - math.exp(-((x - px) ** 2 + (z - pz) ** 2) / 0.012)
+    edge = min(1.0, (w / 2 - abs(x)) / 0.05, (h / 2 - abs(z + h / 2)) / 0.05)
+    return amp * (0.55 + 0.45 * a) * hold * (0.6 + 0.4 * max(0.0, edge))
+
+
+def curl(x: float, z: float, hinge_p, hinge_d, R: float, droop: float = 0.0, grow: float = 0.0015):
+    """Отклеившийся угол заворачивается от стены: точки за линией отрыва (через hinge_p вдоль hinge_d) свёрнуты
+    спиралью от радиуса R (каждый виток шире на grow — рулон не проходит сам в себя); возвращает (x, z, отход)."""
+    px, pz = hinge_p
+    dx, dz = hinge_d
+    n = math.hypot(dx, dz)
+    dx, dz = dx / n, dz / n
+    nx_, nz_ = dz, -dx                        # нормаль к линии в плоскости листа
+    s = (x - px) * nx_ + (z - pz) * nz_
+    if s <= 0:
+        return x, z, 0.0
+    ang = s / R
+    Rk = R + grow * ang / TAU
+    along = Rk * math.sin(ang)
+    off = Rk * (1 - math.cos(ang))
+    bx, bz = x - nx_ * s, z - nz_ * s
+    return bx + nx_ * along, bz + nz_ * along - droop * (s ** 2), off
+
+
+def pushpin(bm, at, kind: str = "кнопка") -> None:
+    """Кнопка: советская — плоская шляпка Ø11 с выпуклостью; канцелярская — пластиковая головка на ножке."""
+    x, y, z = at
+    if kind == "кнопка":
+        lathe(bm, [(0.0, 0.0), (0.0055, 0.0), (0.0055, -0.0004), (0.0045, -0.001), (0.0, -0.0013)], segs=20, origin=(x, y, z),
+              axis=(0, 1, 0))
+    else:
+        lathe(bm, [(0.0, 0.0), (0.0048, 0.0), (0.0048, -0.0015), (0.0028, -0.0025), (0.0026, -0.009), (0.004, -0.0105),
+                   (0.004, -0.0125), (0.0, -0.013)], segs=16, origin=(x, y, z), axis=(0, 1, 0))
+
+
+def tape_piece(bm, cx: float, cz: float, ang: float, y: float, lw=(0.045, 0.019), lift=None) -> None:
+    """Кусок скотча на углу листа: тонкая сетка 6 × 3 с лёгкой морщиной; lift(x, z) — отход (отклеился)."""
+    L_, W_ = lw
+    ca, sa = math.cos(ang), math.sin(ang)
+    rows = []
+    for j in range(4):
+        row = []
+        for i in range(7):
+            u, v = -L_ / 2 + L_ * i / 6, -W_ / 2 + W_ * j / 3
+            x, z = cx + u * ca - v * sa, cz + u * sa + v * ca
+            off = 0.00025 * math.sin(i * 1.9 + j * 2.3)
+            if lift is not None:
+                off += lift(x, z)
+            row.append(V((x, y - off, z)))
+        rows.append(row)
+    strip(bm, rows)
+
+
+def poster(coll, m, at, rng, name: str, w: float, h: float, mount: str, state: str = "целый", amp: float = 0.004):
+    """Лист на стене (корень — середина верха у стены, лицо к −Y): волна от сырости, края чуть отходят. mount: «кнопки»
+    (советские кнопки по углам и верху), «скотч» (куски по углам), «булавки» (канцелярские кнопки по углам).
+    state: «надорван» — нижний угол оторван рваным краем, край отошёл; «угол» — верхний угол отклеился и завернулся;
+    «свернулся» — верхние кнопки потеряны, лист свернулся сверху рулоном."""
+    r = L.root(f"{name}{'' if state == 'целый' else '_' + state}", coll, at)
+    seed = rng.uniform(0, 10)
+    inset = 0.015
+    pins = [(-w / 2 + inset, -inset), (w / 2 - inset, -inset), (-w / 2 + inset, -h + inset), (w / 2 - inset, -h + inset)]
+    if mount == "кнопки" and w > 0.45:
+        pins.append((0.0, -inset))
+    lost = []
+    if state == "угол":
+        lost = [pins[1]]
+    if state == "свернулся":
+        lost = [pins[0], pins[1]] + ([pins[4]] if len(pins) > 4 else [])
+    held = [p for p in pins if p not in lost]
+    hinge = None
+    if state == "угол":
+        hinge = ((w / 2 - 0.16, 0.0), (-1.0, 1.25))
+        R_ = 0.05
+    if state == "свернулся":
+        hinge = ((0.0, -h * 0.42), (-1.0, 0.0))
+        R_ = 0.028
+    tear_cx, tear_cz = w / 2, -h
+
+    def keep(x, z):
+        if state != "надорван":
+            return True
+        # оторван нижний угол: край рваный мелко (волокна), но линия отрыва одна
+        jag = 0.006 * math.sin(x * 140 + seed) + 0.004 * math.sin(z * 210 + seed * 2) + 0.01 * math.sin((x - z) * 23 + seed)
+        return (x - (w / 2 - 0.34)) / 0.34 + ((-h + 0.42) - z) / 0.42 < 1.0 + jag / 0.35
+
+    def place(x, z):
+        off = buckle(x, z, w, h, held, amp, seed)
+        xx, zz = x, z
+        if hinge is not None:
+            xx, zz, c_off = curl(x, z, hinge[0], hinge[1], R_, droop=0.0)
+            off += c_off
+        if state == "надорван":
+            # у рваного края лист отошёл от стены
+            d = (x - (w / 2 - 0.34)) / 0.34 + ((-h + 0.42) - z) / 0.42
+            off += 0.02 * max(0.0, d - 0.6) ** 2
+        return V((xx, -0.0006 - off, zz))
+
+    bm = bmesh.new()
+    sheet(bm, w, h, 0.006 if state == "надорван" else 0.01, place, keep)
+    ob = obj(bm, f"{name}_лист", coll, [m["paper"]], r, smooth=60)
+    so = ob.modifiers.new("Бумага", "SOLIDIFY")
+    so.thickness = 0.0003
+    so.offset = 1
+    hb = bmesh.new()
+    if mount in ("кнопки", "булавки"):
+        for px, pz in held:
+            pushpin(hb, (px, -0.0006 - buckle(px, pz, w, h, held, amp, seed) - 0.0004, pz), "кнопка" if mount == "кнопки" else "булавка")
+        # потерянные кнопки — дырочки от них остаются на текстуре; одна кнопка висит на углу (у «угла»)
+    if mount == "скотч":
+        tb = bmesh.new()
+        for (px, pz), ang in zip(pins, (math.radians(45), math.radians(-45), math.radians(-45), math.radians(45))):
+            if (px, pz) in lost:
+                # отклеившийся кусок остался на завёрнутом углу
+                xx, zz, c_off = curl(px, pz, hinge[0], hinge[1], R_)
+                tape_piece(tb, xx, zz, ang, -0.0012 - c_off, lift=None)
+                continue
+            tape_piece(tb, px, pz, ang, -0.0012)
+        obj(tb, f"{name}_скотч", coll, [m["tape_clear"]], r, smooth=50)
+    if len(hb.verts):
+        obj(hb, f"{name}_кнопки", coll, [m["pin_metal"] if mount == "кнопки" else m["pin_plastic"]], r, smooth=40)
+    else:
+        hb.free()
+    return r
+
+
+def calendar(coll, m, at, rng):
+    """Настенный календарь 300 × 450 на пружине: подложка-картон, двенадцать листов веером снизу, проволочная пружина
+    по верху, отверстие и гвоздь."""
+    r = L.root("КЛ_календарь", coll, at)
+    w, h = 0.3, 0.45
+    bm = bmesh.new()
+    L.bm_box(bm, (-w / 2, -0.0015, -h - 0.01), (w / 2, -0.0003, -0.008))
+    ob = obj(bm, "КЛ_подложка", coll, [m["paper"]], r, bevel=0.0004, segs=1)
+    _ = ob
+    pb = bmesh.new()
+    for k in range(12):
+        y = -0.0016 - k * 0.00022
+        lift = 0.0009 * (12 - k)
+
+        def place(x, z, y=y, lift=lift, k=k):
+            t = min(1.0, -z / h)
+            return V((x, y - lift * t ** 3 - 0.0004 * math.sin(x * 20 + k), z - 0.016))
+        sheet(pb, w - 0.004, h - 0.02, 0.02, place)
+    obj(pb, "КЛ_листы", coll, [m["paper"]], r, smooth=60)
+    wb = bmesh.new()
+    for i in range(24):
+        x = -w / 2 + 0.012 + (w - 0.024) * i / 23
+        pts = [V((x + 0.0008 * math.sin(a), -0.0045 + 0.0045 * math.cos(a), -0.012 + 0.0055 * math.sin(a)))
+               for a in [TAU * q / 10 for q in range(10)]]
+        pipe(wb, pts, 0.0006, segs=6, closed=True)
+    pipe(wb, [(0, 0.0, 0.004), (0, -0.012, 0.004)], 0.0012, segs=8)
+    lathe(wb, [(0.0, 0.0), (0.0028, 0.0), (0.0028, -0.0008), (0.0, -0.001)], segs=14, origin=(0, -0.012, 0.004), axis=(0, -1, 0))
+    obj(wb, "КЛ_пружина_гвоздь", coll, [m["pin_metal"]], r, smooth=50)
+    return r
+
+
+def chart(coll, m, at, rng, fallen: bool = False):
+    """Учебная таблица 700 × 1000 на рейках: лист зажат парой деревянных реек сверху и снизу, шнур от концов верхней
+    рейки на гвоздь. Сорванная — шнур с одной стороны лопнул, таблица висит углом, обрывок шнура свисает."""
+    r = L.root("УТ_таблица" + ("_сорвана" if fallen else ""), coll, at)
+    w, h = 0.7, 1.0
+    drop = 0.14                                    # гвоздь выше верхней рейки
+    seed = rng.uniform(0, 10)
+    pivot = V((-w / 2 - 0.01, -0.008, -drop))       # левый конец верхней рейки — за него висит сорванная
+    grp = bpy.data.objects.new("УТ_полотно", None)
+    coll.objects.link(grp)
+    grp.parent = r
+    grp.location = pivot
+
+    def place(x, z):
+        bow = 0.006 * math.sin(math.pi * (-z) / h) + 0.002 * math.sin(x * 8 + seed)
+        return V((x, -0.008 - bow, z - drop)) - pivot
+    bm = bmesh.new()
+    sheet(bm, w, h, 0.02, place)
+    sh = obj(bm, "УТ_лист", coll, [m["paper"]], grp, smooth=60)
+    so = sh.modifiers.new("Бумага", "SOLIDIFY")
+    so.thickness = 0.0005
+    rb = bmesh.new()
+    for z in (-drop + 0.004, -drop - h - 0.004):
+        for y0, y1 in ((-0.0035, -0.0003), (-0.0158, -0.0126)):
+            L.bm_box(rb, (-w / 2 - 0.012, y0 - 0.004, z - 0.011), (w / 2 + 0.012, y1 - 0.004, z + 0.011))
+    for v in rb.verts:
+        v.co -= pivot
+    obj(rb, "УТ_рейки", coll, [m["wood_slat"]], grp, bevel=0.0012, segs=1)
+    cb = bmesh.new()
+    nail = V((0, 0.0, 0.0))
+    ends = [V((-w / 2 - 0.004, -0.009, -drop + 0.012)), V((w / 2 + 0.004, -0.009, -drop + 0.012))]
+    if not fallen:
+        pipe(cb, [ends[0], nail + V((0, -0.006, 0.0)), ends[1]], 0.0013, segs=8, bend=0.01)
+    else:
+        pipe(cb, [ends[0], nail + V((0, -0.006, 0.0))], 0.0013, segs=8)
+    pipe(cb, [nail + V((0, 0.002, 0)), nail + V((0, -0.012, 0))], 0.0013, segs=8)
+    lathe(cb, [(0.0, 0.0), (0.0028, 0.0), (0.0028, -0.0008), (0.0, -0.001)], segs=14, origin=(0, -0.012, 0.0), axis=(0, -1, 0))
+    obj(cb, "УТ_шнур_гвоздь", coll, [m["rope"]], r, smooth=50)
+    if fallen:
+        # висит на левом конце: полотно повёрнуто вокруг него, обрывок шнура свисает с правого конца
+        grp.rotation_euler = (0, math.radians(38), 0)
+        fb = bmesh.new()
+        e = ends[1] - pivot
+        rot = Matrix.Rotation(math.radians(38), 3, "Y")
+        e = rot @ e + pivot
+        pipe(fb, [e, e + V((0.01, -0.004, -0.05)), e + V((0.004, -0.002, -0.11))], 0.0013, segs=8, bend=0.02)
+        obj(fb, "УТ_обрывок", coll, [m["rope"]], r, smooth=50)
+    return r
+
+
+def frame_picture(coll, m, at, rng, kind: str = "дерево", state: str = "висит"):
+    """Картина в раме: багет протяжкой по контуру (дерево — фигурный профиль 42 × 24 мм, пластик — узкий 14 × 10),
+    стекло, картинка с паспарту на картоне, задник; дерево — на тросике с двух колец за гвоздь (верх отходит от стены),
+    пластик — на петле вплотную. state: «висит», «разбито» (стекло лучами от удара, двух осколков нет, остальные сдвинуты),
+    «упала» (стоит на полу, прислонена к стене; корень — на полу у стены)."""
+    name = "КР_картина" + ("_пластик" if kind == "пластик" else "")
+    r = L.root(name + ("" if state == "висит" else "_" + state), coll, at)
+    W, H = (0.4, 0.5) if kind == "дерево" else (0.3, 0.4)
+    pw, pd = (0.042, 0.024) if kind == "дерево" else (0.014, 0.01)
+    grp = bpy.data.objects.new(f"{name}_рама", None)
+    coll.objects.link(grp)
+    grp.parent = r
+    hang = kind == "дерево"
+    if state == "упала":
+        # низ на полу в 13 см от стены, верх лёг на стену
+        grp.location = (0, -0.13, 0.0)
+        grp.rotation_euler = (-math.radians(14), 0, 0)
+        base_z = 0.0
+    else:
+        base_z = -0.12 if hang else -0.01
+        tilt = math.radians(4.5) if hang else 0.0
+        grp.location = (0, -0.002, base_z - H)
+        grp.rotation_euler = (tilt, 0, 0)   # верх на тросике отходит от стены
+    # в осях группы: рама стоит низом в z = 0, задник у y = 0, лицо к −Y
+    path = [V((x, 0.0, z)) for x, z in ((-W / 2 + pw / 2, pw / 2), (W / 2 - pw / 2, pw / 2), (W / 2 - pw / 2, H - pw / 2),
+                                         (-W / 2 + pw / 2, H - pw / 2))]
+    if kind == "дерево":
+        prof = [(-pw / 2, 0.0), (pw / 2, 0.0), (pw / 2, pd * 0.55), (pw * 0.42, pd * 0.8), (pw * 0.2, pd), (-pw * 0.05, pd * 0.92),
+                (-pw * 0.25, pd * 0.7), (-pw * 0.38, pd * 0.72), (-pw / 2, pd * 0.62), (-pw / 2, pd * 0.32), (-pw * 0.32, pd * 0.32),
+                (-pw * 0.32, 0.0)]
+    else:
+        prof = [(-pw / 2, 0.0), (pw / 2, 0.0), (pw / 2, pd * 0.7), (pw * 0.2, pd), (-pw / 2, pd), (-pw / 2, pd * 0.5),
+                (-pw * 0.25, pd * 0.5), (-pw * 0.25, 0.0)]
+    bm = bmesh.new()
+    L.bm_sweep(bm, path, [(-s_, v_) for s_, v_ in prof], closed=True, up=(0, -1, 0))
+    obj(bm, f"{name}_багет", coll, [m["frame_wood"] if kind == "дерево" else m["frame_plastic"]], grp, smooth=35)
+    inner_w, inner_h = W - 2 * pw + 0.012, H - 2 * pw + 0.012
+    zc = H / 2
+    glass_y = -pd * 0.3
+    cb = bmesh.new()
+    L.bm_box(cb, (-inner_w / 2, glass_y + 0.0012, zc - inner_h / 2), (inner_w / 2, glass_y + 0.0028, zc + inner_h / 2))
+    L.bm_box(cb, (-inner_w / 2, glass_y + 0.0028, zc - inner_h / 2), (inner_w / 2, glass_y + 0.0058, zc + inner_h / 2))
+    obj(cb, f"{name}_картинка_задник", coll, [m["paper"], m["cardboard"]], grp, smooth=30)
+    gb = bmesh.new()
+    if state != "разбито":
+        L.bm_box(gb, (-inner_w / 2, glass_y - 0.001, zc - inner_h / 2), (inner_w / 2, glass_y + 0.001, zc + inner_h / 2))
+    else:
+        # лучи трещин из точки удара и кольцо: секторы-осколки, двух нет, остальные чуть сдвинуты
+        P = V((-inner_w * 0.12, 0.0, zc + inner_h * 0.08))
+        n_r = 7
+        angs = sorted(rng.uniform(0, TAU) for _ in range(n_r))
+        rr = 0.055
+
+        def border(a):
+            dx, dz = math.cos(a), math.sin(a)
+            ts = []
+            for lim, d in ((inner_w / 2 - P.x, dx), (-inner_w / 2 - P.x, dx)):
+                if abs(d) > 1e-6 and lim / d > 0:
+                    ts.append(lim / d)
+            for lim, d in ((zc + inner_h / 2 - P.z, dz), (zc - inner_h / 2 - P.z, dz)):
+                if abs(d) > 1e-6 and lim / d > 0:
+                    ts.append(lim / d)
+            t = min(ts)
+            return V((P.x + dx * t, 0.0, P.z + dz * t))
+        missing = {1, n_r + 4}
+        k = 0
+        for i in range(n_r):
+            a0, a1 = angs[i], angs[(i + 1) % n_r] + (TAU if i == n_r - 1 else 0)
+            inner = [P] + [P + V((math.cos(a0 + (a1 - a0) * q / 4), 0, math.sin(a0 + (a1 - a0) * q / 4))) * rr for q in range(5)]
+            outer = [P + V((math.cos(a0 + (a1 - a0) * q / 4), 0, math.sin(a0 + (a1 - a0) * q / 4))) * rr for q in range(5)]
+            # внешний сектор: от кольца до края (по лучам — граница; углы рамки между лучами — точки границы по дуге)
+            far = [border(a0 + (a1 - a0) * q / 6) for q in range(7)]
+            for piece in (inner, outer[::-1] + far):
+                if k not in missing:
+                    jit = Matrix.Translation((rng.uniform(-0.001, 0.001), rng.uniform(-0.0015, 0.0), rng.uniform(-0.001, 0.001)))
+                    vs = [gb.verts.new(jit @ (V((p.x, glass_y - 0.001, p.z)))) for p in piece]
+                    vb = [gb.verts.new(jit @ (V((p.x, glass_y + 0.001, p.z)))) for p in piece]
+                    try:
+                        f0 = gb.faces.new(vs)
+                        f1 = gb.faces.new(vb[::-1])
+                        for q in range(len(vs)):
+                            gb.faces.new((vs[q], vs[(q + 1) % len(vs)], vb[(q + 1) % len(vs)], vb[q]))
+                        _ = (f0, f1)
+                    except ValueError:
+                        pass
+                k += 1
+    obj(gb, f"{name}_стекло", coll, [m["glass"]], grp, smooth=10)
+    hb = bmesh.new()
+    if hang and state != "упала":
+        # кольца на заднике, тросик к гвоздю; гвоздь — в стене
+        rings = []
+        for sx in (-1, 1):
+            p = V((sx * (W / 2 - pw), 0.004, H * 0.74))
+            lathe(hb, [(0.003, -0.0007), (0.0048, -0.0007), (0.0048, 0.0007), (0.003, 0.0007)], segs=12, origin=tuple(p), axis=(1, 0, 0),
+                  closed=True)
+            rings.append(p)
+        # тросик: из осей группы в осях корня — через матрицу группы
+        gm = Matrix.Translation(grp.location) @ grp.rotation_euler.to_matrix().to_4x4()
+        nail = V((0.0, -0.012, 0.0))
+        wire = bmesh.new()
+        pa, pb_ = gm @ rings[0], gm @ rings[1]
+        pipe(wire, [pa, nail + V((0, 0.0, -0.003)), pb_], 0.0007, segs=6, bend=0.004)
+        pipe(wire, [V((0, 0.002, 0)), V((0, -0.014, 0.0))], 0.0012, segs=8)
+        lathe(wire, [(0.0, 0.0), (0.0028, 0.0), (0.0028, -0.0008), (0.0, -0.001)], segs=14, origin=(0, -0.014, 0.0), axis=(0, -1, 0))
+        obj(wire, f"{name}_тросик_гвоздь", coll, [m["pin_metal"]], r, smooth=50)
+    if not hang:
+        L.bm_box(hb, (-0.02, 0.0005, H - pw - 0.01), (0.02, 0.0015, H - pw + 0.005))
+    if len(hb.verts):
+        obj(hb, f"{name}_крепёж", coll, [m["pin_metal"]], grp, smooth=50)
+    else:
+        hb.free()
+    return r
+
+
+ITEMS_B = [
+    ("Плакат советский", lambda c, m, at, rng: poster(c, m, at, rng, "ПЛ_плакат", 0.6, 0.9, "кнопки"), 0.75),
+    ("Плакат советский надорван", lambda c, m, at, rng: poster(c, m, at, rng, "ПЛ_плакат", 0.6, 0.9, "кнопки", "надорван"), 0.75),
+    ("Плакат советский угол", lambda c, m, at, rng: poster(c, m, at, rng, "ПЛ_плакат", 0.6, 0.9, "кнопки", "угол"), 0.75),
+    ("Плакат студенческий", lambda c, m, at, rng: poster(c, m, at, rng, "ПС_плакат", 0.42, 0.594, "скотч", amp=0.003), 0.55),
+    ("Плакат студенческий угол", lambda c, m, at, rng: poster(c, m, at, rng, "ПС_плакат", 0.42, 0.594, "скотч", "угол", 0.003), 0.55),
+    ("Вырезка", lambda c, m, at, rng: poster(c, m, at, rng, "ВР_вырезка", 0.21, 0.28, "скотч", amp=0.002), 0.35),
+    ("Календарь", lambda c, m, at, rng: calendar(c, m, at, rng), 0.45),
+    ("Таблица", lambda c, m, at, rng: chart(c, m, at, rng, False), 0.85),
+    ("Таблица сорвана", lambda c, m, at, rng: chart(c, m, at, rng, True), 0.95),
+    ("Чертёж", lambda c, m, at, rng: poster(c, m, at, rng, "ЧР_чертёж", 0.841, 0.594, "булавки", amp=0.003), 1.0),
+    ("Чертёж свернулся", lambda c, m, at, rng: poster(c, m, at, rng, "ЧР_чертёж", 0.841, 0.594, "булавки", "свернулся", 0.003), 1.0),
+    ("Картина", lambda c, m, at, rng: frame_picture(c, m, at, rng, "дерево", "висит"), 0.55),
+    ("Картина разбита", lambda c, m, at, rng: frame_picture(c, m, at, rng, "дерево", "разбито"), 0.55),
+    ("Картина упала", lambda c, m, at, rng: frame_picture(c, m, at, rng, "дерево", "упала"), 0.55),
+    ("Картина пластик", lambda c, m, at, rng: frame_picture(c, m, at, rng, "пластик", "висит"), 0.45),
+]
+
+
 # ---------------------------------------------------------------- состав группы А
 
 ITEMS_A = [
@@ -871,19 +1246,27 @@ ITEMS_A = [
 ]
 
 
+WALL_Y = 1.4          # стена студии (build_furniture.studio): у навесного корень — у неё
+# высота корня навесного: плакаты, календарь — верх листа; таблица и картины на гвозде — гвоздь; упавшая — пол
+TOP_Z = {"Таблица": 2.25, "Таблица сорвана": 2.25, "Картина": 1.85, "Картина разбита": 1.85, "Картина упала": 0.0,
+         "Картина пластик": 1.75, "Вырезка": 1.7, "Календарь": 1.75}
+
+
 def build(out: str) -> list:
     for ob in list(bpy.data.objects):
         bpy.data.objects.remove(ob)
-    top = L.collection("Партия3_А_ящики_вещи_v01")
     m = mats()
-    rng = random.Random(33)
     x = 0.0
     placed = []
-    for label, fn, width in ITEMS_A:
-        c = L.collection(label, top)
-        root = fn(c, m, (x + width / 2, 0.0, 0.0), rng)
-        placed.append((label, c, root))
-        x += width + 0.4
+    for top_name, items, wall in (("Партия3_А_ящики_вещи_v01", ITEMS_A, False), ("Партия3_Б_плакаты_картины_v01", ITEMS_B, True)):
+        top = L.collection(top_name)
+        rng = random.Random(33 if not wall else 34)
+        for label, fn, width in items:
+            c = L.collection(label, top)
+            at = (x + width / 2, WALL_Y, TOP_Z.get(label, 2.0)) if wall else (x + width / 2, 0.0, 0.0)
+            root = fn(c, m, at, rng)
+            placed.append((label, c, root))
+            x += width + 0.4
     B.studio(L.collection("Студия"), x)
     for scr in bpy.data.screens:
         for area in scr.areas:
@@ -899,8 +1282,7 @@ def build(out: str) -> list:
 
 def preview(placed: list, folder: str, only: set | None = None) -> None:
     wall = bpy.data.objects.get("студия_стена")
-    if wall:
-        wall.hide_render = True
+    wall_labels = {lb for lb, _, _ in ITEMS_B}
     os.makedirs(folder, exist_ok=True)
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = 900, 700
@@ -909,6 +1291,8 @@ def preview(placed: list, folder: str, only: set | None = None) -> None:
     for i, (label, coll, root) in enumerate(placed):
         if only and i not in only:
             continue
+        if wall:
+            wall.hide_render = label not in wall_labels
         pts = []
         for ob in coll.all_objects:
             if ob.type == "MESH" and not ob.hide_render:
