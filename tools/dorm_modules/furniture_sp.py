@@ -99,16 +99,18 @@ def open_and_meshes(name: str) -> list[str]:
 
 
 def build_and_export(name: str, parts: list, out_dir: Path, marker: str, save: bool, wear: bool = False,
-                     wear_args: str = "") -> None:
+                     wear_args: str = "", print_key: str | None = None) -> None:
     """Стек отделок (sp_finish.build_set), печать этапа 1 слоем сверху (если есть) — или (wear) печать и группа
-    «Этап 2 — износ» (sp_furniture_wear.py) над отделкой; выгрузка карт, сохранение."""
+    «Этап 2 — износ» (sp_furniture_wear.py) над отделкой; выгрузка карт, сохранение. print_key — другой набор печати
+    того же предмета (вариант картинки: prints/uv/<print_key>_print_*)."""
     px_mm = RES_ITEM.get(name, RES) / ITEMS[name] * 0.55
     top = ([f"print({WEAR}.build(set_name, r'{SRC.as_posix()}', '{name}', {ITEMS[name]}{wear_args}))"] if wear else [
         "st = sp_lib.stack_by_name(set_name)",
         "for n in L.get_root_layer_nodes(st):",
         "    if n.get_name() == sp_dorm_wear.PRINT:",
         "        L.delete_node(n)",
-        f"sp_dorm_wear._print_layer(set_name, r'{SRC.as_posix()}', '{name}', L.InsertPosition.from_textureset_stack(st))"])
+        f"sp_dorm_wear._print_layer(set_name, r'{SRC.as_posix()}', '{print_key or name}', "
+        "L.InsertPosition.from_textureset_stack(st))"])
     code = "\n".join([
         "import json",
         f"sys.path.insert(0, r'{HERE}') if r'{HERE}' not in sys.path else None",

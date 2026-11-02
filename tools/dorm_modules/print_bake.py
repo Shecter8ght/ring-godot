@@ -4,7 +4,8 @@
   "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<…_uv_v01.blend>" --python-exit-code 1 \
       --python tools/dorm_modules/print_bake.py -- <папка выхода> <модуль развёртки: found_lights_uv|clutter_uv> [вещь …]
 
-Выход: <папка>/<вещь>_pos.exr, _nrm.exr, _part.exr (R = номер детали) и <вещь>_parts.json (номер → имя сетки).
+Выход: <папка>/<вещь>_pos.exr, _nrm.exr, _part.exr (R = номер детали), у листов со слоем «Печать» — _prm.exr
+(развёртка печати), и <вещь>_parts.json (номер → имя сетки).
 Запекание Cycles на процессоре, эмиссия, 2048, поле 8 пикселей.
 """
 import importlib
@@ -47,7 +48,13 @@ def bake_item(coll, game, out_dir, res=RES) -> None:
     nt.links.new(info.outputs["Object Index"], comb.inputs["X"])
     img_node = nt.nodes.new("ShaderNodeTexImage")
     nt.nodes.active = img_node
-    for kind, sock in (("pos", geo.outputs["Position"]), ("nrm", geo.outputs["Normal"]), ("part", comb.outputs["Vector"])):
+    kinds = [("pos", geo.outputs["Position"]), ("nrm", geo.outputs["Normal"]), ("part", comb.outputs["Vector"])]
+    # развёртка печати листа (слой «Печать», items3_uv.py): картинка кладётся по ней; у изнанки −1
+    if any("Печать" in ob.data.uv_layers for ob in objs):
+        prm = nt.nodes.new("ShaderNodeUVMap")
+        prm.uv_map = "Печать"
+        kinds.append(("prm", prm.outputs["UV"]))
+    for kind, sock in kinds:
         img = bpy.data.images.new(f"{game}_{kind}", res, res, float_buffer=True, alpha=False)
         img.colorspace_settings.name = "Non-Color"
         img_node.image = img

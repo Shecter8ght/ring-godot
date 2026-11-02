@@ -279,6 +279,17 @@ python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # м
                                                               # чертежи), тетради (школьная — закрыта, раскрыта, стопкой; общая), учебники в твёрдом
                                                               # переплёте (закрыт, раскрыт, стопкой, ряд стоя)
                                                               # → RING_Dorm_Items_v01.blend
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Items_v01.blend | …_uv_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/items3_uv.py [-- набор …]
+                                                              # вещи партии 3, текстуры этап 1: развёртка 33 наборов (подвижное и прячущееся — сетки «<слот>__<метка>»;
+                                                              # бумага — слой «Печать» из формы, изнанка мельче; сумка — выкройкой; доски — волокнами вдоль U, картон — гофрой;
+                                                              # верх клавиш ×3, корешки ×2,5; тонкие листы лицом наружу) и FBX → _asset_src/dorm_items3/sp; на файле развёртки —
+                                                              # переделка отдельных наборов. Карты геометрии — print_bake.py (items3_uv; у листов ещё «prm»), оси книг
+                                                              # и тетрадей — items3_frames.py; печать — python -X utf8 tools/dorm_modules/items3_prints.py [набор …]
+                                                              # (картинки владельца RING_Dorm_Items/картинки по развёртке листа и по лицу, трафареты, коробка,
+                                                              # календарь, правила, таблица Менделеева, страницы, подписи клавиш, марки); Painter — python -X utf8
+                                                              # tools/dorm_modules/items3_sp.py projects|stack|variants|prints (свой экземпляр, FINISH_SP_JOBS=
+                                                              # _asset_src/dorm_items3/sp_jobs); просмотр — items3_review.py -- <карты> <выход.blend> на файле
+                                                              # развёртки (состояния формы — в позах формы, варианты — копиями)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);

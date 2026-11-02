@@ -53,6 +53,14 @@
 - Red Bricks 04, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/red_bricks_04 — кирпич под отвалившейся штукатуркой (brick_*)
 - Oak Veneer 01, Jenelle van Heerden, CC0 1.0, https://polyhaven.com/a/oak_veneer_01 — дуб паркетных планок (floor_wood)
 - Painted Wood 008 A, ambientCG, CC0 1.0, https://ambientcg.com/view?id=PaintedWood008A — фактура и трещины краски на коробках, полотнах и окнах модулей (painted_wood_*, перекрашивается шейдером); сырьё — `_asset_src/dorm_textures/PaintedWood008A`
+- Wood 079, ambientCG, CC0 1.0, https://ambientcg.com/view?id=Wood079 — волокна пиленой сосны на досках военных ящиков
+  (вещи общежития, партия 3: отделки PT-WD-OLV, WD-PIN-RAW, WD-PIN-END, запечены в карты Painter); сырьё —
+  `_asset_src/dorm_textures/Wood079`
+- Cardboard 002, ambientCG, CC0 1.0, https://ambientcg.com/view?id=Cardboard002 — гофрокартон коробки (вещи общежития,
+  партия 3: отделка CB-KRF-MAT, запечена в карты Painter); сырьё — `_asset_src/dorm_textures/Cardboard002`
+- Картинки плакатов, вырезок, календаря, учебной таблицы, чертежа, картин, обложек учебников и тетрадей (вещи
+  общежития, партия 3) — сгенерированы владельцем проекта в ChatGPT по промтам `RING_Dorm_Items/картинки/ПРОМТЫ.md`,
+  собственные; названия, издательства и марки вымышлены
 - Модули `assets/models/dorm` (коробка двери, полотно, окно, батарея, марши, ограждения, повороты поручня) — свои, Blender (tools/dorm_modules); краска батарей и ограждения — та же green_metal_rust (Poly Haven, CC0), поручень — Sapele Veneer (Poly Haven, CC0), перекрашенные шейдером
 - Следы `assets/textures/dorm_decals` (кровь, грязь, пыль, копоть) — из альфа-масок владельца `E:/Models Blender/Маски_АЛЬФА` (22_Кровь, 03, 04, 06, 21; маски не изменены, цвет и рельеф — tools/dorm_modules/gen_dorm_decals.py)
 - Оставленный свет `assets/models/dorm/found_*` (фонарь, налобник, химсвет, кемпинговый фонарь, свечи, мигалка) — свои, Blender (tools/dorm_modules/build_found_lights.py)

@@ -731,6 +731,26 @@ def duffel(coll, m, at, rng, half: bool = False):
         for i in range(n_ring):
             k = (i + 1) % n_ring
             bm.faces.new((prev[k], prev[i], c) if flip else (prev[i], prev[k], c))
+    # развёртка выкройкой до симуляции (метры): труба — по обхвату и длине, торцы — плоско; ткань тянется вместе с ней,
+    # как сшитые полотнища (переплетение не рвётся по складкам)
+    uv = bm.loops.layers.uv.new("UVMap")
+    arc = [0.0]
+    for i in range(n_ring):
+        arc.append(arc[-1] + (rings[0][(i + 1) % n_ring].co - rings[0][i].co).length)
+    ring_of = {v: (j, i) for j, ring in enumerate(rings) for i, v in enumerate(ring)}
+    for f in bm.faces:
+        tube = all(v in ring_of for v in f.verts)
+        idx = [ring_of[v][1] for v in f.verts] if tube else []
+        wrap = tube and max(idx) == n_ring - 1 and min(idx) == 0
+        for lp in f.loops:
+            v = lp.vert
+            if tube:
+                i = ring_of[v][1]
+                lp[uv].uv = (arc[n_ring if wrap and i == 0 else i], v.co.x)
+            else:
+                # торцы: у левого — зеркально, чтобы лицо читалось снаружи; сдвиг — в стороне от трубы
+                s = -1.0 if v.co.x < 0 else 1.0
+                lp[uv].uv = (arc[-1] + 0.2 + R0 + s * v.co.y, (0.0 if s < 0 else 0.4) + v.co.z)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new("СС_ткань")
     bm.to_mesh(me)
@@ -875,8 +895,13 @@ def duffel(coll, m, at, rng, half: bool = False):
 
 def sheet(bm, w: float, h: float, step: float, place, keep=None) -> None:
     """Лист сеткой (шаг step): place(x, z) → точка; x — поперёк (−w/2…w/2), z — от верха вниз (0…−h); keep(x, z) —
-    оставить ли клетку (рваный край)."""
+    оставить ли клетку (рваный край). Развёртка печати — слой «Печать» по самому листу (u слева направо, v снизу вверх,
+    если смотреть на лицо): картинка ложится без искажений и на завёрнутом угле, и на рулоне. Основной слой «UVMap»
+    создаётся раньше — его пишет finish_bm (активный — первый)."""
     nx, nz = max(2, round(w / step)), max(2, round(h / step))
+    if bm.loops.layers.uv.get("UVMap") is None:
+        bm.loops.layers.uv.new("UVMap")
+    pr = bm.loops.layers.uv.get("Печать") or bm.loops.layers.uv.new("Печать")
     vs = {}
 
     def vert(i, j):
@@ -889,7 +914,10 @@ def sheet(bm, w: float, h: float, step: float, place, keep=None) -> None:
             xc, zc = -w / 2 + w * (i + 0.5) / nx, -h * (j + 0.5) / nz
             if keep is not None and not keep(xc, zc):
                 continue
-            bm.faces.new((vert(i, j), vert(i + 1, j), vert(i + 1, j + 1), vert(i, j + 1)))
+            ij = ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1))
+            f = bm.faces.new([vert(a, b) for a, b in ij])
+            for lp, (a, b) in zip(f.loops, ij):
+                lp[pr].uv = (a / nx, 1.0 - b / nz)
 
 
 def buckle(x: float, z: float, w: float, h: float, pins: list, amp: float, seed: float) -> float:

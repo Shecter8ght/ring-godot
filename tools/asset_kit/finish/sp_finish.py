@@ -311,7 +311,42 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
             sp_lib.mask_proc(lay, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft",
                              {"Balance": 0.55, "Contrast": 0.3}, scale=1.4)
             n = lay
+        elif sp["type"] == "photo":
+            # фотоматериал CC0 по развёртке (сырьё — sp["set"]: <путь>_Color/_Roughness/_Displacement.jpg): тон
+            # и волокна — наложением на основу (свой оттенок отделки остаётся), рельеф — картой высоты, блеск — картой
+            # шероховатости; волокна идут вдоль U (у досок развёртка выровнена по длине), плитка образца — mm
+            stem = f"{ROOT}/{sp['set']}"
+            lay = L.insert_fill(above(n))
+            lay.set_name(f"{tag} · фото {sp['set'].rsplit('/', 1)[-1]}")
+            chans = {CH.BaseColor: _bitmap(f"{stem}_Color.jpg")}
+            if sp.get("rough"):
+                chans[CH.SpecularRoughness] = _bitmap(f"{stem}_Roughness.jpg")
+            if sp.get("height"):
+                chans[CH.Height] = _bitmap(f"{stem}_Displacement.jpg")
+            lay.active_channels = set(chans)
+            for c, src in chans.items():
+                lay.set_source(c, src)
+            lay.set_blending_mode(L.BlendingMode.Overlay, CH.BaseColor)
+            lay.set_opacity(sp.get("color", 0.5), CH.BaseColor)
+            if sp.get("rough"):
+                lay.set_opacity(sp["rough"], CH.SpecularRoughness)
+            if sp.get("height"):
+                lay.set_blending_mode(L.BlendingMode.Overlay, CH.Height)
+                lay.set_opacity(sp["height"], CH.Height)
+            sp_lib.uvscale(lay, res / max(sp.get("mm", 500.0) * px_mm, 1.0))
+            n = scope(lay)
     return n
+
+
+def _bitmap(path):
+    """Картинка ресурсом проекта (имя — с отметкой времени файла, чтобы перезаписанная карта не бралась прежней)."""
+    import substance_painter.resource as R
+    stem = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    name = f"{stem}_{int(os.path.getmtime(path))}"
+    for r in R.search("u:texture"):
+        if r.identifier().name == name:
+            return r.identifier()
+    return R.import_project_resource(path, R.Usage.TEXTURE, name=name).identifier()
 
 
 def build_set(set_name, parts, px_mm, bbox_mm=170.0, sharpen=0.3):
