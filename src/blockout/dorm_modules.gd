@@ -22,6 +22,8 @@ const FLIGHT_AXIS_TO_GAP: float = 0.9
 const PALETTE_SLOTS: Dictionary = {"Побелка_потолок": ["ceiling"], "Ступени_мозаика": ["stair_tread", "slab"]}
 const FACADE_HALF: float = 0.32
 const SILL_ABOVE_FLOOR: float = 0.85
+## Модуль окна — на 3 мм выше: верх его подоконника совпадал с верхом кладки под окном и мерцал.
+const SILL_LIFT: float = 0.003
 ## Черновой проём коробки M01 (снят с модели: наружная грань добора 0,622 от оси, верх 2,452 от пола).
 const DOOR_ROUGH_HALF: float = 0.622
 const DOOR_ROUGH_TOP: float = 2.452
@@ -198,7 +200,7 @@ func place(target: Node3D) -> void:
 	for wid: String in windows:
 		var w: Dictionary = windows[wid]
 		var at: Vector3 = _vec(w.at)
-		var floor_at: Vector3 = Vector3(at.x, at.y - SILL_ABOVE_FLOOR, at.z)
+		var floor_at: Vector3 = Vector3(at.x, at.y - SILL_ABOVE_FLOOR + SILL_LIFT, at.z)
 		var room: Vector3 = _room_dir(w)
 		_instance(root, "window", wid, floor_at, room)
 		if radiator_windows.has(wid):

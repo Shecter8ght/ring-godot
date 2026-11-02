@@ -276,7 +276,8 @@ def make_plan():
             w,dh,thick=item["width"],item["height"],item["thickness"]
             lo,hi=along-w/2,along+w/2
             uid=item["uid"]
-            for aa in [lo-.0125,hi+.0125]:
+            # обкладка на 3 мм в проёме: её грань не совпадает с откосом стены (совпавшие плоскости мерцали у входа)
+            for aa in [lo-.0095,hi+.0095]:
                 strip(key,uid+"_lining",aa-.0125,aa+.0125,constant,thick,y,y+dh,axis,"frame","door_frames")
             for face in [-1,1]:
                 depth=constant+face*(thick/2+.0125)
@@ -316,7 +317,8 @@ def make_plan():
                 strip(key,uid+"_reveal",a-.009,a+.009,(constant+inside)/2,EXT/2,bottom,bottom+h,axis,"reveal","window_reveals")
             strip(key,uid+"_reveal_top",along-w/2,along+w/2,(constant+inside)/2,EXT/2,bottom+h-.018,bottom+h,axis,"reveal","window_reveals")
             edge=inside+inward*.28
-            strip(key,uid+"_sill",along-w/2-.08,along+w/2+.08,(constant+edge)/2,abs(edge-constant),bottom-.04,bottom,axis,"reveal","window_sills")
+            # верх подоконника на 3 мм выше кладки под окном: совпавшие плоскости мерцали
+            strip(key,uid+"_sill",along-w/2-.08,along+w/2+.08,(constant+edge)/2,abs(edge-constant),bottom-.04,bottom+.003,axis,"reveal","window_sills")
             base=bottom-SILL
             for rib in range(10):
                 cc=along-.45+rib*.1

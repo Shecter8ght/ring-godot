@@ -189,7 +189,7 @@ func create_controls(parent: Control) -> void:
 	var panel: ColorRect = ColorRect.new()
 	panel.color = Color(0.03,0.04,0.05,0.86)
 	panel.position = Vector2(18,146)
-	panel.size = Vector2(1180,154)
+	panel.size = Vector2(1420,154)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(panel)
 	for i: int in range(config.cases.size()):
@@ -227,7 +227,8 @@ func create_controls(parent: Control) -> void:
 	parent.add_child(night_toggle)
 	tarkov_toggle = CheckButton.new()
 	tarkov_toggle.text = "F9 · Как в Таркове (зоны окружения)"
-	tarkov_toggle.position = Vector2(960,234)
+	# правее подписи «холодных коридоров»: на 960 текст двух переключателей наезжал друг на друга
+	tarkov_toggle.position = Vector2(1070,234)
 	tarkov_toggle.focus_mode = Control.FOCUS_NONE
 	tarkov_toggle.button_pressed = tarkov
 	tarkov_toggle.toggled.connect(set_tarkov)

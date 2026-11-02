@@ -28,7 +28,7 @@ var fov_h: float = 80.0
 var fov_slider: HSlider
 var fov_label: Label
 var lighting: Node3D
-## F10 — весь интерфейс стенда скрыт (подсказки, панель света, план, подписи в мире): смотреть на свет без помех.
+## F10 или U — весь интерфейс стенда скрыт (подсказки, панель света, план, подписи в мире): смотреть на свет без помех.
 var hud_hidden: bool = false
 var labels_before: bool = true
 ## L — расстановка оставленного людьми света по месту (только прогулка).
@@ -84,7 +84,7 @@ func _ready() -> void:
 					break
 			print("dorm: стартовый свет · ",plan.environment.cases[int(lighting.get("case_index"))].label)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 скрыть интерфейс · L расставить свет · Esc мышь / FOV 60–110°")
+		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 / U скрыть интерфейс · L расставить свет · Esc мышь / FOV 60–110°")
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		walker.set("is_probe", true)
@@ -145,13 +145,18 @@ func _ui() -> void:
 		button.size = Vector2(65, 32)
 		button.pressed.connect(_set_fov.bind(float(preset)))
 		root.add_child(button)
+	# подсказка внизу переносится по ширине окна: одной строкой она уходила за край, и «скрыть интерфейс» не было видно
 	var help: Label = Label.new()
-	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	help.position = Vector2(28, -85)
-	help.text = "WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения"
-	help.text += " · F1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников · F8 ночная луна"
-	help.text += " · F9 как в Таркове · F10 скрыть интерфейс · L расставить свет"
-	help.add_theme_font_size_override("font_size", 18)
+	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	help.offset_left = 28
+	help.offset_right = -28
+	help.offset_bottom = -14
+	help.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	help.text = "F10 или U — скрыть весь интерфейс (для записи) · WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)"
+	help.text += "\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения · L расставить свет"
+	help.text += "\nF1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников · F8 ночная луна · F9 как в Таркове"
+	help.add_theme_font_size_override("font_size", 16)
 	help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	help.add_theme_constant_override("shadow_offset_x", 1)
 	help.add_theme_constant_override("shadow_offset_y", 1)
@@ -169,7 +174,7 @@ func _ui() -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(walker) or not is_instance_valid(status):
 		return
-	title.text = "Общежитие · этап 1 · %d: %s" % [current, String(plan.locations[current-1].label)]
+	title.text = "Общежитие · этап 1 · %d: %s · F10 / U — скрыть интерфейс" % [current, String(plan.locations[current-1].label)]
 	status.text = "x %.2f · y %.2f · z %.2f · глаз 1,62 м · поле зрения %.0f° · %d к/с%s" % [
 		walker.position.x,walker.position.y,walker.position.z,fov_h,Engine.get_frames_per_second(),
 		" · полёт" if bool(walker.get("flight")) else ""]
@@ -214,7 +219,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			lighting.call("set_night_exterior",not bool(lighting.get("night_exterior")))
 		KEY_F9:
 			lighting.call("set_tarkov",not bool(lighting.get("tarkov")))
-		KEY_F10:
+		KEY_F10, KEY_U:
 			_toggle_hud()
 		KEY_L:
 			placer.call("toggle")
