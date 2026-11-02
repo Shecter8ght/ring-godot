@@ -35,6 +35,14 @@ light_energy = 1.15
 shadow_enabled = true
 directional_shadow_max_distance = 150.0
 
+[node name="Floor5" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "Floor5"
+
+[node name="FireEscapes" type="Node3D" parent="."]
+script = ExtResource("1")
+section_id = "FireEscapes"
+
 [node name="Site" type="Node3D" parent="."]
 script = ExtResource("1")
 section_id = "Site"
@@ -54,10 +62,6 @@ section_id = "Floor3"
 [node name="Floor4" type="Node3D" parent="."]
 script = ExtResource("1")
 section_id = "Floor4"
-
-[node name="Floor5" type="Node3D" parent="."]
-script = ExtResource("1")
-section_id = "Floor5"
 
 [node name="CentralStair" type="Node3D" parent="."]
 script = ExtResource("1")

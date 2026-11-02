@@ -14,7 +14,7 @@ func _draw() -> void:
 		return
 	var floor_index: int = 0
 	var levels: Array = plan.scale.floor_y
-	for i: int in range(3):
+	for i: int in range(levels.size()):
 		if walker.position.y >= float(levels[i]) - 0.2:
 			floor_index = i
 	var floor_y: float = float(levels[floor_index])

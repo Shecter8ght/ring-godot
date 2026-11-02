@@ -309,17 +309,22 @@ func _verify() -> void:
 	# Размер капсулы, ходьба, снап и подъём на ступень — из настоящего StudyWalker / Balance.
 	_check("Собственный свет редакции 6.1 загружен, шесть вариантов",lighting!=null and lighting.get("environment") is Environment and plan.environment.cases.size()==6,
 		{"default":plan.environment.default,"author":plan.environment.author})
-	var rooms: Array[int] = [0,0,0]
+	# Владелец 2026-11-02: открыты все пять этажей, жилые 1–4, пятый — технический (docs/design/dorm_routes.md).
+	var rooms: Array[int] = [0,0,0,0,0]
+	var tech: int = 0
 	var spaces: int = 0
 	for space: Dictionary in plan.spaces:
 		if bool(space.open):
 			spaces += 1
 			if String(space.kind)=="room":
 				rooms[int(space.floor)-1] += 1
-	_check("Пять этажей, открыты три; по 8–10 жилых комнат",plan.scale.floor_y.size()==5 and rooms.min()>=8 and rooms.max()<=10,{"rooms":rooms,"open_spaces":spaces})
+			tech += 1 if String(space.kind)=="tech" else 0
+	var living: Array[int] = rooms.slice(0,4)
+	_check("Пять этажей открыты: 1–4 по 8–10 жилых комнат, 5-й технический",plan.scale.floor_y.size()==5 and living.min()>=8 and living.max()<=10 and rooms[4]==0 and tech>=10,
+		{"rooms":rooms,"tech":tech,"open_spaces":spaces})
 	_check("Капсула, глаз и скорость соответствуют игроку",is_equal_approx(camera.position.y,Balance.ADS_EYE.stand),
 		{"capsule_height":Balance.STANCE_HEIGHT.stand,"capsule_radius":Balance.CAPSULE_RADIUS,"eye":camera.position.y,"walk_m_s":Balance.PLAYER_WALK_SPEED,"jump":false,"flight":false})
-	for f: int in range(3):
+	for f: int in range(5):
 		var y: float = float(plan.scale.floor_y[f])
 		var probe_x: float = float(plan.checks.ceiling_probe_x)
 		var ceiling_hit: Dictionary = _ray(Vector3(probe_x,y+0.1,0),Vector3(probe_x,y+8,0))
@@ -431,7 +436,7 @@ func _verify_details() -> void:
 	var min_width: float = INF
 	var annex_portals: int = 0
 	for portal: Dictionary in plan.portals:
-		if int(portal.floor)>3 or String(portal.kind)!="transverse":
+		if String(portal.kind)!="transverse":
 			continue
 		var foot: Vector3 = _vec(portal.at)
 		annex_portals += 1 if String(portal.get("travel_axis","x"))=="z" else 0
@@ -447,7 +452,7 @@ func _verify_details() -> void:
 			portal_errors.append(String(portal.id))
 	_check("Порталы: от 2,6 м под балкой и 3,0 м между пилястрами с плинтусами",portal_errors.is_empty(),
 		{"minimum_height_m":min_height,"minimum_width_m":min_width,"failed":portal_errors})
-	_check("В хозкрыле по два портала на каждом открытом этаже",annex_portals==6,{"annex_portals":annex_portals})
+	_check("В хозкрыле по два портала на каждом открытом этаже",annex_portals==10,{"annex_portals":annex_portals})
 	var bad_leaves: Array[String] = []
 	var poses: Dictionary = {}
 	var grilles: int = 0

@@ -193,8 +193,23 @@ def empty(r: Room) -> None:
         r.add("furn_stool", rng.uniform(1.0, r.W - 1.0), 2.0, "room", yaw_add=rng.uniform(0, 90))
 
 
+def breach(r: Room) -> None:
+    """Комната с проломом (docs/design/dorm_routes.md): посередине или у стены x1 — дыра в полу или скат под дырой в
+    потолке, путь вдоль стены x0 свободен. Каркас кровати без матраса — у стены x1, если рядом с дырой хватает места."""
+    free = r.W
+    for b in r.breaches:
+        x0, _, x1, _ = b["hole"]
+        half = max(b.get("width", 0.0), x1 - x0) / 2
+        cx = b["start"][0] if "start" in b else (x0 + x1) / 2
+        free = min(free, r.x1 - (cx + half))
+    if free >= 1.1:
+        r.bed("furn_bed", "x1", mattress=False, variant="EN-DGR-SAT")
+    if r.rng.random() < 0.6:
+        r.add("furn_stool", 0.7, 1.6, "room", tilt=-90.0, yaw_add=r.rng.uniform(0, 360))
+
+
 STATES = {"жилая": lived, "разграбленная": looted, "сгоревшая": burned, "баррикада у окна": barricade,
-          "пустая с матрасами": empty}
+          "пустая с матрасами": empty, "пролом": breach}
 
 
 def main() -> None:
@@ -204,6 +219,7 @@ def main() -> None:
         if s.get("kind") != "room":
             continue
         r = Room(s)
+        r.breaches = [b for b in plan.get("breaches", []) if s["id"] in (b["room_below"], b["room_above"])]
         STATES[s["state"]](r)
         items += r.items
         clears += r.clear()

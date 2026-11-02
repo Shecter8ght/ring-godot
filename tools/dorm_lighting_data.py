@@ -44,12 +44,13 @@ def add_lighting(p):
 
     stations=sorted(a["at"][0] for a in p["portals"] if a["floor"]==1 and a["kind"]=="transverse" and a.get("travel_axis","x")=="x")
     cuts=[0,*stations,p["main_rect"][2]]
-    for f in range(3):
+    # Все пять этажей открыты (владелец 2026-11-02); на техэтаже горит только каждая третья лампа коридора.
+    for f in range(5):
         key=f"Floor{f+1}"
         y,h=levels[f],heights[f]
         for i in range(0,len(cuts)-1,2):
             xx=(cuts[i]+cuts[i+1])/2
-            on=(i//2+f)%3!=1
+            on=(i//2+f)%3!=1 if f<4 else (i//2)%3==0
             lamp("main_corridor",key,[xx,y+h-.22,0],2.0,4.6,on,on=on)
         for i,zz in enumerate([-10.2,-18.6,-27.0]):
             lamp("annex_corridor","NorthAnnex",[41.71,y+h-.22,zz],1.8,4.5,True,on=(i+f)%3!=0)
@@ -86,8 +87,6 @@ def add_lighting(p):
     # Широкий источник в плоскости окна приближает рассеянный свет неба.
     # Короткая дальность и тени стен сохраняют тёмную глубину комнаты и закрытые углы.
     for w in p["windows"]:
-        if w["floor"]>3:
-            continue
         x,y,z=w["at"]
         axis=w["axis"]
         inward=(-1 if z>0 else 1) if axis=="z" else (-1 if x>p["main_rect"][2] else 1)
@@ -121,8 +120,9 @@ def add_lighting(p):
             "overcast":{"label":"Пасмурный день","sun_rotation":[-40,145,0],"sun_energy":0.,"sun_color":"ffffff",
                         "sky_top":"748695","sky_horizon":"c1c7c9","background_energy":.85,"ambient":.22,"exposure":1.25,"window_energy":1.15}},
         "sdfgi":{"min_cell_size":.12,"cascades":4,"energy":2.4,"bounce_feedback":.65,"normal_bias":1.,"probe_bias":1.},
+        # Объёмы VoxelGI — жилые этажи 1–4 (восемь: больше Forward+ разом не рисует); техэтаж — без них.
         "voxel":{"subdiv":2,"energy":1.05,"bias":.3,"normal_bias":.5,"interior":False,"diffuse_proxy":True,"volumes":[
-            volume for f in range(3) for volume in [
+            volume for f in range(4) for volume in [
                 {"id":f"floor_{f+1}","at":[21.705,levels[f]+(heights[f]+.099)/2,0],"size":[43.85,heights[f]+.101,18.2],
                  "cache":f"res://data/blockouts/dorm_voxel/floor_{f+1}.res"},
                 {"id":f"annex_{f+1}","at":[38.655,levels[f]+(heights[f]+.099)/2,-24.15],"size":[9.95,heights[f]+.101,30.14],
@@ -139,7 +139,7 @@ def add_lighting(p):
                    "fog":True,"fog_density":0.,"fog_length":32.,"fog_anisotropy":.15,"sun_fog_energy":8.,
                    "dust_density":.025,"dust_volumes":[
                        {"id":f"dust_{part}_{f+1}","at":[cx,levels[f]+heights[f]/2,cz],"size":[sx,heights[f]-.1,sz]}
-                       for f in range(3) for part,cx,cz,sx,sz in [("main",21.705,0,43.4,17.75),("annex",38.655,-24.26,9.5,29.47)]],
+                       for f in range(5) for part,cx,cz,sx,sz in [("main",21.705,0,43.4,17.75),("annex",38.655,-24.26,9.5,29.47)]],
                    "post":True,"tonemap_mode":2,"tonemap_name":"Filmic",
                    "saturation":.88,"sharpen":.5,"grain":.003,"vignette":.15,
                    "lut":[[0,0,0],[.15,.175,.20],[.46,.485,.50],[.80,.81,.79],[1.,.99,.965]]},

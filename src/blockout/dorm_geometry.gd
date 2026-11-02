@@ -422,7 +422,10 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		"rail": "444a50", "sealed": "555b60", "ground": "656b66", "paving": "85898b", "tree": "646b67", "glass": "88969e",
 		"mattress": "a39d89", "wood": "766449", "ceramic": "d5d9ce", "basin": "8d9996", "mirror": "f0f0ed",
 		"ceiling":"777d83", "skirting":"4d554d", "reveal":"dfe1d9", "radiator":"c0c6bc",
-		"door_green":"596350", "door_wood":"75634f", "panel":"656a65", "fire_cabinet":"824b43"}
+		"door_green":"596350", "door_wood":"75634f", "panel":"656a65", "fire_cabinet":"824b43",
+		# вертикальные пути и техэтаж (docs/design/dorm_routes.md): сталь пожарных лестниц и стремянок, обломки
+		# под проломами, короба, трубы и баки 5-го этажа — серые заглушки до моделей Blender
+		"steel_stair":"4f5559", "rubble":"8a8579", "duct":"9a9fa2", "pipe":"5d6366", "tank":"6f7a74"}
 	for key: String in colors:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = Color(String(colors[key]))

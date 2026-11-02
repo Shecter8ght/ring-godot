@@ -37,6 +37,42 @@ DOOR_W, DOOR_H = 1.17, 2.415
 WINDOW_W = 2 * .82 * 1.15 + .21
 SILL = .85
 STATES = ["жилая", "разграбленная", "сгоревшая", "баррикада у окна", "пустая с матрасами"]
+# Вертикальные пути (владелец 2026-11-02, docs/design/dorm_routes.md): дыра в перекрытии этажа floor (номер
+# этажа, в полу которого она) — прямоугольник x0, z0, x1, z1; скат под ней — от start до end по оси комнаты
+# (куча обломков / штабель мебели; в блокауте ступенями с наклонной коллизией, не круче 40°), у люков —
+# стальная стремянка 45°; провал С1 — без ската, внизу невысокая куча (наверх не забраться).
+BREACHES = [
+    {"id": "П1", "kind": "rubble", "floor": 2, "room_below": "f1_room_1_2", "room_above": "f2_room_1_2",
+     "hole": [9.885, 4.5, 11.385, 7.9], "start": [10.635, 2.9], "end": [10.635, 7.9], "width": 1.4},
+    {"id": "П2", "kind": "rubble", "floor": 3, "room_below": "f2_room_-1_5", "room_above": "f3_room_-1_5",
+     "hole": [24.855, -7.1, 26.355, -3.65], "start": [25.605, -2.9], "end": [25.605, -7.1], "width": 1.4},
+    {"id": "П3", "kind": "furniture", "floor": 4, "room_below": "f3_room_1_7", "room_above": "f4_room_1_7",
+     "hole": [36.1, 3.75, 37.6, 7.1], "start": [36.85, 2.9], "end": [36.85, 7.1], "width": 1.3},
+    {"id": "П4", "kind": "ladder", "floor": 5, "room_below": "f4_storage_-1_6", "room_above": "f5_storage_-1_6",
+     "hole": [32.0, -6.3, 33.2, -3.35], "start": [32.6, -2.9], "end": [32.6, -6.3], "width": 1.0},
+    {"id": "Л", "kind": "ladder", "floor": 6, "room_below": "f5_storage_1_0", "room_above": "roof",
+     "hole": [2.2, 3.4, 3.4, 6.4], "start": [2.8, 3.0], "end": [2.8, 6.4], "width": 1.0},
+    {"id": "С1", "kind": "drop", "floor": 4, "room_below": "f3_room_-1_3", "room_above": "f4_room_-1_3",
+     "hole": [15.3, -6.2, 17.0, -4.4]},
+]
+BREACH_ROOMS = {b[k] for b in BREACHES for k in ("room_below", "room_above") if b[k] != "roof"}
+
+
+def subtract(rect, holes):
+    """Прямоугольник без дыр — набор прямоугольников (перекрытие с проломами и люками)."""
+    out = [rect]
+    for h in holes:
+        nxt = []
+        for x0, z0, x1, z1 in out:
+            hx0, hz0, hx1, hz1 = max(x0, h[0]), max(z0, h[1]), min(x1, h[2]), min(z1, h[3])
+            if hx0 >= hx1 or hz0 >= hz1:
+                nxt.append([x0, z0, x1, z1])
+                continue
+            for r in ([x0, z0, hx0, z1], [hx1, z0, x1, z1], [hx0, z0, hx1, hz0], [hx0, hz1, hx1, z1]):
+                if r[2] - r[0] > .001 and r[3] - r[1] > .001:
+                    nxt.append(r)
+        out = nxt
+    return out
 
 
 def rounded(v):
@@ -73,7 +109,8 @@ def make_plan():
          "stair_core": {"rect": [SC0, -FACADE, SC1, -ROOM_EDGE], "front_z": SZ, "center_x": SCX},
          "outline": [[-EXT,-FACADE-EXT],[ANNEX_X-EXT,-FACADE-EXT],[ANNEX_X-EXT,ANNEX_END-EXT],
                      [LENGTH+EXT,ANNEX_END-EXT],[LENGTH+EXT,FACADE+EXT],[-EXT,FACADE+EXT]],
-         "checks": {"ceiling_probe_x": (BAYS[1]["x0"] + BAYS[1]["x1"]) / 2}}
+         "checks": {"ceiling_probe_x": (BAYS[1]["x0"] + BAYS[1]["x1"]) / 2},
+         "breaches": BREACHES}
 
     def section(key, group=None):
         s=p["sections"].setdefault(key, {"boxes": [], "beams": [], "stairs": [], "labels": [], "lights": [], "probes": [], "groups": {}})
@@ -139,7 +176,7 @@ def make_plan():
 
     def space(sid,name,kind,f,rect,path,probes=None,polygon=None):
         s = {"id": sid,"label": name,"kind": kind,"floor": f+1,"y": LEVELS[f],"rect": rect,
-             "open": f<3,"path": path,"probe_points": probes or []}
+             "open": True,"path": path,"probe_points": probes or []}
         if polygon:
             s["polygon"] = polygon
         p["spaces"].append(s)
@@ -196,6 +233,112 @@ def make_plan():
         p["barriers"].append({"id":sid,"label":label_text,"from":[(x0+x1)/2,y,center+.85],
                               "to":[(x0+x1)/2,y,center-.85],"point":[(x0+x1)/2,y,center],"normal":[0,0,1]})
 
+    def fire_escape(name, door_xz, out, along):
+        """Маршевая пожарная лестница у торца: площадка у двери каждого этажа и на уровне крыши (два ряда маршей по
+        1,0 м: внутренний к стене и наружный), между этажами — два марша по 10 ступеней через промежуточную площадку,
+        к земле — три ступени, стойки до земли, поручни. Сталь, решётчатый настил."""
+        key="FireEscapes"
+        ox,oz=door_xz
+        def P(a,o):   # вдоль стены a, от стены o → x, z
+            return [ox+along[0]*a+out[0]*o, oz+along[1]*a+out[1]*o]
+        def R(a0,o0,a1,o1):
+            (x0,z0),(x1,z1)=P(a0,o0),P(a1,o1)
+            return [min(x0,x1),min(z0,z1),max(x0,x1),max(z0,z1)]
+        levels=LEVELS+[LEVELS[-1]+HEIGHTS[-1]+SLAB]
+        run=2.5
+        for k,y in enumerate(levels):
+            box(key,name+"_landing",R(-1.0,0.0,1.0,2.3),y-.08,y,"steel_stair")
+            if k==len(levels)-1:
+                break
+            yy=levels[k+1]
+            ym=(y+yy)/2
+            a_far=-1.0-run
+            box(key,name+"_half_landing",R(a_far-1.2,0.0,a_far,2.3),ym-.08,ym,"steel_stair")
+            x0,z0=P(-1.0,.6)
+            x1,z1=P(a_far,.6)
+            section(key)["stairs"].append({"start":[x0,y,z0],"end":[x1,ym,z1],"width":1.0,"count":10,"mat":"steel_stair"})
+            x0,z0=P(a_far,1.7)
+            x1,z1=P(-1.0,1.7)
+            section(key)["stairs"].append({"start":[x0,ym,z0],"end":[x1,yy,z1],"width":1.0,"count":10,"mat":"steel_stair"})
+            for o in [2.3]:
+                for a0,a1,h0,h1 in [(-1.0,a_far,y,ym),(a_far,-1.0,ym,yy)]:
+                    (bx0,bz0),(bx1,bz1)=P(a0,o),P(a1,o)
+                    beam(key,[bx0,h0+1.0,bz0],[bx1,h1+1.0,bz1],.05,.05,"steel_stair")
+            (bx0,bz0),(bx1,bz1)=P(-1.0,1.15),P(a_far,1.15)
+            beam(key,[bx0,y+1.0,bz0],[bx1,ym+1.0,bz1],.05,.05,"steel_stair",False)
+        # стойки до земли
+        for a in [1.0,-1.0,-1.0-run,-1.0-run-1.2]:
+            for o in [0.0,2.3]:
+                x,z=P(a,o)
+                beam(key,[x,0.0,z],[x,levels[-1],z],.08,.08,"steel_stair")
+        # три ступени к земле с площадки 1-го этажа (наружу, вдоль стены)
+        x0,z0=P(1.0,1.15)
+        x1,z1=P(1.9,1.15)
+        section(key)["stairs"].append({"start":[x0,LEVELS[0],z0],"end":[x1,0.0,z1],"width":1.0,"count":3,"mat":"steel_stair"})
+        # маршрут проверки: от земли до крыши по всем площадкам
+        pts=[[*[P(2.6,1.15)[0]],0.0,P(2.6,1.15)[1]]]
+        pts=[[P(2.6,1.15)[0],0.0,P(2.6,1.15)[1]],[P(1.0,1.15)[0],LEVELS[0],P(1.0,1.15)[1]],
+             [P(0.0,.6)[0],LEVELS[0],P(0.0,.6)[1]]]
+        for k,y in enumerate(levels[:-1]):
+            yy=levels[k+1]; ym=(y+yy)/2; a_far=-1.0-run
+            pts+=[[*P(-1.0,.6)[:1],y,P(-1.0,.6)[1]],[P(a_far,.6)[0],ym,P(a_far,.6)[1]],
+                  [P(a_far-.6,1.15)[0],ym,P(a_far-.6,1.15)[1]],[P(a_far,1.7)[0],ym,P(a_far,1.7)[1]],
+                  [P(-1.0,1.7)[0],yy,P(-1.0,1.7)[1]],[P(0.0,1.15)[0],yy,P(0.0,1.15)[1]]]
+        pts.append([P(0.0,-1.2)[0],levels[-1],P(0.0,-1.2)[1]])
+        p["routes"].append({"id":"fire_"+name,"label":f"Пожарная лестница {name}: земля → все площадки → крыша","points":pts})
+        p["routes"].append({"id":"fire_"+name+"_down","label":f"Пожарная лестница {name}: крыша → земля","points":list(reversed(pts))})
+
+    def vertical_routes():
+        """Проломы, люки и провал: скаты-кучи и стремянки под дырами, маршруты проверки по ним."""
+        roof_top=LEVELS[-1]+HEIGHTS[-1]+SLAB
+        levels=LEVELS+[roof_top]
+        for b_ in BREACHES:
+            f_above=b_["floor"]-1          # индекс уровня с дырой в полу
+            y1=levels[f_above]
+            y0=levels[f_above-1]
+            key=f"Floor{f_above}"
+            if b_["kind"]=="drop":
+                x0,z0,x1,z1=b_["hole"]
+                box(key,"rubble_pile",[x0+.1,z0+.1,x1-.1,z1-.1],y0,y0+1.1,"rubble")
+                cx,cz=(x0+x1)/2,(z0+z1)/2
+                p["routes"].append({"id":"drop_"+b_["id"],"label":f"Провал {b_['id']}: {f_above+1} → {f_above} этаж (вниз)",
+                                    "points":[[cx,y1,z1+.7],[cx,y0+1.1,cz],[cx+1.2,y0,cz]]})
+                continue
+            (sx,sz),(ex,ez)=b_["start"],b_["end"]
+            run=abs(ez-sz)
+            count=max(10,int(math.ceil((y1-y0)/.2)))
+            mat="steel_stair" if b_["kind"]=="ladder" else ("rubble" if b_["kind"]=="rubble" else "wood")
+            section(key)["stairs"].append({"start":[sx,y0,sz],"end":[ex,y1,ez],"width":b_["width"],"count":count,"mat":mat})
+            if b_["kind"]=="ladder":
+                for side in [-1,1]:
+                    xx=sx+side*b_["width"]/2
+                    beam(key,[xx,y0+1.0,sz],[xx,y1+1.0,ez],.04,.04,"steel_stair",False)
+            sgn=1 if ez>sz else -1
+            p["routes"].append({"id":"breach_"+b_["id"],"label":f"{b_['id']}: {f_above} → {'крыша' if f_above==5 else str(f_above+1)+' этаж'} по {'стремянке' if b_['kind']=='ladder' else 'завалу'}",
+                                "points":[[sx,y0,sz-sgn*.6],[sx,y0,sz],[ex,y1,ez],[ex,y1,ez+sgn*.3]]})
+
+    def tech_floor():
+        """Техэтаж: вентиляционный короб под потолком коридора, трубы по стенам, баки и венткамеры в помещениях."""
+        f=4
+        key="Floor5"
+        y,h=LEVELS[f],HEIGHTS[f]
+        for x0,x1 in [(.6,SC0-.3),(SC1+.3,LENGTH-.6)]:
+            box(key,"tech_duct",[x0,-.95,x1,-.15],y+h-.62,y+h-.2,"duct")
+        for side in [-1,1]:
+            zz=side*(HALF-.12)
+            for yy,r in [(2.35,.06),(2.15,.045)]:
+                beam(key,[.3,y+yy,zz],[LENGTH-.3,y+yy,zz],r*2,r*2,"pipe")
+        tanks=[(BAYS[2],-1),(BAYS[3],-1),(BAYS[6],1)]
+        for bay,side in tanks:
+            cx=(bay["x0"]+bay["x1"])/2
+            za,zb=sorted([side*(FACADE-.6),side*(FACADE-2.4)])
+            box(key,"tech_tank",[cx-.9,za,cx+.9,zb],y,y+1.45,"tank")
+            beam(key,[cx,y+1.45,(za+zb)/2],[cx,y+h-.02,(za+zb)/2],.12,.12,"pipe")
+        for bay,side in [(BAYS[1],1),(BAYS[5],-1),(BAYS[7],1)]:
+            cx=(bay["x0"]+bay["x1"])/2
+            za,zb=sorted([side*(FACADE-.5),side*(FACADE-1.9)])
+            box(key,"tech_fan",[cx-.8,za,cx+.8,zb],y,y+1.9,"duct")
+
     def add_details():
         # Все новые категории отделены от несущей коробки. На этапе 2 их заменят модули Blender.
         def strip(key,name,lo,hi,constant,depth,y0,y1,axis,mat,group):
@@ -240,7 +383,7 @@ def make_plan():
                                      "clear_width":width,"kind":"side_opening"})
             # Перегородка стоит между дверями комнат: распахнутые створки не заслоняют соседний вход.
             wall(key,"service_partition",-HALF,HALF,36.7,PART,y,h,[(0,2.4,0,2.7)],"x",group="portals")
-            door(key,"ХОЗКРЫЛО",0,36.7,y,-1,w=2.4,dh=2.7,axis="x",opened=f<3,thick=PART,inward=1)
+            door(key,"ХОЗКРЫЛО",0,36.7,y,-1,w=2.4,dh=2.7,axis="x",opened=True,thick=PART,inward=1)
             p["portals"].append({"id":f"f{f+1}_service_door","floor":f+1,"at":[36.7,y,0],
                                  "clear_height":2.7,"clear_width":2.4,"kind":"double_door"})
             for side in [-1,1]:
@@ -347,7 +490,7 @@ def make_plan():
                     dc=d["at"][2] if axis=="z" else d["at"][0]
                     if abs(dc-const)<=d["thickness"]/2+.02:
                         holes.append((d["at"][0] if axis=="z" else d["at"][2],d["width"]+.02))
-                if s["kind"]=="lounge" and abs(const-ROOM_EDGE)<.01 and axis=="z":
+                if s["id"].endswith("_lounge") and abs(const-ROOM_EDGE)<.01 and axis=="z":
                     holes.append(((SC0+BAYS[5]["x1"])/2,BAYS[5]["x1"]-SC0-.24))
                 skirt(key,lo,hi,const,direction,y,axis,holes)
         # Хозкрыло: порталы по стенам между службами, через два модуля (8,6 м).
@@ -368,6 +511,9 @@ def make_plan():
                 holes += [(zz,.45) for zz in annex_stations]
                 skirt("NorthAnnex",ANNEX_END,-FACADE-EXT,x,inward,y,"x",holes)
 
+    tech_floor()
+    fire_escape("А",(-EXT,0.0),(-1.0,0.0),(0.0,-1.0))
+    fire_escape("Б",(TURN_X,ANNEX_END-EXT),(0.0,-1.0),(-1.0,0.0))
     # Двор и оба входа. Въездов, транспорта и новых игровых механик здесь нет.
     box("Site","ground",[-14,-49,LENGTH+15,26],-.3,0,"ground")
     box("Site","main_plinth",[-EXT,-FACADE-EXT,LENGTH+EXT,FACADE+EXT],0,BASE-SLAB,"slab")
@@ -387,8 +533,10 @@ def make_plan():
     for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
         key = f"Floor{f+1}"
         # Проём центральной лестницы вырезан из перекрытий, а не закрыт невидимой плоскостью.
+        holes=[b_["hole"] for b_ in BREACHES if b_["floor"]==f+1]
         for rect in [[0,-FACADE,SC0,FACADE],[SC1,-FACADE,LENGTH,FACADE],[SC0,-ROOM_EDGE,SC1,FACADE]]:
-            box(key,"floor",rect,y-SLAB,y,"floor")
+            for piece_rect in subtract(rect,holes):
+                box(key,"floor",piece_rect,y-SLAB,y,"floor")
         if f==0:
             box(key,"stair_ground",[SC0,-FACADE,SC1,-ROOM_EDGE],y-SLAB,y,"floor")
         corridor_holes = {-1:[],1:[]}
@@ -398,7 +546,7 @@ def make_plan():
             for side in [-1,1]:
                 if side==-1 and b==4:
                     corridor_holes[side].append((SCX,2.4,0,h-.4))
-                    door(key,"ЛЕСТНИЦА",SCX,-HALF-LOAD/2,y,-1,w=2.4,dh=h-.4,opened=f<3,leaf=False)
+                    door(key,"ЛЕСТНИЦА",SCX,-HALF-LOAD/2,y,-1,w=2.4,dh=h-.4,opened=True,leaf=False)
                     continue
                 # Примыкание крыла: наружная стена становится внутренней, окон между комнатами нет.
                 if side==-1 and b>=7:
@@ -431,6 +579,9 @@ def make_plan():
                     kind,name = ("hall","ХОЛЛ / ВАХТА") if f==0 else ("storage","КЛАДОВАЯ")
                 else:
                     kind,name = "room",str((f+1)*100+b*2+(1 if side<0 else 2))
+                # 5-й этаж — технический: вместо жилых комнат — венткамеры, баки, кладовые за сеткой
+                if f==4 and kind in ["room","toilets","laundry"]:
+                    kind,name = "tech",{"laundry":"ВЕНТКАМЕРА"}.get(kind,"ТЕХ. ПОМ.")
                 dx = cx if kind in ["hall","turn"] else x0+1.1
                 if kind=="turn":
                     dx=TURN_X
@@ -439,7 +590,7 @@ def make_plan():
                 corridor_holes[side].append((dx,dw,0,dh))
                 room_state=STATES[(b+f+(1 if side>0 else 0))%len(STATES)] if kind=="room" else ""
                 pose=("wide","ajar","closed")[(b+f+(1 if side>0 else 0))%3] if kind=="room" else "wide"
-                door(key,name,dx,side*(HALF+LOAD/2),y,side,w=dw,dh=dh,opened=f<3,
+                door(key,name,dx,side*(HALF+LOAD/2),y,side,w=dw,dh=dh,opened=True,
                      leaf=kind!="turn",pose=pose,grille="баррикада" in room_state,wide_angle=112.0 if kind=="hall" else None)
                 z0,z1 = sorted([side*ROOM_EDGE,side*FACADE])
                 rect=[x0,z0,x1,z1]
@@ -452,10 +603,17 @@ def make_plan():
                 s=space(f"f{f+1}_{kind}_{side}_{b}",name,kind,f,rect,path,probes)
                 if kind=="room":
                     s["width_scale"]=w/3.9
-                    s["state"]=room_state
+                    s["state"]="пролом" if s["id"] in BREACH_ROOMS else room_state
                     s["probe_points"]=[[cx,y,side*(FACADE-.95)],[cx,y,side*5.9],
                                        [x0+.8,y,side*(ROOM_EDGE+1.0)],[x1-.8,y,side*(ROOM_EDGE+1.0)]]
-                    bunks(key,rect,y)
+                    if s["id"] not in BREACH_ROOMS:
+                        bunks(key,rect,y)
+                if kind=="tech":
+                    s["probe_points"]=[[cx,y,side*(ROOM_EDGE+1.0)],[x0+.7,y,side*(FACADE-.9)]]
+                if s["id"] in BREACH_ROOMS:
+                    # дыра, скат или стремянка — посередине или у стены x1; путь и точки осмотра — вдоль стены x0
+                    s["path"][-1]=[x0+.7,y,side*5.7]
+                    s["probe_points"]=[[x0+.6,y,side*(ROOM_EDGE+1.0)],[x0+.6,y,side*(FACADE-.7)]]
                 if kind=="toilets":
                     bathroom(key,rect,f,dx)
                     s["probe_points"]=[[cx,y,-FACADE+2.5],[cx,y,-3.3]]
@@ -482,7 +640,9 @@ def make_plan():
             wall(key,"corridor_load",0,LENGTH,side*(HALF+LOAD/2),LOAD,y,h+SLAB,corridor_holes[side]+niches,portal_centers=centers)
         # Торцы корпуса: чёрный выход только на первом, выше — дневное окно в конце коридора.
         offset=SLAB if f==0 else 0
-        wall(key,"west_end",-FACADE,FACADE,-EXT/2,EXT,y-offset,h+SLAB+offset,axis="x")
+        # Пожарный выход к наружной лестнице А — в торце коридора на каждом этаже.
+        wall(key,"west_end",-FACADE,FACADE,-EXT/2,EXT,y-offset,h+SLAB+offset,[(0,DOOR_W,offset,DOOR_H)],axis="x")
+        door(key,"ПОЖАРНЫЙ ВЫХОД",0,-EXT/2,y,-1,axis="x",thick=EXT,leaf=False)
         east_holes=[(0,1.8,offset,DOOR_H)] if f==0 else [(0,1.8,SILL+offset,1.65)]
         wall(key,"east_end",-FACADE,FACADE,LENGTH+EXT/2,EXT,y-offset,h+SLAB+offset,east_holes,axis="x")
         if f==0:
@@ -492,11 +652,11 @@ def make_plan():
         # Общая зона напротив лестницы: окно в широком объёме и неглубокая боковая ниша.
         a,b,c=BAYS[4]["x0"],BAYS[5]["x0"],BAYS[5]["x1"]
         poly=[[a,ROOM_EDGE],[c,ROOM_EDGE],[c,FACADE],[b,FACADE],[b,5.6],[a,5.6]]
-        space(f"f{f+1}_lounge","ГОСТИНАЯ","lounge",f,[a,ROOM_EDGE,c,FACADE],
+        space(f"f{f+1}_lounge",*(("ГОСТИНАЯ","lounge") if f<4 else ("ТЕХ. ЗАЛ","tech")),f,[a,ROOM_EDGE,c,FACADE],
               [[SCX,y,0],[SCX,y,3.8],[b+1.4,y,3.8],[b+1.4,y,7.1]],
               [[c-1.4,y,FACADE-1.0],[b+1.4,y,FACADE-1.0],[b+1.4,y,3.8],[a+1.0,y,3.8]],poly)
         wall(key,"lounge_store",a,SC1,5.675,PART,y,h,[(SCX,DOOR_W,0,DOOR_H)])
-        door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=f<3,thick=PART)
+        door(key,"КЛАДОВАЯ",SCX,5.675,y,1,opened=True,thick=PART)
         # Кладовка ограничена только шириной своего модуля.
         box(key,"lounge_store_side",[SC1,5.6,b,FACADE],y,y+h+SLAB)
         space(f"f{f+1}_lounge_store","КЛАДОВАЯ ПРИ ГОСТИНОЙ","storage",f,[a,5.75,SC1,FACADE],
@@ -528,7 +688,7 @@ def make_plan():
                 if s["floor"]==f+1 and s["open"]:
                     r=s["rect"]
                     section(key)["lights"].append({"at":[(r[0]+r[2])/2,y+h-.25,(r[1]+r[3])/2],"energy":.35,"range":6.5})
-        if f<3:
+        if True:
             p["floor_routes"].append({"floor":f+1,"start":[SCX,y,0],"end":[LENGTH-.8,y,0]})
             p["circulation"].extend([{"floor":f+1,"rect":[0,-HALF,LENGTH,HALF]},
                                       {"floor":f+1,"rect":[ANNEX_CORRIDOR,ANNEX_END,LENGTH,-FACADE]}])
@@ -552,11 +712,11 @@ def make_plan():
         window(key,SCX,wz,wy,f+1,height=wh)
         bottom=wy+wh
     box(key,"stair_spandrel",[SCX-wx/2,wz-EXT/2,SCX+wx/2,wz+EXT/2],bottom,LEVELS[-1]+HEIGHTS[-1]+SLAB,"wall")
+    roof_top=LEVELS[-1]+HEIGHTS[-1]+SLAB
     for f,y in enumerate(LEVELS):
         box(key,"stair_front_landing",[SC0,SZ,SC1,-ROOM_EDGE],y-SLAB,y,"floor")
-        if f==4:
-            continue
-        yy=LEVELS[f+1]
+        # с 5-го этажа марши ведут в будку выхода на крышу
+        yy=LEVELS[f+1] if f<4 else roof_top
         count=12 if f==0 else 10
         run=count*.3
         zm=SZ-run
@@ -573,18 +733,30 @@ def make_plan():
                 zz=start[2]+(end[2]-start[2])*k
                 hh=start[1]+(end[1]-start[1])*k
                 beam(key,[edge,hh,zz],[edge,hh+1.05,zz],.035,.035)
-        if f<2:
+        if f<4:
             pts=[[SCX,y,0],[SCX,y,-ROOM_EDGE-.65],[left,y,SZ+.45],[left,y,SZ],
                  [left,ym,zm-.6],[right,ym,zm-.6],[right,ym,zm],
                  [right,yy,SZ],[right,yy,SZ+.45],[SCX,yy,-ROOM_EDGE-.65],[SCX,yy,0]]
             p["routes"].extend([{"id":f"up{f+1}","label":f"Лестница {f+1} → {f+2}","points":pts},
                                 {"id":f"down{f+1}","label":f"Лестница {f+2} → {f+1}","points":list(reversed(pts))}])
-        if f==2:
-            gate(key,"upper_floors",SZ-.12,y,HEIGHTS[f],SC0,SC0+1.5,"Подъём на 4–5 этажи")
+        if f==4:
+            pts=[[SCX,y,0],[SCX,y,-ROOM_EDGE-.65],[left,y,SZ+.45],[left,y,SZ],
+                 [left,ym,zm-.6],[right,ym,zm-.6],[right,ym,zm],[right,yy,SZ],[right,yy,SZ+.45],[SCX,yy,-ROOM_EDGE+.9]]
+            p["routes"].extend([{"id":"up_roof","label":"Лестница 5 → будка → крыша","points":pts},
+                                {"id":"down_roof","label":"Крыша → будка → 5 этаж","points":list(reversed(pts))}])
+        space(f"f{f+1}_stairs","ЦЕНТРАЛЬНАЯ ЛЕСТНИЦА","stairs",f,[SC0,SZ,SC1,-ROOM_EDGE],
+              [[SCX,y,0],[SCX,y,-ROOM_EDGE-.65]],[[SC0+.75,y,SZ+.55],[SC1-.75,y,SZ+.55]])
         if f<3:
-            space(f"f{f+1}_stairs","ЦЕНТРАЛЬНАЯ ЛЕСТНИЦА","stairs",f,[SC0,SZ,SC1,-ROOM_EDGE],
-                  [[SCX,y,0],[SCX,y,-ROOM_EDGE-.65]],[[SC0+.75,y,SZ+.55],[SC1-.75,y,SZ+.55]])
             section(key)["lights"].append({"at":[SCX,y+2.4,SZ-.8],"energy":.7,"range":7})
+    # Будка выхода на крышу над лестничной клеткой: стены, плита, дверь к середине крыши.
+    box(key,"stair_front_landing",[SC0,SZ,SC1,-ROOM_EDGE],roof_top-SLAB,roof_top,"floor")
+    hut_top=roof_top+2.9
+    box(key,"hut_wall",[SC0-.25,-FACADE-EXT,SC0,-ROOM_EDGE+.25],roof_top,hut_top)
+    box(key,"hut_wall",[SC1,-FACADE-EXT,SC1+.25,-ROOM_EDGE+.25],roof_top,hut_top)
+    box(key,"hut_wall",[SC0,-FACADE-EXT,SC1,-FACADE],roof_top,hut_top)
+    wall(key,"hut_wall",SC0,SC1,-ROOM_EDGE+.125,.25,roof_top,hut_top-roof_top,[(SCX,DOOR_W,0,DOOR_H)])
+    door(key,"ВЫХОД НА КРЫШУ",SCX,-ROOM_EDGE+.125,roof_top,1,thick=.25,inward=1)
+    box(key,"hut_roof",[SC0-.35,-FACADE-EXT-.1,SC1+.35,-ROOM_EDGE+.35],hut_top,hut_top+.2,"slab")
 
     # Хозяйственный отворот буквой Г. Остаток за решёткой виден, но не доступен.
     key="NorthAnnex"
@@ -593,6 +765,11 @@ def make_plan():
         box(key,"annex_floor",[ANNEX_X,ANNEX_END,LENGTH,-FACADE-EXT],y-SLAB,y,"floor")
         wh,dh=[],[]
         for i,(kind,name) in enumerate(service_kinds):
+            sid=f"f{f+1}_annex_{kind}"
+            if f==4:
+                # техэтаж: над службами — инженерные помещения
+                kind,name=("tech",["ВЕНТКАМЕРА","БОЙЛЕРНАЯ","НАСОСНАЯ","ЭЛЕКТРОЩИТОВАЯ"][i])
+                sid=f"f5_annex_tech_{i}"
             z1=-FACADE-EXT-.2-i*4.3
             z0=z1-4.15
             zc=(z0+z1)/2
@@ -602,32 +779,63 @@ def make_plan():
             if i==0:
                 box(key,"service_partition",[ANNEX_X,z1,ANNEX_CORRIDOR-LOAD,z1+PART],y,y+h+SLAB)
             window(key,ANNEX_X-EXT/2,zc,y+SILL,f+1,"x")
-            door(key,name,zc,ANNEX_WALL,y,axis="x",opened=f<3,inward=-1)
+            door(key,name,zc,ANNEX_WALL,y,axis="x",opened=True,inward=-1)
             rect=[ANNEX_X,z0,ANNEX_CORRIDOR-LOAD,z1]
             cc=(rect[0]+rect[2])/2
-            space(f"f{f+1}_annex_{kind}",name,kind,f,rect,
+            space(sid,name,kind,f,rect,
                   [[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,zc],[cc,y,zc]],
                   [[ANNEX_X+.8,y,z0+.8],[cc,y,z1-.8]])
             if kind in ["wash","showers","toilets"]:
                 bathroom(key,rect,f,zc,"x")
             if f<3:
                 section(key)["lights"].append({"at":[cc,y+h-.25,zc],"energy":.45,"range":5.5})
+        # Конец хозкрыла за службами — склад (прежде закрытая часть): дверь из коридора, два окна.
+        store_z1=-FACADE-EXT-.2-3*4.3-4.15-PART
+        store_zc=(ANNEX_END+store_z1)/2
+        dh.append((store_zc,DOOR_W,0,DOOR_H))
+        door(key,"СКЛАД",store_zc,ANNEX_WALL,y,axis="x",opened=True,inward=-1)
+        for zz in [store_zc+2.9,store_zc-2.9]:
+            wh.append((zz,WINDOW_W,SILL,1.65))
+            window(key,ANNEX_X-EXT/2,zz,y+SILL,f+1,"x")
+        srect=[ANNEX_X,ANNEX_END,ANNEX_CORRIDOR-LOAD,store_z1]
+        space(f"f{f+1}_annex_store","СКЛАД","storage",f,srect,
+              [[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,store_zc],[(srect[0]+srect[2])/2,y,store_zc]],
+              [[ANNEX_X+.9,y,ANNEX_END+.9],[(srect[0]+srect[2])/2,y,store_z1-.9]])
         wall(key,"annex_facade",ANNEX_END,-FACADE-EXT,ANNEX_X-EXT/2,EXT,y,h+SLAB,wh,"x")
         wall(key,"annex_east",ANNEX_END,-FACADE-EXT,LENGTH+EXT/2,EXT,y,h+SLAB,axis="x")
         wall(key,"annex_corridor",ANNEX_END,-FACADE-EXT,ANNEX_WALL,LOAD,y,h+SLAB,dh,"x")
-        wall(key,"annex_end",ANNEX_X,LENGTH,ANNEX_END-EXT/2,EXT,y,h+SLAB)
+        # пожарный выход к наружной лестнице Б — в торце коридора хозкрыла на каждом этаже
+        wall(key,"annex_end",ANNEX_X,LENGTH,ANNEX_END-EXT/2,EXT,y,h+SLAB,[(TURN_X,DOOR_W,0,DOOR_H)])
+        door(key,"ПОЖАРНЫЙ ВЫХОД",TURN_X,ANNEX_END-EXT/2,y,-1,thick=EXT,leaf=False)
         if f<3:
-            gate(key,f"annex_f{f+1}",-29.2,y,h,ANNEX_CORRIDOR,LENGTH,f"Закрытая часть хозкрыла, {f+1} этаж")
             for z in [-13,-21,-27.5]:
                 section(key)["lights"].append({"at":[TURN_X,y+h-.25,z],"energy":.65,"range":6.5})
-            p["routes"].append({"id":f"turn_f{f+1}","label":f"{f+1} этаж: лестница → гостиная → поворот Г",
+        if True:
+            p["routes"].append({"id":f"turn_f{f+1}","label":f"{f+1} этаж: лестница → гостиная → поворот Г → торец хозкрыла",
                                 "points":[[SCX,y,0],[SCX,y,3.8],[BAYS[5]["x0"]+2,y,3.8],
-                                          [SCX,y,3.8],[SCX,y,0],[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,-28.2]]})
+                                          [SCX,y,3.8],[SCX,y,0],[TURN_X,y,0],[TURN_X,y,-6],[TURN_X,y,ANNEX_END+.6]]})
     roof=LEVELS[-1]+HEIGHTS[-1]
-    box("Roof","roof",[0,-FACADE,LENGTH,FACADE],roof,roof+SLAB,"slab")
+    roof_holes=[[SC0,-FACADE,SC1,-ROOM_EDGE]]+[b_["hole"] for b_ in BREACHES if b_["floor"]==6]
+    for rect in subtract([0,-FACADE,LENGTH,FACADE],roof_holes):
+        box("Roof","roof",rect,roof,roof+SLAB,"slab")
     box("Roof","annex_roof",[ANNEX_X,ANNEX_END,LENGTH,-FACADE-EXT],roof,roof+SLAB,"slab")
-    for z in [-FACADE-EXT/2,FACADE+EXT/2]:
-        box("Roof","parapet",[-EXT,z-.15,LENGTH+EXT,z+.15],roof+SLAB,roof+SLAB+.4,"wall")
+    # Парапет 0,4 м по всему краю кровли, проёмы — у выходов пожарных лестниц (запад у оси коридора, торец хозкрыла).
+    top=roof+SLAB
+    par=lambda rect: box("Roof","parapet",rect,top,top+.4,"wall")
+    par([-EXT,FACADE+EXT/2-.15,LENGTH+EXT,FACADE+EXT/2+.15])
+    par([-EXT,-FACADE-EXT/2-.15,ANNEX_X-EXT,-FACADE-EXT/2+.15])
+    par([-EXT/2-.15,-FACADE-EXT,-EXT/2+.15,-.75])
+    par([-EXT/2-.15,.75,-EXT/2+.15,FACADE+EXT])
+    par([LENGTH+EXT/2-.15,ANNEX_END-EXT,LENGTH+EXT/2+.15,FACADE+EXT])
+    par([ANNEX_X-EXT/2-.15,ANNEX_END-EXT,ANNEX_X-EXT/2+.15,-FACADE-EXT])
+    par([ANNEX_X-EXT,ANNEX_END-EXT/2-.15,TURN_X-.75,ANNEX_END-EXT/2+.15])
+    par([TURN_X+.75,ANNEX_END-EXT/2-.15,LENGTH+EXT,ANNEX_END-EXT/2+.15])
+    # Откинутая крышка люка Л рядом с проёмом.
+    lx0,lz0,lx1,lz1=next(b_["hole"] for b_ in BREACHES if b_["id"]=="Л")
+    box("Roof","hatch_lid",[lx1+.05,lz0,lx1+.11,lz1],top,top+.9,"steel_stair")
+    for x in [lx0-.06,lx1]:
+        box("Roof","hatch_curb",[x,lz0-.06,x+.06,lz1+.06],top,top+.12,"steel_stair")
+    vertical_routes()
     p["routes"].append({"id":"entry_to_back","label":"Вход → турникет → коридор → чёрный выход",
                         "points":[[ENTRY_X,0,17],[ENTRY_X,0,14.4],[ENTRY_X,BASE,12.0],[ENTRY_X,BASE,8.4],
                                   [LANE_X,BASE,6.5],[LANE_X,BASE,5.4],[LANE_X,BASE,4.5],[ENTRY_X,BASE,3.1],
@@ -656,6 +864,10 @@ def make_plan():
         ("12_commandant","Кабинет коменданта",[BAYS[6]["x0"]+2.6,BASE,-3.3],[BAYS[6]["x0"]+1,BASE+1.62,-8]),
         ("13_narrow_room","Узкая комната ×1,0",[(narrow["x0"]+narrow["x1"])/2,LEVELS[1],3.3],[(narrow["x0"]+narrow["x1"])/2,LEVELS[1]+1.62,FACADE]),
         ("14_toilets","Первый туалет у входа",[2,BASE,-3.3],[2.7,BASE+1.55,-7.2]),
+        ("15_fire_a","Пожарная лестница А у торца",[-4.5,0,4.5],[-1.5,8.0,-2.0]),
+        ("16_roof","Крыша: будка и люк",[10.0,LEVELS[-1]+HEIGHTS[-1]+SLAB,3.0],[SCX,LEVELS[-1]+HEIGHTS[-1]+SLAB+1.5,-4.0]),
+        ("17_tech","Техэтаж: короб и трубы",[ENTRY_X+2,LEVELS[4],0],[LENGTH-1,LEVELS[4]+1.62,0]),
+        ("18_breach","Пролом П1 снизу",[9.0,BASE,3.0],[10.635,BASE+3.0,6.5]),
     ]
     for i,(sid,name,foot,look) in enumerate(views,1):
         p["locations"].append({"id":i,"label":name,"foot":foot,"look":look})

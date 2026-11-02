@@ -50,7 +50,7 @@ CEILING = {
 }
 KIND = {"room": "room", "toilets": "wet", "showers": "wet", "wash": "wet", "kitchen": "service", "laundry": "service",
         "lounge": "service", "hall": "service", "vestibule": "service", "commandant": "service", "watch": "service",
-        "turn": "service", "storage": "storage"}
+        "turn": "service", "storage": "storage", "tech": "service"}
 TUBES = {"el_lsp_2", "el_lsp_1", "el_lpo_closed", "el_lpo_hanging", "el_lpo_torn"}
 
 
@@ -399,9 +399,11 @@ def main() -> None:
     clears = plan["scale"]["ceiling_clear"]
     floors_y = plan["scale"]["floor_y"]
     doors = plan["doors"]
+    # потолок с проломом над комнатой — проводка оборвана вместе с перекрытием
+    broken = {b["room_below"] for b in plan.get("breaches", [])}
     for s in plan["spaces"]:
         kind = KIND.get(s["kind"])
-        if kind is None:
+        if kind is None or s["id"] in broken:
             continue
         f = int(s["floor"])
         room_wiring(W, s, doors, clears[f - 1], f"Floor{f}", kind)

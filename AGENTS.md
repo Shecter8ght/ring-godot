@@ -185,11 +185,17 @@ python -X utf8 tools/build_prospekt.py                        # карта «П�
                                                               # ProspektLandscape: переход, паркинг −1, кордон); перезаписывает оба файла
 python -X utf8 tools/build_dorm.py                            # общежитие, пробный свет r6.1 на принятой геометрии r4, пороги и порталы r5 сохранены →
                                                               # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; режимы и замеры — docs/design/dorm_light_test.md
+                                                              # вертикальные пути (5 открытых этажей, 5-й — техэтаж, пожарные лестницы, проломы, люки) — docs/design/dorm_routes.md
 tools/dorm_study.cmd                                         # старт — выбранный владельцем вечер Б (VoxelGI) со светом «как в Таркове»; F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников, F8 — пробная ночная луна (при старте выключена); F9 — выключить / включить свет «как в Таркове» (зоны окружения, основной), F10 или U — скрыть весь интерфейс (для записи ролика); L — расставить свет (колесо — вид, ЛКМ / ПКМ — поставить / убрать, сразу в dorm_found_lights.json);
                                                               # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
-tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 117 проверок: 68 помещений пешком, лестница, двери, оба выхода и новые порталы хозкрыла
+tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 190 проверок: 117 помещений пешком на пяти этажах, лестница до крыши,
+                                                              # обе пожарные лестницы, проломы П1–П4, люк Л на крышу, провал С1, двери, выходы
 tools/godot.cmd --windowed --resolution 1600x900 --script res://tools/dorm_ui_check.gd # интерфейс прогулки: подсказка умещается в окно,
                                                               # F10 / U прячет всё (панель света, подсказки, план, подписи) и возвращает; снимки docs/screens/dorm/ui_check_*
+tools/dorm_play.cmd                                           # общежитие с настоящим игроком и ботами при свете стенда: в полёте расставить ботов где угодно
+                                                              # (ЛКМ / ПКМ, 1–5 — кого, G — игрок сюда, Backspace — заново), Enter — в тело игрока, боты оживают;
+                                                              # Tab — любое оружие игры, F — дверь, Esc — свет и бессмертие; --headless res://tools/dorm_play.tscn -- check —
+                                                              # навмеш, пути ботов до крыши, техэтажа и пожарных лестниц, расстановка, оружие; -- shots — снимки dorm/play_*
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # r6.1: 42 затронутых вида + шесть ночных пар с луной; 36 новых серий FPS/GPU → light_* / light61_*; «до» — light6_*; общая матрица 149 кадров / 83 серии
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- bake # шесть объёмов VoxelGI трёх этажей (~4 с), цвета шейдера учтены; источники динамические, LightmapGI нет
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- v3shots # материалы v03 (краска, побелка, паркет, плитка;
