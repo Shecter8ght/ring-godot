@@ -10493,6 +10493,441 @@
       "files": []
     },
     {
+      "id": "wpn_ar_09_shot",
+      "name": "Выстрел — основной",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_suppressed",
+      "name": "Выстрел с глушителем",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_suppressed",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_sup"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_outdoor",
+      "name": "Выстрел на улице",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_outdoor",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_outdoor"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_room",
+      "name": "Выстрел в небольшом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_room",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_room"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_hall",
+      "name": "Выстрел в большом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_hall",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_hall"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_sup_outdoor",
+      "name": "С глушителем на улице",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_sup_outdoor",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_sup_outdoor"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_sup_room",
+      "name": "С глушителем в помещении",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_sup_room",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_sup_room"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shot_sup_hall",
+      "name": "С глушителем в большом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shot_sup_hall",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shot_sup_hall"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_mechanism",
+      "name": "Механика выстрела",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "mechanism",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_mechanism"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_dry_fire",
+      "name": "Сухой спуск",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "dry_fire",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_dry_fire"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_jam",
+      "name": "Задержка / осечка",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_jam"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_clear_jam",
+      "name": "Устранить задержку — затвор назад",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "clear_jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_clear_jam"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_clear_jam_release",
+      "name": "Устранить задержку — затвор вперёд",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "clear_jam_release",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_clear_jam_release"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_reload",
+      "name": "Перезарядка целиком",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "reload",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_reload"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_mag_out",
+      "name": "Магазин вынуть",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "mag_out",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_mag_out"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_mag_in",
+      "name": "Магазин вставить",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "mag_in",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_mag_in"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_mag_drop",
+      "name": "Магазин выпал",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "mag_drop",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_mag_drop"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_bolt_lock",
+      "name": "Затворная задержка",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "bolt_lock",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_bolt_lock"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_charge",
+      "name": "Затвор вперёд / дослать патрон",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "charge",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_charge"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_mag_check",
+      "name": "Проверить боезапас",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "mag_check",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_mag_check"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_fire_mode",
+      "name": "Переводчик огня",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "fire_mode",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_fire_mode"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_draw",
+      "name": "Достать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "draw",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_draw"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_holster",
+      "name": "Убрать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "holster",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_holster"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_ads_raise",
+      "name": "Поднять оружие",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "ads_raise",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_ads_raise"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_ads_lower",
+      "name": "Опустить оружие",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "ads_lower",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_ads_lower"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shell_hard",
+      "name": "Гильза — плитка / бетон",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_hard",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_hard"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_metal"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shell_soft",
+      "name": "Гильза — мягкая поверхность",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_soft",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_soft"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_ar_09_shell_roll",
+      "name": "Гильза катится",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_roll",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_roll"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
       "id": "mag_drop",
       "name": "Пустой магазин падает на пол",
       "category": "Оружие — обращение",
