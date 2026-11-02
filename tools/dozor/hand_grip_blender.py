@@ -8,7 +8,7 @@ from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/dozor/grip'
-OUTPUT = Path('E:/Models Blender/новые руки/DOZOR_Pistol_Grip_starter_v01.blend')
+OUTPUT = Path('E:/Models Blender/новые руки/DOZOR_Pistol_Grip_starter_v02.blend')
 C = Matrix.Rotation(math.pi / 2, 4, 'X')
 
 
@@ -94,6 +94,9 @@ def build_scene(wid, title):
     arm.animation_data_clear()
     arm.show_in_front = True
     arm.data.display_type = 'STICK'
+    # glTF assigns icospheres as custom bone shapes. They override STICK and obscure the grip.
+    for bone in arm.pose.bones:
+        bone.custom_shape = None
     bones = json.loads((WORK / (wid + '_pose.json')).read_text('utf-8'))['bones']
     convert, rest_error = alignment(arm, bones)
     rest = {b.name: arm.matrix_world @ b.matrix_local for b in arm.data.bones}
