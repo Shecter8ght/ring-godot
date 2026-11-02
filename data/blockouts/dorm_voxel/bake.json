@@ -1,15 +1,15 @@
 {
-	"bake_sha256": "0c86e4ae5f4e74d22f45bcf45219e069a12e2bca02c1fe6bf0876ac9a343b7c8",
+	"bake_sha256": "24339973252a347d172ee3bfd46e342c4b823222acd4ba5131176be97dd52b75",
 	"diffuse_proxy": "dorm_v3_diffuse_proxy_8_stair_concrete",
 	"engine": "4.7.2-stable (steam)",
 	"floors": [
 		{
-			"bytes": 899349,
-			"data_bytes": 2596240,
+			"bytes": 907606,
+			"data_bytes": 2598528,
 			"id": "floor_1",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_1.res",
-			"seconds": 5.172,
+			"seconds": 5.007,
 			"size": "(43.85, 3.801, 18.2)",
 			"subdiv": 2
 		},
@@ -19,17 +19,17 @@
 			"id": "annex_1",
 			"octree_size": "(128.0, 64.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_1.res",
-			"seconds": 2.11,
+			"seconds": 2.2,
 			"size": "(9.95, 3.801, 30.14)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 822606,
-			"data_bytes": 2319664,
+			"bytes": 824760,
+			"data_bytes": 2315840,
 			"id": "floor_2",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_2.res",
-			"seconds": 4.894,
+			"seconds": 5.142,
 			"size": "(43.85, 3.101, 18.2)",
 			"subdiv": 2
 		},
@@ -39,17 +39,17 @@
 			"id": "annex_2",
 			"octree_size": "(128.0, 32.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_2.res",
-			"seconds": 2.176,
+			"seconds": 2.195,
 			"size": "(9.95, 3.101, 30.14)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 814043,
-			"data_bytes": 2307888,
+			"bytes": 823059,
+			"data_bytes": 2310480,
 			"id": "floor_3",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_3.res",
-			"seconds": 4.918,
+			"seconds": 4.715,
 			"size": "(43.85, 3.101, 18.2)",
 			"subdiv": 2
 		},
@@ -59,17 +59,17 @@
 			"id": "annex_3",
 			"octree_size": "(128.0, 32.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_3.res",
-			"seconds": 2.012,
+			"seconds": 1.836,
 			"size": "(9.95, 3.101, 30.14)",
 			"subdiv": 2
 		},
 		{
-			"bytes": 838118,
-			"data_bytes": 2337600,
+			"bytes": 842328,
+			"data_bytes": 2334000,
 			"id": "floor_4",
 			"octree_size": "(256.0, 32.0, 128.0)",
 			"path": "res://data/blockouts/dorm_voxel/floor_4.res",
-			"seconds": 4.981,
+			"seconds": 4.893,
 			"size": "(43.85, 3.101, 18.2)",
 			"subdiv": 2
 		},
@@ -79,12 +79,12 @@
 			"id": "annex_4",
 			"octree_size": "(128.0, 32.0, 256.0)",
 			"path": "res://data/blockouts/dorm_voxel/annex_4.res",
-			"seconds": 1.926,
+			"seconds": 2.058,
 			"size": "(9.95, 3.101, 30.14)",
 			"subdiv": 2
 		}
 	],
-	"geometry_sha256": "bb0e9f5a8c401b1218dbe523330c0e74491c962ca669fc4312ce2ce644910724",
+	"geometry_sha256": "0e991765cf14c2a80693ff9e0f070de0ed8cad4ae73531dd43737de971464fde",
 	"lighting": "BAKE_DYNAMIC; no LightmapGI",
-	"total_sec": 28.189
+	"total_sec": 28.046
 }
