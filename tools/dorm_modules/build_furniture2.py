@@ -54,6 +54,7 @@ def mats() -> dict:
         "mirror": L.material("Зеркало", (0.9, 0.9, 0.9), 0.02, 1.0),
         "pipe_paint": L.material("Труба_краска", (0.75, 0.75, 0.72), 0.4),
         "chain": L.material("Цепочка_сталь", (0.45, 0.43, 0.4), 0.4, 1.0),
+        "oven": L.material("Духовка_эмаль", (0.05, 0.05, 0.055), 0.35),
     })
     return m
 
@@ -347,6 +348,34 @@ def stove(coll, m, at, rng, open_door: bool = False) -> bpy.types.Object:
     set_mat(rounded_box(bm, (w, 0.03, 0.08), 0.008, cuts=4, center=(0, d / 2 - 0.015, h + 0.04)), 0)
     body = obj(bm, "ЭП_корпус", coll, [m["stove_enamel"]], r, smooth=50)
     yf = -d / 2 + 0.02          # лицевая плоскость корпуса
+    # камера духовки за дверцей: вырез в корпусе и тёмная эмалированная камера (открыта спереди), направляющие
+    # по бокам на трёх уровнях, решётка на среднем, ТЭН петлёй под потолком
+    ox, oz0, oz1, od = 0.205, 0.215, 0.585, 0.46
+    cb = bmesh.new()
+    L.bm_box(cb, (-ox, yf - 0.02, oz0), (ox, yf + od, oz1))
+    cut(body, coll, r, "ЭП_камера_вырез", cb)
+    ch = bmesh.new()
+    fs = L.bm_box(ch, (-ox + 0.0005, yf + 0.0005, oz0 + 0.0005), (ox - 0.0005, yf + od - 0.0005, oz1 - 0.0005))
+    ch.normal_update()
+    bmesh.ops.delete(ch, geom=[f for f in fs if f.normal.y < -0.9], context="FACES")
+    bmesh.ops.reverse_faces(ch, faces=ch.faces[:])
+    for sx in (-1, 1):
+        for z in (0.31, 0.39, 0.47):
+            L.bm_cyl(ch, (sx * (ox - 0.004), yf + 0.03, z), (sx * (ox - 0.004), yf + od - 0.03, z), 0.0045, segs=10)
+    camera = L.finish_bm(ch, "ЭП_камера", coll, m["oven"], r, smooth_angle=35)
+    camera.data.materials.clear()
+    camera.data.materials.append(m["oven"])
+    rk = bmesh.new()
+    zr = 0.395
+    pipe(rk, [(-ox + 0.012, yf + 0.03, zr), (ox - 0.012, yf + 0.03, zr), (ox - 0.012, yf + od - 0.03, zr),
+              (-ox + 0.012, yf + od - 0.03, zr)], 0.003, segs=8, bend=0.012, closed=True)
+    for k in range(11):
+        x = -ox + 0.04 + k * (2 * ox - 0.08) / 10
+        pipe(rk, [(x, yf + 0.03, zr + 0.004), (x, yf + od - 0.03, zr + 0.004)], 0.0018, segs=6)
+    pipe(rk, [(-0.15, yf + od - 0.01, oz1 - 0.03), (-0.15, yf + 0.06, oz1 - 0.03), (-0.05, yf + 0.06, oz1 - 0.03),
+              (-0.05, yf + od - 0.06, oz1 - 0.03), (0.05, yf + od - 0.06, oz1 - 0.03), (0.05, yf + 0.06, oz1 - 0.03),
+              (0.15, yf + 0.06, oz1 - 0.03), (0.15, yf + od - 0.01, oz1 - 0.03)], 0.004, segs=8, bend=0.03)
+    obj(rk, "ЭП_решётка_тэн", coll, [m["handle"]], r, smooth=60)
     # панель управления — наклонная полоса спереди сверху
     pb = bmesh.new()
     L.bm_prism(pb, [(-w / 2 + 0.005, 0.0), (w / 2 - 0.005, 0.0), (w / 2 - 0.005, 0.07), (-w / 2 + 0.005, 0.07)],
@@ -385,6 +414,7 @@ def stove(coll, m, at, rng, open_door: bool = False) -> bpy.types.Object:
     door.rotation_euler = (math.radians(88 if open_door else 0), 0, 0)
     gb = bmesh.new()
     set_mat(L.bm_box(gb, (-0.13, -0.037, 0.13), (0.13, -0.033, 0.29)), 0)
+    set_mat(L.bm_box(gb, (-0.15, -0.002, 0.11), (0.15, 0.001, 0.31)), 0)
     gl = obj(gb, "ЭП_стекло", coll, [m["glass"]], door)
     gl.matrix_parent_inverse = Matrix.Identity(4)
     hb = bmesh.new()
@@ -415,6 +445,52 @@ def edge_strips(bm, x0, x1, y0, y1, z0, z1, back: bool, t: float = 0.0025) -> No
         set_mat(L.bm_box(bm, (x0 - t, y1, z0), (x1 + t, y1 + t, z1)), 0)
 
 
+def part_at(bm, name, coll, mlist, parent, pivot, **kw):
+    """Деталь, которая потом открывается в игре (дверца, ящик): геометрия построена в осях предмета, начало узла —
+    в шарнире / у лица ящика."""
+    ob = obj(bm, name, coll, mlist, parent, **kw)
+    ob.data.transform(Matrix.Translation(-V(pivot)))
+    ob.matrix_parent_inverse = Matrix.Identity(4)
+    ob.location = V(pivot)
+    return ob
+
+
+def hinged_doors(coll, m, r, prefix, x_outer, y_face, z0, z1, handle_z, thick=0.016) -> None:
+    """Две накладные дверцы на петлях по наружным краям (лицо — к −Y от y_face), ручки-скобы у притвора — дочерние
+    узлы дверец: дверцы открываются в игре отдельно, корпус внутри пустой."""
+    for s, side in ((-1, "лев"), (1, "прав")):
+        x0, x1 = (-x_outer, -0.0015) if s < 0 else (0.0015, x_outer)
+        db = bmesh.new()
+        board(db, (x0, y_face - thick, z0), (x1, y_face, z1))
+        pivot = (s * x_outer, y_face, z0)
+        door = part_at(db, f"{prefix}_дверца_{side}", coll, [m["chip"], m["edge"]], r, pivot, bevel=0.0012, segs=1)
+        hb = bmesh.new()
+        bow_handle(hb, (s * 0.04, y_face - thick, handle_z), (0, 0, 1))
+        hd = obj(hb, f"{prefix}_ручка_{side}", coll, [m["handle"]], door)
+        hd.data.transform(Matrix.Translation(-V(pivot)))
+        hd.matrix_parent_inverse = Matrix.Identity(4)
+
+
+def drawer(coll, m, r, prefix, x_half, y_face, z0, z1, depth, thick=0.016) -> None:
+    """Выдвижной ящик: накладное лицо и короб из ДСП 12 мм за ним (дно — ДВП), ручка-скоба; узел — у лица ящика."""
+    bm = bmesh.new()
+    board(bm, (-x_half, y_face - thick, z0), (x_half, y_face, z1))
+    bx0, bx1 = -x_half + 0.03, x_half - 0.03
+    bz0, bz1 = z0 + 0.012, z1 - 0.02
+    for x in (bx0, bx1 - 0.012):
+        board(bm, (x, y_face, bz0), (x + 0.012, y_face + depth, bz1))
+    board(bm, (bx0, y_face + depth - 0.012, bz0), (bx1, y_face + depth, bz1))
+    board(bm, (bx0 + 0.012, y_face, bz0 + 0.004), (bx1 - 0.012, y_face + 0.012, bz1))
+    set_mat(L.bm_box(bm, (bx0, y_face, bz0 - 0.004), (bx1, y_face + depth, bz0)), 2)
+    pivot = (0.0, y_face, z0)
+    box = part_at(bm, f"{prefix}_ящик", coll, [m["chip"], m["edge"], m["hdf"]], r, pivot, bevel=0.0012, segs=1)
+    hb = bmesh.new()
+    bow_handle(hb, (0, y_face - thick, (z0 + z1) / 2), (1, 0, 0))
+    hd = obj(hb, f"{prefix}_ручка_ящика", coll, [m["handle"]], box)
+    hd.data.transform(Matrix.Translation(-V(pivot)))
+    hd.matrix_parent_inverse = Matrix.Identity(4)
+
+
 def cabinet_box(bm, w, d, h, t=0.016, plinth=0.08, top_over=0.0):
     """Корпус тумбы из ДСП: боковины, дно, цоколь, задняя ДВП (слот 2); верх — отдельно."""
     hw, hd = w / 2, d / 2
@@ -433,16 +509,8 @@ def sink_cabinet(coll, m, at, rng) -> bpy.types.Object:
     w, d, h = 0.8, 0.6, 0.85
     bm = bmesh.new()
     cabinet_box(bm, w, d, h - 0.03)
-    t = 0.016
-    for s in (-1, 1):
-        x0, x1 = (-w / 2 + 0.002, -0.0015) if s < 0 else (0.0015, w / 2 - 0.002)
-        board(bm, (x0, -d / 2 + 0.004, 0.082), (x1, -d / 2 + 0.02, h - 0.035))
     obj(bm, "МК_тумба", coll, [m["chip"], m["edge"], m["hdf"]], r, bevel=0.0012, segs=1)
-    hb = bmesh.new()
-    for s in (-1, 1):
-        bow_handle(hb, (s * 0.04, -d / 2 + 0.004, h - 0.17), (0, 0, 1))
-    obj(hb, "МК_ручки", coll, [m["handle"]], r)
-    del t
+    hinged_doors(coll, m, r, "МК", w / 2 - 0.002, -d / 2 + 0.02, 0.082, h - 0.035, h - 0.17)
     # чаша слева, крыло справа: верх — кольцо от контура мойки к краю чаши, чаша вниз до выпуска
     n = 64
     top = h
@@ -489,23 +557,16 @@ def cutting_table(coll, m, at, rng) -> bpy.types.Object:
     w, d, h = 0.8, 0.6, 0.85
     bm = bmesh.new()
     cabinet_box(bm, w, d, h - 0.028)
-    board(bm, (-w / 2 + 0.002, -d / 2 + 0.004, h - 0.18), (w / 2 - 0.002, -d / 2 + 0.02, h - 0.032))
-    for s in (-1, 1):
-        x0, x1 = (-w / 2 + 0.002, -0.0015) if s < 0 else (0.0015, w / 2 - 0.002)
-        board(bm, (x0, -d / 2 + 0.004, 0.082), (x1, -d / 2 + 0.02, h - 0.185))
     board(bm, (-w / 2 + 0.016, -d / 2 + 0.02, h - 0.195), (w / 2 - 0.016, d / 2 - 0.004, h - 0.18))
     obj(bm, "СР_корпус", coll, [m["chip"], m["edge"], m["hdf"]], r, bevel=0.0012, segs=1)
+    drawer(coll, m, r, "СР", w / 2 - 0.002, -d / 2 + 0.02, h - 0.18, h - 0.032, 0.5)
+    hinged_doors(coll, m, r, "СР", w / 2 - 0.002, -d / 2 + 0.02, 0.082, h - 0.185, h - 0.28)
     tb = bmesh.new()
     set_mat(L.bm_box(tb, (-w / 2 - 0.01, -d / 2 - 0.01, h - 0.028), (w / 2 + 0.01, d / 2, h)), 0)
     obj(tb, "СР_столешница", coll, [m["top_laminate"]], r, bevel=0.0015, segs=1)
     eb = bmesh.new()
     edge_strips(eb, -w / 2 - 0.01, w / 2 + 0.01, -d / 2 - 0.01, d / 2, h - 0.03, h + 0.002, back=False)
     obj(eb, "СР_окантовка", coll, [m["aluminium"]], r, bevel=0.0008, segs=1)
-    hb = bmesh.new()
-    bow_handle(hb, (0, -d / 2 + 0.004, h - 0.105), (1, 0, 0))
-    for s in (-1, 1):
-        bow_handle(hb, (s * 0.04, -d / 2 + 0.004, h - 0.28), (0, 0, 1))
-    obj(hb, "СР_ручки", coll, [m["handle"]], r)
     return r
 
 
@@ -552,16 +613,10 @@ def wall_cabinet(coll, m, at, rng) -> bpy.types.Object:
     for s in (-1, 1):
         board(bm, (s * hw - (t if s > 0 else 0), y0 + 0.018, -h + t), (s * hw + (0 if s > 0 else t), -0.004, -t))
     board(bm, (-hw + t, y0 + 0.03, -h / 2 - t / 2), (hw - t, -0.004, -h / 2 + t / 2))
-    for s in (-1, 1):
-        x0, x1 = (-hw + 0.002, -0.0015) if s < 0 else (0.0015, hw - 0.002)
-        board(bm, (x0, y0, -h + 0.003), (x1, y0 + 0.016, -0.003))
     back = L.bm_box(bm, (-hw + 0.004, -0.004, -h + 0.004), (hw - 0.004, 0.0, -0.004))
     set_mat(back, 2)
     obj(bm, "ШН_корпус", coll, [m["chip"], m["edge"], m["hdf"]], r, bevel=0.0012, segs=1)
-    hb = bmesh.new()
-    for s in (-1, 1):
-        bow_handle(hb, (s * 0.04, y0, -h + 0.1), (0, 0, 1))
-    obj(hb, "ШН_ручки", coll, [m["handle"]], r)
+    hinged_doors(coll, m, r, "ШН", hw - 0.002, y0 + 0.016, -h + 0.003, -0.003, -h + 0.1)
     return r
 
 
