@@ -196,7 +196,7 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		if _cleared(String(item.mat),(start+end)*0.5):
 			continue
 		# перила лестницы с маршами-модулями — модулем ограждения (dorm_modules.gd), здесь остаётся коллизия
-		var visual: bool = modules==null or not bool(modules.call("rail_beam",item))
+		var visual: bool = (modules==null or not bool(modules.call("rail_beam",item))) and bool(item.get("visual",true))
 		if absf(start.x-end.x)<0.001 and absf(start.z-end.z)<0.001:
 			var size: Vector3 = Vector3(float(item.width),absf(end.y-start.y),float(item.depth))
 			if visual:
@@ -470,7 +470,9 @@ static func _palette(plan: Dictionary) -> Dictionary:
 		# под проломами, короба, трубы и баки 5-го этажа — серые заглушки до моделей Blender
 		"steel_stair":"6a3b2c", "rubble":"8a8579", "duct":"9a9fa2", "pipe":"5d6366", "tank":"6f7a74",
 		# пожарные лестницы — сурик с ржавчиной, настил темнее; сетка-рабица выгородок техэтажа; арматура
-		"grating":"4a3a32", "mesh":"8a8f8c", "rebar":"5a3a2a"}
+		"grating":"4a3a32", "mesh":"8a8f8c", "rebar":"5a3a2a",
+		# металлические двери пожарных выходов — крашеная сталь
+		"door_metal":"4e5752"}
 	for key: String in colors:
 		var material: StandardMaterial3D = StandardMaterial3D.new()
 		material.albedo_color = Color(String(colors[key]))

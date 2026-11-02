@@ -77,6 +77,53 @@ def wall_breach_v(x, side, y):
 BREACH_ROOMS = {b[k] for b in BREACHES for k in ("room_below", "room_above") if b[k] not in ("roof", "roof_hall", "f5_tech_hall")}
 
 
+def ragged(b):
+    """Рваный край пролома (владелец 2026-11-02: «не идеально ровные»): выбоины — прямоугольники, которые вырезаются
+    из перекрытия вокруг дыры сверх неё, и зубья — куски плиты, нависающие над дырой. Без них остаётся край, к
+    которому прикреплена обломившаяся плита (hinge), у кучи край, на который подтягиваются (edge), — мельче."""
+    x0, z0, x1, z1 = b["hole"]
+    seed = sum(ord(c) for c in b["id"]) * 7
+    # выбоины не заходят под стены своей комнаты (иначе снизу в щель у стены видно свет)
+    cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+    bay = next((bb for bb in BAYS if bb["x0"] <= cx <= bb["x1"]), {"x0": x0 - 1, "x1": x1 + 1})
+    side = 1 if cz > 0 else -1
+    clip = [bay["x0"] + .08, min(side * (ROOM_EDGE + .08), side * (FACADE - .08)),
+            bay["x1"] - .08, max(side * (ROOM_EDGE + .08), side * (FACADE - .08))]
+    def rnd(i, lo, hi):
+        return lo + (hi - lo) * (((seed + i * 97) * 2654435761) % 1000) / 1000.0
+    bites, teeth = [], []
+    for k, edge in enumerate(["z0", "z1", "x0", "x1"]):
+        if edge == b.get("hinge"):
+            continue
+        shallow = edge == b.get("edge")
+        along0, along1 = (x0, x1) if edge[0] == "z" else (z0, z1)
+        for j in range(3):
+            i = k * 10 + j
+            c = along0 + (along1 - along0) * (j + .5) / 3 + rnd(i, -.2, .2)
+            w = rnd(i + 1, .25, .6)
+            d = rnd(i + 2, .08, .18) if shallow else rnd(i + 2, .12, .38)
+            lo, hi = max(along0 - .2, c - w / 2), min(along1 + .2, c + w / 2)
+            if edge == "z0":
+                bites.append([lo, z0 - d, hi, z0 + .01])
+            elif edge == "z1":
+                bites.append([lo, z1 - .01, hi, z1 + d])
+            elif edge == "x0":
+                bites.append([x0 - d, lo, x0 + .01, hi])
+            else:
+                bites.append([x1 - .01, lo, x1 + d, hi])
+            # зуб между выбоинами: кусок плиты висит над дырой, загнут вниз
+            ct = along0 + (along1 - along0) * (j + 1) / 3.2 + rnd(i + 3, -.1, .1)
+            reach = rnd(i + 4, .12, .32) * (.5 if shallow else 1.0)
+            wt = rnd(i + 5, .18, .42)
+            teeth.append({"edge": edge, "at": ct, "reach": reach, "width": wt, "drop": rnd(i + 6, .03, .14)})
+    clipped = []
+    for r in bites:
+        c = [max(r[0], clip[0]), max(r[1], clip[1]), min(r[2], clip[2]), min(r[3], clip[3])]
+        if c[2] - c[0] > .03 and c[3] - c[1] > .03:
+            clipped.append(c)
+    return clipped, teeth
+
+
 def subtract(rect, holes):
     """Прямоугольник без дыр — набор прямоугольников (перекрытие с проломами и люками)."""
     out = [rect]
@@ -152,8 +199,11 @@ def make_plan():
         section(key,group)["boxes"].append({"id": name, "at": [(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],
                                       "size": [x1-x0,y1-y0,z1-z0], "mat": mat, "solid": solid, "yaw": 0})
 
-    def beam(key, a, b, w=.06, depth=.06, mat="rail", solid=True):
-        section(key)["beams"].append({"start": a, "end": b, "width": w, "depth": depth, "mat": mat, "solid": solid})
+    def beam(key, a, b, w=.06, depth=.06, mat="rail", solid=True, visual=True):
+        item={"start": a, "end": b, "width": w, "depth": depth, "mat": mat, "solid": solid}
+        if not visual:
+            item["visual"]=False
+        section(key)["beams"].append(item)
 
     def label(key, text, at, yaw=0, group=None, permanent=False):
         section(key,group)["labels"].append({"text": text, "at": at, "yaw": yaw, "permanent": permanent})
@@ -367,6 +417,22 @@ def make_plan():
         p["routes"].append({"id":"fire_"+name,"label":f"Пожарная лестница {name}: земля → все площадки → крыша","points":pts})
         p["routes"].append({"id":"fire_"+name+"_down","label":f"Пожарная лестница {name}: крыша → земля","points":list(reversed(pts))})
 
+    def breach_teeth(key,b_,y):
+        """Куски плиты на краю дыры: бетон и паркет пола сверху, загнуты вниз в дыру."""
+        x0,z0,x1,z1=b_["hole"]
+        for tooth in ragged(b_)[1]:
+            e,c,r,w,d=tooth["edge"],tooth["at"],tooth["reach"],tooth["width"],tooth["drop"]
+            if e=="z0":
+                a,b=[c,y-.12,z0-.02],[c,y-.12-d,z0+r]
+            elif e=="z1":
+                a,b=[c,y-.12,z1+.02],[c,y-.12-d,z1-r]
+            elif e=="x0":
+                a,b=[x0-.02,y-.12,c],[x0+r,y-.12-d,c]
+            else:
+                a,b=[x1+.02,y-.12,c],[x1-r,y-.12-d,c]
+            beam(key,a,b,w,.2,"slab",False)
+            beam(key,[a[0],a[1]+.112,a[2]],[b[0],b[1]+.112,b[2]],w-.04,.025,"floor",False)
+
     def rebar(key,hole,y,skip=""):
         """Рваный край дыры: торчащая и загнутая вниз арматура по краям (кроме края skip — у ската он сломан иначе)."""
         x0,z0,x1,z1=hole
@@ -420,6 +486,7 @@ def make_plan():
                                     "ladder":True,"points":[[cx,y0,z1+.5],[cx,y0,z0+.75],[cx,y1,z0-.6]]})
                 continue
             rebar(key,b_["hole"],y1,b_.get("hinge",""))
+            breach_teeth(key,b_,y1)
             rubble(key,cx,cz,y0,1.2,9,n+3)
             if kind=="drop":
                 box(key,"rubble_pile",[x0+.1,z0+.1,x1-.1,z1-.1],y0,y0+1.1,"rubble")
@@ -443,7 +510,27 @@ def make_plan():
                 vy,vz=dz/length,sgn*dy/length
                 off=SLAB/2
                 w=b_["width"]
-                beam(key,[cx,y_f+.04-vy*off,z_f-vz*off],[cx,y1-vy*off,z_h-vz*off],w,SLAB,"slab",True)
+                pa=[cx,y_f+.04-vy*off,z_f-vz*off]
+                pb=[cx,y1-vy*off,z_h-vz*off]
+                beam(key,pa,pb,w,SLAB,"slab",True,False)
+                def at(k,lift=0.0,shift=0.0):
+                    return [pa[0]+shift,pa[1]+(pb[1]-pa[1])*k+vy*lift,pa[2]+(pb[2]-pa[2])*k+vz*lift]
+                # куски вдоль ската: (от, до, ширина, сдвиг вбок, просадка)
+                for i,(k0,k1,ww,sh,sag) in enumerate([(0,.31,w-.06,.04,-.035),(.325,.68,w,-.03,0.0),(.695,1.0,w-.14,.06,-.02)]):
+                    beam(key,at(k0,sag,sh),at(k1,sag,sh),ww,SLAB,"slab",False)
+                    # паркет пола, с которого упала плита; в среднем куске выбит клок — виден бетон
+                    top=off+.0125+sag
+                    if i==1:
+                        beam(key,at(k0+.01,top,sh),at(.47,top,sh),ww-.05,.025,"floor",False)
+                        beam(key,at(.55,top,sh-.18),at(k1-.01,top,sh-.18),ww-.4,.025,"floor",False)
+                        beam(key,at(.47,top,sh+.32),at(.55,top,sh+.32),ww-.7,.025,"floor",False)
+                    else:
+                        beam(key,at(k0+.01,top,sh),at(k1-.01,top,sh),ww-.05,.025,"floor",False)
+                # отбитые углы — куски бетона у краёв плиты
+                for k,sh in [(.12,w/2-.05),(.52,-w/2+.04),(.86,w/2-.1)]:
+                    p_=at(k,off+.02,sh)
+                    box(key,"slab_chunk",[p_[0]-.12,p_[2]-.09,p_[0]+.12,p_[2]+.09],p_[1]-.05,p_[1]+.08,"slab",False)
+                    section(key)["boxes"][-1]["yaw"]=int(k*300)%90
                 # арматура из слома у шарнира: висит вниз вдоль плиты
                 for i in range(6):
                     xx=cx-w/2+.1+i*(w-.2)/5
@@ -647,6 +734,8 @@ def make_plan():
                 continue
             double=w>=2.0
             leaf_mat="door_green" if int(uid.rsplit("_",1)[1])%3==0 else "door_wood"
+            if item["id"]=="ПОЖАРНЫЙ ВЫХОД":
+                leaf_mat="door_metal"
             for leaf_index in range(2 if double else 1):
                 hand=1 if leaf_index==0 else -1
                 pivot=lo+.008 if hand>0 else hi-.008
@@ -768,7 +857,12 @@ def make_plan():
     for f,(y,h) in enumerate(zip(LEVELS,HEIGHTS)):
         key = f"Floor{f+1}"
         # Проём центральной лестницы вырезан из перекрытий, а не закрыт невидимой плоскостью.
-        holes=[b_["hole"] for b_ in BREACHES if b_["floor"]==f+1]
+        holes=[]
+        for b_ in BREACHES:
+            if b_["floor"]==f+1:
+                holes.append(b_["hole"])
+                if b_["kind"]!="hatch":
+                    holes += ragged(b_)[0]
         for rect in [[0,-FACADE,SC0,FACADE],[SC1,-FACADE,LENGTH,FACADE],[SC0,-ROOM_EDGE,SC1,FACADE]]:
             for piece_rect in subtract(rect,holes):
                 box(key,"floor",piece_rect,y-SLAB,y,"floor")
@@ -906,7 +1000,8 @@ def make_plan():
         offset=SLAB if f==0 else 0
         # Пожарный выход к наружной лестнице А — в торце коридора на каждом этаже.
         wall(key,"west_end",-FACADE,FACADE,-EXT/2,EXT,y-offset,h+SLAB+offset,[(0,DOOR_W,offset,DOOR_H)],axis="x")
-        door(key,"ПОЖАРНЫЙ ВЫХОД",0,-EXT/2,y,-1,axis="x",thick=EXT,leaf=False)
+        # металлическая дверь (владелец 2026-11-02); распахнута внутрь к торцевой стене — наружу створка закрывала площадку лестницы
+        door(key,"ПОЖАРНЫЙ ВЫХОД",0,-EXT/2,y,-1,axis="x",thick=EXT,inward=1,wide_angle=163.0)
         east_holes=[(0,1.8,offset,DOOR_H)] if f==0 else [(0,1.8,SILL+offset,1.65)]
         wall(key,"east_end",-FACADE,FACADE,LENGTH+EXT/2,EXT,y-offset,h+SLAB+offset,east_holes,axis="x")
         if f==0:
@@ -1086,7 +1181,7 @@ def make_plan():
             wall(key,"annex_corridor",ANNEX_END,-FACADE-EXT,ANNEX_WALL,LOAD,y,h+SLAB,dh,"x")
         # пожарный выход к наружной лестнице Б — в торце коридора хозкрыла на каждом этаже
         wall(key,"annex_end",ANNEX_X,LENGTH,ANNEX_END-EXT/2,EXT,y,h+SLAB,[(TURN_X,DOOR_W,0,DOOR_H)])
-        door(key,"ПОЖАРНЫЙ ВЫХОД",TURN_X,ANNEX_END-EXT/2,y,-1,thick=EXT,leaf=False)
+        door(key,"ПОЖАРНЫЙ ВЫХОД",TURN_X,ANNEX_END-EXT/2,y,-1,thick=EXT,inward=1,wide_angle=163.0)
         if f<3:
             for z in [-13,-21,-27.5]:
                 section(key)["lights"].append({"at":[TURN_X,y+h-.25,z],"energy":.65,"range":6.5})
