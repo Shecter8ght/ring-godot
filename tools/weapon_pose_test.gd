@@ -11,6 +11,10 @@ func _ready() -> void:
 	Engine.max_fps = 90
 	WeaponPoseProfiles.storage_path = "user://weapon_pose_lab_test.cfg"
 	DirAccess.remove_absolute(WeaponPoseProfiles.storage_path)
+	# стенд сохраняет и хват: без своего файла проверка писала в хваты владельца (2026-11-02)
+	HandGripProfiles.storage_path = "user://weapon_pose_lab_grips_test_%d.cfg" % OS.get_process_id()
+	DirAccess.remove_absolute(HandGripProfiles.storage_path)
+	HandGripProfiles.reload()
 	WeaponPoseProfiles.reload()
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("out="):
@@ -112,6 +116,7 @@ func _ready() -> void:
 	await _key(KEY_F6)
 	_check("F6 restores editing without firing", _lab.is_open() and not _lab._player.is_physics_processing())
 	DirAccess.remove_absolute(WeaponPoseProfiles.storage_path)
+	DirAccess.remove_absolute(HandGripProfiles.storage_path)
 	print("WEAPON_POSE_TEST checks=%d failures=%d" % [_checks, _fails])
 	get_tree().quit(1 if _fails > 0 else 0)
 

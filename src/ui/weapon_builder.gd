@@ -92,6 +92,16 @@ static func open_hideout(parent: Node, p_where: String, p_idx: int) -> WeaponBui
 	return b
 
 
+## Ствол стойки тира / стенда (Player.range_weapon): любой обвес и магазин игры без покупки и без тайника —
+## «Применить» сразу выдаёт собранный ствол в руки (Player.set_range_weapon). Своё снаряжение не трогается.
+static func open_sandbox(parent: Node, player: Player) -> WeaponBuilder:
+	var b := WeaponBuilder.new()
+	b.mode = "sandbox"
+	b._player = player
+	parent.add_child(b)
+	return b
+
+
 ## Рейд: своё оружие в слоте ("equip:<слот>") или в рюкзаке ("backpack", idx); применяет хост.
 static func open_raid(parent: Node, player: Player, p_where: String, p_idx: int) -> WeaponBuilder:
 	var b := WeaponBuilder.new()
@@ -124,6 +134,8 @@ func _exit_tree() -> void:
 
 
 func _current_weapon() -> Dictionary:
+	if mode == "sandbox":
+		return _player.range_weapon.duplicate(true) if _player != null and is_instance_valid(_player) else {}
 	if mode == "raid":
 		if _player == null or not is_instance_valid(_player):
 			return {}
@@ -140,13 +152,30 @@ func _current_weapon() -> Dictionary:
 	return (list[idx] as Dictionary).duplicate(true) if idx >= 0 and idx < list.size() else {}
 
 
+## Стенд: по два экземпляра каждого обвеса игры (две одинаковые детали на одном стволе) и по полному магазину.
+var _sandbox_items: Array = []
+
+
 func _lists() -> Dictionary:
+	if mode == "sandbox":
+		if _sandbox_items.is_empty():
+			for id: Variant in WeaponDb.ids("attachments"):
+				for copy: int in range(2):
+					_sandbox_items.append({"id": String(id), "n": 1, "dur": float(Balance.CONDITION.full)})
+			for mid: Variant in WeaponDb.ids("magazines"):
+				var cal: String = WeaponDb.mag_caliber(String(mid))
+				var mag: Dictionary = WeaponDb.make_mag(String(mid), WeaponDb.default_ammo(cal), int(WeaponDb.magazine(String(mid)).get("capacity", 0)))
+				mag["n"] = 1
+				_sandbox_items.append(mag)
+		return {"sandbox": _sandbox_items}
 	if mode == "raid":
 		return {"backpack": _player.inventory.items}
 	return {"stash": Profile.stash, "backpack": Profile.backpack}
 
 
 func _rules() -> Dictionary:
+	if mode == "sandbox":
+		return {"shop": false, "lists": ["sandbox"], "locked": []}
 	if mode == "raid":
 		return {"shop": false, "lists": BuildPlan.RAID_LISTS, "locked": ["stock"]}
 	return {"shop": true, "lists": BuildPlan.HIDEOUT_LISTS}
@@ -466,7 +495,7 @@ func _pool() -> Array[Dictionary]:
 					continue
 				var carried: int = (e.get("mods", {}) as Dictionary).size()
 				out.append({"id": WeaponDb.canonical(String(e.id)), "src": {"from": String(ln), "idx": i, "sub": ""}, "item": e,
-					"sub": "%s · %d%%%s" % ["тайник" if ln == "stash" else "рюкзак", int(WeaponCondition.percent(e)), " · +%d на нём" % carried if carried > 0 else ""]})
+					"sub": "%s · %d%%%s" % [_list_name(String(ln)), int(WeaponCondition.percent(e)), " · +%d на нём" % carried if carried > 0 else ""]})
 	elif mode == "hideout":
 		for id: Variant in TraderStock.stock():
 			var sid: String = String(id)
@@ -1210,8 +1239,12 @@ func _mag_strip() -> void:
 			var lname: String = String(ln)
 			var cap: int = int(WeaponDb.magazine(String(e.id)).get("capacity", 0))
 			var put_in: Callable = func() -> void: _set_mag({"from": lname, "idx": li})
-			_strip.add_child(_simple_card(ItemDb.item_name(String(e.id)), "%s · %s" % ["тайник" if ln == "stash" else "рюкзак",
+			_strip.add_child(_simple_card(ItemDb.item_name(String(e.id)), "%s · %s" % [_list_name(lname),
 				Gear.ammo_estimate(int(e.get("rounds", 0)), cap, false)], put_in, String(e.id)))
+
+
+static func _list_name(list_name: String) -> String:
+	return {"stash": "тайник", "backpack": "рюкзак", "sandbox": "любой, без покупки"}.get(list_name, list_name)
 
 
 func _set_mag(mag: Dictionary) -> void:
@@ -1288,6 +1321,21 @@ func _apply() -> void:
 		if Raid.current:
 			Raid.current.request_build(where, idx, _draft, _mag)
 		_close()
+		return
+	if mode == "sandbox":
+		var entry: Dictionary = (_plan.get("entry", {}) as Dictionary).duplicate(true)
+		if entry.is_empty() or _player == null or not is_instance_valid(_player):
+			return
+		_player.set_range_weapon(entry, _player.range_own_slot)
+		_weapon = _current_weapon()
+		_draft = BuildPlan.draft_of(_weapon)
+		_mag = {"from": "weapon"}
+		_undo.clear()
+		_redo.clear()
+		_place = {}
+		Audio.play_ui("mod_fit")
+		_say("Собрано — в руках.", true)
+		_refresh()
 		return
 	var why: String = Profile.apply_build(where, idx, _draft, _mag)
 	if why != "":

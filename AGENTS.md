@@ -193,9 +193,10 @@ tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify 
 tools/godot.cmd --windowed --resolution 1600x900 --script res://tools/dorm_ui_check.gd # интерфейс прогулки: подсказка умещается в окно,
                                                               # F10 / U прячет всё (панель света, подсказки, план, подписи) и возвращает; снимки docs/screens/dorm/ui_check_*
 tools/dorm_play.cmd                                           # общежитие с настоящим игроком и ботами при свете стенда: в полёте расставить ботов где угодно
-                                                              # (ЛКМ / ПКМ, 1–5 — кого, G — игрок сюда, Backspace — заново), Enter — в тело игрока, боты оживают;
-                                                              # Tab — любое оружие игры, F — дверь, Esc — свет и бессмертие; --headless res://tools/dorm_play.tscn -- check —
-                                                              # навмеш, пути ботов до крыши, техэтажа и пожарных лестниц, расстановка, оружие; -- shots — снимки dorm/play_*
+                                                              # (ЛКМ / ПКМ, 1–5 — кого, R — патруль по зданию / обход рядом / пост, G — игрок сюда, Backspace — заново),
+                                                              # Enter — в тело игрока, боты оживают; Tab — любое оружие игры и конструктор (любые обвесы без покупки),
+                                                              # F — дверь, Esc — свет, поле зрения, бессмертие; --headless res://tools/dorm_play.tscn -- check — навмеш, пути ботов
+                                                              # до крыши, техэтажа и пожарных лестниц, расстановка, патруль и пост, конструктор; -- shots — снимки dorm/play_*
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # r6.1: 42 затронутых вида + шесть ночных пар с луной; 36 новых серий FPS/GPU → light_* / light61_*; «до» — light6_*; общая матрица 149 кадров / 83 серии
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- bake # шесть объёмов VoxelGI трёх этажей (~4 с), цвета шейдера учтены; источники динамические, LightmapGI нет
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- v3shots # материалы v03 (краска, побелка, паркет, плитка;

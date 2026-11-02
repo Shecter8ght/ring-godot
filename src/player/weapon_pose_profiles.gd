@@ -8,7 +8,12 @@ const POSES: Array[String] = ["hip", "ads", "low"]
 const POSITION_LIMIT: Vector3 = Vector3(0.5, 0.5, 0.75)
 const ROTATION_LIMIT: float = 45.0
 
-static var storage_path: String = PATH
+## Путь — в метаданных Engine, как у HandGripProfiles.storage_path.
+static var storage_path: String:
+	get:
+		return String(Engine.get_meta(&"weapon_poses_path", PATH))
+	set(value):
+		Engine.set_meta(&"weapon_poses_path", value)
 static var _loaded: bool = false
 static var _enabled: bool = true
 static var _profiles: Dictionary = {}
@@ -40,17 +45,23 @@ static func _ensure() -> void:
 	_loaded = true
 	_profiles = {}
 	_enabled = true
-	var config: ConfigFile = ConfigFile.new()
-	if config.load(storage_path) != OK or int(config.get_value("settings", "version", 0)) != 1:
+	var config: ConfigFile = HandGripProfiles.read_config(storage_path)
+	if config == null:
 		return
 	_enabled = bool(config.get_value("settings", "enabled", true))
+	_profiles = _from_config(config)
+
+
+static func _from_config(config: ConfigFile) -> Dictionary:
+	var result: Dictionary = {}
 	for section: String in config.get_sections():
 		if section == "settings":
 			continue
 		for pose: String in POSES:
-			put(_profiles, section, pose,
+			put(result, section, pose,
 				_safe_vector(config.get_value(section, pose + "/position", Vector3.ZERO), POSITION_LIMIT),
 				_safe_vector(config.get_value(section, pose + "/rotation", Vector3.ZERO), Vector3.ONE * ROTATION_LIMIT))
+	return result
 
 
 static func _safe_vector(value: Variant, limit: Vector3) -> Vector3:
@@ -92,7 +103,14 @@ static func apply(base: Transform3D, profiles: Dictionary, weapon: String, aim: 
 	return Transform3D(offset.basis * base.basis, base.origin + offset.origin)
 
 
+## Стволы, которых нет в черновике, остаются как на диске, прежний файл — копией (см. HandGripProfiles.save_profiles).
 static func save_profiles(profiles: Dictionary, use_in_game: bool) -> Error:
+	var disk: ConfigFile = HandGripProfiles.read_config(storage_path)
+	if disk != null:
+		var merged: Dictionary = _from_config(disk)
+		merged.merge(profiles.duplicate(true), true)
+		profiles = merged
+	HandGripProfiles.backup(storage_path)
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("settings", "version", 1)
 	config.set_value("settings", "enabled", use_in_game)

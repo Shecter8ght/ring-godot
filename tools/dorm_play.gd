@@ -4,10 +4,12 @@ extends Node3D
 ## этажа), потом — в тело игрока, и боты оживают.
 ##   tools/dorm_play.cmd
 ## Расстановка (полёт): WASD и мышь, Shift — быстрее, Space / C — вверх / вниз; ЛКМ — бот в точку под прицелом (смотрит
-## туда же, куда камера), ПКМ — убрать бота под прицелом; 1–5 — кого ставить; G — игрок сюда; Del — убрать всех;
-## Backspace — заново (боты и игрок на местах расстановки, убитые встают); Enter — в тело игрока, игра.
-## Игра: клавиши игры; Tab — окно со всем оружием игры; F — дверь; Enter — обратно в полёт (боты замирают).
-## Всегда: Esc — мышь и панель (свет, бессмертие); F1–F8, F9 — свет как в прогулке (tools/dorm_study.cmd); F10 — без интерфейса.
+## туда же, куда камера), ПКМ — убрать бота под прицелом; 1–5 — кого ставить; R — что делает (патруль по зданию, обход
+## рядом, пост); G — игрок сюда; Del — убрать всех; Backspace — заново (боты и игрок на местах расстановки, убитые
+## встают); Enter — в тело игрока, игра.
+## Игра: клавиши игры; Tab — окно со всем оружием игры и конструктор; F — дверь; Enter — обратно в полёт (боты замирают).
+## Всегда: Esc — мышь и панель (свет, поле зрения, бессмертие); F1–F8, F9 — свет как в прогулке (tools/dorm_study.cmd);
+## F10 — без интерфейса.
 ## Проверка: --headless res://tools/dorm_play.tscn -- check (навигация по этажам, крыше и пожарным лестницам, расстановка,
 ## боты оживают и идут на шум, оружие из окна); с окном -- shots — снимки docs/screens/dorm/play_*.
 
@@ -17,6 +19,11 @@ const RIG_SCENE: String = "res://scenes/player/camera_rig.tscn"
 const MARAUDER_SCENE: String = "res://scenes/ai/marauder.tscn"
 ## Кого ставить (клавиши 1–5): типы Balance.AI_ARCHETYPES; "" — случайный мародёр.
 const BOT_TYPES: Array[String] = ["", "gunner", "heavy", "pmc", "rival"]
+## Что делает бот (клавиша R в полёте): патруль — ходит по комнатам и этажам здания; обход — бродит в 8 м от своей
+## точки; пост — стоит на месте и смотрит туда, куда смотрела камера. На шум и бой — как всегда.
+const BEHAVIOURS: Array[String] = ["patrol", "area", "post"]
+const BEHAVIOUR_NAMES: Dictionary = {"patrol": "патруль по зданию", "area": "обход рядом", "post": "пост"}
+const AREA_RADIUS: float = 8.0
 const START_LOCATION: int = 8
 const FLY_SPEED: float = 6.0
 const FLY_FAST: float = 18.0
@@ -39,6 +46,11 @@ var player_yaw: float = 0.0
 ## Расстановка: {"at", "yaw", "type", "node"}; node — живой бот этой точки.
 var bots: Array[Dictionary] = []
 var bot_type: int = 0
+var behaviour: int = 0
+## Точки патруля: середины помещений всех этажей (путь осмотра плана) — бот выбирает любую.
+var patrol_points: PackedVector3Array = PackedVector3Array()
+var patrol_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var fov_label: Label
 var nav_region: NavigationRegion3D
 var nav_ready: bool = false
 var god: bool = true
@@ -74,6 +86,10 @@ func _ready() -> void:
 	world = (load(LEVEL) as PackedScene).instantiate() as Node3D
 	add_child(world)
 	lighting = world.get_node_or_null("Lighting") as Node3D
+	for space: Dictionary in plan.spaces:
+		var path: Array = space.path
+		if not path.is_empty():
+			patrol_points.append(_vec(path[path.size()-1]))
 	var location: Dictionary = plan.locations[START_LOCATION-1]
 	player_start = _vec(location.foot)
 	var look: Vector3 = _vec(location.look)-player_start
@@ -254,8 +270,8 @@ func _open_doors_near_bots() -> void:
 
 # ---------------------------------------------------------------- боты
 
-func _place_bot(at: Vector3, yaw: float, type: String) -> Dictionary:
-	var bot: Dictionary = {"at": at, "yaw": yaw, "type": type, "node": null}
+func _place_bot(at: Vector3, yaw: float, type: String, mode_name: String = "patrol") -> Dictionary:
+	var bot: Dictionary = {"at": at, "yaw": yaw, "type": type, "behaviour": mode_name, "node": null}
 	bots.append(bot)
 	_spawn_bot(bot)
 	return bot
@@ -267,19 +283,27 @@ func _spawn_bot(bot: Dictionary) -> void:
 	if String(bot.type)!="":
 		m.archetype = String(bot.type)
 	var dir: Vector3 = Vector3(sin(float(bot.yaw)),0.0,cos(float(bot.yaw)))
-	# держит место расстановки и смотрит туда, куда смотрела камера; шум и бой — как у всех, потом обратно
-	m.home = bot.at
-	m.home_radius = 1.0
-	m.stay = true
-	m.watch_dir = dir
-	m.watch_sector_deg = 90.0
+	match String(bot.get("behaviour","patrol")):
+		"post":
+			# держит место и смотрит туда, куда смотрела камера; шум и бой — как у всех, потом обратно
+			m.home = bot.at
+			m.home_radius = 1.0
+			m.stay = true
+			m.watch_dir = dir
+			m.watch_sector_deg = 90.0
+		"area":
+			m.home = bot.at
+			m.home_radius = AREA_RADIUS
+		_:
+			m.patrol_point_provider = _patrol_point
+	m.no_loot = true
 	m.process_mode = Node.PROCESS_MODE_DISABLED if mode=="fly" else Node.PROCESS_MODE_INHERIT
 	add_child(m)
 	m.global_position = (bot.at as Vector3)+Vector3.UP*0.05
 	m.set("_facing",float(bot.yaw))
 	var label: Label3D = Label3D.new()
 	label.name = "PlaceLabel"
-	label.text = String((Balance.AI_ARCHETYPES[m.archetype] as Dictionary).get("name",m.archetype))
+	label.text = String((Balance.AI_ARCHETYPES[m.archetype] as Dictionary).get("name",m.archetype))+" · "+String(BEHAVIOUR_NAMES[String(bot.get("behaviour","patrol"))])
 	label.position = Vector3(0,2.15,0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.font_size = 40
@@ -289,6 +313,10 @@ func _spawn_bot(bot: Dictionary) -> void:
 	label.visible = mode=="fly"
 	m.add_child(label)
 	bot.node = m
+
+
+func _patrol_point() -> Vector3:
+	return patrol_points[patrol_rng.randi_range(0,patrol_points.size()-1)] if not patrol_points.is_empty() else player_start
 
 
 func _bot_label(bot: Dictionary) -> Label3D:
@@ -405,7 +433,7 @@ func _update_marker() -> void:
 	marker.global_position = at
 	marker.global_rotation = Vector3(0,_fly_yaw_dir(),0)
 	marker_mat.albedo_color = Color(0.35,1.0,0.45,0.45) if on_nav else Color(1.0,0.6,0.2,0.45)
-	marker_label.text = _type_name(BOT_TYPES[bot_type])+("" if on_nav or not nav_ready else " · вне навмеша")
+	marker_label.text = _type_name(BOT_TYPES[bot_type])+" · "+String(BEHAVIOUR_NAMES[BEHAVIOURS[behaviour]])+("" if on_nav or not nav_ready else " · вне навмеша")
 
 
 func _type_name(type: String) -> String:
@@ -490,7 +518,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			var at: Vector3 = _aim_floor()
 			if at!=Vector3.INF:
 				var snapped: Vector3 = _nav_point(at)
-				_place_bot(snapped if snapped!=Vector3.INF else at,_fly_yaw_dir(),BOT_TYPES[bot_type])
+				_place_bot(snapped if snapped!=Vector3.INF else at,_fly_yaw_dir(),BOT_TYPES[bot_type],BEHAVIOURS[behaviour])
 		elif button.button_index==MOUSE_BUTTON_RIGHT:
 			var bot: Dictionary = _bot_under_aim()
 			if not bot.is_empty():
@@ -525,6 +553,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
 				bot_type = key-KEY_1
 				_update_help()
+			KEY_R:
+				behaviour = (behaviour+1)%BEHAVIOURS.size()
+				_update_help()
 			KEY_G:
 				var at: Vector3 = _aim_floor()
 				if at!=Vector3.INF:
@@ -538,6 +569,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_BACKSPACE:
 				_restart()
 	elif key==KEY_TAB and is_instance_valid(player) and not player.ui_blocked():
+		# ствол в руках — стволом «стойки», чтобы конструктор окна собирал именно его
+		if not player.in_range_mode() and player.sandbox_weapons.has(player.weapon_slot):
+			player.set_range_weapon(player.sandbox_weapons[player.weapon_slot])
 		if picker==null:
 			picker = RangeWeaponPicker.new()
 			picker.name = "WeaponPicker"
@@ -584,7 +618,7 @@ func _ui() -> void:
 	var shade: ColorRect = ColorRect.new()
 	shade.color = Color(0.03,0.04,0.05,0.82)
 	shade.position = Vector2(18,140)
-	shade.size = Vector2(1440,200)
+	shade.size = Vector2(1440,210)
 	panel.add_child(shade)
 	if lighting!=null:
 		lighting.call("create_controls",panel)
@@ -598,6 +632,34 @@ func _ui() -> void:
 		if is_instance_valid(player):
 			player.set_god(on))
 	panel.add_child(god_toggle)
+	# поле зрения игры (Settings.fov_h) — на время стенда, в настройки игры не записывается
+	fov_label = Label.new()
+	fov_label.position = Vector2(300,294)
+	panel.add_child(fov_label)
+	var fov_slider: HSlider = HSlider.new()
+	fov_slider.position = Vector2(560,296)
+	fov_slider.size = Vector2(320,26)
+	fov_slider.min_value = 60.0
+	fov_slider.max_value = 110.0
+	fov_slider.step = 1.0
+	fov_slider.focus_mode = Control.FOCUS_NONE
+	fov_slider.value = Settings.fov_h
+	fov_slider.value_changed.connect(_set_fov)
+	panel.add_child(fov_slider)
+	for i: int in range(3):
+		var preset: float = [80.0,95.0,110.0][i]
+		var b: Button = Button.new()
+		b.text = "%d°" % int(preset)
+		b.position = Vector2(900+i*70,292)
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(func() -> void: fov_slider.value = preset)
+		panel.add_child(b)
+	_set_fov(Settings.fov_h)
+
+
+func _set_fov(value: float) -> void:
+	Settings.fov_h = clampf(value,60.0,110.0)
+	fov_label.text = "Поле зрения %d° по горизонтали" % int(Settings.fov_h)
 
 
 func _toggle_panel() -> void:
@@ -613,13 +675,13 @@ func _update_help() -> void:
 	var lines: PackedStringArray = []
 	if mode=="fly":
 		lines.append("РАССТАНОВКА · полёт: WASD и мышь, Shift быстрее, Space / C — вверх / вниз")
-		lines.append("ЛКМ — поставить «%s» под прицел (смотрит туда же, куда ты) · ПКМ — убрать · 1–5 — кого ставить" % _type_name(BOT_TYPES[bot_type]))
+		lines.append("ЛКМ — поставить «%s», %s, под прицел (смотрит туда же, куда ты) · ПКМ — убрать · 1–5 — кого · R — что делает" % [_type_name(BOT_TYPES[bot_type]),String(BEHAVIOUR_NAMES[BEHAVIOURS[behaviour]])])
 		lines.append("G — игрок сюда · Del — убрать всех · Backspace — заново (все на местах) · Enter — в тело игрока, игра")
 		if not nav_ready:
 			lines.append("навигация ботов печётся…")
 	else:
-		lines.append("ИГРА · клавиши игры · Tab — любое оружие · F — дверь · Enter — обратно в полёт (боты замрут)")
-	lines.append("Esc — мышь, свет, бессмертие · F1–F8, F9 — свет · F10 — без интерфейса")
+		lines.append("ИГРА · клавиши игры · Tab — любое оружие и конструктор · F — дверь · Enter — обратно в полёт (боты замрут)")
+	lines.append("Esc — мышь, свет, поле зрения, бессмертие · F1–F8, F9 — свет · F10 — без интерфейса")
 	help.text = "\n".join(lines)
 
 
@@ -675,9 +737,11 @@ func _check_run() -> void:
 	await get_tree().process_frame
 	var aimed: Vector3 = _aim_floor()
 	_check("Прицел полёта сверху попадает на крышу",aimed!=Vector3.INF and absf(aimed.y-roof_y)<0.1,str(aimed))
-	var roof_bot: Dictionary = _place_bot(_nav_point(aimed) if _nav_point(aimed)!=Vector3.INF else aimed,0.0,"")
-	_place_bot(Vector3(3.95,float(plan.scale.floor_y[4]),0.0),PI*0.5,"pmc")
-	var room_bot: Dictionary = _place_bot(Vector3(10.6,float(plan.scale.floor_y[1]),-5.0),PI,"gunner")
+	var roof_bot: Dictionary = _place_bot(_nav_point(aimed) if _nav_point(aimed)!=Vector3.INF else aimed,0.0,"","post")
+	_place_bot(Vector3(3.95,float(plan.scale.floor_y[4]),0.0),PI*0.5,"pmc","area")
+	var room_bot: Dictionary = _place_bot(Vector3(10.6,float(plan.scale.floor_y[1]),-5.0),PI,"gunner","post")
+	# патруль: игрок далеко на улице, шума нет — бот всё равно ходит по зданию
+	var walker_bot: Dictionary = _place_bot(Vector3(30.0,float(plan.scale.floor_y[2]),0.0),0.0,"scout","patrol")
 	var frozen_at: Vector3 = (room_bot.node as Node3D).global_position
 	for i: int in range(60):
 		await get_tree().physics_frame
@@ -692,6 +756,9 @@ func _check_run() -> void:
 		moved = maxf(moved,(room_bot.node as Node3D).global_position.distance_to(frozen_at))
 		closest = minf(closest,(room_bot.node as Node3D).global_position.distance_to(noise))
 	_check("В игре бот ожил и пошёл на шум к лестнице",moved>2.0 and closest<4.0,"отошёл на %.1f м, до места шума %.1f м" % [moved,closest])
+	var walked: float = (walker_bot.node as Node3D).global_position.distance_to(walker_bot.at)
+	_check("Бот «патруль по зданию» ходит без шума и без игрока",walked>3.0,"%.1f м от места расстановки" % walked)
+	_check("Бот «пост» стоит на месте",(roof_bot.node as Node3D).global_position.distance_to(roof_bot.at)<1.5,str((roof_bot.node as Node3D).global_position))
 	_check("Бот на крыше стоит на крыше",absf((roof_bot.node as Node3D).global_position.y-roof_y)<0.3,str((roof_bot.node as Node3D).global_position))
 	var opened: int = 0
 	for door: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
@@ -702,6 +769,33 @@ func _check_run() -> void:
 	for i: int in range(30):
 		await get_tree().physics_frame
 	_check("Оружие из окна в руках",player.weapon_id!="" and player.in_range_mode(),player.weapon_id)
+	# конструктор окна оружия: любой обвес без покупки — «Применить» выдаёт собранный ствол в руки
+	var holder: CanvasLayer = CanvasLayer.new()
+	add_child(holder)
+	var builder: WeaponBuilder = WeaponBuilder.open_sandbox(holder,player)
+	await get_tree().process_frame
+	var lists: Dictionary = builder._lists()
+	var items: Array = lists.get("sandbox",[])
+	var placed: String = ""
+	var placed_id: String = ""
+	for i: int in range(items.size()):
+		var id: String = String((items[i] as Dictionary).id)
+		if not WeaponDb.is_optic(id):
+			continue
+		var keys: Array = WeaponBuild.candidate_keys(builder._draft_entry(),id)
+		if keys.is_empty():
+			continue
+		placed = String(keys[0])
+		placed_id = id
+		builder._draft[placed] = {"id": id, "src": {"from": "sandbox", "idx": i, "sub": ""}}
+		break
+	builder._refresh()
+	builder._apply()
+	var mods: Dictionary = player.range_weapon.get("mods",{})
+	_check("Конструктор: прицел из всех обвесов игры встал и ствол в руках",placed!="" and mods.has(placed) and WeaponDb.mod_id(mods[placed])==placed_id,
+		"%s → %s, %s" % [placed_id,placed,str(builder._plan.get("why",""))])
+	builder._close()
+	holder.queue_free()
 	_set_mode("fly")
 	_restart()
 	for i: int in range(10):

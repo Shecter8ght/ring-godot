@@ -12,8 +12,15 @@ const BEND_LIMIT: float = 100.0
 const SPREAD_LIMIT: float = 45.0
 const TWIST_LIMIT: float = 90.0
 const JOINT_ROTATION_LIMIT: float = 180.0
+const BACKUPS_KEPT: int = 30
 
-static var storage_path: String = PATH
+## Путь файла — в метаданных Engine, а не в статической переменной: проверка задавала свой путь, а стенд видел другую
+## копию переменной с настоящим — проверки писали в хваты владельца и в конце удаляли файл (2026-11-02).
+static var storage_path: String:
+	get:
+		return String(Engine.get_meta(&"hand_grips_path", PATH))
+	set(value):
+		Engine.set_meta(&"hand_grips_path", value)
 static var _loaded: bool = false
 static var _enabled: bool = true
 static var _profiles: Dictionary = {}
@@ -56,17 +63,56 @@ static func _ensure() -> void:
 	_loaded = true
 	_profiles = {}
 	_enabled = true
-	var config: ConfigFile = ConfigFile.new()
-	if config.load(storage_path) != OK or int(config.get_value("settings", "version", 0)) != 1:
+	var config: ConfigFile = read_config(storage_path)
+	if config == null:
 		return
 	_enabled = bool(config.get_value("settings", "enabled", true))
+	_profiles = _from_config(config)
+
+
+static func _from_config(config: ConfigFile) -> Dictionary:
+	var result: Dictionary = {}
 	for key: String in config.get_sections():
 		if key == "settings":
 			continue
 		for side: String in SIDES:
 			var raw: Variant = config.get_value(key, side, {})
 			if raw is Dictionary and not (raw as Dictionary).is_empty():
-				put(_profiles, key, side, raw as Dictionary)
+				put(result, key, side, raw as Dictionary)
+	return result
+
+
+## Файл стенда (хваты и позы): несколько попыток — занятый на миг другим процессом файл не должен читаться как пустой.
+## null — файла нет или он другого формата.
+static func read_config(path: String) -> ConfigFile:
+	if not FileAccess.file_exists(path):
+		return null
+	for attempt: int in range(5):
+		var config: ConfigFile = ConfigFile.new()
+		if config.load(path) == OK:
+			return config if int(config.get_value("settings", "version", 0)) == 1 else null
+		OS.delay_msec(60)
+	push_warning("Стенд хвата: не прочитан " + path)
+	return null
+
+
+## Прежний файл настроек — копией в user://backups (последние BACKUPS_KEPT), прежде чем записать новый.
+static func backup(path: String) -> void:
+	# только настоящие файлы владельца: у тестов свои пути, их копии не нужны
+	if not FileAccess.file_exists(path) or not path in [PATH, WeaponPoseProfiles.PATH]:
+		return
+	var folder: String = "user://backups"
+	DirAccess.make_dir_recursive_absolute(folder)
+	var stem: String = path.get_file().get_basename()
+	var stamp: String = Time.get_datetime_string_from_system().replace(":", "").replace("-", "").replace("T", "_")
+	DirAccess.copy_absolute(path, folder.path_join("%s_%s.cfg" % [stem, stamp]))
+	var copies: Array[String] = []
+	for file: String in DirAccess.get_files_at(folder):
+		if file.begins_with(stem + "_"):
+			copies.append(file)
+	copies.sort()
+	while copies.size() > BACKUPS_KEPT:
+		DirAccess.remove_absolute(folder.path_join(copies.pop_front()))
 
 
 static func _vector(value: Variant, limit: float) -> Vector3:
@@ -110,7 +156,16 @@ static func put(profiles: Dictionary, key: String, side: String, value: Dictiona
 	(profiles[key] as Dictionary)[side] = sanitize(value)
 
 
+## Записи стволов, которых нет в черновике, остаются как на диске: 2026-11-01 стенд открылся с пустым черновиком
+## (файл не прочитался), и сохранение одной ГРАНЬ-15 стёрло хваты всех стволов. Удалять записи стенд не умеет —
+## сброс кисти хранится нулями, поэтому дописывать безопасно.
 static func save_profiles(profiles: Dictionary, use_in_game: bool) -> Error:
+	var disk: ConfigFile = read_config(storage_path)
+	if disk != null:
+		var merged: Dictionary = _from_config(disk)
+		merged.merge(profiles.duplicate(true), true)
+		profiles = merged
+	backup(storage_path)
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("settings", "version", 1)
 	config.set_value("settings", "enabled", use_in_game)

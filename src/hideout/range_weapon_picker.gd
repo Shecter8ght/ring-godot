@@ -19,6 +19,9 @@ var _root: Control
 var _list: VBoxContainer
 var _hand_label: Label
 var _return_button: Button
+var _build_button: Button
+## Конструктор ствола со стойки (WeaponBuilder, режим sandbox): пока открыт, окно стойки спрятано, но «открыто».
+var _builder: WeaponBuilder
 ## Свои надетые стволы — взять копию на зал для пристрелки (кнопки пересобираются при открытии).
 var _own_box: HBoxContainer
 var _opened_frame: int = -1
@@ -79,6 +82,11 @@ func _ready() -> void:
 	_return_button.text = "Сдать ствол — взять своё"
 	_return_button.focus_mode = Control.FOCUS_NONE
 	_return_button.pressed.connect(_return_weapon)
+	_build_button = Button.new()
+	_build_button.text = "Собрать в конструкторе — любые обвесы"
+	_build_button.focus_mode = Control.FOCUS_NONE
+	_build_button.pressed.connect(_open_builder)
+	hand.add_child(_build_button)
 	hand.add_child(_return_button)
 	_own_box = HBoxContainer.new()
 	_own_box.add_theme_constant_override("separation", 10)
@@ -95,7 +103,24 @@ func _ready() -> void:
 
 
 func is_open() -> bool:
-	return _root.visible
+	return _root.visible or is_instance_valid(_builder)
+
+
+## Ствол в руках — в конструктор: прицелы, рукоятки, глушители, магазины из всего, что есть в игре.
+func _open_builder() -> void:
+	if _player == null or not _player.in_range_mode():
+		return
+	_root.visible = false
+	var holder: CanvasLayer = CanvasLayer.new()
+	holder.layer = layer + 1
+	add_child(holder)
+	_builder = WeaponBuilder.open_sandbox(holder, _player)
+	_builder.closed.connect(func() -> void:
+		holder.queue_free()
+		_builder = null
+		_refresh_hand()
+		_root.visible = true
+		_opened_frame = Engine.get_process_frames())
 
 
 func open_for(pl: Player) -> void:
@@ -122,6 +147,7 @@ func _process(_delta: float) -> void:
 func _refresh_hand() -> void:
 	var active: bool = _player != null and _player.in_range_mode()
 	_return_button.visible = active
+	_build_button.visible = active
 	if active:
 		_hand_label.text = "В руках со стойки: " + ItemDb.item_name(String(_player.range_weapon.get("id", "")))
 	else:
