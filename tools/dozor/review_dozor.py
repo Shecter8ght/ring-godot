@@ -14,7 +14,8 @@ a=p.parse_args(sys.argv[sys.argv.index('--')+1:])
 out=pathlib.Path(a.out)
 scene=bpy.context.scene
 scene.cycles.samples=40
-scene.world.node_tree.nodes.get('Background').inputs['Strength'].default_value=.25
+if scene.world.name=='Neutral inspection world':
+    scene.world.node_tree.nodes.get('Background').inputs['Strength'].default_value=.25
 base=bpy.data.collections['01 • ДОЗОР Ф-1 • master shape']
 variants=[bpy.data.collections['02 • ДОЗОР Ф-1М • shared housing'],bpy.data.collections['03 • ДОЗОР Ф-1С • shared housing']]
 mount=bpy.data.collections['04 • ДОЗОР-П • independent Picatinny mount']
