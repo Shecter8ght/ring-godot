@@ -621,6 +621,8 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
 
 ## ДОЗОР · рабочее состояние фонарей и крепежа
 
+- Игровые карты ДОЗОР 2K/1K запечены с принятого high-poly/Painter; источники и лицензии сохранены.
+
 - Маски рисунка следов — ambientCG [Fingerprints002](https://ambientcg.com/view?id=Fingerprints002),
   [Scratches002](https://ambientcg.com/view?id=Scratches002) и
   [SurfaceImperfections007](https://ambientcg.com/view?id=SurfaceImperfections007),

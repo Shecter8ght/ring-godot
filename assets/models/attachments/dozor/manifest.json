@@ -1,0 +1,234 @@
+{
+  "triangle_limit_complete_assembly": 5000,
+  "states": [
+    "working100"
+  ],
+  "source": "E:\\Models Blender\\WEAPONS\\ДОЗОР — фонари и крепёж\\models\\DOZOR_Working100_Painter_v01.blend",
+  "source_sha256": "35be0eb80339d152920c71e0f4b5afb9337ebe17db268ca95e2571ef3ed3f0c3",
+  "axes": "Godot native X right, Y up, +Z light emission; glTF export_yup=false avoids a second conversion",
+  "flashlight_root": "tube axis at axial 80.5 mm; emitter at +Z 80.5 mm",
+  "mount_root": "Picatinny mounting datum; FlashlightSocket at Y +24 mm",
+  "roles": "Handheld / mounted first-person attachment and world item, same mesh, automatic import LOD",
+  "triangles": {
+    "f1": 3214,
+    "f1m": 3214,
+    "f1s": 3214,
+    "p": 1780
+  },
+  "nodes": {
+    "f1": {
+      "Bezel": 240,
+      "Clip": 218,
+      "Housing": 1352,
+      "Lens": 124,
+      "ModeButton": 60,
+      "Optics": 524,
+      "PrimaryButton": 60,
+      "TailCap": 636
+    },
+    "f1m": {
+      "Bezel.001": 240,
+      "Clip.001": 218,
+      "Housing.001": 1352,
+      "Lens.001": 124,
+      "ModeButton.001": 60,
+      "Optics.001": 524,
+      "PrimaryButton.001": 60,
+      "TailCap.001": 636
+    },
+    "f1s": {
+      "Bezel.002": 240,
+      "Clip.002": 218,
+      "Housing.002": 1352,
+      "Lens.002": 124,
+      "ModeButton.002": 60,
+      "Optics.002": 524,
+      "PrimaryButton.002": 60,
+      "TailCap.002": 636
+    },
+    "p": {
+      "CapHinge": 578,
+      "ClampPadNegative": 62,
+      "ClampPadPositive": 62,
+      "LockScrew": 140,
+      "MountBody": 910,
+      "MovingJaw": 28
+    }
+  },
+  "atlas": {
+    "F1": {
+      "px_mm": 10.275,
+      "fill": 0.5661,
+      "islands": 202,
+      "packed_islands": 202,
+      "pieces": 202,
+      "groups": 22,
+      "group_members": 172,
+      "stacked_rigid": 0,
+      "stacked_mirror": 0,
+      "margin_px": 12,
+      "group_margin_px": 6,
+      "stack": false,
+      "stitch": false,
+      "hidden_pool": false,
+      "holes": true,
+      "score": "bl",
+      "order": "side",
+      "stitched_islands": 0,
+      "units": 0,
+      "eyes": [],
+      "loss_pixel_round": 0.011,
+      "loss_margins": 0.1793,
+      "loss_empty": 0.2437,
+      "empty_below_skyline": 0.2011,
+      "in_holes": 117,
+      "k_visible": [
+        1.0,
+        1.0
+      ],
+      "tries": [
+        [
+          10.128,
+          true,
+          1.1
+        ],
+        [
+          10.938,
+          false,
+          0.7
+        ],
+        [
+          10.525,
+          false,
+          0.7
+        ],
+        [
+          10.324,
+          false,
+          0.7
+        ],
+        [
+          10.225,
+          true,
+          1.0
+        ],
+        [
+          10.275,
+          true,
+          1.1
+        ]
+      ],
+      "sec": 5.4,
+      "verify": {
+        "out_of_square": 0,
+        "px_closer_than_group_margin": 0,
+        "px_groups_closer_than_margin": 0,
+        "checked_islands": 202
+      }
+    },
+    "P": {
+      "px_mm": 5.695,
+      "fill": 0.6293,
+      "islands": 129,
+      "packed_islands": 129,
+      "pieces": 129,
+      "groups": 14,
+      "group_members": 90,
+      "stacked_rigid": 0,
+      "stacked_mirror": 0,
+      "margin_px": 12,
+      "group_margin_px": 6,
+      "stack": false,
+      "stitch": false,
+      "hidden_pool": false,
+      "holes": true,
+      "score": "bl",
+      "order": "area",
+      "stitched_islands": 0,
+      "units": 0,
+      "eyes": [],
+      "loss_pixel_round": 0.0121,
+      "loss_margins": 0.241,
+      "loss_empty": 0.1177,
+      "empty_below_skyline": 0.103,
+      "in_holes": 20,
+      "k_visible": [
+        1.0,
+        1.0
+      ],
+      "tries": [
+        [
+          5.324,
+          true,
+          0.3
+        ],
+        [
+          5.75,
+          false,
+          0.2
+        ],
+        [
+          5.533,
+          true,
+          0.3
+        ],
+        [
+          5.64,
+          true,
+          0.3
+        ],
+        [
+          5.695,
+          true,
+          0.3
+        ],
+        [
+          5.722,
+          false,
+          0.3
+        ]
+      ],
+      "sec": 1.6,
+      "verify": {
+        "out_of_square": 0,
+        "px_closer_than_group_margin": 0,
+        "px_groups_closer_than_margin": 0,
+        "checked_islands": 129
+      }
+    }
+  },
+  "texture_size": {
+    "F1": 2048,
+    "P": 1024
+  },
+  "uv_limit": "Below 80%: 12/6-pixel safety margins and curved/end-face islands. Four pack variants tried; maps not enlarged.",
+  "movable": {
+    "flashlight": [
+      "Clip",
+      "PrimaryButton",
+      "ModeButton",
+      "TailCap",
+      "Bezel"
+    ],
+    "mount": [
+      "CapHinge",
+      "MovingJaw",
+      "LockScrew",
+      "ClampPadNegative",
+      "ClampPadPositive"
+    ]
+  },
+  "controls": {
+    "CapHinge": {
+      "axis": "Z",
+      "open_deg": 65,
+      "pivot_m": [
+        -0.0155,
+        0.024,
+        0
+      ]
+    }
+  },
+  "collision": "Separate simple shapes in DozorAsset loader; no HP collision",
+  "integration": "Assets and validation stand only; gameplay, prices and FPS hands unchanged"
+}
