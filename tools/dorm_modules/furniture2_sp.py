@@ -1,11 +1,12 @@
 """Мебель общежития, партия 2 (кухня, умывальня, туалеты), текстуры: тот же конвейер Painter, что у мебели партии 1
 (furniture_sp.py) — свои папки, спецификация finish-spec-2.json, наборы и пара слотов «пласть — кромка».
 
-  python -X utf8 tools/dorm_modules/furniture2_sp.py projects|stack|variants [набор …]
+  python -X utf8 tools/dorm_modules/furniture2_sp.py projects|stack|variants|wear [набор …]
 
 Свой экземпляр Painter (папка заданий _asset_src/dorm_furniture2/sp_jobs), проекты 2K, стек отделок по finish-spec-2.json,
 печать слоем (furniture2_prints.py: ободки посуды, шкалы панели плиты, марка на дверце духовки), варианты — пласти ДСП
-и кромки меняются парой («орех» → «бук» → крашеные белые / голубые).
+и кромки меняются парой («орех» → «бук» → крашеные белые / голубые). wear — этап 2: печать и группа «Этап 2 — износ»
+(sp_furniture2_wear.py) над отделкой каждого варианта (код варианта — построителю: у крашеных свой износ) → maps_worn.
 """
 from __future__ import annotations
 
@@ -28,9 +29,30 @@ F.PAIRS = {"chip": "edge"}
 F.ITEMS = {"furn_stove": 850, "furn_sink": 850, "furn_counter": 850, "furn_dining": 1200, "furn_wallcab": 800,
            "furn_dishrack": 800, "furn_pot": 280, "furn_kettle": 260, "furn_pan": 410, "furn_can": 410, "furn_bucket": 330,
            "furn_basin": 550, "furn_mirror": 600, "furn_toilet": 2100, "furn_stall": 1950}
+F.WEAR = "sp_furniture2_wear"
+
+
+def wear(names: list[str]) -> None:
+    """Этап 2: отделка + печать + износ на каждом варианте и на основном наборе → maps_worn/<набор>[__<код>]; карты
+    принятого этапа 1 в maps не трогаются, основной стек с износом сохраняется в проект последним."""
+    import json
+    F.wait_shelves()
+    spec = json.loads(F.SPEC.read_text(encoding="utf-8"))
+    for name in names:
+        meshes = F.open_and_meshes(name)
+        for code, swap in F.variant_swaps(spec, name, meshes):
+            parts, _ = F.parts_for(spec, name, meshes, swap)
+            marker = f"_wear_{name}_{code}.txt"
+            (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+            F.build_and_export(name, parts, F.SRC / "maps_worn" / f"{name}__{code}", marker, save=False, wear=True,
+                               wear_args=f", variant='{code}'")
+        parts, _ = F.parts_for(spec, name, meshes)
+        marker = f"_wear_{name}.txt"
+        (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+        F.build_and_export(name, parts, F.SRC / "maps_worn" / name, marker, save=True, wear=True)
 
 
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     todo = rest or list(F.ITEMS)
-    {"projects": F.projects, "stack": F.stack, "variants": F.variants}[mode](todo)
+    {"projects": F.projects, "stack": F.stack, "variants": F.variants, "wear": wear}[mode](todo)

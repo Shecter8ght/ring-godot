@@ -247,6 +247,15 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
                                                               # tools/dorm_modules/furniture2_sp.py projects|stack|variants (finish-spec-2.json, свой экземпляр,
                                                               # FINISH_SP_JOBS=_asset_src/dorm_furniture2/sp_jobs); просмотр — furniture2_review.py -- <карты> <выход.blend>
                                                               # на файле развёртки (варианты отделки — копиями с подписью)
+python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # мебель партия 2, износ (этап 2): места в развёртке —
+                                                              # кромки своей картой (расстояние до выпуклого ребра: генератор кривизны Painter
+                                                              # на панелях давал полосу в ладонь), удары точками, жир и пригар плиты, ржавчина
+                                                              # у выпуска, разбухшая ДСП, пятна / кольца / порезы на столешницах, потёки и налёт
+                                                              # в чашах, трещины глазури, ржавые потёки бачка, чешуйки краски кабинок и пятна
+                                                              # амальгамы шумом с порогом → _asset_src/dorm_furniture2/wear; Painter —
+                                                              # furniture2_sp.py wear [набор …] (построитель sp_furniture2_wear.py, код варианта
+                                                              # отделки — ему: у крашеных свой износ) → maps_worn; просмотр — furniture2_review.py
+                                                              # -- <maps_worn> <…_worn_v01.blend>
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);
