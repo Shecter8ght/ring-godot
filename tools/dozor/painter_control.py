@@ -1,7 +1,7 @@
 """Send jobs only to the dedicated DOZOR Painter bridge; bounded per-call waits."""
 import os,pathlib,sys
 ROOT=pathlib.Path(__file__).resolve().parents[2]
-os.environ['FINISH_SP_JOBS']=str(ROOT/'_asset_src/dozor/painter_jobs')
+os.environ['FINISH_SP_JOBS']=os.environ.get('DOZOR_SP_JOBS',str(ROOT/'_asset_src/dozor/painter_jobs'))
 sys.path.insert(0,str(ROOT/'tools/asset_kit/finish'))
 import sp_run
 if sys.argv[1]=='wait':

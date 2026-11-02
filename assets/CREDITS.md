@@ -618,3 +618,14 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   использование и изменение, в том числе в коммерческих работах), запечён в карты цвета `tools/prospekt_vehicles/livery.py`.
   Файл шрифта в игру не входит: `_asset_src/fonts/DejaVuSans-Bold.ttf` + `license.txt` (из matplotlib системного Python).
   Названия фирм вымышленные, гербов и эмблем нет.
+
+## ДОЗОР · рабочее состояние фонарей и крепежа
+
+- Маски рисунка следов — ambientCG [Fingerprints002](https://ambientcg.com/view?id=Fingerprints002),
+  [Scratches002](https://ambientcg.com/view?id=Scratches002) и
+  [SurfaceImperfections007](https://ambientcg.com/view?id=SurfaceImperfections007),
+  [CC0 1.0](https://docs.ambientcg.com/license/). Библиотечные узоры; не заявлены как фотографические сканы.
+  Оригиналы, SHA-256, уровни и частичный кроп — `_asset_src/dozor/wear/sources.json` и
+  `tools/dozor/wear_masks.py`. Места следов вычислены по геометрии ДОЗОР, не перенесены с другого оружия.
+  Ресурсы встроены в отдельный редактируемый проект Painter `DOZOR_working100_v01.spp`;
+  заводские материалы, маркировка и принятые исходники сохранены.

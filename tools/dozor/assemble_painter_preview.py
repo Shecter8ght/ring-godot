@@ -1,13 +1,19 @@
 """Preview the actual Painter exports on the unchanged editable high-poly source."""
-import bpy,json,pathlib,hashlib
+import bpy,json,pathlib,hashlib,argparse,sys
 ROOT=pathlib.Path('E:/Games/RING-godot')
 OUT=pathlib.Path('E:/Models Blender/WEAPONS/ДОЗОР — фонари и крепёж')
 sc=bpy.context.scene
 spec=json.loads((OUT/'finish-spec.json').read_text(encoding='utf-8'))
+p=argparse.ArgumentParser();p.add_argument('--stage',choices=['factory','working100'],default='factory')
+args=p.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+stage=args.stage
+if stage=='factory' and spec.get('accepted'):raise RuntimeError('Accepted factory preview is immutable; use a new version')
+label='factory' if stage=='factory' else 'working100'
+project='DOZOR_factory_v01.spp' if stage=='factory' else 'DOZOR_working100_v01.spp'
 
 def mat(key,texset,glass=False):
-    folder=OUT/'textures/factory'/key
-    m=bpy.data.materials.new('DOZOR_'+key+' • Painter factory')
+    folder=OUT/'textures'/stage/key
+    m=bpy.data.materials.new('DOZOR_'+key+' • Painter '+label)
     m.use_nodes=True;nt=m.node_tree;nt.nodes.clear()
     out=nt.nodes.new('ShaderNodeOutputMaterial');out.location=(600,0)
     bs=nt.nodes.new('ShaderNodeBsdfPrincipled');bs.location=(300,0)
@@ -34,8 +40,8 @@ def mat(key,texset,glass=False):
         bs.inputs['IOR'].default_value=1.52
         bs.inputs['Thin Film Thickness'].default_value=110
         bs.inputs['Thin Film IOR'].default_value=1.38
-    m['authoring']='Substance 3D Painter • DOZOR_factory_v01.spp'
-    m['stage']='Factory finish; no wear'
+    m['authoring']='Substance 3D Painter • '+project
+    m['stage']='Factory finish; no wear' if stage=='factory' else 'Accepted factory plus toggleable working100 wear'
     return m
 
 mats={v:mat(v,'DOZOR_F1') for v in ('F1','F1M','F1S')}
@@ -68,17 +74,20 @@ for area in bpy.context.screen.areas:
         sp=area.spaces.active;sp.shading.type='RENDERED';sp.clip_start=.001
         sp.region_3d.view_location=(.07,.025,.035);sp.region_3d.view_distance=.26
 bpy.ops.file.pack_all()
-path=OUT/'models/DOZOR_Factory_Painter_v01.blend'
+path=OUT/'models'/('DOZOR_Factory_Painter_v01.blend' if stage=='factory' else 'DOZOR_Working100_Painter_v01.blend')
 bpy.ops.wm.save_as_mainfile(filepath=str(path))
-spec['model']=str(path);spec['painter_project']=str(OUT/'painter/DOZOR_factory_v01.spp')
-spec['authoring']='Substance 3D Painter; native editable layer stacks; exact catalogue functions sp_finish.build_set'
-spec['accepted']=False
-spec['texture_sets']={'DOZOR_F1':4096,'DOZOR_P':2048,'DOZOR_LENS':512}
+if stage=='factory':
+    spec['model']=str(path);spec['painter_project']=str(OUT/'painter'/project)
+    spec['authoring']='Substance 3D Painter; native editable layer stacks; exact catalogue functions sp_finish.build_set'
+    spec['accepted']=False
+    spec['texture_sets']={'DOZOR_F1':4096,'DOZOR_P':2048,'DOZOR_LENS':512}
+else:
+    spec.setdefault('wear',{}).update({'accepted':False,'state':'working100','model':str(path),'painter_project':str(OUT/'painter'/project)})
 (OUT/'finish-spec.json').write_text(json.dumps(spec,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 manifest=[]
 for im in bpy.data.images:
     if im.source=='FILE' and im.packed_file:
         manifest.append({'image':im.name,'colorspace':im.colorspace_settings.name,'size':list(im.size),
                          'sha256':hashlib.sha256(im.packed_file.data).hexdigest()})
-(OUT/'checks/factory-packed-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
-print('FACTORY PREVIEW READY',path,flush=True)
+(OUT/('checks/'+stage+'-packed-manifest.json')).write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+print(stage.upper(),'PREVIEW READY',path,flush=True)

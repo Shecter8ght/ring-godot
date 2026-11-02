@@ -35,6 +35,7 @@ views={
 '10':('10_picatinny',(.018,-.145,.110),(.0805,-.064,.030),.110,[mount.name],False,False),
 '11':('11_marking_surface',(.019,0,.12),(.019,0,.051),.047,[base.name],False,False),
 '12':('12_marking_raking',(.025,.095,.105),(.019,0,.050),.047,[base.name],False,False),
+'13':('13_grip_contact',(.080,-.095,.125),(.080,0,.040),.066,[base.name],False,False),
 }
 if a.save:
     # Update the saved studio only; ensure all mesh variants remain visible in the file.
