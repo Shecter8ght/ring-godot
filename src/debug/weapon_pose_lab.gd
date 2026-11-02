@@ -90,6 +90,8 @@ func _build_catalog() -> void:
 			continue
 		var item: Dictionary = WeaponDb.items()[id]
 		_catalog.append({"id": id, "preset": "", "name": String(item.get("name", id))})
+		if String(WeaponDb.weapon(id).get("class", "")) == "PISTOL":
+			_catalog.append({"id": id, "preset": "", "handheld": "tac_flashlight_01", "name": String(item.get("name", id)) + " · ДОЗОР в левой руке"})
 		# Рукоятки доступны и без готового пресета из песочницы.
 		for raw_grip: Variant in WeaponDb.ids("attachments"):
 			var grip_id: String = String(raw_grip)
@@ -110,6 +112,11 @@ func _build_catalog() -> void:
 		_panel.weapons.add_item(String(_catalog[index].name))
 		if String(_catalog[index].id) == "wpn_ar_01" and String(_catalog[index].preset) == "" and not _catalog[index].has("grip"):
 			_weapon_index = index
+	if OS.get_cmdline_user_args().has("dozor"):
+		for index: int in range(_catalog.size()):
+			if String(_catalog[index].id) == "wpn_hg_02" and _catalog[index].has("handheld"):
+				_weapon_index = index
+				break
 
 
 func _select_weapon(index: int) -> void:
@@ -122,12 +129,16 @@ func _select_weapon(index: int) -> void:
 	_weapon_index = index
 	_panel.weapons.select(index)
 	var entry: Dictionary = _catalog[index]
+	_player.handheld_flashlight.stow()
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 54
 	var weapon: Dictionary = WeaponDb.bare_weapon(String(entry.id), rng, [100, 100]) if String(entry.preset) == "" else WeaponDb.make_weapon(String(entry.preset), rng, [100, 100])
 	if entry.has("grip"):
 		weapon = WeaponBuild.insert(weapon, "underbarrel", {"id": String(entry.grip), "dur": 100.0})[0] as Dictionary
 	_player.set_range_weapon(weapon)
+	if entry.has("handheld"):
+		_player.inventory.items = [ItemDb.make(String(entry.handheld), 1)]
+		_player.handheld_flashlight.toggle()
 	# На открытом стенде физика Player остановлена, поэтому обновляем видимые поля
 	# сразу: обычный игровой тик ещё не успел перенести обвес и магазин из экземпляра.
 	var held: Dictionary = _player.weapon_entry()
@@ -197,7 +208,7 @@ func _hand_side() -> String:
 
 
 func _hand_key() -> String:
-	return String(HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods)[_hand_side()])
+	return String(HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods, _player.handheld_light_on)[_hand_side()])
 
 
 func _refresh_hand_values() -> void:
@@ -209,13 +220,16 @@ func _refresh_hand_values() -> void:
 	if _player.weapon_id == "signal_launcher":
 		_panel.grip.context.text += " Ракетницу держат одной рукой; левая помогает только при перезарядке."
 	_panel.grip.context.visible = (_hand_side() == "Left" and attachment != "") or _player.weapon_id == "signal_launcher"
+	if _player.handheld_light_on and _hand_side() == "Left":
+		_panel.grip.context.text = "Левая кисть · ДОЗОР. Отдельный хват; фонарь следует за положением и поворотом кисти."
+		_panel.grip.context.visible = true
 	_panel.grip.transfer_scope.set_item_disabled(1, _player.weapon_id == "signal_launcher")
 	if _player.weapon_id == "signal_launcher" and _panel.grip.transfer_scope.selected == 1:
 		_panel.grip.transfer_scope.select(2)
 
 
 func _copy_hand_grip(sides: Array[String]) -> bool:
-	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods)
+	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods, _player.handheld_light_on)
 	var hands: Dictionary = {}
 	var copied: Array[String] = []
 	for side: String in sides:
@@ -235,7 +249,7 @@ func _copy_hand_grip(sides: Array[String]) -> bool:
 func _paste_hand_grip() -> bool:
 	if _hand_buffer.is_empty():
 		return false
-	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods)
+	var keys: Dictionary = HandGripProfiles.keys(_player.weapon_id, _player.weapon_mods, _player.handheld_light_on)
 	var hands: Dictionary = _hand_buffer.hands as Dictionary
 	var applied: Array[String] = []
 	for side: String in hands:

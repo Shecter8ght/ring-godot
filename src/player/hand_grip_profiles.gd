@@ -28,8 +28,10 @@ static var _profiles: Dictionary = {}
 
 ## Правая кисть общая для ствола; левая — отдельная для каждой рукоятки / устройства
 ## под цевьём. Смена прицела не теряет хват, а передвижение рукоятки сохраняет поправку.
-static func keys(weapon: String, mods: Dictionary) -> Dictionary:
+static func keys(weapon: String, mods: Dictionary, handheld: bool = false) -> Dictionary:
 	var support: String = ""
+	if handheld and String(WeaponDb.weapon(weapon).get("class", "")) == "PISTOL":
+		support = "dozor"
 	if String(WeaponDb.weapon(weapon).get("model", "")) != "pistol":
 		var under: String = WeaponGrips._under_key(mods)
 		if under != "":

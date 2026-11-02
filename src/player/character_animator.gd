@@ -589,7 +589,7 @@ func _process(delta: float) -> void:
 	if _support:
 		# с пистолетом — вторая рука на рукоятке только в прицеле (на ходу клипы держат одной)
 		var hold := _grip != null and _grip.visible and family != "unarmed" and not downed \
-			and not FREE_LEFT_HAND.has(_one_shot) and (family != "pistol" or aiming)
+			and not FREE_LEFT_HAND.has(_one_shot) and (family != "pistol" or aiming or (_actor is Player and (_actor as Player).handheld_light_on))
 		var held: Node3D = held_model(_grip)
 		# риг ищется обходом всей модели ствола — только когда в руке другая модель
 		if held != _rig_model:

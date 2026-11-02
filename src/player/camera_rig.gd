@@ -882,6 +882,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	for n in _viewmodel.find_children("LaserBeam*", "Node3D", true, false):
 		(n as Node3D).visible = Player.tac_on(pl.weapon_mods, n, "laser")
 	for n in _viewmodel.find_children("Flashlight*", "SpotLight3D", true, false):
+		if String(n.get_meta("mount", "")) == "handheld":
+			continue # HandheldFlashlight owns this light, outside weapon.mods.
 		(n as SpotLight3D).visible = Player.tac_on(pl.weapon_mods, n, "light")
 	var az: float = _viewmodel.get_meta("ads_z", 0.25)
 	var line: Vector3 = _aim_line(_viewmodel, "cant" if pl.aim_cant else String(spec.get("sight", "primary")), delta)
@@ -962,6 +964,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		else:
 			_arms.set_hand_target("Left", null, 0.0)
 		_arms.collision_exclude = [pl.get_rid()]
+		pl.handheld_flashlight.prepare_fps(_viewmodel, _arms)
 		_arms.update_pose()
 		if not _arms.arms_clear:
 			_viewmodel.visible = false
