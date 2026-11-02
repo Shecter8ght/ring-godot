@@ -191,7 +191,7 @@ python -X utf8 tools/build_dorm.py                            # общежити
                                                               # data/blockouts/dorm.json, scenes/levels/dorm_study.tscn, docs/plans/dorm.png; режимы и замеры — docs/design/dorm_light_test.md
                                                               # вертикальные пути (5 открытых этажей, 5-й — техэтаж, пожарные лестницы, проломы, люки) — docs/design/dorm_routes.md
 tools/dorm_study.cmd                                         # старт — выбранный владельцем вечер Б (VoxelGI) со светом «как в Таркове»; F1–F4 — вечер А / Б, ночь А, пасмурно А; F5 — холодные коридоры 4400 K, F6 — ночь Б, F7 — Б без оконных источников, F8 — пробная ночная луна (при старте выключена); F9 — выключить / включить свет «как в Таркове» (зоны окружения, основной), F10 или U — скрыть весь интерфейс (для записи ролика); L — расставить свет (колесо — вид, ЛКМ / ПКМ — поставить / убрать, сразу в dorm_found_lights.json);
-                                                              # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь, M — план, 1–9/0 и N/B — места
+                                                              # Esc — мышь / FOV 60–110° / SSIL, пыль, обработка; E — дверь или ящик (открыть), M — план, 1–9/0 и N/B — места
 tools/godot.cmd --headless --fixed-fps 60 res://tools/dorm_study.tscn -- verify # 178 проверок: 97 помещений пешком (4 жилых этажа и технический зал),
                                                               # лестница до крыши, обе пожарные лестницы, проломы-скаты П1 и П3, 8 проломов в стенах, провал С1;
                                                               # кучи П2 и П4 (наверх на руках) и люк Л (вертикальная лестница) — по высотам, ходок их не лезет
@@ -200,7 +200,7 @@ tools/godot.cmd --windowed --resolution 1600x900 --script res://tools/dorm_ui_ch
 tools/dorm_play.cmd                                           # общежитие с настоящим игроком и ботами при свете стенда: в полёте расставить ботов где угодно
                                                               # (ЛКМ / ПКМ, 1–5 — кого, R — патруль по зданию / обход рядом / пост, G — игрок сюда, Backspace — заново),
                                                               # Enter — в тело игрока, боты оживают; Tab — любое оружие игры и конструктор (любые обвесы без покупки),
-                                                              # F — дверь, Esc — свет, поле зрения, бессмертие; --headless res://tools/dorm_play.tscn -- check — навмеш, пути ботов
+                                                              # F — дверь или ящик (открыть), Esc — свет, поле зрения, бессмертие; --headless res://tools/dorm_play.tscn -- check — навмеш, пути ботов
                                                               # до крыши, техэтажа и пожарных лестниц, расстановка, патруль и пост, конструктор; -- shots — снимки dorm/play_*
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dorm_study.tscn -- shots # r6.1: 42 затронутых вида + шесть ночных пар с луной; 36 новых серий FPS/GPU → light_* / light61_*; «до» — light6_*; общая матрица 149 кадров / 83 серии
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/dorm_study.tscn -- bake # шесть объёмов VoxelGI трёх этажей (~4 с), цвета шейдера учтены; источники динамические, LightmapGI нет
@@ -208,7 +208,7 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/dor
                                                               # src/blockout/dorm_v3) при свете «вечер Б»: снимки docs/screens/dorm/v3 и время кадра на видеокарте
                                                               # (DORM_V3_VIEWS=01_corridor,04_wash — выборочно; архивы пробы света не трогает);
                                                               # с модулями Blender (dorm_modules.gd: двери, окна, батареи); свои кадры —
-                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*); DORM_V3_CASE=overcast_A — другой свет; DORM_V3_FILL=1 — свет от камеры; DORM_V3_TARKOV=0 — без «как в Таркове»
+                                                              # DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (крупные планы v3_m_*); DORM_V3_CASE=overcast_A — другой свет; DORM_V3_FILL=1 — свет от камеры; DORM_V3_TARKOV=0 — без «как в Таркове»; DORM_V3_LOOT=open — ящики партии 3 открыты
 tools/godot.cmd --headless --script res://tools/dorm_v3_check.gd # материалы v03 в движке: карты и форматы (поля EXR без сжатия), шейдеры, палитра стенда, модули и их места
 python -X utf8 tools/dorm_modules/godot_textures.py           # карты v03 из комплекта модулей → assets/textures/dorm_v3 (+ .import, шум износа); затем --import
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Dorm_Modules/models/RING_Dorm_Modules_v03.blend" --python-exit-code 1 --python tools/dorm_modules/godot_export.py
@@ -296,6 +296,15 @@ python -X utf8 tools/dorm_modules/items3_wear_zones.py [набор …] # вещ
                                                               # затёртые клавиши, надписи на обложках тетрадей, потёртые углы и корешки → _asset_src/dorm_items3/wear;
                                                               # Painter — items3_sp.py wear [набор …] (построитель sp_items3_wear.py; свой износ у каждого варианта отделки
                                                               # и картинки) → maps_worn; просмотр — items3_review.py -- <maps_worn> <…/RING_Dorm_Items_worn_v01.blend>
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Items_uv_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/items3_game.py [-- набор …]
+                                                              # вещи партии 3, игровые версии (бюджет «средне»: крупное и бумага 1K, мышь, тетради, учебник 512; листы плакатов
+                                                              # и чертежей, ткань сумки, чемодан, тубус, мышь упрощены с запеканием нормали): каждое состояние формы — своя модель
+                                                              # (it_ammo / it_ammo_open, it_frame_fallen, it_pc_opened …), у открытых ящиков и чемодана крышка и створка — узлы
+                                                              # с углом открытия (movers: open) → assets/models/dorm/furniture (тот же furniture.json); --import, python -X utf8
+                                                              # tools/dorm_modules/furniture_imports.py, --import; расстановка — furnish_rooms.py (комнаты по виду, коридоры, вахта,
+                                                              # комната отдыха, кладовые, клетка техэтажа); ящики, сундук, ящик для инструментов, чемодан, сумка, коробка
+                                                              # обыскиваются (item.loot → LootContainer, таблицы dorm_* в data/loot.json; стенд — src/blockout/dorm_loot_box.gd:
+                                                              # после обыска открытая модель, крышка доводится до открытой; в стенде открыть — E в прогулке, F в dorm_play)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);

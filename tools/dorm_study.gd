@@ -84,7 +84,7 @@ func _ready() -> void:
 					break
 			print("dorm: стартовый свет · ",plan.environment.cases[int(lighting.get("case_index"))].label)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		print("dorm: прогулка · WASD, Shift, C, Space · E дверь · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 / U скрыть интерфейс · L расставить свет · Esc мышь / FOV 60–110°")
+		print("dorm: прогулка · WASD, Shift, C, Space · E дверь, ящик · M план · 1–9/0 и N/B места · F полёт · H подписи · F9 как в Таркове · F10 / U скрыть интерфейс · L расставить свет · Esc мышь / FOV 60–110°")
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		walker.set("is_probe", true)
@@ -153,7 +153,7 @@ func _ui() -> void:
 	help.offset_bottom = -14
 	help.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	help.text = "F10 или U — скрыть весь интерфейс (для записи) · WASD · Shift бег · C присесть · Space прыжок · E дверь · F полёт (Space вверх / Ctrl вниз)"
+	help.text = "F10 или U — скрыть весь интерфейс (для записи) · WASD · Shift бег · C присесть · Space прыжок · E дверь, ящик · F полёт (Space вверх / Ctrl вниз)"
 	help.text += "\nM план · 1–9 / 0 места · N / B следующее / предыдущее · R вход · H подписи · Esc мышь / угол зрения · L расставить свет"
 	help.text += "\nF1–F4 свет · F5 холодные коридоры · F6 ночь Б · F7 Б без оконных источников · F8 ночная луна · F9 как в Таркове"
 	help.add_theme_font_size_override("font_size", 16)
@@ -230,7 +230,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			var hit: Dictionary = _ray(camera.global_position,camera.global_position-camera.global_basis.z*3.0)
 			if not hit.is_empty():
 				var leaf: Node = (hit.collider as Node).get_parent()
-				if leaf.is_in_group("dorm_study_doors"):
+				# ящик партии 3 (коробка столкновений — в сетке модели): открыть, как при обыске
+				var box: Node = leaf
+				while box!=null and not box.is_in_group("dorm_loot_boxes"):
+					box = box.get_parent()
+				if box!=null:
+					box.call("open")
+				elif leaf.is_in_group("dorm_study_doors"):
 					# Обе створки одной двери переключаются вместе.
 					var uid: String = String((leaf.get("data") as Dictionary).door_uid)
 					var open_door: bool = not bool(leaf.get("is_open"))
@@ -643,6 +649,10 @@ func _v3_shots() -> void:
 	var fails: int = 0
 	for leaf: Node in get_tree().get_nodes_in_group("dorm_study_doors"):
 		leaf.call("reset_pose")
+	# DORM_V3_LOOT=open — ящики, чемоданы, сумки и коробки партии 3 открыты, как после обыска
+	if OS.get_environment("DORM_V3_LOOT")=="open":
+		for box: Node in get_tree().get_nodes_in_group("dorm_loot_boxes"):
+			box.call("open")
 	# свои кадры: DORM_V3_VIEW="имя:x:y:z:куда_x:куда_y:куда_z;…" (глаз и точка взгляда в метрах); с ними штатные — только из DORM_V3_VIEWS
 	# DORM_V3_FILL=1 — свет от камеры, как фонарь в руке: проверить мелочь и следы в тёмных местах
 	if OS.get_environment("DORM_V3_FILL")!="":

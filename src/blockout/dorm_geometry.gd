@@ -24,7 +24,11 @@ const PROP_DIR: String = "res://assets/models/dorm/props"
 ## мебель партии 2 (furniture2_game.py): серые умывальники, зеркала и чаши унитазов тоже снимаются.
 const FURNITURE_PATH: String = "res://data/blockouts/dorm_furniture.json"
 const FURNITURE_DIR: String = "res://assets/models/dorm/furniture"
-const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress", "ceramic", "basin", "mirror"]
+## «wood» — серые ящики в клетке техэтажа (их место заняли ящики партии 3) и серый экран на столе вахтёра («frame»).
+const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress", "ceramic", "basin", "mirror", "wood"]
+## Вещи партии 3 (items3_game.py) — в той же папке и index; ящики, которые обыскивают (item.loot), — DormLootBox.
+const LootBox = preload("res://src/blockout/dorm_loot_box.gd")
+const LOOT_SCENE: PackedScene = preload("res://scenes/world/loot_container.tscn")
 ## Электрика — светильники, выключатели, розетки, коробки, провода и 1–2 мигающих на этаж (dorm_electrics.gd); без
 ## моделей её нет.
 const Electrics = preload("res://src/blockout/dorm_electrics.gd")
@@ -141,7 +145,11 @@ func rebuild() -> void:
 			_add_prop(item)
 	var index: Dictionary = _read_json(FURNITURE_DIR+"/furniture.json")
 	for item: Dictionary in furniture.get("furniture",[]):
-		if String(item.get("section",""))==section_id:
+		if String(item.get("section",""))!=section_id:
+			continue
+		if item.has("loot"):
+			_add_loot_box(item,index)
+		else:
 			_add_furniture(item,index.get(String(item.model),{}))
 	if Electrics.available():
 		var electrics: RefCounted = Electrics.new()
@@ -347,10 +355,60 @@ func _cleared(mat: String, at: Vector3) -> bool:
 ## карты textures/<набор>__<код>_* вместо карт материала набора; pose — подвижное (index movers); solid — коробки
 ## столкновений: по доскам из index colliders (кабинки), иначе по габариту каждой сетки.
 func _add_furniture(item: Dictionary, info: Dictionary) -> void:
+	var node: Node3D = _furniture_node(item,info)
+	if node!=null:
+		add_child(node)
+
+
+## Ящик, который обыскивают (партия 3, item.loot: name, table, search, open — модель открытого): узел DormLootBox с
+## закрытой моделью и скрытой открытой, точка обыска LootContainer — над серединой верха; в игре её ведёт Raid, в стенде
+## ящик открывается клавишей (open()).
+func _add_loot_box(item: Dictionary, index: Dictionary) -> void:
+	var info: Dictionary = index.get(String(item.model),{})
+	var closed: Node3D = _furniture_node(item,info)
+	if closed==null:
+		return
+	var loot: Dictionary = item.loot as Dictionary
+	var open_id: String = String(loot.get("open",item.model))
+	var opened: Node3D = null
+	if open_id!=String(item.model):
+		var spec: Dictionary = item.duplicate()
+		spec.model = open_id
+		spec.erase("pose")
+		spec.erase("solid")
+		opened = _furniture_node(spec,index.get(open_id,{}))
+	var box: Node3D = LootBox.new()
+	box.name = String(item.id)
+	box.transform = closed.transform
+	closed.transform = Transform3D.IDENTITY
+	closed.name = "Закрыт"
+	box.add_child(closed)
+	if opened!=null:
+		opened.transform = Transform3D.IDENTITY
+		opened.name = "Открыт"
+		box.add_child(opened)
+	box.call("setup",closed,opened,index.get(open_id,{}),item.get("pose",{}))
+	box.add_to_group("dorm_loot_boxes")
+	if not Engine.is_editor_hint():
+		var aabb: Dictionary = info.get("aabb",{"center": [0,0,0],"size": [0,0,0]})
+		var c: LootContainer = LOOT_SCENE.instantiate() as LootContainer
+		c.name = "Loot"
+		c.display_name = String(loot.get("name","Ящик"))
+		c.table = String(loot.get("table","storage"))
+		c.search_s = float(loot.get("search",2.0))
+		c.require_line_of_sight = true
+		c.position = Vector3(float(aabb.center[0]),float(aabb.center[1])+float(aabb.size[1])*0.5+0.02,float(aabb.center[2]))
+		c.opened.connect(box.call.bind("open"))
+		box.add_child(c)
+	add_child(box)
+
+
+## Узел мебели (не добавлен в дерево): модель, поза, материалы, коробки столкновений; null — модели нет.
+func _furniture_node(item: Dictionary, info: Dictionary) -> Node3D:
 	var model: String = String(item.model)
 	var path: String = "%s/%s.gltf" % [FURNITURE_DIR,model]
 	if not ResourceLoader.exists(path):
-		return
+		return null
 	var node: Node3D = (load(path) as PackedScene).instantiate() as Node3D
 	node.name = String(item.id)
 	node.position = _vec(item.at)
@@ -380,7 +438,7 @@ func _add_furniture(item: Dictionary, info: Dictionary) -> void:
 			var aabb: AABB = mesh_node.get_aabb()
 			mesh_node.add_child(_box_body(aabb.get_center(),aabb.size))
 	node.add_to_group("dorm_furniture")
-	add_child(node)
+	return node
 
 
 static func _box_body(center: Vector3, size: Vector3) -> StaticBody3D:

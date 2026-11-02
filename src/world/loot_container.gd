@@ -30,13 +30,21 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 		look = v
 		_rebuild()
 
+## Содержимое брошено — ящик обыскан (у всех peer: rolled реплицируется); мебель общежития открывает крышку.
+signal opened
+
 ## Содержимое: [{"id", "n", "x", "y", "r"}] — стоит в клетках сетки grid (как рюкзак); rolled —
 ## брошено ли уже (иначе бросит хост при первом обыске).
 var items: Array = []:
 	set(value):
 		items = value
 		_contents_changed()
-var rolled: bool = false
+var rolled: bool = false:
+	set(value):
+		var was: bool = rolled
+		rolled = value
+		if value and not was:
+			opened.emit()
 ## Открыт ключом / при питании — дальше открыт для всех (хост, синхронизируется).
 var unlocked: bool = false
 ## Схрон в этом рейде закрыт: пуст и не виден (бросает хост при старте).
