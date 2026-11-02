@@ -290,6 +290,12 @@ python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # м
                                                               # tools/dorm_modules/items3_sp.py projects|stack|variants|prints (свой экземпляр, FINISH_SP_JOBS=
                                                               # _asset_src/dorm_items3/sp_jobs); просмотр — items3_review.py -- <карты> <выход.blend> на файле
                                                               # развёртки (состояния формы — в позах формы, варианты — копиями)
+python -X utf8 tools/dorm_modules/items3_wear_zones.py [набор …] # вещи партии 3, износ (этап 2): места в развёртке — пыль, кромки и углы,
+                                                              # следы сапог, ржавчина фурнитуры, отсыревший низ коробки; у бумаги — пожелтение, сырость, ржавчина у
+                                                              # кнопок, мухи, захватанные углы, ручка и карандаш в координатах листа (обведённые даты календаря, подписи);
+                                                              # затёртые клавиши, надписи на обложках тетрадей, потёртые углы и корешки → _asset_src/dorm_items3/wear;
+                                                              # Painter — items3_sp.py wear [набор …] (построитель sp_items3_wear.py; свой износ у каждого варианта отделки
+                                                              # и картинки) → maps_worn; просмотр — items3_review.py -- <maps_worn> <…/RING_Dorm_Items_worn_v01.blend>
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);

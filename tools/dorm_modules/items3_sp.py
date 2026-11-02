@@ -1,12 +1,13 @@
 """Вещи общежития, партия 3, текстуры: тот же конвейер Painter, что у мебели (furniture_sp.py) — свои папки,
 спецификация finish-spec-3.json, наборы items3_uv.py.
 
-  python -X utf8 tools/dorm_modules/items3_sp.py projects|stack|variants|prints [набор …]
+  python -X utf8 tools/dorm_modules/items3_sp.py projects|stack|variants|prints|wear [набор …]
 
 Свой экземпляр Painter (папка заданий _asset_src/dorm_items3/sp_jobs), проекты 2K (мышь и тетради — 1K), стек отделок
 по finish-spec-3.json, печать слоем (items3_prints.py), варианты отделки (чемодан, сумка, ящик для инструментов,
 ноутбук) → maps/<набор>__<код>; prints — другие картинки того же листа, обложки, картины (наборы печати
-<набор>__<картинка>) → maps/<набор>__<картинка>.
+<набор>__<картинка>) → maps/<набор>__<картинка>; wear — этап 2 (sp_items3_wear.py, места — items3_wear_zones.py) у
+основного набора, каждого варианта отделки и картинки → maps_worn/<набор>[__<ключ>].
 """
 from __future__ import annotations
 
@@ -37,14 +38,43 @@ F.ITEMS = {"it_ammo": 490, "it_zip": 1000, "it_trunk": 800, "it_toolbox": 460, "
            "it_book_stack": 260, "it_book_row": 260}
 
 
+F.WEAR = "sp_items3_wear"
+
+
+def print_keys(name: str) -> list[str]:
+    uv = F.SRC / "prints" / "uv"
+    return sorted(p.name[len(name) + 2:-len("_print.json")] for p in uv.glob(f"{name}__*_print.json"))
+
+
+def wear(names: list[str]) -> None:
+    """Этап 2: отделка + печать + группа «Этап 2 — износ» (sp_items3_wear.py) у каждого варианта отделки (код —
+    построителю: у голой сосны свой износ) и каждой картинки (её печать под износом) → maps_worn/<набор>[__<ключ>];
+    карты принятого этапа 1 в maps не трогаются, основной стек с износом сохраняется в проект последним."""
+    F.wait_shelves()
+    spec = json.loads(F.SPEC.read_text(encoding="utf-8"))
+    for name in names:
+        meshes = F.open_and_meshes(name)
+        jobs = [(code, F.parts_for(spec, name, meshes, swap)[0], f", variant='{code}'")
+                for code, swap in F.variant_swaps(spec, name, meshes)]
+        base_parts, _ = F.parts_for(spec, name, meshes)
+        jobs += [(key, base_parts, f", print_key='{name}__{key}'") for key in print_keys(name)]
+        for key, parts, args in jobs:
+            marker = f"_wear_{name}_{key}.txt"
+            (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+            F.build_and_export(name, parts, F.SRC / "maps_worn" / f"{name}__{key}", marker, save=False, wear=True,
+                               wear_args=args)
+        marker = f"_wear_{name}.txt"
+        (F.sp_run.SP_JOBS / marker).unlink(missing_ok=True)
+        F.build_and_export(name, base_parts, F.SRC / "maps_worn" / name, marker, save=True, wear=True)
+
+
 def prints(names: list[str]) -> None:
     """Варианты печати набора (prints/uv/<набор>__<ключ>_print.json): основной стек, печать варианта, выгрузка в
     maps/<набор>__<ключ>; основной проект не пересохраняется."""
     F.wait_shelves()
     spec = json.loads(F.SPEC.read_text(encoding="utf-8"))
-    uv = F.SRC / "prints" / "uv"
     for name in names:
-        keys = sorted(p.name[len(name) + 2:-len("_print.json")] for p in uv.glob(f"{name}__*_print.json"))
+        keys = print_keys(name)
         if not keys:
             continue
         meshes = F.open_and_meshes(name)
@@ -59,4 +89,4 @@ def prints(names: list[str]) -> None:
 if __name__ == "__main__":
     mode, rest = sys.argv[1], sys.argv[2:]
     todo = rest or list(F.ITEMS)
-    {"projects": F.projects, "stack": F.stack, "variants": F.variants, "prints": prints}[mode](todo)
+    {"projects": F.projects, "stack": F.stack, "variants": F.variants, "prints": prints, "wear": wear}[mode](todo)
