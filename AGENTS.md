@@ -256,6 +256,14 @@ python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # м
                                                               # furniture2_sp.py wear [набор …] (построитель sp_furniture2_wear.py, код варианта
                                                               # отделки — ему: у крашеных свой износ) → maps_worn; просмотр — furniture2_review.py
                                                               # -- <maps_worn> <…_worn_v01.blend>
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture2_uv_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture2_game.py [-- набор …]
+                                                              # мебель партия 2, игровые версии (бюджет «средне»: крупное 1K, посуда, бидон, бак 512; тяжёлое
+                                                              # упрощено с запеканием нормали): подвижное — узлами с осью (дверцы и ящик тумб, дверца духовки
+                                                              # и кабинки, сиденье; index movers — плюс открывает), варианты формы — свои модели (отбитая
+                                                              # раковина, унитаз без бачка, крайняя перегородка), у кабинок коробки по доскам (colliders) →
+                                                              # assets/models/dorm/furniture (тот же furniture.json; material — набор); --import, python -X utf8
+                                                              # tools/dorm_modules/furniture_imports.py, --import; расстановка — furnish_rooms.py (кухни, умывальни,
+                                                              # душевые, туалеты; pose подвижного, серые умывальники и чаши снимаются по clear)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);

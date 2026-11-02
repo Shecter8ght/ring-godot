@@ -20,10 +20,11 @@ const PROPS_PATH: String = "res://data/blockouts/dorm_props.json"
 const PROP_DIR: String = "res://assets/models/dorm/props"
 ## Мебель — игровые модели (tools/dorm_modules/furniture_game.py → assets/models/dorm/furniture, index furniture.json:
 ## варианты отделки, блеск ворса), расстановка по комнатам (furnish_rooms.py). Серые кровати плана в прямоугольниках
-## clear снимаются, только если модели на месте: без assets/models стоит серый план.
+## clear снимаются, только если модели на месте: без assets/models стоит серый план. Кухни, умывальни, туалеты —
+## мебель партии 2 (furniture2_game.py): серые умывальники, зеркала и чаши унитазов тоже снимаются.
 const FURNITURE_PATH: String = "res://data/blockouts/dorm_furniture.json"
 const FURNITURE_DIR: String = "res://assets/models/dorm/furniture"
-const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress"]
+const FURNITURE_GREYBOX: Array[String] = ["rail", "frame", "mattress", "ceramic", "basin", "mirror"]
 ## Электрика — светильники, выключатели, розетки, коробки, провода и 1–2 мигающих на этаж (dorm_electrics.gd); без
 ## моделей её нет.
 const Electrics = preload("res://src/blockout/dorm_electrics.gd")
@@ -343,7 +344,8 @@ func _cleared(mat: String, at: Vector3) -> bool:
 
 
 ## Мебель: модель стоит низом в at (наклон tilt вокруг своей X — до поворота yaw, подъём уже в at). Вариант отделки —
-## карты textures/<модель>__<код>_* вместо карт материала модели; solid — коробка столкновений по габариту.
+## карты textures/<набор>__<код>_* вместо карт материала набора; pose — подвижное (index movers); solid — коробки
+## столкновений: по доскам из index colliders (кабинки), иначе по габариту каждой сетки.
 func _add_furniture(item: Dictionary, info: Dictionary) -> void:
 	var model: String = String(item.model)
 	var path: String = "%s/%s.gltf" % [FURNITURE_DIR,model]
@@ -355,6 +357,13 @@ func _add_furniture(item: Dictionary, info: Dictionary) -> void:
 	node.rotation_degrees = Vector3(float(item.get("tilt",0.0)),float(item.get("yaw",0.0)),0.0)
 	var variant: String = String(item.get("variant",""))
 	var far: float = float(item.get("far",60.0))
+	_pose_movers(node,item.get("pose",{}) as Dictionary,info)
+	var colliders: Array = info.get("colliders",[]) as Array
+	if bool(item.get("solid",false)) and not colliders.is_empty():
+		for c: Dictionary in colliders:
+			var holder: Node3D = node if String(c.node)=="" else node.find_child(String(c.node),true,false) as Node3D
+			if holder!=null:
+				holder.add_child(_box_body(_vec(c.center),_vec(c.size)))
 	for found: Node in node.find_children("*","MeshInstance3D",true,false):
 		var mesh_node: MeshInstance3D = found as MeshInstance3D
 		mesh_node.visibility_range_end = far
@@ -367,18 +376,42 @@ func _add_furniture(item: Dictionary, info: Dictionary) -> void:
 			var mat: StandardMaterial3D = _furniture_material(source,model,variant,info)
 			if mat!=source:
 				mesh_node.set_surface_override_material(s,mat)
-		if bool(item.get("solid",false)):
-			var body: StaticBody3D = StaticBody3D.new()
-			var shape: CollisionShape3D = CollisionShape3D.new()
-			var box: BoxShape3D = BoxShape3D.new()
+		if bool(item.get("solid",false)) and colliders.is_empty():
 			var aabb: AABB = mesh_node.get_aabb()
-			box.size = aabb.size
-			shape.shape = box
-			shape.position = aabb.get_center()
-			body.add_child(shape)
-			mesh_node.add_child(body)
+			mesh_node.add_child(_box_body(aabb.get_center(),aabb.size))
 	node.add_to_group("dorm_furniture")
 	add_child(node)
+
+
+static func _box_body(center: Vector3, size: Vector3) -> StaticBody3D:
+	var body: StaticBody3D = StaticBody3D.new()
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	var box: BoxShape3D = BoxShape3D.new()
+	box.size = size
+	shape.shape = box
+	shape.position = center
+	body.add_child(shape)
+	return body
+
+
+## Подвижное мебели (index movers: дверцы, ящик, сиденье) по item.pose — угол в градусах вокруг оси узла (ось в index
+## такая, что плюс открывает), у ящика — выдвинут на метры; «removed» — узла нет (выбитая дверца кабинки).
+func _pose_movers(node: Node3D, pose: Dictionary, info: Dictionary) -> void:
+	for mover: Dictionary in info.get("movers",[]):
+		var node_id: String = String(mover.node)
+		if not pose.has(node_id):
+			continue
+		var part: Node3D = node.find_child(node_id,true,false) as Node3D
+		if part==null:
+			continue
+		var value: Variant = pose[node_id]
+		if value is String and String(value)=="removed":
+			part.get_parent().remove_child(part)
+			part.free()
+		elif String(mover.kind)=="slide":
+			part.position += _vec(mover.axis)*float(value)
+		else:
+			part.rotate(_vec(mover.axis),deg_to_rad(float(value)))
 
 
 ## Панцирная сетка («_сетка») — прозрачность шумом: отсечение по порогу на mip-уровнях съедает проволоку 1,8 мм, шум
@@ -399,13 +432,15 @@ func _furniture_material(source: StandardMaterial3D, model: String, variant: Str
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		mat.albedo_color = Color(0.6,0.62,0.6,0.28)
 		mat.metallic = 0.0
-	elif name_id==model and (variant!="" or info.has("rim")):
+	elif name_id==String(info.get("material",model)) and (variant!="" or info.has("rim")):
+		# материал назван по набору карт: у производных моделей (отбитая раковина, крайняя перегородка) — набор основной
 		mat = source.duplicate() as StandardMaterial3D
 		if variant!="":
-			var base: String = "%s/textures/%s__%s_" % [FURNITURE_DIR,model,variant]
+			var base: String = "%s/textures/%s__%s_" % [FURNITURE_DIR,name_id,variant]
 			var color: Texture2D = load(base+"baseColor.webp") as Texture2D
 			var orm: Texture2D = load(base+"occlusionRoughnessMetallic.webp") as Texture2D
-			var normal: Texture2D = load(base+"normal.webp") as Texture2D
+			# у упрощённых наборов нормали варианта нет — остаётся нормаль набора (в ней запечён рельеф)
+			var normal: Texture2D = load(base+"normal.webp") as Texture2D if ResourceLoader.exists(base+"normal.webp") else null
 			if color!=null:mat.albedo_texture = color
 			if orm!=null:
 				mat.roughness_texture = orm

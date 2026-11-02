@@ -3,6 +3,146 @@
  "source": "tools/dorm_modules/furnish_rooms.py",
  "furniture": [
   {
+   "id": "f1_toilets_-1_0_0_stall",
+   "section": "Floor1",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    0.48,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 85.2
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_1_toilet_torn",
+   "section": "Floor1",
+   "model": "furn_toilet_torn",
+   "at": [
+    0.015,
+    0.48,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_2_stall",
+   "section": "Floor1",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    0.48,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 94.8
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_3_toilet",
+   "section": "Floor1",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    0.48,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "pose": {
+    "сиденье": 75.8
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_4_stall",
+   "section": "Floor1",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    0.48,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_5_toilet",
+   "section": "Floor1",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    0.48,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_6_stall_end",
+   "section": "Floor1",
+   "model": "furn_stall_end",
+   "at": [
+    0.015,
+    0.48,
+    -8.03
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_7_basin",
+   "section": "Floor1",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    0.48,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_8_basin",
+   "section": "Floor1",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    0.48,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_toilets_-1_0_9_mirror",
+   "section": "Floor1",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    2.23,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
+  },
+  {
    "id": "f1_room_-1_1_0_bunk_bed",
    "section": "Floor1",
    "model": "furn_bunk_bed",
@@ -714,6 +854,160 @@
    ],
    "yaw": 3.35,
    "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_0_stall",
+   "section": "Floor2",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    4.42,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_1_toilet",
+   "section": "Floor2",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    4.42,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_2_stall",
+   "section": "Floor2",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    4.42,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 85.0
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_3_toilet",
+   "section": "Floor2",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    4.42,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_4_stall",
+   "section": "Floor2",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    4.42,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 90.9
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_5_toilet",
+   "section": "Floor2",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    4.42,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "pose": {
+    "сиденье": 60.6
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_6_stall_end",
+   "section": "Floor2",
+   "model": "furn_stall_end",
+   "at": [
+    0.015,
+    4.42,
+    -8.03
+   ],
+   "yaw": 90.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_7_basin",
+   "section": "Floor2",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    4.42,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_8_mirror",
+   "section": "Floor2",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    6.17,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_toilets_-1_0_9_basin",
+   "section": "Floor2",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    4.42,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_toilets_-1_0_10_mirror",
+   "section": "Floor2",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    6.17,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
   },
   {
    "id": "f2_room_-1_1_0_bunk_bed",
@@ -1510,6 +1804,156 @@
    "far": 60.0
   },
   {
+   "id": "f3_toilets_-1_0_0_stall",
+   "section": "Floor3",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    7.66,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "pose": {
+    "дверца": 76.4
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_1_toilet_torn",
+   "section": "Floor3",
+   "model": "furn_toilet_torn",
+   "at": [
+    0.015,
+    7.66,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_2_stall",
+   "section": "Floor3",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    7.66,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": 91.0
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_3_toilet",
+   "section": "Floor3",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    7.66,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_4_stall",
+   "section": "Floor3",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    7.66,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_5_toilet",
+   "section": "Floor3",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    7.66,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_6_stall_end",
+   "section": "Floor3",
+   "model": "furn_stall_end",
+   "at": [
+    0.015,
+    7.66,
+    -8.03
+   ],
+   "yaw": 90.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_7_basin",
+   "section": "Floor3",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    7.66,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_8_mirror",
+   "section": "Floor3",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    9.41,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_toilets_-1_0_9_basin",
+   "section": "Floor3",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    7.66,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_toilets_-1_0_10_mirror",
+   "section": "Floor3",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    9.41,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
+  },
+  {
    "id": "f3_room_-1_1_0_wardrobe",
    "section": "Floor3",
    "model": "furn_wardrobe",
@@ -2278,6 +2722,155 @@
     3.98
    ],
    "yaw": 90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_toilets_-1_0_0_stall",
+   "section": "Floor4",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    10.9,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_1_toilet_torn",
+   "section": "Floor4",
+   "model": "furn_toilet_torn",
+   "at": [
+    0.015,
+    10.9,
+    -5.28
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_2_stall",
+   "section": "Floor4",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    10.9,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 70.8
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_3_toilet",
+   "section": "Floor4",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    10.9,
+    -6.38
+   ],
+   "yaw": 90.0,
+   "pose": {
+    "сиденье": 78.5
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_4_stall",
+   "section": "Floor4",
+   "model": "furn_stall",
+   "at": [
+    0.015,
+    10.9,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_5_toilet",
+   "section": "Floor4",
+   "model": "furn_toilet",
+   "at": [
+    0.015,
+    10.9,
+    -7.48
+   ],
+   "yaw": 90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_6_stall_end",
+   "section": "Floor4",
+   "model": "furn_stall_end",
+   "at": [
+    0.015,
+    10.9,
+    -8.03
+   ],
+   "yaw": 90.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_7_basin",
+   "section": "Floor4",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    10.9,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_8_mirror",
+   "section": "Floor4",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    12.65,
+    -4.98
+   ],
+   "yaw": -90.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_toilets_-1_0_9_basin",
+   "section": "Floor4",
+   "model": "furn_basin",
+   "at": [
+    3.8851,
+    10.9,
+    -5.98
+   ],
+   "yaw": -90.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_toilets_-1_0_10_mirror",
+   "section": "Floor4",
+   "model": "furn_mirror",
+   "at": [
+    3.885,
+    12.65,
+    -5.98
+   ],
+   "yaw": -90.0,
    "far": 25.0
   },
   {
@@ -3244,12 +3837,3153 @@
    "variant": "EN-DGR-SAT",
    "solid": true,
    "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_0_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    34.9,
+    0.48,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "pose": {
+    "дверца_прав": 16.7
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_1_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    34.9,
+    2.43,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_2_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    34.969,
+    1.332,
+    -10.0586
+   ],
+   "yaw": 143.89,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_3_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.57,
+    0.48,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_4_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.46,
+    1.342,
+    -9.915
+   ],
+   "yaw": 263.78,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_5_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    35.45,
+    1.342,
+    -10.155
+   ],
+   "yaw": 180.53,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_6_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.23,
+    0.48,
+    -10.0636
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_7_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.23,
+    2.38,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_8_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    36.89,
+    0.48,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_9_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    36.78,
+    1.342,
+    -9.915
+   ],
+   "yaw": 369.2,
+   "variant": "EN-POT-RED",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_10_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    37.01,
+    1.342,
+    -9.895
+   ],
+   "yaw": 442.76,
+   "variant": "EN-POT-RED",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_11_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    37.56,
+    0.48,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_12_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    37.56,
+    2.43,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_13_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.2,
+    0.48,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_14_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.09,
+    1.342,
+    -13.455
+   ],
+   "yaw": 324.06,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_15_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    35.32,
+    1.342,
+    -13.435
+   ],
+   "yaw": 40.34,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_16_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    35.86,
+    0.48,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "variant": "LM-BCH-SAT",
+   "pose": {
+    "ящик": 0.204
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_17_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    35.86,
+    2.43,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "variant": "LM-BCH-SAT",
+   "pose": {
+    "дверца_прав": 77.4
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_18_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    35.7973,
+    1.332,
+    -13.5081
+   ],
+   "yaw": 29.05,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_19_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.68,
+    0.48,
+    -13.5264
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_20_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.68,
+    2.38,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_21_dining",
+   "section": "NorthAnnex",
+   "model": "furn_dining",
+   "at": [
+    34.5525,
+    0.48,
+    -11.795
+   ],
+   "yaw": 272.76,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_22_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1471,
+    0.48,
+    -11.345
+   ],
+   "yaw": 187.41,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_23_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1829,
+    0.48,
+    -11.795
+   ],
+   "yaw": 230.85,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_kitchen_24_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    39.28,
+    0.48,
+    -10.07
+   ],
+   "yaw": 443.4,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_kitchen_25_can",
+   "section": "NorthAnnex",
+   "model": "furn_can",
+   "at": [
+    39.28,
+    0.48,
+    -13.52
+   ],
+   "yaw": 372.1,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    0.48,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    2.23,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    0.48,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    2.23,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_4_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    0.48,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_5_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    2.23,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_6_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    0.48,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_7_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    2.23,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_8_basin_broken",
+   "section": "NorthAnnex",
+   "model": "furn_basin_broken",
+   "at": [
+    38.5,
+    0.48,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_9_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    38.5,
+    2.23,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_10_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    0.48,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_11_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    2.23,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_12_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    0.48,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_13_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    2.23,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_14_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    0.48,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_15_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    2.23,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_16_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    0.48,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_17_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    2.23,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_wash_18_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    0.48,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_wash_19_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    34.35,
+    0.48,
+    -16.0578
+   ],
+   "yaw": 470.41,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_showers_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.265,
+    0.48,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_showers_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.265,
+    2.23,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_showers_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.265,
+    0.48,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_showers_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.265,
+    2.23,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_toilets_0_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    35.65,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": 71.8
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_1_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    35.65,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "сиденье": 61.0
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_2_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    36.75,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": 94.0
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_3_toilet_torn",
+   "section": "NorthAnnex",
+   "model": "furn_toilet_torn",
+   "at": [
+    36.75,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_4_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    37.85,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_5_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    37.85,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_6_stall_end",
+   "section": "NorthAnnex",
+   "model": "furn_stall_end",
+   "at": [
+    38.4,
+    0.48,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.2,
+    0.48,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_8_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.2,
+    2.23,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f1_annex_toilets_9_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.1,
+    0.48,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f1_annex_toilets_10_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.1,
+    2.23,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_0_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    34.9,
+    4.42,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_1_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    34.9,
+    6.37,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_2_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    34.7816,
+    5.272,
+    -10.114
+   ],
+   "yaw": 192.18,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_3_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.57,
+    4.42,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_4_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.46,
+    5.282,
+    -9.915
+   ],
+   "yaw": 419.84,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_5_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    35.45,
+    5.282,
+    -10.155
+   ],
+   "yaw": 532.25,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_6_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.23,
+    4.42,
+    -10.0636
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "pose": {
+    "дверца_прав": 57.9
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_7_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.23,
+    6.32,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_8_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    36.89,
+    4.42,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_9_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    36.77,
+    5.282,
+    -10.155
+   ],
+   "yaw": 195.4,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_10_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    37.56,
+    4.42,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_11_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    37.56,
+    6.37,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца_лев": 44.2,
+    "дверца_прав": 31.2
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_12_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    37.5346,
+    5.272,
+    -10.1172
+   ],
+   "yaw": 206.88,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_13_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.2,
+    4.42,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_14_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.09,
+    5.282,
+    -13.455
+   ],
+   "yaw": 316.62,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_15_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    35.31,
+    5.282,
+    -13.675
+   ],
+   "yaw": 141.8,
+   "variant": "EN-POT-RED",
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_16_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    35.86,
+    4.42,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "дверца_лев": 92.1
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_17_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    35.86,
+    6.37,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "дверца_лев": 78.6
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_18_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.68,
+    4.42,
+    -13.5264
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_19_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.68,
+    6.32,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_kitchen_20_dining",
+   "section": "NorthAnnex",
+   "model": "furn_dining",
+   "at": [
+    34.5525,
+    4.42,
+    -11.795
+   ],
+   "yaw": 270.94,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_21_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1451,
+    4.42,
+    -11.345
+   ],
+   "yaw": 250.02,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_22_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1396,
+    4.42,
+    -11.795
+   ],
+   "yaw": 206.53,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_kitchen_23_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    39.28,
+    4.42,
+    -10.07
+   ],
+   "yaw": 314.84,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    4.42,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    6.17,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    4.42,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    6.17,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_4_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    4.42,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_5_basin_broken",
+   "section": "NorthAnnex",
+   "model": "furn_basin_broken",
+   "at": [
+    37.6,
+    4.42,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_6_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    6.17,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    4.42,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_8_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    38.5,
+    6.17,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_9_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    4.42,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_10_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    6.17,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_11_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    4.42,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_12_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    6.17,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_13_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    4.42,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_14_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    4.42,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_15_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    6.17,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_16_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    4.42,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_wash_17_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    38.5,
+    6.17,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_wash_18_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    34.35,
+    4.42,
+    -16.1004
+   ],
+   "yaw": 189.26,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_showers_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.265,
+    4.42,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_showers_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.265,
+    6.17,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_showers_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.265,
+    4.42,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_showers_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.265,
+    6.17,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_toilets_0_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    35.65,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 89.7
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_1_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    35.65,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_2_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    36.75,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_3_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    36.75,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "сиденье": 83.3
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_4_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    37.85,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": "removed"
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_5_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    37.85,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_6_stall_end",
+   "section": "NorthAnnex",
+   "model": "furn_stall_end",
+   "at": [
+    38.4,
+    4.42,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.2,
+    4.42,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_8_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.2,
+    6.17,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f2_annex_toilets_9_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.1,
+    4.42,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f2_annex_toilets_10_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.1,
+    6.17,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_0_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    34.9,
+    7.66,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "pose": {
+    "дверца_лев": 21.7
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_1_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    34.9,
+    9.61,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_2_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    34.827,
+    8.512,
+    -9.9952
+   ],
+   "yaw": 153.17,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_3_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.57,
+    7.66,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_4_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.46,
+    8.522,
+    -9.915
+   ],
+   "yaw": 344.21,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_5_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.23,
+    7.66,
+    -10.0636
+   ],
+   "yaw": 180.0,
+   "variant": "LM-BCH-SAT",
+   "pose": {
+    "дверца_лев": 21.4
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_6_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.23,
+    9.56,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_7_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    36.89,
+    7.66,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "pose": {
+    "дверца": 63.1
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_8_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    37.01,
+    8.522,
+    -9.895
+   ],
+   "yaw": 428.4,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_9_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    37.0,
+    8.522,
+    -10.135
+   ],
+   "yaw": 291.66,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_10_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    37.56,
+    7.66,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "pose": {
+    "дверца_прав": 37.5,
+    "ящик": 0.295
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_11_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    37.56,
+    9.61,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "pose": {
+    "дверца_лев": 43.8,
+    "дверца_прав": 21.3
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_12_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.2,
+    7.66,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "дверца": 73.6
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_13_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.08,
+    8.522,
+    -13.695
+   ],
+   "yaw": 30.28,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_14_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    35.86,
+    7.66,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "variant": "LM-BCH-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_15_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    35.86,
+    9.61,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца_лев": 59.8
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_16_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    35.8122,
+    8.512,
+    -13.5984
+   ],
+   "yaw": 10.37,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_17_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.68,
+    7.66,
+    -13.5264
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-WHT",
+   "pose": {
+    "дверца_лев": 31.9
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_18_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.68,
+    9.56,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_19_dining",
+   "section": "NorthAnnex",
+   "model": "furn_dining",
+   "at": [
+    34.5525,
+    7.66,
+    -11.795
+   ],
+   "yaw": 271.26,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_20_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.0823,
+    7.66,
+    -11.345
+   ],
+   "yaw": 262.37,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_21_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1507,
+    7.66,
+    -11.795
+   ],
+   "yaw": 192.22,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_kitchen_22_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    39.28,
+    7.66,
+    -10.07
+   ],
+   "yaw": 455.23,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_kitchen_23_can",
+   "section": "NorthAnnex",
+   "model": "furn_can",
+   "at": [
+    39.28,
+    7.66,
+    -13.52
+   ],
+   "yaw": 240.71,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    7.66,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    9.41,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    7.66,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    9.41,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_4_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    7.66,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_5_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    9.41,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_6_basin_broken",
+   "section": "NorthAnnex",
+   "model": "furn_basin_broken",
+   "at": [
+    37.6,
+    7.66,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_7_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    9.41,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_8_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    7.66,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_9_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    7.66,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_10_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    9.41,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_11_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    7.66,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_12_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    9.41,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_13_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    7.66,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_14_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    9.41,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_15_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    7.66,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_16_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    9.41,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_17_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    7.66,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_wash_18_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    38.5,
+    9.41,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_wash_19_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    34.35,
+    7.66,
+    -15.607
+   ],
+   "yaw": 369.2,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_showers_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.265,
+    7.66,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_showers_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.265,
+    9.41,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_showers_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.265,
+    7.66,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_showers_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.265,
+    9.41,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f3_annex_toilets_0_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    35.65,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_1_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    35.65,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "сиденье": 69.5
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_2_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    36.75,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": "removed"
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_3_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    36.75,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_4_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    37.85,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_5_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    37.85,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_6_stall_end",
+   "section": "NorthAnnex",
+   "model": "furn_stall_end",
+   "at": [
+    38.4,
+    7.66,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.2,
+    7.66,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_8_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.1,
+    7.66,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f3_annex_toilets_9_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.1,
+    9.41,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_0_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    34.9,
+    10.9,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-WHT",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_1_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    34.9,
+    12.85,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_2_pan",
+   "section": "NorthAnnex",
+   "model": "furn_pan",
+   "at": [
+    34.8948,
+    11.752,
+    -10.0759
+   ],
+   "yaw": 148.38,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_3_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.57,
+    10.9,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_4_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.45,
+    11.762,
+    -10.155
+   ],
+   "yaw": 254.07,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_5_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.23,
+    10.9,
+    -10.0636
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_6_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.23,
+    12.8,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_7_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    36.89,
+    10.9,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_8_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    36.78,
+    11.762,
+    -9.915
+   ],
+   "yaw": 532.35,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_9_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    37.01,
+    11.762,
+    -9.895
+   ],
+   "yaw": 417.71,
+   "variant": "EN-POT-RED",
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_10_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    37.56,
+    10.9,
+    -10.035
+   ],
+   "yaw": 180.0,
+   "pose": {
+    "дверца_лев": 48.4
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_11_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    37.56,
+    12.85,
+    -9.735
+   ],
+   "yaw": 180.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца_прав": 69.2
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_12_stove",
+   "section": "NorthAnnex",
+   "model": "furn_stove",
+   "at": [
+    35.2,
+    10.9,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_13_pot",
+   "section": "NorthAnnex",
+   "model": "furn_pot",
+   "at": [
+    35.08,
+    11.762,
+    -13.695
+   ],
+   "yaw": 236.38,
+   "variant": "EN-POT-GRN",
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_14_kettle",
+   "section": "NorthAnnex",
+   "model": "furn_kettle",
+   "at": [
+    35.09,
+    11.762,
+    -13.455
+   ],
+   "yaw": 189.88,
+   "variant": "EN-POT-RED",
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_15_counter",
+   "section": "NorthAnnex",
+   "model": "furn_counter",
+   "at": [
+    35.86,
+    10.9,
+    -13.555
+   ],
+   "yaw": 0.0,
+   "variant": "LM-BCH-SAT",
+   "pose": {
+    "дверца_лев": 65.0,
+    "ящик": 0.128
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_16_wallcab",
+   "section": "NorthAnnex",
+   "model": "furn_wallcab",
+   "at": [
+    35.86,
+    12.85,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "variant": "LM-BCH-SAT",
+   "pose": {
+    "дверца_лев": 23.7
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_17_sink",
+   "section": "NorthAnnex",
+   "model": "furn_sink",
+   "at": [
+    36.68,
+    10.9,
+    -13.5264
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "дверца_лев": 93.6
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_18_dishrack",
+   "section": "NorthAnnex",
+   "model": "furn_dishrack",
+   "at": [
+    36.68,
+    12.8,
+    -13.855
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_kitchen_19_dining",
+   "section": "NorthAnnex",
+   "model": "furn_dining",
+   "at": [
+    34.5525,
+    10.9,
+    -11.795
+   ],
+   "yaw": 270.99,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_20_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.0918,
+    10.9,
+    -11.345
+   ],
+   "yaw": 219.93,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_21_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.1189,
+    10.9,
+    -11.795
+   ],
+   "yaw": 193.16,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_22_stool",
+   "section": "NorthAnnex",
+   "model": "furn_stool",
+   "at": [
+    35.0862,
+    10.9,
+    -12.245
+   ],
+   "yaw": 211.4,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_kitchen_23_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    39.28,
+    10.9,
+    -10.07
+   ],
+   "yaw": 477.55,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_0_basin_broken",
+   "section": "NorthAnnex",
+   "model": "furn_basin_broken",
+   "at": [
+    34.9,
+    10.9,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    12.65,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    10.9,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    12.65,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_4_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    10.9,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_5_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    12.65,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_6_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    10.9,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    10.9,
+    -14.035
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_8_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    34.9,
+    10.9,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_9_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    34.9,
+    12.65,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_10_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    35.8,
+    10.9,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_11_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    35.8,
+    12.65,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_12_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.7,
+    10.9,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_13_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.7,
+    12.65,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_14_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.6,
+    10.9,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_15_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.6,
+    12.65,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_16_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    38.5,
+    10.9,
+    -18.1551
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_wash_17_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    38.5,
+    12.65,
+    -18.155
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_wash_18_bucket",
+   "section": "NorthAnnex",
+   "model": "furn_bucket",
+   "at": [
+    34.35,
+    10.9,
+    -16.4799
+   ],
+   "yaw": 198.45,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_showers_0_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.265,
+    10.9,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_showers_1_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.265,
+    12.65,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_showers_2_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.265,
+    10.9,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_showers_3_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.265,
+    12.65,
+    -22.455
+   ],
+   "yaw": 0.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_toilets_0_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    35.65,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "дверца": 83.0
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_1_toilet_torn",
+   "section": "NorthAnnex",
+   "model": "furn_toilet_torn",
+   "at": [
+    35.65,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_2_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    36.75,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "EN-DGR-SAT",
+   "pose": {
+    "дверца": 79.1
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_3_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    36.75,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "pose": {
+    "сиденье": 62.4
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_4_stall",
+   "section": "NorthAnnex",
+   "model": "furn_stall",
+   "at": [
+    37.85,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "pose": {
+    "дверца": 75.6
+   },
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_5_toilet",
+   "section": "NorthAnnex",
+   "model": "furn_toilet",
+   "at": [
+    37.85,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_6_stall_end",
+   "section": "NorthAnnex",
+   "model": "furn_stall_end",
+   "at": [
+    38.4,
+    10.9,
+    -26.755
+   ],
+   "yaw": 0.0,
+   "variant": "PT-OIL-BLU",
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_7_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    36.2,
+    10.9,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_8_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    36.2,
+    12.65,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
+  },
+  {
+   "id": "f4_annex_toilets_9_basin",
+   "section": "NorthAnnex",
+   "model": "furn_basin",
+   "at": [
+    37.1,
+    10.9,
+    -22.6349
+   ],
+   "yaw": 180.0,
+   "solid": true,
+   "far": 60.0
+  },
+  {
+   "id": "f4_annex_toilets_10_mirror",
+   "section": "NorthAnnex",
+   "model": "furn_mirror",
+   "at": [
+    37.1,
+    12.65,
+    -22.635
+   ],
+   "yaw": 180.0,
+   "far": 25.0
   }
  ],
  "clear": [
   {
    "section": "Floor1",
    "min": [
+    0.3,
+    0.47,
+    -8.48
+   ],
+   "max": [
+    3.4,
+    1.08,
+    -7.63
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
+    3.2,
+    0.47,
+    -6.53
+   ],
+   "max": [
+    3.92,
+    2.78,
+    -4.43
+   ]
+  },
+  {
+   "section": "Floor1",
+   "min": [
     4.14,
     0.47,
     -8.33
@@ -3510,6 +7244,32 @@
   {
    "section": "Floor2",
    "min": [
+    0.3,
+    4.41,
+    -8.48
+   ],
+   "max": [
+    3.4,
+    5.02,
+    -7.63
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
+    3.2,
+    4.41,
+    -6.53
+   ],
+   "max": [
+    3.92,
+    6.72,
+    -4.43
+   ]
+  },
+  {
+   "section": "Floor2",
+   "min": [
     4.14,
     4.41,
     -8.33
@@ -3770,6 +7530,32 @@
   {
    "section": "Floor3",
    "min": [
+    0.3,
+    7.65,
+    -8.48
+   ],
+   "max": [
+    3.4,
+    8.26,
+    -7.63
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
+    3.2,
+    7.65,
+    -6.53
+   ],
+   "max": [
+    3.92,
+    9.96,
+    -4.43
+   ]
+  },
+  {
+   "section": "Floor3",
+   "min": [
     4.14,
     7.65,
     -8.33
@@ -4030,6 +7816,32 @@
   {
    "section": "Floor4",
    "min": [
+    0.3,
+    10.89,
+    -8.48
+   ],
+   "max": [
+    3.4,
+    11.5,
+    -7.63
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
+    3.2,
+    10.89,
+    -6.53
+   ],
+   "max": [
+    3.92,
+    13.2,
+    -4.43
+   ]
+  },
+  {
+   "section": "Floor4",
+   "min": [
     4.14,
     10.89,
     -8.33
@@ -4285,6 +8097,162 @@
     43.32,
     12.8,
     8.33
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    0.47,
+    -18.19
+   ],
+   "max": [
+    37.815,
+    2.78,
+    -17.47
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    0.47,
+    -22.49
+   ],
+   "max": [
+    37.815,
+    2.78,
+    -21.77
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    0.47,
+    -26.79
+   ],
+   "max": [
+    37.815,
+    2.78,
+    -26.07
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    4.41,
+    -18.19
+   ],
+   "max": [
+    37.815,
+    6.72,
+    -17.47
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    4.41,
+    -22.49
+   ],
+   "max": [
+    37.815,
+    6.72,
+    -21.77
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    4.41,
+    -26.79
+   ],
+   "max": [
+    37.815,
+    6.72,
+    -26.07
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    7.65,
+    -18.19
+   ],
+   "max": [
+    37.815,
+    9.96,
+    -17.47
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    7.65,
+    -22.49
+   ],
+   "max": [
+    37.815,
+    9.96,
+    -21.77
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    7.65,
+    -26.79
+   ],
+   "max": [
+    37.815,
+    9.96,
+    -26.07
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    10.89,
+    -18.19
+   ],
+   "max": [
+    37.815,
+    13.2,
+    -17.47
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    10.89,
+    -22.49
+   ],
+   "max": [
+    37.815,
+    13.2,
+    -21.77
+   ]
+  },
+  {
+   "section": "NorthAnnex",
+   "min": [
+    35.715,
+    10.89,
+    -26.79
+   ],
+   "max": [
+    37.815,
+    13.2,
+    -26.07
    ]
   }
  ]

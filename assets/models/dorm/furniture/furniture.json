@@ -270,5 +270,566 @@
    0.6,
    0.5
   ]
+ },
+ "furn_stove": {
+  "file": "res://assets/models/dorm/furniture/furn_stove.gltf",
+  "triangles": 8302,
+  "aabb": {
+   "center": [
+    0.0,
+    0.465,
+    0.0285
+   ],
+   "size": [
+    0.5,
+    0.93,
+    0.657
+   ]
+  },
+  "material": "furn_stove",
+  "variants": [],
+  "movers": [
+   {
+    "node": "дверца",
+    "kind": "hinge",
+    "pivot": [
+     0.0,
+     0.2,
+     0.28
+    ],
+    "axis": [
+     1,
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "furn_sink": {
+  "file": "res://assets/models/dorm/furniture/furn_sink.gltf",
+  "triangles": 5916,
+  "aabb": {
+   "center": [
+    0.0,
+    0.5989,
+    -0.0
+   ],
+   "size": [
+    0.8,
+    1.1979,
+    0.6571
+   ]
+  },
+  "material": "furn_sink",
+  "variants": [
+   "LM-BCH-SAT",
+   "PT-OIL-BLU",
+   "PT-OIL-WHT"
+  ],
+  "movers": [
+   {
+    "node": "дверца_лев",
+    "kind": "hinge",
+    "pivot": [
+     -0.398,
+     0.082,
+     0.28
+    ],
+    "axis": [
+     0,
+     -1,
+     0
+    ]
+   },
+   {
+    "node": "дверца_прав",
+    "kind": "hinge",
+    "pivot": [
+     0.398,
+     0.082,
+     0.28
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ]
+   }
+  ]
+ },
+ "furn_counter": {
+  "file": "res://assets/models/dorm/furniture/furn_counter.gltf",
+  "triangles": 2052,
+  "aabb": {
+   "center": [
+    0.0,
+    0.426,
+    0.0143
+   ],
+   "size": [
+    0.825,
+    0.852,
+    0.6285
+   ]
+  },
+  "material": "furn_counter",
+  "variants": [
+   "LM-BCH-SAT",
+   "PT-OIL-BLU",
+   "PT-OIL-WHT"
+  ],
+  "movers": [
+   {
+    "node": "дверца_лев",
+    "kind": "hinge",
+    "pivot": [
+     -0.398,
+     0.082,
+     0.28
+    ],
+    "axis": [
+     0,
+     -1,
+     0
+    ]
+   },
+   {
+    "node": "дверца_прав",
+    "kind": "hinge",
+    "pivot": [
+     0.398,
+     0.082,
+     0.28
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ]
+   },
+   {
+    "node": "ящик",
+    "kind": "slide",
+    "pivot": [
+     0.0,
+     0.67,
+     0.28
+    ],
+    "axis": [
+     0,
+     0,
+     1
+    ]
+   }
+  ]
+ },
+ "furn_dining": {
+  "file": "res://assets/models/dorm/furniture/furn_dining.gltf",
+  "triangles": 900,
+  "aabb": {
+   "center": [
+    0.0,
+    0.376,
+    0.0
+   ],
+   "size": [
+    1.205,
+    0.752,
+    0.805
+   ]
+  },
+  "material": "furn_dining",
+  "variants": [
+   "EN-DGR-SAT"
+  ]
+ },
+ "furn_wallcab": {
+  "file": "res://assets/models/dorm/furniture/furn_wallcab.gltf",
+  "triangles": 1192,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.3,
+    0.1663
+   ],
+   "size": [
+    0.8,
+    0.6,
+    0.3325
+   ]
+  },
+  "material": "furn_wallcab",
+  "variants": [
+   "LM-BCH-SAT",
+   "PT-OIL-BLU",
+   "PT-OIL-WHT"
+  ],
+  "movers": [
+   {
+    "node": "дверца_лев",
+    "kind": "hinge",
+    "pivot": [
+     -0.398,
+     -0.597,
+     0.284
+    ],
+    "axis": [
+     0,
+     -1,
+     0
+    ]
+   },
+   {
+    "node": "дверца_прав",
+    "kind": "hinge",
+    "pivot": [
+     0.398,
+     -0.597,
+     0.284
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ]
+   }
+  ]
+ },
+ "furn_dishrack": {
+  "file": "res://assets/models/dorm/furniture/furn_dishrack.gltf",
+  "triangles": 1356,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.2315,
+    0.125
+   ],
+   "size": [
+    0.8,
+    0.537,
+    0.25
+   ]
+  },
+  "material": "furn_dishrack",
+  "variants": [
+   "PT-OIL-BLU",
+   "PT-OIL-WHT"
+  ]
+ },
+ "furn_pot": {
+  "file": "res://assets/models/dorm/furniture/furn_pot.gltf",
+  "triangles": 1400,
+  "aabb": {
+   "center": [
+    0.0,
+    0.086,
+    0.0
+   ],
+   "size": [
+    0.2878,
+    0.172,
+    0.224
+   ]
+  },
+  "material": "furn_pot",
+  "variants": [
+   "EN-POT-GRN",
+   "EN-POT-RED"
+  ]
+ },
+ "furn_kettle": {
+  "file": "res://assets/models/dorm/furniture/furn_kettle.gltf",
+  "triangles": 1456,
+  "aabb": {
+   "center": [
+    0.0391,
+    0.1268,
+    0.0
+   ],
+   "size": [
+    0.2742,
+    0.2537,
+    0.196
+   ]
+  },
+  "material": "furn_kettle",
+  "variants": [
+   "EN-POT-GRN",
+   "EN-POT-RED"
+  ]
+ },
+ "furn_pan": {
+  "file": "res://assets/models/dorm/furniture/furn_pan.gltf",
+  "triangles": 848,
+  "aabb": {
+   "center": [
+    -0.0842,
+    0.036,
+    0.0
+   ],
+   "size": [
+    0.4144,
+    0.0719,
+    0.246
+   ]
+  },
+  "material": "furn_pan",
+  "variants": []
+ },
+ "furn_can": {
+  "file": "res://assets/models/dorm/furniture/furn_can.gltf",
+  "triangles": 1400,
+  "aabb": {
+   "center": [
+    0.0,
+    0.2067,
+    0.0
+   ],
+   "size": [
+    0.2894,
+    0.4133,
+    0.23
+   ]
+  },
+  "material": "furn_can",
+  "variants": []
+ },
+ "furn_bucket": {
+  "file": "res://assets/models/dorm/furniture/furn_bucket.gltf",
+  "triangles": 1400,
+  "aabb": {
+   "center": [
+    0.0,
+    0.2015,
+    0.0
+   ],
+   "size": [
+    0.3162,
+    0.403,
+    0.3162
+   ]
+  },
+  "material": "furn_bucket",
+  "variants": []
+ },
+ "furn_basin": {
+  "file": "res://assets/models/dorm/furniture/furn_basin.gltf",
+  "triangles": 4172,
+  "aabb": {
+   "center": [
+    0.0,
+    0.6825,
+    0.2256
+   ],
+   "size": [
+    0.5438,
+    0.465,
+    0.4511
+   ]
+  },
+  "material": "furn_basin",
+  "variants": []
+ },
+ "furn_basin_broken": {
+  "file": "res://assets/models/dorm/furniture/furn_basin_broken.gltf",
+  "triangles": 4272,
+  "aabb": {
+   "center": [
+    0.0,
+    0.6825,
+    0.2256
+   ],
+   "size": [
+    0.5438,
+    0.465,
+    0.4511
+   ]
+  },
+  "material": "furn_basin",
+  "variants": []
+ },
+ "furn_mirror": {
+  "file": "res://assets/models/dorm/furniture/furn_mirror.gltf",
+  "triangles": 284,
+  "aabb": {
+   "center": [
+    0.0,
+    -0.3,
+    0.0055
+   ],
+   "size": [
+    0.416,
+    0.6,
+    0.011
+   ]
+  },
+  "material": "furn_mirror",
+  "variants": []
+ },
+ "furn_toilet": {
+  "file": "res://assets/models/dorm/furniture/furn_toilet.gltf",
+  "triangles": 10060,
+  "aabb": {
+   "center": [
+    -0.026,
+    1.0726,
+    0.2911
+   ],
+   "size": [
+    0.468,
+    2.1448,
+    0.5822
+   ]
+  },
+  "material": "furn_toilet",
+  "variants": [],
+  "movers": [
+   {
+    "node": "сиденье",
+    "kind": "hinge",
+    "pivot": [
+     0.0,
+     0.418,
+     0.105
+    ],
+    "axis": [
+     -1,
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "furn_toilet_torn": {
+  "file": "res://assets/models/dorm/furniture/furn_toilet_torn.gltf",
+  "triangles": 4008,
+  "aabb": {
+   "center": [
+    0.0,
+    0.9001,
+    0.2911
+   ],
+   "size": [
+    0.3488,
+    1.7998,
+    0.5822
+   ]
+  },
+  "material": "furn_toilet",
+  "variants": []
+ },
+ "furn_stall": {
+  "file": "res://assets/models/dorm/furniture/furn_stall.gltf",
+  "triangles": 968,
+  "aabb": {
+   "center": [
+    -0.005,
+    0.991,
+    0.615
+   ],
+   "size": [
+    1.15,
+    1.982,
+    1.23
+   ]
+  },
+  "material": "furn_stall",
+  "variants": [
+   "EN-DGR-SAT",
+   "PT-OIL-BLU"
+  ],
+  "movers": [
+   {
+    "node": "дверца",
+    "kind": "hinge",
+    "pivot": [
+     -0.5335,
+     0.2,
+     1.202
+    ],
+    "axis": [
+     0,
+     1,
+     0
+    ]
+   }
+  ],
+  "colliders": [
+   {
+    "node": "дверца",
+    "center": [
+     0.4233,
+     0.825,
+     -0.0206
+    ],
+    "size": [
+     0.8463,
+     1.65,
+     0.0767
+    ]
+   },
+   {
+    "node": "",
+    "center": [
+     0.42,
+     1.05,
+     1.209
+    ],
+    "size": [
+     0.2,
+     1.8,
+     0.018
+    ]
+   },
+   {
+    "node": "",
+    "center": [
+     -0.55,
+     1.05,
+     0.6
+    ],
+    "size": [
+     0.025,
+     1.8,
+     1.2
+    ]
+   }
+  ]
+ },
+ "furn_stall_end": {
+  "file": "res://assets/models/dorm/furniture/furn_stall_end.gltf",
+  "triangles": 428,
+  "aabb": {
+   "center": [
+    0.0,
+    0.975,
+    0.6
+   ],
+   "size": [
+    0.06,
+    1.95,
+    1.2
+   ]
+  },
+  "material": "furn_stall",
+  "variants": [
+   "EN-DGR-SAT",
+   "PT-OIL-BLU"
+  ],
+  "colliders": [
+   {
+    "node": "",
+    "center": [
+     0.0,
+     1.05,
+     0.6
+    ],
+    "size": [
+     0.025,
+     1.8,
+     1.2
+    ]
+   }
+  ]
  }
 }
