@@ -77,6 +77,10 @@ tools/godot.cmd                       # редактор
 tools/godot.cmd --headless --import   # переимпорт: после новых ассетов И после нового файла с class_name
 tools/smoke.cmd <сцена> [кадров] [overview[:x:z:высота]|at:угол:радиус[:высота[:курс]]]
                                       # скриншот в docs/screens/, выход (cmd режет «=» и «,» — только «:»)
+SCENE_BOARD.cmd                                              # доска сцен (tools/scene_board): все сцены, стенды и уровни на одной странице http://localhost:8767/ —
+                                                              # что это, откуда запускают, что сломается, если убрать; «Запустить», «Убрать» в карантин E:/RING_карантин_<дата>/Доска_сцен
+                                                              # (запись и отчёт.md) и «Вернуть»; из git — только кнопкой владельца «Убрать из git»; --lan — с телефона, только смотреть;
+                                                              # отчёт для агентов: python -X utf8 tools/scene_board/inventory.py --md → docs/scene_inventory.md; названия и пометки — notes.json
 tools/godot.cmd res://tools/ai_test.tscn                     # прогон мародёра: шум → бой → выстрелы, печатает состояния
 tools/godot.cmd res://tools/ai_squad_test.tscn               # тактика отряда: окрик, укрытие, перезарядка, поиск
 tools/godot.cmd --headless res://tools/ambush_test.tscn     # засада (AI_AMBUSH): цель ушла за угол — присел, смотрит на точку, ждёт; вышла там же — прицел сидит;

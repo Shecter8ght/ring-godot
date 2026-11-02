@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Доска сцен RING</title>
+<style>
+:root {
+  --bg: #15171a; --panel: #1e2125; --panel2: #262a2f; --line: #33383e; --text: #e6e2da; --dim: #9a978f;
+  --accent: #e0a24a; --red: #e06a5a; --green: #7fbf7a; --blue: #7aa7d8; --yellow: #d8c46a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: #121417ee; backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+  padding: 12px 16px 10px; }
+h1 { margin: 0 0 2px; font-size: 22px; letter-spacing: .5px; }
+h1 b { color: var(--accent); }
+.sub { color: var(--dim); font-size: 13px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+input[type=search] { flex: 1 1 220px; min-width: 0; background: var(--panel); color: var(--text); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; font-size: 15px; }
+.chip { background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 5px 12px;
+  cursor: pointer; font-size: 13px; white-space: nowrap; }
+.chip.on { background: var(--accent); color: #1a1408; border-color: var(--accent); }
+button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
+  padding: 6px 12px; }
+button:hover { border-color: var(--dim); }
+button.go { background: #2d4a2d; border-color: #3f6b3f; }
+button.rm { background: #4a2a26; border-color: #6b3b33; }
+button.git { background: #3a2f4a; border-color: #574770; }
+button:disabled { opacity: .45; cursor: default; }
+main { padding: 12px 16px 120px; max-width: 1280px; margin: 0 auto; }
+.note { background: #2a2416; border: 1px solid #5a4a22; border-radius: 10px; padding: 10px 14px; margin: 10px 0; color: #e8d6a8; }
+.err { background: #3a1e1a; border-color: #7a3a30; color: #f0c0b8; }
+section.group > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 10px; padding: 14px 2px 8px;
+  border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+section.group > summary::-webkit-details-marker { display: none; }
+details.group > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 10px; padding: 14px 2px 8px;
+  border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+details.group > summary::-webkit-details-marker { display: none; }
+.gtitle { font-size: 19px; font-weight: 600; }
+.gcount { color: var(--dim); font-size: 14px; }
+.ghint { color: var(--dim); font-size: 13px; margin: -4px 0 10px; }
+.ghint, .desc, .facts, .note, .sub, #modal p { overflow-wrap: anywhere; }
+.card > div { min-width: 0; }
+.card { display: grid; grid-template-columns: 200px 1fr; gap: 14px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.card.old { border-color: #6b5a2a; }
+.card.slim { grid-template-columns: 1fr; padding: 9px 12px; }
+.thumb { width: 200px; height: 112px; border-radius: 8px; background: #0e0f11 center/cover no-repeat; border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; color: #4a4e54; font-size: 12px; cursor: zoom-in; }
+.thumb.none { cursor: default; }
+.top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.title { font-size: 17px; font-weight: 600; }
+.path { font: 12px Consolas, monospace; color: var(--dim); word-break: break-all; }
+.desc { margin: 6px 0 4px; color: #d6d2ca; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.tag { font-size: 12px; border-radius: 6px; padding: 1px 8px; border: 1px solid var(--line); color: var(--dim); }
+.tag.old { color: #f0d18a; border-color: #6b5a2a; background: #2a2416; }
+.tag.active { color: var(--green); border-color: #3f6b3f; }
+.tag.warn { color: #f0b0a0; border-color: #6b3b33; }
+.tag.keep { color: var(--blue); border-color: #35506b; }
+.tag.dup { color: var(--yellow); border-color: #5f5530; }
+.facts { font-size: 13px; color: var(--dim); }
+.facts b { color: var(--text); font-weight: 600; }
+.facts div { margin: 2px 0; }
+.breaks { color: #f0b0a0; }
+.fine { color: var(--green); }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+select { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; font: inherit; max-width: 260px; }
+details.more summary { cursor: pointer; color: var(--blue); font-size: 13px; }
+details.more ul { margin: 4px 0; padding-left: 18px; font: 12px Consolas, monospace; color: var(--dim); }
+.qrec { background: #1d1a24; border: 1px solid #3d3450; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.qrec.returned { opacity: .6; }
+#modal { position: fixed; inset: 0; background: #000a; display: none; align-items: center; justify-content: center; z-index: 20; padding: 16px; }
+#modal .box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-width: 760px; width: 100%; max-height: 90vh;
+  overflow: auto; padding: 18px; }
+#modal h2 { margin: 0 0 8px; font-size: 19px; }
+#modal ul { font: 12px Consolas, monospace; color: var(--dim); padding-left: 18px; max-height: 180px; overflow: auto; }
+#modal label { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; cursor: pointer; }
+#modal .warnbox { background: #3a1e1a; border: 1px solid #7a3a30; border-radius: 8px; padding: 8px 12px; color: #f0c0b8; margin: 8px 0; }
+#modal .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+#runs { position: fixed; right: 12px; bottom: 12px; width: min(460px, calc(100vw - 24px)); z-index: 10; }
+.run { background: #101214f2; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin-top: 6px; font-size: 13px; }
+.run pre { margin: 6px 0 0; max-height: 160px; overflow: auto; font: 11px Consolas, monospace; color: #b8b4ac; white-space: pre-wrap; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); top: 12px; z-index: 30; background: #24301f; border: 1px solid #3f6b3f;
+  border-radius: 10px; padding: 10px 16px; display: none; max-width: 90vw; }
+#toast.bad { background: #3a1e1a; border-color: #7a3a30; }
+#busy { position: fixed; inset: 0; background: #0008; z-index: 40; display: none; align-items: center; justify-content: center; font-size: 18px; }
+@media (max-width: 640px) {
+  .card { grid-template-columns: 1fr; }
+  .thumb { width: 100%; height: 180px; }
+  .thumb.none { display: none; }
+  h1 { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Доска сцен <b>RING</b></h1>
+  <div class="sub" id="sub">Собираю список…</div>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Поиск: название, файл, слово из описания">
+    <button id="refresh" title="Пересобрать список">Обновить</button>
+  </div>
+  <div class="bar" id="chips"></div>
+</header>
+<main>
+  <div id="notes"></div>
+  <div id="quarantine"></div>
+  <div id="list"></div>
+</main>
+<div id="runs"></div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+<div id="toast"></div>
+<div id="busy">Подождите…</div>
+<script>
+const FLAG = {
+  old: ["устарело", "old"], active: ["в работе", "active"], dup: ["дубль", "dup"], new: ["не в git", "warn"],
+  changed: ["есть несохранённые правки", "warn"], no_agents: ["нет в AGENTS.md", ""], broken: ["ссылается на отсутствующие файлы", "warn"],
+  unused: ["никем не используется", "old"],
+};
+const KIND = { scene: "сцена", code: "код", data: "данные", cmd: "запускалка", menu: "главное меню", build: "скрипт сборки",
+  doc: "документ", other: "прочее" };
+const GROUP_HINT = {
+  raid: "Карты, на которые игрок уходит в рейд (data/floors.json). Убирать — только через агента.",
+  hideout: "Нынешнее убежище — котельная. Старое убежище помечено «устарело».",
+  stand: "Интерактивные стенды: ходить, переключать, сравнивать.",
+  walk: "Серые черновики карт — для прогулки и проверки размеров.",
+  test: "Сами проверяют механику и пишут итог; «Запустить» покажет вывод внизу справа.",
+  shots: "Делают снимки в docs/screens; последний снимок — на карточке.",
+  perf: "Меряют кадры в секунду.",
+  service: "Собирают и перепекают данные (навигация, иконки, убежище). Запускает агент.",
+  part: "Вставляются в карты и другие сцены. Отдельно не запускаются.",
+  shelter_part: "Предметы и стены убежища, вставляются в котельную. «Никем не используется» — кандидаты в уборку.",
+  launcher: "Файлы .cmd, которые запускают что-то сами.",
+};
+const COLLAPSED = new Set(["part", "shelter_part", "test", "launcher", "service"]);
+const FILTERS = [
+  ["all", "Все"], ["stand", "Стенды"], ["maps", "Карты и черновики"], ["test", "Проверки"], ["shots", "Снимки"],
+  ["old", "Можно убрать?"], ["parts", "Детали"],
+];
+let INV = null, LOCAL = true, NO_PUSH = false, QROOT = "", QTODAY = "", RECORDS = [], filter = "all", openGroups = new Set();
+
+const $ = (s) => document.querySelector(s);
+const h = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function size(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " МБ" : n >= 1024 ? Math.round(n / 1024) + " КБ" : n + " Б"; }
+function files(n) { const m = n % 10, c = n % 100; return n + " " + (m === 1 && c !== 11 ? "файл" : m >= 2 && m <= 4 && (c < 12 || c > 14) ? "файла" : "файлов"); }
+function toast(msg, bad) { const t = $("#toast"); t.textContent = msg; t.className = bad ? "bad" : ""; t.style.display = "block";
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", bad ? 9000 : 5000); }
+function busy(on, text) { $("#busy").style.display = on ? "flex" : "none"; $("#busy").textContent = text || "Подождите…"; }
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  return r.json();
+}
+
+async function load(refresh) {
+  busy(true, refresh ? "Пересобираю список (секунд десять)…" : "Собираю список…");
+  try {
+    const d = await api("/api/inventory" + (refresh ? "?refresh=1" : ""));
+    INV = d.inv; LOCAL = d.local; NO_PUSH = d.no_push; QROOT = d.quarantine_root; QTODAY = d.quarantine_today;
+    const q = await api("/api/quarantine"); RECORDS = q.records;
+    render();
+    if (d.error) toast(d.error, true);
+  } finally { busy(false); }
+}
+
+function matchFilter(it) {
+  switch (filter) {
+    case "stand": return it.kind === "stand";
+    case "maps": return ["raid", "hideout", "walk"].includes(it.kind);
+    case "test": return it.kind === "test" || it.kind === "perf";
+    case "shots": return it.kind === "shots";
+    case "old": return it.flags.includes("old") || it.flags.includes("unused") || it.flags.includes("dup");
+    case "parts": return it.kind === "part" || it.kind === "shelter_part";
+  }
+  return true;
+}
+function matchQuery(it, q) {
+  if (!q) return true;
+  const s = (it.title + " " + it.id + " " + it.desc + " " + it.note).toLowerCase();
+  return q.split(/\s+/).every((w) => s.includes(w));
+}
+
+function render() {
+  if (!INV) return;
+  const n = INV.items.filter((x) => x.type === "scene").length;
+  $("#sub").textContent = `Собрано ${INV.generated} · сцен ${n} · запускалок ${INV.items.length - n}` + (NO_PUSH ? " · проба без отправки в git" : "");
+  $("#chips").innerHTML = FILTERS.map(([k, t]) => `<span class="chip ${filter === k ? "on" : ""}" data-f="${k}">${t}</span>`).join("");
+  let notes = "";
+  if (!LOCAL) notes += `<div class="note">Открыто с другого устройства — можно только смотреть. Запуск и уборка — на компьютере.</div>`;
+  if (INV.gone && INV.gone.length) notes += `<div class="note">Уже удалены руками, но git их ещё помнит: ${INV.gone.map(h).join(", ")}. Это сделал кто-то раньше; разобраться — через агента.</div>`;
+  $("#notes").innerHTML = notes;
+  renderQuarantine();
+  const q = $("#q").value.trim().toLowerCase();
+  const byGroup = {};
+  for (const it of INV.items) if (matchFilter(it) && matchQuery(it, q)) (byGroup[it.kind] ||= []).push(it);
+  let html = "";
+  for (const g of INV.groups) {
+    const lst = byGroup[g.kind];
+    if (!lst) continue;
+    const open = q || filter !== "all" || !COLLAPSED.has(g.kind) || openGroups.has(g.kind);
+    html += `<details class="group" data-g="${g.kind}" ${open ? "open" : ""}><summary><span class="gtitle">${h(g.title)}</span>` +
+      `<span class="gcount">${lst.length}</span></summary><div class="ghint">${h(GROUP_HINT[g.kind] || "")}</div>`;
+    if (open) html += lst.map(card).join("");
+    html += `</details>`;
+  }
+  $("#list").innerHTML = html || `<div class="note">Ничего не нашлось.</div>`;
+}
+
+function card(it) {
+  const slim = it.kind === "shelter_part" || (it.kind === "part" && !it.thumb);
+  const old = it.flags.includes("old");
+  const tags = [];
+  if (it.keep) tags.push(`<span class="tag keep">не убирать</span>`);
+  else if (it.game_used) tags.push(`<span class="tag keep">нужна игре</span>`);
+  for (const f of it.flags) if (FLAG[f]) tags.push(`<span class="tag ${FLAG[f][1]}">${FLAG[f][0]}</span>`);
+  const live = it.refs.filter((r) => ["scene", "code", "data", "cmd"].includes(r.kind));
+  const docs = it.refs.filter((r) => r.kind === "doc" || r.kind === "build" || r.kind === "other");
+  const core = it.own.filter((o) => o.core), assets = it.own.filter((o) => !o.core);
+  const sources = it.sources.map((s) => h(s.text)).join("; ");
+  let breaks;
+  if (!live.length) breaks = `<span class="fine">ничего не сломается</span>`;
+  else breaks = `<span class="breaks">сломается ${live.length}: ${live.slice(0, 3).map((r) => h(r.file.split("/").pop()) + " (" + KIND[r.kind] + ")").join(", ")}${live.length > 3 ? "…" : ""}</span>`;
+  const take = `${files(core.length)} стенда (${size(core.reduce((a, o) => a + o.size, 0))})` +
+    (assets.length ? `, ещё ${files(assets.length)} игры по выбору (${size(assets.reduce((a, o) => a + o.size, 0))})` : "") +
+    (it.snapshots.length ? `, снимков ${it.snapshots.length} (${size(it.snap_size)})` : "");
+  let launch = "";
+  if (it.launches.length && LOCAL) {
+    if (it.launches.length === 1) launch = `<button class="go" data-run="${h(it.id)}" data-i="0">Запустить</button>`;
+    else launch = `<select data-sel="${h(it.id)}">${it.launches.map((l, i) => `<option value="${i}">${h(l.label)}${l.needs_pair ? " — нужен второй запуск" : ""}</option>`).join("")}</select>` +
+      `<button class="go" data-run="${h(it.id)}">Запустить</button>`;
+  }
+  let rm = "";
+  if (LOCAL) {
+    if (it.keep) rm = "";
+    else if (it.game_used) rm = `<button disabled title="Игра использует эту сцену — убирать только через агента">Нужна игре</button>`;
+    else rm = `<button class="rm" data-rm="${h(it.id)}">Убрать</button>`;
+  }
+  const more = `<details class="more"><summary>подробнее</summary>` +
+    (live.length ? `<div>Кто ссылается (сломается):</div><ul>${live.map((r) => `<li>${h(r.file)} — ${KIND[r.kind]}</li>`).join("")}</ul>` : "") +
+    (docs.length ? `<div>Упоминания в документах и скриптах сборки (не ломаются):</div><ul>${docs.slice(0, 30).map((r) => `<li>${h(r.file)}</li>`).join("")}${docs.length > 30 ? `<li>…и ещё ${docs.length - 30}</li>` : ""}</ul>` : "") +
+    `<div>Файлы стенда:</div><ul>${core.map((o) => `<li>${h(o.file)} · ${size(o.size)}</li>`).join("")}</ul>` +
+    (assets.length ? `<div>Файлы игры, которыми больше никто не пользуется:</div><ul>${assets.map((o) => `<li>${h(o.file)} · ${size(o.size)}</li>`).join("")}</ul>` : "") +
+    (it.missing.length ? `<div>Ссылается на отсутствующие:</div><ul>${it.missing.map((m) => `<li>${h(m)}</li>`).join("")}</ul>` : "") +
+    (it.script ? `<div>Скрипт: <span class="path">${h(it.script)}</span></div>` : "") + `</details>`;
+  const th = it.thumb ? `<div class="thumb" style="background-image:url('/img?f=${encodeURIComponent(it.thumb)}')" data-full="${h(it.thumb)}" title="Открыть снимок"></div>`
+    : `<div class="thumb none">нет снимка</div>`;
+  return `<div class="card ${slim ? "slim" : ""} ${old ? "old" : ""}">${slim ? "" : th}<div>
+    <div class="top"><div><div class="title">${h(it.title)}</div><div class="path">${h(it.id)}</div></div>
+      <div class="actions">${launch}${rm}</div></div>
+    ${it.desc && !slim ? `<div class="desc">${h(it.desc)}</div>` : ""}
+    ${it.note ? `<div class="desc" style="color:#f0d18a">${h(it.note)}</div>` : ""}
+    <div class="tags">${tags.join("")}</div>
+    <div class="facts">
+      <div><b>Откуда запускают:</b> ${sources || "ниоткуда"}</div>
+      <div><b>Если убрать:</b> ${breaks}</div>
+      <div>${it.keep ? "" : `<b>Заберёт:</b> ${take} · `}<b>правка</b> ${h(it.last_commit || "не в git")}</div>
+    </div>${more}</div></div>`;
+}
+
+function renderQuarantine() {
+  const act = RECORDS.filter((r) => r.state === "quarantine");
+  const ret = RECORDS.filter((r) => r.state !== "quarantine").slice(0, 6);
+  if (!RECORDS.length) { $("#quarantine").innerHTML = ""; return; }
+  let html = `<details class="group" open><summary><span class="gtitle">Карантин</span><span class="gcount">${act.length} убрано</span></summary>` +
+    `<div class="ghint">Файлы лежат в папках вида ${h(QTODAY)} (по дню уборки), там же отчёт.md — вернуть можно в любой момент. «Убрать из git» — отдельный шаг: коммит и отправка.</div>`;
+  for (const r of act.concat(ret)) {
+    const g = r.git || {};
+    const tracked = r.files.filter((f) => f.tracked).length;
+    let btns = "";
+    if (LOCAL && r.state === "quarantine") {
+      btns += `<button data-restore="${h(r._path)}">Вернуть</button>`;
+      if (!g.commit && (tracked || (r.edits || []).length)) btns += `<button class="git" data-git="${h(r._path)}">Убрать из git</button>`;
+      if (g.commit && !g.pushed) btns += `<button class="git" data-git="${h(r._path)}">Отправить</button>`;
+    }
+    const state = r.state === "quarantine" ? (g.commit ? (g.pushed ? "убрано и из git" : "убрано из git, не отправлено") : "в карантине, в git ещё есть") : "возвращено " + h(r.returned || "");
+    html += `<div class="qrec ${r.state === "quarantine" ? "" : "returned"}"><div class="top"><div><div class="title">${h(r.title)}</div>` +
+      `<div class="path">${h(r.item)} · ${h(r.time)} · ${state}</div></div><div class="actions">${btns}</div></div>` +
+      `<details class="more"><summary>${files(r.files.length)}${(r.edits || []).length ? ", сняты строки AGENTS.md / меню" : ""}</summary><ul>` +
+      r.files.map((f) => `<li>${h(f.rel)} → ${h(f.to)}</li>`).join("") +
+      (r.edits || []).map((e) => `<li>${h(e.file)}: строки ${e.lines.map((x) => x.n).join(", ")}</li>`).join("") +
+      (r.manual || []).map((m) => `<li>вручную: ${h(m)}</li>`).join("") + `</ul></details></div>`;
+  }
+  $("#quarantine").innerHTML = html + `</details>`;
+}
+
+function openRemove(id) {
+  const it = INV.items.find((x) => x.id === id);
+  if (!it) return;
+  const core = it.own.filter((o) => o.core), assets = it.own.filter((o) => !o.core);
+  const live = it.refs.filter((r) => ["scene", "code", "data", "cmd"].includes(r.kind));
+  const changed = it.own.filter((o) => o.changed || !o.tracked);
+  const risky = live.length || changed.length;
+  const agents = it.agents_own.length ? `<li>AGENTS.md: строки запуска ${it.agents_own.join(", ")} — снимаются, при «Вернуть» встают обратно</li>` : "";
+  const menu = it.menu_lines.length ? `<li>Главное меню, «Отладочные стенды»: пункт снимается, при «Вернуть» встаёт обратно</li>` : "";
+  const other = it.agents_lines.filter((n) => !it.agents_own.includes(n));
+  $("#mbox").innerHTML = `<h2>Убрать «${h(it.title)}»?</h2>
+    <div class="sub">${h(it.id)}</div>
+    <p>Файлы уйдут в карантин <b>${h(QTODAY)}</b>. Насовсем ничего не удаляется: «Вернуть» положит всё на место.
+    Из git — только отдельной кнопкой потом.</p>
+    <div>Уйдут файлы стенда (${files(core.length)}):</div><ul>${core.map((o) => `<li>${h(o.file)} · ${size(o.size)}</li>`).join("")}</ul>
+    ${agents || menu ? `<ul>${agents}${menu}</ul>` : ""}
+    ${other.length ? `<div class="sub">AGENTS.md, строки ${other.join(", ")} упоминают сцену вместе с другими — их поправит агент.</div>` : ""}
+    ${it.snapshots.length ? `<label><input type="checkbox" id="m_snaps" checked> <span>И снимки этого стенда в docs/screens: ${it.snapshots.length} (${size(it.snap_size)})</span></label>` : ""}
+    ${assets.length ? `<label><input type="checkbox" id="m_assets"> <span>И файлы игры, которыми больше никто не пользуется: ${files(assets.length)} (${size(assets.reduce((a, o) => a + o.size, 0))}).
+      Это модели, текстуры или скрипты — на них не ссылается ничто, кроме этой сцены.</span></label><ul>${assets.map((o) => `<li>${h(o.file)}</li>`).join("")}</ul>` : ""}
+    ${live.length ? `<div class="warnbox"><b>На неё ссылается живое — после уборки это сломается:</b><ul>${live.map((r) => `<li>${h(r.file)} — ${KIND[r.kind]}</li>`).join("")}</ul></div>` : ""}
+    ${changed.length ? `<div class="warnbox"><b>В этих файлах есть правки, которых нет в git (кто-то сейчас работает):</b><ul>${changed.map((o) => `<li>${h(o.file)}</li>`).join("")}</ul></div>` : ""}
+    ${risky ? `<label><input type="checkbox" id="m_consent"> <span><b>Понимаю, что может сломаться, — всё равно убрать</b></span></label>` : ""}
+    <div class="row"><button id="m_cancel">Отмена</button><button class="rm" id="m_ok" ${risky ? "disabled" : ""}>Убрать в карантин</button></div>`;
+  $("#modal").style.display = "flex";
+  $("#m_cancel").onclick = closeModal;
+  if (risky) $("#m_consent").onchange = (e) => $("#m_ok").disabled = !e.target.checked;
+  $("#m_ok").onclick = async () => {
+    closeModal(); busy(true, "Переношу в карантин и пересобираю список…");
+    try {
+      const r = await api("/api/remove", { id, snaps: $("#m_snaps")?.checked ?? false, assets: $("#m_assets")?.checked ?? false,
+        consent: !!risky });
+      toast(r.msg, !r.ok);
+    } finally { busy(false); await load(false); }
+  };
+}
+function closeModal() { $("#modal").style.display = "none"; }
+
+function confirmBox(title, text, okText, cls, fn) {
+  $("#mbox").innerHTML = `<h2>${h(title)}</h2><p>${text}</p><div class="row"><button id="m_cancel">Отмена</button><button class="${cls}" id="m_ok">${h(okText)}</button></div>`;
+  $("#modal").style.display = "flex";
+  $("#m_cancel").onclick = closeModal;
+  $("#m_ok").onclick = () => { closeModal(); fn(); };
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.matches(".chip")) { filter = t.dataset.f; render(); return; }
+  if (t.closest("summary") && t.closest("details.group")) {
+    const d = t.closest("details.group");
+    setTimeout(() => { if (d.open) { openGroups.add(d.dataset.g); render(); } else openGroups.delete(d.dataset.g); }, 0);
+    return;
+  }
+  if (t.dataset.full) { window.open("/img?full=1&f=" + encodeURIComponent(t.dataset.full), "_blank"); return; }
+  if (t.dataset.run) {
+    const sel = document.querySelector(`select[data-sel="${CSS.escape(t.dataset.run)}"]`);
+    const r = await api("/api/launch", { id: t.dataset.run, index: sel ? +sel.value : 0 });
+    toast(r.msg, !r.ok); pollRuns(); return;
+  }
+  if (t.dataset.rm) { openRemove(t.dataset.rm); return; }
+  if (t.dataset.restore) {
+    const rec = RECORDS.find((r) => r._path === t.dataset.restore);
+    confirmBox("Вернуть «" + rec.title + "»?", `Файлы (${files(rec.files.length)}) встанут на прежние места, снятые строки AGENTS.md и меню — обратно.` +
+      (rec.git && rec.git.commit ? " Её уже убрали из git — будет коммит, который возвращает." : ""), "Вернуть", "go", async () => {
+      busy(true, "Возвращаю…");
+      try { const r = await api("/api/restore", { record: rec._path }); toast(r.msg, !r.ok); } finally { busy(false); await load(false); }
+    });
+    return;
+  }
+  if (t.dataset.git) {
+    const rec = RECORDS.find((r) => r._path === t.dataset.git);
+    const again = rec.git && rec.git.commit;
+    confirmBox(again ? "Отправить в git?" : "Убрать «" + rec.title + "» из git?",
+      again ? "Коммит уже сделан, отправим его ещё раз." :
+      `Будет коммит: эти файлы пропадут из git и у всех, кто обновит проект. Файлы останутся в карантине — «Вернуть» сработает и после этого.` +
+      (NO_PUSH ? " (Пробный режим: коммит без отправки.)" : ""), again ? "Отправить" : "Убрать из git", "git", async () => {
+      busy(true, "Коммит и отправка (до пары минут)…");
+      try { const r = await api("/api/git_remove", { record: rec._path }); toast(r.msg, !r.ok); } finally { busy(false); await load(false); }
+    });
+    return;
+  }
+  if (t.dataset.hide) { hiddenRuns.add(t.dataset.hide); pollRuns(); return; }
+  if (t.dataset.stop) { const r = await api("/api/stop", { run: t.dataset.stop }); toast(r.msg, !r.ok); pollRuns(); return; }
+  if (t.id === "refresh") { load(true); return; }
+  if (t.id === "modal") closeModal();
+});
+$("#q").addEventListener("input", () => { clearTimeout(render.t); render.t = setTimeout(render, 200); });
+
+let runTimer = null;
+const hiddenRuns = new Set();
+async function pollRuns() {
+  const d = await api("/api/runs");
+  const box = $("#runs");
+  box.innerHTML = d.runs.filter((r) => !hiddenRuns.has(r.id)).slice(0, 3).map((r) => {
+    // итог проверки — последняя строка с «провалено / FAIL / PASS / ok», иначе последняя строка вывода
+    const sum = [...r.tail].reverse().find((l) => /провален|FAIL|PASS|итог|ошиб/i.test(l)) || r.tail[r.tail.length - 1] || "";
+    return `<div class="run"><div class="top"><div><b>${h(r.title)}</b> — ${h(r.label)}<br>
+    <span class="sub">${r.started} · ${r.running ? "идёт" : r.code === 0 ? "закончено" : "закончено с ошибкой (" + r.code + ")"}</span></div>
+    <div class="actions">${r.running ? `<button data-stop="${r.id}">Остановить</button>` : `<button data-hide="${r.id}">Скрыть</button>`}</div></div>
+    ${r.running ? "" : `<div class="sub" style="color:${r.code === 0 ? "var(--green)" : "var(--red)"}">${h(sum)}</div>`}
+    <details><summary class="sub">весь вывод</summary><pre>${h(r.tail.join("\n"))}</pre></details></div>`;
+  }).join("");
+  clearTimeout(runTimer);
+  if (d.runs.some((r) => r.running)) runTimer = setTimeout(pollRuns, 2000);
+}
+
+// ссылка вида …/#f=old сразу открывает нужный отбор (удобно присылать)
+if (/^#f=\w+$/.test(location.hash)) filter = location.hash.slice(3);
+load(false).then(pollRuns);
+</script>
+</body>
+</html>
