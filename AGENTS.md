@@ -219,6 +219,12 @@ python -X utf8 tools/dorm_modules/gen_dorm_decals.py [имя …]            # �
                                                               # мебель общежития, партия 1 (комнаты): кровати двух- и одноярусная с панцирной сеткой на пружинах,
                                                               # матрас, тумбочка, шкаф, стол, стул, табурет, полка; вещи жильцов — холодильник, диван-книжка, ковёр,
                                                               # телевизор с антенной, плитка → RING_Dorm_Furniture (preview — кадры самопроверки)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_furniture2.py -- <файл.blend> [preview <папка> [номера]]
+                                                              # мебель общежития, партия 2 (кухня, умывальня, туалеты): электроплита (и с распахнутой дверцей), чугунная
+                                                              # мойка на тумбе со смесителем, стол-тумба, обеденный стол, шкафчик и полка для посуды, кастрюля, чайник,
+                                                              # сковорода, бидон, бак; фаянсовая раковина на кронштейнах (и отбитая), зеркало; унитаз с высоким бачком
+                                                              # и цепочкой (и с сорванным бачком), кабинки (дверца прикрыта / распахнута / выбита), крайняя перегородка;
+                                                              # фаянс и мойка — лофтом по сечениям-суперэллипсам → RING_Dorm_Furniture2_v01.blend
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);
