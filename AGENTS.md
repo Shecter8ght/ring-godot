@@ -264,6 +264,12 @@ python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # м
                                                               # assets/models/dorm/furniture (тот же furniture.json; material — набор); --import, python -X utf8
                                                               # tools/dorm_modules/furniture_imports.py, --import; расстановка — furnish_rooms.py (кухни, умывальни,
                                                               # душевые, туалеты; pose подвижного, серые умывальники и чаши снимаются по clear)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_items3.py -- <файл.blend> [preview <папка> [номера]]
+                                                              # вещи общежития, партия 3 (RING_Dorm_Items, интервью 2026-11-02), группа А — ящики для лута и вещи
+                                                              # жильцов: дощатые ящики под патроны (с цинками) и ЗИП, стальной сундук, раскладной ящик для
+                                                              # инструментов, жёсткий чемодан на колёсах, спортивная сумка (ткань симуляцией на «вещах»),
+                                                              # картонная коробка; у каждого — закрытый и открытый / раскрытый / полупустой корень, крышки и
+                                                              # створки — узлами с осью → RING_Dorm_Items_v01.blend
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Furniture_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/furniture_uv.py
                                                               # мебель, текстуры этап 1: развёртка и FBX → _asset_src/dorm_furniture/sp; печать — print_bake.py
                                                               # (furniture_uv) и python -X utf8 tools/dorm_modules/furniture_prints.py (тик, орнамент ковра, марки);
