@@ -221,6 +221,10 @@ def text(name, body, loc, size, c, parent, rot=(0,0,0)):
     ob=bpy.data.objects.new(name,cu);c.objects.link(ob);ob.parent=parent
     ob.location=Vector(loc)*MM;ob.rotation_euler=rot
     cu.materials.append(M['label'])
+    # Construction helper only. Visible marking belongs to a surface material layer.
+    ob['construction_only']=True
+    ob.hide_render=True
+    ob.hide_set(True)
     return ob
 
 def build_flashlight():

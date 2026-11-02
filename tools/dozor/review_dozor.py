@@ -32,6 +32,8 @@ views={
 '08':('08_family',(-.045,-.23,.265),(.070,.058,.034),.240,[base.name,*[c.name for c in variants]],False,False),
 '09':('09_front',(-.1,0,.035),(.010,0,.035),.075,[base.name],False,False),
 '10':('10_picatinny',(.018,-.145,.110),(.0805,-.064,.030),.110,[mount.name],False,False),
+'11':('11_marking_surface',(.019,0,.12),(.019,0,.051),.047,[base.name],False,False),
+'12':('12_marking_raking',(.025,.095,.105),(.019,0,.050),.047,[base.name],False,False),
 }
 if a.save:
     # Update the saved studio only; ensure all mesh variants remain visible in the file.
