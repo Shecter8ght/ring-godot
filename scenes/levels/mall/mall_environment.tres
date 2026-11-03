@@ -1,0 +1,49 @@
+[gd_resource type="Environment" load_steps=5 format=3]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+sky_top_color = Color(0.24, 0.4, 0.56, 1)
+sky_horizon_color = Color(0.6, 0.68, 0.74, 1)
+ground_bottom_color = Color(0.16, 0.18, 0.16, 1)
+ground_horizon_color = Color(0.5, 0.56, 0.55, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Gradient" id="TealCurve"]
+offsets = PackedFloat32Array(0, 0.25, 0.5, 0.75, 1)
+colors = PackedColorArray(0, 0.01, 0.018, 1, 0.225, 0.255, 0.265, 1, 0.47, 0.505, 0.52, 1, 0.735, 0.76, 0.77, 1, 0.985, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="TealLUT"]
+gradient = SubResource("TealCurve")
+width = 256
+
+[resource]
+background_mode = 2
+background_energy_multiplier = 1.15
+sky = SubResource("Sky")
+ambient_light_energy = 0.4
+tonemap_mode = 2
+tonemap_exposure = 0.8
+ssao_enabled = true
+ssao_radius = 2.5
+ssao_intensity = 4.0
+ssao_power = 2.0
+ssao_light_affect = 0.3
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_min_cell_size = 0.25
+glow_enabled = true
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.7, 0.77, 0.82, 1)
+fog_sun_scatter = 0.15
+fog_density = 0.55
+fog_aerial_perspective = 0.5
+fog_sky_affect = 0.1
+fog_depth_curve = 0.6
+fog_depth_begin = 50.0
+fog_depth_end = 900.0
+adjustment_enabled = true
+adjustment_saturation = 0.9
+adjustment_color_correction = SubResource("TealLUT")
+metadata/authored_lighting = true

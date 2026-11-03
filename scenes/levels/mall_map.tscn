@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/levels/mall/car_recovery_sites.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/world/spawn_point.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/world/extraction_point.tscn" id="5"]
-[ext_resource type="Environment" path="res://scenes/levels/zone01/zone01_environment.tres" id="6"]
+[ext_resource type="Environment" path="res://scenes/levels/mall/mall_environment.tres" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/player/camera_rig.tscn" id="7"]
 
 [node name="Mall_Map" type="Node3D"]
@@ -127,13 +127,14 @@ environment = ExtResource("6")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-21.0, -128.0, 0.0)
-light_color = Color(1, 0.88, 0.76, 1)
-light_energy = 2.2
-light_angular_distance = 2.5
+light_color = Color(1, 0.9, 0.76, 1)
+light_energy = 2.0
+light_angular_distance = 0.53
 shadow_enabled = true
-shadow_blur = 2.5
+shadow_blur = 1.0
 directional_shadow_max_distance = 260.0
 light_volumetric_fog_energy = 1.6
+metadata/authored_shadow = true
 
 [node name="CameraRig" parent="." instance=ExtResource("7")]
 

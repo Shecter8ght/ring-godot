@@ -24,6 +24,7 @@ var _sky: ShaderMaterial
 var _calc: bool = false
 var _profiles: Dictionary = {}
 var _conf: Dictionary = {}
+var _light_conf: Dictionary = {}
 var _phase: String = ""
 var _sync_t: float = 0.0
 var _sky_t: float = 0.0
@@ -64,6 +65,7 @@ func set_hour(h: float) -> void:
 ## Погода или карта сменились: собрать заново профили времени суток и небо.
 func rebuild() -> void:
 	_profiles.clear()
+	_light_conf.clear()
 	for k in ["day", "dusk", "night"]:
 		_profiles[k] = _profile(k)
 	_build_sky()
@@ -150,6 +152,7 @@ func _profile(k: String) -> Dictionary:
 	var path: Variant = _atm.get_parent().get("sector_path") if _atm else null
 	if path != null and String(path) != "":
 		lc = SectorBuilder.load_def(String(path)).get("light", {})
+	_light_conf = lc
 	var ak: float = float(lc.get("ambient_k_%s_%s" % [k, c.weather], lc.get("ambient_k_" + k, lc.get("ambient_k", 1.0))))
 	var p := {
 		"sun_energy": float(t.sun_energy) * float(lc.get("sun_k", 1.0)),
@@ -330,6 +333,7 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 		sun.global_basis = Basis.looking_at(-to, Vector3.UP if absf(to.y) < 0.99 else Vector3.FORWARD)
 		sun.light_energy = energy
 		sun.light_color = col
+		RaidAtmosphere.apply_sun_shadows(sun, _light_conf, sa.x, lit <= 0.0005)
 		sun.visible = String(RaidConditions.current.weather) != "rain" and energy > 0.001
 		sun.light_volumetric_fog_energy = lerpf(_mixf(w, "vol_sun"), float(Balance.NIGHT_ENV.moon_fog), float(w.night))
 	if e:

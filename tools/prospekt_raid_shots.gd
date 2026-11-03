@@ -7,6 +7,8 @@ extends Node
 ## → PROSPEKT_OUTPUT (по умолчанию user://prospekt_raid_shots)/<условие>__<кадр>.png; PROSPEKT_CASES=day,night — выборочно.
 ## PROSPEKT_VIEWS=avenue,hall — точки; PROSPEKT_HIDE_LABELS=1 — убрать подписи блокаута;
 ## PROSPEKT_ANGULAR=0 — сравнить с обычной фильтрацией теней без PCSS.
+## RAID_LIGHT_SCENE=res://… — другая карта; RAID_LIGHT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z;… — её камеры.
+## RAID_LIGHT_REUSE=1 — переключать условия на одной карте (проверяет и переходы погоды без повторного навмеша).
 
 const SCENE: String = "res://scenes/levels/prospekt.tscn"
 const CASES: Array[Dictionary] = [
@@ -41,6 +43,21 @@ func _ready() -> void:
 	Profile.use_file("user://profile_prospekt_light_test.json", true)
 	Profile.ensure()
 	RaidEvents.enabled = false
+	get_tree().node_added.connect(func(n: Node) -> void:
+		if n is Marauder:
+			n.process_mode = Node.PROCESS_MODE_DISABLED
+			(n as Node3D).visible = false)
+	var scene_path: String = OS.get_environment("RAID_LIGHT_SCENE")
+	if scene_path == "":
+		scene_path = SCENE
+	var shot_views: Array[Dictionary] = VIEWS.duplicate()
+	if OS.get_environment("RAID_LIGHT_VIEW") != "":
+		shot_views.clear()
+		for spec: String in OS.get_environment("RAID_LIGHT_VIEW").split(";", false):
+			var p: PackedStringArray = spec.split(":")
+			if p.size() == 7:
+				shot_views.append({"id": p[0], "at": Vector3(p[1].to_float(), p[2].to_float(), p[3].to_float()),
+					"look": Vector3(p[4].to_float(), p[5].to_float(), p[6].to_float())})
 	var clean: bool = OS.get_environment("PROSPEKT_CLEAN") != ""
 	if clean:
 		Settings.lens_fx = false
@@ -50,15 +67,25 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var only: PackedStringArray = OS.get_environment("PROSPEKT_CASES").split(",", false)
 	var views: PackedStringArray = OS.get_environment("PROSPEKT_VIEWS").split(",", false)
+	var reuse: bool = OS.get_environment("RAID_LIGHT_REUSE") == "1"
+	var level: Node = null
 	for c: Dictionary in CASES:
 		if not only.is_empty() and not String(c.id) in only:
 			continue
 		RaidConditions.from_host = {"time": c.time, "weather": c.weather, "power": "on"}
-		var level: Node = (load(SCENE) as PackedScene).instantiate()
-		# корень ещё расставляет детей (первый кадр) — добавить отложенно
-		get_tree().root.add_child.call_deferred(level)
-		await _frames(2)
-		get_tree().current_scene = level
+		if level == null:
+			level = (load(scene_path) as PackedScene).instantiate()
+			# корень ещё расставляет детей (первый кадр) — добавить отложенно
+			get_tree().root.add_child.call_deferred(level)
+			await _frames(2)
+			get_tree().current_scene = level
+		else:
+			RaidConditions.current = RaidConditions.from_host.duplicate()
+			AtmosphereSky.reset_blend()
+			RaidAtmosphere.current.apply()
+			RaidWeather.current.conditions_changed()
+			if DayCycle.current:
+				DayCycle.current.set_hour(float((Balance.RAID_TIME[String(c.time)] as Dictionary).start_hour))
 		# Население ещё ждёт навмеш: не создавать бойцов для съёмки света.
 		var population: AIPopulation = level.get_node_or_null("Population") as AIPopulation
 		if population:
@@ -108,7 +135,7 @@ func _ready() -> void:
 			we.environment.ambient_light_energy, we.environment.tonemap_exposure,
 			"вкл" if we.environment.fog_enabled else "выкл", we.environment.fog_density,
 			"своя камера" if camera else "глазами игрока"])
-		for view: Dictionary in VIEWS:
+		for view: Dictionary in shot_views:
 			if not views.is_empty() and not String(view.id) in views:
 				continue
 			var at: Vector3 = view.at
@@ -126,6 +153,11 @@ func _ready() -> void:
 			await RenderingServer.frame_post_draw
 			var path: String = out_dir.path_join("%s__%s.png" % [c.id, view.id])
 			print("prospekt_raid_shots: снимок ", path, " ошибка=", get_viewport().get_texture().get_image().save_png(path))
+		if not reuse:
+			level.queue_free()
+			level = null
+			await _frames(10)
+	if level:
 		level.queue_free()
 		await _frames(10)
 	get_tree().quit()

@@ -67,12 +67,7 @@ func apply() -> void:
 			e.ambient_light_energy *= ak
 			if sun:
 				sun.light_energy *= float(lc.get("sun_k", 1.0))
-				if lc.has("sun_angular_distance"):
-					# При низком солнце PCSS пропускает крышу в каскадах: проверено в зале Проспекта.
-					# Обычная фильтрация сохраняет перекрытие; размер солнца — только днём выше порога.
-					var soft: bool = not night and float(t.sun_elev) >= float(lc.get("sun_soft_min_elev", 0.0))
-					sun.light_angular_distance = float(lc.sun_angular_distance) if soft else 0.0
-					sun.shadow_blur = 1.0 if soft else float(lc.get("sun_hard_blur", 1.0))
+				apply_sun_shadows(sun, lc, float(t.sun_elev), night)
 			if bool(lc.get("procedural_weather", false)):
 				e.set_meta("procedural_weather", true)
 				_apply_procedural_weather(e, sun)
@@ -118,6 +113,16 @@ func _apply_procedural_weather(e: Environment, sun: DirectionalLight3D) -> void:
 	e.background_energy_multiplier *= float(weather.sky_k)
 	if sun:
 		sun.light_energy *= float(weather.sun_k)
+
+
+## Один профиль тени для статического времени и движущегося солнца DayCycle.
+## При низком солнце PCSS пропускает крышу в каскадах: обычная фильтрация сохраняет перекрытие.
+static func apply_sun_shadows(sun: DirectionalLight3D, conf: Dictionary, elevation: float, night: bool) -> void:
+	if sun == null or not conf.has("sun_angular_distance"):
+		return
+	var soft: bool = not night and elevation >= float(conf.get("sun_soft_min_elev", 0.0))
+	sun.light_angular_distance = float(conf.sun_angular_distance) if soft else 0.0
+	sun.shadow_blur = 1.0 if soft else float(conf.get("sun_hard_blur", 1.0))
 
 
 ## Смена суток: на карте с панорамами дня и заката (данные "sky_hdri") часы идут — DayCycle
