@@ -8,6 +8,10 @@
 Окружение — scenes/levels/prospekt/prospekt_environment.tres (пишет tools/build_prospekt.py, ссылаются обе сцены).
 В рейде силу солнца, рассеянный и выдержку по времени суток задаёт RaidAtmosphere, дымку по погоде — RaidWeather:
 поправки карты — LIGHT_KEYS и DEPTH_FOG в данных сектора (tools/build_prospekt_raid.py).
+
+Сверка 2026-11-03: дневные кадры референсы/prospekt_ground_zero и портфолио автора света Ground Zero:
+https://www.thewarpgames.com/andrewgubinportfolio/2024/2/27/escape-from-tarkov-ground-zero
+Визуальный ориентир: солнечный контраст с читаемыми поверхностями в тени и мягкой дальней границей тени.
 """
 
 ENV_PATH = "res://scenes/levels/prospekt/prospekt_environment.tres"
@@ -31,7 +35,7 @@ ENV_TRES = "\n".join([
     '',
     '[resource]',
     'background_mode = 2', 'background_energy_multiplier = 1.15', 'sky = SubResource("Sky")',
-    'ambient_light_energy = 0.25',
+    'ambient_light_energy = 0.4',
     'tonemap_mode = 2', 'tonemap_exposure = 0.8',
     'ssao_enabled = true', 'ssao_radius = 2.5', 'ssao_intensity = 4.0', 'ssao_power = 2.0', 'ssao_light_affect = 0.3',
     'sdfgi_enabled = true', 'sdfgi_use_occlusion = true', 'sdfgi_min_cell_size = 0.25',
@@ -49,16 +53,20 @@ ENV_TRES = "\n".join([
 SUN_PROPS = [
     'transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.75, -0.43301, 0, 0, 0)',
     'light_color = Color(1, 0.9, 0.76, 1)', 'light_energy = 2.0', 'shadow_enabled = true',
+    'light_angular_distance = 0.53', 'metadata/authored_shadow = true',
 ]
 
 
 # рейд: RaidAtmosphere ставит солнце t.sun_energy × sun_k, рассеянный 0,8 × t.ambient × ambient_k, выдержку t.exposure.
-# Днём (солнце 2,2, выдержка 0,9) это даёт то же, что в блокауте: солнце 2 × 0,8, рассеянный 0,25 × 0,8.
+# Днём (солнце 2,2, выдержка 0,9) близко к блокауту: солнце 2 × 0,8, рассеянный 0,4 × 0,8.
+# 2026-11-03: рассеянный поднят с 0,28 до 0,4 — фактура остаётся видимой в солнечной тени.
 # Ночью, в дождь и пасмурно солнца нет или оно слабое — рассеянный режется меньше, ночью он как у других карт
 # (0,15–0,18); подобрано снимками tools/prospekt_raid_shots.tscn.
-LIGHT_KEYS = {"sun_k": 0.81, "ambient_k": 0.28, "ambient_k_night": 1.8,
+LIGHT_KEYS = {"sun_k": 0.81, "sun_angular_distance": 0.53, "sun_soft_min_elev": 20.0,
+              "sun_hard_blur": 1.5, "procedural_weather": True,
+              "ambient_k": 0.4, "ambient_k_night": 1.8,
               "ambient_k_day_rain": 0.8, "ambient_k_dusk_rain": 0.8, "ambient_k_night_rain": 3.2,
-              "ambient_k_day_overcast": 0.5, "ambient_k_dusk_overcast": 0.5, "ambient_k_night_overcast": 2.6}
+              "ambient_k_day_overcast": 0.8, "ambient_k_dusk_overcast": 0.8, "ambient_k_night_overcast": 2.6}
 # привыкание глаза камеры игрока (CameraLook, общее — Balance.LOOK: цель 0,9, светлее до ×5 на улице и ×12 в здании)
 # вытягивало тёмный свет карты почти до белого и высветляло помещения в 3 раза (владелец 2026-10-26: «слишком
 # выбелено»). Своё у карты: цель ниже, на улице светлее не больше ×2, в здании ×2,5 — помещения остаются тёмными.

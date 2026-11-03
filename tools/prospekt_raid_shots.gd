@@ -1,10 +1,12 @@
 extends Node
-## Свет «Проспекта» в рейде (tools/prospekt_light.py): та же карта по условиям — день, закат, ночь, пасмурно, дождь, —
+## Свет «Проспекта» в рейде (tools/prospekt_light.py): день / закат / ночь × ясно / пасмурно / дождь / туман / жара,
 ## с одних точек (проспект, площадь, зал супермаркета). Уровень грузится заново на каждое условие, мародёры убраны,
 ## интерфейс скрыт. По умолчанию — глазами игрока: его камера с привыканием глаза и «объективом» (CameraLook),
 ## как видит игрок; PROSPEKT_CLEAN=1 — своей камерой без них (чистый свет сцены).
 ##   tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn
 ## → PROSPEKT_OUTPUT (по умолчанию user://prospekt_raid_shots)/<условие>__<кадр>.png; PROSPEKT_CASES=day,night — выборочно.
+## PROSPEKT_VIEWS=avenue,hall — точки; PROSPEKT_HIDE_LABELS=1 — убрать подписи блокаута;
+## PROSPEKT_ANGULAR=0 — сравнить с обычной фильтрацией теней без PCSS.
 
 const SCENE: String = "res://scenes/levels/prospekt.tscn"
 const CASES: Array[Dictionary] = [
@@ -13,6 +15,16 @@ const CASES: Array[Dictionary] = [
 	{"id": "night", "time": "night", "weather": "clear"},
 	{"id": "day_overcast", "time": "day", "weather": "overcast"},
 	{"id": "day_rain", "time": "day", "weather": "rain"},
+	{"id": "day_fog", "time": "day", "weather": "fog"},
+	{"id": "day_heat", "time": "day", "weather": "heat"},
+	{"id": "dusk_overcast", "time": "dusk", "weather": "overcast"},
+	{"id": "dusk_rain", "time": "dusk", "weather": "rain"},
+	{"id": "dusk_fog", "time": "dusk", "weather": "fog"},
+	{"id": "dusk_heat", "time": "dusk", "weather": "heat"},
+	{"id": "night_overcast", "time": "night", "weather": "overcast"},
+	{"id": "night_rain", "time": "night", "weather": "rain"},
+	{"id": "night_fog", "time": "night", "weather": "fog"},
+	{"id": "night_heat", "time": "night", "weather": "heat"},
 ]
 const VIEWS: Array[Dictionary] = [
 	{"id": "avenue", "at": Vector3(-170, 1.62, -12), "look": Vector3(-60, 2, -6)},
@@ -26,6 +38,8 @@ const KEEP_LAYERS: Array[String] = ["LensLayer"]
 
 
 func _ready() -> void:
+	Profile.use_file("user://profile_prospekt_light_test.json", true)
+	Profile.ensure()
 	RaidEvents.enabled = false
 	var clean: bool = OS.get_environment("PROSPEKT_CLEAN") != ""
 	if clean:
@@ -35,6 +49,7 @@ func _ready() -> void:
 		out_dir = ProjectSettings.globalize_path("user://prospekt_raid_shots")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var only: PackedStringArray = OS.get_environment("PROSPEKT_CASES").split(",", false)
+	var views: PackedStringArray = OS.get_environment("PROSPEKT_VIEWS").split(",", false)
 	for c: Dictionary in CASES:
 		if not only.is_empty() and not String(c.id) in only:
 			continue
@@ -44,7 +59,18 @@ func _ready() -> void:
 		get_tree().root.add_child.call_deferred(level)
 		await _frames(2)
 		get_tree().current_scene = level
+		# Население ещё ждёт навмеш: не создавать бойцов для съёмки света.
+		var population: AIPopulation = level.get_node_or_null("Population") as AIPopulation
+		if population:
+			population.posts_only = true
+			population.keep_posts.clear()
+		for warden: Node in level.find_children("*", "Node3D", true, false):
+			if warden is GateWarden:
+				warden.set_physics_process(false)
 		await _frames(30)
+		if OS.get_environment("PROSPEKT_HIDE_LABELS") == "1":
+			for label: Node in level.find_children("*", "Label3D", true, false):
+				(label as Label3D).visible = false
 		var marauders: Node = level.get_node_or_null("Marauders")
 		if marauders:
 			for m: Node in marauders.get_children():
@@ -71,6 +97,8 @@ func _ready() -> void:
 			me.health.max_hp = 1e9
 			CameraRig.first_person_mode = true
 		var sun: DirectionalLight3D = level.get_node_or_null("Sun") as DirectionalLight3D
+		if sun and OS.get_environment("PROSPEKT_ANGULAR") != "":
+			sun.light_angular_distance = float(OS.get_environment("PROSPEKT_ANGULAR"))
 		var we: WorldEnvironment = level.find_child("WorldEnvironment", false, false) as WorldEnvironment
 		# для поиска причин: PROSPEKT_ENV_OFF=sdfgi,ssao,fog,adjustment — выключить части окружения
 		for part: String in OS.get_environment("PROSPEKT_ENV_OFF").split(",", false):
@@ -81,6 +109,8 @@ func _ready() -> void:
 			"вкл" if we.environment.fog_enabled else "выкл", we.environment.fog_density,
 			"своя камера" if camera else "глазами игрока"])
 		for view: Dictionary in VIEWS:
+			if not views.is_empty() and not String(view.id) in views:
+				continue
 			var at: Vector3 = view.at
 			var look: Vector3 = view.look
 			if camera:

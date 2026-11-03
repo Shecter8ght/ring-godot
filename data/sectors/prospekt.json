@@ -47,13 +47,17 @@
  "nav_cache": "res://data/navigation/prospekt",
  "light": {
   "sun_k": 0.81,
-  "ambient_k": 0.28,
+  "sun_angular_distance": 0.53,
+  "sun_soft_min_elev": 20.0,
+  "sun_hard_blur": 1.5,
+  "procedural_weather": true,
+  "ambient_k": 0.4,
   "ambient_k_night": 1.8,
   "ambient_k_day_rain": 0.8,
   "ambient_k_dusk_rain": 0.8,
   "ambient_k_night_rain": 3.2,
-  "ambient_k_day_overcast": 0.5,
-  "ambient_k_dusk_overcast": 0.5,
+  "ambient_k_day_overcast": 0.8,
+  "ambient_k_dusk_overcast": 0.8,
   "ambient_k_night_overcast": 2.6
  },
  "depth_fog": {

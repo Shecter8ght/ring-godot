@@ -1058,6 +1058,17 @@ const HDRI_WEATHER := {
 	"fog": {"overcast": 0.7, "exposure": 0.8, "tint": Color(0.95, 0.97, 1.0), "sun_k": 0.45},
 	"rain": {"overcast": 1.0, "exposure": 0.5, "tint": Color(0.8, 0.84, 0.9), "sun_k": 0.0},
 }
+## Погода карт со своим процедурным небом (Проспект). Сплошные тучи освещают землю
+## рассеянно: прямого солнечного луча и его жёсткой тени нет. Ночной свет задаётся отдельно.
+const PROCEDURAL_WEATHER := {
+	"overcast": {"sun_k": 0.0, "sky_k": 0.85},
+	"rain": {"sun_k": 0.0, "sky_k": 0.65},
+	"fog": {"sun_k": 0.15, "sky_k": 0.8},
+}
+const PROCEDURAL_CLOUD_SKY := {
+	"top": Color(0.58, 0.62, 0.66), "horizon": Color(0.68, 0.70, 0.72),
+	"ground": Color(0.22, 0.24, 0.25), "ground_horizon": Color(0.45, 0.47, 0.48),
+}
 ## Расчётное небо — второй режим неба смены суток (DayCycle; Settings.sky_mode = "calc", переключатель —
 ## Esc → Читы → Мир): атмосфера считается по положению солнца (atmosphere_sky.gdshader, таблицы —
 ## data/sky_atmosphere.json). Погода: mie — во сколько раз больше дымки (белёсый горизонт, ореол

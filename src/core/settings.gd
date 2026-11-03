@@ -521,6 +521,9 @@ func _on_node_added(n: Node) -> void:
 	elif n is OmniLight3D or n is SpotLight3D:
 		soften(n as Light3D)
 	elif n is DirectionalLight3D:
+		# Карта с отдельно проверенными тенями сохраняет свой размер солнца.
+		if n.has_meta("authored_shadow"):
+			return
 		# солнце без PCSS (угловой размер): при низком солнце (закат, 12°) мягкая тень в каскадах
 		# не находит перекрытие над головой — прямое солнце ложилось на пол коридоров ТЦ под
 		# потолком ярким пятном (проба: пол 0.49 → 0.13 без PCSS); мягкость края — shadow_blur

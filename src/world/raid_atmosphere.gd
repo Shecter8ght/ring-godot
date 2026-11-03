@@ -67,6 +67,15 @@ func apply() -> void:
 			e.ambient_light_energy *= ak
 			if sun:
 				sun.light_energy *= float(lc.get("sun_k", 1.0))
+				if lc.has("sun_angular_distance"):
+					# При низком солнце PCSS пропускает крышу в каскадах: проверено в зале Проспекта.
+					# Обычная фильтрация сохраняет перекрытие; размер солнца — только днём выше порога.
+					var soft: bool = not night and float(t.sun_elev) >= float(lc.get("sun_soft_min_elev", 0.0))
+					sun.light_angular_distance = float(lc.sun_angular_distance) if soft else 0.0
+					sun.shadow_blur = 1.0 if soft else float(lc.get("sun_hard_blur", 1.0))
+			if bool(lc.get("procedural_weather", false)):
+				e.set_meta("procedural_weather", true)
+				_apply_procedural_weather(e, sun)
 		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
 		if not e.has_meta("vol_base"):
 			e.set_meta("vol_base", e.volumetric_fog_density)
@@ -77,11 +86,38 @@ func apply() -> void:
 	# дождь: сплошные тучи — ни солнца, ни Луны: ни прямого света, ни бликов в лужах и на мокром;
 	# пасмурно — солнце едва пробивается (слабее, RaidWeather / HDRI_WEATHER), Луны за тучами нет
 	if sun:
-		sun.visible = String(c.weather) != "rain" and not (night and RaidConditions.clouded(String(c.weather)))
+		sun.visible = sun.light_energy > 0.001 and String(c.weather) != "rain" and not (night and RaidConditions.clouded(String(c.weather)))
 	_apply_power(String(c.power))
 	_day_cycle(String(c.time))
 	if level.get_node_or_null("DayCycle") == null:
 		Balance.lab_atmosphere(sun, we.environment if we else null)
+
+
+## Свой процедурный небосвод карты: серое небо вместо ясного под сплошными тучами.
+## _apply_night уже вернул исходное дневное небо, поэтому переключения не копят множители
+## и не меняют общий ресурс неба, который нужен следующему ясному дню.
+func _apply_procedural_weather(e: Environment, sun: DirectionalLight3D) -> void:
+	if String(RaidConditions.current.time) == "night" or e.sky == null:
+		return
+	var base: ProceduralSkyMaterial = e.sky.sky_material as ProceduralSkyMaterial
+	if base == null:
+		return
+	var weather: Dictionary = Balance.PROCEDURAL_WEATHER.get(String(RaidConditions.current.weather), {})
+	if weather.is_empty():
+		return
+	var sky: Sky = e.sky.duplicate() as Sky
+	var mat: ProceduralSkyMaterial = base.duplicate() as ProceduralSkyMaterial
+	var colors: Dictionary = Balance.PROCEDURAL_CLOUD_SKY
+	mat.sky_top_color = colors.top
+	mat.sky_horizon_color = colors.horizon
+	mat.ground_bottom_color = colors.ground
+	mat.ground_horizon_color = colors.ground_horizon
+	mat.sun_angle_max = 0.0
+	sky.sky_material = mat
+	e.sky = sky
+	e.background_energy_multiplier *= float(weather.sky_k)
+	if sun:
+		sun.light_energy *= float(weather.sun_k)
 
 
 ## Смена суток: на карте с панорамами дня и заката (данные "sky_hdri") часы идут — DayCycle

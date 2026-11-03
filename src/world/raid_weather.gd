@@ -165,6 +165,10 @@ func _apply_static() -> void:
 	if String(RaidConditions.current.time) == "night":
 		_fog_sky_target = minf(_fog_sky_target, float(Balance.NIGHT_ENV.fog_sky))
 	var e := _env()
+	# На карте со своим процедурным небом погоду целиком пересобирает Atmosphere.
+	# Это нужно и при автоматическом начале дождя, а не только при выборе в настройках.
+	if e and e.has_meta("procedural_weather") and RaidAtmosphere.current:
+		RaidAtmosphere.current.apply()
 	if e and e.fog_mode == Environment.FOG_MODE_DEPTH:
 		# туман по расстоянию: плотность — доля дымки на дальней границе, а не «дым» по всему объёму;
 		# своя дымка карты на эту погоду — данные сектора "depth_fog" (у «Проспекта» — в ясную)
@@ -281,6 +285,8 @@ var _overcast: Array = []
 func _set_overcast(on: bool) -> void:
 	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
+	if we and we.environment and we.environment.has_meta("procedural_weather"):
+		return
 	# небо из панорамы (RaidAtmosphere._apply_hdri) погоду уже учло: пасмурная панорама, пелена, солнце
 	if we and we.environment and we.environment.sky and we.environment.sky.sky_material and we.environment.sky.sky_material.has_meta("hdri"):
 		return

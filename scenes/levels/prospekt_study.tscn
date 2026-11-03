@@ -31,6 +31,8 @@ light_color = Color(1, 0.9, 0.76, 1)
 light_energy = 2.0
 
 shadow_enabled = true
+light_angular_distance = 0.53
+metadata/authored_shadow = true
 
 [node name="Landscape" type="Node3D" parent="."]
 
