@@ -25,6 +25,7 @@
  ],
  "raid": {
   "level": "prospekt",
+  "complete_on_extraction": true,
   "entry": "Gameplay/Prologue/Cordon",
   "checkpoint": "Gameplay/Prologue/Checkpoint",
   "checkpoint_after": "hall",

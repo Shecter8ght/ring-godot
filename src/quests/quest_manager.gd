@@ -1147,6 +1147,13 @@ func on_extracted(params: Dictionary) -> void:
 				for k in (rule.get("flags", {}) as Dictionary):
 					_flags()[String(k)] = rule.flags[k]
 	event("extracted", params)
+	# Успешный выход завершает вводный рейд даже при пропущенной промежуточной зоне.
+	# Это явное свойство сценария: обычные заказы продолжают требовать все свои цели.
+	for qid: String in _order:
+		var rd: Dictionary = raid_def(qid)
+		if state(qid) == "ACTIVE" and bool(rd.get("complete_on_extraction", false)) \
+				and world != null and String(rd.get("level", "")) == world.level:
+			_complete_quest(qid)
 	_delivered = true
 	_commit_host()
 	_broadcast()

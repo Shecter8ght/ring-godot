@@ -79,6 +79,7 @@ static func prologue_pending(path: String) -> bool:
 	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 	if not d is Dictionary:
 		return false
+	Prologue.repair_saved_completion((d as Dictionary).get("quests", {}), (d as Dictionary).get("flags", {}))
 	var q: Variant = ((d as Dictionary).get("quests", {}) as Dictionary).get(String(Balance.PROLOGUE.quest), {})
 	return q is Dictionary and String((q as Dictionary).get("state", "")) == "ACTIVE"
 

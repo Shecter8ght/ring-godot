@@ -16,6 +16,20 @@ static var checkpoint_kit: Dictionary = {}
 ## Вступительный экран закрыт в этой сессии (гость со своей кампанией — его профиль не трогаем).
 static var intro_seen: bool = false
 
+
+## Старый пролог мог остаться ACTIVE после выхода, если не сработала одна из зон маршрута.
+## Доставленный пакет ставится только при эвакуации: это подтверждение завершённого первого рейда.
+## Работает и на прочитанном сохранении главного меню, до загрузки Profile.
+static func repair_saved_completion(quests: Dictionary, flags: Dictionary) -> bool:
+	var q: Dictionary = quests.get(String(Balance.PROLOGUE.quest), {})
+	if String(q.get("state", "")) != "ACTIVE":
+		return false
+	if flags.get("packet_delivered") != true and flags.get("prologue_done") != true:
+		return false
+	q["state"] = "COMPLETED"
+	flags["prologue_done"] = true
+	return true
+
 var qid: String = ""
 ## Режим рейда из данных квеста (raid).
 var spec: Dictionary = {}

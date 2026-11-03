@@ -908,6 +908,7 @@ static func check_mag(name: String, idx: int) -> void:
 ## Старые сохранения (до арсенала): id по алиасам, обвес по точкам, магазины, прочность. Что не
 ## встало — в тайник.
 static func _migrate() -> void:
+	Prologue.repair_saved_completion(quests, flags)
 	var spill: Array = []
 	for list in [stash, backpack, pocket]:
 		for i in range(list.size()):
