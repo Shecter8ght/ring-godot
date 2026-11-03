@@ -56,6 +56,7 @@ var _overlay: Control
 var _cards: Control
 var _tree_box: VBoxContainer
 var _actions: HFlowContainer
+var _lock_note: Label
 var _stats_box: VBoxContainer
 var _strip: HBoxContainer
 var _tabs_box: HBoxContainer
@@ -196,6 +197,7 @@ func _panel(color: Color = C_PANEL, radius: int = 8, margin: int = 12) -> StyleB
 func _label(text: String, size: int = 14, color: Color = C_TEXT) -> Label:
 	var l := Label.new()
 	l.text = text
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
 	return l
@@ -286,6 +288,12 @@ func _build_ui() -> void:
 	_actions.add_theme_constant_override("h_separation", 6)
 	_actions.add_theme_constant_override("v_separation", 6)
 	lv.add_child(_actions)
+	_lock_note = _label("", 12, C_ACCENT)
+	_lock_note.name = "LockExplanation"
+	_lock_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lock_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_lock_note.visible = false
+	lv.add_child(_lock_note)
 	var center := Control.new()
 	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center.clip_contents = true
@@ -439,7 +447,8 @@ func _remove(key: String) -> void:
 	if not _draft.has(key):
 		return
 	if _locked(key) != "":
-		_say(_locked(key))
+		_show_lock(_locked(key))
+		_say(_locked(key).get_slice("\n", 0))
 		return
 	_push()
 	for k: String in WeaponBuild.subtree(_draft, key):
@@ -453,12 +462,42 @@ func _remove(key: String) -> void:
 func _locked(key: String) -> String:
 	var top: String = WeaponBuild.top_mount(key)
 	if mode == "raid" and top == "stock":
-		return "Приклад — только на верстаке в убежище"
+		return "Приклад нельзя менять в рейде.\nЭвакуируйся и открой конструктор на верстаке в убежище."
 	if mode == "hideout":
 		var why: String = Profile.mod_block("", top)
 		if why != "":
-			return why[0].to_upper() + why.substr(1)
+			var need: int = int(Balance.WORKBENCH_SLOT_LEVEL.get(top, 1))
+			var lines: Array[String] = ["Нужен верстак уровня %d (сейчас %d)." % [need, Upgrades.level("workbench")],
+				"В убежище открой «Модули убежища» и улучши «Верстак»."]
+			var levels: Array = Upgrades.find("workbench").get("levels", [])
+			if need > 0 and need <= levels.size():
+				var cost: Dictionary = levels[need - 1]
+				for dependency: String in cost.get("needs", {}):
+					var target: int = int(cost.needs[dependency])
+					if Upgrades.level(dependency) < target:
+						lines.append("Сначала построй «%s» уровня %d (сейчас %d)." % [String(Upgrades.find(dependency).get("name", dependency)), target, Upgrades.level(dependency)])
+				var trust: int = TraderStock.step_of(int(cost.get("trust", 1)))
+				if Profile.trust_step() < trust:
+					lines.append(_trust_help(trust))
+				if int(cost.get("money", 0)) > 0:
+					lines.append("Стоимость: %s ₽ (есть %s ₽)." % [InventoryUI.money(int(cost.money)), InventoryUI.money(Profile.money)])
+				var items: Array[String] = []
+				for pair: Array in cost.get("items", []):
+					items.append("%s × %d (в тайнике %d)" % [ItemDb.item_name(String(pair[0])), int(pair[1]), Profile.stash_count(String(pair[0]))])
+				if not items.is_empty():
+					lines.append("Из тайника: " + "; ".join(items) + ".")
+			return "\n".join(lines)
 	return ""
+
+
+func _trust_help(required: int) -> String:
+	return "Доверие Михалыча: нужно %d, сейчас %d.\nПовышай доверие успешными эвакуациями и заданиями с наградой доверием." % [required, Profile.trust_step()]
+
+
+## Объяснение остаётся на экране, пока игрок выбирает закрытую точку или другую деталь.
+func _show_lock(text: String) -> void:
+	_lock_note.text = text
+	_lock_note.visible = text != ""
 
 
 # ---------------------------------------------------------------- детали: откуда и куда
@@ -503,11 +542,14 @@ func _pool() -> Array[Dictionary]:
 				continue
 			var price: int = Profile.buy_price(sid)
 			var lock: String = ""
+			var lock_summary: String = ""
 			var tl: int = maxi(TraderStock.catalog_of(sid), 1)
 			if not Settings.all_weapons and Profile.trust_level() < tl and not sid in Profile.unlocked_stock:
-				lock = "ступень доверия %d" % TraderStock.step_of(tl)
+				var required: int = TraderStock.step_of(tl)
+				lock = "Михалыч пока не продаёт эту деталь.\n" + _trust_help(required)
+				lock_summary = "🔒 Доверие: %d / %d" % [Profile.trust_step(), required]
 			out.append({"id": sid, "src": {"from": "shop"}, "item": {"id": sid, "n": 1}, "price": price, "lock": lock,
-				"sub": "%s ₽" % InventoryUI.money(price)})
+				"lock_summary": lock_summary, "sub": "%s ₽" % InventoryUI.money(price)})
 	return out
 
 
@@ -573,11 +615,13 @@ func _target_for(part: Dictionary) -> Dictionary:
 ## Выбрали деталь в полосе: на планку — режим установки по пазам, иначе — сразу.
 func _choose(part: Dictionary) -> void:
 	if String(part.get("lock", "")) != "":
-		_say(String(part.lock))
+		_show_lock(ItemDb.item_name(String(part.id)) + "\n\n" + String(part.lock))
+		_say(String(part.lock).get_slice("\n", 0))
 		return
 	var t: Dictionary = _target_for(part)
 	if String(t.get("key", "")) == "":
-		_say(String(t.why))
+		_show_lock(String(t.why))
+		_say(String(t.why).get_slice("\n", 0))
 		return
 	if bool(t.get("rail", false)):
 		_begin_place(String(t.key), part, int(t.slot), false)
@@ -950,6 +994,8 @@ func _tree_order(k: String) -> String:
 
 func _tree_row(key: String, title: String, sub: String, depth: int, filled: bool) -> void:
 	var row := PanelContainer.new()
+	var lock: String = _locked(key) if key != "@mag" else ""
+	row.tooltip_text = title + "\n" + sub + ("\n\n" + lock if lock != "" else "")
 	var selected: bool = key == _sel or (key == "@mag" and _tab == "mag" and _sel == "@mag")
 	row.add_theme_stylebox_override("panel", _row_style(selected))
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -967,7 +1013,7 @@ func _tree_row(key: String, title: String, sub: String, depth: int, filled: bool
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(v)
 	v.add_child(_label(title, 14, C_TEXT if filled else C_MUTED))
-	v.add_child(_label(sub, 11, C_MUTED))
+	v.add_child(_label("🔒 " + lock.get_slice("\n", 0) if lock != "" else sub, 11, C_ACCENT if lock != "" else C_MUTED))
 	row.gui_input.connect(func(ev: InputEvent) -> void:
 		if ev is InputEventMouseButton and (ev as InputEventMouseButton).pressed and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
 			if _draft.has(key):
@@ -988,6 +1034,10 @@ func _tree_row(key: String, title: String, sub: String, depth: int, filled: bool
 func _refresh_actions() -> void:
 	for c: Node in _actions.get_children():
 		c.queue_free()
+	var lock: String = _locked(_sel) if _sel != "" and _sel != "@mag" else ""
+	_show_lock(lock)
+	if lock != "":
+		return
 	if not _draft.has(_sel):
 		if _sel != "" and _sel != "@mag":
 			_actions.add_child(_label("Выбери деталь снизу — встанет сюда.", 12, C_MUTED))
@@ -1134,7 +1184,10 @@ func _refresh_strip() -> void:
 		any = true
 		_strip.add_child(_part_card(part, String(t.get("why", ""))))
 	if not any:
-		_strip.add_child(_label("Подходящих деталей нет" + (" у Михалыча" if _source == "shop" else " в вещах") + (" для этой точки" if _sel != "" else "") + ".", 13, C_MUTED))
+		if _sel != "" and _locked(_sel) != "":
+			_strip.add_child(_label("Точка крепления закрыта. Условия открытия — слева.", 13, C_ACCENT))
+		else:
+			_strip.add_child(_label("Подходящих деталей нет" + (" у Михалыча" if _source == "shop" else " в вещах") + (" для этой точки" if _sel != "" else "") + ".", 13, C_MUTED))
 
 
 func _pick_tab(tid: String) -> void:
@@ -1159,8 +1212,13 @@ func _part_card(part: Dictionary, why: String) -> Control:
 	card.custom_minimum_size = Vector2(200, 96)
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	card.tooltip_text = "%s\n%s" % [ItemDb.item_name(String(part.id)), String(WeaponDb.attachment(String(part.id)).get("desc", ""))]
+	if lock != "":
+		card.tooltip_text += "\n\n" + lock
+	if why != "" and why != lock:
+		card.tooltip_text += "\n\nУстановка: " + why
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
 	var icon := ItemCard.IconBox.new()
 	icon.id = String(part.id)
@@ -1173,7 +1231,7 @@ func _part_card(part: Dictionary, why: String) -> Control:
 	v.add_child(name)
 	v.add_child(_label(String(part.get("sub", "")), 11, C_SHOP if String(part.src.from) == "shop" else C_MUTED))
 	if cant:
-		v.add_child(_label(lock if lock != "" else why, 11, C_BAD))
+		v.add_child(_label(String(part.get("lock_summary", lock.get_slice("\n", 0))) if lock != "" else why.get_slice("\n", 0), 11, C_BAD))
 		card.modulate = Color(1, 1, 1, 0.6)
 	card.mouse_entered.connect(func() -> void:
 		(card.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = C_CARD_HI
@@ -1479,8 +1537,9 @@ func _spot(key: String, p: Vector3, title: String, sub: String, filled: bool, ad
 	if not fits.is_empty():
 		var pt_iface: String = iface if iface != "" else String(WeaponBuild.point(String(_weapon.id), BuildPlan.clean(_draft), key).get("iface", ""))
 		match_hover = pt_iface in fits
+	var reason: String = _locked(key)
 	_spots.append({"key": key, "pos": _view.project(p), "title": title, "sub": sub, "filled": filled, "add": add,
-		"hot": match_hover, "lock": _locked(key) != ""})
+		"hot": match_hover, "lock": reason != "", "lock_reason": reason})
 
 
 ## Карточки по краям студии: слева — точки левой половины, справа — правой, без наложений.
@@ -1700,6 +1759,7 @@ class _SpotCard:
 		add_theme_stylebox_override("panel", _style)
 		var h := HBoxContainer.new()
 		h.add_theme_constant_override("separation", 8)
+		h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(h)
 		_icon = ItemCard.IconBox.new()
 		_icon.custom_minimum_size = Vector2(52, 36)
@@ -1707,14 +1767,17 @@ class _SpotCard:
 		h.add_child(_icon)
 		var v := VBoxContainer.new()
 		v.add_theme_constant_override("separation", -2)
+		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(v)
 		_t = Label.new()
+		_t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_t.add_theme_font_size_override("font_size", 13)
 		_t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		_t.custom_minimum_size.x = 96
 		v.add_child(_t)
 		_s = Label.new()
+		_s.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_s.add_theme_font_size_override("font_size", 11)
 		_s.add_theme_color_override("font_color", Color(0.58, 0.59, 0.58))
 		_s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1737,7 +1800,9 @@ class _SpotCard:
 		_icon.visible = filled
 		_t.text = String(s.title)
 		_t.add_theme_color_override("font_color", Color(0.93, 0.91, 0.87) if filled else Color(0.75, 0.75, 0.72))
-		_s.text = ("🔒 " if bool(s.lock) else "") + String(s.sub)
+		var reason: String = String(s.get("lock_reason", ""))
+		_s.text = "🔒 " + reason.get_slice("\n", 0) if bool(s.lock) else String(s.sub)
+		tooltip_text = String(s.title) + "\n" + String(s.sub) + ("\n\n" + reason if reason != "" else "")
 		_style.bg_color = Color(0.96, 0.74, 0.38, 0.18) if selected else Color(0.08, 0.082, 0.088, 0.92)
 		_style.border_color = Color(0.45, 0.88, 0.55, 0.8) if bool(s.hot) else (Color(0.96, 0.74, 0.38, 0.7) if selected else Color(1, 1, 1, 0.08))
 
