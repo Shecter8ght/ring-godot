@@ -34,6 +34,8 @@ func apply() -> void:
 	var t := RaidConditions.spec("time")
 	var level := get_parent()
 	var sun := level.get_node_or_null("Sun") as DirectionalLight3D
+	var we := level.find_child("WorldEnvironment", false, false) as WorldEnvironment
+	RaidLighting.prepare(we, sun)
 	var night := String(c.time) == "night"
 	var sky_mat: ShaderMaterial = night_sky_material() if night else null
 	if sun:
@@ -47,7 +49,6 @@ func apply() -> void:
 		sun.light_energy = float(t.sun_energy)
 		sun.light_color = t.sun_color
 		sun.light_volumetric_fog_energy = 1.6 if not night else float(Balance.NIGHT_ENV.moon_fog)
-	var we := level.find_child("WorldEnvironment", false, false) as WorldEnvironment
 	if we and we.environment:
 		var e := we.environment
 		e.ambient_light_energy = 0.8 * float(t.ambient)
@@ -58,19 +59,13 @@ func apply() -> void:
 		_apply_night(e, sky_mat)
 		if not night:
 			_apply_hdri(e, sun)
-		# свет карты: больше рассеянного (тени не чёрные), солнце мягче — данные сектора "light"
-		var path: Variant = get_parent().get("sector_path")
-		if path != null and String(path) != "":
-			var lc: Dictionary = SectorBuilder.load_def(String(path)).get("light", {})
-			# ambient_k_<время>_<погода> → ambient_k_<время> → ambient_k
-			var ak: float = float(lc.get("ambient_k_%s_%s" % [c.time, c.weather], lc.get("ambient_k_" + String(c.time), lc.get("ambient_k", 1.0))))
-			e.ambient_light_energy *= ak
-			if sun:
-				sun.light_energy *= float(lc.get("sun_k", 1.0))
-				apply_sun_shadows(sun, lc, float(t.sun_elev), night)
-			if bool(lc.get("procedural_weather", false)):
-				e.set_meta("procedural_weather", true)
-				_apply_procedural_weather(e, sun)
+		# Один профиль для любой карты, даже без sector_path.
+		var lc: Dictionary = RaidLighting.light_conf()
+		var ak: float = float(lc.get("ambient_k_%s_%s" % [c.time, c.weather], lc.get("ambient_k_" + String(c.time), lc.get("ambient_k", 1.0))))
+		e.ambient_light_energy *= ak
+		if sun:
+			sun.light_energy *= float(lc.get("sun_k", 1.0))
+			apply_sun_shadows(sun, lc, float(t.sun_elev), night)
 		var vt: Dictionary = Balance.VOLUMETRIC_TIME.get(String(c.time), {})
 		if not e.has_meta("vol_base"):
 			e.set_meta("vol_base", e.volumetric_fog_density)
@@ -120,12 +115,12 @@ func _apply_procedural_weather(e: Environment, sun: DirectionalLight3D) -> void:
 static func apply_sun_shadows(sun: DirectionalLight3D, conf: Dictionary, elevation: float, night: bool) -> void:
 	if sun == null or not conf.has("sun_angular_distance"):
 		return
-	var soft: bool = not night and elevation >= float(conf.get("sun_soft_min_elev", 0.0))
-	sun.light_angular_distance = float(conf.sun_angular_distance) if soft else 0.0
-	sun.shadow_blur = 1.0 if soft else float(conf.get("sun_hard_blur", 1.0))
+	var soft: bool = not night and elevation >= Balance.lab_number("atmosphere", "shadow_min_elev")
+	sun.light_angular_distance = Balance.lab_number("atmosphere", "shadow_angle") if soft else 0.0
+	sun.shadow_blur = 1.0 if soft else Balance.lab_number("atmosphere", "shadow_blur")
 
 
-## Смена суток: на карте с панорамами дня и заката (данные "sky_hdri") часы идут — DayCycle
+## Смена суток: общие панорамы дня и заката; часы идут — DayCycle
 ## ведёт солнце, Луну, свет и небо. Время суток сменили вручную (настройки) — часы с его начала;
 ## сменилась погода — то же время, новые панорамы.
 var _cycle_key: String = ""
@@ -155,11 +150,8 @@ func _day_cycle(time_key: String) -> void:
 ## панорама доворачивается так, чтобы её солнце (sun_u — доля ширины панорамы) стояло там же, где
 ## игровое; погода смешивает её по Balance.HDRI_WEATHER. Нет панорамы или файла — небо сцены.
 func _apply_hdri(e: Environment, sun: DirectionalLight3D) -> void:
-	var path: Variant = get_parent().get("sector_path")
-	if path == null or String(path) == "":
-		return
-	# своё небо на «время_погода» (закат в дождь — пасмурное), иначе на время суток
-	var all: Dictionary = SectorBuilder.load_def(String(path)).get("sky_hdri", {})
+	# Погода и небо общие для всех карт.
+	var all: Dictionary = RaidLighting.sky_conf()
 	var tk := String(RaidConditions.current.time)
 	var conf: Dictionary = (all.get(tk + "_" + String(RaidConditions.current.weather), all.get(tk, {})) as Dictionary).duplicate()
 	if hdri_override != "" and not conf.is_empty():

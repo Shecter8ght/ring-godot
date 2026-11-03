@@ -1,0 +1,56 @@
+{
+ "day": {
+  "a": "res://assets/sky/kloppenheim_03_puresky.hdr",
+  "exposure": 1.0,
+  "sun_k": 1.0,
+  "haze": 0.35
+ },
+ "day_rain": {
+  "a": "res://assets/sky/kloofendal_overcast_puresky.hdr",
+  "exposure": 0.9,
+  "sun_k": 0.0,
+  "veil": 0.8,
+  "haze": 0.55
+ },
+ "day_fog": {
+  "a": "res://assets/sky/kloofendal_overcast_puresky.hdr",
+  "exposure": 1.05,
+  "sun_k": 0.2,
+  "veil": 0.4,
+  "haze": 0.6
+ },
+ "dusk": {
+  "a": "res://assets/sky/kloppenheim_06_puresky.hdr",
+  "exposure": 1.0,
+  "sun_k": 1.0,
+  "haze": 0.4
+ },
+ "dusk_rain": {
+  "a": "res://assets/sky/kloppenheim_01_puresky.hdr",
+  "exposure": 0.9,
+  "sun_k": 0.0,
+  "veil": 0.8,
+  "haze": 0.55
+ },
+ "dusk_fog": {
+  "a": "res://assets/sky/kloppenheim_01_puresky.hdr",
+  "exposure": 1.05,
+  "sun_k": 0.22,
+  "veil": 0.4,
+  "haze": 0.6
+ },
+ "day_overcast": {
+  "a": "res://assets/sky/kloofendal_overcast_puresky.hdr",
+  "exposure": 1.0,
+  "sun_k": 0.0,
+  "veil": 0.6,
+  "haze": 0.45
+ },
+ "dusk_overcast": {
+  "a": "res://assets/sky/kloppenheim_01_puresky.hdr",
+  "exposure": 1.0,
+  "sun_k": 0.0,
+  "veil": 0.6,
+  "haze": 0.45
+ }
+}

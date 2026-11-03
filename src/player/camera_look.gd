@@ -79,6 +79,7 @@ var _fill: DirectionalLight3D
 ## adapt_up, adapt_up_indoor); у какого уровня (id) прочитано. Нет ключа — общее из Balance.LOOK.
 var _map_look: Dictionary = {}
 var _map_look_level: int = 0
+var _lighting_revision: int = -1
 
 
 ## Основная камера — главная: по ней размытие в движении; остальные (оптика) получают ту же экспозицию.
@@ -142,9 +143,10 @@ func apply_settings() -> void:
 func _apply_exposure() -> void:
 	var L: Dictionary = Balance.LOOK
 	_refresh_map_look()
-	var scale: float = _look("exposure_scale_raid") if _raid else float(L.exposure_scale)
+	var raid_light: bool = _raid or RaidAtmosphere.current != null
+	var scale: float = _look("exposure_scale_raid") if raid_light else float(L.exposure_scale)
 	var up: float = float(L.adapt_up_shelter)
-	if _raid:
+	if raid_light:
 		up = _look("adapt_up_indoor") if _indoor else _look("adapt_up")
 	_attr.auto_exposure_scale = scale
 	_attr.auto_exposure_min_sensitivity = _iso(scale / up)
@@ -171,15 +173,13 @@ func _look(key: String) -> float:
 
 ## Данные "look" карты рейда — раз на уровень (уровень меняется — читаются заново).
 func _refresh_map_look() -> void:
-	var level: Node = RaidAtmosphere.current.get_parent() if _raid and RaidAtmosphere.current else null
+	var level: Node = RaidAtmosphere.current.get_parent() if RaidAtmosphere.current else null
 	var level_id: int = level.get_instance_id() if level else 0
-	if level_id == _map_look_level:
+	if level_id == _map_look_level and _lighting_revision == LabTuning.revision:
 		return
 	_map_look_level = level_id
-	_map_look = {}
-	var path: Variant = level.get("sector_path") if level else null
-	if path != null and String(path) != "":
-		_map_look = SectorBuilder.load_def(String(path)).get("look", {}) as Dictionary
+	_lighting_revision = LabTuning.revision
+	_map_look = RaidLighting.look() if level else {}
 
 
 ## Светимость (как её меряет движок) → «чувствительность ISO» CameraAttributesPractical (12.5 ед. = ISO 100).
@@ -194,6 +194,8 @@ func _process(delta: float) -> void:
 		_raid = Raid.current != null
 		apply_settings()
 	var L: Dictionary = Balance.LOOK
+	if RaidAtmosphere.current and _lighting_revision != LabTuning.revision:
+		_apply_exposure()
 	if _raid and Settings.lens_fx:
 		_ctx_t -= delta
 		if _ctx_t <= 0.0 and RaidAtmosphere.current:

@@ -4303,6 +4303,17 @@ const SONORA_AUDIO: Dictionary = {
  "unfiltered_hz": 20500.0
 }
 
+## Общий свет всех рейдовых карт — выбранный владельцем профиль «Проспекта».
+## Индивидуальные поля света в данных старых карт оставлены только для истории.
+const WORLD_LIGHT := {
+ "sun_k": 0.81, "sun_angular_distance": 0.53, "sun_soft_min_elev": 20.0, "sun_hard_blur": 1.5,
+ "ambient_k": 0.4, "ambient_k_night": 1.8,
+ "ambient_k_day_rain": 0.8, "ambient_k_dusk_rain": 0.8, "ambient_k_night_rain": 3.2,
+ "ambient_k_day_overcast": 0.8, "ambient_k_dusk_overcast": 0.8, "ambient_k_night_overcast": 2.6,
+}
+const WORLD_FOG := {"clear": {"begin": 50.0, "end": 900.0, "density": 0.55, "curve": 0.6, "sky": 0.1}}
+
+
 # --- Интерактивные стенды: нейтральные множители и допустимые пределы ---
 ## Подпись, исходное значение, минимум, максимум, шаг. По умолчанию поведение игры прежнее.
 const LAB_RULES: Dictionary = {
@@ -4313,6 +4324,30 @@ const LAB_RULES: Dictionary = {
 		"exposure": ["Экспозиция ×", 1.0, 0.1, 4.0, 0.05],
 		"fog": ["Плотность тумана ×", 1.0, 0.0, 4.0, 0.05],
 		"volume": ["Объёмная дымка ×", 1.0, 0.0, 4.0, 0.05],
+		"sun_day": ["Солнце · день ×", 1.0, 0.0, 4.0, 0.05],
+		"sun_dusk": ["Солнце · закат ×", 1.0, 0.0, 4.0, 0.05],
+		"sun_night": ["Луна · ночь ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient_day": ["Рассеянный · день ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient_dusk": ["Рассеянный · закат ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient_night": ["Рассеянный · ночь ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient_overcast": ["Рассеянный · пасмурно ×", 1.0, 0.0, 4.0, 0.05],
+		"ambient_rain": ["Рассеянный · дождь ×", 1.0, 0.0, 4.0, 0.05],
+		"shadow_angle": ["Размер солнца · мягкость теней, °", 0.53, 0.0, 3.0, 0.01],
+		"shadow_min_elev": ["Мягкие тени выше солнца, °", 20.0, 20.0, 80.0, 1.0],
+		"shadow_blur": ["Размытие теней низкого солнца / Луны", 1.5, 0.1, 4.0, 0.1],
+		"tonemap": ["Тональная кривая", 2.0, 0.0, 4.0, 1.0, ["Линейная", "Reinhard", "Filmic · Проспект", "ACES", "AgX"]],
+		"contrast": ["Контраст", 1.0, 0.5, 1.5, 0.01],
+		"saturation": ["Насыщенность", 0.9, 0.0, 2.0, 0.01],
+		"ssao_intensity": ["Тени в углах · сила SSAO", 4.0, 0.0, 8.0, 0.1],
+		"ssao_radius": ["Тени в углах · радиус, м", 2.5, 0.1, 6.0, 0.1],
+		"ssao_power": ["Тени в углах · контраст SSAO", 2.0, 0.1, 6.0, 0.1],
+		"gi_energy": ["Отражённый свет · энергия SDFGI ×", 1.0, 0.0, 3.0, 0.05],
+		"fog_distance": ["Дальность начала / конца дымки ×", 1.0, 0.1, 3.0, 0.05],
+		"fog_curve": ["Кривая дымки по расстоянию ×", 1.0, 0.1, 3.0, 0.05],
+		"volume_density": ["Объёмная дымка · плотность", 0.0, 0.0, 0.01, 0.0001],
+		"adapt_scale": ["Глаз · целевая экспозиция", 0.35, 0.05, 2.0, 0.01],
+		"adapt_up": ["Глаз · осветление на улице до ×", 2.0, 1.0, 8.0, 0.1],
+		"adapt_indoor": ["Глаз · осветление в помещении до ×", 2.5, 1.0, 12.0, 0.1],
 		"sun_tint": ["Оттенок солнечного / лунного света", Color.WHITE],
 		"fog_tint": ["Оттенок тумана", Color.WHITE],
 	},
@@ -4360,6 +4395,16 @@ func lab_atmosphere(sun: DirectionalLight3D, environment: Environment) -> void:
 		environment.background_energy_multiplier *= lab_number("atmosphere", "sky")
 		environment.tonemap_exposure *= lab_number("atmosphere", "exposure")
 		environment.fog_light_color *= LabTuning.value("atmosphere", "fog_tint") as Color
+		if environment.has_meta("shared_lighting"):
+			environment.tonemap_mode = int(lab_number("atmosphere", "tonemap"))
+			environment.adjustment_contrast = lab_number("atmosphere", "contrast")
+			environment.adjustment_saturation = lab_number("atmosphere", "saturation")
+			environment.ssao_intensity = lab_number("atmosphere", "ssao_intensity")
+			environment.ssao_radius = lab_number("atmosphere", "ssao_radius")
+			environment.ssao_power = lab_number("atmosphere", "ssao_power")
+			environment.sdfgi_energy = lab_number("atmosphere", "gi_energy")
+			environment.volumetric_fog_density = lab_number("atmosphere", "volume_density")
+			environment.volumetric_fog_enabled = environment.volumetric_fog_density > 0.000001 and Settings.quality != "low"
 		environment.volumetric_fog_density *= lab_number("atmosphere", "volume")
 
 

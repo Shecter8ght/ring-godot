@@ -47,6 +47,12 @@ func _ready() -> void:
 	var doubled: float = sun.light_energy
 	atmosphere._settings_changed()
 	_check("lighting does not accumulate", absf(sun.light_energy - doubled) < 0.001)
+	(atmosphere.panel.fields.shadow_angle as SpinBox).value = 0.75
+	_check("UI changes actual shadow softness", is_equal_approx(sun.light_angular_distance, 0.75))
+	(atmosphere.panel.fields.fog_distance as SpinBox).value = 1.5
+	_check("UI changes depth fog distance immediately", is_equal_approx(atmosphere.world_environment.environment.fog_depth_end, 1350.0))
+	(atmosphere.panel.fields.adapt_scale as SpinBox).value = 0.42
+	_check("UI changes actual player eye exposure", is_equal_approx(atmosphere.rig._look._attr.auto_exposure_scale, 0.42))
 	atmosphere.panel.compare.button_pressed = true
 	_check("light comparison restores default", absf(sun.light_energy - original) < 0.001)
 	atmosphere.panel.compare.button_pressed = false

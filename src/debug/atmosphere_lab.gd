@@ -3,19 +3,30 @@ extends DevelopmentLab
 ## Свет на настоящем цикле суток и погоде игры; часы и лампа — условия осмотра стенда.
 
 var _lamp: OmniLight3D
+var _sky_mode_before: String = "calc"
 
 
 func _ready() -> void:
+	_sky_mode_before = Settings.sky_mode
 	super._ready()
 	_build_samples()
 	start_atmosphere(16.0)
 	panel.option("Погода для просмотра", ["Ясно", "Пасмурно", "Дождь", "Туман", "Жара"], set_weather)
+	var sky_mode: OptionButton = panel.option("Небо для просмотра", ["Расчётное", "Панорамы HDRI"], func(index: int) -> void:
+		Settings.sky_mode = "calc" if index == 0 else "hdri"
+		if DayCycle.current:
+			DayCycle.current.rebuild())
+	sky_mode.select(0 if Settings.sky_mode == "calc" else 1)
 	panel.number("Часы · 0–24 (условие просмотра)", 16.0, 0.0, 23.95, 0.1, set_hour)
 	panel.number("Лампа в комнате · яркость", 4.0, 0.0, 16.0, 0.1,
 		func(value: float) -> void: _lamp.light_energy = value)
 	panel.action("Перенести игрока: улица / комната", _move_location)
 	weapon_selector()
-	panel.label(panel.context, "В игре сохраняются множители света и тумана. Часы, погода и лампа здесь — условия осмотра.", 14)
+	panel.label(panel.context, "Общий профиль всех рейдовых карт, включая будущие. Во вкладке «Варианты» включи «Применять на всех картах» и сохрани. Часы, погода и лампа — только условия осмотра.", 14)
+	panel.use_in_game.text = "Применять на всех картах после сохранения"
+	if LabTuning.names("atmosphere").is_empty():
+		panel.use_in_game.set_pressed_no_signal(true)
+	panel.status.text = "Общий свет всех карт · исходный профиль Проспекта."
 	_settings_changed()
 
 
@@ -55,10 +66,21 @@ func _move_location() -> void:
 
 
 func _settings_changed() -> void:
+	if atmosphere:
+		atmosphere.apply()
 	if DayCycle.current:
+		DayCycle.current.set_process(false)
 		DayCycle.current.set_hour(DayCycle.current.hour)
+	if rig and rig._look:
+		rig._look._apply_exposure()
 	if weather:
+		weather._apply_static()
 		weather._tick_fog(0.0)
+
+
+func _exit_tree() -> void:
+	Settings.sky_mode = _sky_mode_before
+	super._exit_tree()
 
 
 func _lab_tick(_delta: float) -> void:

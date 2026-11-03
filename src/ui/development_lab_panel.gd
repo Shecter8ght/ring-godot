@@ -176,6 +176,14 @@ func configure(title: String, domain: String, values: Dictionary) -> void:
 			tuning.add_child(picker)
 			picker.color_changed.connect(func(value: Color) -> void: value_changed.emit(key, value))
 			fields[key] = picker
+		elif rule.size() > 5:
+			var option: OptionButton = OptionButton.new()
+			for name: String in rule[5]:
+				option.add_item(name)
+			option.select(int(values[key]))
+			tuning.add_child(option)
+			option.item_selected.connect(func(index: int) -> void: value_changed.emit(key, float(index)))
+			fields[key] = option
 		else:
 			fields[key] = _numeric(tuning, float(values[key]), float(rule[2]), float(rule[3]), float(rule[4]),
 				func(value: float) -> void: value_changed.emit(key, value))

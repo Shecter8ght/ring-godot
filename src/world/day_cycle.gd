@@ -148,16 +148,13 @@ static func moon_at(h: float) -> Vector2:
 func _profile(k: String) -> Dictionary:
 	var c := RaidConditions.current
 	var t: Dictionary = Balance.RAID_TIME[k]
-	var lc: Dictionary = {}
-	var path: Variant = _atm.get_parent().get("sector_path") if _atm else null
-	if path != null and String(path) != "":
-		lc = SectorBuilder.load_def(String(path)).get("light", {})
+	var lc: Dictionary = RaidLighting.light_conf()
 	_light_conf = lc
 	var ak: float = float(lc.get("ambient_k_%s_%s" % [k, c.weather], lc.get("ambient_k_" + k, lc.get("ambient_k", 1.0))))
 	var p := {
 		"sun_energy": float(t.sun_energy) * float(lc.get("sun_k", 1.0)),
 		"sun_color": t.sun_color,
-		"ambient": 0.8 * float(t.ambient) * ak,
+		"ambient": 0.8 * float(t.ambient) * ak * Balance.lab_number("atmosphere", "ambient_" + k),
 		"exposure": float(t.get("exposure", 1.0)),
 		"view": float(t.view),
 		"vol": float((Balance.VOLUMETRIC_TIME.get(k, {}) as Dictionary).get("density", 1.0)),
@@ -175,15 +172,15 @@ func _profile(k: String) -> Dictionary:
 	p["horizon_cut"] = float(conf.get("horizon_cut", 0.0))
 	if k == "night":
 		p["sun_energy"] = float(t.sun_energy) * (0.0 if RaidConditions.clouded(String(c.weather)) else 1.0)
+	p.sun_energy = float(p.sun_energy) * Balance.lab_number("atmosphere", "sun_" + k)
+	if String(c.weather) in ["rain", "overcast"]:
+		p.ambient = float(p.ambient) * Balance.lab_number("atmosphere", "ambient_" + String(c.weather))
 	return p
 
 
-## Панорама для времени k под нынешнюю погоду (данные карты "sky_hdri"), с положением её солнца.
+## Общая панорама для времени k под нынешнюю погоду, с положением её солнца.
 func hdri_conf(k: String) -> Dictionary:
-	var path: Variant = _atm.get_parent().get("sector_path") if _atm else null
-	if path == null or String(path) == "":
-		return {}
-	var all: Dictionary = SectorBuilder.load_def(String(path)).get("sky_hdri", {})
+	var all: Dictionary = RaidLighting.sky_conf()
 	var conf: Dictionary = (all.get(k + "_" + String(RaidConditions.current.weather), all.get(k, {})) as Dictionary).duplicate()
 	if conf.is_empty() or not ResourceLoader.exists(String(conf.get("a", ""))):
 		return {}
