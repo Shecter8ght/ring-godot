@@ -21,7 +21,7 @@ func _ready() -> void:
 	if OS.get_environment("BUILDER_LOCK_SMALL") == "1" and DisplayServer.get_name() != "headless":
 		get_window().size = Vector2i(1280, 720)
 		await _frames(8)
-	_b._select("optic_primary")
+	_b._select("side_right")
 	await _frames(3)
 	var text: String = _b._lock_note.text
 	_check("выбранный замок имеет постоянное объяснение", _b._lock_note.visible and text.contains("уровня 2 (сейчас 1)"))
@@ -29,28 +29,37 @@ func _ready() -> void:
 	_check("сказано о недостающем генераторе", text.contains("Генератор") and text.contains("сейчас 0"))
 	_check("показаны деньги и детали из тайника", text.contains(InventoryUI.money(180000)) and text.contains(ItemDb.item_name("toolset")) and text.contains(ItemDb.item_name("wires")))
 	_check("показано текущее доверие и способ повысить", text.contains("сейчас 1") and text.contains("эвакуациями") and text.contains("заданиями"))
-	_check("дочернее крепление объясняет уровень родительской точки", _b._locked("optic_primary#2/rail").contains("уровня 2"))
+	_check("дочернее крепление объясняет уровень родительской точки", _b._locked("side_right/light").contains("уровня 2"))
 	var with_tooltip: bool = false
 	for card: Node in _b._cards.get_children():
-		if card.get("key") == "optic_primary":
+		if card.get("key") == "side_right":
 			with_tooltip = (card as Control).tooltip_text.contains("Модули убежища")
 	_check("карточка крепления имеет полную подсказку", with_tooltip)
 	_check("объяснение и кнопки помещаются по высоте", _b._lock_note.get_global_rect().end.y <= _b._strip.get_global_rect().position.y
 		and _b._apply_btn.get_global_rect().end.y <= get_viewport_rect().end.y)
 	await _shot("workbench")
-	Profile.stash.append({"id": "optic_holo_01", "n": 1, "dur": 100.0})
+	Profile.stash.append({"id": "optic_holo_01", "n": 1, "dur": 73.0})
 	_b._select("")
+	var money_before: int = Profile.money
 	for part: Dictionary in _b._pool():
 		if String(part.id) == "optic_holo_01":
 			_b._choose(part)
 			break
-	_check("свой прицел при закрытом верстаке показывает условия, не раздвигая нижнюю строку", _b._draft.is_empty()
-		and _b._lock_note.visible and _b._lock_note.text.contains("уровня 2") and not _b._status.text.contains("\n"))
+	_check("найденный прицел доступен на стартовом верстаке", not _b._place.is_empty()
+		and String(_b._place.get("key", "")) == "optic_primary" and _b._locked("optic_primary") == "")
+	_b._confirm_place()
+	_check("прицел из тайника включён в сборку без покупки", _b._draft.has("optic_primary")
+		and String(_b._draft.get("optic_primary", {}).get("src", {}).get("from", "")) == "stash" and (_b._plan.get("buy", []) as Array).is_empty())
+	_b._apply()
+	_check("сборка действительно применена: прицел снят из тайника, состояние и деньги сохранены", Profile.stash.is_empty()
+		and WeaponDb.mod_id(Profile.equipment.primary.mods.get("optic_primary", {})) == "optic_holo_01"
+		and float(Profile.equipment.primary.mods.get("optic_primary", {}).get("dur", 0)) == 73.0 and Profile.money == money_before)
+	_check("кронштейны на основной планке тоже доступны без улучшения", _b._locked("optic_primary#2/rail") == "")
 	_b._select("muzzle")
 	_check("на открытой точке сообщение о замке скрыто", not _b._lock_note.visible and _b._locked("muzzle") == "")
 	Profile.modules.workbench = 2
-	_b._select("optic_primary")
-	_check("улучшенный верстак открывает точку и убирает сообщение", not _b._lock_note.visible and _b._locked("optic_primary") == "")
+	_b._select("side_right")
+	_check("улучшенный верстак открывает точку и убирает сообщение", not _b._lock_note.visible and _b._locked("side_right") == "")
 	_b._select("")
 	_b._pick_source("shop")
 	var locked: Dictionary = {}
@@ -85,9 +94,40 @@ func _ready() -> void:
 	_b.mode = "sandbox"
 	_check("в стенде замков верстака нет", _b._locked("optic_primary") == "")
 	_b.mode = "hideout"
+	_owned_optics()
 	print("builder_lock_test: проверок %d, провалено %d" % [_checks, _fails])
 	_b._close()
 	get_tree().quit(_fails)
+
+
+func _owned_optics() -> void:
+	Profile.modules = {"workbench": 1, "generator": 0}
+	Profile.trust = 0
+	Profile.money = 0
+	Profile.stash.clear()
+	Profile.backpack.clear()
+	var weapon: Dictionary = Profile.equipment.primary.duplicate(true)
+	weapon.mods = {}
+	Profile.equipment.primary = weapon
+	Profile.backpack.append({"id": "optic_8x_01", "n": 1, "dur": 61.0})
+	var slots: Array[int] = WeaponBuild.valid_slots(weapon, "optic_primary", "optic_8x_01")
+	_check("у найденной оптики есть место на совместимой планке", not slots.is_empty())
+	if slots.is_empty():
+		return
+	var draft: Dictionary = {"optic_primary": {"id": "optic_8x_01", "slot": slots[0], "src": {"from": "backpack", "idx": 0}}}
+	var why: String = Profile.apply_build("equip:primary", -1, draft)
+	_check("дорогой прицел из рюкзака ставится без денег, доверия и генератора", why == "" and Profile.backpack.is_empty()
+		and WeaponDb.mod_id(Profile.equipment.primary.mods.get("optic_primary", {})) == "optic_8x_01"
+		and float(Profile.equipment.primary.mods.get("optic_primary", {}).get("dur", 0)) == 61.0
+		and Profile.money == 0 and Profile.trust == 0)
+	why = Profile.apply_build("equip:primary", -1, {})
+	_check("найденный прицел можно снять обратно в тайник на первом уровне", why == "" and Profile.equipment.primary.mods.is_empty()
+		and Profile.stash.size() == 1 and String(Profile.stash[0].id) == "optic_8x_01" and float(Profile.stash[0].dur) == 61.0)
+	Profile.backpack.append({"id": "optic_rd_dt_01", "n": 1, "dur": 82.0})
+	var before: Dictionary = Profile.equipment.primary.duplicate(true)
+	why = Profile.apply_build("equip:primary", -1, {"optic_primary": {"id": "optic_rd_dt_01", "src": {"from": "backpack", "idx": 0}}})
+	_check("несовместимый ласточкин хвост не ставится на планку и не теряется", why != "" and Profile.equipment.primary == before
+		and Profile.backpack.size() == 1 and String(Profile.backpack[0].id) == "optic_rd_dt_01" and Profile.money == 0)
 
 
 func _shot(id: String) -> void:
