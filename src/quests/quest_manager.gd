@@ -69,6 +69,8 @@ var _cargo_claims: Dictionary = {}
 var _supply_out: Dictionary = {}
 ## Квесты, закрытые в этом рейде (хост): вынос напарника после закрытия ещё ставит их extract_flags.
 var _done_in_raid: Dictionary = {}
+## Квесты с подтверждённой передачей: их сохранённое состояние получают и гости до эвакуации.
+var _field_confirmed: Dictionary = {}
 
 
 func campaign_modules() -> Dictionary:
@@ -429,6 +431,13 @@ func finish_talk(qid: String, npc: String, did: String) -> void:
 	if is_client():
 		_rpc_talk.rpc_id(1, qid, npc, did)
 		return
+	# Полевой канал не открывает остальные разговоры терминала в рейде.
+	if in_raid() and is_terminal(qid) and def(qid).has("field_link"):
+		return
+	_apply_talk(qid, npc, did)
+
+
+func _apply_talk(qid: String, npc: String, did: String) -> void:
 	if state(qid) == "AVAILABLE":
 		start(qid)
 	# сдача вещей: забираются из тайника в момент, когда разговор засчитывается
@@ -485,6 +494,8 @@ func thread_log(qid: String) -> Array:
 func terminal_action(qid: String) -> Dictionary:
 	if not is_terminal(qid):
 		return {}
+	if in_raid() and def(qid).has("field_link"):
+		return {}
 	var d := def(qid)
 	var st := state(qid)
 	if st == "AVAILABLE":
@@ -502,6 +513,73 @@ func terminal_action(qid: String) -> Dictionary:
 	var label := String(o.get("button", "ОТПРАВИТЬ: " + String(o.get("text", ""))))
 	return {"kind": "send", "npc": String(o.get("npc", "")), "label": label, "ready": ready,
 		"dialogue": talk_dialogue(qid, o) if ready else String(o.get("dialogue_missing", o.get("dialogue", "")))}
+
+
+## Уже пройденная цель — в том числе в старом сохранении, где ещё не было полевого канала.
+func objective_passed(qid: String, oid: String) -> bool:
+	var s := qstate(qid)
+	var stages: Array = def(qid).get("stages", [])
+	for si in range(stages.size()):
+		var goals: Array = (stages[si] as Dictionary).get("objectives", [])
+		for oi in range(goals.size()):
+			if String((goals[oi] as Dictionary).get("id", "")) == oid:
+				return state(qid) == "COMPLETED" or int(s.get("stage", -1)) > si \
+					or (int(s.get("stage", -1)) == si and int(s.get("obj", -1)) > oi)
+	return false
+
+
+## Модем — служебное оснащение заказа, выдаётся в убежище после подтверждения машины.
+func field_link_unlocked(qid: String) -> bool:
+	var link: Dictionary = def(qid).get("field_link", {})
+	return not link.is_empty() and objective_passed(qid, String(link.get("after_objective", "")))
+
+
+## Только назначенный пакет, на своей карте, после всех снимков. Другой переписки в рейде нет.
+func field_action(qid: String) -> Dictionary:
+	var link: Dictionary = def(qid).get("field_link", {})
+	var o := objective(qid)
+	if not in_raid() or world == null or not world.raid or not field_link_unlocked(qid) \
+			or state(qid) != "ACTIVE" or world.level != String(link.get("level", "")) \
+			or String(o.get("id", "")) != String(link.get("objective", "")) \
+			or String(o.get("type", "")) != "talk" or not take_ready(o):
+		return {}
+	return {"npc": String(o.get("npc", "")), "dialogue": talk_dialogue(qid, o), "label": String(o.get("text", "Отправить снимки"))}
+
+
+func request_field_report(qid: String) -> void:
+	if is_client():
+		_rpc_field_report.rpc_id(1, qid)
+	else:
+		_send_field_report(multiplayer.get_unique_id() if Net.is_networked() else 1, qid)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_field_report(qid: String) -> void:
+	if multiplayer.is_server():
+		_send_field_report(multiplayer.get_remote_sender_id(), qid)
+
+
+func _send_field_report(peer: int, qid: String) -> bool:
+	var act := field_action(qid)
+	if act.is_empty():
+		return false
+	var pl := world._player(peer)
+	if pl == null or not pl.is_alive() or pl.is_downed() or (Raid.current != null and Raid.current.has_left(peer)):
+		return false
+	if Raid.current != null and (not Raid.current.participants.has(peer) or Net.scene_of(pl) != Net.scene_of(world)):
+		return false
+	var lines := dialogue(qid, String(act.dialogue)).duplicate(true)
+	_apply_talk(qid, String(act.npc), String(act.dialogue))
+	# Полученный адресатом пакет не теряется после гибели. Сохраняем только этот заказ,
+	# остальные находки рейда по-прежнему требуют эвакуации.
+	Profile.quests[qid] = qstate(qid).duplicate(true)
+	Profile.save()
+	_field_confirmed[qid] = true
+	_tell("Пакет доставлен. Ответ — в журнале")
+	_say(lines)
+	_broadcast()
+	changed.emit()
+	return true
 
 
 ## Какой разговор у цели talk сейчас: первый вариант (variants: [{facts, flags, dialogue, set_flags}]),
@@ -1129,6 +1207,7 @@ func begin_raid() -> void:
 	_live = {"quests": Profile.quests.duplicate(true), "flags": Profile.flags.duplicate(true)}
 	_delivered = false
 	_done_in_raid = {}
+	_field_confirmed = {}
 	# сдано в прошлом рейде без эвакуации — цель засчитывается сама
 	_auto_all()
 	_carry = {}
@@ -1212,10 +1291,13 @@ func _commit_host() -> void:
 # ---------------------------------------------------------------- группа: снимок и сообщения
 
 func _snapshot() -> Dictionary:
+	var confirmed := {}
+	for qid: String in _field_confirmed:
+		confirmed[qid] = (Profile.quests.get(qid, {}) as Dictionary).duplicate(true)
 	return {"campaign": Profile.own_campaign(), "quests": _quests(), "flags": _flags(), "raid": not _live.is_empty(),
 		"delivered": _delivered, "carry": _carry, "npc_pos": _npc_pos, "trust_level": Profile.trust_level(),
 		"contracts": Contracts.board(), "modules": Profile.modules, "cargo_claims": _cargo_claims, "supply_out": _supply_out,
-		"unlock_all": Settings.unlock_all}
+		"unlock_all": Settings.unlock_all, "field_confirmed": confirmed}
 
 
 func _broadcast() -> void:
@@ -1232,7 +1314,21 @@ func _rpc_state(snap: Dictionary) -> void:
 	# вне рейда хоста или группа уже что-то вынесла — это засчитано: в свой профиль
 	if not bool(snap.get("raid", false)) or bool(snap.get("delivered", false)):
 		_commit_guest(snap)
+	else:
+		_commit_guest_field_reports(snap)
 	changed.emit()
+
+
+## Подтверждённая передача сохраняется гостю, не подтверждая остальные находки рейда.
+func _commit_guest_field_reports(snap: Dictionary) -> void:
+	var confirmed: Dictionary = snap.get("field_confirmed", {})
+	var cid := String(snap.get("campaign", ""))
+	if confirmed.is_empty() or cid == "":
+		return
+	var store: Dictionary = Profile.guest_campaigns.get(cid, {})
+	var merged: Dictionary = (store.get("quests", {}) as Dictionary).duplicate(true)
+	merged.merge(confirmed, true)
+	_commit_guest({"campaign": cid, "quests": merged, "flags": store.get("flags", {})})
 
 
 ## Гость: состояние кампании хоста — в своё сохранение (отдельно от своей кампании), награды —

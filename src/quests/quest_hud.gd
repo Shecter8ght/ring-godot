@@ -39,6 +39,7 @@ var _carry: Label
 var _coach: Label
 var _journal: PanelContainer
 var _journal_text: Label
+var _field_box: VBoxContainer
 ## Тестовые инструкции (Balance.QUEST_TEST_HINTS): что делать на текущем шаге — слева, после смены
 ## цели; ключ «квест:этап:цель» последней показанной у каждого квеста.
 var _test_box: PanelContainer
@@ -69,6 +70,9 @@ func _ready() -> void:
 			_next_sub())
 	Quests.changed.connect(_update_tracker)
 	Quests.changed.connect(_update_test_hint)
+	Quests.changed.connect(func() -> void:
+		if _journal.visible:
+			_fill_journal())
 
 
 func is_open() -> bool:
@@ -286,6 +290,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _fill_journal() -> void:
+	_fill_field_link()
 	var lines: Array[String] = []
 	# тест: инструкции текущих шагов — сверху журнала
 	if Balance.QUEST_TEST_HINTS:
@@ -305,6 +310,39 @@ func _fill_journal() -> void:
 		for c in Quests.clues(qid):
 			lines.append("   • %s — %s" % [String((c as Dictionary).get("title", "")), String((c as Dictionary).get("text", ""))])
 	_journal_text.text = "\n".join(lines) if not lines.is_empty() else "Сюжетных заданий пока нет."
+
+
+func _fill_field_link() -> void:
+	for child in _field_box.get_children():
+		_field_box.remove_child(child)
+		child.queue_free()
+	for qid: String in Quests.ids():
+		if not Quests.field_link_unlocked(qid) or Quests.state(qid) != "ACTIVE":
+			continue
+		var link: Dictionary = Quests.def(qid).get("field_link", {})
+		_field_box.add_child(_label(String(link.get("title", "Полевой модем")), 19, NPC_COLOR))
+		var info := _label(String(link.get("description", "")), 15, DESC_COLOR)
+		info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_field_box.add_child(info)
+		var act := Quests.field_action(qid)
+		if not act.is_empty():
+			var send := Button.new()
+			send.text = String(act.label)
+			send.pressed.connect(Quests.request_field_report.bind(qid))
+			_field_box.add_child(send)
+		elif Quests.objective_passed(qid, String(link.get("objective", ""))):
+			var reply: Array[String] = ["Пакет доставлен. Ответ мастерской:"]
+			var goal := Quests._objective_def(qid, String(link.get("objective", "")))
+			for line: Array in Quests.dialogue(qid, String(goal.get("dialogue", ""))):
+				if line.size() >= 2 and String(line[0]) != "player":
+					reply.append("%s: %s" % [String(Quests.speaker(qid, String(line[0])).name), String(line[1])])
+			var text := _label("\n".join(reply), 16, DESC_COLOR)
+			text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			_field_box.add_child(text)
+		else:
+			var waiting := _label(String(link.get("waiting", "")), 16, DESC_COLOR)
+			waiting.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			_field_box.add_child(waiting)
 
 
 # ---------------------------------------------------------------- построение
@@ -419,13 +457,24 @@ func _build() -> void:
 	_journal.offset_right = 420
 	_journal.offset_top = -240
 	_journal.offset_bottom = 240
-	_journal.add_theme_stylebox_override("panel", sb)
+	var journal_style := sb.duplicate() as StyleBoxFlat
+	journal_style.bg_color.a = 0.98
+	_journal.add_theme_stylebox_override("panel", journal_style)
 	var jv := VBoxContainer.new()
 	_journal.add_child(jv)
-	jv.add_child(_label("Журнал — сюжет и улики   (J — закрыть)", 20, Color(1.0, 0.78, 0.45)))
+	jv.add_child(_label("Журнал — сюжет и улики   (%s — закрыть)" % PauseMenu.key_name("journal"), 20, Color(1.0, 0.78, 0.45)))
+	var journal_scroll := ScrollContainer.new()
+	journal_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	journal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	jv.add_child(journal_scroll)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	journal_scroll.add_child(content)
+	_field_box = VBoxContainer.new()
+	content.add_child(_field_box)
 	_journal_text = _label("", 16, Color(0.9, 0.9, 0.86))
 	_journal_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	jv.add_child(_journal_text)
+	content.add_child(_journal_text)
 	_journal.visible = false
 	_root.add_child(_journal)
 
