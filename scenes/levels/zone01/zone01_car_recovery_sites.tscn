@@ -81,7 +81,7 @@ rotation_degrees = Vector3(0.0, 0.0, 0.0)
 [node name="car_belt_delivery" parent="Hangar8" type="Marker3D"]
 script = ExtResource("1")
 site_id = "car_belt_delivery"
-position = Vector3(6.0, 0.05, -2.5)
+position = Vector3(7.4, 1.0, -4.0)
 rotation_degrees = Vector3(0.0, -90.0, 0.0)
 
 [node name="Sites" parent="." type="Node3D"]

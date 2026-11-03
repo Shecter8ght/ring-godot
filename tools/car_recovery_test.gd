@@ -20,6 +20,7 @@ func _ready() -> void:
 	_check("заказ предлагается в терминале", Quests.state(Q) == "AVAILABLE" and Q in Quests.terminal_threads(), Quests.state(Q))
 	# обычный путь
 	_begin()
+	_check("до расследования источники деталей закрыты", _supplies_locked())
 	var m0 := Profile.money
 	_check("тест: инструкция шага «стоянка» всплыла", not Balance.QUEST_TEST_HINTS or Quests.hud._test_text.text.contains("северо-восточным докам"), Quests.hud._test_text.text)
 	_check("у каждого шага есть тестовая инструкция", _all_hinted())
@@ -35,6 +36,11 @@ func _ready() -> void:
 	_send("decode")
 	_check("«ЮР / 8» расшифрован — дворы, в журнале улика", _oid() == "search" and _has_clue("«ЮР / 8»"))
 	_check("на этапе дворов — охрана у ангара", not Quests.guards_for("zone01_mall").is_empty())
+	_check("поиск ангара не открывает колесо и радиатор", _supplies_locked())
+	var early_part := _site_node("car_belt_parts_radiator")
+	await get_tree().process_frame
+	_check("даже заранее созданный источник не показывает радиатор", not _shown(early_part, "QuestCargo"))
+	early_part.queue_free()
 	Quests.event("site", {"site": "car_belt_search"})
 	_check("банда не убита — снимать машину рано", _oid() == "gang")
 	Quests.event("cleared", {"site": "car_belt_hangar"})
@@ -44,12 +50,15 @@ func _ready() -> void:
 	var b0 := Profile.stash_count("battery")
 	_send("kirill_task")
 	_check("механик: аккумулятор оплачен — в тайнике", Profile.stash_count("battery") == b0 + 1 and _oid() == "battery")
+	_check("до диагностики источники деталей закрыты", _supplies_locked())
 	_hand("battery")
 	for sid in ["car_belt_photo_engine", "car_belt_photo_radiator", "car_belt_photo_wheel", "car_belt_photo_wiring"]:
 		_site(sid)
+	_check("одних снимков недостаточно: ждём ответ Кирилла", _supplies_locked())
 	_send("report_kirill")
 	_check("список механика — колесо и радиатор", _oid() == "wheel" and Quests.pending_items(Q) == ["car_wheel", "car_radiator"], str(Quests.pending_items(Q)))
 	_check("источники деталей открыты", _site_on("car_belt_parts_wheel", "zone01_mall") and _site_on("car_mall_supply_wheel", "mall_map"))
+	_check("хост разрешает выдачу всех трёх источников после ответа", ["car_belt_parts_wheel", "car_belt_parts_radiator", "car_mall_supply_wheel"].all(func(sid: String) -> bool: return Quests.supply_available(Q, sid)))
 	# места заказа узлами, как их ставит QuestWorld: модель радиатора в кладовой и в комплекте
 	var parts := _site_node("car_belt_parts_radiator")
 	var wheel := _site_node("car_belt_parts_wheel")
@@ -63,6 +72,7 @@ func _ready() -> void:
 	_check("радиатор сдан: в кладовой его нет, в комплекте лежит", not _shown(parts, "QuestCargo") and _shown(kit, "QuestPlaced")
 			and Quests.handed_over(Q, "car_belt_delivery"))
 	_check("колесо поставлено: в кладовой его нет", not _shown(wheel, "QuestCargo"))
+	_check("после сдачи источники деталей не предлагают новый груз", not _site_on("car_belt_parts_wheel", "zone01_mall") and not _site_on("car_belt_parts_radiator", "zone01_mall") and not _site_on("car_mall_supply_wheel", "mall_map"))
 	wheel.queue_free()
 	parts.queue_free()
 	kit.queue_free()
@@ -159,6 +169,14 @@ func _site_on(sid: String, level: String) -> bool:
 		if String(w.site) == sid and bool(w.active):
 			return true
 	return false
+
+
+func _supplies_locked() -> bool:
+	for sid: String in ["car_belt_parts_wheel", "car_belt_parts_radiator", "car_mall_supply_wheel"]:
+		var level := String(Quests.site_spec(sid).get("level", ""))
+		if _site_on(sid, level) or Quests.supply_available(Q, sid):
+			return false
+	return true
 
 
 func _has_clue(title: String) -> bool:

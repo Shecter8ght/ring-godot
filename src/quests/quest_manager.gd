@@ -789,13 +789,20 @@ func _site_open(qid: String, sd: Dictionary) -> bool:
 
 ## Хост: место-источник груза (supply: id предмета) выдаёт деталь, пока заказ её ждёт; потерял по
 ## дороге — в следующем рейде бери снова (один экземпляр с места за раз, QuestWorld.give_cargo).
+func supply_available(qid: String, sid: String) -> bool:
+	var sd: Dictionary = (def(qid).get("sites", {}) as Dictionary).get(sid, {})
+	var item := String(sd.get("supply", ""))
+	return item != "" and item in pending_items(qid) \
+		and (_site_open(qid, sd) or String(objective(qid).get("site", "")) == sid)
+
+
 func _supply(peer: int, sid: String) -> bool:
 	var item := String(site_spec(sid).get("supply", ""))
 	if item == "":
 		return false
 	var needed := false
 	for qid: String in _order:
-		needed = needed or item in pending_items(qid)
+		needed = needed or supply_available(qid, sid)
 	if needed and world != null and world.give_cargo(peer, sid, item):
 		world.notify(peer, "Взято: " + ItemDb.item_name(item))
 	return true
@@ -1374,6 +1381,8 @@ func sites_for(level: String) -> Array:
 			for sid in wanted.keys():
 				if not pending_handover(qid, String(sid)).is_empty():
 					wanted[sid] = true
+				if String((sites.get(sid, {}) as Dictionary).get("supply", "")) != "":
+					wanted[sid] = supply_available(qid, String(sid))
 		for sid in sites:
 			var sd: Dictionary = sites[sid]
 			var wf: Dictionary = sd.get("when_flags", {})

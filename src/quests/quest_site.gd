@@ -131,7 +131,7 @@ func _process(delta: float) -> void:
 		var supply := String(spec.get("supply", ""))
 		if supply != "":
 			# место-источник детали: лежит, пока заказ её ждёт; взяли — у кого-то в рюкзаке, на месте нет
-			cargo.visible = supply in Quests.pending_items(quest_id) and not Quests.supply_out(site_id)
+			cargo.visible = Quests.supply_available(quest_id, site_id) and not Quests.supply_out(site_id)
 		else:
 			cargo.visible = not Quests.cargo_claimed(site_id) and not (done and bool(spec.get("cargo_until_done", false)))
 	var placed: Node3D = _vis.get_node_or_null("QuestPlaced") as Node3D if _vis != null else null

@@ -103,8 +103,8 @@ func _ready() -> void:
 			var invoice: Node3D = _site("car_mall_lead_invoice")
 			if invoice:
 				await _shot(cam, player, invoice.global_position + Vector3(0.1, 1.55, 0.75), invoice.global_position + Vector3(0.0, 1.06, 1.6), "lead_invoice")
-	# этап «дворы»: склад техники у ТЦ — второй источник колеса
-	Quests.dev_stage(Q, 4)
+	# этап «комплект»: после списка Кирилла склад техники у ТЦ — второй источник колеса
+	Quests.dev_stage(Q, 6)
 	for frame: int in range(10):
 		await get_tree().process_frame
 	var had: int = player.inventory.count("car_wheel")

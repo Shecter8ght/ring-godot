@@ -1308,7 +1308,7 @@ CAR_SITES = [
     ("car_belt_car_wheel", 1.8, 2.4, 0.0, "установка колеса"),
     ("car_belt_car_battery", -1.5, 1.2, 0.0, "установка аккумулятора справа под капотом"),
     ("car_belt_photo_wiring", -1.5, 0.2, 0.0, "съёмка проводки у аккумулятора"),
-    ("car_belt_delivery", 6.0, -2.5, -90.0, "комплект у машины: сюда кладут радиатор (перёд — к машине)"),
+    ("car_belt_delivery", 7.4, -4.0, -90.0, "ящик у задней части машины: радиатор кладут на его верх"),
 ]
 # кладовая и район поиска — в осях карты
 SITES_WORLD = [
@@ -1343,10 +1343,11 @@ def car_sites_scene() -> None:
            shape=s.sub("BoxShape3D", size=v3(2.08, 1.22, 4.86)))
     registry = []
     for sid, lx, lz, yaw, purpose in CAR_SITES:
-        s.node(sid, "Hangar8", kind="Marker3D", script=anchor, site_id=sid, position=v3(lx, 0.05, lz),
+        ly = 1.0 if sid == "car_belt_delivery" else 0.05
+        s.node(sid, "Hangar8", kind="Marker3D", script=anchor, site_id=sid, position=v3(lx, ly, lz),
                rotation_degrees=v3(0, yaw, 0))
         wx, wz = cx - lx, cz - lz
-        registry.append({"id": sid, "node": f"Hangar8/{sid}", "position": [round(wx, 2), round(hy + 0.05, 2), round(wz, 2)],
+        registry.append({"id": sid, "node": f"Hangar8/{sid}", "position": [round(wx, 2), round(hy + ly, 2), round(wz, 2)],
                          "yaw": round((180.0 + yaw) % 360.0, 1), "purpose": purpose})
     s.node("Sites")
     for sid, wx, wz, yaw, bid, purpose in SITES_WORLD:

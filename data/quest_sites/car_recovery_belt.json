@@ -197,12 +197,12 @@
    "id": "car_belt_delivery",
    "node": "Hangar8/car_belt_delivery",
    "position": [
-    94.0,
-    0.0,
-    279.0
+    92.6,
+    0.95,
+    280.5
    ],
    "yaw": 90.0,
-   "purpose": "комплект у машины: сюда кладут радиатор (перёд — к машине)"
+   "purpose": "ящик у задней части машины: радиатор кладут на его верх"
   },
   {
    "id": "car_belt_parts_radiator",
