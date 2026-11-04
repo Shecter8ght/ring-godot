@@ -1,0 +1,747 @@
+{
+  "status": "revised_planning_proposal_under_approved_constraints",
+  "approved_constraints_date": "2026-11-04",
+  "version": "v02",
+  "floor": 2,
+  "storeys": 3,
+  "units": "game_metres_after_E",
+  "building_count_approved": 2,
+  "form_approved": "soft_S_opposite_curves",
+  "room_layout_proposed": true,
+  "metric_dimensions_status": "working_values_pending_geometry_and_FPS_validation",
+  "rooms": [
+    {
+      "id": "Л201",
+      "wing": "Л",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        120,
+        130
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        -13.765834472425109,
+        -7.840350937064201
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л202",
+      "wing": "Л",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        130,
+        140
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        -16.97056274847714,
+        -10.529437251522857
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л203",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        140,
+        154
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        -20.128093630690174,
+        -14.428663159639346
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л204",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        154,
+        168
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        -22.692445814383603,
+        -19.68636429302824
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л205",
+      "wing": "Л",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        168,
+        186
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        -23.967108834109773,
+        -26.24393705016935
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л206",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        186,
+        200
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        -23.384881554845645,
+        -32.89882530425276
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л207",
+      "wing": "Л",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        200,
+        218
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        -20.9908729713455,
+        -39.135430885912086
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л208",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        218,
+        232
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        -16.970562748477143,
+        -44.470562748477136
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л209",
+      "wing": "Л",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        232,
+        250
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        -11.635430885912085,
+        -48.490872971345496
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л210",
+      "wing": "Л",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        250,
+        260
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        -6.211657082460495,
+        -50.68221983093764
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л211",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        260,
+        274
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        -1.2560629498306635,
+        -51.46710883410977
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "Л212",
+      "wing": "Л",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        -27.5
+      ],
+      "angles": [
+        274,
+        288
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        4.579415889037083,
+        -51.05905240274393
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П201",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        300,
+        314
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        14.44356055564915,
+        8.332747758864969
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П202",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        314,
+        328
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        18.651503074967295,
+        12.396310614803891
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П203",
+      "wing": "П",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        328,
+        338
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        21.384156580520827,
+        16.60422800625087
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П204",
+      "wing": "П",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        338,
+        356
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        23.38488155484564,
+        22.101174695747233
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П205",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        356,
+        370
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        23.967108834109773,
+        28.756062949830653
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П206",
+      "wing": "П",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        370,
+        388
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        22.692445814383607,
+        35.31363570697175
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П207",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        388,
+        402
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        19.659649062935802,
+        41.265834472425105
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П208",
+      "wing": "П",
+      "type": "triple",
+      "beds": 3,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        402,
+        420
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 70.4,
+      "area_nominal_m2": 41.6,
+      "door_to_corridor": [
+        15.103689385196091,
+        46.15150307496731
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П209",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        420,
+        434
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        9.377547083742574,
+        49.592116482858565
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П210",
+      "wing": "П",
+      "type": "double",
+      "beds": 2,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        434,
+        448
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 54.7,
+      "area_nominal_m2": 32.4,
+      "door_to_corridor": [
+        3.754427160965548,
+        51.2045201742833
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П211",
+      "wing": "П",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        448,
+        458
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        -1.2560629498306517,
+        51.46710883410977
+      ],
+      "door_clear_game_m": 1.2
+    },
+    {
+      "id": "П212",
+      "wing": "П",
+      "type": "single",
+      "beds": 1,
+      "center": [
+        0,
+        27.5
+      ],
+      "angles": [
+        458,
+        468
+      ],
+      "radii": [
+        24,
+        32
+      ],
+      "area_game_m2": 39.1,
+      "area_nominal_m2": 23.1,
+      "door_to_corridor": [
+        -5.398825304252755,
+        50.88488155484565
+      ],
+      "door_clear_game_m": 1.2
+    }
+  ],
+  "corridors": [
+    {
+      "wing": "Л",
+      "center": [
+        0,
+        -27.5
+      ],
+      "radii": [
+        21,
+        24
+      ],
+      "angles": [
+        90,
+        288
+      ]
+    },
+    {
+      "wing": "П",
+      "center": [
+        0,
+        27.5
+      ],
+      "radii": [
+        21,
+        24
+      ],
+      "angles": [
+        270,
+        468
+      ]
+    }
+  ],
+  "hall_polygon": [
+    [
+      -12,
+      -10
+    ],
+    [
+      12,
+      -10
+    ],
+    [
+      12,
+      10
+    ],
+    [
+      -12,
+      10
+    ]
+  ],
+  "stair": {
+    "center": [
+      0,
+      -0.5
+    ],
+    "outer_radius": 3.8,
+    "well_radius": 0.9
+  },
+  "lifts": [
+    {
+      "id": "LIFT1",
+      "rect": [
+        -9.5,
+        4,
+        -6.5,
+        7.5
+      ]
+    },
+    {
+      "id": "LIFT2",
+      "rect": [
+        6.5,
+        4,
+        9.5,
+        7.5
+      ]
+    }
+  ],
+  "lift_operation": "always_operational",
+  "lift_stops": [
+    1,
+    2,
+    3
+  ],
+  "main_ground_floor_entry": null,
+  "service_stairs": [
+    {
+      "id": "ЛС2",
+      "wing": "Л",
+      "center": [
+        0,
+        -27.5
+      ],
+      "radii": [
+        21,
+        32
+      ],
+      "angles": [
+        288,
+        300
+      ],
+      "door_from_corridor": [
+        6.952882373436313,
+        -48.89877161664096
+      ],
+      "roof_access_proposed": true
+    },
+    {
+      "id": "ПС2",
+      "wing": "П",
+      "center": [
+        0,
+        27.5
+      ],
+      "radii": [
+        21,
+        32
+      ],
+      "angles": [
+        468,
+        480
+      ],
+      "door_from_corridor": [
+        -6.95288237343631,
+        48.89877161664096
+      ],
+      "roof_access_proposed": true
+    }
+  ],
+  "ground_floor_exits": [],
+  "materials_status": "deferred_by_owner",
+  "presidential_suite": "cancelled_by_owner",
+  "roof_access_required": true
+}
