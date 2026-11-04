@@ -1,0 +1,15 @@
+{
+  "output": "E:\\Models Blender\\новые руки\\Phone_Grip_starter_v01.blend",
+  "sha256": "64ae968d6ecceebbee47658ad24faebe827507ea42bddb0e8734657cced0abe4",
+  "sources_unchanged": {
+    "E:\\Models Blender\\PROPS\\QuestPhone\\game\\QuestPhone_Game_v01.blend": "79cdabf05fdca1d1019108cfb92cbd8afb90ebfc7c0b23fa30b9ed497523dc8b",
+    "E:\\Games\\RING-godot\\assets\\models\\characters\\veras_arms.gltf": "019332d4d435570695e761de51ac107fe66a7077e6eb57207969c7a5c58d63de",
+    "E:\\Games\\RING-godot\\assets\\models\\characters\\veras_arms.bin": "6c6d077179efca42f1a71578622bc542a1d4bb3c6546a9e578dd3f850002013a"
+  },
+  "bones": 39,
+  "rest_error_m": 5.405651672845201e-07,
+  "pose_error_m": 8.940696716308594e-08,
+  "packed_images": 8,
+  "frame": 1,
+  "status": "Starter for owner editing; not finally accepted; no automatic Godot sync"
+}

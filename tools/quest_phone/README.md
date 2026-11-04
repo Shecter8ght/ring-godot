@@ -67,3 +67,13 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/phone_grip_lab.tscn
 купе и устройство на уровне с отдельным тестовым профилем. Экран — два SubViewport,
 постоянный инвентарь — PhoneGear, стартовый хват — phone_grip.json + профиль @phone.
 Ограничения UV, стекла и анимации, управление и сохранения — `docs/assets/quest_phone.md`.
+
+### Хват в Blender
+
+`tools/godot.cmd --windowed --resolution 1280x900 res://tools/phone_grip_export.tscn`
+выгружает фактическую позу и экран в `_asset_src/quest_phone/grip/` без сохранения профиля.
+Затем Blender `--background --factory-startup --python-exit-code 1 --python tools/quest_phone/hand_grip_blender.py`
+собирает `E:/Models Blender/новые руки/Phone_Grip_starter_v01.blend`: существующие руки,
+игровой телефон, Pose Mode, кадр 1, упакованные текстуры, три камеры и встроенная инструкция.
+Скрипт откажется перезаписать уже выданный файл: следующую сборку делать новой версией.
+Сохранённая владельцем поза потребует отдельного переноса в Godot.
