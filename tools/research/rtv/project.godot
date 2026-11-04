@@ -1,0 +1,6 @@
+; Пустой проект для чтения чужого пакета (tools/research/rtv/run.sh): пакет подключается
+; в отдельный процесс, кэш и импорт основного проекта RING не трогаются. Папка скрыта от RING (.gdignore).
+config_version=5
+
+[application]
+config/name="rtv_research"
