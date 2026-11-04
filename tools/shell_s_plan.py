@@ -1,6 +1,8 @@
 """Current soft-S residential concept: editable top-view SVG, PNG and room data.
 
-Documentation only. Dimensions are proposed GAME metres after the E multiplier.
+Documentation only. Floor 1 v01 accepted as a planning base on 2026-11-04.
+The image retains the original proposal caption; JSON records the subsequent acceptance.
+Dimensions are working GAME metres after the E multiplier, pending geometry/FPS validation.
 Run: python -X utf8 tools/shell_s_plan.py
 """
 from pathlib import Path
@@ -210,9 +212,12 @@ def generate():
     OUT.mkdir(parents=True,exist_ok=True)
     png=OUT/'residential_shell_s_floor_v01.png'; svg=OUT/'residential_shell_s_floor_v01.svg'
     s.im.save(png); svg.write_text('\n'.join(s.svg+['</svg>']),encoding='utf-8')
-    data={'status':'proposal','version':'v01','floor':1,'units':'game_metres_after_E',
+    data={'status':'accepted_as_planning_base','accepted_by_owner':'2026-11-04',
+          'version':'v01','floor':1,'units':'game_metres_after_E',
           'building_count_approved':2,'form_approved':'soft_S_opposite_curves',
-          'room_layout_proposed':True,'rooms':rooms,'corridors':corridors,
+          'room_layout_proposed':False,
+          'metric_dimensions_status':'working_values_pending_geometry_and_FPS_validation',
+          'rooms':rooms,'corridors':corridors,
           'hall_polygon':hall,'stair':{'center':[0,-0.5],'outer_radius':3.8,'well_radius':0.9},
           'lifts':lifts,'main_ground_floor_entry':[12,-3],
           'ground_floor_exits':exits,'materials_status':'deferred_by_owner',

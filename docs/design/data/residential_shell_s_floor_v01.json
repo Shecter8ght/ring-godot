@@ -1,11 +1,13 @@
 {
-  "status": "proposal",
+  "status": "accepted_as_planning_base",
+  "accepted_by_owner": "2026-11-04",
   "version": "v01",
   "floor": 1,
   "units": "game_metres_after_E",
   "building_count_approved": 2,
   "form_approved": "soft_S_opposite_curves",
-  "room_layout_proposed": true,
+  "room_layout_proposed": false,
+  "metric_dimensions_status": "working_values_pending_geometry_and_FPS_validation",
   "rooms": [
     {
       "id": "Л01",
