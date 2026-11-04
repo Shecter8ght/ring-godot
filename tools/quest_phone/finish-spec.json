@@ -1,0 +1,150 @@
+{
+  "schema": "ring-finish-spec/1",
+  "asset": "QuestPhone",
+  "stage": "factory",
+  "model": "models/QuestPhone_factory_v01.blend",
+  "source": {
+    "model": "models/QuestPhone_v02.blend",
+    "sha256": "13e406a76661eefa9f73d0d8ad80749009dd5704cef9601e0a93c40073388bdb",
+    "accepted": true,
+    "acceptance": "2026-11-04: владелец — «принимаю»"
+  },
+  "catalog": "tools/asset_kit/finish/finishes.json",
+  "interview": [
+    {
+      "question": "Заводская отделка телефона",
+      "answer": "Графит: тёмная рамка и матовое тёмное стекло"
+    },
+    {
+      "question": "Металлические ободы трёх задних камер",
+      "answer": "В цвет металлической рамки"
+    }
+  ],
+  "slots": [
+    {
+      "id": "frame",
+      "title": "Рамка, кнопки, ободы камер",
+      "finish": "MT-GPH-SAT",
+      "parts": [
+        "Рамка"
+      ],
+      "overrides": {},
+      "note": ""
+    },
+    {
+      "id": "back",
+      "title": "Заднее матовое стекло и площадка камер",
+      "finish": "GL-GPH-FRST",
+      "parts": [
+        "Задняя панель"
+      ],
+      "overrides": {},
+      "note": ""
+    },
+    {
+      "id": "front",
+      "title": "Переднее стекло и выключенный экран",
+      "finish": "GL-PHONE-OFF",
+      "parts": [
+        "Стекло",
+        "Экран"
+      ],
+      "overrides": {},
+      "note": ""
+    },
+    {
+      "id": "optics",
+      "title": "Прозрачные стёкла объективов",
+      "finish": "GL-AR",
+      "parts": [
+        "Оптика"
+      ],
+      "overrides": {},
+      "note": ""
+    },
+    {
+      "id": "seals",
+      "title": "Уплотнения и чёрные внутренние детали",
+      "finish": "RB-BLK-MAT",
+      "parts": [
+        "Внутри"
+      ],
+      "overrides": {
+        "grain": null,
+        "edges": null,
+        "cavity": null,
+        "gradients": null,
+        "layers": null
+      },
+      "note": "Малые гладкие вставки и уплотнения смартфона: только основа; без литьевых разводов и затёртых кромок оружейного образца."
+    },
+    {
+      "id": "polymer",
+      "title": "Антенные вставки и USB-C",
+      "finish": "PL-BLK-SMO",
+      "parts": [
+        "Полимер"
+      ],
+      "overrides": {
+        "grain": null,
+        "edges": null,
+        "cavity": null,
+        "gradients": null,
+        "layers": null
+      },
+      "note": "Малые гладкие вставки и уплотнения смартфона: только основа; без литьевых разводов и затёртых кромок оружейного образца."
+    },
+    {
+      "id": "contacts",
+      "title": "Контакты разъёма",
+      "finish": "NI-PLT-SAT",
+      "parts": [
+        "Контакты"
+      ],
+      "overrides": {
+        "grain": null,
+        "edges": null,
+        "cavity": null,
+        "gradients": null,
+        "layers": null
+      },
+      "note": "Малые гладкие вставки и уплотнения смартфона: только основа; без литьевых разводов и затёртых кромок оружейного образца."
+    },
+    {
+      "id": "flash",
+      "title": "Рассеиватель вспышки",
+      "finish": "TL-MLK-FRO",
+      "parts": [
+        "Вспышка"
+      ],
+      "overrides": {
+        "grain": null,
+        "edges": null,
+        "cavity": null,
+        "gradients": null,
+        "layers": null
+      },
+      "note": ""
+    },
+    {
+      "id": "camera_cover",
+      "title": "Защитные стёкла трёх камер",
+      "finish": "GL-CLR",
+      "parts": [
+        "Защитное стекло камер"
+      ],
+      "overrides": {},
+      "note": "Отделены от непрозрачного стекла передней панели; Transmission 1."
+    }
+  ],
+  "favorites": [],
+  "requests": [],
+  "history": [
+    {
+      "time": "2026-11-04",
+      "by": "Явные ответы владельца в чате",
+      "note": "Выбор палитры записан; численные рецепты и законченная отделка ещё предъявляются владельцу."
+    }
+  ],
+  "accepted": false
+}

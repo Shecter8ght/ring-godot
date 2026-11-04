@@ -1,0 +1,285 @@
+{
+  "schema": "ring-asset-validation/1",
+  "asset": "QuestPhone_factory_v01",
+  "source": {
+    "blender": "5.2.2 LTS",
+    "reference": "E:\\Games\\RING-godot\\_asset_src\\quest_phone\\models\\QuestPhone_v02.blend",
+    "candidate": "E:\\Games\\RING-godot\\_asset_src\\quest_phone\\models\\QuestPhone_factory_v01.blend",
+    "reference_object_count": 130,
+    "candidate_object_count": 130,
+    "geometry_changes": {},
+    "added_objects": [],
+    "images": [
+      {
+        "name": "studio.exr",
+        "source": "FILE",
+        "packed": true,
+        "filepath": "D:\\ПРОГРАММЫ\\Blender 5\\5.2\\datafiles\\studiolights\\world\\studio.exr",
+        "resolved": "D:\\ПРОГРАММЫ\\Blender 5\\5.2\\datafiles\\studiolights\\world\\studio.exr",
+        "size": [
+          1024,
+          512
+        ],
+        "color_space": "Linear Rec.709"
+      }
+    ],
+    "dependency_errors": [],
+    "manual_review": [],
+    "packed_basename_collisions": {},
+    "limits": "Not a full modifier/animation/shape-key/UCUPaint/optics audit; manual review remains.",
+    "pass": true
+  },
+  "native": {
+    "blender": "5.2.2 LTS",
+    "ucupaint": "2.4.9",
+    "materials": [
+      {
+        "name": "Внутри",
+        "code": "RB-BLK-MAT",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.8500000238418579
+        },
+        "transmission": 0.0,
+        "ior": 1.5
+      },
+      {
+        "name": "Вспышка",
+        "code": "TL-MLK-FRO",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.550000011920929
+        },
+        "transmission": 0.8500000238418579,
+        "ior": 1.4900000095367432
+      },
+      {
+        "name": "Задняя панель",
+        "code": "GL-GPH-FRST",
+        "layers": [
+          "02 · Микроструктура 0.025 мм",
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.5799999833106995
+        },
+        "transmission": 0.0,
+        "ior": 1.5199999809265137
+      },
+      {
+        "name": "Защитное стекло камер",
+        "code": "GL-CLR",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.019999999552965164
+        },
+        "transmission": 1.0,
+        "ior": 1.5199999809265137
+      },
+      {
+        "name": "Контакты",
+        "code": "NI-PLT-SAT",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 1.0,
+          "Roughness": 0.23999999463558197
+        },
+        "transmission": 0.0,
+        "ior": 1.5
+      },
+      {
+        "name": "Оптика",
+        "code": "GL-AR",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.019999999552965164
+        },
+        "transmission": 1.0,
+        "ior": 1.5199999809265137
+      },
+      {
+        "name": "Полимер",
+        "code": "PL-BLK-SMO",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.5
+        },
+        "transmission": 0.0,
+        "ior": 1.5
+      },
+      {
+        "name": "Рамка",
+        "code": "MT-GPH-SAT",
+        "layers": [
+          "02 · Микроструктура 0.035 мм",
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 1.0,
+          "Roughness": 0.33000001311302185
+        },
+        "transmission": 0.0,
+        "ior": 1.5
+      },
+      {
+        "name": "Стекло",
+        "code": "GL-PHONE-OFF",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.054999999701976776
+        },
+        "transmission": 0.0,
+        "ior": 1.5199999809265137
+      },
+      {
+        "name": "Экран",
+        "code": "GL-PHONE-OFF",
+        "layers": [
+          "01 · Заводская основа"
+        ],
+        "channels": {
+          "Metallic": 0.0,
+          "Roughness": 0.054999999701976776
+        },
+        "transmission": 0.0,
+        "ior": 1.5199999809265137
+      }
+    ],
+    "images": [
+      {
+        "name": "studio.exr",
+        "packed": true
+      }
+    ]
+  },
+  "review": {
+    "views": {
+      "side_r": {
+        "object_share": 0.673,
+        "px_per_cm": 69.77,
+        "lum_p2_p50_p98": [
+          0.091,
+          0.101,
+          0.126
+        ],
+        "clipped": 0.0,
+        "crushed": 0.001
+      },
+      "side_l": {
+        "object_share": 0.664,
+        "px_per_cm": 69.77,
+        "lum_p2_p50_p98": [
+          0.141,
+          0.286,
+          0.341
+        ],
+        "clipped": 0.0,
+        "crushed": 0.0
+      },
+      "fps": {
+        "object_share": 0.019,
+        "px_per_cm": 18.05,
+        "lum_p2_p50_p98": [
+          0.027,
+          0.094,
+          0.612
+        ],
+        "clipped": 0.0,
+        "crushed": 0.021
+      },
+      "macro_mid": {
+        "object_share": 1.0,
+        "px_per_cm": 426.67,
+        "lum_p2_p50_p98": [
+          0.071,
+          0.082,
+          0.097
+        ],
+        "clipped": 0.0,
+        "crushed": 0.0
+      },
+      "rake_f": {
+        "object_share": 0.673,
+        "px_per_cm": 69.77,
+        "lum_p2_p50_p98": [
+          0.039,
+          0.066,
+          0.105
+        ],
+        "clipped": 0.0,
+        "crushed": 0.009
+      },
+      "rake_b": {
+        "object_share": 0.673,
+        "px_per_cm": 69.77,
+        "lum_p2_p50_p98": [
+          0.039,
+          0.066,
+          0.105
+        ],
+        "clipped": 0.0,
+        "crushed": 0.008
+      }
+    },
+    "far": {
+      "side_r": {
+        "lambda_px": 279.1,
+        "flat": 0.662,
+        "flat_color": 1.0,
+        "flat_rough": 0.662,
+        "tone_spread_L": 0.39,
+        "gloss_spread": 6.77
+      },
+      "fps": {
+        "lambda_px": 72.2,
+        "flat": 0.192,
+        "flat_color": 0.623,
+        "flat_rough": 0.192,
+        "tone_spread_L": 5.9,
+        "gloss_spread": 10.29
+      }
+    },
+    "findings": [
+      {
+        "set": "render:side_r",
+        "level": "warn",
+        "code": "flat_far",
+        "text": "издали (~4 см): однотонно 66% видимой модели",
+        "value": 0.662
+      }
+    ]
+  },
+  "delivery": "E:/Models Blender/PROPS/QuestPhone/models/QuestPhone_factory_v01.blend",
+  "decisions": [
+    "Form v02 accepted by owner; finish awaiting owner review.",
+    "Uniform switched-off display warning reviewed; no arbitrary stains added.",
+    "Actual camera cover glass checked from both sides with temporary checker.",
+    "Delivered file reopened: 100 meshes, USB entrance and dimensions pass."
+  ],
+  "limitations": [
+    "Procedural materials, no game atlases or LOD.",
+    "Noise implementations in Painter and UCUPaint are not bit-identical.",
+    "Source audit does not compare all modifier properties or calculate optics."
+  ]
+}
