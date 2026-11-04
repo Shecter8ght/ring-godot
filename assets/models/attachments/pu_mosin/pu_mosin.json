@@ -1,0 +1,37 @@
+{
+ "schema": "mosin_pu_scope_v01",
+ "source": "E:\\Games\\RING-godot\\_asset_src\\mosin_pu_game\\fp\\lp\\Mosin_Game_LP.blend",
+ "rifle": "mosin_pu.glb",
+ "axes": "+Z к дулу, +Y верх, −X правая сторона стрелка; начало — ось кронштейна (узел Mount_Bracket); метры",
+ "socket_on_rifle_m": [
+  0.0225,
+  0.06252,
+  0.214
+ ],
+ "triangles": {
+  "first_person": 5369,
+  "lod1": 1037
+ },
+ "meshes": {
+  "Body_Bracket": 1636,
+  "Body_Lens": 374,
+  "Body_Scope": 3359,
+  "Body_Bracket_LOD1": 316,
+  "Body_Lens_LOD1": 72,
+  "Body_Scope_LOD1": 649
+ },
+ "markers_m": {
+  "ScopeEye": [
+   -0.0145,
+   0.047,
+   -0.1615
+  ],
+  "ScopeFront": [
+   -0.0145,
+   0.047,
+   0.0082
+  ]
+ },
+ "ocular_r_m": 0.0118,
+ "maps": "атлас Optic винтовки: ../../weapons/mosin_pu/mosin_pu_Optic_20_*.png"
+}

@@ -135,7 +135,6 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 	_static_lod(model, lod)
 	root.add_child(model)
 	apply_markers(root, model, float((weapon.get("viewmodel", {}) as Dictionary).get("ads_z", 0.3)))
-	_integral_scope(root, model, (weapon.get("viewmodel", {}) as Dictionary).get("scope", {}))
 	# магазин с патронами — отдельная деталь экспорта: вынут — прячется, другой — заменяется
 	for node: Node in model.find_children("Magazine*", "MeshInstance3D", true, false):
 		node.set_meta("part", "mag")
@@ -193,26 +192,6 @@ static func _static_lod(model: Node3D, lod: int) -> void:
 	for raw: Node in model.find_children("*", "MeshInstance3D", true, false):
 		if not low.is_ancestor_of(raw):
 			(raw as MeshInstance3D).visible = false
-
-
-## Встроенная оптика модели (viewmodel.scope; Мосин: ПУ — часть ассета): метка ScopeEye — центр заднего торца окуляра;
-## линия прицеливания — ось трубы (у ПУ она левее оси ствола), в окуляр ложится картинка оптики (CameraRig), вынос
-## глаза — eye_relief, сетка — своя текстура (как у оптики-обвеса, WeaponMods._model_part).
-static func _integral_scope(root: Node3D, model: Node3D, scope: Dictionary) -> void:
-	if scope.is_empty():
-		return
-	var eye_mark: Node3D = model.find_child("ScopeEye", true, false) as Node3D
-	if eye_mark == null:
-		return
-	var ocular: Vector3 = between(root, eye_mark).origin
-	root.set_meta("scoped", true)
-	root.set_meta("ocular", ocular)
-	root.set_meta("ocular_r", float(scope.get("ocular_r", 0.0118)))
-	root.set_meta("sight_h", ocular.y)
-	root.set_meta("sight_x", ocular.x)
-	root.set_meta("ads_z", maxf(float(scope.get("eye_relief", 0.072)) - ocular.z, Balance.SCOPE_ADS_Z_MIN))
-	if scope.has("reticle"):
-		root.set_meta("reticle_tex", String(scope.reticle))
 
 
 ## Метки модели (Muzzle, SightRear, MuzzleDevice) → meta основы в осях meta_root.

@@ -495,7 +495,8 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 
 ## Мосин 1891/30 ПУ (assets/models/weapons/mosin_pu)
 
-- `mosin_pu.glb` (винтовка с креплением и прицелом ПУ, ~25 800 треугольников + LOD1), `mosin_pu_round.glb` (патрон
+- `mosin_pu.glb` (винтовка с основанием кронштейна ПУ, ~20 400 треугольников + LOD1), прицел ПУ на кронштейне —
+  `assets/models/attachments/pu_mosin/pu_mosin.gltf` (съёмный обвес, ~5 400 + LOD1, карты — общий атлас винтовки), `mosin_pu_round.glb` (патрон
   7,62×54R и стреляная гильза), `mosin_pu_collision.glb` (выпуклые оболочки) — собственная модель, сделана для RING
   по фото-референсам (список — `E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/sources.md`); маркировки вымышленные.
   Игровая сетка — ретопология той же сборкой формы (`tools/mosin_pu/game_retopo.py`, `game_lp.py`), развёртка —

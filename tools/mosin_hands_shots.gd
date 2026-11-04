@@ -1,14 +1,18 @@
 extends Node
 ## Мосин 1891/30 ПУ (wpn_sr_03) в руках днём под небом (Пригород, ясно): игровая модель assets/models/weapons/mosin_pu,
-## общие руки по меткам хвата data/weapon_grips.json (mosin_pu), встроенный прицел ПУ 3,5× (метка ScopeEye, своя
-## сетка), продольно-скользящий затвор (CameraRig._tick_bolt_action). Кадры: от бедра; выстрел — середина цикла
-## затвора (рукоять вверху, затвор отведён, правая кисть на шаре); в прицеле (картинка ПУ в окуляре); перезарядка —
-## затвор открыт; модель сбоку справа (покой и затвор отведён) и мировая модель (ветка LOD1) с 3 м.
+## общие руки по меткам хвата data/weapon_grips.json (mosin_pu), съёмный прицел ПУ 3,5× на кронштейне (обвес optic_pu_01,
+## assets/models/attachments/pu_mosin: окуляр — метка ScopeEye, своя сетка), продольно-скользящий затвор
+## (CameraRig._tick_bolt_action). Кадры: от бедра; выстрел — середина цикла затвора (рукоять вверху, затвор отведён, правая
+## кисть на шаре); в прицеле (картинка ПУ в окуляре); перезарядка — затвор открыт; модель сбоку справа (покой и затвор
+## отведён), мировая модель (ветки LOD1 винтовки и прицела) с 3 м; ПУ отдельно — как предмет; без ПУ — открытые
+## прицельные (iron_hip, iron_ads), на винтовке остаётся только основание кронштейна.
 ## Сделано по tools/ar15_shots.gd.
 ## tools/godot.cmd --windowed --resolution 1920x1080 res://tools/mosin_hands_shots.tscn → docs/screens/mosin_hands_*.png
-## (MOSIN_ONLY=hip,fire,ads,reload,side,world — выборочно; MOSIN_POS=x,y,z — место; без окна — только лог затвора и прицела)
+## (MOSIN_ONLY=hip,fire,ads,reload,side,world,item,iron — выборочно; MOSIN_POS=x,y,z — место; без окна — только лог)
 
 const ID := "wpn_sr_03"
+const SCOPE := "optic_pu_01"
+const MODS := {"optic_primary": {"id": SCOPE, "dur": 100.0}}
 const OUT := "res://docs/screens/"
 
 var _player: Player
@@ -48,7 +52,7 @@ func _ready() -> void:
 	for canvas: Node in get_tree().root.find_children("*", "CanvasLayer", true, false):
 		if canvas != _camera._scope_view.get_parent():
 			(canvas as CanvasLayer).visible = false
-	await _equip()
+	await _equip(MODS)
 	_player.carry_low = false
 	_camera._look_yaw = 0.0
 	_camera._look_pitch = 0.05
@@ -91,7 +95,10 @@ func _ready() -> void:
 				" увеличение ", _player.spec().get("zoom", 0.0), " сетка ", fr.get_meta("reticle_tex", ""))
 		else:
 			fails += 1
-			push_error("mosin_hands_shots: у модели в руках нет окуляра (встроенный ПУ)")
+			push_error("mosin_hands_shots: у модели в руках нет окуляра (ПУ)")
+		if not _camera.scope_active or not is_equal_approx(float(_player.spec().get("zoom", 0.0)), 3.5):
+			fails += 1
+			push_error("mosin_hands_shots: в прицел — не оптика ПУ 3,5×")
 		Input.action_release("aim")
 		await get_tree().create_timer(0.8).timeout
 	if _want("reload"):
@@ -113,6 +120,10 @@ func _ready() -> void:
 		await _side()
 	if _want("world"):
 		await _world()
+	if _want("item"):
+		fails += await _item()
+	if _want("iron"):
+		fails += await _iron()
 	print("mosin_hands_shots: провалено ", fails)
 	get_tree().quit(1 if fails > 0 else 0)
 
@@ -135,7 +146,7 @@ func _bolt_state() -> Array:
 
 ## Сбоку справа — модель как в руках (lod 0), затвор в покое и отведён до упора (рукоять вверх).
 func _side() -> void:
-	var gun: Node3D = WeaponModels.build(ID)
+	var gun: Node3D = WeaponModels.build(ID, MODS)
 	var holder := Node3D.new()
 	get_tree().current_scene.add_child(holder)
 	holder.add_child(gun)
@@ -173,9 +184,9 @@ func _side() -> void:
 	holder.queue_free()
 
 
-## Мировая модель (lod 1: ветка Mosin_PU_LOD1) с 3 м — как у чужих рук и на земле.
+## Мировая модель (lod 1: ветка Mosin_PU_LOD1 и Body_*_LOD1 прицела) с 3 м — как у чужих рук и на земле.
 func _world() -> void:
-	var gun: Node3D = WeaponModels.build(ID, {}, 1)
+	var gun: Node3D = WeaponModels.build(ID, MODS, 1)
 	var holder := Node3D.new()
 	get_tree().current_scene.add_child(holder)
 	holder.add_child(gun)
@@ -201,9 +212,74 @@ func _world() -> void:
 	holder.queue_free()
 
 
-func _equip() -> void:
+## ПУ отдельно — как предмет (значок, на полу): модель обвеса сама по себе, материалы — общий атлас винтовки.
+func _item() -> int:
+	var item: Node3D = WeaponMods.standalone(SCOPE)
+	if item == null:
+		push_error("mosin_hands_shots: у ПУ нет модели предмета")
+		return 1
+	var holder := Node3D.new()
+	get_tree().current_scene.add_child(holder)
+	holder.add_child(item)
+	holder.global_position = _player.global_position + Vector3(0, 1.5, -3.0)
+	var shown: int = 0
+	var textured: int = 0
+	for raw: Node in item.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = raw as MeshInstance3D
+		if mi.is_visible_in_tree():
+			shown += 1
+			# стекло — без цвета из карты, только шероховатость из атласа
+			var mat: BaseMaterial3D = mi.get_active_material(0) as BaseMaterial3D
+			if mat and (mat.albedo_texture != null or mat.roughness_texture != null or mat.orm_texture != null):
+				textured += 1
+	print("mosin_hands_shots: ПУ предметом: видно сеток ", shown, ", с картами ", textured, ", размер ", ItemModels.bounds(item).size)
+	var player_cam: Camera3D = get_viewport().get_camera_3d()
+	var cam := Camera3D.new()
+	cam.fov = 24.0
+	holder.add_child(cam)
+	var fill := OmniLight3D.new()
+	fill.omni_range = 3.0
+	fill.light_energy = 1.2
+	holder.add_child(fill)
+	cam.global_position = holder.global_position + Vector3(0.75, 0.3, 0.35)
+	cam.look_at(holder.global_position)
+	fill.global_position = holder.global_position + Vector3(0.6, 0.5, -0.2)
+	cam.current = true
+	await get_tree().create_timer(0.4).timeout
+	await _shot("pu_item")
+	player_cam.current = true
+	holder.queue_free()
+	return 0 if shown == 3 and textured == 3 else 1
+
+
+## Без ПУ: открытые прицельные (метки SightRear / SightFront), на винтовке только основание кронштейна, без оптики.
+func _iron() -> int:
+	await _equip({})
+	_camera._look_yaw = 0.0
+	_camera._look_pitch = 0.05
+	await get_tree().create_timer(1.0).timeout
+	var fr: Node3D = _camera._vm_frame()
+	var pu_parts: int = fr.find_children("Body_*", "MeshInstance3D", true, false).size()
+	var base: bool = fr.find_child("Mount_Base_Mesh", true, false) != null
+	print("mosin_hands_shots: без ПУ: оптика ", fr.get_meta("scoped", false), ", окуляр ", fr.has_meta("ocular"), ", сеток ПУ ", pu_parts,
+		", основание ", base, ", sight_h ", fr.get_meta("sight_h", -1.0), ", sight_x ", fr.get_meta("sight_x", 0.0),
+		", увеличение ", _player.spec().get("zoom", 0.0))
+	await _shot("iron_hip")
+	Input.action_press("aim")
+	await get_tree().create_timer(float(_player.spec().aim_time) + 0.8).timeout
+	await _shot("iron_ads")
+	print("mosin_hands_shots: без ПУ в прицел: оптика ", _camera.scope_active)
+	Input.action_release("aim")
+	await get_tree().create_timer(0.6).timeout
+	var bad: bool = bool(fr.get_meta("scoped", false)) or pu_parts > 0 or not base or _camera.scope_active 		or float(_player.spec().get("zoom", 0.0)) > 0.0
+	if bad:
+		push_error("mosin_hands_shots: без ПУ осталась оптика или нет основания")
+	return 1 if bad else 0
+
+
+func _equip(mods: Dictionary) -> void:
 	var slot: String = String(WeaponDb.sandbox()[0])
-	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": {},
+	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": mods.duplicate(true),
 		"mag": {"id": "", "ammo": "ammo_76254_std", "rounds": 5}, "sight": "primary", "rev": randi()}
 	_player.weapon_slot = ""
 	_player._switch(slot, false)

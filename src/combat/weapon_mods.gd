@@ -390,6 +390,7 @@ static func _build_look(root: Node3D, m: Dictionary, a: Dictionary) -> void:
 ## 2026-10-19), жировые следы рук — <имя>_100_coat.png, если есть. Начало модели — место посадки:
 ## у рукоятки — нижняя плоскость планки, у глушителя — задний торец на оси ствола, у ЗОРИН К-1 — корень
 ## крепления на затворе ПМ. Остальные сетки модели (Lens — стекло, Reticle — светящаяся метка) — как в файле.
+## own_materials — материалы из файла модели, своих карт _100_ у обвеса нет (ПУ Мосина: атлас общий с винтовкой).
 static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var spec: Dictionary = a.model
 	var path: String = String(spec.get("scene", ""))
@@ -398,19 +399,22 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 	var model: Node3D = (load(path) as PackedScene).instantiate() as Node3D
 	if model == null:
 		return false
-	var full: StandardMaterial3D = _model_material(path.get_basename() + "_100_") as StandardMaterial3D
-	if full == null:
-		model.free()
-		return false
-	var coated: ShaderMaterial = WeaponCondition.wear_material(full)
-	var material: Material = coated if coated else full
+	var material: Material = null
+	if not bool(spec.get("own_materials", false)):
+		var full: StandardMaterial3D = _model_material(path.get_basename() + "_100_") as StandardMaterial3D
+		if full == null:
+			model.free()
+			return false
+		var coated: ShaderMaterial = WeaponCondition.wear_material(full)
+		material = coated if coated else full
 	var o: Array = spec.get("offset", [0, 0, 0])
 	var at: Vector3 = (m.pos as Vector3) + Vector3(float(o[0]), float(o[1]), float(o[2]))
 	model.position = at
 	root.add_child(model)
 	for raw: Node in model.find_children("Body*", "MeshInstance3D", true, false):
 		var body: MeshInstance3D = raw as MeshInstance3D
-		body.material_override = material
+		if material:
+			body.material_override = material
 		body.visible = String(body.name).contains("LOD1") == (int(m.get("lod", 0)) > 0)
 		if String(body.name).contains("Eyecup"):
 			# наглазник оптики: у глаза заходит за ближнюю плоскость камеры — CameraRig его прячет

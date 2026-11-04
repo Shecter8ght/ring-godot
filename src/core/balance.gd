@@ -594,6 +594,7 @@ const TRADER_BUY_PRICES := {
 	"optic_holo_01": 80000,
 	"optic_lpvo_01": 350000,
 	"optic_pso_01": 100000,
+	"optic_pu_01": 100000,
 	"optic_rd_01": 30000,
 	"optic_rd_dt_01": 28000,
 	"optic_zorin_k1": 55000,

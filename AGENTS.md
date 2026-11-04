@@ -634,12 +634,14 @@ tools/godot.cmd --headless res://tools/dust_cover_test.tscn    # шторка Г
 # Мосин 1891/30 ПУ (wpn_sr_03) в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/mosin_pu/game_retopo.py
 #   (ретопология той же сборкой формы build_*.py: лишние петли сняты, клейма и фаски — в запекание → _asset_src/mosin_pu_game/lr)
 #   → game_lp.py -- fp (лучи видимости; развёртка game_uv.py: швы до дисков, ложа и длинное — отрезками, ABF, укладка asset_kit) → game_bake.py --
-#   rifle|mount|scope|ammo|ao → game_pack.py → game_export.py → --import → python -X utf8 tools/mosin_pu/game_imports.py → --import;
+#   rifle|mount|scope|ammo|ao → game_pack.py → game_export.py (винтовка с основанием кронштейна; прицел ПУ на кронштейне — съёмный
+#   обвес optic_pu_01: assets/models/attachments/pu_mosin, карты — общий атлас винтовки) → --import → python -X utf8 tools/mosin_pu/game_imports.py → --import;
 #   сетка ПУ — python -X utf8 tools/mosin_pu/reticle.py; данные — python -X utf8 tools/mosin_pu/game_data.py; переразвернуть
 #   готовую сетку без пересборки — game_uv.py -- [атлас …]; файл просмотра для владельца — game_view.py
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/mosin_hands_shots.tscn # Мосин в руках (Пригород): от бедра, цикл затвора после выстрела
                                                               # (рукоять вверх, отвод, правая кисть на шаре), в прицел ПУ, перезарядка с открытым затвором,
-                                                              # сбоку, мировая модель (LOD1); снимки mosin_hands_* (MOSIN_ONLY=hip,fire,ads)
+                                                              # сбоку, мировая модель (LOD1), ПУ предметом, без ПУ — открытые прицельные;
+                                                              # снимки mosin_hands_* (MOSIN_ONLY=hip,fire,ads,item,iron)
 tools/godot.cmd --windowed --resolution 1100x760 res://tools/mosin_pu_shots.tscn  # Мосин — сама модель в студии: ракурсы, затвор открыт, LOD; снимки mosin_pu_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/smg03/build.py -- <out.blend>
                                                               # ПП по мотивам KRISS Vector Gen II (wpn_smg_03), high-poly, форма ждёт приёмки: контуры со снимков KRISS

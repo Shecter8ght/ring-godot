@@ -2,7 +2,11 @@
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_export.py -- [fp|detail]
   fp:
-  mosin_pu.glb           — винтовка с креплением и прицелом, ~20 000 треугольников (в руках) + ветка Mosin_PU_LOD1 (мировая);
+  mosin_pu.glb           — винтовка с основанием кронштейна, ~20 000 треугольников (в руках) + ветка Mosin_PU_LOD1 (мировая);
+  attachments/pu_mosin/pu_mosin.gltf — прицел ПУ на кронштейне, съёмный обвес optic_pu_01 (решение владельца 2026-11-04):
+                           начало — ось узла Mount_Bracket (на винтовке — сокет optic_primary); сетки Body_Bracket,
+                           Body_Scope, Body_Lens и их _LOD1 (WeaponMods._model_part); карты — общие с винтовкой
+                           (атлас Optic: ссылки на mosin_pu_Optic_20_*.png, копий нет); pu_mosin.json — окуляр и треугольники;
   mosin_pu_round.glb     — патрон 7,62×54R (Round) и стреляная гильза (SpentCase);
   mosin_pu_collision.glb — упрощённая физика: выпуклые оболочки «-convcolonly» (Godot делает из них StaticBody3D;
                            отдельным файлом — чтобы у модели в руках не было физики);
@@ -21,6 +25,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+import time
 from pathlib import Path
 
 import bmesh
@@ -47,8 +52,11 @@ COLLISION = {                   # оболочка → (детали, x от, x 
     'Col_Wrist': (('Frame_Wood_Stock', 'Frame_Steel', 'Bolt_Rotor_Mesh', 'Bolt_Cocking_Mesh', 'Trigger_Mesh'), -0.30, 0.03),
     'Col_Fore': (('Frame_Wood_Stock', 'Frame_Wood_Handguard', 'Frame_Steel'), 0.03, 0.62),
     'Col_Muzzle': (('Frame_Steel',), 0.62, 0.80),
-    'Col_Optic': (('Mount_Base_Mesh', 'Mount_Bracket_Mesh', 'Scope_Body_Mesh'), -1.0, 1.0),
+    # прицел съёмный (обвес optic_pu_01): у винтовки — только основание кронштейна на ствольной коробке
+    'Col_Optic': (('Mount_Base_Mesh',), -1.0, 1.0),
 }
+PU_OUT = ROOT / 'assets/models/attachments/pu_mosin'
+PU_NAMES = {'Mount_Bracket_Mesh': 'Body_Bracket', 'Scope_Body_Mesh': 'Body_Scope', 'Scope_Lens_Mesh': 'Body_Lens'}
 HULL_VERTS = 48
 log = lambda *a: print('MOSIN_EXPORT', *a, flush=True)
 
@@ -288,7 +296,29 @@ for o in sorted([o for o in O if o.parent is not None and o != lod_root and not 
             d.use_collapse_triangulate = True
             bpy.ops.object.modifier_apply(modifier=d.name)
 bpy.context.view_layer.update()
-lod_total = sum(tris(o) for o in bpy.data.objects if o.type == 'MESH' and o.name.endswith('_LOD1'))
+
+# ---------------------------------------------------------------- прицел ПУ на кронштейне — отдельный обвес (только fp)
+# кронштейн с трубой (и их ветка LOD1) уходят из винтовки под свой корень; начало — ось узла Mount_Bracket, то есть
+# на винтовке он встаёт ровно туда, где стоял (сокет optic_primary = положение узла). Основание — у винтовки.
+pu_root = None
+pu_at = Vector((0.0, 0.0, 0.0))
+if VARIANT == 'fp':
+    pu_root = bpy.data.objects.new('PU_Mosin', None)
+    S.collection.objects.link(pu_root)
+    pu_at = O['Mount_Bracket'].matrix_world.translation.copy()
+    for name in ('Mount_Bracket', 'Mount_Bracket_LOD1'):
+        n = O[name]
+        mw = n.matrix_world.copy()
+        n.parent = pu_root
+        n.matrix_parent_inverse = Matrix.Identity(4)
+        n.matrix_basis = Matrix.Translation(-pu_at) @ mw
+    for src, dst in PU_NAMES.items():
+        O[src + '_LOD1'].name = dst + '_LOD1'
+        O[src].name = dst
+    bpy.context.view_layer.update()
+pu_meshes = [o for o in pu_root.children_recursive if o.type == 'MESH'] if pu_root is not None else []
+rifle_meshes = [o for o in rifle_meshes if o not in pu_meshes]
+lod_total = sum(tris(o) for o in bpy.data.objects if o.type == 'MESH' and o.name.endswith('_LOD1') and o not in pu_meshes)
 
 
 def subtree(o):
@@ -298,15 +328,52 @@ def subtree(o):
     return out
 
 
+def gltf_out(path: Path, fmt: str) -> None:
+    # запись файла на E: изредка срывается OSError Errno 22 (2026-11-04, дважды, каждый раз другой файл; повтор
+    # проходит) — несколько попыток с паузой
+    for attempt in range(4):
+        try:
+            bpy.ops.export_scene.gltf(filepath=str(path), export_format=fmt, use_selection=True, export_yup=True,
+                                      export_apply=True, export_extras=True, export_animations=False,
+                                      export_cameras=False, export_lights=False, export_image_format='AUTO')
+            return
+        except RuntimeError as e:
+            if 'Errno 22' not in str(e) or attempt == 3:
+                raise
+            log('retry', path.name, attempt + 1)
+            time.sleep(3.0)
+
+
 def export(path: Path, objs) -> None:
     bpy.ops.object.select_all(action='DESELECT')
     for o in objs:
         o.hide_set(False)
         o.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=str(path), export_format='GLB', use_selection=True, export_yup=True, export_apply=True,
-                              export_extras=True, export_animations=False, export_cameras=False, export_lights=False,
-                              export_image_format='AUTO')
+    gltf_out(path, 'GLB')
     log('exported', path.name)
+
+
+def export_pu() -> None:
+    """Прицел ПУ — .gltf с отдельными картами; Blender кладёт рядом копии атласа Optic, они заменяются ссылками на карты
+    винтовки (Godot берёт уже импортированные mosin_pu_Optic_20_*.png — один атлас в памяти на винтовку и прицел)."""
+    PU_OUT.mkdir(parents=True, exist_ok=True)
+    path = PU_OUT / 'pu_mosin.gltf'
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in subtree(pu_root):
+        o.hide_set(False)
+        o.select_set(True)
+    gltf_out(path, 'GLTF_SEPARATE')
+    g = json.loads(path.read_text(encoding='utf-8'))
+    for im in g.get('images', []):
+        local = PU_OUT / im['uri']
+        shared = f'{NAME}_{Path(im["uri"]).stem}.png'
+        if not (OUT / shared).exists():
+            raise SystemExit(f'нет карты винтовки {shared} — сначала импорт mosin_pu.glb в Godot')
+        im['uri'] = '../../weapons/mosin_pu/' + shared
+        im.pop('mimeType', None)
+        local.unlink(missing_ok=True)
+    path.write_text(json.dumps(g, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+    log('exported', path.name, [im['uri'] for im in g.get('images', [])])
 
 
 if VARIANT == 'detail':
@@ -315,16 +382,32 @@ export(OUT / f'{NAME}.glb', subtree(root))
 if VARIANT == 'fp':
     export(OUT / 'mosin_pu_round.glb', subtree(O['Round']) + subtree(O['SpentCase']))
     export(OUT / 'mosin_pu_collision.glb', col_objs)
+    export_pu()
 bpy.ops.wm.save_as_mainfile(filepath=str(WORK / 'lp/Mosin_Game_export.blend'))
 
 gl = lambda v: [round(v[0], 5), round(v[2], 5), round(-v[1], 5)]          # Blender (Z-up) → glTF (Y-up)
 game = lambda mm: gl(MAP @ (Vector(mm) * 0.001))
+if VARIANT == 'fp':
+    pu_rel = lambda name: gl(O[name].matrix_world.translation)   # в осях прицела-обвеса: его корень — в начале сцены
+    (PU_OUT / 'pu_mosin.json').write_text(json.dumps(dict(
+        schema='mosin_pu_scope_v01', source=str(WORK / 'lp/Mosin_Game_LP.blend'), rifle=f'{NAME}.glb',
+        axes='+Z к дулу, +Y верх, −X правая сторона стрелка; начало — ось кронштейна (узел Mount_Bracket); метры',
+        socket_on_rifle_m=gl(pu_at),
+        triangles=dict(first_person=sum(tris(o) for o in pu_meshes if not o.name.endswith('_LOD1')),
+                       lod1=sum(tris(o) for o in pu_meshes if o.name.endswith('_LOD1'))),
+        meshes={o.name: tris(o) for o in pu_meshes},
+        markers_m={k: pu_rel(k) for k in ('ScopeEye', 'ScopeFront')},
+        # центр заднего торца окуляра (метка ScopeEye) и радиус его стекла — для картинки оптики (CameraRig)
+        ocular_r_m=0.0118, maps='атлас Optic винтовки: ../../weapons/mosin_pu/mosin_pu_Optic_20_*.png'),
+        ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 report = dict(
     schema='mosin_pu_game_v02', variant=VARIANT, source_lp=str(WORK / 'lp/Mosin_Game_LP.blend'), sources=REC['sources'],
     state='20 % (особый ствол: одно состояние; текстуры приняты владельцем 2026-10-17, на форме v08 — tex20_v03)',
     axes='+Z дуло, +Y верх, −X правая сторона стрелка; начало — середина шейки ложи (хват правой рукой); метры',
     grip_origin_rifle_mm=[round(c * 1000, 2) for c in GRIP],
-    triangles=dict(first_person=main_total, lod1=lod_total, round=tris(O['Round_Mesh']), spent_case=tris(O['SpentCase_Mesh'])),
+    triangles=dict(first_person=sum(tris(o) for o in rifle_meshes), lod1=lod_total, round=tris(O['Round_Mesh']),
+                   spent_case=tris(O['SpentCase_Mesh'])),
+    scope='съёмный обвес optic_pu_01: assets/models/attachments/pu_mosin/pu_mosin.gltf (pu_mosin.json)',
     meshes={o.name: tris(o) for o in rifle_meshes},
     markers_game_m={k: game(v) for k, v in MK.items()},
     pivots_game_m={k: game(v) for k, v in REC['pivots_mm'].items() if k not in ('Mosin_PU', 'Round', 'Frame')},

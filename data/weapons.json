@@ -622,6 +622,13 @@
       0.9688
      ],
      "bore_r": 0.00381
+    },
+    "optic_primary": {
+     "pos": [
+      0.0225,
+      0.06252,
+      0.214
+     ]
     }
    },
    "pivots": {
@@ -2163,7 +2170,7 @@
    ],
    "value": 55000,
    "stack": 1,
-   "weight": 4.5,
+   "weight": 4.0,
    "tier": 2,
    "rarity": "uncommon",
    "tags": [
@@ -2172,7 +2179,7 @@
     "PRECISION"
    ],
    "code": "91/30 ПУ",
-   "desc": "Снайперская трёхлинейка с прицелом ПУ 3,5× на боковом кронштейне: 7.62×54R, постоянный магазин на пять патронов, продольно-скользящий затвор. Старая, тяжёлая и точная; ложа и металл видели не одну войну.",
+   "desc": "Снайперская трёхлинейка: 7.62×54R, постоянный магазин на пять патронов, продольно-скользящий затвор; слева на ствольной коробке — основание под кронштейн прицела ПУ (прицел — отдельно). Старая, тяжёлая и точная; ложа и металл видели не одну войну.",
    "weapon": {
     "slot": "primary",
     "class": "SNIPER",
@@ -2182,14 +2189,14 @@
     "length": 1.232,
     "stats": {
      "spread": 1.5,
-     "ads_spread": 0.06,
-     "ads_fov": 40,
+     "ads_spread": 0.1,
+     "ads_fov": 50,
      "kick": 0.075,
      "kick_h": 0.016,
      "kick_bias": 0.1,
      "recover": 0.7,
      "shake": 0.3,
-     "ergo": 30,
+     "ergo": 34,
      "rpm": 35,
      "auto": false,
      "reload": 3.4,
@@ -2198,23 +2205,17 @@
      "reliability": 0.99,
      "wear": 0.02
     },
-    "mounts": {},
+    "mounts": {
+     "optic_primary": "MOSIN_PU"
+    },
     "internal_mag": 5,
     "sound": "shot_bolt",
     "reload_sound": "reload_rifle",
     "cycle_sound": "bolt",
-    "integral": {
-     "zoom": 3.5
-    },
     "asset": "res://assets/models/weapons/mosin_pu/mosin_pu.glb",
     "asset_kind": "static",
     "viewmodel": {
-     "ads_z": 0.12,
-     "scope": {
-      "ocular_r": 0.0118,
-      "eye_relief": 0.072,
-      "reticle": "res://assets/models/weapons/mosin_pu/mosin_pu_reticle.png"
-     }
+     "ads_z": 0.12
     }
    },
    "flavor": "Пять патронов, один выдох и долгий ход затвора: этой винтовке не нужно спешить."
@@ -5615,6 +5616,60 @@
    },
    "desc": "Разъёмное кольцо для ДОЗОР Ф-1, Ф-1М и Ф-1С. Устанавливается на планку Picatinny длинноствольного оружия. Фонарь покупается отдельно.",
    "flavor": "Кольцо держит корпус, зажим держит планку — фонарь можно переставить на другой ствол."
+  },
+  "optic_pu_01": {
+   "name": "Прицел ПУ 3,5× с кронштейном",
+   "cat": "mod",
+   "size": [
+    2,
+    1
+   ],
+   "value": 20000,
+   "stack": 1,
+   "weight": 0.5,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "SCAV",
+    "PRECISION"
+   ],
+   "short": "ПУ",
+   "code": "ПУ",
+   "desc": "Снайперский прицел ПУ 3,5× в кольцах бокового кронштейна: кронштейн надевается на основание слева на ствольной коробке трёхлинейки 91/30 и зажимается винтами. На другое оружие не встаёт.",
+   "attach": {
+    "type": "OPTIC_4X",
+    "fits": [
+     "MOSIN_PU"
+    ],
+    "look": "scope4x",
+    "fx": {
+     "ads_spread": 0.6,
+     "ergo": -4
+    },
+    "role": "PRIMARY",
+    "zoom": 3.5,
+    "model": {
+     "scene": "res://assets/models/attachments/pu_mosin/pu_mosin.gltf",
+     "offset": [
+      0,
+      0,
+      0
+     ],
+     "own_materials": true,
+     "sight_h": 0.047,
+     "sight_x": -0.0145,
+     "ocular": [
+      -0.0145,
+      0.047,
+      -0.1615
+     ],
+     "ocular_r": 0.0118,
+     "eye_relief": 0.072,
+     "reticle": "res://assets/models/weapons/mosin_pu/mosin_pu_reticle.png"
+    }
+   },
+   "flavor": "Небольшое увеличение и толстый пенёк сетки: прицел делали для войны, а не для тира."
   }
  },
  "presets": {
@@ -6556,7 +6611,9 @@
   },
   "MOSIN_PU_BASE": {
    "weapon": "wpn_sr_03",
-   "mods": {},
+   "mods": {
+    "optic_primary": "optic_pu_01"
+   },
    "ammo": [
     [
      "ammo_76254_std",

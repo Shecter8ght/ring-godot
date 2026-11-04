@@ -16,11 +16,12 @@
   -58.32
  ],
  "triangles": {
-  "first_person": 25802,
-  "lod1": 4994,
+  "first_person": 20433,
+  "lod1": 3956,
   "round": 1232,
   "spent_case": 752
  },
+ "scope": "съёмный обвес optic_pu_01: assets/models/attachments/pu_mosin/pu_mosin.gltf (pu_mosin.json)",
  "meshes": {
   "Bolt_Bar_Mesh": 292,
   "Bolt_Cocking_Mesh": 2017,
@@ -30,11 +31,8 @@
   "Frame_Wood": 5144,
   "Interrupter_Mesh": 46,
   "Mount_Base_Mesh": 1159,
-  "Mount_Bracket_Mesh": 1636,
   "RearSight_Leaf_Mesh": 587,
   "RearSight_Slider_Mesh": 256,
-  "Scope_Body_Mesh": 3359,
-  "Scope_Lens_Mesh": 374,
   "Trigger_Mesh": 140
  },
  "markers_game_m": {

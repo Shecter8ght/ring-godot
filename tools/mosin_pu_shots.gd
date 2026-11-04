@@ -11,6 +11,8 @@ extends Node3D
 
 const MODEL: String = "res://assets/models/weapons/mosin_pu/mosin_pu.glb"
 const INFO: String = "res://assets/models/weapons/mosin_pu/mosin_pu.json"
+const SCOPE_MODEL: String = "res://assets/models/attachments/pu_mosin/pu_mosin.gltf"
+const SCOPE_INFO: String = "res://assets/models/attachments/pu_mosin/pu_mosin.json"
 const OUTPUT_DIR: String = "res://docs/screens"
 const SKY: String = "res://assets/sky/kloofendal_overcast_puresky.hdr"
 const SIZE: Vector2i = Vector2i(1100, 760)
@@ -131,6 +133,15 @@ func _shot(view: String, lod: int, open: bool, text: String) -> Image:
 	var model: Node3D = (load(MODEL) as PackedScene).instantiate() as Node3D
 	WeaponModels._select_lod(model, lod)
 	add_child(model)
+	# прицел ПУ на кронштейне — отдельный обвес (optic_pu_01): на ось кронштейна, ветка по LOD
+	if ResourceLoader.exists(SCOPE_MODEL, "PackedScene"):
+		var scope: Node3D = (load(SCOPE_MODEL) as PackedScene).instantiate() as Node3D
+		var scope_info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SCOPE_INFO)) as Dictionary
+		var at: Array = scope_info.get("socket_on_rifle_m", [0, 0, 0]) as Array
+		scope.position = Vector3(float(at[0]), float(at[1]), float(at[2]))
+		for raw: Node in scope.find_children("Body*", "MeshInstance3D", true, false):
+			(raw as MeshInstance3D).visible = String(raw.name).contains("LOD1") == (lod > 0)
+		model.add_child(scope)
 	WeaponCondition.apply_visual(model)
 	if open:
 		# как в Blender: стебель повёрнут рукоятью вверх (−90° вокруг оси канала), затвор назад, курок взведён
