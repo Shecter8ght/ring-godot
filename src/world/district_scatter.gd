@@ -40,6 +40,9 @@ extends Node3D
 @export var mid_distance: float = 45.0
 ## Клетка дальнего вида, м (0 — как cell): силуэтов видно сотни, крупная клетка — меньше вызовов отрисовки.
 @export var far_cell: float = 0.0
+## Тень деревьев отдельными копиями «только тень» (Balance.TREE_SHADOWS): вблизи — полная модель, дальше —
+## карточки дальнего вида; видимые модели тень не отбрасывают. Нужен far_model; нет — тень от видимых, как раньше.
+@export var card_shadows: bool = true
 ## Заслоняет ли россыпь свет в SDFGI. Да: без этого кроны и стволы освещены со всех сторон, как одиночное
 ## дерево в поле, — лес белёсый, «в инее» (проба 2026-10-19, владелец: цвет деревьев исказился). Нет —
 ## под кронами светлее, но сама листва без своей тени.
@@ -88,6 +91,13 @@ func _build() -> void:
 	var mid_end: float = near_distance if far_mesh else view_distance
 	var far_separate: bool = far_mesh != null and far_cell > cell
 	var far_cells: Dictionary = {}
+	# тень деревьев — своими копиями «только тень» (Balance.TREE_SHADOWS), видимые — без тени
+	var tree_sh: Dictionary = Balance.TREE_SHADOWS
+	var cards: bool = shadows and card_shadows and far_mesh != null and bool(tree_sh.on)
+	var visible_shadow: GeometryInstance3D.ShadowCastingSetting = GeometryInstance3D.SHADOW_CASTING_SETTING_ON \
+		if shadows and not cards else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# порог «полная тень → карточки» — по центру клетки: клетка игрока и соседние всегда с полной тенью
+	var detail_end: float = float(tree_sh.detail_m) + cell * 0.5 if float(tree_sh.detail_m) > 0.0 else 0.0
 	# из координат точек — в координаты узла: мир минус положение узла или через корень сцены
 	var to_node: Transform3D = Transform3D(Basis.IDENTITY, -global_position)
 	if local_points and is_inside_tree():
@@ -113,10 +123,14 @@ func _build() -> void:
 		mm.use_colors = model == "" or foliage
 		mm.mesh = mesh
 		mm.instance_count = list.size()
+		# положения экземпляров — и для теневых копий (обратное чтение из MultiMesh гоняет данные из видеокарты)
+		var xfs: Array[Transform3D] = []
 		for i in range(list.size()):
 			var p: Array = list[i]
 			var basis := Basis(Vector3.UP, deg_to_rad(float(p[3]))).scaled(Vector3.ONE * float(p[4]))
-			mm.set_instance_transform(i, to_node * Transform3D(basis, Vector3(float(p[0]), float(p[1]), float(p[2]))))
+			var xf: Transform3D = to_node * Transform3D(basis, Vector3(float(p[0]), float(p[1]), float(p[2])))
+			xfs.append(xf)
+			mm.set_instance_transform(i, xf)
 			if mm.use_colors:
 				# оттенок пучка: от выгоревшего до оливкового (из угла поворота — без лишних данных)
 				var t: float = fposmod(float(p[3]) * 0.137, 1.0)
@@ -140,9 +154,11 @@ func _build() -> void:
 		mmi.visibility_range_end = near_end
 		mmi.visibility_range_end_margin = 8.0 if (far_mesh or mid_mesh) else view_distance * 0.1
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.cast_shadow = visible_shadow
 		mmi.gi_mode = GeometryInstance3D.GI_MODE_STATIC if gi_occluder else GeometryInstance3D.GI_MODE_DISABLED
 		add_child(mmi)
+		if cards:
+			_add_shadow_casters(c, mm, xfs, far_mesh, detail_end, float(tree_sh.margin))
 		if mid_mesh:
 			var md := MultiMesh.new()
 			md.transform_format = MultiMesh.TRANSFORM_3D
@@ -203,9 +219,42 @@ func _build() -> void:
 		fmi.visibility_range_end = view_distance
 		fmi.visibility_range_end_margin = view_distance * 0.1
 		fmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		fmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		fmi.cast_shadow = visible_shadow
 		fmi.gi_mode = GeometryInstance3D.GI_MODE_STATIC if gi_occluder else GeometryInstance3D.GI_MODE_DISABLED
 		add_child(fmi)
+
+
+## Тень клетки деревьев копиями «только тень» (Balance.TREE_SHADOWS): ближе detail_end (по центру клетки) — полная
+## модель с теми же экземплярами (пятна от листвы под кроной), дальше — карточки дальнего вида до view_distance.
+## Пороги общие — у клетки всегда одна тень, без дыр и без двойной. В SDFGI они не нужны (видимые — там).
+func _add_shadow_casters(c: Vector2i, mm: MultiMesh, xfs: Array[Transform3D], far_mesh: Mesh, detail_end: float, margin: float) -> void:
+	if detail_end > 0.0:
+		var near := MultiMeshInstance3D.new()
+		near.name = "_ShadowNear_%d_%d" % [c.x, c.y]
+		near.multimesh = mm
+		near.visibility_range_end = detail_end
+		near.visibility_range_end_margin = margin
+		near.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		near.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		near.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		add_child(near)
+	var cm := MultiMesh.new()
+	cm.transform_format = MultiMesh.TRANSFORM_3D
+	cm.mesh = far_mesh
+	cm.instance_count = xfs.size()
+	for i in range(xfs.size()):
+		cm.set_instance_transform(i, xfs[i])
+	var cards := MultiMeshInstance3D.new()
+	cards.name = "_ShadowCards_%d_%d" % [c.x, c.y]
+	cards.multimesh = cm
+	cards.visibility_range_begin = detail_end
+	cards.visibility_range_begin_margin = margin if detail_end > 0.0 else 0.0
+	cards.visibility_range_end = view_distance
+	cards.visibility_range_end_margin = view_distance * 0.1
+	cards.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	cards.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	cards.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	add_child(cards)
 
 
 func _mesh() -> Mesh:

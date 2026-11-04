@@ -1384,6 +1384,26 @@ func _batch_model(model_id: String, transforms: Array) -> void:
 ## пропускается; нет ни одного — серая коробка по габариту. lod_fade: false — смена уровня без плавного перехода
 ## (поля остаются как запас от мигания): пачка в полосе перехода рисуется прозрачной, и у машин «Проспекта» это
 ## съедало весь выигрыш уровней (tools/prospekt_vehicles_perf.tscn).
+## Невидимая копия пачки «только тень» (Balance.TREE_SHADOWS) на дальностях begin–end от камеры; пороги
+## у полной модели и карточек общие — у пачки всегда одна тень.
+func _shadow_copy(node_name: String, multi: MultiMesh, center: Vector3, begin: float, end: float,
+		fade: GeometryInstance3D.VisibilityRangeFadeMode) -> void:
+	var margin: float = float(Balance.TREE_SHADOWS.margin)
+	var shadow: MultiMeshInstance3D = MultiMeshInstance3D.new()
+	shadow.name = node_name
+	shadow.multimesh = multi
+	shadow.position = center
+	shadow.visibility_range_begin = begin
+	shadow.visibility_range_begin_margin = margin if begin > 0.0 else 0.0
+	shadow.visibility_range_end = end
+	shadow.visibility_range_end_margin = margin
+	shadow.visibility_range_fade_mode = fade
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	shadow.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	generated.add_child(shadow)
+	stats.batches = int(stats.batches) + 1
+
+
 func _batch_model_lods(model_id: String, transforms: Array) -> void:
 	var entry: Dictionary = _model_index[model_id]
 	var fade: GeometryInstance3D.VisibilityRangeFadeMode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF \
@@ -1392,6 +1412,16 @@ func _batch_model_lods(model_id: String, transforms: Array) -> void:
 	for t: Transform3D in transforms:
 		center += t.origin
 	center /= float(transforms.size())
+	# дерево с карточками в последнем LOD — тень отдельными копиями «только тень» (Balance.TREE_SHADOWS):
+	# видимые LOD без тени, вблизи тень от LOD0, дальше — от карточек; кусты и изгородь — как раньше
+	var ts: Dictionary = Balance.TREE_SHADOWS
+	var lods: Array = entry.lods
+	var cards: bool = bool(ts.on) and lods.size() >= 2 and _model_aabb(model_id).size.y >= float(ts.min_height) \
+		and int((lods[lods.size() - 1] as Dictionary).get("triangles", 1 << 30)) <= int(ts.cards_max_tris)
+	var detail_end: float = float(ts.detail_m) + float(entry.get("cell", 24.0)) * 0.5 if float(ts.detail_m) > 0.0 else 0.0
+	var near_multi: MultiMesh = null
+	var card_multi: MultiMesh = null
+	var card_end: float = 0.0
 	var begin: float = 0.0
 	var placed: bool = false
 	for lod: Dictionary in entry.lods:
@@ -1416,10 +1446,26 @@ func _batch_model_lods(model_id: String, transforms: Array) -> void:
 		visual.visibility_range_end = end
 		visual.visibility_range_end_margin = 4.0
 		visual.visibility_range_fade_mode = fade
+		if cards:
+			visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if lods.find(lod) == 0:
+				near_multi = multi
+			elif lods.find(lod) == lods.size() - 1:
+				card_multi = multi
+				card_end = end
 		generated.add_child(visual)
 		stats.batches = int(stats.batches) + 1
 		begin = end
 		placed = true
+	if cards and placed:
+		if card_multi == null:
+			# карточек нет на диске — тень от видимых, как раньше
+			for raw: Node in generated.find_children("model_%s_lod*_*" % model_id, "MultiMeshInstance3D", false, false):
+				(raw as MultiMeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		else:
+			if near_multi and detail_end > 0.0:
+				_shadow_copy("model_%s_shadow_near_%d" % [model_id, int(stats.batches)], near_multi, center, 0.0, detail_end, fade)
+			_shadow_copy("model_%s_shadow_cards_%d" % [model_id, int(stats.batches)], card_multi, center, detail_end, card_end, fade)
 	if not placed:
 		var fallback: Dictionary = entry.duplicate()
 		fallback.erase("lods")
