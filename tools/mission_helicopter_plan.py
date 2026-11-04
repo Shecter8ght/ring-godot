@@ -1,7 +1,8 @@
 """Editable design diagrams; proposed geometry, never input to the level builder.
 
 Run: python -X utf8 tools/mission_helicopter_plan.py
-All metric dimensions below are unapproved design proposals. See mission_helicopter.md.
+Bank allocation, the northern bypass and the 3/4/4 floors are approved.
+Metric dimensions and parking capacities remain proposals. See mission_helicopter.md.
 """
 from pathlib import Path
 import math
@@ -65,7 +66,7 @@ class Sheet:
 def plan():
     s = Sheet((1600, 1900))
     s.text((60, 35), 'ВЕРТОЛЁТ · ПЕРВАЯ СХЕМА КАРТЫ', 43, bold=True)
-    s.text((60, 100), 'ПРЕДЛОЖЕНИЕ v01 · 04.11.2026 · размещение, высоты и размер не утверждены', 25, ORANGE)
+    s.text((60, 100), 'СХЕМА v02 · берега и обход приняты · точные координаты, высоты и размер на оценку', 25, ORANGE)
     s.text((60, 144), 'Рабочая рамка 2 × 3 км. Все отметки высот — от уровня озера.', 25)
     x0, y0, scale = 60, 220, 0.5
 
@@ -119,7 +120,7 @@ def plan():
     west = [(-950,-1250),(-650,-1080),(-650,-850),(-480,-570),(-550,-200),
             (-520,0),(-560,420),(-460,640),(-340,800)]
     east = [(900,-1260),(650,-1100),(650,-900),(500,-600),(620,-300),
-            (600,180),(470,480),(340,800)]
+            (820,-150),(850,50),(900,350),(470,480),(340,800)]
     route(west, '#73786d', 12)
     route(east, '#73786d', 12)
     route([(340,800),(600,900),(700,1100),(850,1350)], '#73786d', 7)
@@ -152,6 +153,14 @@ def plan():
     poly([(370,40),(760,-10),(870,150),(800,420),(510,530),(330,340)], '#b3c79d', '#8fa17d', 2)
     for x,z,w,h in [(520,30,260,55),(490,200,95,130),(710,160,95,130)]:
         a,b=p(x,z); s.d.rectangle((a,b,a+w/2,b+h/2),fill='#eee6ce',outline='#95846d',width=3)
+    # Individual parking zones; no bays or capacities are assigned yet.
+    for x,z,w,h in [(540,-90,200,70),(500,350,100,70),(830,170,100,100)]:
+        a,b=p(x,z)
+        s.d.rectangle((a,b,a+w/2,b+h/2),fill='#d0d0c4',outline='#777d75',width=2)
+        s.text((a+w/4-7,b+h/4-13),'P',20,'#536e86',True)
+    route([(820,-150),(650,-150),(650,-90)],'#73786d',5)
+    route([(900,350),(850,390),(600,390)],'#73786d',5)
+    route([(850,50),(900,120),(880,170)],'#73786d',5)
     a,b=p(640,200); s.d.ellipse((a-15,b-15,a+15,b+15),fill='#9fc6cc',outline='#f3eddc',width=4)
     for points in [[(640,200),(520,260),(560,350),(400,390),(440,480),(330,420)],
                    [(520,30),(440,100),(480,180),(360,230),(400,300),(285,280)]]:
@@ -184,14 +193,14 @@ def plan():
 
     # Legend stays separate from the map so labels never obscure a route.
     col, y = 1110, 230
-    s.text((col,y),'МЕСТА · РАССТАНОВКА',26,bold=True); y+=44
-    s.text((col,y),'НА ОЦЕНКУ',25,ORANGE,True); y+=60
+    s.text((col,y),'МЕСТА · ОБЩАЯ КОМПОЗИЦИЯ',25,bold=True); y+=44
+    s.text((col,y),'ПРИНЯТА · ЧИСЛА НА ОЦЕНКУ',23,ORANGE,True); y+=60
     entries=[
         ('1 · Рабочий посёлок','12–18 участков. В схеме показано 15. Место преступления; связь с лесопилкой.'),
         ('2 · Лесопилка','Производственный двор, цеха, штабеля и хозяйственные проходы.'),
         ('3 · Старый военный склад','Занят мародёрами. Здесь добывается ПЗРК боем или скрытно.'),
         ('4 · Старая ПВО','На горной террасе. Второй способ подготовки; высота +220 м — предложение.'),
-        ('5 · Санаторий','Главный и два жилых корпуса, парк и пляж. Недавно опустел, занят мародёрами. Террасы +40…80 м.'),
+        ('5 · Санаторий','Главный — 3 этажа, жилые — 4 / 4. У каждого своя парковка. Мародёры, парк и пляж. Террасы +40…80 м.'),
         ('6 · Арочная плотина','Предложение: высота около 260 м. Доступны гребень, галереи и подножие.'),
         ('7 · Нижнее ущелье','Предлагаемые дороги и технические подходы к подножию плотины.'),
     ]
@@ -201,7 +210,7 @@ def plan():
     y+=8
     s.line([(col,y),(col+62,y)],ORANGE,5,(15,10))
     s.text((col+78,y-15),'Северный обход',22); y+=36
-    s.text((col,y),'Его наличие не утверждено.',21,ORANGE); y+=46
+    s.text((col,y),'Принят. Точная тропа на оценку.',21,ORANGE); y+=46
     s.wrapped((col,y),'A–D: предложенные районы входа / выхода. Условия и точные точки не выбраны.',32,22,MUTED)
 
     # North and metric scale apply only to this proposed frame.
@@ -213,13 +222,13 @@ def plan():
     s.text((80,1800),'0',22); s.text((180,1800),'250',22); s.text((295,1800),'500 м',22)
     s.text((540,1766),'Полёт, три места падения и население — следующий слой.',23,ORANGE)
     s.text((540,1805),'Это схема связей. Рельеф и время пути ещё не проверены.',23,MUTED)
-    s.save('mission_helicopter_map_v01.png')
+    s.save('mission_helicopter_map_v02.png')
 
 
 def sections():
     s=Sheet((1800,1700))
     s.text((60,30),'ВЕРТОЛЁТ · ВЫСОТНЫЕ РАЗРЕЗЫ',43,bold=True)
-    s.text((60,92),'ПРЕДЛОЖЕНИЕ v01 · числа, расстояния и профили ещё не утверждены',25,ORANGE)
+    s.text((60,92),'СХЕМА v02 · этажность 3 / 4 / 4 принята · высоты и профили на оценку',25,ORANGE)
     s.text((60,155),'А · ВДОЛЬ ВОДОХРАНИЛИЩА И ЧЕРЕЗ ПЛОТИНУ',28,bold=True)
     water=410
     s.d.polygon([(90,water),(1190,water),(1190,726),(1060,696),(900,645),
@@ -251,21 +260,24 @@ def sections():
     s.d.polygon(ground+[(1740,1610),(70,1610)],fill='#b2c2a0')
     s.line(ground,'#768b6b',4)
     s.line([(70,1550),(350,1550)],'#55939a',8)
-    # Resort building silhouettes and garden levels, intentionally no fixed floor count.
-    for x,y,w,h in [(645,1460,120,78),(800,1430,68,55),(905,1424,70,55)]:
+    # Approved floor counts, schematic facades and unapproved metric dimensions.
+    for x,y,w,h,floors in [(645,1460,120,72,3),(800,1430,68,88,4),(905,1424,70,88,4)]:
         s.d.rectangle((x,y-h,x+w,y),fill='#e6ddc5',outline='#99886c',width=3)
         for xx in range(x+12,x+w-5,20):
-            for yy in range(y-h+12,y-5,20): s.d.rectangle((xx,yy,xx+7,yy+10),fill='#7e9389')
+            for floor in range(floors):
+                yy=y-h+9+floor*20
+                s.d.rectangle((xx,yy,xx+7,yy+10),fill='#7e9389')
     s.line([(355,1547),(400,1534),(410,1520),(455,1510),(465,1490),(520,1480),
             (535,1468),(590,1465),(610,1448),(640,1448)],'#efe1b8',7)
     s.line([(1020,1402),(1130,1385),(1100,1365),(1210,1340),(1190,1317),
             (1320,1280),(1290,1260),(1430,1240)],'#eee1b9',5)
     s.text((100,1570),'Пляж · 0 м',23,INK,True)
     s.text((480,1310),'Санаторий · +40…80 м',26,INK,True)
+    s.text((480,1270),'Главный — 3 этажа · жилые — 4 / 4',23,INK)
     s.text((1070,1450),'Горные маршруты · +150…350 м',24,INK,True)
     s.text((1370,1102),'Вершины · +450…700 м',23,INK,True)
     s.text((60,1630),'Схематические разрезы: горизонтальный масштаб условный. Они не задают конструкцию плотины.',22,MUTED)
-    s.save('mission_helicopter_sections_v01.png')
+    s.save('mission_helicopter_sections_v02.png')
 
 
 if __name__ == '__main__':
