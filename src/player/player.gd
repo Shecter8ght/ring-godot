@@ -264,6 +264,12 @@ var _allies_down: Dictionary = {}
 var _dive_t: float = -1.0
 var _dive_dir: Vector3 = Vector3.ZERO
 var _dive_cd: float = 0.0
+## Слой рендера своих рук и оружия у лица (CameraRig ставит его модели в руках).
+const VIEWMODEL_LAYER := 1 << 1
+## Свет только на свои руки (слой 2): от вспышки выстрела и отражённый от фонаря (Balance.VIEWMODEL_LIGHTS).
+## Создаются у своего игрока при первой надобности.
+var _hands_flash: OmniLight3D
+var _hands_bounce: OmniLight3D
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -1056,6 +1062,25 @@ func lean_vector() -> Vector3:
 	return right * lean * Balance.LEAN_OFFSET + Vector3.DOWN * absf(lean) * 0.08
 
 
+## Насколько можно наклониться в сторону side (−1 влево, 1 вправо), доля полного наклона 0–1: шар
+## Balance.LEAN_WALL_RADIUS ведётся от глаза без наклона туда же, куда lean_vector() при полном наклоне,
+## и останавливается у стены, двери или стекла.
+func lean_room(side: float) -> float:
+	var y := body_yaw()
+	var right := Vector3(-cos(y), 0.0, sin(y))
+	var motion := right * side * Balance.LEAN_OFFSET + Vector3.DOWN * 0.08
+	var ball := SphereShape3D.new()
+	ball.radius = Balance.LEAN_WALL_RADIUS
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = ball
+	q.transform = Transform3D(Basis.IDENTITY, global_position + Vector3.UP * (_eye_height() + _eye_dy))
+	q.motion = motion
+	q.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS
+	q.exclude = [get_rid()]
+	var frac: PackedFloat32Array = get_world_3d().direct_space_state.cast_motion(q)
+	return clampf(frac[0], 0.0, 1.0) if frac.size() > 0 else 1.0
+
+
 ## Направление взгляда в прицеле.
 func look_dir() -> Vector3:
 	return Vector3(sin(look_yaw) * cos(look_pitch), sin(look_pitch), cos(look_yaw) * cos(look_pitch))
@@ -1173,6 +1198,7 @@ func _process(delta: float) -> void:
 	_update_hand()
 	_tick_gear_look(delta)
 	_tick_rung_sound()
+	_tick_hands_bounce(delta)
 	# смерть видна у всех peer: у хоста — по сигналу, у клиентов — по синхронизированному alive
 	if not health.alive and _ragdoll == null and not _died_shown:
 		_die()
@@ -1255,6 +1281,9 @@ func _physics_process(delta: float) -> void:
 	# наклон: Q/E только когда камера в глазах; в изометрии Q/E крутят камеру
 	var lean_to := Input.get_axis("camera_left", "camera_right") if ads and not PauseMenu.shown else 0.0
 	lean = move_toward(lean, lean_to, Balance.LEAN_SPEED * delta)
+	# у стены — не дальше, чем пускает стена (подошёл к стене в наклоне — глаз отходит вместе с ней)
+	if absf(lean) > 0.001:
+		lean = signf(lean) * minf(absf(lean), lean_room(signf(lean)))
 	var down := is_downed()
 	if down:
 		# раненый лежит; X (держать) — сдаться
@@ -2735,8 +2764,19 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 	if flash > 0.05:
 		_muzzle.global_position = muzzle
 		_muzzle.light_energy = 3.0 * flash
+		# своя вспышка стоит у дула модели в руках — свои руки она не освещает (пересвет ствола в упор),
+		# им — свой свет; вспышка напарника рядом руки освещает как обычно
+		_muzzle.light_cull_mask = (0xFFFFF & ~VIEWMODEL_LAYER) if is_local() else 0xFFFFF
 		_muzzle.visible = true
 		get_tree().create_timer(0.05).timeout.connect(func() -> void: _muzzle.visible = false)
+		if is_local() and ads:
+			var hands := _hands_light("flash")
+			hands.global_position = hands_flash_at(muzzle)
+			hands.light_energy = float(Balance.VIEWMODEL_LIGHTS.flash.energy) * flash
+			hands.visible = true
+			get_tree().create_timer(0.05).timeout.connect(func() -> void:
+				if is_instance_valid(hands):
+					hands.visible = false)
 	Audio.play(sound, muzzle, db)
 	if mechanism_sound != "":
 		Audio.play(mechanism_sound, muzzle, db - 5.0)
@@ -2771,6 +2811,70 @@ func _muzzle_world() -> Vector3:
 	if _weapon_model:
 		return _weapon_model.to_global(_weapon_model.get_meta("muzzle", Vector3.ZERO))
 	return global_position + Vector3.UP * 1.3
+
+
+## Свет только на свои руки и оружие у лица (kind: flash — от вспышки, bounce — отражённый от фонаря):
+## сам по себе в мире (top_level), без теней и тумана; Settings.soften его не трогает.
+func _hands_light(kind: String) -> OmniLight3D:
+	var have: OmniLight3D = _hands_flash if kind == "flash" else _hands_bounce
+	if have:
+		return have
+	var cfg: Dictionary = Balance.VIEWMODEL_LIGHTS[kind]
+	var l := OmniLight3D.new()
+	l.name = "HandsFlash" if kind == "flash" else "HandsBounce"
+	l.set_meta("own", true)
+	l.set_meta("soft", true)
+	l.top_level = true
+	l.light_cull_mask = VIEWMODEL_LAYER
+	l.shadow_enabled = false
+	l.light_color = cfg.color
+	l.omni_range = float(cfg.range)
+	l.light_indirect_energy = 0.0
+	l.light_volumetric_fog_energy = 0.0
+	l.light_energy = 0.0
+	l.visible = false
+	add_child(l)
+	if kind == "flash":
+		_hands_flash = l
+	else:
+		_hands_bounce = l
+	return l
+
+
+## Где свет рук от вспышки: от дула к глазу и чуть выше (Balance.VIEWMODEL_LIGHTS.flash) — на верх оружия и руки.
+func hands_flash_at(muzzle: Vector3) -> Vector3:
+	var cfg: Dictionary = Balance.VIEWMODEL_LIGHTS.flash
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return muzzle
+	return muzzle.lerp(cam.global_position, float(cfg.toward_eye)) + cam.global_basis.y * float(cfg.up)
+
+
+## Отражённый свет фонаря на свои руки (Balance.VIEWMODEL_LIGHTS.bounce): фонарь светит вперёд, и руки за
+## ним видны только от того, что перед стволом, — у стены светло, в открытом поле почти ничего.
+func _tick_hands_bounce(delta: float) -> void:
+	var on := is_local() and ads and light_on and is_alive()
+	if not on and (_hands_bounce == null or not _hands_bounce.visible):
+		return
+	var cfg: Dictionary = Balance.VIEWMODEL_LIGHTS.bounce
+	var l := _hands_light("bounce")
+	var target := 0.0
+	var cam := get_viewport().get_camera_3d()
+	if on and cam:
+		var from := cam.global_position
+		var fwd := -cam.global_basis.z
+		var d := float(cfg.far_m)
+		var q := PhysicsRayQueryParameters3D.create(from, from + fwd * d,
+			Hitscan.LAYER_WORLD | Hitscan.LAYER_PLAYER | Hitscan.LAYER_MARAUDER | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS)
+		q.exclude = [get_rid()]
+		var hit := get_world_3d().direct_space_state.intersect_ray(q)
+		if not hit.is_empty():
+			d = from.distance_to(hit.position as Vector3)
+		target = float(cfg.energy) * minf(1.0, pow(float(cfg.near_m) / maxf(d, 0.01), 2.0))
+		l.global_position = from + fwd * minf(d * float(cfg.forward_k), float(cfg.max_m)) \
+			+ cam.global_basis * (cfg.offset as Vector3)
+	l.light_energy = lerpf(l.light_energy, target, 1.0 - exp(-delta / float(cfg.sec)))
+	l.visible = l.light_energy > 0.002
 
 
 ## Ушёл со сцены (конец рейда, убежище) — поправки гарнитуры снимаются; свой игрок, пока жив,

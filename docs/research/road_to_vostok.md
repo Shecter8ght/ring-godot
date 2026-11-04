@@ -319,8 +319,8 @@ bash tools/research/rtv/run.sh <папка вне репозитория>
 | № | Что | Где у нас | Чем проверить |
 |---|---|---|---|
 | 1 | Тени деревьев одним мешем «только тень», у полных мешей тень выключить | `district_scatter.gd`, деревья зоны 1 и «Проспекта» | `zone01_trees_perf`, `prospekt_plants_perf` |
-| 2 | Свет вспышки и фонаря раздельно: мир без слоя рук + маленький свет только на руки | `player.gd` (`Body/Muzzle`), `handheld_flashlight.gd` | `light_tour`, `veras_shots` |
-| 3 | Наклон не уходит в стену (боковой луч) | `player.gd` (`lean`, `lean_vector`) | новый случай в `camera_motion_test` |
+| 2 | ✅ 2026-11-04. Свет вспышки и фонаря раздельно: своя вспышка в мир не светит на руки, им — свой короткий свет; отражённый свет фонаря на руки по расстоянию до стены | `player.gd` (`_hands_light`, `_tick_hands_bounce`), `Balance.VIEWMODEL_LIGHTS` | `lean_light_test` |
+| 3 | ✅ 2026-11-04. Наклон не уходит в стену (шар 0,15 м вбок от глаза) | `player.gd` (`lean_room`), `Balance.LEAN_WALL_RADIUS` | `lean_light_test` |
 | 4 | «Трава издали» в рельефе за радиусом травы | `district_terrain.gdshader` | `grass_shots` |
 | 5 | Пресеты теней по качеству (дальность, каскады, тени мелочи маской слоёв) | `settings.gd`, `Balance` | `settings_test`, `perf_test` |
 | 6 | Прогрев облётом под экраном загрузки | `ImpactFx.warm_up`, загрузка рейда | `first_hit_test` |
