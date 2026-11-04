@@ -55,7 +55,7 @@ def build(ctx):
     for k in range(6):
         a = 2 * math.pi * k / 6 + math.pi / 12
         cy, cz = math.cos(a) * (BORE_R - 0.62), math.sin(a) * (BORE_R - 0.62)
-        g = cyl("_rf", BARREL_LEN - 24.0, BARREL_LEN + 1.0, 0.8, C, seg=12, cy=cy, cz=cz)
+        g = cyl("_rf", BARREL_LEN - 24.0, BARREL_LEN - 1.8, 0.8, C, seg=12, cy=cy, cz=cz)   # не до среза (Д18)
         boolean(b, g)
     from lib import finish_small
 

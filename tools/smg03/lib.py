@@ -185,7 +185,6 @@ def finish_small(o, w=0.5, seg=2, angle=30.0, exclude=None):
             grid_split(o)
             weighted(o)
             apply_all(o)
-            flat_panels(o)
             return o
         print("SMALL_FAIL", o.name, round(ww, 2), "nm", _nonmanifold(o))
     old = o.data
@@ -416,7 +415,8 @@ def lathe(name, prof, coll, mat=None, seg=64, cy=0.0, cz=BORE_Z, smooth=True, cl
         rings.append(ring)
     m = len(rings)
     pairs = list(zip(range(m - 1), range(1, m)))
-    if closed:
+    # оба конца профиля на оси — замыкать по оси не нужно (грани нулевой площади, сверка v04 Д23)
+    if closed and not (abs(prof[0][1]) < 1e-9 and abs(prof[-1][1]) < 1e-9):
         pairs.append((m - 1, 0))
     for i0, i1 in pairs:
         r0, r1 = rings[i0], rings[i1]
@@ -682,10 +682,11 @@ def renormal(o):
     apply_all(o)
 
 
-def grid_split(o, step=12.0, min_verts=24):
-    """Крупные многоугольники (боковины корпуса с вырезами-«дырками» после булевых) режутся невидимой сеткой плоскостей
-    X и Z через step мм: форма та же, многоугольники мелкие — Blender при показе бьёт их без перехлёста (иначе на ровном
-    борту чёрный клин, вырез затягивался — сверка v04). Режутся только грани больше min_verts вершин."""
+def grid_split(o, step=12.0, min_verts=12):
+    """Многоугольники после булевых (боковины с вырезами-«дырками», соединёнными с краем разрезом) Blender при показе
+    бьёт на треугольники с перехлёстом — вырез затягивается, на ровной грани чёрный клин или светлый конус (сверка v04
+    Д4, Н1). Режем их невидимой сеткой плоскостей X, Y, Z (шаг — не больше пятой части детали): форма та же, куски
+    мелкие. Новые рёбра — гладкие (иначе скругления выходили гранёными полосами — сверка v04b Н3)."""
     from mathutils import Vector as _V
     bm = bmesh.new(); bm.from_mesh(o.data)
     nm0 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
@@ -693,76 +694,33 @@ def grid_split(o, step=12.0, min_verts=24):
     if not big:
         bm.free()
         return
-    xs = [vv.co.x for f in big for vv in f.verts]; zs = [vv.co.z for f in big for vv in f.verts]
+    orig = set(bm.edges)
+    dims = [max(vv.co[k] for vv in bm.verts) - min(vv.co[k] for vv in bm.verts) for k in range(3)]
+    st = min(step * MM, max(dims) / 5.0)
     planes = []
-    x = math.floor(min(xs) / (step * MM)) * step * MM + step * MM / 2
-    while x < max(xs):
-        planes.append((_V((x, 0, 0)), _V((1, 0, 0)))); x += step * MM
-    z = math.floor(min(zs) / (step * MM)) * step * MM + step * MM / 2
-    while z < max(zs):
-        planes.append((_V((0, 0, z)), _V((0, 0, 1)))); z += step * MM
+    for k in range(3):
+        cs = [vv.co[k] for f in big for vv in f.verts]
+        c = math.floor(min(cs) / st) * st + st / 2
+        while c < max(cs):
+            co = _V((0, 0, 0)); no = _V((0, 0, 0))
+            co[k] = c; no[k] = 1.0
+            planes.append((co, no))
+            c += st
     for co, no in planes:
         faces = [f for f in bm.faces if len(f.verts) > min_verts]
         if not faces:
             break
         geom = list({e for f in faces for e in f.edges}) + faces
         bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-9, plane_co=co, plane_no=no)
+    for e in bm.edges:
+        if e not in orig:
+            e.smooth = True
     nm1 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
     if nm1 <= nm0:
         bm.to_mesh(o.data)
-        print("GRID_SPLIT", o.name, len(big))
     else:
         print("GRID_SPLIT_SKIP", o.name, nm0, nm1)
     bm.free()
-
-
-def flat_panels(o, min_area=30.0, ang=0.5):
-    """Плоские участки (соседние грани с нормалями в пределах ang°, площадь больше min_area мм²) — нормали углов ровно по
-    плоскости, остальные углы — как были (после взвешенных нормалей). Длинные треугольники от угла выреза иначе тянули
-    сглаженную нормаль через всю плоскость — «конус» затенения (сверка v04 Д4)."""
-    me = o.data
-    if len(me.polygons) < 8:
-        return
-    try:
-        cn = [tuple(c.vector) for c in me.corner_normals]
-    except AttributeError:
-        return
-    polys = me.polygons
-    nrm = [p.normal.copy() for p in polys]
-    area = [p.area * 1e6 for p in polys]
-    cos_t = math.cos(math.radians(ang))
-    # смежность граней через рёбра
-    edge_faces = {}
-    for p in polys:
-        for ek in p.edge_keys:
-            edge_faces.setdefault(ek, []).append(p.index)
-    seen = [False] * len(polys)
-    pn = [None] * len(polys)                 # нормаль участка для граней плоских участков
-    tiny = [a < 0.02 for a in area]          # почти нулевые грани (щепки после булевых): их нормаль ненадёжна
-    for i in range(len(polys)):
-        if seen[i] or tiny[i]:
-            continue
-        seen[i] = True
-        grp = [i]; st = [i]; tot = 0.0
-        while st:
-            f = st.pop(); tot += area[f]
-            for ek in polys[f].edge_keys:
-                for g in edge_faces[ek]:
-                    if not seen[g] and (tiny[g] or nrm[g].dot(nrm[i]) > cos_t):
-                        seen[g] = True; grp.append(g); st.append(g)
-        if tot > min_area:
-            acc = nrm[i] * 0.0
-            for f in grp:
-                acc += nrm[f] * area[f]
-            acc.normalize()
-            for f in grp:
-                pn[f] = tuple(acc)
-    out = list(cn)
-    for p in polys:
-        if pn[p.index] is not None:
-            for li in p.loop_indices:
-                out[li] = pn[p.index]
-    me.normals_split_custom_set(out)
 
 
 def weighted(o):

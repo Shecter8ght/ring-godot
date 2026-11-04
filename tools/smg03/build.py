@@ -73,10 +73,9 @@ def drop_wire():
             bm.to_mesh(o.data)
         bm.free()
         if changed and o.get("_fin"):
-            # перенос через bmesh сбрасывает свои нормали — взвешенные и ровные на плоскостях заново
+            # перенос через bmesh сбрасывает свои нормали — взвешенные заново
             lib.weighted(o)
             lib.apply_all(o)
-            lib.flat_panels(o)
 
 
 def main():
