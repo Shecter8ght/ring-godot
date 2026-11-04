@@ -73,12 +73,10 @@ for bone in arm.data.bones:
         bpy.context.view_layer.update()
 pose_error = max((arm.pose.bones[n].matrix.translation - m.translation).length for n, m in desired.items())
 assert pose_error < .0001, ('pose transfer', pose_error)
-action = bpy.data.actions.new('Phone_Grip_starter — кадр 1')
-arm.animation_data_create(); arm.animation_data.action = action
+# A static editing file must not have keys that overwrite a user's Ctrl+S pose on reopening.
+arm.animation_data_clear()
 for bone in arm.pose.bones:
     bone.rotation_mode = 'QUATERNION'
-    for prop in ['location', 'rotation_quaternion', 'scale']:
-        bone.keyframe_insert(data_path=prop, frame=1, group=bone.name)
 for bone in arm.data.bones:
     bone.hide = 'Right' not in bone.name
 correction = convert @ Matrix(pose['phone']) @ C.inverted()
@@ -125,6 +123,7 @@ scene.camera = inspection
 scene.render.engine = 'CYCLES'; scene.cycles.samples = 24; scene.cycles.use_denoising = True
 scene.render.resolution_x = 1280; scene.render.resolution_y = 900; scene.render.resolution_percentage = 100
 scene.frame_start = 1; scene.frame_end = 1; scene.frame_set(1)
+scene.tool_settings.use_keyframe_insert_auto = False
 instructions = '''Телефон в правой руке — стартовая поза из игры, кадр 1.
 Выбран Phone_Arms_Rig, Pose Mode. Правьте кости RightHand и RightHandThumb/Index/Middle/Ring/Pinky.
 Остальные кости скрыты для удобства: Alt+H в Pose Mode вернёт их.
@@ -133,12 +132,13 @@ instructions = '''Телефон в правой руке — стартовая
 Сетки телефона защищены от случайного выбора, редактировать их для хвата не нужно.
 Камеры: 01 — глаз игрока, 02 — осмотр, 03 — пальцы сзади.
 Экран — неподвижный снимок интерфейса для позирования, не живая камера Blender.
-После правки выделите изменённые кости, I → Location/Rotation/Scale на кадре 1 и сохраните копию.
+После правки достаточно Ctrl+S. В этой сцене нет анимации, которая сбрасывает позу.
 Не применять Pose as Rest Pose, не менять имена костей, веса и rest-геометрию.
 Изменения Blender не синхронизируются с Godot автоматически: готовый .blend надо перенести в игру.
 Это стартовая поза, окончательный хват владельцем не принят.
 '''
 bpy.data.texts.new('00 — КАК ПРАВИТЬ ХВАТ').write(instructions)
+bpy.data.texts.new('RING_PHONE_RETARGET').write(json.dumps(pose, ensure_ascii=False))
 arm['Инструкция'] = 'Pose Mode, кадр 1; текст 00 — КАК ПРАВИТЬ ХВАТ'
 scene['Источник'] = 'Точная стартовая поза Phone из Godot; телефон game_v01, существующие veras_arms'
 for image in bpy.data.images:

@@ -41,6 +41,7 @@ func _ready() -> void:
 	player.inventory.items = [ItemDb.make(PhoneGear.ID, 1)]
 	await benchmark("stowed")
 	Phone.set_active(true)
+	Phone.frame_site(level.find_child("Quest_car_belt_photo_engine", true, false) as QuestSite)
 	await frames(45)
 	await benchmark("live camera")
 	await shot("camera")

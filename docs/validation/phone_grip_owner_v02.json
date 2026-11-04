@@ -1,0 +1,144 @@
+{
+  "date": "2026-11-04",
+  "status": "Owner saved pose recovered and integrated; final visual acceptance not asserted",
+  "recovery": {
+    "source": "E:\\Models Blender\\новые руки\\Phone_Grip_starter_v01.blend",
+    "source_sha256": "6250ffc6ac2458893d27e2dcac36e87b9ee01512084477a9f6b2b84375480c1b",
+    "output": "E:\\Models Blender\\новые руки\\Phone_Grip_owner_v02.blend",
+    "sha256": "49a9c659437bd912c56098e74e130b66268f8d72ff50d3bb7620fb3624bb219b",
+    "method": "Append raw saved object pose channels; detach old Action before scene linking",
+    "active_animation": false,
+    "reopen_matrix_error": 0.0,
+    "frame_change_error": 0.0,
+    "source_unchanged": true,
+    "packed_images": 7
+  },
+  "retarget": {
+    "source": "E:\\Models Blender\\новые руки\\Phone_Grip_owner_v02.blend",
+    "sha256": "49a9c659437bd912c56098e74e130b66268f8d72ff50d3bb7620fb3624bb219b",
+    "snapshot": "E:\\Games\\RING-godot\\_asset_src\\quest_phone\\grip\\owner_49a9c659437b.blend",
+    "frame": 1,
+    "bones": 39,
+    "rest_error": 0.0,
+    "alignment_error_m": 5.405651672845201e-07,
+    "changed_bones": [
+      {
+        "bone": "mixamorig_RightForeArm",
+        "position_mm": 208.0128645619194,
+        "rotation_deg": 84.07073577655761
+      },
+      {
+        "bone": "mixamorig_RightHand",
+        "position_mm": 49.52724719122518,
+        "rotation_deg": 40.010664176760656
+      },
+      {
+        "bone": "mixamorig_RightHandIndex1",
+        "position_mm": 106.17435857783326,
+        "rotation_deg": 58.719317521983726
+      },
+      {
+        "bone": "mixamorig_RightHandIndex2",
+        "position_mm": 120.3035803422633,
+        "rotation_deg": 48.55406286609854
+      },
+      {
+        "bone": "mixamorig_RightHandIndex3",
+        "position_mm": 113.69375324247395,
+        "rotation_deg": 92.77318908109757
+      },
+      {
+        "bone": "mixamorig_RightHandMiddle1",
+        "position_mm": 114.43949148560625,
+        "rotation_deg": 64.64969392827331
+      },
+      {
+        "bone": "mixamorig_RightHandMiddle2",
+        "position_mm": 137.55039653283362,
+        "rotation_deg": 65.29356584341775
+      },
+      {
+        "bone": "mixamorig_RightHandMiddle3",
+        "position_mm": 141.97774566696756,
+        "rotation_deg": 78.26076194495698
+      },
+      {
+        "bone": "mixamorig_RightHandPinky1",
+        "position_mm": 120.34565065924617,
+        "rotation_deg": 24.690336425010496
+      },
+      {
+        "bone": "mixamorig_RightHandPinky2",
+        "position_mm": 125.98597529272982,
+        "rotation_deg": 16.735524164756587
+      },
+      {
+        "bone": "mixamorig_RightHandPinky3",
+        "position_mm": 127.30929750239095,
+        "rotation_deg": 84.89791949637033
+      },
+      {
+        "bone": "mixamorig_RightHandRing1",
+        "position_mm": 119.80603124691989,
+        "rotation_deg": 47.84888681542974
+      },
+      {
+        "bone": "mixamorig_RightHandRing2",
+        "position_mm": 136.53231323843858,
+        "rotation_deg": 31.935140275757824
+      },
+      {
+        "bone": "mixamorig_RightHandRing3",
+        "position_mm": 142.04487875664577,
+        "rotation_deg": 65.24862638640256
+      },
+      {
+        "bone": "mixamorig_RightHandThumb1",
+        "position_mm": 62.03340746923705,
+        "rotation_deg": 90.8115350731789
+      },
+      {
+        "bone": "mixamorig_RightHandThumb2",
+        "position_mm": 101.57500388357994,
+        "rotation_deg": 81.95392719145292
+      },
+      {
+        "bone": "mixamorig_RightHandThumb3",
+        "position_mm": 99.89116933420127,
+        "rotation_deg": 134.93737114939933
+      }
+    ],
+    "right_hand_global_scale": [
+      0.7999998331069946,
+      0.8000001907348633,
+      0.8000002503395081
+    ]
+  },
+  "runtime": "39 matrices relative to phone; 0.8 scale already included; no base finger CCD over owner pose",
+  "tests": {
+    "reopen_static_pose": "passed, zero matrix error",
+    "change_frame": "passed, zero matrix error",
+    "functional": "passed",
+    "states": [
+      "held",
+      "after shutter",
+      "reading",
+      "re-equipped"
+    ],
+    "matrix_tolerance_m": 1e-05,
+    "double_scale_guard": "0.8, not 0.64",
+    "live_image_capture": "passed",
+    "zoom": "passed",
+    "physical_screen_click": "passed",
+    "lab": "passed",
+    "real_mission_photo_packet": "ready"
+  },
+  "performance": "Latest screenshot run shared the GPU with functional test; timings excluded as not representative.",
+  "game_pose_sha256": "dbfbacd098c324c1478f9e7ad474131dbf4f5dd7eef4969629dea18d58a723b5",
+  "screenshots": [
+    "docs/screens/phone_mission_camera.png",
+    "docs/screens/phone_mission_modem.png",
+    "docs/screens/quest_phone_fps_camera.png",
+    "docs/screens/phone_grip_owner_inspect.png"
+  ]
+}

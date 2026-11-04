@@ -14,6 +14,22 @@ func count_phone(list: Array) -> int:
 func frames(n: int) -> void:
 	for i: int in range(n): await get_tree().process_frame
 
+func authored_pose(title: String) -> void:
+	check(not Phone._authored_pose.is_empty(), title + " uses Blender pose")
+	var sk := Phone.arms.skeleton
+	var frame := Phone.model.global_transform.affine_inverse() * sk.global_transform
+	var worst_position: float = 0.0
+	var worst_basis: float = 0.0
+	for entry: Dictionary in Phone._authored_pose.get("runtime_bones", []):
+		var actual := frame * sk.get_bone_global_pose(int(entry.bone))
+		var expected: Transform3D = entry.transform
+		worst_position = maxf(worst_position, actual.origin.distance_to(expected.origin))
+		for axis: int in range(3): worst_basis = maxf(worst_basis, actual.basis[axis].distance_to(expected.basis[axis]))
+	check(worst_position < 0.00001 and worst_basis < 0.00001, title + " preserves owner bone transforms")
+	var hand := sk.find_bone("mixamorig_RightHand")
+	var scale := sk.get_bone_global_pose(hand).basis.get_scale()
+	check(scale.distance_to(Vector3.ONE * 0.8) < 0.00001, title + " keeps 80 percent hands without double scaling")
+
 func _ready() -> void:
 	Profile.use_file("user://personal_phone_test.json", true)
 	Profile.ensure()
@@ -83,7 +99,8 @@ func _ready() -> void:
 	check(Phone.finder.world_3d == rig._ads_cam.get_world_3d(), "viewfinder shares actual world")
 	check((Phone.lens.cull_mask & 2) == 0, "capture excludes phone and arms")
 	check(Phone.model.screen.material_override.albedo_texture == Phone.screen_viewport.get_texture(), "physical screen uses independent UI viewport")
-	check(Phone.arms.visible and Phone.arms.max_grip_error < 0.01, "right-hand grip solver reaches device")
+	check(Phone.arms.visible and Phone.arms.max_grip_error < 0.01, "right hand is present at device")
+	authored_pose("held")
 	await shot("camera")
 	var shot_before := me.last_shot_ms
 	Input.action_press("fire"); await frames(5); Input.action_release("fire")
@@ -92,6 +109,7 @@ func _ready() -> void:
 	await Phone.capture()
 	await frames(4)
 	check(Phone._photos.size() == before + 1, "real viewfinder capture saved")
+	authored_pose("after shutter")
 	Phone._set_zoom(2.0)
 	check(Phone.lens.fov < 35, "2x changes capture lens FOV")
 	# Use an actual projected mouse click on the physical display's gallery tab.
@@ -101,6 +119,7 @@ func _ready() -> void:
 	check(Phone.pointer, "middle button enters display control")
 	toggle = toggle.duplicate(); toggle.pressed = false; Input.parse_input_event(toggle)
 	await frames(30)
+	authored_pose("reading")
 	var display: MeshInstance3D = Phone.model.screen
 	var box := display.get_aabb()
 	var point := Vector3(box.position.x + box.size.x * 0.375, box.end.y - box.size.y * 0.95, box.position.z)
@@ -121,6 +140,7 @@ func _ready() -> void:
 	check(not Phone.active and not is_instance_valid(Phone.holder), "stow frees extra viewport/model")
 	Phone.set_active(true); await frames(6)
 	check(Phone._photos.size() == before + 1, "gallery survives stow/reopen")
+	authored_pose("re-equipped")
 	Phone.close()
 	print("PHONE FUNCTIONAL failures ", failures)
 	get_tree().quit(1 if failures else 0)

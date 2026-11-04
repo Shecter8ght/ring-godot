@@ -23,6 +23,7 @@ var _hint: Label
 var _shutter_t: float = 0.0
 var _release_guard: bool = false
 var _grip_data: Dictionary = {}
+var _authored_pose: Dictionary = {}
 var thumb_error: float = 0.0
 var preview: bool = false
 
@@ -81,9 +82,17 @@ func _process(delta: float) -> void:
 	if is_instance_valid(rig._weapon_label): rig._weapon_label.visible = false
 	if is_instance_valid(actor._weapon_model): actor._weapon_model.visible = false
 	actor.aiming = false
-	var reading := pointer or Input.is_action_pressed("aim")
+	var photo_site := _site.get_ref() as QuestSite if _site else null
+	var framing := is_instance_valid(photo_site) and photo_site.active
+	var reading := pointer or Input.is_action_pressed("aim") or framing
 	var target := Vector3(0.015, -0.01, -0.24) if reading else Vector3(0.10, -0.065, -0.36)
+	var rotation := Quaternion.IDENTITY
+	if not _authored_pose.is_empty() and not reading:
+		var authored: Transform3D = _authored_pose.runtime_phone
+		# Keep the established FPS distance so the whole device stays inside the view.
+		rotation = authored.basis.orthonormalized().get_rotation_quaternion()
 	holder.position = holder.position.lerp(target, 1.0 - exp(-delta * 14))
+	holder.quaternion = holder.quaternion.slerp(rotation, 1.0 - exp(-delta * 14))
 	# The second camera is at the actual rear lens; it shares the world's 3D state.
 	var marker := model.find_child("CameraLensMarker", true, false) as Node3D
 	lens.global_transform = Transform3D(model.global_basis.orthonormalized(), marker.global_position)
@@ -103,6 +112,9 @@ func _process(delta: float) -> void:
 		var original := arms.grip_profiles
 		var profiles := original if editing else HandGripProfiles.active()
 		var value := HandGripProfiles.values(profiles, "@phone", "Right")
+		if not _authored_pose.is_empty():
+			PhoneHandGrip.apply_pose(arms, model, _authored_pose, value)
+			return
 		var wrists: Dictionary = {}
 		HandGripProfiles.put(wrists, "@phone", "Right", {"position": value.position, "rotation": value.rotation})
 		arms.grip_preview = true; arms.grip_profiles = wrists
@@ -231,6 +243,7 @@ func _build_grip() -> void:
 	model.set_meta("hand_grip_keys", {"Right": "@phone", "Left": "@phone"})
 	arms = FirstPersonArms.new(); arms.name = "PhoneArms"; _camera.add_child(arms)
 	arms.bind_weapon(model)
+	_authored_pose = PhoneHandGrip.load_pose("res://data/phone_grip_pose.json", arms.skeleton)
 	# Own the arms through the holder so closing/reopening cannot leave orphan sleeves.
 	arms.reparent(holder, true)
 
