@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/mosin_hands_shots.gd" id="1_mosin"]
+
+[node name="MosinHandsShots" type="Node"]
+script = ExtResource("1_mosin")

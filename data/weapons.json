@@ -585,6 +585,62 @@
      ]
     }
    }
+  },
+  "mosin_pu": {
+   "anim": "bolt",
+   "action": {
+    "kind": "bolt",
+    "carrier": "Bolt",
+    "bolt": "Bolt_Rotor",
+    "cocking": "Bolt_Cocking",
+    "interrupter": "Interrupter",
+    "travel": 0.11,
+    "turn_deg": -90.0,
+    "cock": 0.0095,
+    "interrupter_in": 0.0028,
+    "interrupter_from": 0.0564,
+    "cycle_sec": [
+     0.14,
+     0.12,
+     0.16,
+     0.15,
+     0.12,
+     0.14
+    ],
+    "knob": [
+     -0.03,
+     0.01032,
+     0.155
+    ],
+    "hand_follow": 0.35
+   },
+   "sockets": {
+    "muzzle": {
+     "pos": [
+      -0.0,
+      0.05832,
+      0.9688
+     ],
+     "bore_r": 0.00381
+    }
+   },
+   "pivots": {
+    "Bolt": [
+     -0.0,
+     0.05832,
+     0.24
+    ],
+    "Trigger": [
+     -0.0,
+     0.00632,
+     0.088
+    ],
+    "RearSight_Leaf": [
+     -0.0,
+     0.07512,
+     0.3975
+    ]
+   }
   }
  },
  "weapons": {
@@ -2097,6 +2153,71 @@
     "length": 0.718
    },
    "flavor": "Знакомая платформа без сюрпризов: планки под любой обвес, а песочное покрытие держит свою историю на кромках."
+  },
+  "wpn_sr_03": {
+   "name": "Мосин 1891/30 ПУ",
+   "cat": "weapon",
+   "size": [
+    5,
+    2
+   ],
+   "value": 55000,
+   "stack": 1,
+   "weight": 4.5,
+   "tier": 2,
+   "rarity": "uncommon",
+   "tags": [
+    "MILITARY",
+    "SCAV",
+    "PRECISION"
+   ],
+   "code": "91/30 ПУ",
+   "desc": "Снайперская трёхлинейка с прицелом ПУ 3,5× на боковом кронштейне: 7.62×54R, постоянный магазин на пять патронов, продольно-скользящий затвор. Старая, тяжёлая и точная; ложа и металл видели не одну войну.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SNIPER",
+    "caliber": "762x54r",
+    "model": "mosin_pu",
+    "scale": 1.0,
+    "length": 1.232,
+    "stats": {
+     "spread": 1.5,
+     "ads_spread": 0.06,
+     "ads_fov": 40,
+     "kick": 0.075,
+     "kick_h": 0.016,
+     "kick_bias": 0.1,
+     "recover": 0.7,
+     "shake": 0.3,
+     "ergo": 30,
+     "rpm": 35,
+     "auto": false,
+     "reload": 3.4,
+     "range": 190,
+     "noise": 120,
+     "reliability": 0.99,
+     "wear": 0.02
+    },
+    "mounts": {},
+    "internal_mag": 5,
+    "sound": "shot_bolt",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "bolt",
+    "integral": {
+     "zoom": 3.5
+    },
+    "asset": "res://assets/models/weapons/mosin_pu/mosin_pu.glb",
+    "asset_kind": "static",
+    "viewmodel": {
+     "ads_z": 0.12,
+     "scope": {
+      "ocular_r": 0.0118,
+      "eye_relief": 0.072,
+      "reticle": "res://assets/models/weapons/mosin_pu/mosin_pu_reticle.png"
+     }
+    }
+   },
+   "flavor": "Пять патронов, один выдох и долгий ход затвора: этой винтовке не нужно спешить."
   }
  },
  "ammo": {
@@ -6432,6 +6553,21 @@
    ],
    "sight": "primary",
    "mag": "mag_556_30_gran"
+  },
+  "MOSIN_PU_BASE": {
+   "weapon": "wpn_sr_03",
+   "mods": {},
+   "ammo": [
+    [
+     "ammo_76254_std",
+     1
+    ]
+   ],
+   "dur": [
+    45,
+    90
+   ],
+   "sight": "primary"
   }
  },
  "sandbox": [

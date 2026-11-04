@@ -41,7 +41,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, _dur: float =
 		scale = float(w.get("scale", 1.0))
 	var static_asset: bool = String(w.get("asset_kind", "")) == "static"
 	var imported: Node3D = null if static_asset else _asset(w, maxi(lod, 0))
-	if static_asset and _static_asset(w, root, lod < 0):
+	if static_asset and _static_asset(w, root, lod < 0, lod):
 		root.set_meta("asset_loaded", true)
 	elif imported:
 		root.free()
@@ -121,7 +121,7 @@ static func build(id: String, mods: Dictionary = {}, lod: int = 0, _dur: float =
 ## Статичный ассет оружия (автомат из Blender, tools/export_veras54.py): модель уже в осях игры, начало —
 ## пистолетная рукоятка. Метки Muzzle / SightRear дают дульный срез и линию прицеливания; деталь
 ## MuzzleDevice помечена "muzzle_device" (обвес на резьбу её прячет). Нет файла — false (процедурная основа).
-static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false) -> bool:
+static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false, lod: int = 0) -> bool:
 	var path: String = String(weapon.get("asset", ""))
 	var detail_path: String = String(weapon.get("asset_detail", ""))
 	if detail and detail_path != "" and ResourceLoader.exists(detail_path, "PackedScene"):
@@ -132,8 +132,10 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 	if model == null:
 		return false
 	model.name = "Model"
+	_static_lod(model, lod)
 	root.add_child(model)
 	apply_markers(root, model, float((weapon.get("viewmodel", {}) as Dictionary).get("ads_z", 0.3)))
+	_integral_scope(root, model, (weapon.get("viewmodel", {}) as Dictionary).get("scope", {}))
 	# магазин с патронами — отдельная деталь экспорта: вынут — прячется, другой — заменяется
 	for node: Node in model.find_children("Magazine*", "MeshInstance3D", true, false):
 		node.set_meta("part", "mag")
@@ -151,6 +153,12 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 			var bolt: Node3D = model.find_child(String(action.get("bolt", "")), true, false) as Node3D
 			if bolt:
 				bolt.set_meta("rest", bolt.transform)
+			# у продольно-скользящего затвора (action.kind = "bolt", Мосин) ещё курок и отсечка-отражатель
+			for extra: String in ["cocking", "interrupter"]:
+				var extra_name := String(action.get(extra, ""))
+				var extra_node: Node3D = model.find_child(extra_name, true, false) as Node3D if extra_name != "" else null
+				if extra_node:
+					extra_node.set_meta("rest", extra_node.transform)
 			# пылезащитная шторка: закрыта в покое, откидывается на cover_deg вокруг своей оси (+Z модели — ось шарнира)
 			var cover_name := String(action.get("cover", ""))
 			var cover: Node3D = model.find_child(cover_name, true, false) as Node3D if cover_name != "" else null
@@ -169,6 +177,42 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 					tuned.metallic_specular = float(spec[mat.resource_name])
 					mi.set_surface_override_material(i, tuned)
 	return true
+
+
+## Дальняя ветка статичной модели («<Модель>_LOD1» рядом с деталями, Мосин ПУ): вблизи (lod 0, конструктор −1) её нет;
+## издали (lod ≥ 1: третье лицо, мародёры, оружие за спиной) видна она, сетки основной спрятаны — метки и узлы
+## затвора остаются на местах.
+static func _static_lod(model: Node3D, lod: int) -> void:
+	var low: Node3D = _lod_branch(model)
+	if low == null:
+		return
+	if lod < 1:
+		low.get_parent().remove_child(low)
+		low.free()
+		return
+	for raw: Node in model.find_children("*", "MeshInstance3D", true, false):
+		if not low.is_ancestor_of(raw):
+			(raw as MeshInstance3D).visible = false
+
+
+## Встроенная оптика модели (viewmodel.scope; Мосин: ПУ — часть ассета): метка ScopeEye — центр заднего торца окуляра;
+## линия прицеливания — ось трубы (у ПУ она левее оси ствола), в окуляр ложится картинка оптики (CameraRig), вынос
+## глаза — eye_relief, сетка — своя текстура (как у оптики-обвеса, WeaponMods._model_part).
+static func _integral_scope(root: Node3D, model: Node3D, scope: Dictionary) -> void:
+	if scope.is_empty():
+		return
+	var eye_mark: Node3D = model.find_child("ScopeEye", true, false) as Node3D
+	if eye_mark == null:
+		return
+	var ocular: Vector3 = between(root, eye_mark).origin
+	root.set_meta("scoped", true)
+	root.set_meta("ocular", ocular)
+	root.set_meta("ocular_r", float(scope.get("ocular_r", 0.0118)))
+	root.set_meta("sight_h", ocular.y)
+	root.set_meta("sight_x", ocular.x)
+	root.set_meta("ads_z", maxf(float(scope.get("eye_relief", 0.072)) - ocular.z, Balance.SCOPE_ADS_Z_MIN))
+	if scope.has("reticle"):
+		root.set_meta("reticle_tex", String(scope.reticle))
 
 
 ## Метки модели (Muzzle, SightRear, MuzzleDevice) → meta основы в осях meta_root.

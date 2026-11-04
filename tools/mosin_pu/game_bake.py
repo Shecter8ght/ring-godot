@@ -23,6 +23,8 @@ from mathutils import Matrix
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/mosin_pu_game'
+sys.path.insert(0, str(ROOT / 'tools'))
+from asset_kit import uv as kit_uv  # noqa: E402
 ap = argparse.ArgumentParser()
 ap.add_argument('kind', choices=('rifle', 'mount', 'scope', 'ammo', 'ao'))
 ap.add_argument('--variant', choices=('fp', 'detail'), default='fp')
@@ -84,6 +86,9 @@ for name, o in zip(asked, dst.objects):
     lp[name] = o
     lp_names.add(o.name)
 bpy.context.view_layer.update()
+# копии внахлёст (uv_stack: одинаковые винты, кольца — укладка asset_kit) на время запекания уходят за квадрат UV:
+# печётся только исходный остров, копия берёт его пиксели
+print('MOSIN_BAKE stacked copies shifted, faces', kit_uv.shift_stack_copies(list(lp.values()), 1.0), flush=True)
 for o in lp.values():
     o.hide_render = False
     if args.kind != 'ao':

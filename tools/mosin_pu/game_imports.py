@@ -21,6 +21,13 @@ def setp(text: str, key: str, val: str) -> str:
 for f in sorted(D.glob('*.png.import')):
     base = f.name[:-len('.import')]
     t = f.read_text(encoding='utf-8')
+    if base.endswith('_reticle.png'):
+        # сетка ПУ в окуляре (tools/mosin_pu/reticle.py): тонкие нити — без сжатия, с mip-уровнями (как у ВСС-М)
+        t = setp(t, 'compress/mode', '0')
+        t = setp(t, 'mipmaps/generate', 'true')
+        f.write_text(t, encoding='utf-8')
+        print('MOSIN_IMPORTS', f.name)
+        continue
     t = setp(t, 'compress/mode', '2')
     t = setp(t, 'mipmaps/generate', 'true')
     t = setp(t, 'detect_3d/compress_to', '0')

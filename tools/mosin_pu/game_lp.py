@@ -1,5 +1,11 @@
 """Мосин 1891/30 ПУ (винтовка v08 + крепление + прицел) → игровая сетка вида от первого лица.
 
+fp (с 2026-11-04): детали — не упрощение high-poly, а ретопология той же процедурной сборкой (game_retopo.py →
+_asset_src/mosin_pu_game/lr/Mosin_LR_*.blend: четырёхугольные сетки без лишних петель, без клейм и фасок). Развёртка —
+швы по острым рёбрам и дорезка до «дисков» по скрытому и нижнему (retopo_lib.auto_seams), минимальное растяжение,
+укладка общим модулем tools/asset_kit/uv.py (плотность по видимости и глазу, внахлёст одинакового мелкого, группы
+разрыва, привязка к пикселю). Старый путь (упрощение Decimate, Smart UV) остаётся у варианта detail.
+
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_lp.py -- [fp|detail]
   fp     — основная игровая модель: ~20 000 треугольников на винтовку с креплением и прицелом (владелец, 2026-10-17:
            «low poly в 15000 … главное, чтобы геометрия/текстуры не поехали», 2026-10-18 — «пускай будет двадцать
@@ -34,7 +40,10 @@ from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import build_rifle as R  # noqa: E402  (ход затвора и размеры коробки — одно место)
+import game_uv as GU  # noqa: E402
+import numpy as np  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/mosin_pu_game'
@@ -49,6 +58,8 @@ VARIANT = (sys.argv[sys.argv.index('--') + 1:] + ['fp'])[0] if '--' in sys.argv 
 assert VARIANT in ('fp', 'detail'), VARIANT
 OUT = WORK / VARIANT / 'lp'
 OUT.mkdir(parents=True, exist_ok=True)
+LR = WORK / 'lr'                                # ретопология fp (game_retopo.py)
+USE_LR = VARIANT == 'fp'
 SHARP = math.radians(60)
 
 # Деталь игры → (атлас, узел-владелец, исходные объекты). None в списке Frame_Steel — «всё остальное стальное».
@@ -460,7 +471,9 @@ def deviation(lp, hp_bvh) -> tuple[float, float]:
     """Насколько игровая поверхность ушла от high-poly: (снаружи — high-poly глубже игровой, внутри), мм, 99,7 %."""
     outside, inside = [], []
     me = lp.data
-    pts = [v.co.copy() for v in me.vertices] + [p.center.copy() for p in me.polygons]
+    me.calc_loop_triangles()
+    # центры треугольников, не граней: центр вогнутого многоугольника (обод вокруг полости) лежит в пустоте
+    pts = [v.co.copy() for v in me.vertices] + [t.center.copy() for t in me.loop_triangles]
     for p in pts:
         loc, nrm, _i, dist = hp_bvh.find_nearest(p)
         if loc is None:
@@ -528,12 +541,15 @@ def visible_faces(o, m, bvh) -> tuple:
     for pl in me.polygons:
         n = (nm @ pl.normal).normalized()
         c = m @ pl.center
+        # старт луча — над всеми вершинами грани: у неплоского четырёхугольника (крупные грани ложи после ретопологии)
+        # центр лежит под его же треугольниками, луч сразу упирался в свою грань, и видимая грань снималась как «прижатая»
+        lift = max(0.0, max(((m @ me.vertices[i].co) - c).dot(n) for i in pl.vertices)) + 1e-5
         starts = [c] + [c + ((m @ me.vertices[i].co) - c) * 0.85 for i in pl.vertices]
         dirs = [d for d in FIB if d.dot(n) > 0.05]
         dist, seen = [], False
         for st in starts:
             for d in dirs:
-                hit = bvh.ray_cast(st + n * 1e-5, d, 2.0)
+                hit = bvh.ray_cast(st + n * lift, d, 2.0)
                 if hit[0] is None:
                     seen = True
                     break
@@ -760,6 +776,39 @@ def unwrap(objs, margin, hidden, eye: bool = True, roomy=None):
         harden_on_seams(objs)
 
 
+def lr_copy(n: str, dg, name: str):
+    """Деталь ретопологии в мировых координатах (как evaluated_copy у high-poly); без своих нормалей и цветов."""
+    src = bpy.data.objects.get('LR_' + n)
+    if src is None:
+        raise SystemExit(f'нет детали ретопологии LR_{n} — запустить game_retopo.py')
+    c = evaluated_copy(src, dg, name)
+    me = c.data
+    for uv in list(me.uv_layers):
+        me.uv_layers.remove(uv)
+    for a in [a.name for a in me.color_attributes]:
+        me.color_attributes.remove(me.color_attributes[a])
+    for a in ('sharp_edge', 'sharp_face', 'custom_normal'):
+        if a in me.attributes:
+            me.attributes.remove(me.attributes[a])
+    # многоугольники (крышки, края вырезов) остаются: запекание Cycles и экспорт glTF берут одно разбиение —
+    # loop_triangles сетки; заранее разбитые давали изломы-швы и худшую развёртку (дерево 72 → 54 %)
+    return c
+
+
+def unwrap_lr(objs, size, hidden, roomy, eye: bool = True) -> dict:
+    """Классы видимости граней — в атрибут lp_class (его читает и повторная развёртка game_uv.py без лучей), развёртка —
+    game_uv.unwrap: швы до дисков, SLIM, выпрямление решёток, укладка модулем kit."""
+    for o in objs:
+        me = o.data
+        raw = np.zeros(len(me.polygons), np.int32)
+        room = (roomy or {}).get(o.name, set())
+        for i in hidden.get(o.name, set()):
+            raw[i] = 1 if i in room else 2
+        at = me.attributes.get(GU.CLASS_ATTR) or me.attributes.new(GU.CLASS_ATTR, 'INT', 'FACE')
+        at.data.foreach_set('value', raw)
+    return GU.unwrap(objs, size, eye)
+
+
 def texel(objs, size) -> float:
     a3 = a2 = 0.0
     for o in objs:
@@ -814,6 +863,21 @@ socket = next(o for o in mount_objs if o.name.startswith('Mount_ScopeSocket'))
 scope_root = next(o for o in scope_objs if o.name == 'PU_Scope')
 scope_root.matrix_world = socket.matrix_world.copy()
 bpy.context.view_layer.update()
+if USE_LR:
+    # детали ретопологии — те же имена с приставкой LR_ (та же сборка: те же положения и родители)
+    lr_coll = bpy.data.collections.new('LR_APPENDED')
+    S.collection.children.link(lr_coll)
+    for part in ('rifle', 'mount', 'scope', 'ammo'):
+        with bpy.data.libraries.load(str(LR / f'Mosin_LR_{part}.blend'), link=False) as (src, dst):
+            names = list(src.objects)
+            dst.objects = list(names)
+        for nm, o in zip(names, dst.objects):
+            if o is None:
+                continue
+            lr_coll.objects.link(o)
+            o.name = 'LR_' + nm
+    bpy.data.objects['LR_PU_Scope'].matrix_world = socket.matrix_world.copy()
+    bpy.context.view_layer.update()
 dg = bpy.context.evaluated_depsgraph_get()
 
 # Состав деталей: неподвижная сталь — все прочие сетки винтовки.
@@ -846,13 +910,18 @@ for gname, (atlas, node, names) in GROUPS.items():
         hp = evaluated_copy(src, dg, f'HP_{n}')
         before = tris(hp.data)
         bvh = BVHTree.FromPolygons([v.co.copy() for v in hp.data.vertices], [p.vertices[:] for p in hp.data.polygons])
-        c = bpy.data.objects.new(f'{gname}_{i}', hp.data.copy())
-        lp.objects.link(c)
-        b = budget_for(n, before)
-        after = simplify(c, b, organic=n in ORGANIC, eye=not gname.startswith('Round'),
-                         protect=FP_PROTECT.get(n.split('.')[0]) if VARIANT == 'fp' else None,
-                         radial=FP_RADIAL.get(n.split('.')[0]) if VARIANT == 'fp' else None,
-                         split=FP_SPLIT.get(n.split('.')[0]) if VARIANT == 'fp' else None)
+        if USE_LR:
+            c = lr_copy(n, dg, f'{gname}_{i}')
+            lp.objects.link(c)
+            after = tris(c.data)
+        else:
+            c = bpy.data.objects.new(f'{gname}_{i}', hp.data.copy())
+            lp.objects.link(c)
+            b = budget_for(n, before)
+            after = simplify(c, b, organic=n in ORGANIC, eye=not gname.startswith('Round'),
+                             protect=FP_PROTECT.get(n.split('.')[0]) if VARIANT == 'fp' else None,
+                             radial=FP_RADIAL.get(n.split('.')[0]) if VARIANT == 'fp' else None,
+                             split=FP_SPLIT.get(n.split('.')[0]) if VARIANT == 'fp' else None)
         devs.append(deviation(c, bvh))
         budgets[n] = [before, after] + [round(x, 3) for x in devs[-1]] if devs else [before, after]
         bpy.data.meshes.remove(hp.data)
@@ -921,10 +990,14 @@ log('hidden area share', hidden_share)
 
 # Развёртки по атласам и материалы.
 texels = {}
+uv_layout = {}
 for atlas, size in ATLAS_SIZE.items():
     keys = [g for g, v in GROUPS.items() if UV_ATLAS.get(v[0], v[0]) == atlas]
     objs = [low[k] for k in keys]
-    unwrap(objs, UV_MARGIN_PX / size, hidden, eye=atlas != 'Ammo', roomy=roomy)   # патрон не на винтовке — без прибавки у глаза
+    if USE_LR:
+        uv_layout[atlas] = unwrap_lr(objs, size, hidden, roomy, eye=atlas != 'Ammo')
+    else:
+        unwrap(objs, UV_MARGIN_PX / size, hidden, eye=atlas != 'Ammo', roomy=roomy)   # патрон не на винтовке — без прибавки у глаза
     texels[atlas] = texel(objs, size)
     log('atlas', atlas, size, 'px/mm, uv area', texels[atlas])
     if texels[atlas][1] < UV_FILL_MIN:
@@ -1009,7 +1082,8 @@ record = dict(variant=VARIANT, sources={k: str(v) for k, v in SRC.items()}, grou
               materials=MATNAME, atlas_size=ATLAS_SIZE, uv_margin_px=UV_MARGIN_PX, removed_hidden_tris=removed_hidden, uv_atlas=UV_ATLAS, texel_px_mm=texels, hidden_area_share=hidden_share, cage=cage, budgets=budgets,
               triangles_first_person=fp, meshes={o.name: tris(o.data) for o in lp.all_objects if o.type == 'MESH'},
               pivots_mm={k: mm(v.matrix_world.translation) for k, v in nodes.items()}, markers_mm=markers,
-              scope_socket=socket_world, skipped=list(SKIP),
+              scope_socket=socket_world, skipped=list(SKIP), retopo='lr' if USE_LR else 'decimate',
+              uv_layout={a: {k: v for k, v in r.items() if k not in ('tries', 'eyes')} for a, r in uv_layout.items()},
               rest_pose='затвор закрыт, курок спущен (cocked 0), отсечка-отражатель внутри коробки на 2,8 мм')
 (OUT / 'parts.json').write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding='utf-8')
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'Mosin_Game_LP.blend'))

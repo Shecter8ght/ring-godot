@@ -33,6 +33,14 @@ var _carrier: Node3D
 var _bolt: Node3D
 var _bolt_kick: float = 0.0
 var _bolt_ammo: int = -1
+# продольно-скользящий затвор (models.<ключ>.action.kind = "bolt", Мосин): после выстрела — рукоять вверх, отвод,
+# подача, вниз; на перезарядке затвор стоит открытым. Правая кисть на это время — на шаре рукояти (метка BoltHand)
+var _bolt_cocking: Node3D
+var _bolt_interrupter: Node3D
+var _bolt_hand: Node3D
+var _bolt_knob: Vector3 = Vector3.ZERO
+var _bolt_t: float = -1.0
+var _bolt_cocked: bool = true
 # пылезащитная шторка (action.cover): откидывается пружиной, бьётся об упор и чуть отскакивает (COVER_POP_SEC);
 # _cover_t — время с начала откидывания (меньше нуля — стоит как есть), _cover_slot — чей ствол показан
 const COVER_POP_SEC := 0.12
@@ -849,6 +857,12 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		_carrier = null
 		_bolt = null
 		_cover = null
+		_bolt_cocking = null
+		_bolt_interrupter = null
+		_bolt_hand = null
+		_bolt_t = -1.0
+		_bolt_cocked = true
+		_arms.set_hand_target("Right", null, 0.0)
 		_cover_slot = ""
 		if not _viewmodel is ViewmodelClips:
 			for raw: Node in _viewmodel.find_children("*", "Node3D", true, false):
@@ -864,6 +878,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_cover = _viewmodel.find_child(cover_name, true, false) as Node3D if cover_name != "" else null
 			if _cover and not _cover.has_meta("rest"):
 				_cover = null
+			_bind_bolt_action(_carrier.get_meta("action"))
 		_bolt_ammo = -1
 		_bolt_kick = 0.0
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
@@ -1289,6 +1304,9 @@ func _set_scope(on: bool) -> void:
 func _tick_action(pl: Player, delta: float) -> void:
 	if _carrier == null or not is_instance_valid(_carrier):
 		return
+	if String((_carrier.get_meta("action") as Dictionary).get("kind", "")) == "bolt":
+		_tick_bolt_action(pl, _carrier.get_meta("action"), delta)
+		return
 	if _bolt_ammo >= 0 and pl.ammo < _bolt_ammo:
 		_bolt_kick = ViewmodelClips.BOLT_KICK_SEC
 	_bolt_ammo = pl.ammo
@@ -1309,6 +1327,89 @@ func _tick_action(pl: Player, delta: float) -> void:
 		var brest: Transform3D = _bolt.get_meta("rest")
 		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, deg_to_rad(float(act.get("unlock_deg", 0.0))) * turn),
 			brest.origin - Vector3(0.0, 0.0, back))
+
+
+## Продольно-скользящий затвор: курок и отсечка (покой — у узлов, WeaponModels._static_asset) и метка правой кисти
+## на шаре рукояти — дочерняя модели, ставится каждый кадр по узлу поворота (рукоять уходит вверх и назад).
+func _bind_bolt_action(act: Dictionary) -> void:
+	if String(act.get("kind", "")) != "bolt" or _bolt == null:
+		return
+	for key: String in ["cocking", "interrupter"]:
+		var node: Node3D = _viewmodel.find_child(String(act.get(key, "")), true, false) as Node3D
+		if node and node.has_meta("rest"):
+			node.transform = node.get_meta("rest")
+			if key == "cocking":
+				_bolt_cocking = node
+			else:
+				_bolt_interrupter = node
+	var knob: Array = act.get("knob", [])
+	var grip: Node3D = _viewmodel.find_child("RightGrip", true, false) as Node3D
+	if knob.size() == 3 and grip:
+		_bolt_knob = WeaponModels.between(_viewmodel, _bolt).affine_inverse() * Vector3(float(knob[0]), float(knob[1]), float(knob[2]))
+		_bolt_hand = Node3D.new()
+		_bolt_hand.name = "BoltHand"
+		_bolt_hand.transform = grip.transform
+		_viewmodel.add_child(_bolt_hand)
+
+
+## Цикл затвора по времени (action.cycle_sec: к шару, вверх, назад, вперёд, вниз, на шейку): выстрел — цикл с начала;
+## перезарядка — затвор открыт и отведён, патроны входят, за последние доли перезарядки — подача и поворот вниз.
+## Курок взводится поворотом рукояти и остаётся взведённым до выстрела; отсечка-отражатель выходит в конце отвода.
+func _tick_bolt_action(pl: Player, act: Dictionary, delta: float) -> void:
+	var c: Array = act.get("cycle_sec", [0.14, 0.12, 0.16, 0.15, 0.12, 0.14])
+	var t1: float = float(c[0])
+	var t2: float = t1 + float(c[1])
+	var t3: float = t2 + float(c[2])
+	var t4: float = t3 + float(c[3])
+	var t5: float = t4 + float(c[4])
+	var t6: float = t5 + float(c[5])
+	if _bolt_ammo >= 0 and pl.ammo < _bolt_ammo:
+		_bolt_t = 0.0
+		_bolt_cocked = false
+	_bolt_ammo = pl.ammo
+	var dt: float = minf(delta, 0.05)
+	if pl.reload_timer > 0.0:
+		var closing: float = t6 - t3
+		if pl.reload_timer > closing:
+			_bolt_t = minf(maxf(_bolt_t, 0.0) + dt, t3) if _bolt_t <= t3 else t3
+		else:
+			_bolt_t = maxf(t3, t6 - pl.reload_timer)
+	elif _bolt_t >= 0.0:
+		_bolt_t += dt
+		if _bolt_t >= t6:
+			_bolt_t = -1.0
+	var t: float = _bolt_t
+	var hand: float = 0.0
+	var turn: float = 0.0
+	var back: float = 0.0
+	if t >= 0.0:
+		hand = smoothstep(0.0, t1, t) if t < t5 else 1.0 - smoothstep(t5, t6, t)
+		turn = smoothstep(t1, t2, t) if t < t4 else 1.0 - smoothstep(t4, t5, t)
+		back = smoothstep(t2, t3, t) if t < t3 else 1.0 - smoothstep(t3, t4, t)
+	if turn > 0.999:
+		_bolt_cocked = true
+	var travel: float = float(act.get("travel", 0.0)) * back
+	var rest: Transform3D = _carrier.get_meta("rest")
+	_carrier.transform = Transform3D(rest.basis, rest.origin - Vector3(0.0, 0.0, travel))
+	var angle: float = deg_to_rad(float(act.get("turn_deg", 0.0))) * turn
+	if _bolt and is_instance_valid(_bolt):
+		var brest: Transform3D = _bolt.get_meta("rest")
+		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, angle), brest.origin)
+	if _bolt_cocking and is_instance_valid(_bolt_cocking):
+		var crest: Transform3D = _bolt_cocking.get_meta("rest")
+		var cock: float = float(act.get("cock", 0.0)) * (1.0 if _bolt_cocked else turn)
+		_bolt_cocking.transform = Transform3D(crest.basis, crest.origin - Vector3(0.0, 0.0, cock))
+	if _bolt_interrupter and is_instance_valid(_bolt_interrupter):
+		var irest: Transform3D = _bolt_interrupter.get_meta("rest")
+		var out: float = clampf((travel - float(act.get("interrupter_from", 0.0564))) / 0.002, 0.0, 1.0)
+		_bolt_interrupter.transform = Transform3D(irest.basis, irest.origin - Vector3(float(act.get("interrupter_in", 0.0028)) * out, 0.0, 0.0))
+	if _bolt_hand and is_instance_valid(_bolt_hand) and _bolt:
+		var grip: Node3D = _viewmodel.find_child("RightGrip", true, false) as Node3D
+		var basis: Basis = grip.transform.basis if grip else _bolt_hand.transform.basis
+		# кисть доворачивается за рукоятью не целиком — запястье поворачивается меньше, чем стебель
+		basis = Basis(Vector3.BACK, angle * float(act.get("hand_follow", 0.35))) * basis
+		_bolt_hand.transform = Transform3D(basis, WeaponModels.between(_viewmodel, _bolt) * _bolt_knob)
+		_arms.set_hand_target("Right", _bolt_hand, hand)
 
 
 ## Шторка ствола в руках — по состоянию экземпляра (Player.dust_cover_open): взял в руки — стоит как есть, рама

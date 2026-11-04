@@ -1,8 +1,9 @@
 """Мосин ПУ: файл просмотра игровой модели (вариант fp, ~20 000 треугольников) для владельца — в библиотеке модели.
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/mosin_pu/game_view.py
-→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game20k_v04.blend
-(v04 — форма v08: ход затвора 110 мм, направляющие обоймы; v03 — прежняя, форма v07)
+→ E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models/06_Игровая/fp/Mosin_PU_Game_Retopo_v05.blend
+(v05 — ретопология той же сборкой формы и новая развёртка, game_retopo.py / game_uv.py, 2026-11-04;
+v04 — упрощение high-poly, форма v08; v03 — прежняя, форма v07)
 Берёт сохранённый экспорт (_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend, после game_export.py -- fp) и
 возвращает его в оси винтовки (дуло +X, верх +Z), как у остальных файлов библиотеки. Коллекции: игровая модель,
 LOD1 (выключена), коллизия (выключена), патрон и гильза; студия и мир — из сборки исходника (как там, для режима
@@ -20,7 +21,7 @@ SRC = ROOT / '_asset_src/mosin_pu_game/fp/lp/Mosin_Game_export.blend'
 INFO = ROOT / 'assets/models/weapons/mosin_pu/mosin_pu.json'
 LIB = Path('E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/models')
 STUDIO = LIB / '00_Сборка/Mosin_9130PU_Assembly_tex20_v03.blend'
-OUT = LIB / '06_Игровая/fp/Mosin_PU_Game20k_v04.blend'
+OUT = LIB / '06_Игровая/fp/Mosin_PU_Game_Retopo_v05.blend'
 log = lambda *a: print('MOSIN_VIEW', *a, flush=True)
 
 bpy.context.preferences.use_preferences_save = False

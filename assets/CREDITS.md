@@ -495,11 +495,13 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 
 ## Мосин 1891/30 ПУ (assets/models/weapons/mosin_pu)
 
-- `mosin_pu.glb` (винтовка с креплением и прицелом ПУ, ~20 000 треугольников + LOD1), `mosin_pu_round.glb` (патрон
+- `mosin_pu.glb` (винтовка с креплением и прицелом ПУ, ~25 800 треугольников + LOD1), `mosin_pu_round.glb` (патрон
   7,62×54R и стреляная гильза), `mosin_pu_collision.glb` (выпуклые оболочки) — собственная модель, сделана для RING
   по фото-референсам (список — `E:/Models Blender/WEAPONS/Мосин — винтовка и узлы/sources.md`); маркировки вымышленные.
-  Игровая сетка, развёртка, запекание и экспорт — `tools/mosin_pu/game_lp.py`, `game_bake.py`, `game_pack.py`,
-  `game_export.py`; карты запечены с собственной high-poly и её слоёв UCUPaint (состояние 20 %).
+  Игровая сетка — ретопология той же сборкой формы (`tools/mosin_pu/game_retopo.py`, `game_lp.py`), развёртка —
+  `game_uv.py`, запекание и экспорт — `game_bake.py`, `game_pack.py`, `game_export.py`; карты запечены с собственной
+  high-poly и её слоёв UCUPaint (состояние 20 %). Сетка прицела ПУ `mosin_pu_reticle.png` — собственная, по рисунку
+  high-poly прицела (`tools/mosin_pu/reticle.py`).
 - Волокно ложи — Poly Haven «Dark Wood» (https://polyhaven.com/a/dark_wood), CC0 1.0 (Dimitrios Savva, Rico Cilliers,
   Dario Barresi); царапины дерева — собственные синтетические карты `tools/mosin_pu/gen_wood_scratches.py`;
   отпечатки, пыль и грязь — маски владельца из его библиотеки `Маски_АЛЬФА` (собственные). Фото референсов в картах

@@ -13,111 +13,111 @@
  "grip_origin_rifle_mm": [
   -240.0,
   0.0,
-  -57.82
+  -58.32
  ],
  "triangles": {
-  "first_person": 20426,
-  "lod1": 5001,
-  "round": 1184,
-  "spent_case": 764
+  "first_person": 25802,
+  "lod1": 4994,
+  "round": 1232,
+  "spent_case": 752
  },
  "meshes": {
-  "Bolt_Bar_Mesh": 99,
-  "Bolt_Cocking_Mesh": 982,
-  "Bolt_Rotor_Mesh": 1132,
-  "Follower_Mesh": 16,
-  "Frame_Steel": 9013,
-  "Frame_Wood": 3302,
-  "Interrupter_Mesh": 28,
-  "Mount_Base_Mesh": 748,
-  "Mount_Bracket_Mesh": 1211,
-  "RearSight_Leaf_Mesh": 636,
-  "RearSight_Slider_Mesh": 108,
-  "Scope_Body_Mesh": 2980,
-  "Scope_Lens_Mesh": 97,
-  "Trigger_Mesh": 74
+  "Bolt_Bar_Mesh": 292,
+  "Bolt_Cocking_Mesh": 2017,
+  "Bolt_Rotor_Mesh": 4570,
+  "Follower_Mesh": 34,
+  "Frame_Steel": 6188,
+  "Frame_Wood": 5144,
+  "Interrupter_Mesh": 46,
+  "Mount_Base_Mesh": 1159,
+  "Mount_Bracket_Mesh": 1636,
+  "RearSight_Leaf_Mesh": 587,
+  "RearSight_Slider_Mesh": 256,
+  "Scope_Body_Mesh": 3359,
+  "Scope_Lens_Mesh": 374,
+  "Trigger_Mesh": 140
  },
  "markers_game_m": {
   "Muzzle": [
    -0.0,
-   0.05782,
+   0.05832,
    0.9688
   ],
   "SightFront": [
    -0.0,
-   0.08082,
+   0.08132,
    0.936
   ],
   "SightRear": [
    -0.0,
-   0.08232,
+   0.08282,
    0.32129
   ],
   "ScopeEye": [
    0.008,
-   0.10902,
+   0.10952,
    0.0525
   ],
   "ScopeFront": [
    0.008,
-   0.10902,
+   0.10952,
    0.2222
   ]
  },
  "pivots_game_m": {
   "Bolt": [
    -0.0,
-   0.05782,
+   0.05832,
    0.24
   ],
   "Bolt_Rotor": [
    -0.0,
-   0.05782,
+   0.05832,
    0.24
   ],
   "Bolt_Cocking": [
    -0.0,
-   0.05782,
+   0.05832,
    0.24
   ],
   "Interrupter": [
    0.0028,
-   0.05782,
+   0.05832,
    0.24
   ],
   "Trigger": [
    -0.0,
-   0.00582,
+   0.00632,
    0.088
   ],
   "Follower": [
    -0.0,
-   0.04392,
+   0.04442,
    0.16925
   ],
   "RearSight_Leaf": [
    -0.0,
-   0.07462,
+   0.07512,
    0.3975
   ],
   "RearSight_Slider": [
    -0.0,
-   0.07782,
+   0.07832,
    0.3328
   ],
   "Mount_Base": [
    0.0225,
-   0.06202,
+   0.06252,
    0.234
   ],
   "Mount_Bracket": [
    0.0225,
-   0.06202,
+   0.06252,
    0.214
   ],
   "Scope": [
    0.008,
-   0.10902,
+   0.10952,
    0.0525
   ]
  },
@@ -141,38 +141,38 @@
  "uv_margin_px": 12,
  "texel_px_mm": {
   "Wood": [
-   5.93,
-   0.409
+   7.54,
+   0.694
   ],
   "Steel": [
-   6.37,
-   0.368
+   8.77,
+   0.726
   ],
   "Optic": [
-   12.28,
-   0.491
+   15.1,
+   0.755
   ],
   "Ammo": [
-   13.79,
-   0.524
+   17.94,
+   0.882
   ]
  },
  "hidden_area_share": {
-  "Frame_Wood_Stock": 0.005,
-  "Frame_Wood_Handguard": 0.0,
-  "Frame_Steel": 0.211,
-  "Trigger_Mesh": 0.069,
-  "Follower_Mesh": 0.458,
-  "RearSight_Leaf_Mesh": 0.008,
+  "Frame_Wood_Stock": 0.03,
+  "Frame_Wood_Handguard": 0.024,
+  "Frame_Steel": 0.209,
+  "Trigger_Mesh": 0.077,
+  "Follower_Mesh": 0.456,
+  "RearSight_Leaf_Mesh": 0.004,
   "RearSight_Slider_Mesh": 0.0,
-  "Bolt_Rotor_Mesh": 0.074,
-  "Bolt_Bar_Mesh": 0.013,
-  "Bolt_Cocking_Mesh": 0.017,
+  "Bolt_Rotor_Mesh": 0.068,
+  "Bolt_Bar_Mesh": 0.011,
+  "Bolt_Cocking_Mesh": 0.018,
   "Interrupter_Mesh": 0.0,
-  "Mount_Base_Mesh": 0.116,
-  "Mount_Bracket_Mesh": 0.108,
-  "Scope_Body_Mesh": 0.354,
-  "Scope_Lens_Mesh": 0.364
+  "Mount_Base_Mesh": 0.195,
+  "Mount_Bracket_Mesh": 0.169,
+  "Scope_Body_Mesh": 0.382,
+  "Scope_Lens_Mesh": 0.421
  },
  "collision": [
   "Col_Butt",
@@ -186,5 +186,5 @@
   "Scope_Reticle"
  ],
  "ocular_r_m": 0.0118,
- "removed_hidden_tris": 2814
+ "removed_hidden_tris": 3002
 }
