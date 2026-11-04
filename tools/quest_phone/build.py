@@ -16,8 +16,12 @@ from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '_asset_src/quest_phone'
-BLEND = OUT / 'models/QuestPhone_v01.blend'
+BLEND = OUT / 'models/QuestPhone_v02.blend'
 W, H, D = .0776, .163, .00825
+CAMERA_X, CAMERA_W, CAMERA_H = .018, .037, .039
+CAMERA_GAP = W/2 - (CAMERA_X + CAMERA_W/2)
+CAMERA_Y = H/2 - CAMERA_GAP - CAMERA_H/2
+CAMERAS_DY = CAMERA_Y - .0535  # Весь блок выше на 6,2 мм: верхний отступ равен боковому.
 COLS = {}
 MATS = {}
 
@@ -156,7 +160,8 @@ def build():
         collection(name)
     root = bpy.data.objects.new('QuestPhone',None)
     COLS['Корпус'].objects.link(root)
-    root['stage'] = 'Форма v01; не принята, без текстур и игровой версии'
+    root['stage'] = 'Форма v02; не принята, без текстур и игровой версии'
+    root['camera_padding_mm'] = CAMERA_GAP*1000
     root['body_mm'] = '163 × 77.6 × 8.25; без выступов камер и кнопок'
     root['axes'] = 'X — ширина, Y — верх, +Z — экран; метры'
     root['owner_choice'] = '2026-11-04: iPhone Pro Max; постоянное оснащение, сохраняется после гибели'
@@ -178,7 +183,7 @@ def build():
     cut(glass,cutter)
     rounded('04 · Остров фронтальных датчиков',.0205,.0056,.0028,.000002,'Экран','Внутри',at=(0,.068,.004128))
     disk('05 · Передняя камера',.00125,.000002,'Экран','Оптика',at=(.0068,.068,.004131))
-    lens_marker=marker('CameraLensMarker',(.0095,.063,-.0073))
+    lens_marker=marker('CameraLensMarker',(.0095,.063+CAMERAS_DY,-.0073))
     lens_marker['forward_axis']='-Z: оптическая ось наружу через заднюю камеру'
     marker('ScreenMarker',(0,0,.004126))
     # Открытая прорезь разговорного динамика с утопленной решёткой.
@@ -189,8 +194,9 @@ def build():
     for i in range(22):
         rounded(f'Динамик · Перемычка {i+1:02}',.00011,.00047,.00005,.00007,'Экран','Рамка',at=(-.0061+i*.00058,.0798,.00335))
     # Авторская адаптация блока: три отдельных корпуса с настоящими кольцевыми стенками.
-    rounded('10 · Площадка камер',.037,.039,.0092,.0016,'Камеры','Задняя панель',at=(.018,.0535,-.0048),bevel=.00038)
+    rounded('10 · Площадка камер',CAMERA_W,CAMERA_H,.0092,.0016,'Камеры','Задняя панель',at=(CAMERA_X,CAMERA_Y,-.0048),bevel=.00038)
     for label,x,y in [('Основная',.0095,.063),('Широкая',.0095,.045),('Телекамера',.0275,.054)]:
+        y += CAMERAS_DY
         profile = [(.00655,-.0007),(.0076,-.0007),(.0080,-.00035),(.0080,.00075),
                    (.0077,.00095),(.00655,.00095)]
         lathe('11 · '+label+' · Обод',profile,'Камеры','Рамка',at=(x,y,-.00605),rot=(math.pi,0,0))
@@ -199,7 +205,7 @@ def build():
               'Камеры','Внутри',at=(x,y,-.00655),rot=(math.pi,0,0))
         disk('14 · '+label+' · Внутренняя линза',.0033,.00012,'Камеры','Оптика',at=(x,y,-.00665))
     for name,r,x,y,mat in [('Вспышка',.0027,.028,.069,'Вспышка'),('Датчик глубины',.0026,.028,.038,'Стекло'),('Микрофон камер',.00062,.033,.044,'Внутри')]:
-        disk('15 · '+name,r,.00018,'Камеры',mat,at=(x,y,-.0057))
+        disk('15 · '+name,r,.00018,'Камеры',mat,at=(x,y+CAMERAS_DY,-.0057))
     # Кнопки и углублённые посадочные места, а не плоские буквы/декали.
     buttons=[('Питание',1,.023,.0130,.0027),('Камера',1,-.039,.0108,.0027),
              ('Действие',-1,.050,.0069,.0026),('Громкость плюс',-1,.032,.0100,.0026),('Громкость минус',-1,.015,.0100,.0026)]
@@ -322,6 +328,15 @@ def verify():
     report['body_measured_mm']=[round(v*1000,4) for v in body_size]
     if any(abs(actual-expected)>.00002 for actual,expected in zip(body_size,[W,H,D])):
         report['issues'].append('Body dimensions outside 0.02 mm tolerance')
+    plate=bpy.data.objects['10 · Площадка камер'].evaluated_get(deps)
+    data=plate.to_mesh()
+    plate_points=[plate.matrix_world@v.co for v in data.vertices]
+    plate.to_mesh_clear()
+    side_gap=max(p.x for p in body_points)-max(p.x for p in plate_points)
+    top_gap=max(p.y for p in body_points)-max(p.y for p in plate_points)
+    report['camera_padding_mm']={'side':round(side_gap*1000,4),'top':round(top_gap*1000,4)}
+    if 'camera_padding_mm' in bpy.data.objects['QuestPhone'] and abs(side_gap-top_gap)>.000001:
+        report['issues'].append('Camera platform: top and side padding differ')
     report['screen_diagonal_inches']=round(bpy.data.objects['DisplaySurface']['active_diagonal_inches'],3)
     report['uv_layers_total']=sum(len(ob.data.uv_layers) for ob in bpy.data.objects if ob.type=='MESH')
     # Просвет настоящего входа USB-C: вне языка луч доходит внутрь, но не видит внешнюю крышку.
@@ -340,21 +355,24 @@ def verify():
         raise RuntimeError('Geometry check failed')
 
 
-def render():
+def render(only=None):
     scene=bpy.context.scene
     cam=scene.camera
     shots=[('front',(.055,-.05,.30),(0,0,0),.198,1050,1250),
            ('back',(-.08,.055,-.30),(0,0,-.002),.198,1050,1250),
            ('bottom',(.028,-.12,.055),(0,-.072,0),.075,1400,800),
-           ('camera_macro',(-.018,.078,-.12),(.018,.054,-.005),.062,1100,1000)]
+           ('camera_macro',(-.018,.078+CAMERAS_DY,-.12),(.018,.054+CAMERAS_DY,-.005),.062,1100,1000)]
     out=OUT/'previews';out.mkdir(parents=True,exist_ok=True)
     for name,eye,target,scale,w,h in shots:
+        if only and name not in only:
+            continue
         cam.location=eye
         point_camera(cam,target,up=(0,0,1) if name=='bottom' else (0,1,0))
         cam.data.ortho_scale=scale
         cam.data.clip_start=.001
         scene.render.resolution_x,scene.render.resolution_y=w,h
-        scene.render.filepath=str(out/f'quest_phone_{name}.png')
+        version=Path(bpy.data.filepath).stem.rsplit('_',1)[-1]
+        scene.render.filepath=str(out/f'quest_phone_{version}_{name}.png')
         bpy.ops.render.render(write_still=True)
         print('RENDER',name)
 
@@ -368,5 +386,5 @@ if __name__=='__main__':
     else:
         bpy.ops.wm.open_mainfile(filepath=str(Path(args[1]) if len(args)>1 else BLEND))
         if command=='verify':verify()
-        elif command=='render':render()
+        elif command=='render':render(only=args[2:])
         else:raise ValueError(command)
