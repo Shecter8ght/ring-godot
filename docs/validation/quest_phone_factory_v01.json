@@ -272,7 +272,7 @@
   },
   "delivery": "E:/Models Blender/PROPS/QuestPhone/models/QuestPhone_factory_v01.blend",
   "decisions": [
-    "Form v02 accepted by owner; finish awaiting owner review.",
+    "Form v02 accepted by owner; factory finish accepted by owner on 2026-11-04.",
     "Uniform switched-off display warning reviewed; no arbitrary stains added.",
     "Actual camera cover glass checked from both sides with temporary checker.",
     "Delivered file reopened: 100 meshes, USB entrance and dimensions pass."
@@ -281,5 +281,12 @@
     "Procedural materials, no game atlases or LOD.",
     "Noise implementations in Painter and UCUPaint are not bit-identical.",
     "Source audit does not compare all modifier properties or calculate optics."
-  ]
+  ],
+  "acceptance": {
+    "date": "2026-11-04",
+    "by": "Владелец",
+    "message": "принимаю",
+    "model": "models/QuestPhone_factory_v01.blend",
+    "sha256": "8f3539ab6422f2533259945d459c2db4809368c897458a3a9456ff4e5177f7e2"
+  }
 }
