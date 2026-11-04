@@ -16,7 +16,8 @@ SAFETY_PIVOT = (-183.5, 39.0)      # снимок A (проверка v02: бы�
 SELECTOR_PIVOT = (-72.0, 38.5)     # лист KRISS SMG (проверка v02: хвост был над окном выброса)
 LEVER_T = 2.6                       # толщина флажков
 BOLT_REL = (-38.0, -10.0)          # кнопка задержки справа
-MAG_REL = (-7.0, -38.0)            # лопатка защёлки магазина у переднего ребра шахты
+MAG_REL = (-15.0, -38.0)           # лопатка защёлки магазина у переднего ребра шахты (на 8 мм назад: перёд шахты скруглён R 14,
+                                   # выемка не должна касаться начала скругления — иначе боковина после булевых «перекручивалась»)
 
 
 def trigger(C):
@@ -34,39 +35,71 @@ def trigger(C):
     return t
 
 
+def _ss_l(t):
+    t = min(1.0, max(0.0, t))
+    return t * t * (3 - 2 * t)
+
+
+def _renormal(me):
+    """После переноса вершин (с зеркалом) — нормали наружу заново."""
+    import bmesh
+    bm = bmesh.new(); bm.from_mesh(me)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    me.update()
+
+
 def lever(name, pivot, hub_r, tail, side, C, mat="Steel_black"):
-    """Флажок на оси: ступица радиуса hub_r и хвост в точку tail (x, z) с упором под палец; side = ±1 (борт)."""
+    """Флажок на оси (как у прототипа, h1ggs и снимок владельца 04): круглая ступица с осью, плоский рычаг к хвосту tail
+    (x, z), конец загнут крючком вверх; на конце — упор под палец: рампа, поднимающаяся от рычага наружу на 3.6 мм, с
+    поперечным рифлением (владелец 04.11: «удобные выступы для пальцев»). side = ±1 (борт)."""
+    from lib import apply_transform
     px, pz = pivot
     tx, tz = tail
     ang = math.atan2(tz - pz, tx - px)
     L = math.hypot(tx - px, tz - pz)
-    nx, nz = -math.sin(ang), math.cos(ang)
-    w0, w1 = hub_r * 0.85, 3.2
-    pts = []
-    for k in range(13):
-        a = ang + math.pi / 2 + math.pi * k / 12
-        pts.append((px + hub_r * math.cos(a), pz + hub_r * math.sin(a)))
-    # хвост: сужение к концу и закруглённый носок
-    pts += [(px + math.cos(ang) * L * 0.55 - nx * w1 * 1.1, pz + math.sin(ang) * L * 0.55 - nz * w1 * 1.1)]
-    for k in range(9):
-        a = ang - math.pi / 2 + math.pi * k / 8
-        pts.append((tx + w1 * math.cos(a), tz + w1 * math.sin(a)))
-    pts += [(px + math.cos(ang) * L * 0.5 + nx * w0, pz + math.sin(ang) * L * 0.5 + nz * w0)]
+    hs = 1.0 if math.cos(ang) > 0 else -1.0          # крючок — вверх (к +Z) при любом направлении рычага
+    ca, sa = math.cos(ang), math.sin(ang)
+
+    def W(u, w):
+        w = w * hs
+        return (px + u * ca - w * sa, pz + u * sa + w * ca)
+    w_hub, w_tip = hub_r * 0.8, 2.4
+    # контур в осях рычага (u — к хвосту, w — к крючку): ступица, нижняя кромка, носок, крючок, верхняя кромка
+    loc = []
+    for k in range(15):
+        a = math.pi / 2 + math.pi * k / 14
+        loc.append((hub_r * math.cos(a), hub_r * math.sin(a)))
+    loc += [(L * 0.45, -w_tip - 0.4), (L + 1.4, -w_tip), (L + 2.0, 1.5), (L + 0.6, 5.2), (L - 1.6, 5.4),
+            (L - 2.6, 3.0), (L * 0.5, w_tip + 0.2)]
+    radii = [0.0] * 15 + [6.0, 1.6, 1.8, 1.4, 1.2, 1.4, 6.0]
+    pts = [W(u, w) for u, w in fillet(loc, radii, 5)]
+    if hs < 0:
+        pts.reverse()
     y0, y1 = (HALF_W + 0.3, HALF_W + 0.3 + LEVER_T) if side > 0 else (-HALF_W - 0.3 - LEVER_T, -HALF_W - 0.3)
     o = rounded_prism(name, pts, y0, y1, 0.9, C, mat, seg=4)
-    # рифление упора под палец: три канавки поперёк хвоста
-    for i in range(3):
-        cx = tx - math.cos(ang) * (1.2 + 2.0 * i)
-        cz = tz - math.sin(ang) * (1.2 + 2.0 * i)
-        g = prism_xz("_lg", [(cx - nx * 5 - math.cos(ang) * 0.5, cz - nz * 5 - math.sin(ang) * 0.5),
-                             (cx + nx * 5 - math.cos(ang) * 0.5, cz + nz * 5 - math.sin(ang) * 0.5),
-                             (cx + nx * 5 + math.cos(ang) * 0.5, cz + nz * 5 + math.sin(ang) * 0.5),
-                             (cx - nx * 5 + math.cos(ang) * 0.5, cz - nz * 5 + math.sin(ang) * 0.5)],
-                     (y1 - 0.5) if side > 0 else (y0 - 1), (y1 + 1) if side > 0 else (y0 + 0.5), C)
-        boolean(o, g)
+    # упор под палец (сверка v04 Д14: был брусок, приставленный к хвосту; у прототипа упор гладкий, отогнут наружу):
+    # наружная половина пластины к носку плавно отгибается наружу на 3.4 мм — упор из самого рычага, без булевых
+    H = 3.4
+    ymid = (y0 + y1) / 2
+    # крышки рычага — сеткой (иначе изогнутый многоугольник затеняется диагональю)
+    import bmesh
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    caps = [f for f in bm.faces if len(f.verts) > 8]
+    tri = bmesh.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="BEAUTY")["faces"]
+    edges = list({e for f in tri for e in f.edges})
+    bmesh.ops.subdivide_edges(bm, edges=edges, cuts=3, use_grid_fill=True)
+    bm.to_mesh(o.data); bm.free()
+    for vv in o.data.vertices:
+        x, y, z = vv.co.x / MM, vv.co.y / MM, vv.co.z / MM
+        u = (x - px) * ca + (z - pz) * sa
+        h = H * _ss_l((u - (L - 7.5)) / 6.3)
+        if h > 0 and (y - ymid) * side > 0:
+            vv.co.y = (y + side * h) * MM
+    o.data.update()
     # ось — шайба в ступице
-    axle = cyl(f"{name}_axle", (y1 - 0.2) if side > 0 else (y0 - 0.6), (y1 + 0.6) if side > 0 else (y0 + 0.2),
-               hub_r * 0.45, C, mat, seg=48, cy=px, cz=pz, axis="Y")
+    axle = cyl(f"{name}_axle", (y1 - 0.2) if side > 0 else (y0 - 0.7), (y1 + 0.7) if side > 0 else (y0 + 0.2),
+               hub_r * 0.5, C, mat, seg=48, cy=px, cz=pz, axis="Y", ch=0.3)
     finish_small(o, w=0.3, seg=3)
     finish_small(axle, w=0.15, seg=2)
     boolean(o, axle, op="UNION")

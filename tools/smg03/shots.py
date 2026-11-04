@@ -2,7 +2,7 @@
 # "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b <файл.blend> --python tools/smg03/shots.py -- <папка> [вид,…] [ключ=значение …]
 # Виды: photoA / photoB — ортокамера ровно в масштабе снимка KRISS (1.797 пикс/мм, 1600 × 1000) слева / справа, рядом
 # пишется compare_<вид>.png — модель поверх снимка (50 %); left, right, top, bottom, front, rear, q34, q34r — глина;
-# zoom:<имя>:<x>:<z>:<ширина мм>:<сторона +Y|-Y|top|front> — крупный план.
+# zoom:<имя>:<x>:<z>:<ширина мм>:<сторона +Y|-Y|top|front|rear|q|q-|qlow|qback|qfront(-)> — крупный план.
 # Ключи: ctrl.<свойство>=<число> — положение органов управления (пустышка SMG03_Controls).
 import math
 import os
@@ -159,7 +159,9 @@ def zoom_view(spec, out):
         cam("Cam_zoom", Vector((-1.0, 0, z)), Vector((0, 0, z)), ortho_scale=wmm)
     else:
         # q — перспектива сверху-спереди-слева на точку
-        d = Vector((0.5, 0.7, 0.5)).normalized() if side == "q" else Vector((0.5, -0.7, 0.5)).normalized()
+        dirs = {"q": (0.5, 0.7, 0.5), "q-": (0.5, -0.7, 0.5), "qlow": (0.6, 0.6, -0.5), "qlow-": (0.6, -0.6, -0.5),
+                "qback": (-0.5, 0.7, 0.4), "qback-": (-0.5, -0.7, 0.4), "qfront": (0.9, 0.35, 0.25), "qfront-": (0.9, -0.35, 0.25)}
+        d = Vector(dirs[side]).normalized()
         cam("Cam_zoom", Vector((x, 0, z)) + d * (wmm * 2.2), Vector((x, 0, z)), lens=40)
     render(os.path.join(out, f"zoom_{name}.png"))
 

@@ -55,8 +55,9 @@ def _area(pts):
 
 def offset_poly(pts, d):
     """Сдвиг замкнутого контура внутрь на d мм (по биссектрисам с поправкой на угол). Углы контура заранее скруглены
-    радиусом не меньше d (profiles.py, ROUND_MM) — сдвиг без самопересечений."""
+    радиусом не меньше d (profiles.py, ROUND_MM) — сдвиг без самопересечений. d — число или список на каждую точку."""
     n = len(pts)
+    ds = d if isinstance(d, (list, tuple)) else [d] * n
     ccw = _area(pts) > 0
     out = []
     for i in range(n):
@@ -73,7 +74,7 @@ def offset_poly(pts, d):
             m = na
         m.normalize()
         k = max(0.4, m.dot(na))
-        q = p1 + m * (d / k)
+        q = p1 + m * (ds[i] / k)
         out.append((q.x, q.y))
     return out
 
@@ -104,27 +105,33 @@ def smooth_poly(pts, step=0.7, k=3):
     return out
 
 
-def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6, tri_caps=False):
+def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6, tri_caps=False, r_fn=None):
     """Призма по контуру (XZ), выдавленная по Y, с круглыми кромками радиуса r по всему контуру с обеих сторон —
     своей сеткой из колец (сдвинутые контуры), без модификатора фаски: чистые четырёхугольники, булевы после неё
-    работают (фаска без зажима на многоугольной боковине ломала EXACT)."""
+    работают (фаска без зажима на многоугольной боковине ломала EXACT). r_fn(x, z) — радиус кромки по месту контура
+    (меняться должен плавно и не больше скругления угла контура в плоскости); без него — r везде."""
     import bmesh as _bm
     pts = smooth_poly(pts)
+    rs = [r_fn(x, z) for x, z in pts] if r_fn is not None else [r] * len(pts)
     rings = []
     angs = [math.pi / 2 * k / seg for k in range(seg + 1)]
-    # от боковины −Y (сдвиг r) к середине и к боковине +Y
+    # от боковины −Y (сдвиг r) к середине и к боковине +Y; кольцо — (Y по точкам, сдвиг по точкам)
+    # y0 + r·(1 − sin t), а не (y0 + r) − r·sin t: на боковине (t = 90°) ровно y0 у каждой точки — при разных r
+    # ошибки округления делали крышку неплоской на 1e-15, и точное булево потом пропускало буквы гравировки
     for t in reversed(angs):
-        rings.append((y0 + r - r * math.sin(t), r * (1 - math.cos(t))))
+        k = 1.0 - math.sin(t) if t < math.pi / 2 else 0.0
+        rings.append(([y0 + ri * k for ri in rs], [ri * (1 - math.cos(t)) for ri in rs]))
     for t in angs:
-        if t == 0 and abs((y1 - r) - (y0 + r)) < 1e-6:
+        if t == 0 and r_fn is None and abs((y1 - r) - (y0 + r)) < 1e-6:
             continue
-        rings.append((y1 - r + r * math.sin(t), r * (1 - math.cos(t))))
+        k = 1.0 - math.sin(t) if t < math.pi / 2 else 0.0
+        rings.append(([y1 - ri * k for ri in rs], [ri * (1 - math.cos(t)) for ri in rs]))
     me = bpy.data.meshes.new(name)
     bm = _bm.new()
     vr = []
-    for y, d in rings:
-        q = offset_poly(pts, d) if d > 1e-9 else pts
-        vr.append([bm.verts.new(v(x, y, z)) for x, z in q])
+    for ys, ds in rings:
+        q = offset_poly(pts, ds) if max(ds) > 1e-9 else pts
+        vr.append([bm.verts.new(v(x, y, z)) for (x, z), y in zip(q, ys)])
     n = len(pts)
     for r0, r1 in zip(vr, vr[1:]):
         for i in range(n):
@@ -175,6 +182,10 @@ def finish_small(o, w=0.5, seg=2, angle=30.0, exclude=None):
             if ww != w or clamp:
                 print("SMALL_RETRY", o.name, round(ww, 2), "зажим" if clamp else "")
             bpy.data.meshes.remove(keep)
+            grid_split(o)
+            weighted(o)
+            apply_all(o)
+            flat_panels(o)
             return o
         print("SMALL_FAIL", o.name, round(ww, 2), "nm", _nonmanifold(o))
     old = o.data
@@ -418,6 +429,14 @@ def lathe(name, prof, coll, mat=None, seg=64, cy=0.0, cz=BORE_Z, smooth=True, cl
                 except ValueError:
                     pass
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
+    # точки профиля на оси дают грани нулевой площади и ребро вдоль оси (сверка v04 Д23) — убрать
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-8, edges=bm.edges)
+    wire = [e for e in bm.edges if not e.link_faces]
+    if wire:
+        bmesh.ops.delete(bm, geom=wire, context="EDGES")
+    loose = [vv for vv in bm.verts if not vv.link_edges]
+    if loose:
+        bmesh.ops.delete(bm, geom=loose, context="VERTS")
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me); bm.free()
     for p in me.polygons:
@@ -476,13 +495,15 @@ def auto_sharp(o, deg=35):
 
 # ---------- булевы и фаски ----------
 
-def boolean(target, cutter, op="DIFFERENCE", remove=True, solver="EXACT", self_x=False):
+def boolean(target, cutter, op="DIFFERENCE", remove=True, solver="EXACT", self_x=False, hole_tolerant=False):
     m = target.modifiers.new("bool", "BOOLEAN")
     m.operation = op
     m.object = cutter
     m.solver = solver
     if solver == "EXACT" and self_x:
         m.use_self = True
+    if solver == "EXACT" and hole_tolerant:
+        m.use_hole_tolerant = True
     apply_all(target)
     _drop_empty_slots(target)
     clean(target, 0.002)
@@ -491,6 +512,63 @@ def boolean(target, cutter, op="DIFFERENCE", remove=True, solver="EXACT", self_x
         bpy.data.objects.remove(cutter, do_unlink=True)
         if me.users == 0:
             bpy.data.meshes.remove(me)
+
+
+def _dupfaces(o):
+    seen = set(); n = 0
+    for f in o.data.polygons:
+        k = tuple(sorted(f.vertices))
+        if k in seen:
+            n += 1
+        seen.add(k)
+    return n
+
+
+def boolean_safe(target, cutter, op="DIFFERENCE", name=""):
+    """Булево с проверкой: открытых / многогранных рёбер и дублей граней не прибавилось — иначе откат и повтор со сдвигом
+    резца на сотые миллиметра, затем точное «с допуском к дырам», затем быстрое. Точное булево Blender на большом корпусе
+    изредка сбоит от запуска к запуску (04.11: стык рукояти с коробкой — тысяча рёбер на три грани)."""
+    from mathutils import Matrix as _M, Vector as _V
+    keep = target.data.copy()
+    nm0, d0 = _nonmanifold(target), _dupfaces(target)
+    tries = [((0, 0, 0), "EXACT", False), ((0.011, 0.007, 0.013), "EXACT", False), ((-0.013, 0.009, -0.007), "EXACT", False),
+             ((0.017, -0.011, 0.005), "EXACT", False), ((0, 0, 0), "EXACT", True), ((0.009, 0.013, -0.011), "EXACT", True),
+             ((0, 0, 0), "FLOAT", False)]
+    best = None
+    for k, (sh, solver, tol) in enumerate(tries):
+        if k:
+            old = target.data
+            target.data = keep.copy()
+            if old.users == 0:
+                bpy.data.meshes.remove(old)
+        c2 = cutter.copy(); c2.data = cutter.data.copy()
+        for coll in cutter.users_collection:
+            coll.objects.link(c2)
+        c2.data.transform(_M.Translation(_V(sh) * MM))
+        boolean(target, c2, op=op, solver=solver, hole_tolerant=tol)
+        nm, d = _nonmanifold(target), _dupfaces(target)
+        if nm <= nm0 and d <= d0:
+            break
+        print("BOOL_RETRY", name or cutter.name, k, nm - nm0, d - d0)
+        if best is None or nm + d < best[0]:
+            if best is not None and best[1].users == 0:
+                bpy.data.meshes.remove(best[1])
+            best = (nm + d, target.data.copy())
+    else:
+        print("BOOL_FAIL", name or cutter.name)
+        old = target.data
+        target.data = best[1]
+        if old.users == 0:
+            bpy.data.meshes.remove(old)
+        best = None
+    if best is not None and best[1].users == 0:
+        bpy.data.meshes.remove(best[1])
+    if keep.users == 0:
+        bpy.data.meshes.remove(keep)
+    me = cutter.data
+    bpy.data.objects.remove(cutter, do_unlink=True)
+    if me.users == 0:
+        bpy.data.meshes.remove(me)
 
 
 def _drop_empty_slots(o):
@@ -602,6 +680,89 @@ def renormal(o):
     auto_sharp(o, 40)
     weighted(o)
     apply_all(o)
+
+
+def grid_split(o, step=12.0, min_verts=24):
+    """Крупные многоугольники (боковины корпуса с вырезами-«дырками» после булевых) режутся невидимой сеткой плоскостей
+    X и Z через step мм: форма та же, многоугольники мелкие — Blender при показе бьёт их без перехлёста (иначе на ровном
+    борту чёрный клин, вырез затягивался — сверка v04). Режутся только грани больше min_verts вершин."""
+    from mathutils import Vector as _V
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    nm0 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
+    big = [f for f in bm.faces if len(f.verts) > min_verts]
+    if not big:
+        bm.free()
+        return
+    xs = [vv.co.x for f in big for vv in f.verts]; zs = [vv.co.z for f in big for vv in f.verts]
+    planes = []
+    x = math.floor(min(xs) / (step * MM)) * step * MM + step * MM / 2
+    while x < max(xs):
+        planes.append((_V((x, 0, 0)), _V((1, 0, 0)))); x += step * MM
+    z = math.floor(min(zs) / (step * MM)) * step * MM + step * MM / 2
+    while z < max(zs):
+        planes.append((_V((0, 0, z)), _V((0, 0, 1)))); z += step * MM
+    for co, no in planes:
+        faces = [f for f in bm.faces if len(f.verts) > min_verts]
+        if not faces:
+            break
+        geom = list({e for f in faces for e in f.edges}) + faces
+        bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-9, plane_co=co, plane_no=no)
+    nm1 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
+    if nm1 <= nm0:
+        bm.to_mesh(o.data)
+        print("GRID_SPLIT", o.name, len(big))
+    else:
+        print("GRID_SPLIT_SKIP", o.name, nm0, nm1)
+    bm.free()
+
+
+def flat_panels(o, min_area=30.0, ang=0.5):
+    """Плоские участки (соседние грани с нормалями в пределах ang°, площадь больше min_area мм²) — нормали углов ровно по
+    плоскости, остальные углы — как были (после взвешенных нормалей). Длинные треугольники от угла выреза иначе тянули
+    сглаженную нормаль через всю плоскость — «конус» затенения (сверка v04 Д4)."""
+    me = o.data
+    if len(me.polygons) < 8:
+        return
+    try:
+        cn = [tuple(c.vector) for c in me.corner_normals]
+    except AttributeError:
+        return
+    polys = me.polygons
+    nrm = [p.normal.copy() for p in polys]
+    area = [p.area * 1e6 for p in polys]
+    cos_t = math.cos(math.radians(ang))
+    # смежность граней через рёбра
+    edge_faces = {}
+    for p in polys:
+        for ek in p.edge_keys:
+            edge_faces.setdefault(ek, []).append(p.index)
+    seen = [False] * len(polys)
+    pn = [None] * len(polys)                 # нормаль участка для граней плоских участков
+    tiny = [a < 0.02 for a in area]          # почти нулевые грани (щепки после булевых): их нормаль ненадёжна
+    for i in range(len(polys)):
+        if seen[i] or tiny[i]:
+            continue
+        seen[i] = True
+        grp = [i]; st = [i]; tot = 0.0
+        while st:
+            f = st.pop(); tot += area[f]
+            for ek in polys[f].edge_keys:
+                for g in edge_faces[ek]:
+                    if not seen[g] and (tiny[g] or nrm[g].dot(nrm[i]) > cos_t):
+                        seen[g] = True; grp.append(g); st.append(g)
+        if tot > min_area:
+            acc = nrm[i] * 0.0
+            for f in grp:
+                acc += nrm[f] * area[f]
+            acc.normalize()
+            for f in grp:
+                pn[f] = tuple(acc)
+    out = list(cn)
+    for p in polys:
+        if pn[p.index] is not None:
+            for li in p.loop_indices:
+                out[li] = pn[p.index]
+    me.normals_split_custom_set(out)
 
 
 def weighted(o):

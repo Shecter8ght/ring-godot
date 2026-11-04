@@ -51,6 +51,7 @@ def place(cut, center, normal, up, lift, target):
 
 
 ZONES = []                       # (центр мм, радиус мм) — места гравировок: мелкая фаска корпуса их не трогает
+FAILED = []                      # надписи, где буква не вырезалась (part_receiver пересобирает корпус и повторяет)
 
 
 def stamp(target, text, size, center, normal, up, depth, coll):
@@ -58,9 +59,8 @@ def stamp(target, text, size, center, normal, up, depth, coll):
     ZONES.append((tuple(center), size * max(1.0, len(text) * 0.42) + 1.0))
     cut = text_cutter(text, size, depth + 0.6, coll)
     place(cut, center, normal, up, 0.6, target)
-    # сетка шрифта не сварена (крышки и стенки букв — отдельными кусками) и буквы перекрываются: сварить, разобрать на
-    # буквы (острова), объединить их в один замкнутый резец и вычесть обычным булевым (самопересечения корпуса не трогаем —
-    # режим use_self на корпусе ломал сетку у рукояти, проверка v02)
+    # сетка шрифта не сварена (крышки и стенки букв — отдельными кусками): сварить и разобрать на буквы (острова);
+    # каждую вычесть обычным булевым (самопересечения корпуса не трогаем — режим use_self ломал сетку у рукояти, v02)
     bm = bmesh.new(); bm.from_mesh(cut.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -89,12 +89,85 @@ def stamp(target, text, size, center, normal, up, depth, coll):
         ob = bpy.data.objects.new("_ch", me); coll.objects.link(ob)
         objs.append(ob)
     bm.free()
-    acc = objs[0]
-    for ob in objs[1:]:
-        boolean(acc, ob, op="UNION")
-    # вычитание — до мелкой фаски корпуса (part_receiver.build): по готовой фаске EXACT рвал сетку у рукояти
-    boolean(target, acc)
+    # буквы — по одной: точное вычитание всем резцом сразу на большом корпусе иногда пропускало часть букв («ИЗЛО»
+    # не вырезались, 04.11) и оставляло ребро на четыре грани. После каждой буквы — проверка: объём корпуса уменьшился
+    # (буква вошла в поверхность) и открытых рёбер не прибавилось; иначе откат и повтор со сдвигом на сотые миллиметра
+    import lib as _lib
+    along = _along(normal, up)
+    upv = Vector(up)
+    # попытки: точное булево со сдвигами, точное «с допуском к дырам», быстрое (у точного на большом корпусе бывают
+    # сбои от запуска к запуску — буква не вырезается, по краю рёбра на 3–4 грани)
+    shifts = [(0.0, 0.0, "EXACT", False), (0.013, 0.007, "EXACT", False), (-0.017, 0.011, "EXACT", False),
+              (0.0, 0.0, "EXACT", True), (0.009, -0.019, "EXACT", True), (0.0, 0.0, "FLOAT", False),
+              (0.011, 0.013, "FLOAT", False)]
+    for ob in objs:
+        vol_l = abs(_volume(ob.data))
+        keep = target.data.copy()
+        v0 = _volume(target.data)
+        nm0 = _lib._nonmanifold(target)
+        sh0 = _shells(target.data)
+        exp = vol_l * depth / (depth + 0.6)          # часть буквы ниже плоской поверхности
+        ok = False
+        for k, (da, du, solver, tol) in enumerate(shifts):
+            if k:
+                old = target.data
+                target.data = keep.copy()
+                bpy.data.meshes.remove(old)
+            c2 = ob.copy(); c2.data = ob.data.copy(); coll.objects.link(c2)
+            c2.data.transform(Matrix.Translation((along * da + upv * du) * MM))
+            boolean(target, c2, solver=solver, hole_tolerant=tol)
+            removed = v0 - _volume(target.data)
+            if (_lib._nonmanifold(target) <= nm0 and 0.2 * exp < removed < 1.6 * exp
+                    and _shells(target.data) <= sh0):
+                ok = True
+                break
+            print("STAMP_RETRY", text, k, round(removed * 1e9, 4), round(vol_l * 1e9, 4), "nm", nm0, _lib._nonmanifold(target))
+        if not ok:
+            # ни один сдвиг не помог — букву пропускаем, корпус возвращаем как был (испорченный результат дальше ломал
+            # все вырезы)
+            print("STAMP_FAIL", text)
+            FAILED.append(text)
+            old = target.data
+            target.data = keep
+            bpy.data.meshes.remove(old)
+        else:
+            bpy.data.meshes.remove(keep)
+        me = ob.data
+        bpy.data.objects.remove(ob, do_unlink=True)
+        bpy.data.meshes.remove(me)
     bpy.data.objects.remove(cut, do_unlink=True)
+
+
+def _shells(me):
+    """Число отдельных оболочек (внутренняя лишняя оболочка от сбойного вычитания не меняет числа открытых рёбер)."""
+    n = len(me.vertices)
+    parent = list(range(n))
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    for e in me.edges:
+        a, b = find(e.vertices[0]), find(e.vertices[1])
+        if a != b:
+            parent[a] = b
+    return len({find(i) for i in range(n)})
+
+
+def _volume(me):
+    """Объём по треугольникам (у корпуса крышки — большие вогнутые многоугольники, веером объём считается неверно)."""
+    bm = bmesh.new(); bm.from_mesh(me)
+    bmesh.ops.triangulate(bm, faces=bm.faces, quad_method="BEAUTY", ngon_method="EAR_CLIP")
+    vol = bm.calc_volume(signed=True)
+    bm.free()
+    return vol
+
+
+def _along(normal, up):
+    """Направление вдоль строки (поперёк нормали и верха)."""
+    n = Vector(normal); u = Vector(up)
+    return u.cross(n).normalized()
 
 
 def emblem_cutter(r_out, depth, coll):
@@ -163,6 +236,7 @@ def apply(target, C):
     if not getattr(lib, "MARKINGS_GEOMETRY", False):
         return []
     ZONES.clear()
+    FAILED.clear()
     up = target
     mw = up
     L, R = (0, 1, 0), (0, -1, 0)

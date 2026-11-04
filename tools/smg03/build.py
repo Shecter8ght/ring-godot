@@ -43,6 +43,42 @@ def sweep_edges():
         print("SWEEP", o.name, round(w, 2))
 
 
+def drop_wire():
+    """Тела вращения с точками на оси оставляли ребро вдоль оси без граней — убрать (и вершины без рёбер); мелкие дыры —
+    заделать."""
+    import bmesh
+    done = set()
+    for o in bpy.data.objects:
+        if o.type != "MESH" or o.data.name in done:
+            continue
+        done.add(o.data.name)
+        bm = bmesh.new(); bm.from_mesh(o.data)
+        wire = [e for e in bm.edges if not e.link_faces]
+        changed = False
+        if wire:
+            bmesh.ops.delete(bm, geom=wire, context="EDGES")
+            loose = [v for v in bm.verts if not v.link_edges]
+            if loose:
+                bmesh.ops.delete(bm, geom=loose, context="VERTS")
+            changed = True
+        # мелкие дыры (точное булево изредка оставляет в дне буквы гравировки дыру в доли миллиметра) — заделать;
+        # незамкнутых оболочек по замыслу у этой модели нет
+        border = [e for e in bm.edges if len(e.link_faces) == 1]
+        if border:
+            res = bmesh.ops.holes_fill(bm, edges=border, sides=16)
+            if res["faces"]:
+                print("HOLES_FILLED", o.name, len(res["faces"]))
+                changed = True
+        if changed:
+            bm.to_mesh(o.data)
+        bm.free()
+        if changed and o.get("_fin"):
+            # перенос через bmesh сбрасывает свои нормали — взвешенные и ровные на плоскостях заново
+            lib.weighted(o)
+            lib.apply_all(o)
+            lib.flat_panels(o)
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     out_path = argv[0] if argv else os.path.join(lib.HERE, "..", "..", "_asset_src", "smg03", "SMG03_geometry.blend")
@@ -60,6 +96,7 @@ def main():
             print("PART_DONE", p)
     if "rig" not in stages:
         sweep_edges()
+    drop_wire()
     tri = sum(lib.tris(o) for o in bpy.data.objects if o.type == "MESH")
     print("SMG03_TRIS", tri, "OBJECTS", sum(1 for o in bpy.data.objects if o.type == "MESH"))
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

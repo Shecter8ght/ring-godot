@@ -7,10 +7,12 @@ import bpy
 from lib import MM, HALF_W, lathe, prism_xy, cyl, boolean, finish_small, apply_transform, v
 from part_receiver import GRIP_HALF_W
 
-# (x, z, тип, стороны, деталь-хозяин): тип big — ось Ø13, small — винт Ø9; стороны: «LR» — обе, «L» — только слева
+# (x, z, тип, стороны, деталь-хозяин): тип big — ось Ø13, small — винт Ø9; стороны: «LR» — обе, «L» — только слева.
+# Оси переднего блока на X 40 и 90: справа на их месте — винты боковой планки (part_receiver), слева — головки осей
+# (у настоящего Gen II и у h1ggs слева планки нет).
 PINS = [
-    (40.5, 38.0, "big", "LR", "Receiver"), (90.0, 0.0, "big", "LR", "Receiver"),
-    (40.5, 0.0, "big", "LR", "Receiver"), (-105.0, 37.5, "big", "LR", "Receiver"),
+    (40.5, 38.0, "big", "LR", "Receiver"), (-105.0, 37.5, "big", "LR", "Receiver"),
+    (40.0, 1.5, "big", "L", "Receiver"), (90.0, 1.5, "big", "L", "Receiver"),
     (0.0, 46.0, "small", "L", "Receiver"),
     (20.0, -5.0, "small", "LR", "Receiver"), (-55.0, -36.0, "small", "LR", "Receiver"),
     (-70.0, -88.0, "small", "LR", "Receiver"), (-93.0, -100.0, "big", "LR", "Receiver"),

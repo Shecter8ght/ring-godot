@@ -54,7 +54,7 @@ def build(ctx):
     # затвор и выбрасыватель — ход назад по X (рукоятка тянет затвор, затвор рукоятку — нет)
     bm = empty("Bolt_mover", (0, 0, 0), R, root, size=0.01)
     add_driver(bm, "location", 0, f"-max(bolt, charging_handle)*{BOLT_TRAVEL}*{MM}", ctrl, ["bolt", "charging_handle"])
-    for n in ("Bolt", "Extractor", "Extractor_pin"):
+    for n in ("Bolt", "Extractor", "Extractor_pin", "Firing_pin", "Firing_pin_retainer", "Bolt_arm_pin"):
         if ob(n):
             set_parent(ob(n), bm)
     cm = empty("Charging_handle_mover", (0, 0, 0), R, root, size=0.008)
@@ -80,11 +80,11 @@ def build(ctx):
     for n in ("Side_button_front", "Side_button_rear"):
         if ob(n):
             add_driver(ob(n), "location", 1, f"-0.4*{MM}*side_buttons", ctrl, ["side_buttons"])
-    # прицельные: целик складывается вперёд (+Y-поворот), мушка — назад
+    # прицельные: целик складывается вперёд (+Y-поворот), мушка — назад; сложены на 89° (лежат на упоре без касания)
     if ob("Rear_sight_leaf"):
-        add_driver(ob("Rear_sight_leaf"), "rotation_euler", 1, "radians(90.0)*(1.0-rear_sight)", ctrl, ["rear_sight"])
+        add_driver(ob("Rear_sight_leaf"), "rotation_euler", 1, "radians(89.0)*(1.0-rear_sight)", ctrl, ["rear_sight"])
     if ob("Front_sight_leaf"):
-        add_driver(ob("Front_sight_leaf"), "rotation_euler", 1, "-radians(90.0)*(1.0-front_sight)", ctrl, ["front_sight"])
+        add_driver(ob("Front_sight_leaf"), "rotation_euler", 1, "-radians(89.0)*(1.0-front_sight)", ctrl, ["front_sight"])
     # магазины: вниз вдоль своей оси; видимость 13 / 30 — по mag30
     up, fwd = mag_frame()
     mm = empty("Magazine_mover", (0, 0, 0), R, root, size=0.01)

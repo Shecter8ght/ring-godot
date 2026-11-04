@@ -57,7 +57,8 @@ GRIP_ZONE = [(-150.0, 30.0), (-300.0, 30.0), (-300.0, -200.0), (-150.0, -200.0)]
 # нижняя тяга: от горловины шахты (X −76, под корпусом шахты) до низа рукояти — тонкая (6–8 мм), своим телом
 BAR_ZONE = [(-76.0, -104.0), (-140.0, -104.0), (-140.0, -72.0), (-204.0, -72.0), (-214.0, -86.0), (-214.0, -140.0),
             (-76.0, -140.0)]
-GUARD_ZONE = [(-134.0, -6.0), (-178.0, 4.0), (-178.0, -26.0), (-134.0, -34.0)]
+# перекладина скобы — только ниже кончика спуска (Z −10.7): к рукояти примыкает под крючком, вверх по ней не идёт
+GUARD_ZONE = [(-130.0, -8.0), (-176.0, -11.5), (-176.0, -26.0), (-130.0, -34.0)]
 OVERLAP = 3.0
 # радиус скругления углов контура в плоскости — с запасом над радиусом кромок в 3D (rounded_prism): иначе во
 # вогнутых углах кольца сдвига сходятся в точку, грани вырождаются и булевы EXACT ломаются
@@ -204,6 +205,7 @@ def main():
     body = cv2.bitwise_or(cv2.bitwise_or(raw["upper"], raw["magwell"]), strip)
     body = cv2.morphologyEx(body, cv2.MORPH_CLOSE, elc)
     out["parts"]["body"] = contours(round_mask(body, 3.8))
+    out["parts"]["body_r11"] = contours(round_mask(body, 11.0))
     loop = cv2.bitwise_and(th, cv2.dilate(cv2.bitwise_or(grip_z, bar_z), el))
     loop[guard_z > 0] = 0
     loop[strip_z > 0] = cv2.bitwise_and(loop, bar_z)[strip_z > 0]
@@ -229,7 +231,7 @@ def main():
     k = 3
     big = cv2.resize(img, None, fx=k, fy=k, interpolation=cv2.INTER_CUBIC)
     cols = {"upper": (0, 0, 255), "magwell": (0, 170, 0), "trigger_housing": (255, 0, 0), "trigger": (0, 200, 255),
-            "magazine_photo": (200, 0, 200), "th_strip": (255, 120, 0), "th_grip": (120, 0, 255), "th_guard": (0, 120, 255), "th_bar": (0, 200, 120), "body": (0, 0, 0), "th_loop": (0, 90, 0), "hand_hole": (0, 200, 200)}
+            "magazine_photo": (200, 0, 200), "th_strip": (255, 120, 0), "th_grip": (120, 0, 255), "th_guard": (0, 120, 255), "th_bar": (0, 200, 120), "body": (0, 0, 0), "th_loop": (0, 90, 0), "hand_hole": (0, 200, 200), "body_r11": (90, 90, 90)}
     for nm, items in out["parts"].items():
         for it in items:
             for poly in [it["outer"]] + it["holes"]:
