@@ -637,6 +637,12 @@ tools/godot.cmd --windowed --resolution 1920x1080 res://tools/mosin_hands_shots.
                                                               # (рукоять вверх, отвод, правая кисть на шаре), в прицел ПУ, перезарядка с открытым затвором,
                                                               # сбоку, мировая модель (LOD1); снимки mosin_hands_* (MOSIN_ONLY=hip,fire,ads)
 tools/godot.cmd --windowed --resolution 1100x760 res://tools/mosin_pu_shots.tscn  # Мосин — сама модель в студии: ракурсы, затвор открыт, LOD; снимки mosin_pu_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/smg03/build.py -- <out.blend>
+                                                              # ПП по мотивам KRISS Vector Gen II (wpn_smg_03), high-poly, форма ждёт приёмки: контуры со снимков KRISS
+                                                              # (python -X utf8 tools/smg03/trace_photos.py <снимки> <trace> → profiles.py <trace> → tools/smg03/data/profiles.json;
+                                                              # приклад — trace_stock.py), детали part_*.py, подвижное — пустышка SMG03_Controls; выдача — -b <out.blend>
+                                                              # --python tools/smg03/delivery.py -- <файл>; проверки -b <файл> --python tools/smg03/check_overlaps.py (16 положений)
+                                                              # | measure.py (габариты против заводских) | shots.py -- <папка> [виды] (наложение на снимки KRISS, крупные планы)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
