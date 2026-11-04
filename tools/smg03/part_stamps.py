@@ -10,7 +10,7 @@ from lib import MM, HALF_W, boolean, renormal
 from part_controls import SELECTOR_PIVOT, SAFETY_PIVOT
 
 FONT = "C:/Windows/Fonts/arialbd.ttf"
-NAME = "ИЗЛОМ-45"               # кандидат названия — до решения владельца (asset-state.md)
+NAME = "ИЗЛОМ-45"               # название принято владельцем 2026-11-04
 CALIBER = "КАЛ .45"
 SERIAL = "№ 45-0412"            # вымышленный номер
 
