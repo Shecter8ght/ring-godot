@@ -1,4 +1,7 @@
-"""Generate the proposed sanatorium room schedule and readable floor-plan diagrams.
+"""ARCHIVED: generate the former rectangular sanatorium proposal for historical study.
+
+Superseded by the owner's shell-shaped building concept on 2026-11-04.
+Do not use these layouts or capacities as the current design; see mission_helicopter.md 6.6.
 
 Design documentation only: this does not create levels or prescribe building compliance.
 Coordinates are nominal architectural metres; game width/depth is x1.3 (AGENTS.md).
@@ -252,7 +255,7 @@ def main():
     floors=[main_floor(n) for n in (1,2,3)]
     floors += [residential_floor(b,n) for b in ('A','B') for n in (1,2,3,4)]
     validate(floors)
-    data={'status':'proposal_not_approved','version':'v01','units':'nominal_metres',
+    data={'status':'archived_superseded_shell_concept_2026-11-04','version':'v01','units':'nominal_metres',
           'game_horizontal_multiplier':1.3,'floors':floors,
           'capacity':{'rooms_per_residential_floor':12,'beds_per_room':2,'beds_per_building':96,'total_beds':192},
           'parking_proposal':{'A':48,'B':48,'M':32,'cars_total':128,'coach_pockets_M':2}}
