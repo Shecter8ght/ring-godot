@@ -64,6 +64,7 @@ var handheld_light_id: String = ""
 var handheld_light_on: bool = false
 var handheld_light_condition: float = 1.0
 var handheld_flashlight: HandheldFlashlight
+var phone_equipped: bool = false
 
 ## Песочница: стволы по ключам (пресеты WeaponDb.sandbox()) — записи оружия.
 var sandbox_weapons: Dictionary = {}
@@ -318,6 +319,9 @@ func _ready() -> void:
 	handheld_flashlight.name = "HandheldFlashlight"
 	handheld_flashlight.actor = self
 	add_child(handheld_flashlight)
+	var phone_world := PhoneWorldModel.new()
+	phone_world.actor = self
+	add_child(phone_world)
 	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
@@ -378,7 +382,7 @@ func _setup_sync() -> void:
 	# у каждого peer своё — пакеты хоста не находили узел у клиента
 	sync.name = "Sync"
 	var config := SceneReplicationConfig.new()
-	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:handheld_light_id", ".:handheld_light_on", ".:handheld_light_condition", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:on_ladder", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
+	for prop in [".:global_position", "Body:rotation", ".:stance", ".:aiming", ".:weapon_id", ".:weapon_mods", ".:weapon_mag", ".:weapon_condition", ".:weapon_engraving", ".:weapon_rounds", ".:weapon_signal_ammo", ".:light_on", ".:laser_on", ".:handheld_light_id", ".:handheld_light_on", ".:handheld_light_condition", ".:phone_equipped", ".:lean", ".:look_pitch", ".:animation_event", ".:animation_event_seq", ".:airborne", ".:on_ladder", ".:weapon_obstruction", ".:weapon_ready_up", ".:grenade_equipped", ".:throwable_id", ".:grenade_in_hand", ".:grenade_pin", ".:grenade_charge", ".:grenade_underhand"]:
 		var path := NodePath(prop)
 		config.add_property(path)
 		config.property_set_replication_mode(path, SceneReplicationConfig.REPLICATION_MODE_ON_CHANGE)
@@ -1526,6 +1530,10 @@ func show_kill_marker() -> void:
 
 ## Стрельба и перезарядка; гранату сначала выбирают отдельной клавишей, затем бросают мышью.
 func _combat(delta: float) -> void:
+	if Phone.blocks_combat(self):
+		aiming = false
+		_fire_queue = 0.0
+		return
 	if PauseMenu.shown:
 		_cancel_grenade_prepare()
 		return

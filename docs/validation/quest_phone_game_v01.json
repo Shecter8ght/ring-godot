@@ -1,0 +1,143 @@
+{
+  "date": "2026-11-04",
+  "stage": "game integration",
+  "status": "implemented; starter grip editable, not finally accepted",
+  "game_blend": "E:\\Models Blender\\PROPS\\QuestPhone\\game\\QuestPhone_Game_v01.blend",
+  "game_blend_sha256": "79cdabf05fdca1d1019108cfb92cbd8afb90ebfc7c0b23fa30b9ed497523dc8b",
+  "source_sha256": {
+    "QuestPhone_v02.blend": "13e406a76661eefa9f73d0d8ad80749009dd5704cef9601e0a93c40073388bdb",
+    "QuestPhone_factory_v01.blend": "8f3539ab6422f2533259945d459c2db4809368c897458a3a9456ff4e5177f7e2"
+  },
+  "triangles": 4910,
+  "limit": 5000,
+  "mesh_nodes": 9,
+  "packed_images": 4,
+  "UV": {
+    "layout_fill": 0.5175,
+    "raster_fill": 0.531,
+    "overlap": 0,
+    "median_px_cm": 75.5,
+    "exception": "Long panels and small padded islands; panels split for packing. Separate dynamic screen and optical glass do not use atlas. One 2K atlas retained."
+  },
+  "maps": {
+    "size": 2048,
+    "channels": [
+      "sRGB albedo",
+      "Non-Color tangent normal",
+      "Non-Color ORM"
+    ],
+    "review": "Two flatness warnings reviewed: accepted clean factory finish; zero fail. Native/baked matched studio and Forward+ screenshots inspected.",
+    "roughness_imports_bad": 0
+  },
+  "tests": {
+    "asset": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_asset.log"
+    },
+    "gear": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_gear.log"
+    },
+    "steps": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_steps.log"
+    },
+    "tutorial": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_tutorial.log"
+    },
+    "field": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_field.log"
+    },
+    "functional": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_functional.log"
+    },
+    "asset_shots": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_asset_shots.log"
+    },
+    "icon": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_icon.log"
+    },
+    "import": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_import.log"
+    },
+    "grip": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\final_grip.log"
+    },
+    "enet_host": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\phone_net_host.log"
+    },
+    "enet_client1": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\phone_net_client1.log"
+    },
+    "enet_client2": {
+      "status": "passed",
+      "log": "_asset_src\\quest_phone\\checks\\phone_net_client2.log"
+    },
+    "mission": {
+      "status": "passed",
+      "field_link": true,
+      "packet_ready": true
+    }
+  },
+  "screenshots": [
+    "docs/screens/quest_phone_game_back.png",
+    "docs/screens/quest_phone_game_cameras.png",
+    "docs/screens/quest_phone_game_front.png",
+    "docs/screens/quest_phone_game_usb.png",
+    "docs/screens/quest_phone_game_work.png",
+    "docs/screens/quest_phone_compare_baked_back.png",
+    "docs/screens/quest_phone_compare_baked_front.png",
+    "docs/screens/quest_phone_compare_native_back.png",
+    "docs/screens/quest_phone_compare_native_front.png",
+    "docs/screens/quest_phone_fps_camera.png",
+    "docs/screens/quest_phone_fps_gallery.png",
+    "docs/screens/quest_phone_fps_messages.png",
+    "docs/screens/quest_phone_fps_orders.png",
+    "docs/screens/phone_mission_camera.png",
+    "docs/screens/phone_mission_coupe.png",
+    "docs/screens/phone_mission_kit.png",
+    "docs/screens/phone_mission_modem.png"
+  ],
+  "limitations": [
+    "Starter grip is editable in PHONE_GRIP.cmd, @phone; no owner acceptance of final pose claimed.",
+    "Godot camera glass uses Fresnel tint approximation, not optical refraction simulation.",
+    "Remote device follows wrist; no new full-body phone animation clip.",
+    "Photos persist in gallery; unsubmitted quest facts follow existing raid rules and are not recovered from old images.",
+    "Single-position performance sample, not a whole-map stress test; 30 Hz extra scene rendering raises tail frame time."
+  ],
+  "performance": {
+    "renderer": "Forward+",
+    "GPU": "RTX 5070 Ti",
+    "resolution": [
+      1600,
+      900
+    ],
+    "vsync": false,
+    "frames_each": 120,
+    "stowed_ms": {
+      "median": 10.0,
+      "p90": 10.7
+    },
+    "live_camera_ms": {
+      "median": 9.979,
+      "p90": 17.529
+    },
+    "scope": "Actual hangar on zone01_mall; enemies stopped, same fixed main camera."
+  },
+  "game_files": {
+    "quest_phone.glb": "48cdd83f2a63e869ca312b5bef76ba4c6eb00fbbb41c957d7aaac4a4a5a31498",
+    "quest_phone.json": "ae659f74b4500783911a04727f4c33f9bd5ea74bebc73170fcc928060eaa26d1",
+    "quest_phone_albedo.png": "332fcdcc0b4250d459fea722bbe4f94beb6a1de2d8d29cc0bd176f90725a2184",
+    "quest_phone_normal.png": "2fb59206fe79e908f09990f46961be8bfe907dd803283719c9b6d14515b73110",
+    "quest_phone_orm.png": "cf0227354c8a3ee35b323820493aa6684594e7c9ac64052dad9c464e7c9f8f95"
+  }
+}

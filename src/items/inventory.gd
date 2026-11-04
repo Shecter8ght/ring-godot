@@ -549,6 +549,8 @@ func move_between(src: String, idx: int, dst: String, x: int, y: int, r: bool) -
 	var from: Array = list_of(src)
 	if idx < 0 or idx >= from.size() or grid_of(dst) == Vector2i.ZERO or not ItemDb.grid_accepts(dst, from[idx]):
 		return false
+	if PhoneGear.personal(from[idx]):
+		return false
 	# клетка не задана (x < 0) — куда влезет
 	if x < 0:
 		var one: Dictionary = (from[idx] as Dictionary).duplicate(true)
@@ -583,6 +585,8 @@ func move(idx: int, x: int, y: int, r: bool) -> bool:
 
 ## Забирает до n штук id (патроны, лекарства); возвращает, сколько забрал (хост).
 func remove(id: String, n: int) -> int:
+	if id == PhoneGear.ID:
+		return 0
 	var list := items.duplicate(true)
 	var left := n
 	var i := list.size() - 1
@@ -597,6 +601,8 @@ func remove(id: String, n: int) -> int:
 
 ## Вынимает из items[idx] до n штук; возвращает вынутое (хост).
 func remove_at(idx: int, n: int) -> Dictionary:
+	if idx >= 0 and idx < items.size() and PhoneGear.personal(items[idx]):
+		return {}
 	var list := items.duplicate(true)
 	var out := ItemDb.remove_at(list, idx, n)
 	if not out.is_empty():
@@ -606,7 +612,7 @@ func remove_at(idx: int, n: int) -> Dictionary:
 
 ## Всё содержимое наружу (смерть — рюкзак и снаряжение в тело), пусто (хост).
 func take_all() -> Array:
-	var all := items.duplicate(true) + buffer.duplicate(true) + trade.duplicate(true)
+	var all := PhoneGear.without_phone(items + buffer + trade)
 	buffer = []
 	trade = []
 	for slot in equipment:
@@ -735,12 +741,14 @@ func take_entry(where: String, idx: int) -> Dictionary:
 		equipment = eq
 		if slot == "backpack":
 			# бросил рюкзак: в карманы — что влезло, остальное выпадает вместе с ним
-			var rf := ItemDb.refit(items, backpack_grid())
+			var rf := ItemDb.refit(PhoneGear.phone_first(items), backpack_grid())
 			items = rf[0]
 			spilled = rf[1]
 		return e
 	var list: Array = list_of(where).duplicate(true)
 	if idx < 0 or idx >= list.size():
+		return {}
+	if PhoneGear.personal(list[idx]):
 		return {}
 	var out: Dictionary = list[idx]
 	list.remove_at(idx)

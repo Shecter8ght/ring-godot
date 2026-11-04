@@ -1,0 +1,7 @@
+{
+ "right": {"position": [0.024, -0.038, -0.055], "rotation_degrees": [0, 0, 90], "curl": [-20, -35, -25]},
+ "thumb_button": [0.043, -0.039, 0.001],
+ "back_contacts": {"Index": [0.012, -0.005, -0.015], "Middle": [-0.018, -0.026, -0.015], "Ring": [-0.018, -0.048, -0.015], "Pinky": [-0.010, -0.066, -0.015]},
+ "left_rest": [-0.30, -0.55, 0.10],
+ "note": "Phone axes: X right, Y up, +Z display. Editable right-hand contact; thumb presses the side shutter."
+}

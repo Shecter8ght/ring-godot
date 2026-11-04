@@ -44,3 +44,26 @@ UCUPaint и студию с упакованным HDRI. Процедурная 
 В выданном файле экран выключен. Заводская отделка factory_v01 принята владельцем 2026-11-04 («принимаю»).
 Принятый .blend не перезаписывать: последующие изменения — в новой версии.
 Отпечатки, износ, игровой bake/LOD, хват и интерфейс телефона сюда не включены.
+
+## Игровая версия
+
+`game.py` читает принятый factory_v01 из библиотеки, проверяет его hash и создаёт производные
+файлы в `_asset_src/quest_phone/game/`. Мастер не сохраняет. Команды в таком порядке:
+
+```powershell
+& 'D:/ПРОГРАММЫ/Blender 5/blender.exe' --background --factory-startup --python-exit-code 1 --python tools/quest_phone/game.py -- lp
+# тем же вызовом Blender: bake -> pack -> export
+tools/godot.cmd --headless --import
+& 'D:/ПРОГРАММЫ/Blender 5/blender.exe' --background --factory-startup --python-exit-code 1 --python tools/quest_phone/game.py -- imports
+tools/godot.cmd --headless --import
+tools/godot.cmd --headless res://tools/quest_phone_shots.tscn -- check
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/phone_test.tscn
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/phone_grip_lab.tscn
+```
+
+4910/5000 треугольников, один 2K атлас, отдельные экран/оптика/кнопки, штатный LOD импортёра.
+`compare.py` даёт native/baked с одинаковым светом. `phone_net_test.tscn -- host`, затем два
+`-- client` (порт 17798) проверяют три настоящих peer. `phone_mission_shots.tscn` снимает
+купе и устройство на уровне с отдельным тестовым профилем. Экран — два SubViewport,
+постоянный инвентарь — PhoneGear, стартовый хват — phone_grip.json + профиль @phone.
+Ограничения UV, стекла и анимации, управление и сохранения — `docs/assets/quest_phone.md`.

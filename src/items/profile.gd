@@ -159,6 +159,7 @@ static func ensure() -> void:
 		_starter()
 		save()
 	grow_unlocked()
+	PhoneGear.ensure_profile()
 
 
 ## Первый запуск: немного денег и базовый набор в тайнике.
@@ -471,6 +472,8 @@ static func transfer(from: String, idx: int, to: String, x: int, y: int, r: bool
 	var src := list_of(from)
 	if idx < 0 or idx >= src.size() or grid_of(to) == Vector2i.ZERO or not ItemDb.grid_accepts(to, src[idx]):
 		return false
+	if PhoneGear.personal(src[idx]):
+		return false
 	if to == "rig" and not ItemDb.rig_accepts_at(equipment, src[idx], x, y, r):
 		return false
 	var e: Dictionary = (src[idx] as Dictionary).duplicate(true)
@@ -505,6 +508,8 @@ static func backpack_to_stash(idx: int, n: int) -> bool:
 
 static func _move(from: Array, to: Array, idx: int, n: int, cap: Vector2i) -> bool:
 	if idx < 0 or idx >= from.size():
+		return false
+	if PhoneGear.personal(from[idx]):
 		return false
 	var probe: Dictionary = (from[idx] as Dictionary).duplicate(true)
 	probe.n = mini(n, int(probe.n))
@@ -598,7 +603,7 @@ static func equip_from(from: String, idx: int, want: String = "") -> bool:
 
 ## Сменили рюкзак (или сняли): вещи — в его сетку (без рюкзака — по карманам), что не влезло — в тайник.
 static func _refit_backpack() -> void:
-	var r := ItemDb.refit(backpack, grid_of("backpack"))
+	var r := ItemDb.refit(PhoneGear.phone_first(backpack), grid_of("backpack"))
 	backpack = r[0]
 	for e in r[1]:
 		ItemDb.add_to(stash, e, stash_grid())
@@ -614,6 +619,8 @@ static func discard(where: String, idx: int) -> bool:
 	else:
 		var list := list_of(where)
 		if idx < 0 or idx >= list.size():
+			return false
+		if PhoneGear.personal(list[idx]):
 			return false
 		list.remove_at(idx)
 	save()
@@ -1086,6 +1093,8 @@ static func sell(idx: int, n: int, from: String = "stash") -> bool:
 	var list := list_of(from)
 	if idx < 0 or idx >= list.size():
 		return false
+	if PhoneGear.personal(list[idx]):
+		return false
 	var out := ItemDb.remove_at(list, idx, n)
 	if out.is_empty():
 		return false
@@ -1116,6 +1125,8 @@ static func sell_many(picks: Array) -> int:
 			if i == last or i < 0 or i >= list.size():
 				continue
 			last = i
+			if PhoneGear.personal(list[i]):
+				continue
 			var out := ItemDb.remove_at(list, i, int(list[i].n))
 			if not out.is_empty():
 				total += sell_price(out)
@@ -1145,10 +1156,11 @@ static func unpack(from: String, idx: int, expected_id: String) -> bool:
 ## Вход в рейд: снаряжение и рюкзак уходят с профиля (на кону), возвращаются при эвакуации.
 static func take_loadout() -> Dictionary:
 	ensure()
+	PhoneGear.ensure_profile()
 	var out := {"equipment": equipment.duplicate(true), "backpack": backpack.duplicate(true),
 		"pocket": pocket.duplicate(true), "pocket_grid": pocket_grid(), "profile_id": profile_id}
 	equipment = {}
-	backpack = []
+	backpack = PhoneGear.retained_profile()
 	save()
 	return out
 
@@ -1172,6 +1184,7 @@ static func return_loadout(eq: Dictionary, items: Array, loot_value: int = 0) ->
 		trust += Balance.TRUST_BONUS
 	equipment = eq.duplicate(true)
 	backpack = items.duplicate(true)
+	PhoneGear.ensure_profile()
 	# наклейка «Счёт» на вынесенном в руках стволе — зарубка за эвакуацию
 	for slot: String in ItemDb.WEAPON_SLOTS:
 		if equipment.get(slot) is Dictionary:

@@ -555,6 +555,12 @@ func _stash_menu(name: String, idx: int, at: Vector2) -> void:
 	var entry: Dictionary = (list[idx] as Dictionary).duplicate(true)
 	menu.add_item("Описание")
 	acts.append(func() -> void: ItemInfo.open(self, entry))
+	if PhoneGear.personal(entry):
+		menu.id_pressed.connect(func(i: int) -> void: acts[i].call())
+		menu.popup_hide.connect(menu.queue_free)
+		_root.add_child(menu)
+		menu.popup(Rect2i(Vector2i(at), Vector2i.ZERO))
+		return
 	if Balance.LOOT_PACKS.has(id):
 		menu.add_item("Вскрыть упаковку")
 		acts.append(func() -> void:

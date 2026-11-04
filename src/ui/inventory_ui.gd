@@ -636,6 +636,9 @@ func _item_menu(me: Player, role: String, idx: int, at: Vector2) -> void:
 	var info := it.duplicate(true)
 	var names: Array = ["Описание"]
 	var acts: Array = [func() -> void: ItemInfo.open(self, info)]
+	if PhoneGear.personal(it):
+		_popup(at, names, acts)
+		return
 	if role == "loot":
 		names.append("Взять")
 		acts.append(func() -> void: _take_one(c, idx))

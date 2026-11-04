@@ -1598,6 +1598,8 @@ func _put(peer_id: int, path: NodePath, idx: int, from: String = "backpack", x: 
 	c.ensure_grid()
 	var src := pl.inventory.list_of(from).duplicate(true)
 	var entry: Dictionary = (src[idx] as Dictionary).duplicate(true)
+	if PhoneGear.personal(entry):
+		return
 	var list := c.items.duplicate(true)
 	var k := ItemDb.put_at(list, entry, c.grid, x, y, r) if x >= 0 else ItemDb.add_to(list, entry, c.grid)
 	if k <= 0:

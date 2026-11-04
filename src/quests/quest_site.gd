@@ -98,6 +98,9 @@ func request_use() -> void:
 					return
 	# точка съёмки: кадр видоискателя у снимающего, снимок засчитывает хост
 	if bool(spec.get("photo", false)) and active:
+		if quest_id == "car_recovery":
+			Phone.frame_site(self)
+			return
 		Quests.hud.photo_flash()
 	_done()
 
