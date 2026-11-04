@@ -12,8 +12,8 @@ from part_receiver import rounded_rect_xz, pill_xz, mag_frame, MAG_CENTER
 
 TRIGGER_PIVOT = (-150.0, 22.0)     # ось спуска (внутри коробки, оценка)
 TRIGGER_HALF_W = 3.2
-SAFETY_PIVOT = (-153.0, 39.0)
-SELECTOR_PIVOT = (-50.0, 37.0)
+SAFETY_PIVOT = (-183.5, 39.0)      # снимок A (проверка v02: было на 31 мм впереди)
+SELECTOR_PIVOT = (-72.0, 38.5)     # лист KRISS SMG (проверка v02: хвост был над окном выброса)
 LEVER_T = 2.6                       # толщина флажков
 BOLT_REL = (-38.0, -10.0)          # кнопка задержки справа
 MAG_REL = (-7.0, -38.0)            # лопатка защёлки магазина у переднего ребра шахты
@@ -164,10 +164,10 @@ def side_block(C, mw):
 def build(ctx):
     C = ctx["coll"]["Controls"]
     t = trigger(C)
-    sl = lever("Safety_L", SAFETY_PIVOT, 4.4, (-166.5, 36.0), 1, C)
-    sr = lever("Safety_R", SAFETY_PIVOT, 4.4, (-166.5, 36.0), -1, C)
-    fl = lever("Selector_L", SELECTOR_PIVOT, 4.0, (-39.0, 32.5), 1, C)
-    fr = lever("Selector_R", SELECTOR_PIVOT, 4.0, (-39.0, 32.5), -1, C)
+    sl = lever("Safety_L", SAFETY_PIVOT, 4.4, (-197.0, 36.0), 1, C)
+    sr = lever("Safety_R", SAFETY_PIVOT, 4.4, (-197.0, 36.0), -1, C)
+    fl = lever("Selector_L", SELECTOR_PIVOT, 4.0, (-60.5, 33.5), 1, C)
+    fr = lever("Selector_R", SELECTOR_PIVOT, 4.0, (-60.5, 33.5), -1, C)
     ml = mag_release("Mag_release_L", 1, C)
     mr = mag_tab_right(C)
     br = bolt_release(C)

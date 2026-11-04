@@ -192,7 +192,7 @@ def magwell_features(o, C):
     # рёбра переда шахты (снимки A, B, владельца 04): шаг 3.6, канавка 1.6 × 1.0 — от переднего блока до низа
     # канавки — по плоской части передней грани (кончаются до скруглённых боковых кромок R 3: иначе фаска их концов
     # перехлёстывается)
-    ribs(o, pts, edge_run(pts, (21.0, -22.0), (-27.0, -104.0), (-2.0, -62.0)), 3.6, 1.6, 1.0, HALF_W - 3.4, C, "_mwribs")
+    ribs(o, pts, edge_run(pts, (21.0, -22.0), (-27.0, -104.0), (-2.0, -62.0)), 3.6, 1.6, 1.0, HALF_W - 4.6, C, "_mwribs")
     # гнёзда органов управления: кнопка задержки справа (X −38, Z −10) и лопатки защёлки магазина у переднего ребра
     c = prism_xz("_brp", rounded_rect_xz(-43.2, -32.8, -14.8, -5.2, 2.0), -HALF_W - 3, -HALF_W + 3.8, C)
     boolean(o, c)
@@ -290,12 +290,13 @@ def narrow(target, zone_xz, section_yz, x0, x1, C, name="_narrow"):
     bpy.data.objects.remove(a, do_unlink=True)
 
 
-def _bodies(name, prof_name, half, r, C, mat=None):
+def _bodies(name, prof_name, half, r, C, mat=None, tri_caps=False):
     """Все куски профиля prof_name — скруглённые призмы, объединённые в одно тело."""
     items = PROFILES["parts"][prof_name]
     objs = []
     for k, it in enumerate(items):
-        objs.append(rounded_prism(name if k == 0 else f"_{name}{k}", [tuple(p) for p in it["outer"]], -half, half, r, C, mat))
+        objs.append(rounded_prism(name if k == 0 else f"_{name}{k}", [tuple(p) for p in it["outer"]], -half, half, r, C, mat,
+                                  tri_caps=tri_caps))
     o = objs[0]
     for b in objs[1:]:
         boolean(o, b, op="UNION")
@@ -304,10 +305,19 @@ def _bodies(name, prof_name, half, r, C, mat=None):
 
 def loop_features(o, C):
     """Рукоять с нижней тягой («петля», 31 мм) и перекладина скобы (13 мм) — заодно с корпусом."""
-    g = _bodies("_loop", "th_loop", GRIP_HALF_W, 2.0, C)
+    # рукоять и нижняя тяга — двумя телами с близкими радиусами кромок (одним вогнутым контуром крышка разбивалась на
+    # треугольники поперёк окна петли — «плёнка», проверка v02)
+    g = _bodies("_grip", "th_grip", GRIP_HALF_W, 2.0, C)
+    bar = _bodies("_bar", "th_bar", GRIP_HALF_W, 1.7, C)
     b = _bodies("_guard", "th_guard", GUARD_HALF_W, 1.5, C)
     boolean(o, g, op="UNION")
+    boolean(o, bar, op="UNION")
     boolean(o, b, op="UNION")
+    # окно петли — вычесть по контуру отверстия со снимка, ужатому на 2.5 мм: убирает натянутую поперёк окна «плёнку»
+    # (проверка v02), стенки окна не задевает
+    for i, it in enumerate(PROFILES["parts"].get("hand_hole", [])):
+        c = prism_xz(f"_hh{i}", [tuple(p) for p in it["outer"]], -40.0, 40.0, C)
+        boolean(o, c)
     gp = [tuple(p) for p in max(PROFILES["parts"]["th_grip"], key=lambda it: len(it["outer"]))["outer"]]
     ribs(o, gp, edge_run(gp, (-183.0, -18.0), (-203.0, -74.0), (-195.0, -50.0)), 3.4, 1.5, 0.9, GRIP_HALF_W - 2.6, C,
          "_gripfront")
@@ -318,12 +328,21 @@ def loop_features(o, C):
     side_recess(o, panel, 0.6, C, half=GRIP_HALF_W)
 
 
+def _panel_to(zmin):
+    """Линия шва шахта / спусковая коробка до высоты zmin (последняя точка — на пересечении диагонали с zmin)."""
+    out = [p for p in PANEL_LINE if p[1] > zmin]
+    a = out[-1]
+    b = next(p for p in PANEL_LINE if p[1] <= zmin)
+    t = (zmin - a[1]) / (b[1] - a[1])
+    return out + [(a[0] + (b[0] - a[0]) * t, zmin)]
+
+
 def seams(o, C):
     """Швы деталей прототипа — канавки 1.2 × 0.45 (корпус одним телом): низ коробки над шахтой (Z 15), задняя грань
     переднего блока (X 22), дуга и диагональ между шахтой и спусковой коробкой."""
     for s_ in (1, -1):
         side_line(o, [(FRONT_BLOCK_REAR_X, FRONT_LOW_Z + 1.0), (FRONT_BLOCK_REAR_X, SEAM_Z), (-60.0, SEAM_Z)] +
-                  [p for p in PANEL_LINE if p[1] > -104.0], 1.2, 0.45, s_, C)
+                  _panel_to(-104.0), 1.2, 0.45, s_, C)
 
 
 def front_face(o, C):
@@ -348,5 +367,15 @@ def build(ctx):
     loop_features(o, C)
     seams(o, C)
     front_face(o, C)
-    finish_small(o, w=0.45, seg=3)
+    # выемка под кулак приклада (шарнир на правом заднем углу), зазор 0.4
+    from part_stock import HINGE_X, HINGE_Y, HINGE_Z
+    c = cyl("_kclr", HINGE_Z[0] + 8.2, HINGE_Z[1] - 8.2, 6.9, C, seg=64, cy=HINGE_X, cz=HINGE_Y, axis="Z")
+    boolean(o, c)
+    # гравировки — точным вычитанием до мелкой фаски; их места фаска не трогает
+    import part_stamps
+    zones = part_stamps.apply(o, C)
+
+    def keep_engraving(center, normal):
+        return any((center - Vector(z)).length < r for z, r in zones)
+    finish_small(o, w=0.45, seg=3, exclude=keep_engraving if zones else None)
     return {"receiver": o, "upper": o, "magwell": o, "trigger_housing": o}

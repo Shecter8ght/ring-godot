@@ -208,6 +208,12 @@ def main():
     loop[guard_z > 0] = 0
     loop[strip_z > 0] = cv2.bitwise_and(loop, bar_z)[strip_z > 0]
     out["parts"]["th_loop"] = contours(round_mask(loop, 3.2))
+    # окно петли (отверстие силуэта между передней тягой, перекладиной скобы, рукоятью и нижней тягой), ужатое на 2.5 мм
+    box = poly_mask([(-120.0, -16.0), (-215.0, -16.0), (-215.0, -110.0), (-120.0, -110.0)], shape)
+    hole = cv2.bitwise_and(cv2.bitwise_not(sm), box)
+    k25 = int(round(2.5 * RES)) * 2 + 1
+    hole = cv2.erode(hole, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k25, k25)))
+    out["parts"]["hand_hole"] = contours(hole)
     # спуск — часть силуэта внутри TRIGGER_CUT
     m = round_mask(cv2.bitwise_and(sm, poly_mask(TRIGGER_CUT, shape)), ROUND_MM["trigger"])
     out["parts"]["trigger"] = contours(m, eps_mm=0.08, min_area_mm2=1.0)
@@ -223,7 +229,7 @@ def main():
     k = 3
     big = cv2.resize(img, None, fx=k, fy=k, interpolation=cv2.INTER_CUBIC)
     cols = {"upper": (0, 0, 255), "magwell": (0, 170, 0), "trigger_housing": (255, 0, 0), "trigger": (0, 200, 255),
-            "magazine_photo": (200, 0, 200), "th_strip": (255, 120, 0), "th_grip": (120, 0, 255), "th_guard": (0, 120, 255), "th_bar": (0, 200, 120), "body": (0, 0, 0), "th_loop": (0, 90, 0)}
+            "magazine_photo": (200, 0, 200), "th_strip": (255, 120, 0), "th_grip": (120, 0, 255), "th_guard": (0, 120, 255), "th_bar": (0, 200, 120), "body": (0, 0, 0), "th_loop": (0, 90, 0), "hand_hole": (0, 200, 200)}
     for nm, items in out["parts"].items():
         for it in items:
             for poly in [it["outer"]] + it["holes"]:

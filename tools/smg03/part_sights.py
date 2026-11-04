@@ -87,15 +87,15 @@ def leaf(name, d, rear, C):
     if rear:
         # кольцо диоптра на стебле
         stem = prism_yz("_stem", fillet([(-1.6, HINGE_Z + 4.0), (1.6, HINGE_Z + 4.0), (1.6, SIGHT_Z), (-1.6, SIGHT_Z)],
-                                        [0.6, 0.6, 0, 0], 3), x0, x1, C)
+                                        [0.6, 0.6, 0, 0], 3), x0 - 0.15, x1 + 0.15, C)
         boolean(o, stem, op="UNION")
-        ring = cyl("_ring", x0, x1, 3.4, C, seg=48, cy=0.0, cz=SIGHT_Z)
+        ring = cyl("_ring", x0 - 0.3, x1 + 0.3, 3.4, C, seg=48, cy=0.0, cz=SIGHT_Z)
         boolean(o, ring, op="UNION")
         hole = cyl("_ap", x0 - 2, x1 + 2, 1.1, C, seg=32, cy=0.0, cz=SIGHT_Z)
         boolean(o, hole)
     else:
         post = prism_yz("_post", fillet([(-1.0, HINGE_Z + 4.0), (1.0, HINGE_Z + 4.0), (0.9, SIGHT_Z), (-0.9, SIGHT_Z)],
-                                        [0.4, 0.4, 0.3, 0.3], 3), x0, x1, C)
+                                        [0.4, 0.4, 0.3, 0.3], 3), x0 - 0.15, x1 + 0.15, C)
         boolean(o, post, op="UNION")
     hp = cyl("_hp", -14, 14, 1.2, C, seg=32, cy=hx, cz=HINGE_Z, axis="Y")
     boolean(o, hp)

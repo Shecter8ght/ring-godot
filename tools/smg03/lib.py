@@ -104,7 +104,7 @@ def smooth_poly(pts, step=0.7, k=3):
     return out
 
 
-def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6):
+def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6, tri_caps=False):
     """Призма по контуру (XZ), выдавленная по Y, с круглыми кромками радиуса r по всему контуру с обеих сторон —
     своей сеткой из колец (сдвинутые контуры), без модификатора фаски: чистые четырёхугольники, булевы после неё
     работают (фаска без зажима на многоугольной боковине ломала EXACT)."""
@@ -130,7 +130,11 @@ def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6):
         for i in range(n):
             j = (i + 1) % n
             bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
-    bm.faces.new(vr[0]); bm.faces.new(list(reversed(vr[-1])))
+    caps = [bm.faces.new(vr[0]), bm.faces.new(list(reversed(vr[-1])))]
+    # вогнутые крышки — сразу на треугольники (ушами по плоскому контуру): после объединений многоугольник крышки
+    # разбивался неверно и натягивал «плёнку» поперёк окна петли (проверка v02)
+    if tri_caps:
+        _bm.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="EAR_CLIP")
     _bm.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me); bm.free()
     for p in me.polygons:
@@ -147,7 +151,7 @@ def _nonmanifold(o):
     return n
 
 
-def finish_small(o, w=0.5, seg=2, angle=30.0):
+def finish_small(o, w=0.5, seg=2, angle=30.0, exclude=None):
     """Второе, мелкое скругление — кромки вырезов, пазов, рёбер (w — мм, без ROUND_K) без зажима фаски (зажим в
     Blender общий на деталь и сводит фаску к долям миллиметра). Если сетка после фаски незамкнута или разлетелась —
     повтор с меньшей шириной; в крайнем случае — с зажимом."""
@@ -161,7 +165,7 @@ def finish_small(o, w=0.5, seg=2, angle=30.0):
         o.data = keep.copy()
         if old is not keep and old.users == 0:
             bpy.data.meshes.remove(old)
-        bevel(o, ww, seg, angle, harden=False, clamp=clamp)
+        bevel(o, ww, seg, angle, harden=False, clamp=clamp, exclude=exclude)
         weighted(o)
         apply_all(o)
         _drop_loose(o)

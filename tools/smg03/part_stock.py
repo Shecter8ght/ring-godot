@@ -29,16 +29,15 @@ def hinge_block(C):
         k.rotation_euler = (0, -math.pi / 2, 0)
         k.location = v(HINGE_X, HINGE_Y, 0)
         apply_transform(k)
+        web = rounded_prism("_web", rounded_rect_xz(HINGE_X - 1.0, REAR_X + 2.0, za, zb, 1.5), HINGE_Y - 5.5,
+                            HINGE_Y + 6.5, 1.2, C, seg=4)
+        boolean(k, web, op="UNION")
         if plate is None:
             plate = k
         else:
             boolean(plate, k, op="UNION")
     plate["owner"] = "Receiver"
     plate["_fin"] = 1
-    rec = bpy.data.objects.get("Receiver")
-    if rec is not None:
-        c = cyl("_kclr", z0 + 8.2, z1 - 8.2, 6.9, C, seg=64, cy=HINGE_X, cz=HINGE_Y, axis="Z")
-        boolean(rec, c)
     pin = cyl("Stock_hinge_pin", z0 - 0.6, z1 + 0.6, 2.5, C, "Steel_black", seg=40, cy=HINGE_X, cz=HINGE_Y, axis="Z")
     cap = lathe("_cap", [(z1 + 0.6, 0.0), (z1 + 0.6, 4.2), (z1 + 2.0, 4.2), (z1 + 2.4, 3.6), (z1 + 2.4, 0.0)], C, seg=48)
     cap.rotation_euler = (0, -math.pi / 2, 0)
