@@ -23,12 +23,17 @@ import sp_finish
 ROOT = "E:/Games/RING-godot"
 TEX = ROOT + "/_asset_src/smg03/tex"
 SPEC = "E:/Models Blender/WEAPONS/Vector — модель/finish-spec.json"
-PROJECT = TEX + "/sp/SMG03_finish_v3.spp"   # v1 — SMG03_finish.spp, v2 — SMG03_finish_v2.spp
+PROJECT = TEX + "/sp/SMG03_finish_v4.spp"   # v1 — SMG03_finish.spp, v2 — …_v2.spp, v3 — …_v3.spp
 LOW = TEX + "/SMG03_low.fbx"
 HIGH = TEX + "/SMG03_high.fbx"
 RES = {"Upper": 4096, "Lower": 4096, "Steel": 4096, "Stock": 2048, "Mag13": 2048, "Mag30": 2048}
 # наибольший размер набора, мм (для трёхпроекционных узоров каталога)
-BBOX_MM = {"Upper": 380.0, "Lower": 300.0, "Steel": 330.0, "Stock": 230.0, "Mag13": 130.0, "Mag30": 260.0}
+def _scene_mm():
+    """Наибольший размер сцены игровой сетки, мм (game_tex.py → scene.json): трёхпроекционная заливка Painter считает
+    плитки на него, а не на габарит набора — с габаритом набора (v1–v4) зерно и пятна выходили в 2–3 раза крупнее
+    карточки (сцена — 1082 мм по высоте из-за опущенных магазинов; замер по карте шероховатости v4: 0.3 мм вместо 0.1)."""
+    with open(TEX + "/scene.json", encoding="utf-8") as f:
+        return json.load(f)["size_mm"]
 # наборы с красными метками (маска <набор>_red.png, tools/smg03/tex_masks.py)
 RED_SETS = ("Upper", "Lower")
 # красная заливка гравировки (эмаль по металлу, полумат): цвет sRGB, шероховатость
@@ -216,7 +221,14 @@ def red_marks(set_name):
 def stack(only=None):
     """Стеки этапа 1 по наборам; итог — _stack_done.txt (когда Painter досчитает), проект сохраняется."""
     import sp_lib
+    # зерно и литьё — в мм трёхпроекционно: у игровой развёртки плотность островов разная, по развёртке зерно меняло
+    # размер на швах (линия и «рёбра» на борту, владелец 05.11, v3)
+    sp_finish.WORLD_GRAIN = True
+    # кромки — только мелкие масштабы кривизны: крупные давали полосы блеска по плоским граням и ступеньку на швах
+    # развёртки («рёбра» на борту у затвора, 05.11)
+    sp_finish.FINE_EDGES = True
     px = _px_mm()
+    scene = _scene_mm()
     log = []
     for t in TS.all_texture_sets():
         name = t.name()
@@ -225,7 +237,7 @@ def stack(only=None):
         parts = parts_of(name)
         if not parts:
             continue
-        log.append(sp_finish.build_set(name, parts, px.get(name, 8.0), BBOX_MM.get(name, 200.0)))
+        log.append(sp_finish.build_set(name, parts, px.get(name, 8.0), scene))
         if name in RED_SETS and os.path.exists(f"{TEX}/masks/{name}_red.png"):
             red_marks(name)
             log.append(f"{name}: красные метки")

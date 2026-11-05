@@ -32,13 +32,23 @@ INSET_MM = 0.15                    # точка пикселя — чуть вн
 EDGE_MM = 0.08                     # сглаживание края заливки
 BEVEL_MM = 0.18                    # фаска верхней кромки букв (part_receiver: bevel_edges w=0.18)
 RAMP_IN_MM = 0.1                   # скат до полной глубины — внутрь от стенки
+ZONE_MARGIN_MM = 4.0               # зона нарезки у знака — шире квадрата: хвосты стыков доходят до края панели (3 мм)
+ZONE_DEG = 89.9                    # в зоне нарезки выравнивается любой наклон: кроме знака и букв (их обход) настоящего там
+                                   # нет, а стыки и щепки нарезки дают 20–80° (05.11, v4)
+EMBLEM_KEEP_MM = 0.8               # знак с фаской — не трогать до r + это
+LETTER_KEEP_MM = 0.4               # буквы — не трогать до края фаски + это
 
 
 def raster(polys, x0, x1, z0, z1, res):
     h, w = int(round((z1 - z0) * res)), int(round((x1 - x0) * res))
     img = np.zeros((h, w), np.uint8)
-    pts = [np.array([[(x - x0) * res, (z1 - z) * res] for x, z in poly], np.float64) for poly in polys]
-    cv2.fillPoly(img, [np.round(p * 16).astype(np.int32) for p in pts], 255, lineType=cv2.LINE_8, shift=4)
+    pts = [np.round(np.array([[(x - x0) * res, (z1 - z) * res] for x, z in poly], np.float64) * 16).astype(np.int32)
+           for poly in polys]
+    # каждый треугольник — отдельно: fillPoly со всем списком заливает по правилу «чёт-нечет», и совпадающие крышки
+    # шрифта (лицо и обратная сторона) и общие рёбра соседних треугольников вычитались — на дне букв шла штриховка
+    # по рёбрам триангуляции («бугристое дно», 05.11, v4)
+    for p in pts:
+        cv2.fillConvexPoly(img, p, 255, lineType=cv2.LINE_8, shift=4)
     return img
 
 
@@ -98,6 +108,79 @@ def engrave_height(pos, nrm, filled, marks):
     return h
 
 
+def zone_pixels(pos, ax, plane_mm, zones, letters, step):
+    """Пиксели плоскости ax / plane_mm в зонах местной нарезки (квадрат зоны + ZONE_MARGIN_MM), кроме знаков
+    (r + EMBLEM_KEEP_MM) и букв (с LETTER_KEEP_MM) — там выравнивание идёт до ZONE_DEG."""
+    other = [i for i in range(3) if i != ax]
+    inz = np.zeros(pos.shape[:2], bool)
+    keep = np.zeros(pos.shape[:2], bool)
+    for z in zones['cuts']:
+        if z['axis'] != ax or abs(z['plane_mm'] - plane_mm) > 0.5:
+            continue
+        c = z['center_mm']
+        d = np.maximum(np.abs(pos[..., other[0]] - c[other[0]]), np.abs(pos[..., other[1]] - c[other[1]]))
+        inz |= d <= z['half_mm'] + ZONE_MARGIN_MM
+    for e in zones['emblems']:
+        c = e['center_mm']
+        if e['axis'] != ax or abs(c[ax] - plane_mm) > 0.5:
+            continue
+        keep |= np.hypot(pos[..., other[0]] - c[other[0]], pos[..., other[1]] - c[other[1]]) <= e['r_mm'] + EMBLEM_KEEP_MM
+    k = max(1, int(round(LETTER_KEEP_MM * step)))
+    keep |= cv2.dilate(letters.astype(np.uint8), np.ones((2 * k + 1, 2 * k + 1), np.uint8)) > 0
+    return inz & ~keep
+
+
+def clean_planes(n_base, pos, nrm, filled, zones, letters, min_px=4000, erode_mm=0.25, max_deg=20.0, cos_ax=0.9995):
+    """Большие ровные плоскости корпуса (торец, борта) — строго плоской нормалью: в high-poly v06 у местной нарезки
+    вокруг знаков и надписей остались т-образные стыки и тонкие наклонные треугольники, и в запечённой карте — тонкие
+    линии на переднем торце (владелец 05.11, v3). Пиксель на плоскости вдоль оси (нормаль игровой сетки до ~0.8°, положение
+    в 0.1 мм от плоскости, на плоскости не меньше min_px пикселей), дальше erode_mm от её края и с отклонением карты меньше
+    max_deg (фаски знака — около 45°, они остаются) — плоская нормаль. В зонах нарезки (zones.json из game_tex.py) — до
+    ZONE_DEG и до пикселя от края плоскости: хвосты стыков у края квадрата нарезки дают 20–30° у самого края панели,
+    щепки — до 80°; знаки и буквы (letters — пиксели гравировки) там обходятся. Гравировка надписей кладётся после."""
+    n = n_base.copy()
+    step = 1.0 / max(np.median(np.linalg.norm(pos[1:, :] - pos[:-1, :], axis=-1)[filled[1:] & filled[:-1]]), 1e-3)
+    er = max(1, int(round(erode_mm * step)))
+    dev = np.degrees(np.arccos(np.clip(n_base[..., 2], -1.0, 1.0)))
+    total = 0
+    for ax in range(3):
+        for sgn in (1.0, -1.0):
+            on_ax = filled & (nrm[..., ax] * sgn > cos_ax)
+            if on_ax.sum() < min_px:
+                continue
+            off = np.round(pos[..., ax] / 0.1)
+            vals, cnt = np.unique(off[on_ax], return_counts=True)
+            for v, c in zip(vals, cnt):
+                if c < min_px:
+                    continue
+                plane = on_ax & (np.abs(off - v) <= 1)
+                core = cv2.erode(plane.astype(np.uint8), np.ones((2 * er + 1, 2 * er + 1), np.uint8)) > 0
+                core1 = cv2.erode(plane.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+                inz = zone_pixels(pos, ax, float(v) * 0.1, zones, letters, step)
+                fix = (core & (dev < max_deg)) | (core1 & inz & (dev < ZONE_DEG))
+                n[fix] = (0.0, 0.0, 1.0)
+                total += int(fix.sum())
+    return n, total
+
+
+def fix_backfaces(n_base, filled, z_min=-0.02):
+    """Пиксели, где запечённая нормаль смотрит внутрь детали (z касательного пространства меньше нуля), — попадание луча
+    в вывернутую грань high-poly: у правильной замкнутой сетки первое попадание всегда лицом к лучу. У v06 такие складки
+    остались на фасках паза торца (60 граней по 0.002–0.14 мм²; владелец 05.11, v3: штрихи по торцу). Они и край в
+    пиксель вокруг — дорисовываются по соседям (inpaint), затем нормируются. Возврат — карта и число пикселей."""
+    bad = filled & (n_base[..., 2] < z_min)
+    if not bad.any():
+        return n_base, 0
+    bad = (cv2.dilate(bad.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) & filled
+    m = bad.astype(np.uint8) * 255
+    n = n_base.copy()
+    for c in range(3):
+        n[..., c] = cv2.inpaint(n_base[..., c].astype(np.float32), m, 3, cv2.INPAINT_TELEA)
+    n[..., 2] = np.maximum(n[..., 2], 0.05)
+    n /= np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
+    return np.where(bad[..., None], n, n_base), int(bad.sum())
+
+
 def engrave_normal(n_base, pos, h):
     """Гравировка в карте нормалей: уклон высоты вдоль осей развёртки (мм на мм — шаг пикселя по карте положения) →
     нормаль в пространстве развёртки (OpenGL: X — вдоль u, Y — вдоль v, вверх по картинке), смешение UDN с запечённой.
@@ -121,6 +204,7 @@ def engrave_normal(n_base, pos, h):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     marks = json.loads((TEX / 'marks.json').read_text(encoding='utf-8'))
+    zones = json.loads((TEX / 'zones.json').read_text(encoding='utf-8'))
     for name in SETS:
         d = np.load(TEX / f'{name}_maps.npz')
         pos, nrm, filled = d['pos'], d['nrm'].astype(np.float32), d['filled']
@@ -134,8 +218,12 @@ def main():
         base_p = TEX / 'normals' / f'{name}_normal.png'
         if base_p.exists():
             b = cv2.imread(str(base_p), cv2.IMREAD_UNCHANGED).astype(np.float32)[..., ::-1] / 65535.0 * 2.0 - 1.0
+            b, back = fix_backfaces(b, filled)
+            print('BACKFACES', name, 'дорисовано пикселей', back)
             h = engrave_height(pos, nrm, filled, marks)
+            b, cleaned = clean_planes(b, pos, nrm, filled, zones, h < -0.001)
             n = engrave_normal(b, pos, h)
+            print('PLANES', name, 'выровнено пикселей', cleaned)
             out = np.clip(np.round((n * 0.5 + 0.5)[..., ::-1] * 65535.0), 0, 65535).astype(np.uint16)
             cv2.imwrite(str(TEX / 'normals' / f'{name}_normal_eng.png'), out)
             print('ENGRAVE', name, 'пикселей букв', int((h < -0.01).sum()), '→', TEX / 'normals' / f'{name}_normal_eng.png')

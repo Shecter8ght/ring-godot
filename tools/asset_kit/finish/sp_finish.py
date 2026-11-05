@@ -23,6 +23,20 @@ JOBS = os.environ.get("SP_BRIDGE_DIR", "")
 GROUP = "Этап 1 — заводская отделка"
 GAUSS_CELLS = 32        # у noise_gaussian_noise 32 ячейки на плитку: масштаб = разрешение / (32 · ячейка в текселях)
 H0 = 0.5                # уровень высоты основы: рельеф Overlay работает вокруг 0.5
+# зерно и литьё в мм трёхпроекционно, а не по развёртке (ставит задание модели перед build_set): у игровых развёрток
+# плотность островов разная, и по развёртке зерно меняло размер на швах. Каталог и прежние модели — по развёртке.
+WORLD_GRAIN = False
+# кромки (генератор кривизны) — только мелкие масштабы (sharp, fine; ставит задание модели перед build_set): крупные
+# масштабы размывают кривизну по развёртке, и у игровой сетки с многими островами давали широкие мягкие полосы блеска
+# по плоским граням и ступеньку на каждом шве («рёбра» на борту ИЗЛОМ-45 у затвора, 05.11). У карточек — один остров.
+FINE_EDGES = False
+_COARSE_CURVATURE = {"curvature_soft": 0.0, "curvature_medium": 0.0, "curvature_large": 0.0, "curvature_big": 0.0,
+                     "curvature_huge": 0.0}
+
+
+def _curv(params):
+    """Параметры генератора кривизны с учётом FINE_EDGES."""
+    return {**params, **_COARSE_CURVATURE} if FINE_EDGES else params
 
 
 def mark(name, text):
@@ -190,12 +204,23 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
         return scope(lay)
 
     def gauss_uv(layer, cell_mm):
-        """Гауссов шум по развёртке ячейкой cell_mm (32 ячейки на плитку процедуры)."""
-        sp_lib.uvscale(layer, res / (GAUSS_CELLS * max(cell_mm * px_mm, 0.5)))
+        """Гауссов шум ячейкой cell_mm (32 ячейки на плитку процедуры): по развёртке от средней плотности набора, а при
+        WORLD_GRAIN — трёхпроекционно в миллиметрах (игровая развёртка с разной плотностью островов: по развёртке зерно
+        меняло размер на швах — линии и «рёбра», ИЗЛОМ-45 05.11)."""
+        if WORLD_GRAIN:
+            sp_lib.triplanar(layer, bbox_mm / (GAUSS_CELLS * max(cell_mm, 0.01)))
+        else:
+            sp_lib.uvscale(layer, res / (GAUSS_CELLS * max(cell_mm * px_mm, 0.5)))
 
     def tri_mm(layer, period_mm, rot=0.0):
-        """Трёхпроекционно, плитка узора — period_mm (масштаб Painter — плиток на наибольший размер набора)."""
+        """Трёхпроекционно, плитка узора — period_mm (масштаб Painter — плиток на наибольший размер всей сцены проекта,
+        не набора: bbox_mm — габарит сцены; замер ИЗЛОМ-45 05.11)."""
         sp_lib.triplanar(layer, bbox_mm / period_mm, rot)
+
+    # постоянные масштабы процедур (облака градиентов, следы течения) подобраны на карточке — образец ~170 мм; Painter
+    # считает плитки на всю сцену, и у игровой сетки (сцена ИЗЛОМ-45 — 1082 мм) пятна выходили в 6 раз крупнее, магазины
+    # однотонные (самопроверка v4) — при WORLD_GRAIN масштаб от габарита сцены, пятна того же размера в мм, что на карточке
+    card_k = bbox_mm / 170.0 if WORLD_GRAIN else 1.0
 
     def above(node):
         return L.InsertPosition.above_node(node)
@@ -242,7 +267,7 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
     if e and (e.get("color") or e.get("rough")):
         lay = rel("кромки", above(n), color=(0.80, 0.80, 0.80) if e.get("color") else None, cop=e.get("color") or 0.0,
                   rough=e.get("rough") or None)
-        sp_lib.mask_generator(lay, "mg_curvature/mg_curvature", {"global_balance": 0.6, "global_contrast": 0.3})
+        sp_lib.mask_generator(lay, "mg_curvature/mg_curvature", _curv({"global_balance": 0.6, "global_contrast": 0.3}))
         n = lay
     c = f.get("cavity")
     if c:
@@ -254,10 +279,11 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
     # 4. только крупные мягкие градиенты: пятна мельче детали читаются отпечатками пальцев (AR-15, 30.10)
     gr = f.get("gradients")
     if gr:
+        k = card_k
         g1 = rel("градиент светлый", above(n), color=(0.75, 0.75, 0.75), cop=gr["color"], rough=-gr["rough"])
-        sp_lib.mask_proc(g1, "noise_clouds_1/clouds_1", scale=0.4)
+        sp_lib.mask_proc(g1, "noise_clouds_1/clouds_1", scale=0.4 * k)
         g2 = rel("градиент тёмный", above(g1), color=(0.25, 0.25, 0.25), cop=gr["color"], rough=gr["rough"])
-        sp_lib.mask_proc(g2, "noise_clouds_1/clouds_1", scale=0.35, rot=1.0)
+        sp_lib.mask_proc(g2, "noise_clouds_1/clouds_1", scale=0.35 * k, rot=1.0)
         n = g2
 
     # 5. зерно отделки — Overlay гауссова шума в блеск, цвет и рельеф; без порога (порог даёт «крошку»)
@@ -291,17 +317,19 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
 
             def no_edges(layer):
                 g = sp_lib.mask_generator(layer, "mg_curvature/mg_curvature",
-                                          {"global_balance": 0.62, "global_contrast": 0.4})
+                                          _curv({"global_balance": 0.62, "global_contrast": 0.4}))
                 g.set_blending_mode(L.BlendingMode.Subtract)
             q1 = rel("литьё — светлые точки (глаже)", above(n), color=(1.0, 1.0, 1.0), cop=0.25,
                      rough=-sp.get("rough", 0.25))
-            mf = sp_lib.mask_proc(q1, "white_noise_fast/white_noise_fast", scale=1.0 / dots, tri=False)
+            # белый шум — ячейка на пиксель плитки (res на плитку): по развёртке 1/dots, в мм — набор / (точка × res)
+            wscale = bbox_mm / (sp.get("dots_mm", 0.10) * res) if WORLD_GRAIN else 1.0 / dots
+            mf = sp_lib.mask_proc(q1, "white_noise_fast/white_noise_fast", scale=wscale, tri=WORLD_GRAIN)
             _mfilter(mf, "histogram_scan", {"Position": 0.15, "Contrast": 0.85})
             no_edges(q1)
             q2 = rel("литьё — тёмные точки (матовее)", above(q1), color=(0.0, 0.0, 0.0), cmode=L.BlendingMode.Multiply,
                      cop=0.18, rough=sp.get("rough", 0.25) * 0.72, height=sp.get("height", 0.003),
                      hmode=L.BlendingMode.Subtract)
-            mf = sp_lib.mask_proc(q2, "white_noise_fast/white_noise_fast", scale=1.0 / dots, tri=False, rot=0.9)
+            mf = sp_lib.mask_proc(q2, "white_noise_fast/white_noise_fast", scale=wscale, tri=WORLD_GRAIN, rot=0.9)
             _mfilter(mf, "histogram_scan", {"Position": 0.15, "Contrast": 0.85})
             no_edges(q2)
             n = q2
@@ -309,7 +337,7 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
             # следы течения пластика — мягкие разводы в блеске
             lay = rel("литьё — следы течения (блеск)", above(n), rough=sp.get("rough", -0.05))
             sp_lib.mask_proc(lay, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft",
-                             {"Balance": 0.55, "Contrast": 0.3}, scale=1.4)
+                             {"Balance": 0.55, "Contrast": 0.3}, scale=1.4 * card_k)
             n = lay
         elif sp["type"] == "photo":
             # фотоматериал CC0 по развёртке (сырьё — sp["set"]: <путь>_Color/_Roughness/_Displacement.jpg): тон

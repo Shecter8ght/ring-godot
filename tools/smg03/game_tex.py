@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -50,6 +51,7 @@ RED_SETS = ('Upper', 'Lower')
 # у кромок — полосы (владелец 05.11, v2; то же у цевья Dolinskyi, tools/handguard_dolinskyi/bake_normal.py)
 NORMAL_RES = {'Upper': 4096, 'Lower': 4096, 'Steel': 4096, 'Stock': 2048, 'Mag13': 2048, 'Mag30': 2048}
 CAGE_M = 0.0008                    # луч стартует на 0.8 мм снаружи игровой сетки
+CAGE_NEAR_M = 0.00015              # второе запекание — с 0.15 мм: для пазов у.же клетки (см. bake_normals)
 RAY_M = 0.0025                     # и идёт до 1.7 мм внутрь: отклонение сетки до 0.47 мм, гравировка 0.25–0.45
 PAIRS = []                         # (low, high, набор) — пары по слотам из build_fbx
 MAG_SHIFT = {'Mag13': (0.0, 0.0, -0.35), 'Mag30': (0.0, 0.0, -0.75)}
@@ -152,6 +154,178 @@ def set_material(o, name):
         p.material_index = 0
 
 
+def planar_snap(o, tol_mm: float = 0.08, min_area_mm2: float = 10.0, cos_lim: float = 0.9998):
+    """Плоскости вдоль осей у high-poly — ровно в одну плоскость: местная нарезка вокруг знаков и надписей
+    (lib.grid_split_local, допуск разреза 0.02 мм) оставляла ступеньки в 0.03 мм — утопленная панель переднего торца лежала
+    на уровнях 105.27 / 105.30 / 105.33 мм, и затенение с картой нормалей показывали полосы по границе нарезки
+    (владелец 05.11, v3). Грани с нормалью вдоль оси (до ~1°) кучкуются по смещению с зазором меньше tol_mm; куча
+    площадью от min_area_mm2 сводится к среднему по площади, вершины её граней сдвигаются только по этой оси. Рельеф
+    глубже tol_mm (гравировка, канавки, шагрень) не трогается. Возврат — сдвинуто вершин."""
+    me = o.data
+    co = np.array([v.co[:] for v in me.vertices], np.float64)
+    moved = np.zeros(len(co), bool)
+    for ax in range(3):
+        for sgn in (1.0, -1.0):
+            faces = [p for p in me.polygons if p.normal[ax] * sgn > cos_lim]
+            if not faces:
+                continue
+            off = np.array([p.center[ax] for p in faces]) * 1000.0
+            area = np.array([p.area for p in faces]) * 1e6
+            order = np.argsort(off)
+            groups, cur = [], [order[0]]
+            for a, b in zip(order[:-1], order[1:]):
+                if off[b] - off[a] < tol_mm * 0.5:
+                    cur.append(b)
+                else:
+                    groups.append(cur)
+                    cur = [b]
+            groups.append(cur)
+            for g in groups:
+                g = np.array(g)
+                if area[g].sum() < min_area_mm2 or off[g].max() - off[g].min() > tol_mm:
+                    continue
+                target = float((off[g] * area[g]).sum() / area[g].sum()) / 1000.0
+                for i in g:
+                    for vi in faces[i].vertices:
+                        # вершина, общая с гранью другой плоскости (дно у знака), уезжала на 0.33 мм — наклонный
+                        # треугольник через переднюю плоскость торца; двигаем только в пределах допуска
+                        dv = abs(co[vi, ax] - target)
+                        if 1e-9 < dv <= tol_mm / 1000.0:
+                            co[vi, ax] = target
+                            moved[vi] = True
+    me.vertices.foreach_set('co', co.astype(np.float32).ravel())
+    me.update()
+    return int(moved.sum())
+
+
+def stamp_zones():
+    """Зоны местной нарезки у high-poly корпуса (part_stamps: знаки и надписи) — (центр мм, радиус мм, ось нормали,
+    смещение плоскости мм): здесь grid_split_local оставлял браки нарезки."""
+    import lib
+    import part_stamps
+    zones = [((lib.FRONT_FACE_X, 0.0, 33.0), 11.0, 0, lib.FRONT_FACE_X)]
+    for s in (1, -1):
+        zones.append(((-80.0, s * lib.HALF_W, -32.0), 13.5, 1, s * lib.HALF_W))
+    for txt, size, center, nrm, depth, red in part_stamps.text_stamps():
+        zones.append((center, size * max(1.0, len(txt) * 0.42) + 2.0, 1, center[1]))
+    return zones
+
+
+def flatten_dents(o, max_mm: float = 0.13):
+    """Вмятины мельче max_mm в зонах нарезки у знаков и надписей — в плоскость: по границе квадратной нарезки вокруг знака
+    на переднем торце остались канавки 0.1 мм (z 23 и 43, левая половина) — полосы на торце (владелец 05.11, v3).
+    Гравировка (0.25–0.45 мм) и её фаска (0.18) глубже — не трогаются. Возврат — сдвинуто вершин."""
+    me = o.data
+    co = np.array([v.co[:] for v in me.vertices], np.float64) * 1000.0
+    moved = 0
+    for center, r, ax, plane in stamp_zones():
+        other = [i for i in range(3) if i != ax]
+        # нарезка — квадратом со стороной 2r (lib.grid_split_local), канавки — по его краю: расстояние по Чебышёву
+        d = np.maximum(np.abs(co[:, other[0]] - center[other[0]]), np.abs(co[:, other[1]] - center[other[1]]))
+        sgn = 1.0 if plane >= 0 else -1.0
+        depth = (plane - co[:, ax]) * sgn            # >0 — внутрь детали
+        # и вмятины, и бугорки: по границе нарезки у знака на торце — гребешок ~0.02 мм над плоскостью (допуск разреза)
+        sel = (d < r) & (np.abs(depth) > 1e-6) & (np.abs(depth) < max_mm)
+        co[sel, ax] = plane
+        moved += int(sel.sum())
+    me.vertices.foreach_set('co', (co / 1000.0).astype(np.float32).ravel())
+    me.update()
+    return moved
+
+
+def outward_shells(bm, min_mm3: float = 1.0):
+    """Замкнутые оболочки, вывернутые целиком (объём со знаком меньше нуля: у корпуса магазина на 30 — вся оболочка
+    наизнанку), — лицом наружу. Открытые (половины корпуса по шву) не трогаются: знак их объёма ничего не значит.
+    Возврат — развёрнуто граней."""
+    bm.faces.ensure_lookup_table()
+    seen = set()
+    flip = []
+    for f0 in bm.faces:
+        if f0.index in seen:
+            continue
+        seen.add(f0.index)
+        comp, st = [], [f0]
+        while st:
+            f = st.pop()
+            comp.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g.index not in seen:
+                        seen.add(g.index)
+                        st.append(g)
+        if any(len(e.link_faces) < 2 for f in comp for e in f.edges):
+            continue
+        vol = 0.0
+        for f in comp:
+            vs = [v.co for v in f.verts]
+            for i in range(1, len(vs) - 1):
+                vol += vs[0].dot(vs[i].cross(vs[i + 1])) / 6.0
+        if vol * 1e9 < -min_mm3:
+            flip += comp
+    if flip:
+        bmesh.ops.reverse_faces(bm, faces=flip)
+        bm.normal_update()
+    return len(flip)
+
+
+def unfold_planes(bm, min_area_mm2: float = 10.0, cos_lim: float = 0.9998, tol_mm: float = 0.02):
+    """Вывернутые грани в больших плоскостях вдоль осей — лицом наружу. У v06 на переднем торце после нарезки остались
+    многоугольники, сложенные «наизнанку» (нормаль −X среди граней +X: длинные полосы у края панели), и Blender при
+    запекании берёт нормаль попавшей грани как есть — в карте 180°, штрихи по торцу (владелец 05.11, v3); AO у Painter
+    от них тоже темнел. Сетка к этому времени — треугольники (у сложенного многоугольника вывернута лишь часть).
+
+    В каждой плоскости вдоль оси сторона наружу — та, чьих граней по площади больше (вывернутых на торце набирается
+    70 мм² — сами они плоскостью не считаются); грань другой стороны, все вершины которой в плоскости и у которой есть
+    сосед по ребру лицом наружу из этой же плоскости, разворачивается; полоса — с краю внутрь, по ряду за проход.
+    Общее правило «соседи по ребру не бывают обращены друг против друга» пробовали 05.11 — оно ломает острые кромки
+    (манжета магазина на 30 вывернулась целиком): складки вне больших плоскостей (скругления, фаски) ловит запекание
+    (bake_normals: вторая клетка и дорисовка). Возврат — развёрнуто граней."""
+    total = 0
+    for _ in range(30):
+        n = _unfold_pass(bm, min_area_mm2, cos_lim, tol_mm)
+        total += n
+        if not n:
+            break
+    return total
+
+
+def _unfold_pass(bm, min_area_mm2, cos_lim, tol_mm):
+    flip = set()
+    half = tol_mm / 2000.0
+    for ax in range(3):
+        area = {}
+        along = []
+        for f in bm.faces:
+            s = f.normal[ax]
+            if abs(s) <= cos_lim:
+                continue
+            k = round(f.calc_center_median()[ax] * 1000.0 / tol_mm)
+            a = area.setdefault(k, [0.0, 0.0])
+            a[0 if s > 0 else 1] += f.calc_area() * 1e6
+            along.append((f, k, 1 if s > 0 else -1))
+        major = {}
+        for k, (ap, an) in area.items():
+            big, small = max(ap, an), min(ap, an)
+            if big >= min_area_mm2 and small * 2.0 < big:
+                major[k] = 1 if ap > an else -1
+        for f, k, sg in along:
+            m = major.get(k)
+            if m is None or sg == m:
+                continue
+            pl = k * tol_mm / 1000.0
+            if not all(abs(v.co[ax] - pl) < half for v in f.verts):
+                continue
+            for e in f.edges:
+                if any(g is not f and g.normal[ax] * m > cos_lim and all(abs(v.co[ax] - pl) < half for v in g.verts)
+                       for g in e.link_faces):
+                    flip.add(f)
+                    break
+    if flip:
+        bmesh.ops.reverse_faces(bm, faces=list(flip))
+        bm.normal_update()
+    return len(flip)
+
+
 def high_normals(o, angle_deg: float = 60.0):
     """Нормали high-poly для запекания: рёбра круче angle (стенки букв, канавок, вырезов — 90°) — жёсткие, затем по
     площади граней. Свои нормали исходника гнулись у стенок букв, и вокруг надписей в карте шёл слабый веер полос
@@ -160,9 +334,28 @@ def high_normals(o, angle_deg: float = 60.0):
     me = o.data
     bm = bmesh.new()
     bm.from_mesh(me)
+    # неплоские многоугольники — по плоским частям: у v06 передняя плоскость торца и начало фаски края панели слиты в одну
+    # грань, при разбиении на треугольники длинный треугольник шёл от плоскости к краю на 0.33 мм глубже — линия на
+    # торце (владелец 05.11, v3; видна и в самом исходнике)
+    bmesh.ops.connect_verts_nonplanar(bm, angle_limit=math.radians(0.5), faces=bm.faces[:])
+    # треугольниками — до своих нормалей: у сложенного многоугольника вывернута только часть треугольников (unfold_planes);
+    # join_copies бьёт на треугольники и сам, но здесь уже нечего
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3], quad_method='BEAUTY',
+                          ngon_method='BEAUTY')
+    # треугольники нулевой площади (многоугольники с вершинами на одной прямой) — прочь: их нормаль случайна, рёбра у них
+    # выходили «острыми», и нормали соседних граней гнулись до 50° — пятно на скруглении левого борта (X −12, Z 49; v4)
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-6, edges=bm.edges[:])
+    bm.normal_update()
+    bm.faces.index_update()
+    inside_out = outward_shells(bm)
+    if inside_out:
+        log('оболочки наизнанку — развёрнуто граней', o.name, inside_out)
+    unfolded = unfold_planes(bm)
+    if unfolded:
+        log('развёрнуто вывернутых граней', o.name, unfolded)
     lim = math.radians(angle_deg)
     for e in bm.edges:
-        if len(e.link_faces) == 2 and e.calc_face_angle(0.0) > lim:
+        if len(e.link_faces) == 2 and e.calc_face_angle(0.0) > lim and                 min(f.calc_area() for f in e.link_faces) > 1e-12:     # у щепки (меньше 1e-6 мм²) нормаль случайна
             e.smooth = False
     # физический разрез этих рёбер (bmesh.ops.split_edges) пробовали 05.11: карта верха не изменилась ни на пиксель,
     # а низ корпуса запёкся пустым (нормаль плоская, AO чёрный) — не делать
@@ -179,6 +372,90 @@ def high_normals(o, angle_deg: float = 60.0):
     o.select_set(True)
     bpy.context.view_layer.objects.active = o
     bpy.ops.object.modifier_apply(modifier=m.name)
+    flat_planes(o)
+    wild = tame_corners(o)
+    if wild:
+        log('нормали углов, ушедшие от грани больше 35°, — по грани', o.name, wild)
+
+
+def tame_corners(o, max_deg: float = 35.0):
+    """Нормаль угла, ушедшая от своей грани больше чем на max_deg, — нормалью грани. У фасок high-poly в два сегмента
+    законное расхождение — до ~22°; больше — от щепок нулевой площади рядом (их нормаль случайна, а по площади
+    граней веер у вершины гнуло до 50°): пятно на скруглении левого борта у затвора (X −12, Z 49; v4). Возврат —
+    исправлено углов."""
+    me = o.data
+    n_c = np.zeros(len(me.loops) * 3, np.float32)
+    me.corner_normals.foreach_get('vector', n_c)
+    n_c = n_c.reshape(-1, 3)
+    lim = math.cos(math.radians(max_deg))
+    fixed = 0
+    for p in me.polygons:
+        if p.area < 1e-12:
+            continue
+        fn = np.array(p.normal[:], np.float32)
+        for li in p.loop_indices:
+            if float(n_c[li] @ fn) < lim:
+                n_c[li] = fn
+                fixed += 1
+    if fixed:
+        me.normals_split_custom_set(n_c.tolist())
+    return fixed
+
+
+def flat_planes(o, min_area_mm2: float = 10.0, cos_lim: float = 0.9998, tol_mm: float = 0.02):
+    """Грани больших плоскостей вдоль осей — строго плоской нормалью в своих углах. По площади граней нормаль у вершины
+    на краю плоскости тянулась к соседней фаске и по длинным узким треугольникам местной нарезки расходилась внутрь
+    плоскости — на переднем торце шли полосы по границе нарезки вокруг знака (они есть и в исходнике v06; владелец 05.11).
+    Фаска своих нормалей не меняет: её край у плоскости остаётся гладким со стороны фаски."""
+    me = o.data
+    n_c = np.zeros(len(me.loops) * 3, np.float32)
+    me.corner_normals.foreach_get('vector', n_c)
+    n_c = n_c.reshape(-1, 3)
+    hit = 0
+    for ax in range(3):
+        for sgn in (1.0, -1.0):
+            faces = [p for p in me.polygons if p.normal[ax] * sgn > cos_lim]
+            if not faces:
+                continue
+            off = np.round(np.array([p.center[ax] for p in faces]) * 1000.0 / tol_mm)
+            area = np.array([p.area for p in faces]) * 1e6
+            tot = {}
+            for k, a in zip(off, area):
+                tot[k] = tot.get(k, 0.0) + a
+            f = np.zeros(3, np.float32)
+            f[ax] = sgn
+            planes = []
+            for p, k in zip(faces, off):
+                if tot[k] < min_area_mm2:
+                    continue
+                for li in p.loop_indices:
+                    n_c[li] = f
+                hit += 1
+                if k not in planes:
+                    planes.append(k)
+            # тонкие почти вырожденные треугольники в самой плоскости (нарезка): их нормаль по вершинам случайна, и в карте
+            # от них оставалась линия на переднем торце — по положению вершин тоже в плоскость
+            if planes:
+                pv = np.array(planes) * tol_mm / 1000.0
+                co = np.array([v.co[ax] for v in me.vertices])
+                cos3 = math.cos(math.radians(3.0))
+                for p in me.polygons:
+                    if abs(p.normal[ax] * sgn) > cos_lim and p.normal[ax] * sgn > 0:
+                        continue
+                    vs = co[list(p.vertices)]
+                    on = np.abs(vs[:, None] - pv[None, :]) < 3e-6          # вершина × плоскость
+                    in_plane = on.all(axis=0).any() and p.normal[ax] * sgn > -0.5
+                    # почти плоская полоска (до 3°), у которой две вершины в плоскости, а третья — у края фаски (Т-стык
+                    # без вершины на торце v06: полоска 0.19 × 12 мм с наклоном 1.5°, нормаль у фаски тянула на 7°)
+                    strip = p.normal[ax] * sgn > cos3 and (on.sum(axis=0) >= 2).any()
+                    if in_plane or strip:
+                        for li in p.loop_indices:
+                            n_c[li] = f
+                        hit += 1
+    for p in me.polygons:
+        p.use_smooth = True
+    me.normals_split_custom_set(n_c.tolist())
+    return hit
 
 
 def keep_normals(me):
@@ -248,9 +525,13 @@ def build_fbx():
         work.objects.link(o)
     need = sorted({n for o in lows for n in o['hp']})
     high = {n: evaluated_copy(hp[n], 'hpc_' + n, work) for n in need}
+    snapped = flatten_dents(high['Receiver'])
+    log('high-poly корпуса: вмятин нарезки выровнено вершин', snapped)
     for o in high.values():
+        snapped += planar_snap(o)
         high_normals(o)
         keep_normals(o.data)
+    log('high-poly: вершин сведено в плоскости', snapped)
     log('деталей high-poly', len(high), 'треугольников', sum(tris(o.data) for o in high.values()))
     halves = {a: half_copy(high['Receiver'], a == 'Upper', 'hpc_Receiver_' + a, work) for a in RECEIVER_HALF}
     log('high-poly корпуса по шву:', {a: tris(o.data) for a, o in halves.items()})
@@ -302,7 +583,14 @@ def build_fbx():
     export_fbx(low_out, OUT / 'SMG03_low.fbx')
     export_fbx(high_out, OUT / 'SMG03_high.fbx')
     (OUT / 'meshes.json').write_text(json.dumps(meshes, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
-    log('FBX', len(low_out), 'пар low/high →', OUT)
+    # габарит всей сцены игровой сетки (с опущенными магазинами): трёхпроекционная заливка Painter считает плитки на
+    # наибольший размер сцены, а не набора — по нему sp_smg03 переводит зерно в мм (v4: по габариту набора вышло в 3 раза
+    # крупнее)
+    cs = np.array([ob.matrix_world @ Vector(c) for ob in low_out for c in ob.bound_box]) * 1000.0
+    scene = {'min_mm': cs.min(0).round(1).tolist(), 'max_mm': cs.max(0).round(1).tolist(),
+             'size_mm': float((cs.max(0) - cs.min(0)).max().round(1))}
+    (OUT / 'scene.json').write_text(json.dumps(scene, ensure_ascii=False), encoding='utf-8', newline='\n')
+    log('FBX', len(low_out), 'пар low/high →', OUT, 'габарит сцены', scene['size_mm'], 'мм')
     return {a: [o for o in low_out if o.data.materials[0].name == a] for a in RED_SETS}
 
 
@@ -399,12 +687,24 @@ def red_marks_json():
                     'red': red, 'tris': tris})
     (OUT / 'marks.json').write_text(json.dumps(out, ensure_ascii=False), encoding='utf-8', newline='\n')
     log('надписей и меток', len(out), '→', OUT / 'marks.json')
+    # зоны местной нарезки (там браки high-poly) и сами знаки — tex_masks.clean_planes выравнивает зону, обходя знак
+    zones = {'cuts': [{'center_mm': list(c), 'half_mm': r, 'axis': ax, 'plane_mm': pl} for c, r, ax, pl in stamp_zones()],
+             'emblems': [{'center_mm': list(c), 'r_mm': r, 'axis': [i for i, v in enumerate(n) if v][0]}
+                         for c, r, n in part_stamps.emblem_places()]}
+    (OUT / 'zones.json').write_text(json.dumps(zones, ensure_ascii=False), encoding='utf-8', newline='\n')
+    log('зон нарезки', len(zones['cuts']), 'знаков', len(zones['emblems']), '→', OUT / 'zones.json')
 
 
 def bake_normals(samples=4, dilate_px=16):
     """Карта нормалей наборов в Blender (Cycles на процессоре): каждая сетка-слот — только со своей high-poly (пары из
     build_fbx), касательные — по нашим нормалям игровой сетки, OpenGL (как проект Painter). Пиксели, куда запекание не
-    попало, — плоская нормаль; края островов дорисованы наружу на dilate_px. → OUT/normals/<набор>_normal.png (16 бит)."""
+    попало, — плоская нормаль; края островов дорисованы наружу на dilate_px. → OUT/normals/<набор>_normal.png (16 бит).
+
+    Запекание дважды — с клеткой CAGE_M и CAGE_NEAR_M. Луч берёт первую попавшуюся грань, и в Blender нет «пропускать
+    изнанку», как у Painter: в пазах у.же клетки (продольные канавки бортов, шлицы) луч стартовал за дальней стенкой паза,
+    бил в неё с изнанки, и нормаль выходила внутрь детали (z < 0 — 0.6 % верхнего атласа, у стали 5 %; владелец 05.11,
+    v3). Где с большой клеткой изнанка — берётся малая; где изнанка у обеих — пиксель дорисовывается по соседям тем же
+    расширением, что и края островов."""
     S = bpy.context.scene
     S.render.engine = 'CYCLES'
     S.cycles.device = 'CPU'
@@ -426,31 +726,43 @@ def bake_normals(samples=4, dilate_px=16):
         pairs = [(lo, hi) for lo, hi, a in PAIRS if a == atlas]
         if not pairs:
             continue
-        img = bpy.data.images.new('nb_' + atlas, size, size, float_buffer=True, alpha=True)
-        img.colorspace_settings.name = 'Non-Color'
-        img.pixels.foreach_set(np.tile(np.array([0.5, 0.5, 1.0, 0.0], np.float32), size * size))
-        mat = bpy.data.materials.new('nb_' + atlas)
-        mat.use_nodes = True
-        tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
-        tex.image = img
-        mat.node_tree.nodes.active = tex
-        for lo, hi in pairs:
-            keep = list(lo.data.materials)
-            lo.data.materials.clear()
-            lo.data.materials.append(mat)
-            bpy.ops.object.select_all(action='DESELECT')
-            hi.select_set(True)
-            lo.select_set(True)
-            bpy.context.view_layer.objects.active = lo
-            bpy.ops.object.bake(type='NORMAL')
-            lo.data.materials.clear()
-            for m in keep:
-                lo.data.materials.append(m)
-        px = np.empty(size * size * 4, np.float32)
-        img.pixels.foreach_get(px)
-        px = px.reshape(size, size, 4)
-        rgb, filled = px[..., :3].copy(), px[..., 3] > 0.5
+        runs = []
+        for cage in (CAGE_M, CAGE_NEAR_M):
+            bk.cage_extrusion = cage
+            img = bpy.data.images.new('nb_' + atlas, size, size, float_buffer=True, alpha=True)
+            img.colorspace_settings.name = 'Non-Color'
+            img.pixels.foreach_set(np.tile(np.array([0.5, 0.5, 1.0, 0.0], np.float32), size * size))
+            mat = bpy.data.materials.new('nb_' + atlas)
+            mat.use_nodes = True
+            tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
+            tex.image = img
+            mat.node_tree.nodes.active = tex
+            for lo, hi in pairs:
+                keep = list(lo.data.materials)
+                lo.data.materials.clear()
+                lo.data.materials.append(mat)
+                bpy.ops.object.select_all(action='DESELECT')
+                hi.select_set(True)
+                lo.select_set(True)
+                bpy.context.view_layer.objects.active = lo
+                bpy.ops.object.bake(type='NORMAL')
+                lo.data.materials.clear()
+                for m in keep:
+                    lo.data.materials.append(m)
+            px = np.empty(size * size * 4, np.float32)
+            img.pixels.foreach_get(px)
+            runs.append(px.reshape(size, size, 4))
+        bk.cage_extrusion = CAGE_M
+        (far, near) = runs
+        rgb, filled = far[..., :3].copy(), far[..., 3] > 0.5
+        back = filled & (far[..., 2] < 0.5)                      # z < 0: попадание в изнанку
+        take = back & (near[..., 3] > 0.5) & (near[..., 2] >= 0.5)
+        rgb[take] = near[..., :3][take]
+        left = back & ~take
+        filled = filled & ~left                                  # и у малой клетки изнанка — дорисовать по соседям
         n_baked = int(filled.sum())
+        log('нормаль', atlas, 'изнанка с клеткой', round(CAGE_M * 1000, 2), 'мм:', int(back.sum()), 'взято с',
+            round(CAGE_NEAR_M * 1000, 2), 'мм:', int(take.sum()), 'дорисовано:', int(left.sum()))
         # дорисовка краёв островов наружу (в Blender нет OpenCV): кольцо за кольцом — среднее запечённых соседей
         for _ in range(dilate_px):
             acc = np.zeros_like(rgb)
@@ -483,6 +795,9 @@ def bake_normals(samples=4, dilate_px=16):
 def main():
     args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
     stages = set(args) or {'fbx', 'maps'}
+    if stages == {'marks'}:          # только marks.json и zones.json — по данным part_stamps, без сборки FBX
+        red_marks_json()
+        return
     rec = build_fbx()
     if 'maps' in stages:
         for set_name, objs in rec.items():

@@ -304,6 +304,17 @@ def red_marks():
     return out
 
 
+def emblem_places():
+    """Знаки корпуса — (центр мм, внешний радиус мм, нормаль): на переднем торце крышки и на боках шахты, на месте литого
+    «V» прототипа (X −80, Z −32). По ним вырезаются знаки (apply), и по ним же tools/smg03/tex_masks.py не трогает знаки,
+    выравнивая плоскости вокруг."""
+    import lib
+    out = [((lib.FRONT_FACE_X, 0.0, 33.0), 8.0, (1, 0, 0))]
+    for nrm, s in (((0, 1, 0), 1), ((0, -1, 0), -1)):
+        out.append(((-80.0, s * HALF_W, -32.0), 10.5, nrm))
+    return out
+
+
 def apply(target, C):
     import lib
     if not getattr(lib, "MARKINGS_GEOMETRY", False):
@@ -312,23 +323,15 @@ def apply(target, C):
     FAILED.clear()
     EMBLEMS.clear()
     up = target
-    mw = up
-    L, R = (0, 1, 0), (0, -1, 0)
     Z = (0, 0, 1)
     # надписи и метки — одним списком (text_stamps): по нему же гравировка в карте нормалей и красная заливка
     for txt, size, center, nrm, depth, _red in text_stamps():
         stamp(up, txt, size, center, nrm, Z, depth, C)
-    # знак на переднем торце (крышка) — как на боку
-    e = emblem_cutter(8.0, 0.45, C)
-    place(e, (lib.FRONT_FACE_X, 0.0, 33.0), (1, 0, 0), Z, 0.0, up)
-    boolean(up, e)
-    ZONES.append(((lib.FRONT_FACE_X, 0.0, 33.0), 9.5))
-    EMBLEMS.append(((lib.FRONT_FACE_X, 0.0, 33.0), 10.0, (1, 2)))
-    # знак на боках корпуса шахты — на месте литого «V» прототипа (X −80, Z −32)
-    for nrm, s in ((L, 1), (R, -1)):
-        e = emblem_cutter(10.5, 0.45, C)
-        place(e, (-80.0, s * HALF_W, -32.0), nrm, Z, 0.0, mw)
-        boolean(mw, e)
-        ZONES.append(((-80.0, s * HALF_W, -32.0), 12.0))
-        EMBLEMS.append(((-80.0, s * HALF_W, -32.0), 12.5, (0, 2)))
+    # знаки: на переднем торце (крышка) и на боках корпуса шахты; зона нарезки — на 2 мм шире знака
+    for center, r_out, nrm in emblem_places():
+        e = emblem_cutter(r_out, 0.45, C)
+        place(e, center, nrm, Z, 0.0, up)
+        boolean(up, e)
+        ZONES.append((center, r_out + 1.5))
+        EMBLEMS.append((center, r_out + 2.0, (1, 2) if nrm[0] else (0, 2)))
     return list(ZONES)
