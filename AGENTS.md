@@ -178,6 +178,11 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/first_look_test.tsc
 tools/godot.cmd res://tools/asphalt_shots.tscn              # мокрый асфальт: сухо / сыро / лужи, от первого лица и изометрия (ASPH_TIME=day|dusk|night); снимки asphalt_*
 tools/godot.cmd res://tools/ssr_probe.tscn                  # SSR движка: зеркало и мокрый асфальт при разных настройках отражений; снимки ssr_probe_*
 python tools/fetch_sky.py                                      # ночное небо: HDRI Poly Haven + карта Луны NASA в assets/sky, CREDITS
+tools/rtv_look.cmd                                            # стенд «Как в Road to Vostok» (опыт владельца 2026-11-05): две одинаковые поляны — опушка, земля, пруд, дом —
+                                                              # наша (земля зоны 1, наша трава, деревья «Проспекта», R06) и из файлов их игры (RTV.pck читается из папки Steam,
+                                                              # RTV_PCK — другой путь, в проект не копируется); игрок с оружием; F1 — свет наш / их, F2 — время, F3 — погода,
+                                                              # F4 — другая поляна; -- shots — 64 кадра в E:/RTV_research/rtv_look (RTV_LOOK_OUT, RTV_LOOK_ONLY=day_clear);
+                                                              # --headless … -- check — сборка и свет туда-обратно; выводы — docs/research/road_to_vostok.md
 python -X utf8 tools/gen_sky_atmosphere.py                    # расчётное небо: таблицы рассеяния и подгонка яркости к небу из панорам → data/sky_atmosphere.json
                                                               # (--preview <папка> — панорамы обоих режимов по высотам солнца)
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/sky_compare_shots.tscn # небо из панорам и расчётное с облаками (Esc → Читы → Мир → «Небо»):

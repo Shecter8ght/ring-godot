@@ -34,6 +34,8 @@ const SCAN_SHADER := preload("res://src/world/grass_scan.gdshader")
 @export var lawn_density: float = 1.0
 ## Сухость травинок 0..1 (0 — зелёная, 1 — солома).
 @export_range(0.0, 1.0) var lawn_dryness: float = 0.3
+## Карта плотности, собранная кодом (стенды): если задана до входа в дерево — вместо density_map.
+var density_texture: Texture2D
 
 var _density: Image
 var _terrain: Node
@@ -54,9 +56,10 @@ var _q: Dictionary = {}
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
-	if density_map == "" or not ResourceLoader.exists(density_map):
+	var tex: Texture2D = _density_texture()
+	if tex == null:
 		return
-	_density = (load(density_map) as Texture2D).get_image()
+	_density = tex.get_image()
 	if _density.is_compressed():
 		_density.decompress()
 	_terrain = get_tree().get_first_node_in_group("district_terrain")
@@ -156,9 +159,9 @@ func _apply_quality() -> void:
 ## «Трава издали» рельефу (DistrictTerrain.set_far_grass, Balance.GRASS.far_look): там, где травинки уходят
 ## в землю, газон в траве берёт их вид — без тёмной полосы за кольцом. Тот же радиус, что у травинок.
 func _push_far_grass(far: float) -> void:
-	if not lawn or _terrain == null or not _terrain.has_method("set_far_grass") or not ResourceLoader.exists(density_map):
+	if not lawn or _terrain == null or not _terrain.has_method("set_far_grass"):
 		return
-	var tex: Texture2D = load(density_map) as Texture2D
+	var tex: Texture2D = _density_texture()
 	if tex == null:
 		return
 	var g: Dictionary = Balance.GRASS
@@ -175,6 +178,14 @@ func _push_far_grass(far: float) -> void:
 		"grass_far_flat": float(look.flat),
 		"grass_far_clumps": look.clumps,
 	})
+
+
+func _density_texture() -> Texture2D:
+	if density_texture:
+		return density_texture
+	if density_map == "" or not ResourceLoader.exists(density_map):
+		return null
+	return load(density_map) as Texture2D
 
 
 func _scan_radius() -> float:
