@@ -45,6 +45,13 @@ OUT = ROOT / '_asset_src/smg03/tex'
 RECEIVER_HALF = {'Upper': 'receiver_upper', 'Lower': 'receiver_lower'}
 HP_INSET_MM = 0.3
 RED_SETS = ('Upper', 'Lower')
+# карта нормалей — запеканием в Blender (стадия normals): Painter 12.1 не берёт из FBX нормалей игровой сетки и пересчитывает
+# их сам; его карта выправляла его же пересчёт, и на наших нормалях (их видят Blender и Godot) вокруг надписей шёл веер,
+# у кромок — полосы (владелец 05.11, v2; то же у цевья Dolinskyi, tools/handguard_dolinskyi/bake_normal.py)
+NORMAL_RES = {'Upper': 4096, 'Lower': 4096, 'Steel': 4096, 'Stock': 2048, 'Mag13': 2048, 'Mag30': 2048}
+CAGE_M = 0.0008                    # луч стартует на 0.8 мм снаружи игровой сетки
+RAY_M = 0.0025                     # и идёт до 1.7 мм внутрь: отклонение сетки до 0.47 мм, гравировка 0.25–0.45
+PAIRS = []                         # (low, high, набор) — пары по слотам из build_fbx
 MAG_SHIFT = {'Mag13': (0.0, 0.0, -0.35), 'Mag30': (0.0, 0.0, -0.75)}
 log = lambda *a: print('SMG03_TEX', *a, flush=True)
 
@@ -284,6 +291,7 @@ def build_fbx():
                     ob.location = MAG_SHIFT[atlas]
             low_out.append(lo)
             high_out.append(hi)
+            PAIRS.append((lo, hi, atlas))
             fin = finish_of[sid]
             meshes.setdefault(atlas, {}).setdefault(sid, {'finish': fin, 'meshes': []})['meshes'].append(lo.name)
             log(atlas, key, 'граней', int(keep.sum()), 'деталей', len(parts), how,
@@ -368,14 +376,15 @@ def bake_maps(set_name, objs, size=4096):
 
 
 def red_marks_json():
-    """Контуры красных меток (part_stamps.red_marks) — треугольники лиц букв на плоскости XZ (мм) по сторонам."""
+    """Контуры надписей и меток (part_stamps.text_stamps) — треугольники лиц букв на плоскости XZ (мм) по сторонам, с
+    глубиной гравировки и признаком красной заливки: tex_masks.py строит по ним маску заливки и гравировку в карте нормалей."""
     import part_stamps
     coll = bpy.data.collections.new('MARKS')
     bpy.context.scene.collection.children.link(coll)
     anchor = bpy.data.objects.new('marks_anchor', None)
     coll.objects.link(anchor)
     out = []
-    for txt, size, center, nrm in part_stamps.red_marks():
+    for txt, size, center, nrm, depth, red in part_stamps.text_stamps():
         cut = part_stamps.text_cutter(txt, size, 0.85, coll)
         part_stamps.place(cut, center, nrm, (0, 0, 1), 0.6, anchor)
         me = cut.data
@@ -386,9 +395,89 @@ def red_marks_json():
                 continue
             tris.append([[round(me.vertices[i].co.x * 1000, 4), round(me.vertices[i].co.z * 1000, 4)]
                          for i in t.vertices])
-        out.append({'text': txt, 'side': 1 if nrm[1] > 0 else -1, 'center_mm': list(center), 'tris': tris})
+        out.append({'text': txt, 'side': 1 if nrm[1] > 0 else -1, 'center_mm': list(center), 'depth_mm': depth,
+                    'red': red, 'tris': tris})
     (OUT / 'marks.json').write_text(json.dumps(out, ensure_ascii=False), encoding='utf-8', newline='\n')
-    log('красных меток', len(out), '→', OUT / 'marks.json')
+    log('надписей и меток', len(out), '→', OUT / 'marks.json')
+
+
+def bake_normals(samples=4, dilate_px=16):
+    """Карта нормалей наборов в Blender (Cycles на процессоре): каждая сетка-слот — только со своей high-poly (пары из
+    build_fbx), касательные — по нашим нормалям игровой сетки, OpenGL (как проект Painter). Пиксели, куда запекание не
+    попало, — плоская нормаль; края островов дорисованы наружу на dilate_px. → OUT/normals/<набор>_normal.png (16 бит)."""
+    S = bpy.context.scene
+    S.render.engine = 'CYCLES'
+    S.cycles.device = 'CPU'
+    S.cycles.samples = samples
+    bk = S.render.bake
+    bk.use_selected_to_active = True
+    bk.use_cage = False
+    bk.cage_extrusion = CAGE_M
+    bk.max_ray_distance = RAY_M
+    bk.margin = 0
+    bk.use_clear = False
+    bk.normal_space = 'TANGENT'
+    bk.normal_r, bk.normal_g, bk.normal_b = 'POS_X', 'POS_Y', 'POS_Z'
+    out_dir = OUT / 'normals'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for ob in bpy.data.objects:
+        ob.hide_render = False
+    for atlas, size in NORMAL_RES.items():
+        pairs = [(lo, hi) for lo, hi, a in PAIRS if a == atlas]
+        if not pairs:
+            continue
+        img = bpy.data.images.new('nb_' + atlas, size, size, float_buffer=True, alpha=True)
+        img.colorspace_settings.name = 'Non-Color'
+        img.pixels.foreach_set(np.tile(np.array([0.5, 0.5, 1.0, 0.0], np.float32), size * size))
+        mat = bpy.data.materials.new('nb_' + atlas)
+        mat.use_nodes = True
+        tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        tex.image = img
+        mat.node_tree.nodes.active = tex
+        for lo, hi in pairs:
+            keep = list(lo.data.materials)
+            lo.data.materials.clear()
+            lo.data.materials.append(mat)
+            bpy.ops.object.select_all(action='DESELECT')
+            hi.select_set(True)
+            lo.select_set(True)
+            bpy.context.view_layer.objects.active = lo
+            bpy.ops.object.bake(type='NORMAL')
+            lo.data.materials.clear()
+            for m in keep:
+                lo.data.materials.append(m)
+        px = np.empty(size * size * 4, np.float32)
+        img.pixels.foreach_get(px)
+        px = px.reshape(size, size, 4)
+        rgb, filled = px[..., :3].copy(), px[..., 3] > 0.5
+        n_baked = int(filled.sum())
+        # дорисовка краёв островов наружу (в Blender нет OpenCV): кольцо за кольцом — среднее запечённых соседей
+        for _ in range(dilate_px):
+            acc = np.zeros_like(rgb)
+            cnt = np.zeros(filled.shape, np.float32)
+            for dy, dx in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
+                f = np.roll(np.roll(filled, dy, 0), dx, 1)
+                acc += np.roll(np.roll(rgb, dy, 0), dx, 1) * f[..., None]
+                cnt += f
+            grow = (~filled) & (cnt > 0)
+            if not grow.any():
+                break
+            rgb[grow] = acc[grow] / cnt[grow][:, None]
+            filled = filled | grow
+        rgb[~filled] = (0.5, 0.5, 1.0)
+        n = rgb * 2.0 - 1.0
+        n /= np.maximum(np.linalg.norm(n, axis=-1, keepdims=True), 1e-6)
+        rgb = n * 0.5 + 0.5
+        out = bpy.data.images.new('nbo_' + atlas, size, size, float_buffer=True, alpha=False)
+        out.colorspace_settings.name = 'Non-Color'
+        out.pixels.foreach_set(np.concatenate([rgb, np.ones((size, size, 1), np.float32)], -1).ravel())
+        path = out_dir / f'{atlas}_normal.png'
+        S.render.image_settings.file_format = 'PNG'
+        S.render.image_settings.color_mode = 'RGB'
+        S.render.image_settings.color_depth = '16'
+        out.save_render(str(path), scene=S)
+        filled_n = n_baked
+        log('нормаль', atlas, size, 'пар', len(pairs), 'запечено пикселей', filled_n, '→', path)
 
 
 def main():
@@ -399,6 +488,8 @@ def main():
         for set_name, objs in rec.items():
             bake_maps(set_name, objs)
         red_marks_json()
+    if 'normals' in stages:
+        bake_normals()
 
 
 if __name__ == '__main__':

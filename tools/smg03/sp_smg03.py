@@ -23,7 +23,7 @@ import sp_finish
 ROOT = "E:/Games/RING-godot"
 TEX = ROOT + "/_asset_src/smg03/tex"
 SPEC = "E:/Models Blender/WEAPONS/Vector — модель/finish-spec.json"
-PROJECT = TEX + "/sp/SMG03_finish_v2.spp"   # v1 (корпус одним атласом) — SMG03_finish.spp
+PROJECT = TEX + "/sp/SMG03_finish_v3.spp"   # v1 — SMG03_finish.spp, v2 — SMG03_finish_v2.spp
 LOW = TEX + "/SMG03_low.fbx"
 HIGH = TEX + "/SMG03_high.fbx"
 RES = {"Upper": 4096, "Lower": 4096, "Steel": 4096, "Stock": 2048, "Mag13": 2048, "Mag30": 2048}
@@ -150,6 +150,29 @@ def bake(only=None, match=1, ray=RAY_REL, sub=1, smooth=False, high=None):
     _connect(E.BakingProcessEnded, nxt, "bake")
     nxt()
     return "bake queue " + " ".join(t.name() for t in sets)
+
+
+def use_blender_normals(only=None):
+    """Карта нормалей наборов — из Blender (tools/smg03/game_tex.py, стадия normals) вместо своей: Painter 12.1 не берёт
+    из FBX нормалей игровой сетки и пересчитывает их сам, его карта выправляла его же пересчёт — на наших нормалях
+    (Blender, Godot) вокруг надписей шёл веер, у кромок полосы (владелец 05.11, v2). AO, кривизна, положение, толщина —
+    от его запекания. Ставить после bake(), до stack()/export()."""
+    import substance_painter.resource as R
+    out = []
+    for t in TS.all_texture_sets():
+        if only and t.name() not in only:
+            continue
+        # с гравировкой надписей по их контурам (tex_masks.py), если есть
+        path = f"{TEX}/normals/{t.name()}_normal_eng.png"
+        if not os.path.exists(path):
+            path = f"{TEX}/normals/{t.name()}_normal.png"
+        if not os.path.exists(path):
+            out.append(f"{t.name()}: нет {path}")
+            continue
+        res = sp_finish._bitmap(path)
+        t.set_mesh_map_resource(U.Normal, res)
+        out.append(f"{t.name()}: {res.name}")
+    return " | ".join(out)
 
 
 def _spec():
