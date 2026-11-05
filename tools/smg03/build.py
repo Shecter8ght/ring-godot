@@ -15,6 +15,14 @@ for mod in ("lib",) + tuple("part_" + p for p in PARTS):
         importlib.reload(sys.modules[mod])
 import lib  # noqa: E402
 
+# SMG03_LP_SOURCE=1 — источник игровой сетки корпуса (tools/smg03/game_lp.py): без надписей, знаков и шагрени поля
+# рукояти — они только в карте нормалей; упрощение оставляло от них обрывки и «шум»
+if os.environ.get("SMG03_LP_SOURCE"):
+    lib.MARKINGS_GEOMETRY = False
+    import part_receiver  # noqa: E402
+    part_receiver.GRIP_STIPPLE_H = 0.0
+    print("LP_SOURCE: без надписей, знаков и шагрени")
+
 COLLS = ["Receiver", "Trigger_housing", "Barrel", "Bolt_group", "Controls", "Sights", "Stock", "Magazine", "Pins", "Rig"]
 # детали без общей фаски (тела вращения с собственными фасками, пружины, патроны)
 SKIP_SWEEP = ("Spring", "Round_", "Case_", "Bullet_")
