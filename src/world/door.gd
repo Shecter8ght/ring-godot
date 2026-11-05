@@ -79,7 +79,8 @@ func _on_body_entered(body: Node3D) -> void:
 		if not RivalRaids.may_open(body as Marauder, required_key) or not _powered():
 			return
 		toggle(body.global_position)
-		NoiseBus.emit(global_position, 10.0, "door")
+		# слышно всем, кроме его отряда (свои знают, что дверь открыл свой)
+		Marauder.emit_own(body as Marauder, global_position, 10.0, "door")
 
 
 func _on_body_exited(body: Node3D) -> void:
@@ -141,6 +142,20 @@ func toggle(from_world: Vector3) -> void:
 		_target_angle = (PI * 0.5) if local.z > 0.0 else (-PI * 0.5)
 	else:
 		_target_angle = 0.0
+
+
+## Мародёр упёрся в открытую створку: она распахнута в его сторону и стоит поперёк пути вдоль стены (сетка путей
+## створок не знает). Толкнул — створка уходит на другую сторону проёма. true — толкнул. Только авторитет (хост).
+func push_from(from_world: Vector3) -> bool:
+	if not is_open or (Net.is_networked() and not is_multiplayer_authority()):
+		return false
+	# распахнута от подошедшего — угол со знаком его стороны (как в toggle)
+	var away := (PI * 0.5) if to_local(from_world).z > 0.0 else (-PI * 0.5)
+	if is_equal_approx(_target_angle, away):
+		return false
+	_target_angle = away
+	Audio.play("door_metal", global_position, 0.0, 0.0, self)
+	return true
 
 
 @rpc("any_peer", "call_remote", "reliable")

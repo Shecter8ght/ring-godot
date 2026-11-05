@@ -2086,7 +2086,9 @@ const AI_DEATH_NOISE := 22.0
 const AI_PATH_HEIGHT_FIX := 2.2
 ## Мародёр упёрся (хочет идти, а стоит): через stuck_sec — шаг вбок на side_sec; не помогло tries раз
 ## подряд в обходе — берёт другую точку обхода. Скорость ниже min_speed считается «стоит».
-const AI_UNSTUCK := {"stuck_sec": 2.0, "side_sec": 0.7, "tries": 3, "min_speed": 0.25}
+## Идёт медленнее slow_k от желаемого дольше door_sec и впереди (до door_reach м) открытая створка — толкает её
+## на другую сторону проёма (Door.push_from: сетка путей створок не знает).
+const AI_UNSTUCK := {"stuck_sec": 2.0, "side_sec": 0.7, "tries": 3, "min_speed": 0.25, "slow_k": 0.5, "door_sec": 0.6, "door_reach": 1.0}
 const AI_FOLLOW_DIST := 2.6
 ## Отряды: сколько в отряде (от и до).
 const AI_SQUAD_SIZE := [1, 3]

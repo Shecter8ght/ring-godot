@@ -44,13 +44,17 @@ func _ready() -> void:
 	get_tree().quit(1 if _fails else 0)
 
 
+## Кольцевая улица ТЦ Ø200 (r 58–68): середина (r 72 — уже внешние магазины, было от кольца Ø250).
+const STREET_R := 63.0
+
+
 ## Место на кольцевой улице, не ближе 60 м к выходу отряда.
 func _spot(exit: Vector3, shift: float = 0.0) -> Vector3:
 	for a: float in [-100.0, -60.0, -140.0, -30.0]:
-		var p: Vector3 = SectorBuilder.polar(a + shift, 72.0)
+		var p: Vector3 = SectorBuilder.polar(a + shift, STREET_R)
 		if p.distance_to(exit) > 60.0:
 			return p
-	return SectorBuilder.polar(-100.0 + shift, 72.0)
+	return SectorBuilder.polar(-100.0 + shift, STREET_R)
 
 
 func _squad(index: int, at: Vector3, exit: Vector3) -> RivalSquad:

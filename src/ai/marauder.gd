@@ -97,10 +97,13 @@ var archetype: String = ""
 var squad: Squad
 ## Откуда брать точки патруля: Callable() -> Vector3 (даёт сцена сектора).
 var patrol_point_provider: Callable
-## Приказ плана отряда (RivalSquad): {"kind": "fallback" | "hold", "until": мс[, "face": точка]}.
+## Приказ плана отряда (RivalSquad): {"kind": "fallback" | "hold", "left": сколько ещё, с, "age": сколько идёт, с
+## [, "face": точка]}. Время — игровое (_physics_process): пауза и Engine.time_scale его не обгоняют.
 var _order: Dictionary = {}
 var _stuck_t: float = 0.0
 var _stuck_n: int = 0
+## Сколько секунд идёт медленно (упёрся в створку? — _tick_door).
+var _door_t: float = 0.0
 var _side_t: float = 0.0
 var _side_sign: float = 1.0
 var last_known: Vector3 = Vector3.ZERO
@@ -246,6 +249,8 @@ var _help_refused: Dictionary = {}
 ## Грабёж: куда идёт ведущий, сколько роется, что уже взял (сумка), где уже был.
 ## Метки «этот контейнер наш» — общие для всех: id контейнера -> [мародёр, время, мс].
 static var _loot_claims: Dictionary = {}
+## Кто сейчас шумит сам (открыл дверь, emit_own): его отряд знает, откуда шум, и проверять его не идёт.
+static var _noise_maker: Marauder = null
 var pack: Array = []
 var _loot_target: LootContainer = null
 var _loot_t: float = -1.0
@@ -715,6 +720,9 @@ func _physics_process(delta: float) -> void:
 	_suppress_t = maxf(0.0, _suppress_t - delta)
 	_shot_heard_t += delta
 	_repath_t -= delta
+	if not _order.is_empty():
+		_order.left = float(_order.get("left", 0.0)) - delta
+		_order.age = float(_order.get("age", 0.0)) + delta
 	var work_started: int = Time.get_ticks_usec() if work_profile_enabled else 0
 	_perceive(delta)
 	if work_profile_enabled:
@@ -998,9 +1006,24 @@ func _on_callout(from: Vector3, radius_m: float, target: Vector3, speaker: Node)
 		_enter_combat(Tactic.FLANK if _rank() == 1 else _closing_tactic())
 
 
+## Шум, который поднял сам боец (открыл дверь): слышат все, кроме его отряда — свои знают, что это они.
+## Иначе отряд шёл проверять свою же дверь, в обыске открывал следующую — и так по кругу, до грабежа не доходя.
+static func emit_own(m: Marauder, pos: Vector3, radius_m: float, kind: String) -> void:
+	act_own(m, func() -> void: NoiseBus.emit(pos, radius_m, kind))
+
+
+## Дело бойца, которое шумит само (щёлкнул рубильником — PowerSwitch шумит): шум «свой» для его отряда.
+static func act_own(m: Marauder, act: Callable) -> void:
+	_noise_maker = m
+	act.call()
+	_noise_maker = null
+
+
 func _on_noise(pos: Vector3, radius_m: float, kind: String) -> void:
 	radius_m *= Balance.lab_number("perception", "hearing")
 	if state == State.DEAD:
+		return
+	if _noise_maker != null and is_instance_valid(_noise_maker) and (_noise_maker == self or (squad != null and _noise_maker.squad == squad)):
 		return
 	if kind == "shot" and global_position.distance_to(pos) <= radius_m:
 		_shot_heard_t = 0.0
@@ -1216,7 +1239,7 @@ func _patrol(delta: float) -> void:
 		return
 	if String(_order.get("kind", "")) == "hold":
 		# прикрывает, пока товарищ обыскивает тела: стоит на месте, смотрит наружу
-		if Time.get_ticks_msec() >= int(_order.until):
+		if float(_order.left) <= 0.0:
 			_order = {}
 		else:
 			if _agent.is_navigation_finished():
@@ -1310,7 +1333,7 @@ func break_contact(to: Vector3, sec: float) -> void:
 	if state in [State.DEAD, State.DOWNED, State.RESCUE]:
 		return
 	_drop_loot_claim()
-	_order = {"kind": "fallback", "since": Time.get_ticks_msec(), "until": Time.get_ticks_msec() + int(sec * 1000.0)}
+	_order = {"kind": "fallback", "age": 0.0, "left": sec}
 	state = State.RETREAT
 	_set_crouch(false)
 	_set_move_target(to, true)
@@ -1332,7 +1355,7 @@ func stand_down() -> void:
 func hold_post(pos: Vector3, face: Vector3, sec: float) -> void:
 	if state != State.PATROL:
 		return
-	_order = {"kind": "hold", "until": Time.get_ticks_msec() + int(sec * 1000.0), "face": face}
+	_order = {"kind": "hold", "age": 0.0, "left": sec, "face": face}
 	_set_move_target(pos, true)
 
 
@@ -1924,8 +1947,7 @@ func _retreat(delta: float) -> void:
 		# отряд разрывает контакт: бежит, за укрытием не отсиживается; дошёл или вышло время — по плану
 		_set_crouch(false)
 		# «дошёл» — не раньше, чем путь проложен (в первый кадр агент ещё считает прежний путь законченным)
-		var now_ms: int = Time.get_ticks_msec()
-		if now_ms >= int(_order.until) or (now_ms - int(_order.since) > 800 and _agent.is_navigation_finished()):
+		if float(_order.left) <= 0.0 or (float(_order.age) > 0.8 and _agent.is_navigation_finished()):
 			stand_down()
 		return
 	if not _agent.is_navigation_finished():
@@ -2814,6 +2836,7 @@ func _move(delta: float) -> void:
 	($CartContact as CartContact).move_character(delta)
 	if wish.length_squared() > 0.01:
 		_step_up(from, wish * delta)
+		_tick_door(from, wish, delta)
 		_tick_stuck(from, delta)
 	else:
 		_stuck_t = 0.0
@@ -2821,6 +2844,29 @@ func _move(delta: float) -> void:
 	# попадание откидывает корпус назад (Body:rotation синхронизируется — видно всем)
 	_body.rotation.x = -0.35 * _flinch
 	# шаги (их слышно — так мародёра можно засечь раньше, чем он тебя) — Footsteps
+
+
+## Распахнутая створка поперёк пути: сетка путей створок не знает, путь вдоль стены упирается в створку, и боец
+## топчется у неё (скользит по ней — «застрял» по скорости не срабатывает; так стоял у фасада ТЦ ведущий чужого
+## отряда). Идёт медленнее slow_k от желаемого дольше door_sec — толкнуть створку на другую сторону проёма.
+func _tick_door(from: Vector3, wish: Vector3, delta: float) -> void:
+	var cfg: Dictionary = Balance.AI_UNSTUCK
+	var step := global_position - from
+	step.y = 0.0
+	var want := Vector3(wish.x, 0.0, wish.z)
+	if step.length() > want.length() * delta * float(cfg.slow_k):
+		_door_t = 0.0
+		return
+	_door_t += delta
+	if _door_t < float(cfg.door_sec):
+		return
+	_door_t = 0.0
+	var eye := global_position + Vector3.UP
+	var q := PhysicsRayQueryParameters3D.create(eye, eye + want.normalized() * float(cfg.door_reach), Hitscan.LAYER_DOOR, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	var door: Door = (hit.collider as Node).get_parent() as Door if not hit.is_empty() else null
+	if door:
+		door.push_from(global_position)
 
 
 func _tick_stuck(from: Vector3, delta: float) -> void:

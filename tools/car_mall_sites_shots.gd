@@ -2,7 +2,8 @@ extends Node
 ## Места заказа «Вернуть машину» на карте ТЦ (scenes/levels/mall_map.tscn, места — scenes/levels/mall/car_recovery_sites.tscn):
 ## рейд грузится, игрок на заходе, навигация из кэша, три выхода; стоянка у доков — два снимка (F) засчитаны, после отчёта
 ## и ответа Нине — бокс скупки у АЗС, номер и накладная засчитаны; с этапа «дворы» на складе техники колесо — F, оно в рюкзаке.
-## У каждого места — путь по навигации от захода.
+## У каждого места — путь по навигации от захода. Снимки заказа — личным телефоном (PersonalPhone): F открывает камеру
+## на этом месте, кадр засчитывает затвор; без окна картинки нет — затвор засчитывает место, как после сохранённого кадра.
 ##   tools/godot.cmd --headless res://tools/car_mall_sites_shots.tscn            — проверка
 ##   tools/godot.cmd --windowed --resolution 1600x900 res://tools/car_mall_sites_shots.tscn — и снимки docs/screens/car_mall_*.png
 
@@ -59,6 +60,9 @@ func _ready() -> void:
 		rig.set_physics_process(false)
 		player.set_physics_process(false)
 		player.set_process(false)                                  # иначе игрок каждый кадр поворачивает камеру по своему взгляду
+	# снимки заказа — личным телефоном: его выдают при принятии заказа (PhoneGear), рейд здесь запущен напрямую
+	if not player.inventory.has(PhoneGear.ID):
+		player.inventory.add(PhoneGear.ID, 1)
 	# стоянка у северо-восточных доков: оба снимка — отчёт Илье
 	for sid: String in ["car_mall_parking_wide", "car_mall_parking_detail"]:
 		await _use(player, sid)
@@ -88,8 +92,11 @@ func _ready() -> void:
 			# пятно антифриза под передком и кусок накладки у левого порога
 			await _shot(cam, player, wide.global_position + Vector3(-2.0, 1.5, -3.3), wide.global_position + Vector3(-0.4, 0.0, -1.5), "parking_detail")
 			await _shot(cam, player, wide.global_position + Vector3(-1.4, 0.55, -1.2), wide.global_position + Vector3(-1.15, 0.0, -0.85), "parking_trim")
-	Quests.finish_talk(Q, "ilya", "report_park")
-	Quests.finish_talk(Q, "perevalka", "hint")
+	# отчёт Илье и ответ Нине — в переписке терминала убежища (в рейде открыт только полевой канал, finish_talk
+	# там не засчитывается): засчитываем их, не выходя из рейда, чтобы снять следующие места
+	for oid: String in ["report_park", "hint"]:
+		if String(Quests.objective(Q).get("id", "")) == oid:
+			Quests.dev_complete_objective(Q)
 	# бокс скупки у АЗС
 	for sid: String in ["car_mall_lead_plate", "car_mall_lead_invoice"]:
 		await _use(player, sid)
@@ -143,6 +150,25 @@ func _use(player: Player, sid: String) -> void:
 		await get_tree().process_frame
 	_check("у места %s можно нажать F" % sid, site.can_use(), site.prompt() if site.can_use() else "")
 	site.request_use()
+	for frame: int in range(6):
+		await get_tree().process_frame
+	if bool(site.spec.get("photo", false)):
+		await _photo(site)
+
+
+## Точка съёмки заказа: F открыл камеру телефона на этом месте — затвор. С окном — настоящий кадр (Phone.capture);
+## без окна видеокарта не рисует — засчитываем место так же, как capture после сохранённого кадра.
+func _photo(site: QuestSite) -> void:
+	var framed: QuestSite = (Phone._site.get_ref() as QuestSite) if Phone.active and Phone._site else null
+	_check("F у %s — камера телефона на этом месте" % site.site_id, framed == site and Phone.screen_ui.app == "Камера",
+		"телефон %s, приложение %s" % [Phone.active, Phone.screen_ui.app if Phone.active else "—"])
+	if framed != site:
+		return
+	if _shots:
+		await Phone.capture()
+	else:
+		site._done()
+	Phone.close()
 	for frame: int in range(6):
 		await get_tree().process_frame
 

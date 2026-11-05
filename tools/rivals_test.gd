@@ -5,7 +5,17 @@ extends Node
 ## игроком, записан за игроком. Правила мира — как для игроков: выход за рубильником — сначала щёлкают
 ## рубильник; выход по карте-ключу — сначала подбирают карту (на карте её больше нет, лежит в сумке);
 ## запертая на ключ дверь без ключа не открывается. Печатает [ok]/[FAIL] и итог.
+## Карта — ТЦ Ø200 с территорией (mall_map): своих выходов за рубильником и по ключу на ней нет (были на кольце Ø250,
+## удалённом 2026-10-24), поэтому на двух её выходах тест ставит свои (_fixture_exit): условие выхода и рубильник /
+## карту-ключ на пути навигации от выхода — правила для отрядов те же, что на «Проспекте».
 ## tools/godot.cmd --headless res://tools/rivals_test.tscn
+
+## Кольцевая улица ТЦ Ø200 (r 58–68): середина.
+const STREET_R := 63.0
+## Рубильник и ключ своего выхода — на пути навигации от выхода вглубь карты, столько метров.
+const FIXTURE_M := 25.0
+const FIXTURE_SWITCH := "rivals_test_power"
+const FIXTURE_KEY := "keycard_security"
 
 var _fails: int = 0
 var _level: Node
@@ -86,9 +96,9 @@ func _loot_and_leave(exits: Array) -> void:
 
 ## Два чужих отряда рядом — бой; свои своих не трогают; мародёры им тоже враги.
 func _fights() -> void:
-	var at: Vector3 = SectorBuilder.polar(-100.0, 72.0)
+	var at: Vector3 = SectorBuilder.polar(-100.0, STREET_R)
 	var a: RivalSquad = _rivals.enter(RivalRoster.squads()[1], at, at)
-	var b: RivalSquad = _rivals.enter(RivalRoster.squads()[2], SectorBuilder.polar(-108.0, 72.0), at)
+	var b: RivalSquad = _rivals.enter(RivalRoster.squads()[2], SectorBuilder.polar(-108.0, STREET_R), at)
 	_check("два отряда на улице", a != null and b != null)
 	if a == null or b == null:
 		return
@@ -110,7 +120,7 @@ func _fights() -> void:
 	await _wait(0.5)
 	# мародёр и чужой
 	var c: RivalSquad = _rivals.enter(RivalRoster.squads()[3], at, at)
-	var scav_squad: Squad = _level.call("spawn_squad", SectorBuilder.polar(-107.0, 72.0), ["gunner", "gunner"], {}) as Squad
+	var scav_squad: Squad = _level.call("spawn_squad", SectorBuilder.polar(-107.0, STREET_R), ["gunner", "gunner"], {}) as Squad
 	_check("мародёры рядом с чужими", c != null and scav_squad != null)
 	if c == null or scav_squad == null:
 		return
@@ -128,7 +138,7 @@ func _fights() -> void:
 
 ## Игрок выбил отряд: записано за игроком.
 func _wiped_by_player() -> void:
-	var at: Vector3 = SectorBuilder.polar(-100.0, 72.0)
+	var at: Vector3 = SectorBuilder.polar(-100.0, STREET_R)
 	var s: RivalSquad = _rivals.enter(RivalRoster.squads()[4], at, at)
 	_check("отряд для игрока", s != null)
 	if s == null:
@@ -151,6 +161,9 @@ func _wiped_by_player() -> void:
 ## Выход за рубильником: отряд сначала идёт к рубильнику и включает его, потом уходит.
 func _switch_exit(exits: Array) -> void:
 	var gated: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.switch) != "")
+	if gated.is_empty():
+		_fixture_exit("switch", 1)
+		gated = _rivals._exits().filter(func(e: Dictionary) -> bool: return String(e.switch) != "")
 	_check("на уровне есть выход за рубильником", not gated.is_empty() and Raid.current != null)
 	if gated.is_empty() or Raid.current == null:
 		return
@@ -183,6 +196,9 @@ func _switch_exit(exits: Array) -> void:
 ## Выход по карте-ключу и запертая дверь: без ключа нельзя, отряд подбирает ключ — ключ у него.
 func _key_exit(exits: Array) -> void:
 	var keyed: Array = exits.filter(func(e: Dictionary) -> bool: return String(e.key) != "")
+	if keyed.is_empty():
+		_fixture_exit("key", 2)
+		keyed = _rivals._exits().filter(func(e: Dictionary) -> bool: return String(e.key) != "")
 	_check("на уровне есть выход по ключу", not keyed.is_empty())
 	if keyed.is_empty():
 		return
@@ -214,6 +230,45 @@ func _key_exit(exits: Array) -> void:
 		t += 1.0
 	_check("ушёл через выход по ключу", s.phase == RivalSquad.Phase.OUT, "фаза %d, прошло %d с, до выхода %s" % [s.phase, int(t),
 		s.alive().map(func(m: Marauder) -> int: return int(m.global_position.distance_to(s.exit_pos)))])
+
+
+## Свой выход за рубильником / по карте-ключу на выходе карты номер index (группа extractions): условие у самой точки
+## эвакуации, рубильник или карта — на пути навигации от выхода к центру ТЦ, в FIXTURE_M метрах (дойти можно заведомо).
+func _fixture_exit(kind: String, index: int) -> void:
+	var all: Array = get_tree().get_nodes_in_group("extractions")
+	var ext := all[index % all.size()] as ExtractionPoint
+	var map: RID = ext.get_world_3d().navigation_map
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(map, ext.global_position, Vector3.ZERO, true)
+	var at: Vector3 = _along(path, FIXTURE_M) if path.size() > 1 else NavigationServer3D.map_get_closest_point(map, ext.global_position)
+	if kind == "switch":
+		ext.required_switch = FIXTURE_SWITCH
+		var sw := (load("res://scenes/world/power_switch.tscn") as PackedScene).instantiate() as PowerSwitch
+		sw.name = "RivalsTestSwitch"
+		_level.add_child(sw)
+		sw.switch_id = FIXTURE_SWITCH
+		sw.display_name = "Рубильник ворот (тест)"
+		sw.global_position = at
+	else:
+		ext.required_key = FIXTURE_KEY
+		var k := (load("res://scenes/world/key_pickup.tscn") as PackedScene).instantiate() as KeyPickup
+		k.name = "RivalsTestKey"
+		_level.add_child(k)
+		k.key_id = FIXTURE_KEY
+		k.display_name = "Карта охраны (тест)"
+		k.global_position = at
+	print("       свой выход «%s»: %s в %.0f м по навигации, %s" % [ext.display_name, "рубильник" if kind == "switch" else "карта-ключ",
+		FIXTURE_M, str(at.snapped(Vector3.ONE * 0.1))])
+
+
+## Точка на ломаной path в d метрах от начала (или её конец).
+func _along(path: PackedVector3Array, d: float) -> Vector3:
+	var left := d
+	for i in range(1, path.size()):
+		var seg := path[i].distance_to(path[i - 1])
+		if seg >= left:
+			return path[i - 1].lerp(path[i], left / seg)
+		left -= seg
+	return path[path.size() - 1]
 
 
 ## Точка у ближайшего к p контейнера.

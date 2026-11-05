@@ -87,7 +87,7 @@ func _setup_host() -> void:
 	var power := String(RaidConditions.current.power)
 	if _off("power"):
 		pass
-	elif power == "on" and _rng.randf() < float(ev.outage_chance):
+	elif power == "on" and has_breaker() and _rng.randf() < float(ev.outage_chance):
 		sched.append(["outage", _rng.randf_range(float(ev.outage_at[0]), float(ev.outage_at[1]))])
 	elif power == "on" and _rng.randf() < float(ev.generator_chance):
 		sched.append(["generator", _rng.randf_range(float(ev.generator_at[0]), float(ev.generator_at[1]))])
@@ -212,6 +212,16 @@ func effective_power() -> String:
 	if generator_down or breaker == "emergency":
 		return "emergency"
 	return "on"
+
+
+## Есть ли на карте главный рубильник (MallBreaker). Без него «свет погас» не выпадает: поднять свет
+## было бы нечем, а сообщение звало бы в электрощитовую, которой нет (карта ТЦ и Пригород — 2026-11-05).
+## Авария генератора остаётся: генератор, если его нет на карте, ставится сам (generator()).
+func has_breaker() -> bool:
+	for n: Node in get_tree().get_nodes_in_group("power_points"):
+		if n is MallBreaker:
+			return true
+	return false
 
 
 ## Главный рубильник: следующее положение — выкл → аварийный → весь → выкл. Генератор стоит —

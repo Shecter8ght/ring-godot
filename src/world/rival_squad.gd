@@ -420,7 +420,8 @@ func _run_errand(living: Array[Marauder]) -> bool:
 		"switch":
 			var sw := node as PowerSwitch
 			if sw.can_use():
-				sw._use(0)
+				# щелчок слышат все, кроме своих: отряд не идёт проверять собственный рубильник
+				Marauder.act_own(lead, func() -> void: sw._use(0))
 	_errand = {}
 	_resume(living)
 	return false
