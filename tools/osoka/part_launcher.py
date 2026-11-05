@@ -59,11 +59,41 @@ def grip(coll):
     bm = bmesh.new(); bm.from_mesh(o.data)
     bmesh.ops.symmetrize(bm, input=bm.verts[:] + bm.edges[:] + bm.faces[:], direction="Y", dist=1e-6)
     bm.to_mesh(o.data); bm.free()
+    # упор пальца — после паза, вставки и отражения (булевы по чистой сетке), насечка — последней
+    finger_spur(o, coll)
     for side in (1, -1):
         knurl_patch(o, pp, side * (D.FRAME_Y[1] - 0.8), side, coll)
-    spur = rounded_prism("Launcher_finger_spur", fillet(P(D.SPUR_PX), [1.4] * 4, seg=3), -4.0, 4.0, 1.1, coll,
-                         "Paint_olive_cast")
-    return [o, spur]
+    return [o]
+
+
+def finger_spur(grip_o, coll):
+    """Упор пальца — прилив литья рукояти (v02.1, владелец: «как будто на соплю приделан» — была отдельная пластина
+    8 мм): сужается от корня к носику 5 × 3.6 мм; у грани рукояти корень расширяется до 19 × 15 (в пределах плоской части грани) — переход без ступеньки
+    (скругление стыка фаской давало рваный край)."""
+    from lib import loft_yz, boolean_safe, bevel_edges
+    xr, zr = px_x(597.0), px_z(597, 646)            # корень на передней грани рукояти
+    xt, zt = px_x(578.0), px_z(578, 648.5)          # носик
+    secs = []
+
+    def sec(w, h, p=3.0, n=28):
+        out = []
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            c, s = math.cos(a), math.sin(a)
+            out.append((0.5 * w * math.copysign(abs(c) ** (2 / p), c), 0.5 * h * math.copysign(abs(s) ** (2 / p), s)))
+        return out
+
+    # корень расширяется к грани рукояти (как литейная галтель): поверхность ложится на грань под малым углом
+    L = xt - xr
+    for x, w, h in ((xr - 4.0, 19.0, 15.0), (xr - 0.6, 19.0, 15.0), (xr + 0.4, 16.6, 12.6), (xr + 1.4, 14.6, 10.6),
+                    (xr + 2.8, 13.2, 9.2), (xr + 0.35 * L, 10.4, 7.3), (xr + 0.62 * L, 7.8, 5.5),
+                    (xr + 0.85 * L, 5.9, 4.2), (xt, 5.0, 3.6), (xt + 0.9, 3.9, 2.8), (xt + 1.5, 2.2, 1.6),
+                    (xt + 1.75, 0.6, 0.45)):
+        f = min(max((x - xr) / (xt - xr), 0.0), 1.0)
+        zc = zr + (zt - zr) * f
+        secs.append((x, [(y, zc + z) for y, z in sec(w, h)]))
+    sp = loft_yz("_spur", secs, coll, "Paint_olive_cast")
+    print("SPUR_UNION", boolean_safe(grip_o, sp, op="UNION", name="finger_spur"))
 
 
 def frame_details(coll):
