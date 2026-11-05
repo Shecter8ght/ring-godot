@@ -591,7 +591,9 @@ def build_fbx():
              'size_mm': float((cs.max(0) - cs.min(0)).max().round(1))}
     (OUT / 'scene.json').write_text(json.dumps(scene, ensure_ascii=False), encoding='utf-8', newline='\n')
     log('FBX', len(low_out), 'пар low/high →', OUT, 'габарит сцены', scene['size_mm'], 'мм')
-    return {a: [o for o in low_out if o.data.materials[0].name == a] for a in RED_SETS}
+    # сетки всех наборов: карты положения нужны и маскам износа по местам (этап 2), не только корпусу
+    return {a: [o for o in low_out if o.data.materials[0].name == a]
+            for a in sorted({o.data.materials[0].name for o in low_out})}
 
 
 def _emit_material(kind, off, scale):
@@ -811,7 +813,7 @@ def main():
     rec = build_fbx()
     if 'maps' in stages:
         for set_name, objs in rec.items():
-            bake_maps(set_name, objs)
+            bake_maps(set_name, objs, NORMAL_RES.get(set_name, 4096))
         red_marks_json()
     if 'normals' in stages:
         bake_normals()
