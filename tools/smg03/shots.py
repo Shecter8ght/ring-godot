@@ -1,7 +1,8 @@
 # ПП по мотивам KRISS Vector Gen II: проверочные снимки (Workbench, глина) и сверка наложением на снимки KRISS.
 # "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b <файл.blend> --python tools/smg03/shots.py -- <папка> [вид,…] [ключ=значение …]
 # Виды: photoA / photoB — ортокамера ровно в масштабе снимка KRISS (1.797 пикс/мм, 1600 × 1000) слева / справа, рядом
-# пишется compare_<вид>.png — модель поверх снимка (50 %); left, right, top, bottom, front, rear, q34, q34r — глина;
+# пишется compare_<вид>.png — модель поверх снимка (50 %); left, right, top, bottom, front, rear, q34, q34fr, q34rl,
+# q34r — глина (размер кадра — ключ res=<ширина>x<высота>);
 # zoom:<имя>:<x>:<z>:<ширина мм>:<сторона +Y|-Y|top|front|rear|q|q-|qlow|qback|qfront(-)> — крупный план.
 # Ключи: ctrl.<свойство>=<число> — положение органов управления (пустышка SMG03_Controls).
 import math
@@ -123,24 +124,26 @@ def photo_view(kind, out):
 
 
 def clay_view(name, out, w=1600, h=1000):
+    """Глина: ортовиды (дуло вправо на видах сбоку, сверху и снизу) и 3/4 в перспективе с четырёх сторон:
+    q34 — спереди слева, q34fr — спереди справа, q34rl — сзади слева, q34r — сзади справа."""
     setup_render(w, h)
     lo, hi = bounds()
     c = (lo + hi) / 2
     size = hi - lo
     dirs = {"left": Vector((0, 1, 0)), "right": Vector((0, -1, 0)), "top": Vector((0, 0, 1)), "bottom": Vector((0, 0, -1)),
             "front": Vector((1, 0, 0)), "rear": Vector((-1, 0, 0)), "q34": Vector((0.55, 0.75, 0.38)),
+            "q34fr": Vector((0.55, -0.75, 0.38)), "q34rl": Vector((-0.6, 0.7, 0.35)),
             "q34r": Vector((-0.6, -0.7, 0.35))}
     d = dirs[name].normalized()
-    span = max(size.x, size.z) if name in ("left", "right") else max(size.x, size.y) if name in ("top", "bottom") \
-        else max(size.y, size.z) if name in ("front", "rear") else size.length * 0.85
-    up = Vector((0, 0, 1)) if name not in ("top", "bottom") else Vector((-1, 0, 0))
-    if name in ("top", "bottom"):
-        loc = c + d * 1.0
-        cam("Cam_clay", loc, c, ortho_scale=span * 1.08 * (w / h if span == size.x else 1), up=Vector((1, 0, 0)))
-    elif name in ("q34", "q34r"):
-        cam("Cam_clay", c + d * span * 1.6, c, lens=50.0)
+    if name.startswith("q34"):
+        cam("Cam_clay", c + d * size.length * 0.85 * 1.6, c, lens=50.0)
     else:
-        cam("Cam_clay", c + d * 1.0, c, ortho_scale=span * 1.08)
+        # по ширине кадра — H, по высоте — V; ортомасштаб — по ширине, с запасом 8 %
+        H, V = {"left": (size.x, size.z), "right": (size.x, size.z), "top": (size.x, size.y),
+                "bottom": (size.x, size.y), "front": (size.y, size.z), "rear": (size.y, size.z)}[name]
+        # сверху — левый борт вверху кадра, снизу — правый; дуло вправо в обоих
+        up = {"top": Vector((0, 1, 0)), "bottom": Vector((0, -1, 0))}.get(name, Vector((0, 0, 1)))
+        cam("Cam_clay", c + d * 1.0, c, ortho_scale=max(H, V * w / h) * 1.08, up=up)
     render(os.path.join(out, f"{name}.png"))
 
 
@@ -172,7 +175,10 @@ def main():
     os.makedirs(out, exist_ok=True)
     views = a[1].split(",") if len(a) > 1 and "=" not in a[1] else ["photoA", "photoB", "left", "top", "front", "q34"]
     ctrl = bpy.data.objects.get("SMG03_Controls")
+    res = (1600, 1000)
     for kv in a[1:]:
+        if kv.startswith("res="):
+            res = tuple(int(t) for t in kv[4:].split("x"))
         if "=" in kv and kv.startswith("ctrl.") and ctrl is not None:
             k, val = kv[5:].split("=")
             ctrl[k] = float(val)
@@ -185,7 +191,7 @@ def main():
         elif vname.startswith("zoom:"):
             zoom_view(vname, out)
         else:
-            clay_view(vname, out)
+            clay_view(vname, out, *res)
         print("SHOT", vname)
 
 
