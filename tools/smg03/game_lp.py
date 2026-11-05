@@ -12,7 +12,7 @@
 Как у ГРАНЬ-15 (tools/ar15/game_lp.py): упрощение по бюджету детали (сначала плоское растворение, затем схлопывание),
 развёртка — tools/asset_kit/uv.py. Отличие: лучи видимости — по всей сборке сразу (корпус закрывает затвор, ось — головку),
 дважды: с магазином на 13 и с магазином на 30 (стоят в одном месте и закрывали бы друг друга). Бюджет — «в руках до
-40 тыс.» с магазином (владелец 2026-10-19); магазин на 30 — свой предмет. Мелкий рельеф (шагрень и рифление рукояти,
+40 тыс.» с магазином (владелец 2026-10-19; v2 05.11 — можно больше: мелочи бюджет вдвое, ~45–50 тыс.); магазин на 30 — свой предмет. Мелкий рельеф (шагрень и рифление рукояти,
 надписи, знак, рифление рычагов и маховичка, витки барабана, канавки накладки) — в карту нормалей. Текстуры — дальше
 на этой сетке (Painter, запекание с high-poly).
 """
@@ -32,6 +32,8 @@ sys.path.insert(0, str(ROOT / 'tools'))
 from asset_kit import uv as kit_uv  # noqa: E402
 from ar15.game_lp import (tris, refresh, evaluated_copy, strip, select_only, deviation, join,  # noqa: E402
                           world_bbox)
+sys.path.insert(0, str(ROOT / 'tools/smg03'))
+import receiver_seam  # noqa: E402
 
 SRC = Path('E:/Models Blender/WEAPONS/Vector — модель/ПП-Vector_геометрия_v06.blend')
 # корпус для игровой сетки — та же сборка без надписей, знаков и шагрени (SMG03_LP_SOURCE=1 build.py): от них после
@@ -41,9 +43,17 @@ LP_FROM_SOURCE = ('Receiver',)
 WORK = ROOT / '_asset_src/smg03/game'
 OUT = WORK / 'lp'
 OUT.mkdir(parents=True, exist_ok=True)
-# атласы: корпус (полимер, крупные плоскости, рукоять и скоба) — 4K; сталь и мелкие органы управления, прицельные
-# у глаза — 4K; приклад — 2K; магазины — по 2K (предметы игры)
-ATLAS_SIZE = {'Receiver': 4096, 'Steel': 4096, 'Stock': 2048, 'Mag13': 2048, 'Mag30': 2048}
+# атласы: корпус — два по 4K, верх (металл: передний блок, коробка с планкой) и низ (полимер: шахта, спусковая коробка,
+# рукоять, скоба) по линии шва (владелец 05.11: «Два атласа 4K» — в одном 4K гравировка выходила мягкой, 7.7 пикс/мм);
+# сталь и мелкие органы управления, прицельные у глаза — 4K; приклад — 2K; магазины — по 2K (предметы игры)
+ATLAS_SIZE = {'Upper': 4096, 'Lower': 4096, 'Steel': 4096, 'Stock': 2048, 'Mag13': 2048, 'Mag30': 2048}
+# корпус одним телом исходника → два узла-атласа по шву (receiver_seam.py); сдвиг точки грани внутрь детали, мм
+SPLIT_RECEIVER = 'Receiver'
+SEAM_INSET_MM = 0.8
+# верх корпуса — коробка с планкой длиной ~375 мм: острова Smart UV во всю длину не дают уложить атлас (v2 без разреза —
+# заполнение 42 %, 9.5 пикс/мм); режем развёртку поперёк (X, мм) — мимо меток, надписей и прицелов: «ИЗЛОМ-45» X 63–92,
+# метки переводчика −55…−66, предохранителя −191…−199, калибр и номер −220…−228
+UPPER_UV_CUTS_X = (25.0, -30.0, -130.0, -240.0)
 MATNAME = {a: f'SMG03 • {a}' for a in ATLAS_SIZE}
 CONTROLS = 'SMG03_Controls'
 # мовер исходника → узел игры (навык godot-asset-preparation, «Подвижные и съёмные детали»): узел — по ближайшему
@@ -68,34 +78,34 @@ POSE_PROPS = {
 # деталь исходника → (атлас, бюджет треугольников); узел — по моверу. Нет в списке — в игру не идёт.
 PARTS = {
     # корпус: верх с планкой, передний блок с нижней планкой, шахта, рукоять, скоба и тяги — одно тело исходника
-    'Receiver': ('Receiver', 15000),
+    'Receiver': ('Receiver', 20000),
     # сталь и мелочь корпуса
     'Side_rail_L': ('Steel', 500), 'Side_rail_R': ('Steel', 500),
-    'Side_rail_screw_L0': ('Steel', 60), 'Side_rail_screw_L1': ('Steel', 60),
-    'Side_rail_screw_R0': ('Steel', 60), 'Side_rail_screw_R1': ('Steel', 60),
+    'Side_rail_screw_L0': ('Steel', 150), 'Side_rail_screw_L1': ('Steel', 150),
+    'Side_rail_screw_R0': ('Steel', 150), 'Side_rail_screw_R1': ('Steel', 150),
     'Barrel': ('Steel', 700), 'Thread_cap': ('Steel', 900),
     'Bolt': ('Steel', 900), 'Extractor': ('Steel', 80), 'Extractor_pin': ('Steel', 24), 'Bolt_arm_pin': ('Steel', 40),
     'Firing_pin_retainer': ('Steel', 24), 'Ejector': ('Steel', 40),
-    'Charging_handle': ('Steel', 700), 'Charging_handle_slider': ('Steel', 160), 'Charging_handle_pin': ('Steel', 60),
-    'Trigger': ('Steel', 300), 'Safety_L': ('Steel', 350), 'Safety_R': ('Steel', 350),
-    'Selector_L': ('Steel', 350), 'Selector_R': ('Steel', 350),
-    'Mag_release_L': ('Steel', 250), 'Mag_release_R': ('Steel', 80),
-    'Bolt_catch': ('Steel', 500), 'Bolt_catch_boss': ('Steel', 20), 'Side_block': ('Steel', 400),
-    'Side_plate_low': ('Steel', 160), 'Side_fins_front': ('Steel', 300), 'Side_fins_rear': ('Steel', 300),
-    'Stud_R': ('Steel', 60),
+    'Charging_handle': ('Steel', 1000), 'Charging_handle_slider': ('Steel', 200), 'Charging_handle_pin': ('Steel', 120),
+    'Trigger': ('Steel', 500), 'Safety_L': ('Steel', 700), 'Safety_R': ('Steel', 700),
+    'Selector_L': ('Steel', 700), 'Selector_R': ('Steel', 700),
+    'Mag_release_L': ('Steel', 450), 'Mag_release_R': ('Steel', 160),
+    'Bolt_catch': ('Steel', 800), 'Bolt_catch_boss': ('Steel', 60), 'Side_block': ('Steel', 500),
+    'Side_plate_low': ('Steel', 200), 'Side_fins_front': ('Steel', 400), 'Side_fins_rear': ('Steel', 400),
+    'Stud_R': ('Steel', 120),
     # прицельные (у глаза)
-    'Rear_sight_base': ('Steel', 500), 'Rear_sight_leaf': ('Steel', 900), 'Rear_sight_base_bolt': ('Steel', 60),
-    'Rear_sight_base_bolt_head': ('Steel', 80), 'Rear_sight_base_nut': ('Steel', 40),
-    'Rear_sight_base_hinge_pin': ('Steel', 24),
-    'Front_sight_base': ('Steel', 500), 'Front_sight_leaf': ('Steel', 450), 'Front_sight_drum': ('Steel', 300),
-    'Front_sight_drum_wheel': ('Steel', 200), 'Front_sight_post': ('Steel', 120), 'Front_sight_base_bolt': ('Steel', 60),
-    'Front_sight_base_bolt_head': ('Steel', 80), 'Front_sight_base_nut': ('Steel', 40),
-    'Front_sight_base_hinge_pin': ('Steel', 24),
+    'Rear_sight_base': ('Steel', 700), 'Rear_sight_leaf': ('Steel', 1300), 'Rear_sight_base_bolt': ('Steel', 100),
+    'Rear_sight_base_bolt_head': ('Steel', 150), 'Rear_sight_base_nut': ('Steel', 80),
+    'Rear_sight_base_hinge_pin': ('Steel', 60),
+    'Front_sight_base': ('Steel', 700), 'Front_sight_leaf': ('Steel', 700), 'Front_sight_drum': ('Steel', 450),
+    'Front_sight_drum_wheel': ('Steel', 350), 'Front_sight_post': ('Steel', 200), 'Front_sight_base_bolt': ('Steel', 100),
+    'Front_sight_base_bolt_head': ('Steel', 150), 'Front_sight_base_nut': ('Steel', 80),
+    'Front_sight_base_hinge_pin': ('Steel', 60),
     # приклад и шарнир
-    'Stock_body': ('Stock', 3500), 'Stock_buttplate': ('Stock', 1800), 'Stock_buttplate_core': ('Stock', 300),
-    'Stock_latch': ('Stock', 300), 'Stock_hinge_block': ('Stock', 600), 'Stock_hinge_pin': ('Stock', 150),
-    'Stock_screw': ('Stock', 80), 'Stock_screw.001': ('Stock', 80), 'Stock_screw.002': ('Stock', 80),
-    'Stock_screw.003': ('Stock', 80),
+    'Stock_body': ('Stock', 4500), 'Stock_buttplate': ('Stock', 1800), 'Stock_buttplate_core': ('Stock', 300),
+    'Stock_latch': ('Stock', 450), 'Stock_hinge_block': ('Stock', 800), 'Stock_hinge_pin': ('Stock', 200),
+    'Stock_screw': ('Stock', 150), 'Stock_screw.001': ('Stock', 150), 'Stock_screw.002': ('Stock', 150),
+    'Stock_screw.003': ('Stock', 150),
     # магазины: корпус, крышка, подаватель и верхний патрон (в шахте ниже не разглядеть)
     'Magazine13_body': ('Mag13', 1500), 'Magazine13_floorplate': ('Mag13', 150), 'Magazine13_follower': ('Mag13', 100),
     'Magazine13_round_00_case': ('Mag13', 160), 'Magazine13_round_00_bullet': ('Mag13', 120),
@@ -104,11 +114,12 @@ PARTS = {
     'Magazine30_round_00_bullet': ('Mag30', 120),
 }
 # головки осей: большие (фланец с канавкой, полая с пружинкой) и малые (с шестигранником) — по бюджету на головку
+# (v2, владелец 05.11: «изломы» на круглой мелочи, бюджет можно больше 40 тыс. — мелким деталям вдвое)
 for i in (0, 1, 6, 7):
     for s in 'LR':
-        PARTS[f'Pin_{i:02d}_{s}'] = ('Steel', 220)
+        PARTS[f'Pin_{i:02d}_{s}'] = ('Steel', 400)
 for nm in ('Pin_02_L', 'Pin_03_L', 'Pin_03_R', 'Pin_04_L', 'Pin_04_R', 'Pin_05_L', 'Pin_05_R'):
-    PARTS[nm] = ('Steel', 120)
+    PARTS[nm] = ('Steel', 250)
 log = lambda *a: print('SMG03_LP', *a, flush=True)
 
 
@@ -136,6 +147,92 @@ def simplify(o, budget: int) -> int:
         bpy.ops.object.modifier_apply(modifier=d.name)
     o.data.validate(clean_customdata=False)
     return tris(o.data)
+
+
+def split_receiver(o, coll):
+    """Корпус — разрез по линии шва и два объекта: верх (атлас Upper) и низ (Lower)."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    receiver_seam.cut_mesh(bm)
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.update()
+    sides = receiver_seam.face_sides(o.data, SEAM_INSET_MM)
+    out = []
+    for atlas, want in (('Upper', True), ('Lower', False)):
+        me = o.data.copy()
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if sides[f.index] != want], context='FACES')
+        bm.to_mesh(me)
+        bm.free()
+        ob = bpy.data.objects.new(f'{o.name}_{atlas}', me)
+        coll.objects.link(ob)
+        if atlas == 'Upper':
+            out += [(c, atlas) for c in chunks_x(ob, UPPER_UV_CUTS_X, coll)]
+        else:
+            out.append((ob, atlas))
+    bpy.data.objects.remove(o, do_unlink=True)
+    return out
+
+
+def chunks_x(o, cuts_mm, coll):
+    """Сетка — на куски поперёк X (разрез плоскостями): несвязные оболочки дают Smart UV острова не длиннее куска;
+    после развёртки куски свариваются (weld_shells) — шов остаётся только в развёртке."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    for x in cuts_mm:
+        xm = x * 0.001
+        faces = [f for f in bm.faces if min(v.co.x for v in f.verts) < xm < max(v.co.x for v in f.verts)]
+        if faces:
+            geom = list({v for f in faces for v in f.verts}) + list({e for f in faces for e in f.edges}) + faces
+            bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-7, plane_co=(xm, 0, 0), plane_no=(1, 0, 0))
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3], quad_method='BEAUTY',
+                          ngon_method='EAR_CLIP')
+    bm.to_mesh(o.data)
+    bm.free()
+    edges = sorted(c * 0.001 for c in cuts_mm)
+    band = [sum(1 for e in edges if p.center.x > e) for p in o.data.polygons]
+    out = []
+    for k in sorted(set(band)):
+        me = o.data.copy()
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if band[f.index] != k], context='FACES')
+        bm.to_mesh(me)
+        bm.free()
+        ob = bpy.data.objects.new(f'{o.name}_{k}', me)
+        coll.objects.link(ob)
+        out.append(ob)
+    bpy.data.objects.remove(o, do_unlink=True)
+    return out
+
+
+def weld_shells(o):
+    """Сварить куски по разрезу (вершины в одной точке): развёртка у петель своя — шов остаётся, затенение — общее."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    n0 = len(bm.verts)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
+    bm.to_mesh(o.data)
+    bm.free()
+    return n0 - len(o.data.vertices)
+
+
+def weighted_normals(o):
+    """Нормали по площади граней (владелец 05.11: «изломы», «мыло»): упрощённая сетка оставляет от скруглений узкие
+    полоски, и гладкое затенение клонило плоские грани — карта нормалей выправляла наклон, а Blender и Godot считают
+    касательные по-разному (полосы по рёбрам треугольников). Теперь плоское плоское, изгиб — в полосках скруглений;
+    жёсткие рёбра на швах развёртки (harden_on_seams) сохраняются."""
+    m = o.modifiers.new('wn', 'WEIGHTED_NORMAL')
+    m.mode = 'FACE_AREA'
+    m.weight = 100
+    m.keep_sharp = True
+    m.thresh = 0.01
+    select_only(o)
+    bpy.ops.object.modifier_apply(modifier=m.name)
 
 
 def mover_node(o):
@@ -248,9 +345,14 @@ def main():
         n = simplify(o, min(budget, n0))
         dev = deviation(o, hp[name])
         rec['parts'][name] = {'node': node, 'atlas': atlas, 'hp_tris': n0, 'tris': n, 'dev_mm': dev}
-        pieces.setdefault((node, atlas), []).append(o)
-        sources[o.name] = [name]
-        totals[atlas] = totals.get(atlas, 0) + n
+        split = split_receiver(o, lp_coll) if name == SPLIT_RECEIVER else [(o, atlas)]
+        if name == SPLIT_RECEIVER:
+            rec['parts'][name]['atlas'] = '+'.join(a for _, a in split)
+            rec['parts'][name]['tris'] = sum(tris(ob.data) for ob, _ in split)
+        for ob, at in split:
+            pieces.setdefault((node, at), []).append(ob)
+            sources[ob.name] = [name]
+            totals[at] = totals.get(at, 0) + tris(ob.data)
         if dev[0] > 0.5:
             log('отклонение', name, dev)
     rec['tris_by_atlas'] = totals
@@ -284,6 +386,9 @@ def main():
             rec['nodes'][nm]['pivot'] = pivots[node]
     # развёртка: острова, лучи видимости по всей сборке, прижатое — прочь, ещё раз лучи, укладка по атласам
     kit_uv.smart_unwrap(game)
+    for o in game:
+        if o['node'] == 'Receiver' and o['atlas'] == 'Upper':
+            log('верх корпуса: сварено вершин по разрезам развёртки', weld_shells(o))
     cls = assembly_classes(game, poses)
     dropped = 0
     for o in game:
@@ -311,6 +416,7 @@ def main():
     for o in game:
         for p in o.data.polygons:
             p.use_smooth = True
+        weighted_normals(o)
         rec['nodes'][o.name]['tris'] = tris(o.data)
     rec['in_hands_tris_final'] = sum(v['tris'] for v in rec['nodes'].values() if v['atlas'] != 'Mag30')
     rec['mag30_tris_final'] = sum(v['tris'] for v in rec['nodes'].values() if v['atlas'] == 'Mag30')

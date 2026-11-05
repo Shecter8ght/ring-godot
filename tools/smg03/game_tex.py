@@ -2,14 +2,17 @@
 
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b -y --factory-startup --python-exit-code 1 --python tools/smg03/game_tex.py -- [fbx] [maps]
 → _asset_src/smg03/tex/ (не в git):
-  SMG03_low.fbx   — игровая сетка: материал = атлас (набор текстур Painter: Receiver, Steel, Stock, Mag13, Mag30), узел игры
+  SMG03_low.fbx   — игровая сетка: материал = атлас (набор текстур Painter: Upper, Lower, Steel, Stock, Mag13, Mag30), узел игры
                     поделён по слотам отделки finish-spec.json — сетка «<узел>__<слот>_low» (маска слоя по имени сетки);
   SMG03_high.fbx  — принятая high-poly v06 (с надписями, знаками, шагренью) теми же группами: «<узел>__<слот>_high» — Painter
                     печёт нормаль, AO, кривизну, толщину с high-poly с отбором по имени сетки (подвижные детали в покое
                     вплотную друг к другу: без отбора лучи с затвора ловили бы корпус);
   meshes.json     — набор → слот → сетки, отделка слота (для sp_finish.build_set);
-  Receiver_maps.npz, marks.json — положение и нормаль в каждом пикселе развёртки корпуса и контуры красных меток:
-                    по ним tools/smg03/tex_masks.py считает маски «верх по шву» и «красная заливка».
+  Upper_maps.npz, Lower_maps.npz, marks.json — положение и нормаль в каждом пикселе развёртки верха и низа корпуса
+                    и контуры красных меток: по ним tools/smg03/tex_masks.py считает маску красной заливки.
+Корпус (v2, владелец 05.11: «Два атласа 4K») — два узла-атласа по линии шва (game_lp.py, receiver_seam.py); high-poly
+корпуса делится тем же правилом, чтобы у каждой половины была своя пара (одинаковые копии high-poly внахлёст затеняли бы
+друг друга в AO).
 Магазины в обоих FBX опущены вниз (у каждого свой сдвиг): это отдельные предметы игры, AO от шахты и друг от друга им не
 нужен. Развёртка — GameUV игровой сетки (tools/smg03/game_lp.py), в FBX она одна и первая.
 """
@@ -32,13 +35,16 @@ sys.path.insert(0, str(ROOT / 'tools'))
 sys.path.insert(0, str(ROOT / 'tools/smg03'))
 from ar15.game_lp import evaluated_copy, tris  # noqa: E402
 from asset_kit import uv as kit_uv  # noqa: E402
+import receiver_seam  # noqa: E402
 
 SRC = Path('E:/Models Blender/WEAPONS/Vector — модель/ПП-Vector_геометрия_v06.blend')
 SPEC = Path('E:/Models Blender/WEAPONS/Vector — модель/finish-spec.json')
 LP = ROOT / '_asset_src/smg03/game/lp/SMG03_Game_LP.blend'
 OUT = ROOT / '_asset_src/smg03/tex'
-# корпус — одна сетка (верх и низ — одно тело исходника): граница металла и полимера — маской по линии шва
-RECEIVER_SLOT = 'receiver'
+# половины корпуса: атлас игровой сетки → слот finish-spec.json; high-poly делится со сдвигом точки грани внутрь, мм
+RECEIVER_HALF = {'Upper': 'receiver_upper', 'Lower': 'receiver_lower'}
+HP_INSET_MM = 0.3
+RED_SETS = ('Upper', 'Lower')
 MAG_SHIFT = {'Mag13': (0.0, 0.0, -0.35), 'Mag30': (0.0, 0.0, -0.75)}
 log = lambda *a: print('SMG03_TEX', *a, flush=True)
 
@@ -48,9 +54,9 @@ def slot_table():
     return spec, [(s['id'], s['parts'], s['finish']) for s in spec['slots']]
 
 
-def slot_of(part, table):
+def slot_of(part, table, atlas=None):
     if part == 'Receiver':
-        return RECEIVER_SLOT
+        return RECEIVER_HALF[atlas]
     for sid, pats, _ in table:
         if any(fnmatch.fnmatchcase(part, p) for p in pats):
             return sid
@@ -91,7 +97,9 @@ def face_parts(o, high):
 
 
 def split_faces(o, keep, name, coll):
-    """Копия узла с гранями keep (маска по граням); развёртка — только GameUV (первая и единственная)."""
+    """Копия узла с гранями keep (маска по граням); развёртка — только GameUV (первая и единственная). Нормали — тем же
+    правилом, что у игровой сетки (game_lp.weighted_normals): слоты — целые детали, их оболочки не связаны с соседними,
+    и нормали куска совпадают с нормалями узла в игре."""
     me = o.data.copy()
     me.name = name
     bm = bmesh.new()
@@ -103,6 +111,23 @@ def split_faces(o, keep, name, coll):
     for uv in [u.name for u in me.uv_layers if u.name != 'GameUV']:
         me.uv_layers.remove(me.uv_layers[uv])
     me.uv_layers['GameUV'].name = 'UVMap'
+    ob = bpy.data.objects.new(name, me)
+    coll.objects.link(ob)
+    import game_lp
+    game_lp.weighted_normals(ob)
+    return ob
+
+
+def half_copy(src, upper, name, coll):
+    """Половина high-poly корпуса по линии шва (receiver_seam.is_upper со сдвигом HP_INSET_MM)."""
+    me = src.data.copy()
+    sides = receiver_seam.face_sides(me, HP_INSET_MM)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if sides[f.index] != upper], context='FACES')
+    bm.to_mesh(me)
+    bm.free()
     ob = bpy.data.objects.new(name, me)
     coll.objects.link(ob)
     return ob
@@ -120,14 +145,71 @@ def set_material(o, name):
         p.material_index = 0
 
 
+def high_normals(o, angle_deg: float = 60.0):
+    """Нормали high-poly для запекания: рёбра круче angle (стенки букв, канавок, вырезов — 90°) — жёсткие, затем по
+    площади граней. Свои нормали исходника гнулись у стенок букв, и вокруг надписей в карте шёл слабый веер полос
+    (05.11); фаски в 2 сегмента (45°) остаются гладкими."""
+    import math
+    me = o.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    lim = math.radians(angle_deg)
+    for e in bm.edges:
+        if len(e.link_faces) == 2 and e.calc_face_angle(0.0) > lim:
+            e.smooth = False
+    # физический разрез этих рёбер (bmesh.ops.split_edges) пробовали 05.11: карта верха не изменилась ни на пиксель,
+    # а низ корпуса запёкся пустым (нормаль плоская, AO чёрный) — не делать
+    bm.to_mesh(me)
+    bm.free()
+    for p in me.polygons:
+        p.use_smooth = True
+    m = o.modifiers.new('wn', 'WEIGHTED_NORMAL')
+    m.mode = 'FACE_AREA'
+    m.weight = 100
+    m.keep_sharp = True
+    m.thresh = 0.01
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.modifier_apply(modifier=m.name)
+
+
+def keep_normals(me):
+    """Свои нормали high-poly (по площади граней — lib.weighted: плоское плоское рядом с фасками) — в атрибут углов:
+    bmesh хранит свои нормали в пространствах углов, и после удаления граней (половины корпуса) или склейки они могли
+    исказиться. Возвращает их restore_normals после склейки (join_copies)."""
+    n = np.zeros(len(me.loops) * 3, np.float32)
+    me.corner_normals.foreach_get('vector', n)
+    a = me.attributes.get('keep_normal') or me.attributes.new('keep_normal', 'FLOAT_VECTOR', 'CORNER')
+    a.data.foreach_set('vector', n)
+
+
+def restore_normals(me):
+    """Нормали углов из атрибута keep_normal — снова своими нормалями сетки (их FBX и передаёт Painter)."""
+    a = me.attributes.get('keep_normal')
+    if a is None:
+        return
+    n = np.zeros(len(me.loops) * 3, np.float32)
+    a.data.foreach_get('vector', n)
+    me.attributes.remove(a)
+    for p in me.polygons:
+        p.use_smooth = True
+    me.normals_split_custom_set(n.reshape(-1, 3).tolist())
+
+
 def join_copies(objs, name, coll):
     """Копии деталей high-poly одной группы — в одну сетку (у Painter пара low/high — по имени)."""
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
     for o in objs:
         bm.from_mesh(o.data)
+    # треугольниками — здесь, в Blender: плоскость с вырезанными буквами — многоугольник с перемычками, и Painter при
+    # чтении FBX бил его на треугольники по-своему, затягивая часть букв («ИЗЛ» слева не запекалась, 05.11)
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3], quad_method='BEAUTY',
+                          ngon_method='BEAUTY')
     bm.to_mesh(me)
     bm.free()
+    restore_normals(me)
     ob = bpy.data.objects.new(name, me)
     coll.objects.link(ob)
     return ob
@@ -144,7 +226,8 @@ def export_fbx(objs, path):
 
 
 def build_fbx():
-    """Пары low/high по слотам, FBX для Painter и meshes.json; возвращает сетки набора Receiver (для карт масок)."""
+    """Пары low/high по слотам, FBX для Painter и meshes.json; возвращает сетки наборов верха и низа корпуса (для карт
+    масок) — {набор: [сетки]}."""
     spec, table = slot_table()
     finish_of = {sid: fin for sid, _, fin in table}
     bpy.ops.wm.open_mainfile(filepath=str(SRC))
@@ -158,7 +241,12 @@ def build_fbx():
         work.objects.link(o)
     need = sorted({n for o in lows for n in o['hp']})
     high = {n: evaluated_copy(hp[n], 'hpc_' + n, work) for n in need}
+    for o in high.values():
+        high_normals(o)
+        keep_normals(o.data)
     log('деталей high-poly', len(high), 'треугольников', sum(tris(o.data) for o in high.values()))
+    halves = {a: half_copy(high['Receiver'], a == 'Upper', 'hpc_Receiver_' + a, work) for a in RECEIVER_HALF}
+    log('high-poly корпуса по шву:', {a: tris(o.data) for a, o in halves.items()})
     lo_coll = bpy.data.collections.new('LOW')
     hi_coll = bpy.data.collections.new('HIGH')
     bpy.context.scene.collection.children.link(lo_coll)
@@ -169,7 +257,7 @@ def build_fbx():
         atlas = o['atlas']
         idx, how = face_parts(o, high)
         names = list(o['hp'])
-        slots = [slot_of(n, table) for n in names]
+        slots = [slot_of(n, table, atlas) for n in names]
         face_slot = np.array([slots[i] for i in idx])
         for sid in sorted(set(slots)):
             keep = face_slot == sid
@@ -177,21 +265,28 @@ def build_fbx():
                 continue
             # у исходника есть свой «Receiver» — игровой при загрузке получает «.001»: имя узла — без суффикса
             key = re.sub(r'[.]\d{3}$', '', o.name) + '__' + sid
+            # «_low» внутри имени: Painter находил суффикс в «_Lower» / «_lower» и не сводил пару low/high — низ корпуса
+            # и площадка задержки запекались пустыми (нормаль плоская, AO чёрный; 05.11)
+            key = re.sub('lower', 'bottom', re.sub('Lower', 'Bottom', key))
             lo = split_faces(o, keep, key + '_low', lo_coll)
             set_material(lo, atlas)
             # копии внахлёст (одинаковое мелкое) — за квадрат развёртки: Painter печёт только 0…1, копия берёт карту
             # своего оригинала (в игре развёртка та же, без сдвига)
             shifted = kit_uv.shift_stack_copies([lo], 1.0, uv='UVMap')
-            hi = join_copies([high[n] for n, s in zip(names, slots) if s == sid], key + '_high', hi_coll)
+            # деталь исходника — один раз: верх корпуса в игре склеен из кусков развёртки (game_lp.chunks_x), и у узла
+            # 'Receiver' в списке hp пять раз — high-poly вкладывалась пятью копиями одна в другую (FBX v2: «шахматка»,
+            # надпись слева пропадала, AO верха затенял сам себя)
+            parts = list(dict.fromkeys(n for n, s in zip(names, slots) if s == sid))
+            hi = join_copies([halves[atlas] if n == 'Receiver' else high[n] for n in parts], key + '_high', hi_coll)
             set_material(hi, atlas)
             if atlas in MAG_SHIFT:
                 for ob in (lo, hi):
                     ob.location = MAG_SHIFT[atlas]
             low_out.append(lo)
             high_out.append(hi)
-            fin = 'AN-BLK-MAT|PL-BLK-TEX' if sid == RECEIVER_SLOT else finish_of[sid]
+            fin = finish_of[sid]
             meshes.setdefault(atlas, {}).setdefault(sid, {'finish': fin, 'meshes': []})['meshes'].append(lo.name)
-            log(atlas, key, 'граней', int(keep.sum()), 'деталей', sum(1 for s in slots if s == sid), how,
+            log(atlas, key, 'граней', int(keep.sum()), 'деталей', len(parts), how,
                 'копий внахлёст', shifted)
     OUT.mkdir(parents=True, exist_ok=True)
     for ob in low_out + high_out:
@@ -200,7 +295,7 @@ def build_fbx():
     export_fbx(high_out, OUT / 'SMG03_high.fbx')
     (OUT / 'meshes.json').write_text(json.dumps(meshes, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
     log('FBX', len(low_out), 'пар low/high →', OUT)
-    return [o for o in low_out if o.data.materials[0].name == 'Receiver']
+    return {a: [o for o in low_out if o.data.materials[0].name == a] for a in RED_SETS}
 
 
 def _emit_material(kind, off, scale):
@@ -224,7 +319,7 @@ def _emit_material(kind, off, scale):
     return mat, tex
 
 
-def bake_maps(objs, size=4096):
+def bake_maps(set_name, objs, size=4096):
     """Положение (мм) и нормаль в каждом пикселе развёртки сеток objs — на процессоре (видеокарта бывает занята
     соседними сессиями), 1 выборка, без размытия края."""
     S = bpy.context.scene
@@ -267,9 +362,9 @@ def bake_maps(objs, size=4096):
     pos = ((res['pos'] / sc + lo) * 1000.0).astype(np.float32)
     nrm = res['nrm'] * 2.0 - 1.0
     nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True) + 1e-6
-    path = OUT / 'Receiver_maps.npz'
+    path = OUT / f'{set_name}_maps.npz'
     np.savez_compressed(path, pos=pos, nrm=nrm.astype(np.float16), filled=filled)
-    log('карты развёртки корпуса', size, 'пикселей на сетке', int(filled.sum()), '→', path)
+    log('карты развёртки', set_name, size, 'пикселей на сетке', int(filled.sum()), '→', path)
 
 
 def red_marks_json():
@@ -301,7 +396,8 @@ def main():
     stages = set(args) or {'fbx', 'maps'}
     rec = build_fbx()
     if 'maps' in stages:
-        bake_maps(rec)
+        for set_name, objs in rec.items():
+            bake_maps(set_name, objs)
         red_marks_json()
 
 

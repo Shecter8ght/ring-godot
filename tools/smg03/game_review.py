@@ -34,7 +34,7 @@ for m in bpy.data.materials:
     nt.nodes.active = tex
 lp_coll = bpy.data.collections.get('LP')
 if lp_coll is not None:
-    lp_coll.name = 'Игровая сетка v1'
+    lp_coll.name = 'Игровая сетка'
 for o in bpy.data.objects:
     if o.type == 'MESH' and 'GameUV' in o.data.uv_layers:
         o.data.uv_layers.active = o.data.uv_layers['GameUV']
