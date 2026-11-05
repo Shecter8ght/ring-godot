@@ -53,15 +53,23 @@ def build(ctx):
         ctrl.id_properties_ui(k).update(min=0.0, max=1.0, soft_min=0.0, soft_max=1.0, step=1)
     # затвор и выбрасыватель — ход назад по X (рукоятка тянет затвор, затвор рукоятку — нет)
     bm = empty("Bolt_mover", (0, 0, 0), R, root, size=0.01)
-    add_driver(bm, "location", 0, f"-max(bolt, charging_handle)*{BOLT_TRAVEL}*{MM}", ctrl, ["bolt", "charging_handle"])
+    # рукоятка выбирает зазор CH_TRAVEL − BOLT_TRAVEL до тяги, потом тянет затвор (сверка v05: затвор шёл сразу)
+    add_driver(bm, "location", 0,
+               f"-max(bolt*{BOLT_TRAVEL}, charging_handle*{CH_TRAVEL}-{CH_TRAVEL - BOLT_TRAVEL}, 0.0)*{MM}", ctrl,
+               ["bolt", "charging_handle"])
     for n in ("Bolt", "Extractor", "Extractor_pin", "Firing_pin", "Firing_pin_retainer", "Bolt_arm_pin"):
         if ob(n):
             set_parent(ob(n), bm)
     cm = empty("Charging_handle_mover", (0, 0, 0), R, root, size=0.008)
     add_driver(cm, "location", 0, f"-charging_handle*{CH_TRAVEL}*{MM}", ctrl, ["charging_handle"])
-    for n in ("Charging_handle", "Charging_handle_slider"):
+    for n in ("Charging_handle", "Charging_handle_slider", "Charging_handle_pin"):
         if ob(n):
             set_parent(ob(n), cm)
+    # рычаг откидывается влево на оси у заднего конца в начале оттяжки (первые 20 % хода) — зацеп под палец
+    if ob("Charging_handle"):
+        from part_bolt import CH_SWING
+        add_driver(ob("Charging_handle"), "rotation_euler", 2, f"radians({CH_SWING})*min(1.0, charging_handle*5.0)", ctrl,
+                   ["charging_handle"])
     # спуск (начало координат — на оси): задняя кромка назад, на предохранителе не идёт
     if ob("Trigger"):
         add_driver(ob("Trigger"), "rotation_euler", 1, "-radians(11.0)*trigger*(1.0 if safety<0.5 else 0.0)", ctrl,
@@ -85,6 +93,10 @@ def build(ctx):
         add_driver(ob("Rear_sight_leaf"), "rotation_euler", 1, "radians(89.0)*(1.0-rear_sight)", ctrl, ["rear_sight"])
     if ob("Front_sight_leaf"):
         add_driver(ob("Front_sight_leaf"), "rotation_euler", 1, "-radians(89.0)*(1.0-front_sight)", ctrl, ["front_sight"])
+        # барабан высоты, маховичок и столбик мушки — отдельные детали на стойке
+        for n in ("Front_sight_drum", "Front_sight_drum_wheel", "Front_sight_post"):
+            if ob(n):
+                set_parent(ob(n), ob("Front_sight_leaf"))
     # магазины: вниз вдоль своей оси; видимость 13 / 30 — по mag30
     up, fwd = mag_frame()
     mm = empty("Magazine_mover", (0, 0, 0), R, root, size=0.01)
@@ -99,7 +111,7 @@ def build(ctx):
     # приклад: складывается вправо вокруг вертикальной оси шарнира; кнопка защёлки — внутрь
     sp = empty("Stock_pivot", (HINGE_X, HINGE_Y, 30.0), R, root, size=0.01)
     add_driver(sp, "rotation_euler", 2, "radians(180.0)*stock_fold", ctrl, ["stock_fold"])
-    for n in ("Stock_body", "Stock_buttplate", "Stock_latch"):
+    for n in ("Stock_body", "Stock_buttplate", "Stock_buttplate_core", "Stock_latch"):
         if ob(n):
             set_parent(ob(n), sp)
     for o in list(bpy.data.objects):

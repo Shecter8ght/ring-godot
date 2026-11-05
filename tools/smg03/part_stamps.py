@@ -52,6 +52,7 @@ def place(cut, center, normal, up, lift, target):
 
 ZONES = []                       # (центр мм, радиус мм) — места гравировок: мелкая фаска корпуса их не трогает
 FAILED = []                      # надписи, где буква не вырезалась (part_receiver пересобирает корпус и повторяет)
+EMBLEMS = []                     # (центр мм, радиус мм, оси в плоскости знака) — part_receiver мелко нарезает там сетку
 
 
 def stamp(target, text, size, center, normal, up, depth, coll):
@@ -195,20 +196,7 @@ def emblem_cutter(r_out, depth, coll):
     # оболочкой в том же резце: три перекрывающиеся «пилюли» давали дыры на стыках (проверка v01/v02)
     import math as _m
     pts = [(-r_out * 0.62, -r_out * 0.18), (-r_out * 0.2, r_out * 0.36), (r_out * 0.2, -r_out * 0.36), (r_out * 0.62, r_out * 0.18)]
-    hw = 0.8
-    left, right = [], []
-    for i, (x, y) in enumerate(pts):
-        a_ = pts[max(i - 1, 0)]; b_ = pts[min(i + 1, len(pts) - 1)]
-        if 0 < i < len(pts) - 1:
-            d1 = Vector((x - a_[0], y - a_[1], 0)).normalized(); d2 = Vector((b_[0] - x, b_[1] - y, 0)).normalized()
-            n1 = Vector((-d1.y, d1.x, 0)); n2 = Vector((-d2.y, d2.x, 0))
-            m = (n1 + n2).normalized()
-            k = hw / max(0.3, m.dot(n1))
-        else:
-            d = Vector((b_[0] - a_[0], b_[1] - a_[1], 0)).normalized()
-            m = Vector((-d.y, d.x, 0)); k = hw
-        left.append((x + m.x * k, y + m.y * k)); right.append((x - m.x * k, y - m.y * k))
-    outline = left + list(reversed(right))
+    outline = _stroke_outline(pts, 0.8)
     me2 = bpy.data.meshes.new("_zz")
     bm = bmesh.new()
     lo = [bm.verts.new(Vector((x * MM, y * MM, -depth * MM))) for x, y in outline]
@@ -226,6 +214,57 @@ def emblem_cutter(r_out, depth, coll):
     return ring
 
 
+def _stroke_outline(pts, hw, arc_seg=6, cap_seg=4, inner_r=0.45):
+    """Контур полосы шириной 2·hw вдоль ломаной: снаружи изломов — дуга (длинный острый «ус» на биссектрисе давал
+    клин, снимок владельца 10), изнутри — пересечение кромок, скруглённое inner_r (острый внутренний угол под
+    скруглением кромок 0.2 давал чёрный клин); концы — полукругом. Против часовой стрелки."""
+    from mathutils import Vector as V2
+    n = len(pts)
+    P = [V2((x, y)) for x, y in pts]
+    dirs = [(P[i + 1] - P[i]).normalized() for i in range(n - 1)]
+    nrm = [V2((-d.y, d.x)) for d in dirs]
+    inner = set()
+
+    def side(sign):
+        out = []
+        for i in range(n):
+            if i == 0:
+                out.append(P[0] + nrm[0] * hw * sign)
+            elif i == n - 1:
+                out.append(P[-1] + nrm[-1] * hw * sign)
+            else:
+                n1, n2 = nrm[i - 1] * sign, nrm[i] * sign
+                turn = dirs[i - 1].x * dirs[i].y - dirs[i - 1].y * dirs[i].x
+                if turn * sign > 0:
+                    # внутренняя сторона излома — пересечение смещённых кромок
+                    m = (n1 + n2).normalized()
+                    q = P[i] + m * (hw / max(0.35, m.dot(n1)))
+                    inner.add((round(q.x, 6), round(q.y, 6)))
+                    out.append(q)
+                else:
+                    a0 = math.atan2(n1.y, n1.x); a1 = math.atan2(n2.y, n2.x)
+                    da = (a1 - a0 + math.pi) % (2 * math.pi) - math.pi
+                    for k in range(arc_seg + 1):
+                        a = a0 + da * k / arc_seg
+                        out.append(P[i] + V2((math.cos(a), math.sin(a))) * hw)
+        return out
+    left = side(1.0)
+    right = side(-1.0)
+    cap_end, cap_start = [], []
+    a0 = math.atan2(nrm[-1].y, nrm[-1].x)
+    for k in range(1, cap_seg * 2):
+        a = a0 - math.pi * k / (cap_seg * 2)
+        cap_end.append(P[-1] + V2((math.cos(a), math.sin(a))) * hw)
+    a0 = math.atan2(-nrm[0].y, -nrm[0].x)
+    for k in range(1, cap_seg * 2):
+        a = a0 - math.pi * k / (cap_seg * 2)
+        cap_start.append(P[0] + V2((math.cos(a), math.sin(a))) * hw)
+    poly = [(q.x, q.y) for q in left + cap_end + list(reversed(right)) + cap_start]
+    from lib import fillet
+    radii = [inner_r if (round(x, 6), round(y, 6)) in inner else 0.0 for x, y in poly]
+    return fillet(poly, radii, 4)
+
+
 def build(ctx):
     """Гравировки режутся из part_receiver.build (apply) до мелкой фаски корпуса; здесь ничего не делается."""
     return {}
@@ -237,6 +276,7 @@ def apply(target, C):
         return []
     ZONES.clear()
     FAILED.clear()
+    EMBLEMS.clear()
     up = target
     mw = up
     L, R = (0, 1, 0), (0, -1, 0)
@@ -267,10 +307,12 @@ def apply(target, C):
     place(e, (lib.FRONT_FACE_X, 0.0, 33.0), (1, 0, 0), Z, 0.0, up)
     boolean(up, e)
     ZONES.append(((lib.FRONT_FACE_X, 0.0, 33.0), 9.5))
+    EMBLEMS.append(((lib.FRONT_FACE_X, 0.0, 33.0), 10.0, (1, 2)))
     # знак на боках корпуса шахты — на месте литого «V» прототипа (X −80, Z −32)
     for nrm, s in ((L, 1), (R, -1)):
         e = emblem_cutter(10.5, 0.45, C)
         place(e, (-80.0, s * HALF_W, -32.0), nrm, Z, 0.0, mw)
         boolean(mw, e)
         ZONES.append(((-80.0, s * HALF_W, -32.0), 12.0))
+        EMBLEMS.append(((-80.0, s * HALF_W, -32.0), 12.5, (0, 2)))
     return list(ZONES)

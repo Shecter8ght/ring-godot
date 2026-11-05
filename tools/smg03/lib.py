@@ -105,13 +105,15 @@ def smooth_poly(pts, step=0.7, k=3):
     return out
 
 
-def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6, tri_caps=False, r_fn=None):
+def rounded_prism(name, pts, y0, y1, r, coll, mat=None, seg=6, tri_caps=False, r_fn=None, smooth=(0.7, 3)):
     """Призма по контуру (XZ), выдавленная по Y, с круглыми кромками радиуса r по всему контуру с обеих сторон —
     своей сеткой из колец (сдвинутые контуры), без модификатора фаски: чистые четырёхугольники, булевы после неё
     работают (фаска без зажима на многоугольной боковине ломала EXACT). r_fn(x, z) — радиус кромки по месту контура
     (меняться должен плавно и не больше скругления угла контура в плоскости); без него — r везде."""
     import bmesh as _bm
-    pts = smooth_poly(pts)
+    # smooth — (шаг перевыборки, полуокно скользящего среднего): обводку со снимка сглаживаем; контур с задуманным
+    # рельефом (рёбра затыльника) — только перевыборка, k = 0
+    pts = smooth_poly(pts, smooth[0], smooth[1])
     rs = [r_fn(x, z) for x, z in pts] if r_fn is not None else [r] * len(pts)
     rings = []
     angs = [math.pi / 2 * k / seg for k in range(seg + 1)]
@@ -527,7 +529,8 @@ def _dupfaces(o):
 def boolean_safe(target, cutter, op="DIFFERENCE", name=""):
     """Булево с проверкой: открытых / многогранных рёбер и дублей граней не прибавилось — иначе откат и повтор со сдвигом
     резца на сотые миллиметра, затем точное «с допуском к дырам», затем быстрое. Точное булево Blender на большом корпусе
-    изредка сбоит от запуска к запуску (04.11: стык рукояти с коробкой — тысяча рёбер на три грани)."""
+    изредка сбоит от запуска к запуску (04.11: стык рукояти с коробкой — тысяча рёбер на три грани).
+    Возвращает номер удавшейся попытки (−1 — ни одна)."""
     from mathutils import Matrix as _M, Vector as _V
     keep = target.data.copy()
     nm0, d0 = _nonmanifold(target), _dupfaces(target)
@@ -535,6 +538,7 @@ def boolean_safe(target, cutter, op="DIFFERENCE", name=""):
              ((0.017, -0.011, 0.005), "EXACT", False), ((0, 0, 0), "EXACT", True), ((0.009, 0.013, -0.011), "EXACT", True),
              ((0, 0, 0), "FLOAT", False)]
     best = None
+    used = -1
     for k, (sh, solver, tol) in enumerate(tries):
         if k:
             old = target.data
@@ -548,6 +552,7 @@ def boolean_safe(target, cutter, op="DIFFERENCE", name=""):
         boolean(target, c2, op=op, solver=solver, hole_tolerant=tol)
         nm, d = _nonmanifold(target), _dupfaces(target)
         if nm <= nm0 and d <= d0:
+            used = k
             break
         print("BOOL_RETRY", name or cutter.name, k, nm - nm0, d - d0)
         if best is None or nm + d < best[0]:
@@ -569,6 +574,8 @@ def boolean_safe(target, cutter, op="DIFFERENCE", name=""):
     bpy.data.objects.remove(cutter, do_unlink=True)
     if me.users == 0:
         bpy.data.meshes.remove(me)
+    # номер удавшейся попытки (0 — с первого раза, 6 — быстрым решателем), −1 — не удалось
+    return used
 
 
 def _drop_empty_slots(o):
@@ -711,7 +718,12 @@ def grid_split(o, step=12.0, min_verts=12):
         if not faces:
             break
         geom = list({e for f in faces for e in f.edges}) + faces
-        bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-9, plane_co=co, plane_no=no)
+        # допуск 0.02 мм: плоскость Z −30.0 шла в 0.01 мм от вершины конца ломаной знака — щепка, после скругления
+        # кромок знака тёмный «шип» (обе стороны шахты)
+        bmesh.ops.bisect_plane(bm, geom=geom, dist=0.02 * MM, plane_co=co, plane_no=no)
+    # рёбра-нулёвки от допуска 0.02 мм (вершины ближе 1 мкм) — схлопнуть
+    new = [e for e in bm.edges if e not in orig]
+    bmesh.ops.dissolve_degenerate(bm, dist=0.002 * MM, edges=new)
     for e in bm.edges:
         if e not in orig:
             e.smooth = True
@@ -721,6 +733,92 @@ def grid_split(o, step=12.0, min_verts=12):
     else:
         print("GRID_SPLIT_SKIP", o.name, nm0, nm1)
     bm.free()
+
+
+def grid_split_local(o, center_mm, radius_mm, axes, step=1.2):
+    """Мелкая нарезка невидимой сеткой только вокруг знака: кольцо с ломаной оставляло многоугольники с вырезами
+    внутри (диск в кольце, борт вокруг кольца) — при показе треугольники с перехлёстом давали клин наружу кольца и
+    «клюв» у конца ломаной (владелец 05.11, снимок 10). axes — оси в плоскости знака (поперёк нормали)."""
+    from mathutils import Vector as _V
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    nm0 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
+    c = _V(center_mm) * MM
+    rad = radius_mm * MM
+    orig = set(bm.edges)
+
+    def near(f):
+        return len(f.verts) > 4 and any((vv.co - c).length < rad for vv in f.verts)
+    st = step * MM
+    for k in axes:
+        t = c[k] - rad + st * 0.37
+        while t < c[k] + rad:
+            faces = [f for f in bm.faces if near(f)]
+            if not faces:
+                break
+            co = _V((0, 0, 0)); no = _V((0, 0, 0))
+            co[k] = t; no[k] = 1.0
+            geom = list({e for f in faces for e in f.edges}) + faces
+            # допуск 0.02 мм: плоскость на волосок от вершины фаски резала рядом — вывернутая щепка 0.003 мм²,
+            # тёмный «шип» у конца ломаной знака
+            bmesh.ops.bisect_plane(bm, geom=geom, dist=0.02 * MM, plane_co=co, plane_no=no)
+            t += st
+    new = [e for e in bm.edges if e not in orig]
+    bmesh.ops.dissolve_degenerate(bm, dist=0.002 * MM, edges=new)
+    for e in bm.edges:
+        if e not in orig:
+            e.smooth = True
+    nm1 = sum(1 for e in bm.edges if len(e.link_faces) != 2)
+    big = sum(1 for f in bm.faces if len(f.verts) > 12 and any((vv.co - c).length < rad for vv in f.verts))
+    if nm1 <= nm0:
+        bm.to_mesh(o.data)
+        print("LOCAL_SPLIT", o.name, [round(q, 1) for q in center_mm], "больших граней", big)
+    else:
+        print("LOCAL_SPLIT_SKIP", o.name, nm0, nm1)
+    bm.free()
+
+
+def hex_socket(name, r, depth, ch, coll, rot=0.0):
+    """Резец гнезда под шестигранник в своих осях: ось +Z, поверхность головки — z = 0, гнездо вниз на depth, на входе
+    фаска ch под 45° (шестигранник шире на ch). Общая мелкая фаска по краю гнезда, рассечённому веером граней головки,
+    рвала край зубчиками (сверка v05 Н4) — край гнезда из фаски не скругляют, его даёт сам резец."""
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    rings = []
+    for z, rr in ((1.5, r + ch + 1.5), (0.0, r + ch), (-ch, r), (-depth, r)):
+        rings.append([bm.verts.new(v(rr * math.cos(math.pi / 3 * k + rot), rr * math.sin(math.pi / 3 * k + rot), z))
+                      for k in range(6)])
+    for a, b in zip(rings, rings[1:]):
+        for k in range(6):
+            j = (k + 1) % 6
+            bm.faces.new((a[k], a[j], b[j], b[k]))
+    bm.faces.new(rings[0]); bm.faces.new(list(reversed(rings[-1])))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    return o
+
+
+def mark_sharp(o, angle_deg, where=None):
+    """Острыми — рёбра с углом между гранями больше angle_deg (where(середина ребра, мм) — где): плоские грани у
+    фаски остаются плоскими при любой нарезке. Иначе после мелкой нарезки нормали мелких плоских кусков у кромки тянулись
+    к фаске — светлые и тёмные пятна-треугольники (кольцо целика, знак). Для мест с гравировкой без фаски не годится:
+    стенки букв смотрят ребром и пропадают."""
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    bm.normal_update()
+    lim = math.radians(angle_deg)
+    n = 0
+    for e in bm.edges:
+        if len(e.link_faces) != 2:
+            continue
+        if e.link_faces[0].normal.angle(e.link_faces[1].normal, 0.0) <= lim:
+            continue
+        if where is not None and not where((e.verts[0].co + e.verts[1].co) * (0.5 / MM)):
+            continue
+        e.smooth = False
+        n += 1
+    bm.to_mesh(o.data); bm.free()
+    return n
 
 
 def weighted(o):

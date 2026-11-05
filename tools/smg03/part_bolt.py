@@ -21,7 +21,9 @@ BOLT_TRAVEL = 45.0               # ход затвора назад (зерка�
 CH_X = (6.0, 70.0)               # рукоятка заряжания в переднем положении (h1ggs; было 40…104)
 CH_TRAVEL = BOLT_TRAVEL + 3.9    # рукоятка выбирает зазор 4 мм до тяги и тянет затвор на весь ход
 CH_KNOB_X = (49.0, 69.0)
-CH_KNOB_OUT = 12.0               # выступ наружу от борта
+CH_KNOB_OUT = 7.5                # выступ наружу от борта в покое (был 12: теперь рычаг откидывается — владелец 05.11)
+CH_PIVOT = (9.5, 1.9)            # ось откидывания рычага: X и вынос от борта (вертикальная, в середине толщины рычага)
+CH_SWING = 22.0                  # на сколько градусов носок рычага отходит влево при оттяжке (part_rig)
 ARM_X = (-12.0, 2.0)             # тяга затвора под рукоятку (слева сверху, выходит в паз)
 ARM_Z = (18.2, 22.8)
 ARM_Y = (12.0, 17.9)
@@ -137,28 +139,50 @@ def ejector(C):
 def charging_handle(C):
     z0, z1 = CH_SLOT_Z
     x0, x1 = CH_X
-    # ползун в пазу (зазор 0.4 по высоте и до дна паза)
+    # Складная рукоятка (владелец 05.11: «цепляются пальцем, при движении на себя она отводится ещё влево»): ползун
+    # в пазу берёт тягу затвора; рычаг вдоль борта сидит на вертикальной оси у заднего конца — в покое прилегает,
+    # при оттяжке носок с выступом отходит влево на CH_SWING (part_rig), под палец — удобный зацеп
+    from lib import boolean_safe, set_origin
+    px, pr = CH_PIVOT
+    py = HALF_W + pr
+    # ползун в пазу (зазор 0.4 по высоте и до дна паза) и ушко оси снизу — из паза наружу под шарнир рычага
     sl = prism_xz("Charging_handle_slider", rounded_rect_xz(x0, x1 - 2.0, z0 + 0.4, z1 - 0.4, 1.6),
                   HALF_W - 4.75, HALF_W + 0.4, C, "Steel_black")
+    lug = box("_lug", px - 2.0, px + 2.0, HALF_W - 0.5, py, z0 + 0.5, 19.6, C)
+    boolean(lug, cyl("_lugr", z0 + 0.5, 19.6, 2.0, C, seg=40, cy=px, cz=py, axis="Z"), op="UNION")
+    boolean_safe(sl, lug, op="UNION", name="ушко ползуна")
     finish_small(sl, w=0.35, seg=3)
-    # рычаг вдоль борта: плоская полоса 3 мм, к переду утолщается в выступ под пальцы
-    arm = prism_xz("Charging_handle", fillet([(x0 + 2.0, 20.0), (CH_KNOB_X[0], 20.0), (CH_KNOB_X[0] + 2.0, 21.5),
+    # рычаг вдоль борта: плоская полоса 3 мм, сзади — шарнир (втулка Ø4 на оси), к переду утолщается в выступ под пальцы
+    # у оси верх рычага горизонтален (Z 26.5): втулка той же высоты, что и конец рычага, — без ступенек (ступеньки по
+    # 0.2 мм ломали мелкую фаску — «шип» в борт)
+    arm = prism_xz("Charging_handle", fillet([(px, 20.0), (CH_KNOB_X[0], 20.0), (CH_KNOB_X[0] + 2.0, 21.5),
                                               (CH_KNOB_X[1], 22.0), (CH_KNOB_X[1], 30.6), (CH_KNOB_X[0] + 3.0, 30.8),
-                                              (CH_KNOB_X[0], 27.8), (x0 + 2.0, 26.5)],
-                                             [2.5, 3.0, 2.0, 2.5, 3.0, 3.0, 4.0, 2.5], 5),
+                                              (CH_KNOB_X[0], 27.8), (px + 6.0, 26.5), (px, 26.5)],
+                                             [0.0, 3.0, 2.0, 2.5, 3.0, 3.0, 4.0, 3.0, 0.0], 5),
                    HALF_W + 0.4, HALF_W + 3.4, C, "Steel_black")
-    # выступ под пальцы: наружу на 12 мм, клином назад, с поперечными рёбрами
+    # втулка Ø3.4 — на 0.2 толще рычага с обеих сторон, до борта остаётся 0.2
+    knuckle = cyl("_knuckle", 20.0, 26.5, 1.7, C, seg=48, cy=px, cz=py, axis="Z")
+    boolean_safe(arm, knuckle, op="UNION", name="втулка рычага")
+    # выступ под пальцы: наружу на CH_KNOB_OUT, клином назад, с поперечными рёбрами по верху
     knob_plan = fillet([(CH_KNOB_X[0] + 1.0, HALF_W + 3.0), (CH_KNOB_X[1], HALF_W + 3.0), (CH_KNOB_X[1], HALF_W + CH_KNOB_OUT),
-                        (CH_KNOB_X[1] - 6.0, HALF_W + CH_KNOB_OUT)], [1.5, 2.0, 2.5, 4.0], 5)
+                        (CH_KNOB_X[1] - 6.0, HALF_W + CH_KNOB_OUT)], [1.5, 1.5, 2.0, 3.5], 5)
     k = prism_xy("_knob", knob_plan, 22.5, 30.4, C)
     boolean(arm, k, op="UNION")
     for i in range(4):
         xg = CH_KNOB_X[1] - 3.5 - i * 3.2
-        g = prism_xy("_kg", fillet([(xg - 0.8, HALF_W + 6.0), (xg + 0.8, HALF_W + 6.0), (xg + 0.8, HALF_W + 20.0),
+        g = prism_xy("_kg", fillet([(xg - 0.8, HALF_W + 3.9), (xg + 0.8, HALF_W + 3.9), (xg + 0.8, HALF_W + 20.0),
                                      (xg - 0.8, HALF_W + 20.0)], [0.8, 0.8, 0, 0], 3), 29.6, 33.0, C)
         boolean(arm, g)
     finish_small(arm, w=0.6, seg=3)
-    sl["owner"] = "Charging_handle"
+    set_origin(arm, (px, py, 23.0))
+    # ось шарнира с головкой сверху — через ушко ползуна и втулку рычага
+    pin = cyl("Charging_handle_pin", z0 + 0.7, 26.8, 0.9, C, "Steel_bare", seg=24, cy=px, cz=py, axis="Z", ch=0.25)
+    hd = cyl("_chph", 26.4, 27.1, 1.3, C, seg=32, cy=px, cz=py, axis="Z", ch=0.3)
+    boolean(pin, hd, op="UNION")
+    finish_small(pin, w=0.15, seg=2)
+    sl["owner"] = "Charging_handle,Charging_handle_pin"
+    pin["owner"] = "Charging_handle,Charging_handle_slider"
+    arm["owner"] = "Charging_handle_slider,Charging_handle_pin"
     return sl, arm
 
 

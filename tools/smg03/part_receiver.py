@@ -18,10 +18,16 @@ CH_SLOT_Z = (17.6, 23.4)         # паз рукоятки заряжания с
 CH_SLOT_X = (-62.0, 74.0)        # паз закрыт с обоих концов (h1ggs: X −56…72; задний конец — под ход тяги затвора)
 CH_SLOT_DEPTH = 7.5              # дно паза — в полости затвора: ползун рукоятки берёт тягу затвора
 PORT_X = (-43.0, 4.0)            # окно выброса справа (снимок B)
-PORT_Z = (13.0, 49.0)            # h1ggs: верх окна — почти у планки; под окном — полочка до шва (Z 15)            # низ окна — по шву (снимок B: 13; дно окна — верх корпуса шахты), сверху полка 2.2 мм
+PORT_Z = (13.0, 47.5)            # верх окна снаружи — на 1 мм ниже начала скругления верхней кромки (Z 48.5): скос рупора на ровном борту
 CAVITY = (-111.0, 40.0, -14.5, 14.5, -12.5, 33.0)  # полость затвора (x0, x1, y0, y1, z0, z1): над затвором 3 мм
-PORT_DEPTH_Y = -1.0               # карман окна выброса — от правого борта до середины коробки
-PORT_CHAMFER = 9.0                # скос задней стенки окна (h1ggs: гильза уходит вперёд-вправо)  # полость затвора внутри коробки (x0, x1, y0, y1, z0, z1)
+# окно выброса рупором (владелец 05.11, снимок 12): от полости затвора наружу стенки расходятся, верхняя — сильнее
+# всех (скос ~60°): гильза идёт вверх и уходит наружу по верхней скошенной стенке. Снаружи окно прежнее (PORT_X, PORT_Z),
+# у полости — меньше
+PORT_IN = (-38.0, 1.0, 15.0, 32.0)    # внутреннее отверстие (X от, до, Z от, до) — в пределах полости затвора
+PORT_IN_Y = -13.0                     # плоскость внутреннего отверстия (уже внутри полости: стенка борта — Y −14.5…−21.75)
+# прорезь спуска (контур XZ): сзади — пазом в верх рукояти (дно Z 11, скругление 0.8), остальные углы R 2, как были
+TRIG_SLOT = [(-174.5, 13.0), (-136.0, 13.0), (-136.0, 30.0), (-174.5, 30.0)]
+TRIG_SLOT_R = [0.8, 2.0, 2.0, 2.0]
 TRIG_HALF_W = 20.0               # спусковая коробка: передняя тяга и нижняя тяга
 GRIP_HALF_W = 15.5               # рукоять (оценка: обычная пистолетная ~31 мм)
 GUARD_HALF_W = 6.5               # перекладина скобы
@@ -164,24 +170,54 @@ def upper_features(o, C):
     x0, x1, y0, y1, zc0, zc1 = CAVITY
     c = prism_xz("_cav", rounded_rect_xz(x0, x1, zc0, zc1, 3.0), y0, y1, C)
     boolean(o, c)
-    c = prism_xz("_port", rounded_rect_xz(PORT_X[0], PORT_X[1], PORT_Z[0], PORT_Z[1], 2.5), -HALF_W - 5, PORT_DEPTH_Y, C)
-    boolean(o, c)
-    # задняя стенка окна — скосом наружу (h1ggs), углы скоса скруглены
-    ch = PORT_CHAMFER
-    c = prism_xy("_portch", fillet([(PORT_X[0] + 0.6, -HALF_W - 1.0), (PORT_X[0] + 0.6, -HALF_W + ch), (PORT_X[0] - ch, -HALF_W - 1.0)],
-                                   [0.0, 1.5, 1.5], 4), PORT_Z[0] + 1.2, PORT_Z[1] - 1.2, C)
-    boolean(o, c)
+    # окно-рупор — только точным булевым: быстрый решатель здесь — признак «отравленного» корпуса (в таких прогонах
+    # у буквы «ОД» справа потом заделывается дыра); тогда корпус строится заново (build)
+    k = boolean_safe(o, port_horn(C), name="port")
     # справа на переднем блоке — линия уступа (снимки KRISS B, владельца 04): от торца на Z 22 назад до X 58, дугой вниз
     # к Z 13 и дальше назад до шва; канавка 1.3 × 0.5 (уже — фаска кромок 0.45 перехлёстывается)
     side_line(o, [(FRONT_FACE_X + 3.0, 22.0), (60.0, 22.0)] +
               [(60.0 - 9.0 * math.sin(math.pi / 2 * k / 8), 13.0 + 9.0 * math.cos(math.pi / 2 * k / 8)) for k in range(1, 9)] +
               [(FRONT_BLOCK_REAR_X - 3.0, 13.0)], 1.3, 0.5, -1, C)
     # прорезь под перо спуска в низу коробки над проёмом скобы (ход назад на 11°)
-    c = prism_xz("_trigslot", rounded_rect_xz(-173.0, -136.0, 12.0, 30.0, 2.0), -3.9, 3.9, C)
+    # сзади прорезь — пазом в верх рукояти: задняя стенка X −174.5 (перёд рукояти здесь −172.5), дно Z 13 (дно паза
+    # 2–3 мм: при 1–1.4 мм мелкая фаска мяла углы — сверка v05 п. 9). Раньше
+    # стенка (−173, дно 12, скругление 2) шла почти вдоль переда рукояти и оставляла полочку-плёнку — «игла» у спуска
+    # (снимок владельца 7); до спуска сзади 3 мм
+    c = prism_xz("_trigslot", fillet(TRIG_SLOT, TRIG_SLOT_R, 6), -3.9, 3.9, C)
     boolean(o, c)
     # канал ствола в переднем блоке
     c = cyl("_bore", 30.0, FRONT_FACE_X + 5, BARREL_R + 0.25, C, seg=64)
     boolean(o, c)
+    return 0 <= k <= 5
+
+
+def port_horn(C):
+    """Резец окна выброса — рупор: скруглённые прямоугольники снаружи (за бортом, с продолжением раструба) и у полости,
+    между ними — прямые стенки; углы скруглены R 2.5 по всей глубине."""
+    import bmesh
+    outer = rounded_rect_xz(PORT_X[0], PORT_X[1], PORT_Z[0], PORT_Z[1], 2.5)
+    inner = rounded_rect_xz(PORT_IN[0], PORT_IN[1], PORT_IN[2], PORT_IN[3], 2.5)
+    assert len(outer) == len(inner)
+    y_out, y_in = -HALF_W, PORT_IN_Y
+
+    def at(y):
+        t = (y - y_out) / (y_in - y_out)
+        return [(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t) for a, b in zip(outer, inner)]
+    rings = [(y_out - 3.0, at(y_out - 3.0)), (y_in, inner), (y_in + 3.0, inner)]
+    me = bpy.data.meshes.new("_port")
+    bm = bmesh.new()
+    vs = [[bm.verts.new(v(x, y, z)) for x, z in pts] for y, pts in rings]
+    n = len(outer)
+    for r0, r1 in zip(vs, vs[1:]):
+        for k in range(n):
+            j = (k + 1) % n
+            bm.faces.new((r0[k], r0[j], r1[j], r1[k]))
+    bm.faces.new(vs[0]); bm.faces.new(list(reversed(vs[-1])))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new("_port", me)
+    C.objects.link(o)
+    return o
 
 
 def magwell_features(o, C):
@@ -326,9 +362,10 @@ GRIP_TOP_Z = 15.1      # низ коробки над рукоятью
 GRIP_TOP_B = HALF_W - 2.7    # у коробки — до плоского низа коробки (кромка R 2.4 остаётся): стык под прямым углом,
                              # без осколков; над ним — скруглённая кромка коробки, как линия стыка верхней и нижней частей
 GRIP_N = (2.4, 8.0)    # показатель овала сечения: в рукояти — и у коробки (сечение к верху почти прямоугольное)
-GRIP_GROOVES = (-73.0, -19.0, 3.4, 1.5, 0.9)   # рифление переда: Z от, до, шаг, ширина, глубина
-GRIP_PANEL_D = 0.7     # поле под ладонь утоплено (шагрень — на этапе текстур)
-GRIP_SEG = 144
+GRIP_GROOVES = (-70.0, -19.0, 3.4, 1.25, 0.9)   # рифление переда: центры канавок Z от, до, шаг, полуширина, глубина
+GRIP_PANEL_D = 0.7     # поле под ладонь утоплено
+GRIP_STIPPLE_H = 0.22  # пупырышки на поле (владелец 05.11: «пупырышки или шершавость») — высота над дном поля
+GRIP_SEG = 352         # точек по кругу (шаг ~0.41 мм по дуге — пупырышек 3×3 точки)
 
 
 def _grip_contour():
@@ -403,65 +440,123 @@ def _sd_poly(poly, x, z):
     return d if _point_in(poly, x, z) else -d
 
 
+def _oval_points(a, b, n, seg, m=2048):
+    """Точки суперэллипса равным шагом по длине дуги (по углу параметра шаг на боках вдвое реже — пупырышки и канавки
+    выходили разными), от переда (u = a) против часовой; с нормалью в плоскости сечения."""
+    def pt(t):
+        c, s_ = math.cos(t), math.sin(t)
+        return a * math.copysign(abs(c) ** (2 / n), c), b * math.copysign(abs(s_) ** (2 / n), s_)
+    ts = [2 * math.pi * i / m for i in range(m + 1)]
+    ps = [pt(t) for t in ts]
+    acc = [0.0]
+    for i in range(m):
+        acc.append(acc[-1] + math.hypot(ps[i + 1][0] - ps[i][0], ps[i + 1][1] - ps[i][1]))
+    total = acc[-1]
+    out = []
+    j = 0
+    for k in range(seg):
+        target = total * k / seg
+        while acc[j + 1] < target:
+            j += 1
+        f = (target - acc[j]) / max(1e-12, acc[j + 1] - acc[j])
+        u, y = pt(ts[j] + (ts[j + 1] - ts[j]) * f)
+        nx = math.copysign(abs(u / a) ** (n - 1), u) / a
+        ny = math.copysign(abs(y / b) ** (n - 1), y) / b
+        ln = math.hypot(nx, ny) or 1.0
+        out.append((u, y, nx / ln, ny / ln))
+    return out
+
+
+def _stipple(j, k):
+    """Пупырышек в узле (j — номер кольца, k — точка по кругу): ряды через кольцо, в ряду — через 4 точки, соседние
+    ряды сдвинуты на 2 (почти шестиугольная решётка ~1.2 / 1.6 мм). 1 — вершина, к краю — на нет."""
+    best = 0.0
+    for jc in range(j - 2, j + 3):
+        if jc % 2:
+            continue
+        off = 2 * ((jc // 2) % 2)
+        kc = off + 4 * round((k - off) / 4)
+        r = math.hypot(j - jc, k - kc)
+        best = max(best, max(0.0, 1.0 - r / 1.8) ** 1.3)
+    return best
+
+
 def grip_loft(C, name="_griploft"):
     """Рукоять одним телом без булевых (владелец 04.11: «кусок кирпича», «как отдельный брусок»; сверка v04: рваные
-    концы рифления и шов на спинке от резцов): плотные кольца-овалы (суперэллипс), кромки — по контуру со снимка;
-    рифление переда и утопленное поле — смещением точек по нормали овала. Спинка гладкая (снимки KRISS, h1ggs)."""
+    концы рифления и шов на спинке от резцов): кольца-овалы (суперэллипс), кромки — по контуру со снимка; рифление
+    переда, утопленное поле и пупырышки на нём — смещением точек по нормали овала. Спинка гладкая (снимки KRISS, h1ggs).
+    Владелец 05.11 («рифление с непонятной геометрией»): кольца в зоне рифления и поля — ровным шагом, восьмая часть шага
+    канавок, с центрами канавок на кольцах — каждая канавка снята одинаково, без полос."""
     import bmesh
     x0, x1 = grip_edges()
-    zs = [-89.6, -89.2, -88.8]
+    g0, g1, pitch, ghw, gd = GRIP_GROOVES
+    dzr = pitch / 8.0
+    ju0, ju1 = -135, 50                      # ровная зона: Z −76.4…+2.25 (кольца с номерами от центра верхней канавки)
+    zu0, zu1 = g1 + ju0 * dzr, g1 + ju1 * dzr
+    zs = [(-89.6, None), (-89.2, None), (-88.8, None)]
     z = -88.4
-    while z < 18.0 - 1e-6:
-        zs.append(round(z, 3))
-        dense = (-76.5 <= z < -16.0) or (-5.0 <= z < 1.0) or (-73.0 <= z < -67.0)
-        z += 0.28 if dense else 1.0
-    zs.append(18.0)
-    g0, g1, pitch, gw, gd = GRIP_GROOVES
+    while z < zu0 - 0.5:
+        zs.append((round(z, 3), None))
+        z += 1.0
+    for j in range(ju0, ju1 + 1):
+        zs.append((g1 + j * dzr, j))
+    z = zu1 + 1.0
+    while z < 18.0 - 0.5:
+        zs.append((round(z, 3), None))
+        z += 1.0
+    zs.append((18.0, None))
+    centers = [g1 - pitch * i for i in range(int(round((g1 - g0) / pitch)) + 1)]
     panel = _panel_poly(x0, x1)
-    pz0, pz1 = min(p[1] for p in panel), max(p[1] for p in panel)
+    pz0, pz1 = min(p_[1] for p_ in panel), max(p_[1] for p_ in panel)
     seg = GRIP_SEG
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
     rings = []
-    for z in zs:
+    bumps = {}                      # (кольцо, точка) → высота пупырышка (0…1): по ним — диагонали четырёхугольников
+    for z, j in zs:
         cx, a, b, n = grip_section(z, x0, x1)
         ring = []
-        for k in range(seg):
-            t = 2 * math.pi * k / seg
-            c, s_ = math.cos(t), math.sin(t)
-            u = a * math.copysign(abs(c) ** (2 / n), c)
-            y = b * math.copysign(abs(s_) ** (2 / n), s_)
-            # нормаль овала в плоскости сечения
-            nx = math.copysign(abs(u / a) ** (n - 1), u) / a
-            ny = math.copysign(abs(y / b) ** (n - 1), y) / b
-            ln = math.hypot(nx, ny) or 1.0
-            nx, ny = nx / ln, ny / ln
+        pts = _oval_points(a, b, n, seg)
+        dzc = min(abs(z - c) for c in centers)
+        for k, (u, y, nx, ny) in enumerate(pts):
             d = 0.0
-            # рифление переда: поперечные канавки, к бокам сходят на нет
-            if g0 - gw <= z <= g1 + gw:
-                dz = abs(((z - g1) + pitch / 2) % pitch - pitch / 2)
-                p = _ss((gw / 2 + 0.25 - dz) / 0.7)      # плавные стенки канавки (сверка v04b: «полосатое» рифление)
-                if p > 0:
-                    wf = _ss(((u / a) - 0.5) / 0.3)
-                    wy = _ss((11.5 - abs(y)) / 2.5)
-                    d = max(d, gd * p * wf * wy)
-            # поле под ладонь — на боках
+            # рифление переда: поперечные канавки косинусом, к бокам сходят на нет
+            if dzc < ghw:
+                wf = _ss(((u / a) - 0.5) / 0.3)
+                wy = _ss((11.5 - abs(y)) / 2.5)
+                d = max(d, gd * (0.5 + 0.5 * math.cos(math.pi * dzc / ghw)) * wf * wy)
+            # поле под ладонь — на боках, на нём пупырышки (только в ровной зоне колец)
             if pz0 - 1 <= z <= pz1 + 1 and abs(y) > 0.3 * b:
                 sd = _sd_poly(panel, cx + u, z)
                 if sd > -0.5:
                     # пологий край поля 1.2 мм — шире шага точек (иначе рамка зубчатая, сверка v04b Д2)
-                    d = max(d, GRIP_PANEL_D * _ss(sd / 1.2))
+                    dp = GRIP_PANEL_D * _ss(sd / 1.2)
+                    if j is not None and sd > 1.6:
+                        st = _stipple(j, k) * _ss((sd - 1.6) / 1.0)
+                        dp -= GRIP_STIPPLE_H * st
+                        bumps[(len(rings), k)] = st
+                    d = max(d, dp)
             ring.append(bm.verts.new(v(cx + u - d * nx, y - d * ny, z)))
         rings.append(ring)
-    zb = zs[0]
+    zb = zs[0][0]
     cxb = grip_section(zb, x0, x1)[0]
     tip = bm.verts.new(v(cxb, 0.0, zb - 0.6))
     for k in range(seg):
         bm.faces.new((rings[0][(k + 1) % seg], rings[0][k], tip))
-    for r0, r1 in zip(rings, rings[1:]):
+    # четырёхугольник с пупырышком — на 4 треугольника через центр: иначе Blender при показе сам выбирает диагональ, на
+    # соседних участках по-разному — вместо точек косые полосы, поле «камуфляжем» (сверка v05 п. 4); диагональ через
+    # вершину пупырышка на перекошенных четырёхугольниках давала длинные треугольники — тёмную «колючую» зону
+    for i, (r0, r1) in enumerate(zip(rings, rings[1:])):
         for k in range(seg):
-            j = (k + 1) % seg
-            bm.faces.new((r0[k], r0[j], r1[j], r1[k]))
+            jn = (k + 1) % seg
+            q = (r0[k], r0[jn], r1[jn], r1[k])
+            if max(bumps.get((i, k), 0.0), bumps.get((i, jn), 0.0), bumps.get((i + 1, jn), 0.0),
+                   bumps.get((i + 1, k), 0.0)) < 1e-6:
+                bm.faces.new(q)
+                continue
+            c = bm.verts.new((q[0].co + q[1].co + q[2].co + q[3].co) * 0.25)
+            for a_, b_ in ((0, 1), (1, 2), (2, 3), (3, 0)):
+                bm.faces.new((q[a_], q[b_], c))
     bm.faces.new(list(reversed(rings[-1])))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me); bm.free()
@@ -469,6 +564,7 @@ def grip_loft(C, name="_griploft"):
         f.use_smooth = True
     o = bpy.data.objects.new(name, me)
     C.objects.link(o)
+    print("GRIP_LOFT", len(zs), "колец", len(me.vertices), "вершин")
     return o
 
 
@@ -558,7 +654,7 @@ def loop_features(o, C):
         c = prism_xz(f"_hh{i}", [tuple(p) for p in it["outer"]], -40.0, 40.0, C)
         boolean_safe(o, c, name="окно петли")
     # прорезь под перо спуска — заново: верх рукояти (лофт до Z 18) заходит в низ коробки у прорези
-    c = prism_xz("_trigslot2", rounded_rect_xz(-173.0, -136.0, 12.0, 30.0, 2.0), -3.9, 3.9, C)
+    c = prism_xz("_trigslot2", fillet(TRIG_SLOT, TRIG_SLOT_R, 6), -3.9, 3.9, C)
     boolean_safe(o, c, name="прорезь спуска")
 
 
@@ -614,9 +710,8 @@ def side_rails(C):
     (владелец 04.11: «не хватает планок Picatinny по бокам»). Основание заходит в борт на 0.3 (без совпадающих граней)."""
     out = []
     x0, x1 = SIDE_RAIL_X
-    # только справа: у настоящего Gen II (снимки KRISS A, владельца 01, 02) и у h1ggs слева планки нет — на её месте
-    # два винта (part_pins); левую можно вернуть, добавив (1, "L") в список
-    for side, tag in ((-1, "R"),):
+    # обе стороны: у настоящего Gen II слева планки нет, но владелец 05.11 решил её вернуть («да, надо добавить»)
+    for side, tag in ((1, "L"), (-1, "R")):
         r = prism_yz("Side_rail_" + tag, rail_profile(SIDE_RAIL_H, -0.3), x0, x1, C, "Steel_black")
         rail_slots(r, x0, x1, SIDE_RAIL_H, 1.0, 100.0, C)
         # торцы и кромки: скругление концов в плане
@@ -635,15 +730,22 @@ def side_rails(C):
         r["owner"] = "Receiver"
         out.append(r)
         for i, xs in enumerate(SIDE_RAIL_SCREWS):
-            hd = lathe(f"Side_rail_screw_{tag}{i}", [(1.5, 0.0), (1.5, 4.25), (4.0, 4.25), (4.3, 3.95), (4.3, 0.0)], C,
+            hd = lathe(f"Side_rail_screw_{tag}{i}", [(1.5, 0.0), (1.5, 4.25), (3.75, 4.25), (4.3, 3.45), (4.3, 0.0)], C,
                        "Steel_black", seg=48, cy=0.0, cz=0.0)
             # ось токарного профиля — X; поворачиваем к Z (вверх «как у верхней»)
             import mathutils
             hd.data.transform(mathutils.Matrix.Rotation(-math.pi / 2, 4, "Y"))
             hd.data.transform(mathutils.Matrix.Translation(v(xs, 0.0, 0.0)))
-            hexp = [(xs + 2.0 * math.cos(math.pi / 3 * k), 2.0 * math.sin(math.pi / 3 * k)) for k in range(6)]
-            boolean(hd, prism_xy("_hex", hexp, 2.6, 5.0, C))
-            finish_small(hd, w=0.15, seg=2)
+            # гнездо — резцом с фаской на входе; край гнезда фаской не трогать (рвался зубчиками, сверка v05 Н4)
+            from lib import hex_socket
+            c = hex_socket("_hex", 2.0, 1.7, 0.3, C)
+            c.data.transform(mathutils.Matrix.Translation(v(xs, 0.0, 4.3)))
+            boolean(hd, c)
+            finish_small(hd, w=0.35, seg=3, exclude=lambda cc, nn, xs=xs: math.hypot(cc.x - xs, cc.y) < 2.8)
+            from lib import mark_sharp, weighted, apply_all
+            mark_sharp(hd, 12.0)
+            weighted(hd)
+            apply_all(hd)
             _side_to_world(hd.data, side)
             hd["owner"] = "Side_rail_" + tag + ",Receiver"
             out.append(hd)
@@ -659,17 +761,24 @@ def build(ctx):
     # Точное булево Blender изредка сбоит от запуска к запуску — буква с неудачным вычитанием откатывается
     # (part_stamps.stamp), и тогда корпус строится заново и гравировка повторяется
     import part_stamps
-    for attempt in range(5):
+    for attempt in range(6):
         o = rounded_prism("Receiver", body_contour(clean_front(pts)), -HALF_W, HALF_W, 2.4, C, "Alu_anodized",
                           r_fn=body_r)
         zones = part_stamps.apply(o, C)
         if not part_stamps.FAILED:
-            break
-        print("STAMPS_REBUILD", attempt, part_stamps.FAILED)
+            # верх (планки, пазы, полость, окно-рупор): окно — только точным булевым, иначе корпус заново
+            if upper_features(o, C) or attempt == 5:
+                break
+            print("PORT_REBUILD", attempt)
+        else:
+            print("STAMPS_REBUILD", attempt, part_stamps.FAILED)
+            if attempt == 5:
+                # последняя попытка — оставить как есть (без пропавших букв), но с верхом
+                upper_features(o, C)
+                break
         me = o.data
         bpy.data.objects.remove(o, do_unlink=True)
         bpy.data.meshes.remove(me)
-    upper_features(o, C)
     magwell_features(o, C)
     loop_features(o, C)
     seams(o, C)
@@ -679,8 +788,40 @@ def build(ctx):
     c = cyl("_kclr", HINGE_Z[0] + 8.2, HINGE_Z[1] - 8.2, 6.9, C, seg=64, cy=HINGE_X, cz=HINGE_Y, axis="Z")
     boolean(o, c)
 
+    # поле рукояти с пупырышками мелкой фаской не трогать: там, где шаг сетки мельче, склоны пупырышков круче 30° — фаска
+    # рвала их в тёмные крапины с резкой границей (сверка v05 п. 4)
+    gx0, gx1 = grip_edges()
+    gpanel = _panel_poly(gx0, gx1)
+    gz0, gz1 = min(q[1] for q in gpanel) - 1.0, max(q[1] for q in gpanel) + 1.0
+
     def keep_engraving(center, normal):
+        if gz0 <= center.z <= gz1 and abs(center.y) > 6.0 and _sd_poly(gpanel, center.x, center.z) > -0.8:
+            return True
         return any((center - Vector(z)).length < r for z, r in zones)
-    finish_small(o, w=0.45, seg=3, exclude=keep_engraving if zones else None)
+    finish_small(o, w=0.45, seg=3, exclude=keep_engraving)
+    # знаки (кольцо с ломаной): кромки канавки — своим скруглением 0.18 без зажима (зажим общий на деталь и сводил ширину к нулю; общая мелкая фаска 0.45 съела бы канавку
+    # 1.4–1.6 мм, без скругления острые кромки при сглаженных нормалях давали «шипы»), затем мелкая нарезка сетки вокруг
+    # (многоугольники с вырезами — клинья, снимок владельца 10) и нормали заново
+    from lib import grid_split_local, weighted, apply_all, bevel_edges, _nonmanifold
+    if part_stamps.EMBLEMS:
+        ems = [(Vector(ctr), rad) for ctr, rad, _ax in part_stamps.EMBLEMS]
+        keep = o.data.copy()
+        nm0 = _nonmanifold(o)
+        nb = bevel_edges(o, lambda n1, n2: n1.angle(n2, 0.0) > math.radians(50.0), w=0.18, seg=2, profile=0.5, clamp=False,
+                         where=lambda c: any((c - ctr).length < rad for ctr, rad in ems))
+        if _nonmanifold(o) > nm0:
+            print("EMBLEM_BEVEL_SKIP", nb, nm0, _nonmanifold(o))
+            old = o.data
+            o.data = keep
+            bpy.data.meshes.remove(old)
+        else:
+            print("EMBLEM_BEVEL", nb)
+            bpy.data.meshes.remove(keep)
+        for ctr, rad, axes in part_stamps.EMBLEMS:
+            grid_split_local(o, ctr, rad, axes)
+        from lib import mark_sharp
+        print("EMBLEM_SHARP", mark_sharp(o, 20.0, where=lambda c: any((c - ctr).length < rad for ctr, rad in ems)))
+        weighted(o)
+        apply_all(o)
     rails = side_rails(C)
     return {"receiver": o, "upper": o, "magwell": o, "trigger_housing": o, "side_rails": rails}

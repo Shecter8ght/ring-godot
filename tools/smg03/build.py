@@ -67,7 +67,9 @@ def drop_wire():
         if border:
             res = bmesh.ops.holes_fill(bm, edges=border, sides=16)
             if res["faces"]:
-                print("HOLES_FILLED", o.name, len(res["faces"]))
+                print("HOLES_FILLED", o.name, len(res["faces"]),
+                      [[round(c * 1000, 1) for c in f.calc_center_median()] for f in res["faces"]][:4],
+                      [round(f.calc_area() * 1e6, 3) for f in res["faces"]][:4])
                 changed = True
         if changed:
             bm.to_mesh(o.data)
