@@ -90,4 +90,6 @@ def main():
     print("SAVED", out_path)
 
 
-main()
+# при импорте (game_retopo.py — та же сборка с подменами) сборка не запускается
+if __name__ == "__main__":
+    main()
