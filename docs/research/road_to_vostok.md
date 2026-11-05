@@ -321,7 +321,7 @@ bash tools/research/rtv/run.sh <папка вне репозитория>
 | 1 | ✅ 2026-11-04. Тени деревьев копиями «только тень»: вблизи (35 м + полклетки) — полная модель, дальше — карточки дальнего вида; видимые модели без тени. Зона 1: 80 → 108 к/с, «Проспект»: 316 → 337 | `district_scatter.gd`, `mall_filler.gd`, `Balance.TREE_SHADOWS` | `tree_shadows_test`, `zone01_trees_perf`, `prospekt_plants_perf` |
 | 2 | ✅ 2026-11-04. Свет вспышки и фонаря раздельно: своя вспышка в мир не светит на руки, им — свой короткий свет; отражённый свет фонаря на руки по расстоянию до стены | `player.gd` (`_hands_light`, `_tick_hands_bounce`), `Balance.VIEWMODEL_LIGHTS` | `lean_light_test` |
 | 3 | ✅ 2026-11-04. Наклон не уходит в стену (шар 0,15 м вбок от глаза) | `player.gd` (`lean_room`), `Balance.LEAN_WALL_RADIUS` | `lean_light_test` |
-| 4 | «Трава издали» в рельефе за радиусом травы | `district_terrain.gdshader` | `grass_shots` |
+| 4 | ✅ 2026-11-05. «Трава издали» в рельефе: с края кольца травинок газон в траве светлее, ровнее, с куртинами — тёмной полосы за кольцом нет | `district_terrain.gdshader`, `district_grass.gd`, `Balance.GRASS.far_look` | `far_grass_test`, `grass_shots` |
 | 5 | Пресеты теней по качеству (дальность, каскады, тени мелочи маской слоёв) | `settings.gd`, `Balance` | `settings_test`, `perf_test` |
 | 6 | Прогрев облётом под экраном загрузки | `ImpactFx.warm_up`, загрузка рейда | `first_hit_test` |
 | 7 | Ручные тактические точки с направлением для ИИ | `marauder.gd`, `ai_population.gd` | `ai_squad_test`, `prospekt_raid_check` |

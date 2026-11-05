@@ -21,7 +21,20 @@ uniform float litter_saturation = 0.7;
 // Камень выходит сам, когда склон круче этого (косинус угла с вертикалью).
 uniform float rock_slope_start = 0.82;
 uniform float rock_slope_end = 0.62;
-// отладка: 1 — вес редкой травы, 2 — крупные пятна, 3 — смешение выборок
+// «Трава издали» (Balance.GRASS.far_look, ставит DistrictGrass через DistrictTerrain.set_far_grass): там, где по
+// карте густоты растёт трава, за кольцом травинок газон светлее, ровнее и с куртинами — как поле травинок издали.
+// Без карты (по умолчанию чёрная) — как было.
+uniform sampler2D grass_density : filter_linear, repeat_disable, hint_default_black;
+uniform vec2 grass_origin = vec2(0.0);
+uniform vec2 grass_size = vec2(1.0);
+uniform float grass_density_from = 0.02;
+uniform float grass_density_full = 0.22;
+uniform float grass_far_start = 100000.0;
+uniform float grass_far_end = 100001.0;
+uniform vec3 grass_far_tint = vec3(1.0);
+uniform float grass_far_flat = 0.0;
+uniform vec2 grass_far_clumps = vec2(1.0);
+// отладка: 1 — вес редкой травы, 2 — крупные пятна, 3 — смешение выборок, 4 — вес «травы издали»
 uniform int debug_view = 0;
 // сырость в дождь (RainFx): темнее, глаже, блестит
 global uniform float rain_wet;
@@ -32,6 +45,16 @@ varying vec3 world_nrm;
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+}
+
+// Газон издали: за кольцом травинок — их вид вместо плоской фотографии (k — вес «травы издали»).
+void far_grass(float k, vec2 wp, inout vec3 alb, inout vec3 nrm) {
+	if (k <= 0.0) {
+		return;
+	}
+	float clump = mix(grass_far_clumps.x, grass_far_clumps.y, texture(noise, wp / 4.0).a);
+	alb *= mix(vec3(1.0), grass_far_tint * clump, k);
+	nrm = mix(nrm, vec3(0.5, 0.5, 1.0), grass_far_flat * k);
 }
 
 // Слой с поворотом второй выборки — ломает повтор плитки на больших полях.
@@ -58,6 +81,10 @@ void fragment() {
 	float mixr = smoothstep(0.3, 0.7, texture(noise, wp / 260.0).g);
 	float up = clamp(world_nrm.y, 0.0, 1.0);
 	float slope_rock = 1.0 - smoothstep(rock_slope_end, rock_slope_start, up);
+	// «трава издали»: где растёт трава и травинки уже ушли в землю (по горизонтали от камеры, как у травинок)
+	vec4 gd = texture(grass_density, (wp - grass_origin) / grass_size);
+	float far_k = smoothstep(grass_far_start, grass_far_end, distance(wp, CAMERA_POSITION_WORLD.xz))
+		* smoothstep(grass_density_from, grass_density_full, gd.r + gd.g * 0.5);
 
 	// веса: газон с пятнами редкой травы, сверху маска; слои с нулевым весом не читаются
 	float w[6];
@@ -71,6 +98,7 @@ void fragment() {
 	vec3 out_r;
 	layer(0, wp, mixr, out_a, out_n, out_r);
 	out_a *= grass_tint;
+	far_grass(far_k, wp, out_a, out_n);
 	for (int i = 1; i < 6; i++) {
 		if (w[i] < 0.01) {
 			continue;
@@ -81,6 +109,7 @@ void fragment() {
 		layer(i, wp, mixr, a, n, r);
 		if (i == 1) {
 			a *= grass_tint;
+			far_grass(far_k, wp, a, n);
 		} else if (i == 2 || i == 3) {
 			a = mix(vec3(dot(a, vec3(0.333))), a, litter_saturation) * litter_tint;
 		}
@@ -103,6 +132,7 @@ void fragment() {
 	if (debug_view == 1) { ALBEDO = vec3(w[1]); }
 	if (debug_view == 2) { ALBEDO = vec3(macro); }
 	if (debug_view == 3) { ALBEDO = vec3(mixr); }
+	if (debug_view == 4) { ALBEDO = vec3(far_k); }
 	NORMAL_MAP = out_n;
 	AO = out_r.r;
 	AO_LIGHT_AFFECT = 0.4;

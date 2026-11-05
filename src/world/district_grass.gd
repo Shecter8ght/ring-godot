@@ -150,6 +150,31 @@ func _apply_quality() -> void:
 	for m in _scan_mats:
 		m.set_shader_parameter("fade_start", sr - 4.0)
 		m.set_shader_parameter("fade_end", sr)
+	_push_far_grass(far)
+
+
+## «Трава издали» рельефу (DistrictTerrain.set_far_grass, Balance.GRASS.far_look): там, где травинки уходят
+## в землю, газон в траве берёт их вид — без тёмной полосы за кольцом. Тот же радиус, что у травинок.
+func _push_far_grass(far: float) -> void:
+	if not lawn or _terrain == null or not _terrain.has_method("set_far_grass") or not ResourceLoader.exists(density_map):
+		return
+	var tex: Texture2D = load(density_map) as Texture2D
+	if tex == null:
+		return
+	var g: Dictionary = Balance.GRASS
+	var look: Dictionary = g.far_look
+	_terrain.call("set_far_grass", {
+		"grass_density": tex,
+		"grass_origin": origin,
+		"grass_size": Vector2(float(tex.get_width()), float(tex.get_height())),
+		"grass_density_from": float(g.lawn_from),
+		"grass_density_full": float(g.lawn_full),
+		"grass_far_start": far - float(g.fade_m),
+		"grass_far_end": far,
+		"grass_far_tint": look.tint,
+		"grass_far_flat": float(look.flat),
+		"grass_far_clumps": look.clumps,
+	})
 
 
 func _scan_radius() -> float:

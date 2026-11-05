@@ -100,6 +100,8 @@ tools/godot.cmd --headless res://tools/lean_light_test.tscn  # наклон у �
 tools/godot.cmd --headless res://tools/tree_shadows_test.tscn # тени деревьев (Balance.TREE_SHADOWS): видимые модели без тени, у каждой клетки
                                                               # копии «только тень» — вблизи полная модель, дальше карточки, порог общий; кусты
                                                               # «Проспекта» с тенью; треугольники деревьев в тени было / стало (зона 1, «Проспект»)
+tools/godot.cmd --headless res://tools/far_grass_test.tscn   # «трава издали» (Balance.GRASS.far_look): рельеф зоны 1 берёт карту густоты травы
+                                                              # и отрезок, где травинки уходят в землю, по качеству графики; снимки — grass_shots GRASS_ONLY=eye
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/scale_probe.tscn # стенд масштаба (вопрос владельца 2026-10-24 «реальные размеры мелкие»):
                                                               # пять наборов рядом — A всё 1:1, B предметы 1:1 / проходы × 1,2, C всё × 1,3, D предметы 1:1 / проходы × 1,3,
                                                               # E как D с высотами × 1,15 (улица, комната с дверью,

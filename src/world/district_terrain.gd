@@ -38,6 +38,9 @@ var _pending: bool = false
 ## попаданию или шагу.
 var _splat_path: String = ""
 var _splat: Image
+var _material: ShaderMaterial
+## «Трава издали» от DistrictGrass (имена параметров шейдера → значения): переживает пересборку рельефа.
+var _far_grass: Dictionary = {}
 
 
 func _ready() -> void:
@@ -52,6 +55,20 @@ func _queue_build() -> void:
 		return
 	_pending = true
 	_build.call_deferred()
+
+
+## «Трава издали» (Balance.GRASS.far_look): DistrictGrass передаёт карту густоты травы и отрезок, где травинки
+## уходят в землю, — дальше газон рельефа в траве берёт их вид. Ключи — имена параметров шейдера.
+func set_far_grass(params: Dictionary) -> void:
+	_far_grass = params
+	_apply_far_grass()
+
+
+func _apply_far_grass() -> void:
+	if _material == null:
+		return
+	for key: String in _far_grass:
+		_material.set_shader_parameter(key, _far_grass[key])
 
 
 ## Высота земли в мировой точке (билинейно по карте); вне карты — край карты.
@@ -153,6 +170,8 @@ func _build() -> void:
 	material.set_shader_parameter("splat_size", Vector2(float(_cols - 1), float(_rows - 1)) * _step)
 	var tiles: Array = terrain.get("layer_tiles", [3.0, 3.0, 2.5, 3.0, 4.0, 2.0])
 	material.set_shader_parameter("layer_tile", PackedFloat32Array(tiles))
+	_material = material
+	_apply_far_grass()
 	var cells: int = int(round(float(tile_size) / _step))
 	var tz: int = 0
 	while tz < _rows - 1:
