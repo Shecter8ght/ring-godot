@@ -172,6 +172,9 @@ tools/godot.cmd res://tools/light_tour.tscn                 # свет: поме
 tools/godot.cmd res://tools/glass_test.tscn                 # витрины: пуля пробивает, трещины, осыпается сама, дробь выбивает, проём — путь ИИ и проход; снимки glass_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/first_hit_test.tscn # фриз первых попаданий: каждый вид, стекло, граната — самый длинный кадр
                                                               # (FIRST_HIT_WARM=1 — после разогрева ImpactFx.warm_up; чистый кэш — APPDATA и LOCALAPPDATA на пустую папку)
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/first_look_test.tscn # фризы первого раза на настоящей карте (зона 1;
+                                                              # FIRST_LOOK_SCENE — другая): первый поворот по кругу, вверх-вниз, выстрел, фонарь, химсвет, фальшфейер —
+                                                              # самый длинный кадр и собранные конвейеры; провал — кадр длиннее FIRST_LOOK_LIMIT_MS (100); чистый кэш — как у first_hit_test
 tools/godot.cmd res://tools/asphalt_shots.tscn              # мокрый асфальт: сухо / сыро / лужи, от первого лица и изометрия (ASPH_TIME=day|dusk|night); снимки asphalt_*
 tools/godot.cmd res://tools/ssr_probe.tscn                  # SSR движка: зеркало и мокрый асфальт при разных настройках отражений; снимки ssr_probe_*
 python tools/fetch_sky.py                                      # ночное небо: HDRI Poly Haven + карта Луны NASA в assets/sky, CREDITS
