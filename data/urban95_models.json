@@ -30,7 +30,7 @@
    "name": "Брошенный хэтчбек с открытым багажником",
    "file": "res://assets/models/urban95/U14_01.gltf",
    "triangles": 34682,
-   "materials": 1,
+   "materials": 3,
    "aabb": {
     "center": [
      -0.0,
@@ -54,7 +54,7 @@
    "name": "Статичный трёхдверный хэтчбек",
    "file": "res://assets/models/urban95/R04.gltf",
    "triangles": 161456,
-   "materials": 1,
+   "materials": 5,
    "aabb": {
     "center": [
      -0.0,
@@ -174,7 +174,7 @@
    "name": "Консольный стеклянный навес",
    "file": "res://assets/models/urban95/U02_01.gltf",
    "triangles": 6662,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -414,7 +414,7 @@
    "name": "Стеклянный створчатый турникет",
    "file": "res://assets/models/urban95/U04_01.gltf",
    "triangles": 740,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0003,
@@ -534,7 +534,7 @@
    "name": "Пост охраны с трёхсторонним остеклением",
    "file": "res://assets/models/urban95/U05_01.gltf",
    "triangles": 2070,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -894,7 +894,7 @@
    "name": "Карусельная стеклянная дверь",
    "file": "res://assets/models/urban95/U08_01.gltf",
    "triangles": 3786,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -918,7 +918,7 @@
    "name": "Двустворчатая входная дверь с фрамугой",
    "file": "res://assets/models/urban95/U08_02.gltf",
    "triangles": 1616,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -966,7 +966,7 @@
    "name": "Криволинейный модуль стеклянного фасада",
    "file": "res://assets/models/urban95/U08_04.gltf",
    "triangles": 1822,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -990,7 +990,7 @@
    "name": "Ограждение площадки со стеклом",
    "file": "res://assets/models/urban95/U08_05.gltf",
    "triangles": 6980,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -1638,7 +1638,7 @@
    "name": "Пространственный треугольный козырёк",
    "file": "res://assets/models/urban95/U14_03.gltf",
    "triangles": 9032,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -1734,7 +1734,7 @@
    "name": "Уличный светофор на гнутой опоре",
    "file": "res://assets/models/urban95/U15_02.gltf",
    "triangles": 3806,
-   "materials": 1,
+   "materials": 4,
    "aabb": {
     "center": [
      0.0001,
@@ -2046,7 +2046,7 @@
    "name": "Большая бутыль для кулера",
    "file": "res://assets/models/urban95/U17_05.gltf",
    "triangles": 4882,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -2358,7 +2358,7 @@
    "name": "Банкомат",
    "file": "res://assets/models/urban95/R03.gltf",
    "triangles": 9114,
-   "materials": 1,
+   "materials": 3,
    "aabb": {
     "center": [
      -0.0,
@@ -2382,7 +2382,7 @@
    "name": "Ларёк с фастфудом",
    "file": "res://assets/models/urban95/R05.gltf",
    "triangles": 9944,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
@@ -2406,7 +2406,7 @@
    "name": "Двухэтажный корпус по фотографиям владельца",
    "file": "res://assets/models/urban95/R06.gltf",
    "triangles": 91835,
-   "materials": 1,
+   "materials": 2,
    "aabb": {
     "center": [
      0.0,
