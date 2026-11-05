@@ -197,6 +197,19 @@
   `tools/ar15/supp_game.py`, `tools/ar15/supp_pack.py`.
 <!-- AR15_END -->
 
+<!-- SMG03_START -->
+## ИЗЛОМ-45 (ПП по мотивам KRISS Vector Gen II)
+
+- `assets/models/weapons/smg03/` (оружие `smg03.gltf`, магазины-предметы `smg03_mag13.gltf`, `smg03_mag30.gltf`, атласы
+  `smg03_<атлас>_100_*`), `assets/icons/wpn_smg_03.png`, `assets/icons/mag_45_vector13.png`,
+  `assets/icons/mag_45_vector30.png` — собственная модель (Blender, геометрия v06), отделка в Substance Painter (этап 1 v4,
+  износ этап 2 v3), игровая сетка и карты — `tools/smg03/game_*.py`; исходники — `E:/Models Blender/WEAPONS/Vector — модель/`,
+  `_asset_src/smg03/`.
+- Рисунок износа в запечённых картах — фото-маски CC0 1.0 ambientCG (https://ambientcg.com, лицензия
+  https://docs.ambientcg.com/license/) — Smear002, Smear004, Smear006, Fingerprints003, Fingerprints005, Fingerprints007.
+  Сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
+<!-- SMG03_END -->
+
 <!-- VSS_OPTICS_START -->
 ## Отдельная оптика ВСС
 

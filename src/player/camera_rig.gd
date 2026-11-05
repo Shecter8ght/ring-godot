@@ -32,6 +32,10 @@ var _carry_grip: Node3D
 var _carrier: Node3D
 var _bolt: Node3D
 var _bolt_kick: float = 0.0
+## Затвор на задержке (action.hold_open): последний патрон ушёл — затвор сзади до конца перезарядки.
+var _bolt_held: bool = false
+## Флажки переводчика и спуск статичной модели: [узел, ось, {режим: градусы} или градусы выжима, текущий угол].
+var _levers: Array = []
 var _bolt_ammo: int = -1
 # продольно-скользящий затвор (models.<ключ>.action.kind = "bolt", Мосин): после выстрела — рукоять вверх, отвод,
 # подача, вниз; на перезарядке затвор стоит открытым. Правая кисть на это время — на шаре рукояти (метка BoltHand)
@@ -879,8 +883,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			if _cover and not _cover.has_meta("rest"):
 				_cover = null
 			_bind_bolt_action(_carrier.get_meta("action"))
+			_bind_levers(_carrier.get_meta("action"))
 		_bolt_ammo = -1
 		_bolt_kick = 0.0
+		_bolt_held = false
 		_viewmodel_rig = WeaponRig.find_on(_viewmodel)
 		if _viewmodel_rig:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
@@ -1315,6 +1321,17 @@ func _tick_action(pl: Player, delta: float) -> void:
 		_bolt_kick = maxf(0.0, _bolt_kick - minf(delta, ViewmodelClips.BOLT_KICK_SEC / 3.0))
 		open = sin(PI * (1.0 - _bolt_kick / ViewmodelClips.BOLT_KICK_SEC))
 	var act: Dictionary = _carrier.get_meta("action")
+	# затворная задержка: после последнего патрона затвор, дойдя назад, там и остаётся; патроны снова есть
+	# (перезарядка кончилась) — идёт вперёд второй половиной того же хода
+	if bool(act.get("hold_open", false)):
+		if pl.ammo <= 0 and _bolt_kick <= ViewmodelClips.BOLT_KICK_SEC * 0.5:
+			_bolt_held = true
+		if _bolt_held:
+			if pl.ammo > 0:
+				_bolt_held = false
+				_bolt_kick = ViewmodelClips.BOLT_KICK_SEC * 0.5
+			open = 1.0
+	_tick_levers(pl, act, delta)
 	_tick_cover(pl, act, delta)
 	# дуло модели — по +Z: рама и затвор уходят назад, к прикладу; поворот затвора — вокруг оси канала (Z)
 	var s: float = float(act.get("travel", 0.0)) * open
@@ -1327,6 +1344,39 @@ func _tick_action(pl: Player, delta: float) -> void:
 		var brest: Transform3D = _bolt.get_meta("rest")
 		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, deg_to_rad(float(act.get("unlock_deg", 0.0))) * turn),
 			brest.origin - Vector3(0.0, 0.0, back))
+
+
+## Флажки переводчика (action.levers: {узел: {axis, deg: {режим: градусы}}}) и спуск (action.trigger: {node, axis,
+## deg}) статичной модели: узлы с покоем (WeaponModels._static_asset) поворачиваются вокруг своего начала.
+func _bind_levers(act: Dictionary) -> void:
+	_levers.clear()
+	var levers: Dictionary = act.get("levers", {})
+	for lever_name: Variant in levers:
+		var node: Node3D = _viewmodel.find_child(String(lever_name), true, false) as Node3D
+		if node and node.has_meta("rest"):
+			var spec: Dictionary = levers[lever_name]
+			_levers.append([node, WeaponGrips.vector(spec.get("axis", [1, 0, 0])).normalized(), spec.get("deg", {}), 0.0])
+	var trig: Dictionary = act.get("trigger", {})
+	var tnode: Node3D = _viewmodel.find_child(String(trig.get("node", "")), true, false) as Node3D if String(trig.get("node", "")) != "" else null
+	if tnode and tnode.has_meta("rest"):
+		_levers.append([tnode, WeaponGrips.vector(trig.get("axis", [1, 0, 0])).normalized(), float(trig.get("deg", 0.0)), 0.0])
+
+
+## Флажки — к углу режима огня (щелчок переводчика ~0.1 с), спуск — выжат, пока идёт выстрел (затвор на ходу).
+func _tick_levers(pl: Player, _act: Dictionary, delta: float) -> void:
+	var mode: String = pl.fire_mode()
+	for item: Array in _levers:
+		var node: Node3D = item[0]
+		if not is_instance_valid(node):
+			continue
+		var target: float = 0.0
+		if item[2] is Dictionary:
+			target = float((item[2] as Dictionary).get(mode, 0.0))
+		elif _bolt_kick > 0.0:
+			target = float(item[2])
+		item[3] = move_toward(float(item[3]), target, 600.0 * delta)
+		var rest: Transform3D = node.get_meta("rest")
+		node.transform = Transform3D(Basis(item[1] as Vector3, deg_to_rad(float(item[3]))) * rest.basis, rest.origin)
 
 
 ## Продольно-скользящий затвор: курок и отсечка (покой — у узлов, WeaponModels._static_asset) и метка правой кисти

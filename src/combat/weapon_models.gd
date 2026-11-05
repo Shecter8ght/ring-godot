@@ -163,6 +163,14 @@ static func _static_asset(weapon: Dictionary, root: Node3D, detail: bool = false
 			var cover: Node3D = model.find_child(cover_name, true, false) as Node3D if cover_name != "" else null
 			if cover:
 				cover.set_meta("rest", cover.transform)
+			# флажки переводчика (action.levers) и спуск (action.trigger.node): покой — у узлов, поворачивает
+			# CameraRig._tick_levers по режиму огня и выстрелу
+			var lever_names: Array = (action.get("levers", {}) as Dictionary).keys()
+			lever_names.append(String((action.get("trigger", {}) as Dictionary).get("node", "")))
+			for lever_name: Variant in lever_names:
+				var lever: Node3D = model.find_child(String(lever_name), true, false) as Node3D if String(lever_name) != "" else null
+				if lever:
+					lever.set_meta("rest", lever.transform)
 	# отражение неметалла по материалу (weapon.material_specular {имя материала: 0…1}): у Cerakote ВСС-М — 0.1,
 	# как в сценах Blender (в glTF его нет; при обычных 0.5 чёрное покрытие на свету читалось серым, владелец 2026-10-26)
 	var spec: Dictionary = weapon.get("material_specular", {})

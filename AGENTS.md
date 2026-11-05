@@ -651,6 +651,21 @@ tools/godot.cmd --windowed --resolution 1920x1080 res://tools/ar15_shots.tscn # 
                                                               # без окна — только лог отвода ствола
 tools/godot.cmd --headless res://tools/dust_cover_test.tscn    # шторка ГРАНЬ-15: у нового ствола закрыта; выстрел, перезарядка с пустым магазином, задержка —
                                                               # откинута и такой остаётся (перезарядка, убрал-достал), в руках — до упора с отскоком, хосту в запись ствола
+# ИЗЛОМ-45 (wpn_smg_03) в игру: "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python
+#   tools/smg03/game_export.py [-- <папка карт Painter>] (игровая сетка SMG03_Game_LP.blend + карты износа «Текстуры_этап2_v3» →
+#   assets/models/weapons/smg03: smg03.gltf — подвижные детали своими узлами, заглушка резьбы MuzzleDevice, Magazine; магазины
+#   smg03_mag13/30.gltf; отчёт smg03.json) → python -X utf8 tools/smg03/game_data.py (models.smg03: планки, ход затвора,
+#   затворная задержка hold_open, флажки переводчика levers, спуск trigger; wpn_smg_03, магазины, хват smg03) → --import →
+#   python -X utf8 tools/smg03/game_imports.py → --import; иконки — icon_bake -- wpn_smg_03 mag_45_vector13 mag_45_vector30
+tools/godot.cmd --headless res://tools/smg03_check.tscn       # ИЗЛОМ-45 в движке: узлы, метки, бюджет, карты, затвор с задержкой, флажки
+                                                              # и спуск, обвесы на планках, прицельные складываются, глушитель .45 прячет
+                                                              # заглушку резьбы, магазин на 30 — из файла, темп и режимы огня
+tools/godot.cmd --windowed --resolution 1600x900 res://tools/smg03_shots.tscn # ИЗЛОМ-45 в руках (Пригород): от бедра, очередь, магазин
+                                                              # пуст — затвор на задержке, перезарядка, флажки по режимам (лог), в прицеле,
+                                                              # сбоку; снимки smg03_* (SMG03_ONLY=iron,rail; SMG03_OUT — папка)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" -b --factory-startup --python-exit-code 1 --python tools/smg03/render_street.py -- <папка> [кадр,…] [ширина высота выборки] [сцена.blend]
+                                                              # ИЗЛОМ-45, рендеры на улице: в статике, затвор на задержке, приклад сложен,
+                                                              # очередь (вспышка, гильзы), на асфальте; позы — tools/smg03/render_poses.py
 # Мосин 1891/30 ПУ (wpn_sr_03) в игру (blender … --background --factory-startup --python-exit-code 1 --python): tools/mosin_pu/game_retopo.py
 #   (ретопология той же сборкой формы build_*.py: лишние петли сняты, клейма и фаски — в запекание → _asset_src/mosin_pu_game/lr)
 #   → game_lp.py -- fp (лучи видимости; развёртка game_uv.py: швы до дисков, ложа и длинное — отрезками, ABF, укладка asset_kit) → game_bake.py --

@@ -1,0 +1,292 @@
+{
+ "version": "v1 (2026-11-06): геометрия v06, игровая сетка v3, отделка этап 1 v4 + износ этап 2 v3",
+ "source": "E:\\Models Blender\\WEAPONS\\Vector — модель\\ПП-Vector_геометрия_v06.blend",
+ "grip_source_m": [
+  -0.21220000088214874,
+  0.0,
+  -0.03500000014901161
+ ],
+ "nodes": {
+  "Bolt_Steel": 607,
+  "BoltCatch_Steel": 1194,
+  "ChargingHandle_Steel": 997,
+  "ChargingSlider_Steel": 249,
+  "FrontSightLeaf_Steel": 2840,
+  "Magazine": 1697,
+  "MagReleaseL_Steel": 420,
+  "MagReleaseR_Steel": 142,
+  "MuzzleDevice": 616,
+  "RearSightLeaf_Steel": 2962,
+  "Receiver_Lower": 14298,
+  "Receiver_Steel": 10961,
+  "Receiver_Stock": 920,
+  "Receiver_Upper": 7225,
+  "SafetyL_Steel": 976,
+  "SafetyR_Steel": 975,
+  "SelectorL_Steel": 983,
+  "SelectorR_Steel": 980,
+  "Stock_Stock": 6990,
+  "StockLatch_Stock": 450,
+  "Trigger_Steel": 633
+ },
+ "smg03_mag13_tris": 1697,
+ "smg03_mag30_tris": 2339,
+ "pivots_game_m": {
+  "Bolt_Steel": [
+   0.0,
+   0.035,
+   0.2122
+  ],
+  "BoltCatch_Steel": [
+   0.02425,
+   0.045,
+   0.18945
+  ],
+  "ChargingHandle_Steel": [
+   0.02365,
+   0.058,
+   0.2217
+  ],
+  "ChargingSlider_Steel": [
+   0.0,
+   0.035,
+   0.2122
+  ],
+  "FrontSightLeaf_Steel": [
+   0.0,
+   0.0965,
+   0.3127
+  ],
+  "Magazine": [
+   0.0,
+   0.0234,
+   0.17674
+  ],
+  "MagReleaseL_Steel": [
+   0.0,
+   0.00259,
+   0.19937
+  ],
+  "MagReleaseR_Steel": [
+   0.0,
+   0.00119,
+   0.19883
+  ],
+  "RearSightLeaf_Steel": [
+   0.0,
+   0.0965,
+   -0.0123
+  ],
+  "SafetyL_Steel": [
+   0.0,
+   0.074,
+   0.0287
+  ],
+  "SafetyR_Steel": [
+   0.0,
+   0.074,
+   0.0287
+  ],
+  "SelectorL_Steel": [
+   0.0,
+   0.0735,
+   0.1402
+  ],
+  "SelectorR_Steel": [
+   0.0,
+   0.0735,
+   0.1402
+  ],
+  "Stock_Stock": [
+   -0.0216,
+   0.065,
+   -0.0588
+  ],
+  "StockLatch_Stock": [
+   0.0,
+   0.035,
+   0.2122
+  ],
+  "Trigger_Steel": [
+   0.0,
+   0.057,
+   0.0622
+  ]
+ },
+ "size_game_m": [
+  0.0585,
+  0.2247,
+  0.6203
+ ],
+ "tris_in_hands": 57115,
+ "marks_game_m": {
+  "Muzzle": [
+   0.0,
+   0.035,
+   0.35409
+  ],
+  "SightRear": [
+   0.0,
+   0.111,
+   -0.0123
+  ],
+  "SightFront": [
+   0.0,
+   0.111,
+   0.3127
+  ],
+  "ThreadTip": [
+   0.0,
+   0.035,
+   0.35191
+  ],
+  "MagMount": [
+   0.0,
+   0.0234,
+   0.17674
+  ]
+ },
+ "rails_game": {
+  "RailTop": {
+   "line_xy": [
+    0.0,
+    0.0925
+   ],
+   "z": [
+    [
+     -0.0498,
+     0.3162
+    ]
+   ],
+   "slots_z": [
+    -0.0402,
+    -0.0302,
+    -0.0202,
+    -0.0102,
+    -0.0002,
+    0.0098,
+    0.0198,
+    0.0298,
+    0.0398,
+    0.0498,
+    0.0598,
+    0.0698,
+    0.0798,
+    0.0898,
+    0.0998,
+    0.1098,
+    0.1198,
+    0.1298,
+    0.1398,
+    0.1498,
+    0.1598,
+    0.1698,
+    0.1798,
+    0.1898,
+    0.1998,
+    0.2098,
+    0.2198,
+    0.2298,
+    0.2398,
+    0.2498,
+    0.2598,
+    0.2698,
+    0.2798,
+    0.2898,
+    0.2998,
+    0.3098
+   ],
+   "up": [
+    0,
+    1,
+    0
+   ]
+  },
+  "RailBottom": {
+   "line_xy": [
+    0.0,
+    0.0055
+   ],
+   "z": [
+    [
+     0.2362,
+     0.3147
+    ]
+   ],
+   "slots_z": [
+    0.2487,
+    0.2587,
+    0.2687,
+    0.2787,
+    0.2887,
+    0.2987,
+    0.3087
+   ],
+   "up": [
+    0,
+    -1,
+    0
+   ]
+  },
+  "RailLeft": {
+   "line_xy": [
+    0.02925,
+    0.0365
+   ],
+   "z": [
+    [
+     0.2382,
+     0.3157
+    ]
+   ],
+   "slots_z": [
+    0.2522,
+    0.2622,
+    0.2722,
+    0.2822,
+    0.2922,
+    0.3022,
+    0.3122
+   ],
+   "up": [
+    1,
+    0,
+    0
+   ]
+  },
+  "RailRight": {
+   "line_xy": [
+    -0.02925,
+    0.0365
+   ],
+   "z": [
+    [
+     0.2382,
+     0.3157
+    ]
+   ],
+   "slots_z": [
+    0.2522,
+    0.2622,
+    0.2722,
+    0.2822,
+    0.2922,
+    0.3022,
+    0.3122
+   ],
+   "up": [
+    -1,
+    0,
+    0
+   ]
+  }
+ },
+ "action_game": {
+  "bolt_travel_m": 0.045,
+  "selector_deg": {
+   "semi": 0.0,
+   "burst": 30.0,
+   "auto": 60.0
+  }
+ }
+}

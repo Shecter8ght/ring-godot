@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/smg03_check.gd" id="1_smg03c"]
+
+[node name="Smg03Check" type="Node"]
+script = ExtResource("1_smg03c")

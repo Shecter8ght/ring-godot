@@ -648,6 +648,182 @@
      0.3975
     ]
    }
+  },
+  "smg03": {
+   "anim": "rifle",
+   "fold_sights": {
+    "RearSightLeaf_Steel": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": 89.0,
+     "pivot": [
+      0.0,
+      0.0965,
+      -0.0123
+     ],
+     "when": [
+      "optic_primary",
+      "top_front"
+     ]
+    },
+    "FrontSightLeaf_Steel": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": -89.0,
+     "pivot": [
+      0.0,
+      0.0965,
+      0.3127
+     ],
+     "when": [
+      "optic_primary",
+      "top_front"
+     ]
+    }
+   },
+   "action": {
+    "carrier": "Bolt_Steel",
+    "bolt": "Bolt_Steel",
+    "travel": 0.045,
+    "bolt_lag": 0.0,
+    "unlock": [
+     0.0,
+     0.0
+    ],
+    "unlock_deg": 0.0,
+    "hold_open": true,
+    "levers": {
+     "SelectorL_Steel": {
+      "axis": [
+       1,
+       0,
+       0
+      ],
+      "deg": {
+       "semi": 0.0,
+       "burst": 30.0,
+       "auto": 60.0
+      }
+     },
+     "SelectorR_Steel": {
+      "axis": [
+       1,
+       0,
+       0
+      ],
+      "deg": {
+       "semi": 0.0,
+       "burst": 30.0,
+       "auto": 60.0
+      }
+     }
+    },
+    "trigger": {
+     "node": "Trigger_Steel",
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": -11.0
+    }
+   },
+   "sockets": {
+    "optic_primary": {
+     "pos": [
+      0.0,
+      0.0925,
+      0.0898
+     ],
+     "rail": false,
+     "rail_z": [
+      0.0148,
+      0.1648
+     ]
+    },
+    "top_front": {
+     "pos": [
+      0.0,
+      0.0925,
+      0.2398
+     ],
+     "rail": false,
+     "rail_z": [
+      0.1948,
+      0.2848
+     ]
+    },
+    "side_left": {
+     "pos": [
+      0.02925,
+      0.0365,
+      0.2772
+     ],
+     "side": true,
+     "rail_z": [
+      0.2472,
+      0.3072
+     ],
+     "overhang": true
+    },
+    "side_right": {
+     "pos": [
+      -0.02925,
+      0.0365,
+      0.2772
+     ],
+     "side": true,
+     "rail_z": [
+      0.2472,
+      0.3072
+     ],
+     "overhang": true
+    },
+    "underbarrel": {
+     "pos": [
+      0.0,
+      0.0055,
+      0.2787
+     ],
+     "rail_z": [
+      0.2437,
+      0.3137
+     ]
+    },
+    "muzzle": {
+     "pos": [
+      0.0,
+      0.035,
+      0.35191
+     ],
+     "bore_r": 0.0057
+    },
+    "stock": {
+     "pos": [
+      0.0,
+      0.065,
+      -0.0538
+     ]
+    },
+    "mag": {
+     "pos": [
+      0.0,
+      0.0234,
+      0.17674
+     ],
+     "asset_pos": [
+      0.0,
+      0.0234,
+      0.17674
+     ]
+    }
+   }
   }
  },
  "weapons": {
@@ -1112,7 +1288,7 @@
    "flavor": "Не самый редкий трофей, зато тот, который почти никогда не подводит в дверном проёме."
   },
   "wpn_smg_03": {
-   "name": "KRISS Vector",
+   "name": "ИЗЛОМ-45",
    "cat": "weapon",
    "size": [
     3,
@@ -1128,15 +1304,15 @@
     "MILITARY",
     "RARE"
    ],
-   "code": "VECTOR45",
-   "desc": "Очень скорострельный .45 ACP с необычной схемой, которая удерживает очередь на цели.",
+   "code": "ИЗЛОМ-45",
+   "desc": "Пистолет-пулемёт .45 ACP с отводом отдачи вниз: очередь держится на цели. Планки Picatinny сверху, снизу и по бокам переднего блока, откидные прицельные, складной вправо приклад, переводчик «ОД — 2 — АВ», затворная задержка после последнего патрона.",
    "weapon": {
     "slot": "primary",
     "class": "SMG",
     "caliber": "45acp",
-    "model": "rifle",
-    "scale": 0.7777777777777777,
-    "length": 0.7,
+    "model": "smg03",
+    "scale": 1.0,
+    "length": 0.62,
     "stats": {
      "spread": 2,
      "ads_spread": 0.36,
@@ -1147,7 +1323,7 @@
      "recover": 0.5,
      "shake": 0.065,
      "ergo": 58,
-     "rpm": 1100,
+     "rpm": 1200,
      "auto": true,
      "reload": 2.2,
      "range": 65,
@@ -1157,6 +1333,7 @@
     },
     "mounts": {
      "optic_primary": "RAIL_TOP",
+     "top_front": "RAIL_TOP",
      "side_left": "RAIL_SIDE",
      "side_right": "RAIL_SIDE",
      "underbarrel": "RAIL_BOTTOM",
@@ -1167,7 +1344,17 @@
     "default_mag": "mag_45_vector13",
     "sound": "shot_smg",
     "reload_sound": "reload_rifle",
-    "cycle_sound": ""
+    "cycle_sound": "",
+    "fire_modes": [
+     "auto",
+     "burst",
+     "semi"
+    ],
+    "asset": "res://assets/models/weapons/smg03/smg03.gltf",
+    "asset_kind": "static",
+    "viewmodel": {
+     "ads_z": 0.12
+    }
    },
    "flavor": "Нажал слишком долго — магазин уже пуст; удержал очередь — коридор тоже."
   },
@@ -3326,7 +3513,7 @@
    "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
   },
   "mag_45_vector13": {
-   "name": "Магазин Vector .45 на 13",
+   "name": "Магазин ИЗЛОМ-45 .45 на 13",
    "cat": "mag",
    "size": [
     1,
@@ -3347,12 +3534,16 @@
     "capacity": 13,
     "reload_k": 1,
     "ergo": 0,
-    "reliability": 1
+    "reliability": 1,
+    "look": "asset",
+    "asset": "res://assets/models/weapons/smg03/smg03_mag13.gltf",
+    "asset_detail": "res://assets/models/weapons/smg03/smg03_mag13.gltf"
    },
-   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться."
+   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться.",
+   "model": "res://assets/models/weapons/smg03/smg03_mag13.gltf"
   },
   "mag_45_vector30": {
-   "name": "Магазин Vector .45 на 30",
+   "name": "Магазин ИЗЛОМ-45 .45 на 30",
    "cat": "mag",
    "size": [
     1,
@@ -3374,9 +3565,12 @@
     "reload_k": 1.18,
     "ergo": -5,
     "reliability": 0.97,
-    "look": "mag_pistol_ext"
+    "look": "asset",
+    "asset": "res://assets/models/weapons/smg03/smg03_mag30.gltf",
+    "asset_detail": "res://assets/models/weapons/smg03/smg03_mag30.gltf"
    },
-   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием."
+   "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием.",
+   "model": "res://assets/models/weapons/smg03/smg03_mag30.gltf"
   },
   "mag_919_vityaz30": {
    "name": "Магазин Vityaz на 30",
