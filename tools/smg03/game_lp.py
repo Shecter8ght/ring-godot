@@ -264,6 +264,10 @@ def main():
         nm = atlas if atlas in ('Mag13', 'Mag30') else (node if node == 'Receiver' and atlas == 'Receiver'
                                                          else f'{node}_{atlas}')
         hp_list = sum((sources.get(o.name, []) for o in objs), [])
+        # номер детали исходника у каждой грани (индекс в j['hp']): по нему game_tex.py делит узел на слоты отделки
+        for k, o in enumerate(objs):
+            a = o.data.attributes.new('hp_part', 'INT', 'FACE')
+            a.data.foreach_set('value', [k] * len(o.data.polygons))
         j = join(objs, nm) if len(objs) > 1 else objs[0]
         j.name = nm
         j.data.name = nm

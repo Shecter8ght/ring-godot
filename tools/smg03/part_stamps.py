@@ -270,6 +270,25 @@ def build(ctx):
     return {}
 
 
+def red_marks():
+    """Метки, залитые красной краской (finish-spec.json, markings): предохранитель «П» (предохранение) и «О» (огонь)
+    у хвоста флажка, переводчик «ОД», «2», «АВ» по дуге хода флажка (вперёд-вниз) — с обеих сторон. Список
+    (текст, размер мм, центр на поверхности мм, нормаль наружу): его режет apply и по нему же считается маска заливки."""
+    out = []
+    left, right = (0, 1, 0), (0, -1, 0)
+    sx, sz = SAFETY_PIVOT
+    for nrm, s in ((left, 1), (right, -1)):
+        out.append(("П", 2.6, (sx - 7.5, s * HALF_W, sz - 9.5), nrm))
+        out.append(("О", 2.6, (sx - 15.5, s * HALF_W, sz + 6.0), nrm))
+    fx, fz = SELECTOR_PIVOT
+    for nrm, s in ((left, 1), (right, -1)):
+        for txt, a in (("ОД", -8.0), ("2", -38.0), ("АВ", -68.0)):
+            r = 17.5
+            out.append((txt, 2.3, (fx + r * math.cos(math.radians(a)), s * HALF_W, fz + r * math.sin(math.radians(a))),
+                        nrm))
+    return out
+
+
 def apply(target, C):
     import lib
     if not getattr(lib, "MARKINGS_GEOMETRY", False):
@@ -288,20 +307,9 @@ def apply(target, C):
     # X −224: под флажком предохранителя (X −197…−180) надпись закрывалась (сверка v04b Н6)
     stamp(up, CALIBER, 2.4, (-224.0, -HALF_W, 37.0), R, Z, 0.25, C)
     stamp(up, SERIAL, 2.4, (-224.0, -HALF_W, 31.5), R, Z, 0.25, C)
-    # предохранитель: «П» (предохранение) и «О» (огонь) у хвоста флажка с обеих сторон
-    sx, sz = SAFETY_PIVOT
-    for nrm, s in ((L, 1), (R, -1)):
-        stamp(up, "П", 2.6, (sx - 7.5, s * HALF_W, sz - 9.5), nrm, Z, 0.25, C)
-        stamp(up, "О", 2.6, (sx - 15.5, s * HALF_W, sz + 6.0), nrm, Z, 0.25, C)
-    # переводчик огня: «ОД», «2», «АВ» по дуге хода флажка (вперёд-вниз), с обеих сторон
-    fx, fz = SELECTOR_PIVOT
-    for nrm, s in ((L, 1), (R, -1)):
-        for txt, a in (("ОД", -8.0), ("2", -38.0), ("АВ", -68.0)):
-            r = 17.5
-            px = fx + r * math.cos(math.radians(a))
-            pz = fz + r * math.sin(math.radians(a))
-            tgt = up if pz > lib.SEAM_Z + 2.0 else mw
-            stamp(tgt, txt, 2.3, (px, s * HALF_W, pz), nrm, Z, 0.25, C)
+    # метки предохранителя и переводчика (их заливают красной краской — маска заливки в game_tex.py по тому же списку)
+    for txt, size, center, nrm in red_marks():
+        stamp(up, txt, size, center, nrm, Z, 0.25, C)
     # знак на переднем торце (крышка) — как на боку
     e = emblem_cutter(8.0, 0.45, C)
     place(e, (lib.FRONT_FACE_X, 0.0, 33.0), (1, 0, 0), Z, 0.0, up)

@@ -349,9 +349,21 @@ def _bitmap(path):
     return R.import_project_resource(path, R.Usage.TEXTURE, name=name).identifier()
 
 
+def bitmap_mask(node, path):
+    """Маска слоя или группы — ч/б карта по развёртке (белое — слой виден); путь — PNG того же размера, что набор."""
+    import substance_painter.layerstack as L
+    if not node.has_mask():
+        node.add_mask(L.MaskBackground.Black)
+    m = L.insert_fill(L.InsertPosition.inside_node(node, L.NodeStack.Mask))
+    m.set_source(None, _bitmap(path))
+    m.set_projection_mode(L.ProjectionMode.UV)
+    return m
+
+
 def build_set(set_name, parts, px_mm, bbox_mm=170.0, sharpen=0.3):
     """Стек набора с нуля: группа «Этап 1 — заводская отделка», в ней по подгруппе на отделку (parts — список
-    {"finish": код или запись каталога, "meshes": [...] или None}); резкость — эффектом группы."""
+    {"finish": код или запись каталога, "meshes": [...] или None, "mask": путь к ч/б карте или нет}); резкость —
+    эффектом группы."""
     import substance_painter.layerstack as L
     import sp_lib
     st = sp_lib.stack_by_name(set_name)
@@ -367,6 +379,9 @@ def build_set(set_name, parts, px_mm, bbox_mm=170.0, sharpen=0.3):
                              else L.InsertPosition.above_node(last))
         sub.set_name(f"{f['code']} — {f['title']}")
         build_finish(L.InsertPosition.inside_node(sub, L.NodeStack.Substack), f, part.get("meshes"), px_mm, res, bbox_mm)
+        if part.get("mask"):
+            # граница отделок внутри одной сетки (верх и низ корпуса одним телом) — ч/б карта по развёртке на группе
+            bitmap_mask(sub, part["mask"])
         last = sub
         log.append(f"{f['code']}:{len(part.get('meshes') or [])}")
     if sharpen:
