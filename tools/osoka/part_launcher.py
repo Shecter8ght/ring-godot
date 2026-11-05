@@ -1,0 +1,318 @@
+# «Осока»: пусковой механизм ПМ-52 (по образцу 9П521) — литой корпус под трубой, спусковая коробка, рукоять с
+# насечённой вставкой, спуск, рычаг «ИСХОДНОЕ — НАКОЛ» (накол источника питания), кнопка в резиновом колпачке,
+# накладка с винтами, ушки с винтами, короб электроники (верх, задняя накладка, низ, защёлки), табличка «ПМ-52 №»
+# со штампом, толкатель за рукоятью. Ширины — оценка (dims.py); контуры — снимок КБМ.
+import math
+import bmesh
+import bpy
+from mathutils import Matrix, Vector
+from lib import (MM, v, lathe, rounded_prism, finish, finish_small, fillet, px, px_x, px_z, cyl, boolean, set_origin,
+                 join, apply_transform, smooth_poly)
+import dims as D
+import stamps
+
+CAST_LEFT = D.CAST_Y[1]
+
+
+def P(pts):
+    return [px(x, y) for x, y in pts]
+
+
+def slotted_screw(name, center, normal, d, coll, mat="Steel_black", slot_ang=0.0):
+    """Винт с полукруглой головкой и шлицем: center — точка на поверхности (мм), normal — наружу (ось ±X/±Y/±Z)."""
+    r = d / 2
+    h = r * 0.55
+    prof = [(-0.6, 0.0), (-0.6, r), (0.0, r), (h * 0.35, r * 0.93), (h * 0.7, r * 0.72), (h, 0.0)]
+    o = lathe(name, prof, coll, mat, seg=32)
+    # шлиц — тонкий брусок поперёк головки
+    from lib import box
+    cut = box("_slot", h * 0.45, h + 1.0, -r - 1.0, r + 1.0, -0.45, 0.45, coll)
+    cut.data.transform(Matrix.Rotation(math.radians(slot_ang), 4, "X"))
+    boolean(o, cut)
+    n = Vector(normal).normalized()
+    rot = Vector((1, 0, 0)).rotation_difference(n).to_matrix().to_4x4()
+    o.data.transform(rot)
+    o.data.transform(Matrix.Translation(Vector(center) * MM))
+    return o
+
+
+def cast_body(coll):
+    pts = fillet(P(D.CAST_PX), [3.0, 4.0, 5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0], seg=5)
+    o = rounded_prism("Launcher_cast", pts, D.CAST_Y[0], D.CAST_Y[1], 2.6, coll, "Paint_olive_cast")
+    return o
+
+
+def trigger_housing(coll):
+    pts = fillet(P(D.TRIG_HOUSING_PX), [6.0, 6.0, 3.2, 3.2, 3.2, 3.2, 3.2, 3.0, 3.0], seg=5)
+    return rounded_prism("Launcher_trigger_housing", pts, D.TRIG_HOUSING_Y[0], D.TRIG_HOUSING_Y[1], 2.4, coll,
+                         "Paint_olive_cast")
+
+
+def grip(coll):
+    # радиус угла контура ≥ скругления кромки (иначе сдвинутые контуры выворачиваются)
+    pts = fillet(P(D.GRIP_PX), [5.5, 5.5, 7.0, 6.0, 6.0, 6.0, 6.0], seg=6)
+    o = rounded_prism("Launcher_grip", pts, D.GRIP_Y[0], D.GRIP_Y[1], 5.0, coll, "Paint_olive_cast")
+    # вставки с насечкой — утоплены на 0.7 мм с обеих сторон (насечка — следующим шагом, после приёмки формы)
+    pp = fillet(P(D.GRIP_PANEL_PX), [4.0] * 4, seg=5)
+    from lib import boolean_safe
+    # резец со скруглёнными кромками (R 0.4): край вставки скруглён; режем слева, правую половину — отражением
+    # (рукоять симметрична; второе вычитание справа давало задвоенную грань)
+    c = rounded_prism("_panel_L", pp, D.GRIP_Y[1] - 0.7, D.GRIP_Y[1] + 3.0, 0.4, coll)
+    boolean_safe(o, c, name="grip_panel_L")
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    bmesh.ops.symmetrize(bm, input=bm.verts[:] + bm.edges[:] + bm.faces[:], direction="Y", dist=1e-6)
+    bm.to_mesh(o.data); bm.free()
+    # насечка — ромбы шагом 1.6 мм, высота 0.5 (вставка утоплена на 0.7 — вершины ниже края)
+    for side in (1, -1):
+        knurl_patch(o, pp, side * (D.GRIP_Y[1] - 0.7), side, coll)
+    spur = rounded_prism("Launcher_finger_spur", fillet(P(D.FINGER_SPUR_PX), [1.8] * 4, seg=3), -4.5, 4.5, 1.5, coll,
+                         "Paint_olive_cast")
+    return [o, spur]
+
+
+def knurl_patch(target, poly, y_plane, side, coll, pitch=1.6, h=0.5, inset=0.6):
+    """Ромбическая насечка в плоскости XZ на y_plane (side — куда наружу): сетка по диагональным осям, пирамидки,
+    грани внутри контура poly (отступ inset); вливается в сетку рукояти — часть детали."""
+    from mathutils.geometry import intersect_point_line
+    xs = [p[0] for p in poly]; zs = [p[1] for p in poly]
+
+    def inside(x, z, d):
+        # точка внутри многоугольника и не ближе d к краю
+        c = False
+        n = len(poly)
+        for i in range(n):
+            x1, z1 = poly[i]; x2, z2 = poly[(i + 1) % n]
+            if (z1 > z) != (z2 > z) and x < (x2 - x1) * (z - z1) / (z2 - z1 + 1e-12) + x1:
+                c = not c
+        if not c:
+            return False
+        for i in range(n):
+            a = Vector((poly[i][0], poly[i][1])); b = Vector((poly[(i + 1) % n][0], poly[(i + 1) % n][1]))
+            q, f = intersect_point_line(Vector((x, z)), a, b)
+            f = min(max(f, 0.0), 1.0)
+            if (a + (b - a) * f - Vector((x, z))).length < d:
+                return False
+        return True
+
+    # пирамидки: ячейки сетки по диагональным осям (ромбы), углы ячеек — впадины, центр — вершина (4 треугольника)
+    e1 = Vector((1.0, 1.0)).normalized() * pitch
+    e2 = Vector((-1.0, 1.0)).normalized() * pitch
+    cx0, cz0 = 0.5 * (min(xs) + max(xs)), 0.5 * (min(zs) + max(zs))
+    o2 = Vector((cx0, cz0))
+    span = int(max(max(xs) - min(xs), max(zs) - min(zs)) / pitch) + 3
+    bm = bmesh.new()
+    corners = {}
+
+    def corner(i, k):
+        if (i, k) not in corners:
+            q = o2 + e1 * i + e2 * k
+            corners[(i, k)] = bm.verts.new(v(q.x, y_plane, q.y))
+        return corners[(i, k)]
+
+    for i in range(-span, span):
+        for k in range(-span, span):
+            c = o2 + e1 * (i + 0.5) + e2 * (k + 0.5)
+            if not inside(c.x, c.y, inset + pitch * 0.75):
+                continue
+            pk = bm.verts.new(v(c.x, y_plane + side * h, c.y))
+            ring = [corner(i, k), corner(i + 1, k), corner(i + 1, k + 1), corner(i, k + 1)]
+            for j in range(4):
+                tri = (ring[j], ring[(j + 1) % 4], pk)
+                bm.faces.new(tri if side > 0 else tuple(reversed(tri)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    # нормали — наружу (side): у плоского лоскута recalc может развернуть — проверим по первой грани
+    if bm.faces:
+        bm.faces.ensure_lookup_table()
+        f0 = bm.faces[0]
+        f0.normal_update()
+        if f0.normal.y * side < 0:
+            for f in bm.faces:
+                f.normal_flip()
+    me = bpy.data.meshes.new("_knurl"); bm.to_mesh(me); bm.free()
+    bm = bmesh.new(); bm.from_mesh(target.data); bm.from_mesh(me); bm.to_mesh(target.data); bm.free()
+    bpy.data.meshes.remove(me)
+
+
+def trigger(coll):
+    pts = fillet(P(D.TRIGGER_PX), [1.4, 1.4, 1.6, 1.4, 1.4, 1.6, 1.4], seg=4)
+    o = rounded_prism("Trigger", pts, -3.5, 3.5, 1.2, coll, "Steel_bare")
+    set_origin(o, (px_x(D.TRIGGER_PIVOT_PX[0]), 0.0, px_z(*D.TRIGGER_PIVOT_PX)))
+    pin = cyl("Trigger_pin", -D.TRIG_HOUSING_Y[1] - 0.5, D.TRIG_HOUSING_Y[1] + 0.5, 1.6, coll, "Steel_bare", seg=24,
+              cy=px_x(D.TRIGGER_PIVOT_PX[0]), cz=px_z(*D.TRIGGER_PIVOT_PX), axis="Y", ch=0.3)
+    return o, pin
+
+
+def lever(coll):
+    """Рычаг «ИСХОДНОЕ — НАКОЛ»: ось сзади, рукоятка с головкой вперёд; поворот вокруг Y."""
+    px0, pz0 = px_x(D.LEVER_PIVOT_PX[0]), px_z(*D.LEVER_PIVOT_PX)
+    tx, tz = px_x(D.LEVER_TIP_PX[0]), px_z(*D.LEVER_TIP_PX)
+    d = Vector((tx - px0, tz - pz0))
+    L = d.length
+    n = Vector((-d.y, d.x)).normalized()
+    hw1 = 3.4
+    # контур: полукруглая головка оси R 6 позади оси, плечо сужается к рукоятке (полуширина 3.4)
+    u = d / L
+    pts = []
+    for k in range(17):
+        a = math.pi / 2 + math.pi * k / 16
+        p = Vector((px0, pz0)) + u * (6.0 * math.cos(a)) + n * (6.0 * math.sin(a))
+        pts.append((p.x, p.y))
+    p_end1 = Vector((tx, tz)) - n * hw1
+    p_end2 = Vector((tx, tz)) + n * hw1
+    pts += [(p_end1.x, p_end1.y), (p_end2.x, p_end2.y)]
+    pts = fillet(pts, [1.6] * len(pts), seg=3)
+    arm = rounded_prism("Lever_arm", pts, CAST_LEFT - 0.5, CAST_LEFT + 4.0, 1.2, coll, "Paint_olive_cast")
+    boss = cyl("Lever_boss", CAST_LEFT - 0.5, CAST_LEFT + 5.5, 6.5, coll, "Paint_olive_cast", seg=40, cy=px0, cz=pz0,
+               axis="Y", ch=0.8)
+    knob = cyl("Lever_knob", CAST_LEFT + 1.0, CAST_LEFT + 13.0, 5.6, coll, "Paint_olive_cast", seg=40, cy=tx, cz=tz,
+               axis="Y", ch=1.6)
+    o = join([arm, boss, knob], "Lever")
+    set_origin(o, (px0, CAST_LEFT, pz0))
+    # шайба оси на корпусе
+    ax = cyl("Lever_axle", CAST_LEFT - 1.0, CAST_LEFT + 6.6, 2.4, coll, "Steel_black", seg=24, cy=px0, cz=pz0, axis="Y",
+             ch=0.5)
+    return o, ax
+
+
+def linkage(coll):
+    """Продольная тяга от оси рычага назад (снимок: 452…546 × 556…560) с винтом на конце."""
+    x0, x1 = px_x(546), px_x(452)
+    z = px_z(500, 558)
+    pts = fillet([(x0, z - 2.6), (x1, z - 2.6), (x1, z + 2.6), (x0, z + 2.6)], [2.4] * 4, seg=4)
+    bar = rounded_prism("Lever_linkage", pts, CAST_LEFT - 0.4, CAST_LEFT + 2.2, 0.8, coll, "Paint_olive_cast")
+    sc = slotted_screw("Lever_linkage_screw", (x0 + 3.0, CAST_LEFT + 2.2, z), (0, 1, 0), 4.2, coll, "Paint_olive_cast",
+                       slot_ang=60)
+    return [bar, sc]
+
+
+def cast_seam(target, coll):
+    """Шов литья по диагонали (снимок: 449,527 → 528,482) — канавка 0.5 мм."""
+    from lib import boolean_safe
+    a = Vector(px(449, 527)); b = Vector(px(528, 482))
+    d = (b - a).normalized(); n = Vector((-d.y, d.x))
+    w = 0.6
+    pts = [tuple(a - n * w), tuple(b - n * w), tuple(b + n * w), tuple(a + n * w)]
+    from lib import prism_xz
+    c = prism_xz("_seam", pts, CAST_LEFT - 0.5, CAST_LEFT + 2.0, coll)
+    boolean_safe(target, c, name="cast_seam")
+
+
+def button(coll):
+    x, y, d = D.BUTTON_PX
+    X, Z = px_x(x), px_z(x, y)
+    boss = cyl("Button_boss", CAST_LEFT - 1.0, CAST_LEFT + 3.0, d / 2, coll, "Paint_olive_cast", seg=48, cy=X, cz=Z,
+               axis="Y", ch=1.0)
+    cap = lathe("Button_cap", [(0.0, 0.0), (0.0, 7.6), (1.2, 7.4), (2.6, 6.4), (3.6, 4.4), (4.1, 0.0)], coll,
+                "Rubber_black", seg=40)
+    cap.data.transform(Matrix.Rotation(math.pi / 2, 4, "Z"))
+    cap.data.transform(Matrix.Translation(v(X, CAST_LEFT + 2.6, Z)))
+    return [boss, cap]
+
+
+def cover_plate(coll):
+    x0, y0, x1, y1 = 529, 503, 660, 530
+    pts = fillet(P([(x0, y0), (x1, y0), (x1, y1), (x0, y1)]), [3.5] * 4, seg=4)
+    plate = rounded_prism("Launcher_cover_plate", pts, CAST_LEFT - 0.5, CAST_LEFT + 1.4, 0.7, coll, "Paint_olive_cast")
+    screws = []
+    for i, (sx, d) in enumerate(((537, 5.0), (584, 7.0), (629, 5.0))):
+        screws.append(slotted_screw(f"Launcher_cover_screw_{i}", (px_x(sx), CAST_LEFT + 1.4, px_z(sx, 514.3)),
+                                    (0, 1, 0), d, coll, "Paint_olive_cast", slot_ang=0 if i != 1 else 90))
+    return [plate] + screws
+
+
+def tabs(coll):
+    """Ушки накладки с винтами по верхней кромке литья (снимок: x 391, 484, 557, 586, 734; y ≈ 482)."""
+    out = []
+    for i, x in enumerate((391, 484, 557, 586, 734)):
+        X = px_x(x)
+        zt, zb = px_z(x, 466), px_z(x, 492)
+        pts = fillet([(X - 5.5, zb), (X + 5.5, zb), (X + 5.5, zt), (X - 5.5, zt)], [5.0, 5.0, 1.0, 1.0], seg=5)
+        t = rounded_prism(f"Launcher_tab_{i}", pts, CAST_LEFT - 0.5, CAST_LEFT + 1.8, 0.7, coll, "Paint_olive_cast")
+        s = slotted_screw(f"Launcher_tab_screw_{i}", (X, CAST_LEFT + 1.8, zb + 4.5), (0, 1, 0), 4.6, coll,
+                          "Paint_olive_cast", slot_ang=30 * i)
+        out += [t, s]
+    return out
+
+
+def plunger(coll):
+    x, y, d = D.PLUNGER_PX
+    X, Z = px_x(x), px_z(x, y)
+    o = cyl("Plunger", D.TRIG_HOUSING_Y[1] - 1.0, D.TRIG_HOUSING_Y[1] + 6.0, d / 2, coll, "Plastic_black", seg=40, cy=X,
+            cz=Z, axis="Y", ch=1.8)
+    return o
+
+
+def box(coll):
+    up = fillet(P(D.BOX_UPPER_PX), [3.6, 3.6, 4.0, 3.6, 3.6], seg=5)
+    upper = rounded_prism("Box_upper", up, D.BOX_Y[0], D.BOX_Y[1], 3.2, coll, "Paint_olive_cast")
+    rp = fillet(P(D.BOX_REAR_PLATE_PX), [2.3, 2.3, 2.3, 2.3, 2.3, 2.3], seg=4)
+    rear = rounded_prism("Box_rear_plate", rp, D.BOX_Y[0] + 4.0, D.BOX_Y[1] - 4.0, 2.0, coll, "Paint_olive_cast")
+    lo = fillet(P(D.BOX_LOWER_PX), [4.5, 4.5, 4.5, 6.0, 6.0, 4.5], seg=5)
+    lower = rounded_prism("Box_lower", lo, D.BOX_Y[0] - 0.8, D.BOX_Y[1] + 0.8, 4.2, coll, "Paint_olive_cast")
+    # шов крышки — бортик по низу верхней части
+    seam_pts = fillet(P([(756, 591), (1049, 591), (1049, 597), (756, 597)]), [1.3] * 4, seg=3)
+    seam = rounded_prism("Box_seam_lip", seam_pts, D.BOX_Y[0] - 1.4, D.BOX_Y[1] + 1.4, 1.0, coll, "Paint_olive_cast")
+    knuckles = []
+    for i, x in enumerate(D.BOX_KNUCKLES_X):
+        X = px_x(x)
+        for s in (1, -1):
+            k = cyl(f"Box_latch_{i}_{'L' if s > 0 else 'R'}", px_z(x, 625), px_z(x, 598), 4.2, coll, "Paint_olive_cast",
+                    seg=32, cy=X, cz=s * (D.BOX_Y[1] + 2.6), axis="Z", ch=0.8)
+            knuckles.append(k)
+    return [upper, rear, lower, seam] + knuckles
+
+
+def nameplate(coll):
+    x0, x1, y0, y1 = D.NAMEPLATE_PX
+    X0, X1 = px_x(x1), px_x(x0)
+    Zt, Zb = px_z(990, y0), px_z(990, y1)
+    zc = 0.5 * (Zt + Zb)
+    h = Zt - Zb
+    pts = fillet([(X0, Zb), (X1, Zb), (X1, Zt), (X0, Zt)], [h / 2 - 0.2] * 4, seg=8)
+    y0_, y1_ = D.BOX_Y[1] - 0.3, D.BOX_Y[1] + 0.7
+    # плоская призма: штамп по простым граням надёжен; кромки скругляются после штампа
+    from lib import prism_xz
+    plate = prism_xz("Nameplate", pts, y0_, y1_, coll, "Plate_alu")
+    rivets = []
+    for i, X in enumerate((X0 + h / 2, X1 - h / 2)):
+        r = lathe(f"Nameplate_rivet_{i}", [(-0.3, 0.0), (-0.3, 1.5), (0.0, 1.5), (0.35, 1.3), (0.7, 0.8), (0.85, 0.0)], coll,
+                  "Plate_alu", seg=24)
+        r.data.transform(Matrix.Rotation(math.pi / 2, 4, "Z"))
+        r.data.transform(Matrix.Translation(v(X, y1_, zc)))
+        rivets.append(r)
+    # штамп: две строки вглубь 0.2 мм
+    xc = 0.5 * (X0 + X1)
+    t1, t2 = D.NAMEPLATE_TEXT
+    stamps.stamp(plate, t1, 5.6, (xc, y1_, zc + 2.3), (0, 1, 0), (0, 0, 1), 0.2, coll)
+    stamps.stamp(plate, t2, 4.6, (xc, y1_, zc - 2.5), (0, 1, 0), (0, 0, 1), 0.2, coll)
+    finish_small(plate, 0.25, 2, 35)
+    return [plate] + rivets
+
+
+def labels(target, coll):
+    from lib import grid_split_local
+    for text, x, y, size in D.LABELS:
+        # большая многоугольная боковина литья: точное булево пропускало буквы — режем её мелко вокруг надписи
+        grid_split_local(target, (px_x(x), CAST_LEFT, px_z(x, y)), size * len(text) * 0.4 + 3.0, (0, 2), step=1.37)
+        stamps.stamp(target, text, size, (px_x(x), CAST_LEFT, px_z(x, y)), (0, 1, 0), (0, 0, 1), 0.35, coll, raised=True)
+
+
+def build(ctx):
+    C = ctx["coll"]["Launcher"]
+    cast = cast_body(C)
+    from lib import hug_tube
+    print("HUG Launcher_cast", hug_tube(cast))
+    cast_seam(cast, C)
+    labels(cast, C)
+    linkage(C)
+    th = trigger_housing(C)
+    g = grip(C)
+    trig, tpin = trigger(C)
+    lv, lax = lever(C)
+    btn = button(C)
+    cp = cover_plate(C)
+    tb = tabs(C)
+    pl = plunger(C)
+    bx = box(C)
+    npl = nameplate(C)
+    return {"trigger": trig, "lever": lv, "plunger": pl, "button_cap": btn[1]}
