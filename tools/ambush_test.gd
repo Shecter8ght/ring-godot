@@ -9,6 +9,11 @@ var _level: Node
 var _player: Player
 var _street: Vector3
 var _hidden: Vector3
+## Кольцевая улица ТЦ Ø200 — r 58–68 (docs/design/mall_1f_plan.md): прежнее кольцо Ø250 с улицей r 65–79 удалено
+## 2026-10-24, тест перевели на mall_map строкой — бойцы стояли в магазинах за стеной и не видели друг друга.
+const STREET_R := 63.0
+## Поперечный проход между секторами C и D (игровой угол −120°) во внешнем поясе магазинов r 68–96.
+const PASSAGE_R := 82.0
 
 
 func _ready() -> void:
@@ -26,8 +31,8 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("players") as Player
 	_player.health.hp = 1e9
 	# игрок на кольцевой улице (видно с улицы), укрытие — поперечный проход за стеной
-	_street = SectorBuilder.polar(-100.0, 72.0) + Vector3(0, 0.1, 0)
-	_hidden = SectorBuilder.polar(-120.0, 90.0) + Vector3(0, 0.1, 0)
+	_street = SectorBuilder.polar(-100.0, STREET_R) + Vector3(0, 0.1, 0)
+	_hidden = SectorBuilder.polar(-120.0, PASSAGE_R) + Vector3(0, 0.1, 0)
 
 	# 1. Склонность 100 — сел в засаду, присел, смотрит на последнюю точку, ждёт
 	var a := _spawn("AmbushA", 100.0)
@@ -121,7 +126,7 @@ func _spawn(nm: String, bias: float, ang: float = -118.0) -> Marauder:
 	m.weapon = "rifle"
 	m.ambush_bias = bias
 	_level.get_node("Marauders").add_child(m)
-	m.global_position = SectorBuilder.polar(ang, 72.0) + Vector3(0, 0.1, 0)
+	m.global_position = SectorBuilder.polar(ang, STREET_R) + Vector3(0, 0.1, 0)
 	m.patrol_point_provider = func() -> Vector3: return m.global_position
 	m._facing = atan2(_street.x - m.global_position.x, _street.z - m.global_position.z)
 	return m
@@ -144,7 +149,7 @@ func _contact(m: Marauder) -> void:
 ## Точка в поперечном проходе за стеной, которую с места мародёра не видно (луч в грудь упирается в стену).
 func _find_hidden(m: Marauder) -> Vector3:
 	var space := m.get_world_3d().direct_space_state
-	for r in [86.0, 90.0, 94.0, 98.0, 102.0, 106.0]:
+	for r in [74.0, 78.0, 82.0, 86.0, 90.0, 94.0]:
 		for ang in [-120.0, -121.5, -118.5, -123.0]:
 			var p := SectorBuilder.polar(ang, r) + Vector3(0, 0.1, 0)
 			if NavigationServer3D.map_get_closest_point(m.get_world_3d().navigation_map, p).distance_to(p) > 1.0:

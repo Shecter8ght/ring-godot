@@ -6,6 +6,11 @@ extends Node
 
 var _fails: int = 0
 var _said: Array[String] = []
+## Кольцевая улица ТЦ Ø200 — r 58–68 (docs/design/mall_1f_plan.md): прежнее кольцо Ø250 с улицей r 65–79 удалено
+## 2026-10-24, тест перевели на mall_map строкой — бойцы стояли в магазинах за стеной и не видели друг друга.
+const STREET_R := 63.0
+## Поперечный проход между секторами C и D (игровой угол −120°) во внешнем поясе магазинов r 68–96.
+const PASSAGE_R := 82.0
 
 
 func _ready() -> void:
@@ -24,7 +29,7 @@ func _ready() -> void:
 	var player := get_tree().get_first_node_in_group("players") as Player
 	player.health.hp = 1e9
 	# игрок — на кольцевой улице, отряд — дальше по улице (видно), второй — за углом в проходе
-	var ppos := SectorBuilder.polar(-100.0, 72.0)
+	var ppos := SectorBuilder.polar(-100.0, STREET_R)
 	player.global_position = ppos + Vector3(0, 0.1, 0)
 	var scene := preload("res://scenes/ai/marauder.tscn")
 	var squad := Squad.new()
@@ -33,27 +38,40 @@ func _ready() -> void:
 	a.archetype = "gunner"
 	a.weapon = "rifle"
 	level.get_node("Marauders").add_child(a)
-	a.global_position = SectorBuilder.polar(-118.0, 72.0) + Vector3(0, 0.1, 0)
+	a.global_position = SectorBuilder.polar(-118.0, STREET_R) + Vector3(0, 0.1, 0)
 	var b := scene.instantiate() as Marauder
 	b.name = "SquadB"
 	b.archetype = "gunner"
 	b.weapon = "pistol"
 	level.get_node("Marauders").add_child(b)
 	# в поперечном проходе за стеной: улицы не видно
-	b.global_position = SectorBuilder.polar(-120.0, 90.0) + Vector3(0, 0.1, 0)
+	b.global_position = SectorBuilder.polar(-120.0, PASSAGE_R) + Vector3(0, 0.1, 0)
 	squad.add(a)
 	squad.add(b)
 	for m in [a, b]:
 		(m as Marauder).patrol_point_provider = func() -> Vector3: return (m as Marauder).global_position
 		var mm: Marauder = m
 		mm._facing = atan2(ppos.x - mm.global_position.x, ppos.z - mm.global_position.z)
-	await _wait(1.5)
+	# за B следим каждый кадр: выстрелил — где стоял, видел ли цель, что было на линии огня
+	var b_shots: Array[String] = []
+	# сколько было при появлении (выкладка даёт патрон в патронник — магазин не обязательно полный)
+	var b_start: int = b._mag
+	var b_mag0: int = b._mag
+	var t_end: int = Time.get_ticks_msec() + 1500
+	while Time.get_ticks_msec() < t_end:
+		await get_tree().physics_frame
+		if b._mag < b_mag0:
+			b_mag0 = b._mag
+			var lof := PhysicsRayQueryParameters3D.create(b._gun_pos(), b.last_known + Vector3.UP * 1.1, 0xFFFFFFFF, [b.get_rid()])
+			var hit: Dictionary = b.get_world_3d().direct_space_state.intersect_ray(lof)
+			b_shots.append("%s видит %s, без цели %.2f с, на линии огня %s" % [Marauder.Tactic.keys()[b.tactic], b._seen_now, b._unseen_t,
+				(hit.collider as Node).name if not hit.is_empty() else "ничего"])
 	_check("A видит игрока — бой", a.state == Marauder.State.COMBAT, _st(a))
 	_check("B за стеной сам не видит, но знает по окрику — бой", b.state == Marauder.State.COMBAT and not b._seen_now and b.last_known.distance_to(ppos) < 3.0,
 		"%s, видит %s, до цели по памяти %.1f м" % [_st(b), b._seen_now, b.last_known.distance_to(ppos)])
-	_check("B не стреляет в стену, пока не видит", b._mag == int(b._spec.mag) or b._seen_now, "в магазине %d из %d" % [b._mag, int(b._spec.mag)])
+	_check("B не стреляет в стену, пока не видит", b._mag == b_start or b._seen_now, "в магазине %d, было %d; выстрелы: %s" % [b._mag, b_start, str(b_shots)])
 	# двое идут к одной точке — каждый в свою
-	var sp := SectorBuilder.polar(-100.0, 76.0)
+	var sp := SectorBuilder.polar(-100.0, STREET_R + 2.0)
 	var d1 := scene.instantiate() as Marauder
 	var d2 := scene.instantiate() as Marauder
 	for pair in [[d1, "SpreadD1", -96.0], [d2, "SpreadD2", -95.0]]:
@@ -61,7 +79,7 @@ func _ready() -> void:
 		dm.name = String(pair[1])
 		dm.archetype = "gunner"
 		level.get_node("Marauders").add_child(dm)
-		dm.global_position = SectorBuilder.polar(float(pair[2]), 78.0) + Vector3(0, 0.1, 0)
+		dm.global_position = SectorBuilder.polar(float(pair[2]), STREET_R + 3.0) + Vector3(0, 0.1, 0)
 	await get_tree().physics_frame
 	for dm in [d1, d2]:
 		(dm as Marauder).last_known = sp
@@ -77,7 +95,7 @@ func _ready() -> void:
 	c.archetype = "gunner"
 	c.weapon = "rifle"
 	level.get_node("Marauders").add_child(c)
-	c.global_position = SectorBuilder.polar(-72.0, 72.0) + Vector3(0, 0.1, 0)
+	c.global_position = SectorBuilder.polar(-72.0, STREET_R) + Vector3(0, 0.1, 0)
 	c._facing = atan2(c.global_position.x - ppos.x, c.global_position.z - ppos.z)
 	await get_tree().physics_frame
 	var c0 := c.global_position.distance_to(ppos)
@@ -131,7 +149,7 @@ func _ready() -> void:
 		t.name = "Type_" + String(k)
 		t.archetype = String(k)
 		level.get_node("Marauders").add_child(t)
-		t.global_position = SectorBuilder.polar(-140.0 - 6.0 * kinds.size(), 72.0) + Vector3(0, 0.1, 0)
+		t.global_position = SectorBuilder.polar(-140.0 - 6.0 * kinds.size(), STREET_R) + Vector3(0, 0.1, 0)
 		kinds[k] = t
 	await get_tree().physics_frame
 	var hp_ok := true
@@ -156,7 +174,8 @@ func _ready() -> void:
 	_check("снайпер держит позицию (окрик — не бежит)", sn.state == Marauder.State.COMBAT and sn.global_position.distance_to(sn0) < 1.5,
 		"%s, сдвинулся на %.1f м" % [_st(sn), sn.global_position.distance_to(sn0)])
 	# грабёж: одиночка у ближайшего контейнера — идёт, роется, забирает самое ценное в сумку
-	var lp := SectorBuilder.polar(-150.0, 100.0)
+	# контейнер в магазине внешнего пояса сектора C (r 100 теперь — фасад)
+	var lp := SectorBuilder.polar(-150.0, PASSAGE_R)
 	var box: LootContainer = null
 	for cn in get_tree().get_nodes_in_group("loot_containers"):
 		var cc := cn as LootContainer
@@ -178,7 +197,7 @@ func _ready() -> void:
 		"сумка %s, в ящике %s" % [looter.pack, box.items])
 	# роли отрядов: трое вступают в бой у одной цели — штурм, обход, прикрытие
 	Squad.engaged.clear()
-	var tgt := SectorBuilder.polar(-100.0, 72.0)
+	var tgt := SectorBuilder.polar(-100.0, STREET_R)
 	var roles: Array = []
 	var cover_m: Marauder = null
 	for k in range(3):
@@ -188,7 +207,7 @@ func _ready() -> void:
 		m.archetype = "gunner"
 		m.weapon = "rifle"
 		level.get_node("Marauders").add_child(m)
-		m.global_position = SectorBuilder.polar(-130.0 + 12.0 * k, 72.0) + Vector3(0, 0.1, 0)
+		m.global_position = SectorBuilder.polar(-130.0 + 12.0 * k, STREET_R) + Vector3(0, 0.1, 0)
 		sq.add(m)
 		await get_tree().physics_frame
 		m.last_known = tgt
