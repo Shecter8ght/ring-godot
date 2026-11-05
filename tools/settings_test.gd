@@ -33,7 +33,12 @@ func _ready() -> void:
 	_check("низко: тень солнца до 100 м, 2 каскада", is_equal_approx(sun.directional_shadow_max_distance, minf(sun_m0, 100.0))
 		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "%.0f м, режим %d" % [sun.directional_shadow_max_distance, sun.directional_shadow_mode])
 	Settings.set_quality("medium")
-	_check("средне: SSAO и туман есть, SDFGI нет", env.ssao_enabled and env.volumetric_fog_enabled and not env.sdfgi_enabled, "")
+	# SSAO и объёмный туман на «средне» — как в сцене (туман есть не на каждом свете: у прежнего света «Проспекта»
+	# объёмного тумана не было, у света Road to Vostok — дымка); SDFGI — только «высоко»
+	var orig: Dictionary = env.get_meta("orig", {})
+	_check("средне: SSAO и туман как в сцене, SDFGI нет", env.ssao_enabled == bool(orig.get("ssao", true)) and env.ssao_enabled
+		and env.volumetric_fog_enabled == bool(orig.get("fog", false)) and not env.sdfgi_enabled,
+		"SSAO %s, туман %s (в сцене %s)" % [env.ssao_enabled, env.volumetric_fog_enabled, orig.get("fog")])
 	_check("средне: тень солнца до 160 м, 4 каскада", is_equal_approx(sun.directional_shadow_max_distance, minf(sun_m0, 160.0))
 		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS, "%.0f м, режим %d" % [sun.directional_shadow_max_distance, sun.directional_shadow_mode])
 	Settings.set_quality("high")
@@ -43,6 +48,8 @@ func _ready() -> void:
 	Settings.set_sens(2.0, 0.5)
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	_check("хит-маркер по умолчанию включён", Settings.hitmarker, "")
+	# маркер горит Balance.HITMARKER_SEC (0,14 с): первые кадры после загрузки карты длиннее — ждём, пока уровень догрузится
+	await _settle()
 	rig.show_hitmarker(false)
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -75,7 +82,8 @@ func _ready() -> void:
 		_check("не целится — множитель прицела не действует", is_equal_approx(rig.ads_sens(), aim1), "%.5f" % rig.ads_sens())
 		Settings.set_sens_ads(1.0)
 	# Поле зрения мира по горизонтали на 16:9; ADS сохраняет его, оружие имеет своё.
-	_check("поле зрения по умолчанию 90°", is_equal_approx(Settings.fov_h, 90.0), "%.1f" % Settings.fov_h)
+	# По умолчанию 80° (решение владельца 2026-10-24, стенд масштаба; было 90°).
+	_check("поле зрения по умолчанию 80°", is_equal_approx(Settings.fov_h, Settings.FOV_H_DEFAULT) and is_equal_approx(Settings.FOV_H_DEFAULT, 80.0), "%.1f" % Settings.fov_h)
 	Settings.set_fov_h(10.0)
 	var lo := Settings.fov_h
 	Settings.set_fov_h(200.0)
@@ -126,6 +134,15 @@ func _ready() -> void:
 	_check("в инструментах настройки не сохраняются", Settings._tool_run, "")
 	print("settings_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
+
+
+## Ждать, пока кадры станут короткими (карта догрузилась, навигация и шейдеры собраны): до 20 с.
+func _settle() -> void:
+	var calm := 0
+	var t0 := Time.get_ticks_msec()
+	while calm < 5 and Time.get_ticks_msec() - t0 < 20000:
+		await get_tree().process_frame
+		calm = calm + 1 if get_process_delta_time() < Balance.HITMARKER_SEC * 0.25 else 0
 
 
 func _check(what: String, ok: bool, info: String) -> void:

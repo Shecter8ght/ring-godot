@@ -73,7 +73,7 @@ func _solo() -> void:
 	_check("обучение в убежище ждёт пролога", Quests.state("tutorial_basics") == "LOCKED", Quests.state("tutorial_basics"))
 	var kit := Profile.start_kit()
 	var rifle: Dictionary = kit.filter(func(e: Dictionary) -> bool: return String(e.id) == "wpn_ar_01")[0]
-	_check("стартовый набор: на автомате тактический фонарь", WeaponDb.mod_id((rifle.mods as Dictionary).get("side_right", "")) == "tac_flashlight_01", str(rifle.mods))
+	_check("стартовый набор: на автомате тактический фонарь", _has_light(rifle), str(rifle.mods))
 	# ---- первый заход: у ворот
 	Prologue.launch()
 	await _level_ready()
@@ -171,7 +171,7 @@ func _coffee() -> void:
 	_check("обыскал сумку — цель «автомат в слот»", _oid() == "equip", _oid())
 	_look_at(bag.global_position)
 	_check("в сумке весь набор и фонарь на автомате", _idx(bag, "wpn_ar_01") >= 0 and _idx(bag, "armor_mid") >= 0 and _idx(bag, "helmet_simple") >= 0 and _idx(bag, "grenade") >= 0
-		and WeaponDb.mod_id(((bag.items[_idx(bag, "wpn_ar_01")] as Dictionary).mods as Dictionary).get("side_right", "")) == "tac_flashlight_01")
+		and _has_light(bag.items[_idx(bag, "wpn_ar_01")] as Dictionary))
 	await _shot("prologue_bag")
 	Raid.current.request_equip_from("loot", _idx(bag, "wpn_ar_01"), bag)
 	await _wait(func() -> bool: return _oid() == "armor", 4.0)
@@ -257,7 +257,7 @@ func _from_checkpoint() -> void:
 	_check("после гибели — у выхода из кофейни", me.global_position.distance_to(Vector3(-184.0, 0, -12.5)) < 4.0, str(me.global_position))
 	await _wait(func() -> bool: return me.inventory.equipment.has("primary"), 5.0)
 	_check("одет: автомат с фонарём, жилет, шлем", me.inventory.equipment.has("primary") and me.inventory.equipment.has("armor") and me.inventory.equipment.has("helmet")
-		and WeaponDb.mod_id(((me.inventory.equipment.primary as Dictionary).get("mods", {}) as Dictionary).get("side_right", "")) == "tac_flashlight_01", str(me.inventory.equipment.keys()))
+		and _has_light(me.inventory.equipment.primary as Dictionary), str(me.inventory.equipment.keys()))
 	_check("пакет в рюкзаке", me.inventory.has("tutorial_packet"))
 	_check("цели до кофейни засчитаны — «проверить магазин»", _oid() == "check", _oid())
 	_check("вводного экрана нет", Prologue.current._intro == null)
@@ -591,6 +591,15 @@ func _packet() -> LootContainer:
 		if lc and lc.items.size() == 1 and String((lc.items[0] as Dictionary).id) == "tutorial_packet":
 			return lc
 	return null
+
+
+## Тактический фонарь на оружии в любой точке: в стартовом наборе он на креплении ДОЗОР-П справа
+## (точка «side_right/light»), прямо на планку его больше не ставят.
+func _has_light(weapon: Dictionary) -> bool:
+	for v in (weapon.get("mods", {}) as Dictionary).values():
+		if WeaponDb.mod_id(v) == "tac_flashlight_01":
+			return true
+	return false
 
 
 func _idx(c: LootContainer, id: String) -> int:

@@ -3,6 +3,12 @@ extends Node
 ## как далеко мародёр видит (день 60, ночь 25, в помещении без света ещё меньше, фонарь выдаёт),
 ## лут богаче за риск. С окном — снимки docs/screens/cond_*.png.
 ## godot --path . res://tools/conditions_test.tscn (можно --headless)
+## Карта ТЦ Ø200 с территорией: точки — на земле (_ground). Улица — сквер к северу от ТЦ, магазин — внешний пояс
+## (r 68–96), зрение — по площади к югу от ТЦ: вдоль +X свободно 80 м.
+
+const OUT := Vector2(-90.0, 160.0)
+const SHOP := Vector2(-104.0, 94.0)
+const OPEN := Vector2(90.0, 150.0)
 
 var _fails: int = 0
 var _level: Node
@@ -24,8 +30,8 @@ func _ready() -> void:
 		RaidConditions.from_host = c
 		await _load()
 		var atmo := RaidAtmosphere.current
-		var out := SectorBuilder.polar(-100.0, 150.0)
-		var inn := SectorBuilder.polar(-104.0, 94.0)
+		var out := _ground(OUT)
+		var inn := _ground(SHOP)
 		var lit := 0
 		var total := 0
 		for l in get_tree().get_nodes_in_group("mall_lights"):
@@ -66,7 +72,7 @@ func _ready() -> void:
 	RaidConditions.from_host = {"time": "night", "weather": "clear", "power": "off"}
 	await _load()
 	var me := Raid.current.local_player()
-	var inn := SectorBuilder.polar(-100.0, 36.0)
+	var inn := _ground(Vector2(-100.0, 36.0))
 	me.global_position = inn + Vector3(0, 0.1, 0)
 	Input.action_press("nvg")
 	await get_tree().physics_frame
@@ -100,11 +106,19 @@ func _ready() -> void:
 
 func _sees_at(d: float) -> bool:
 	var me := Raid.current.local_player()
-	var p := SectorBuilder.polar(-90.0, 160.0)
+	var p := _ground(OPEN)
 	me.global_position = p + Vector3(0, 0.1, 0)
 	me.light_on = false
 	var eye := p + Vector3(d, 1.6, 0)
 	return Perception.can_see(me.get_world_3d(), eye, Vector3(-1, 0, 0), me, [])
+
+
+## Точка карты по углу и радиусу (SectorBuilder.polar) — на земле: рельеф территории не на нуле (горки, выемки).
+func _ground(ar: Vector2) -> Vector3:
+	var p := SectorBuilder.polar(ar.x, ar.y)
+	var hit := get_viewport().get_world_3d().direct_space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(p + Vector3.UP * 60.0, p + Vector3.DOWN * 60.0, 1))
+	return hit.position as Vector3 if not hit.is_empty() else p
 
 
 func _load() -> void:
