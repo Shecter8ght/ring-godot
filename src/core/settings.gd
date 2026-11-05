@@ -521,6 +521,8 @@ func _on_node_added(n: Node) -> void:
 	elif n is OmniLight3D or n is SpotLight3D:
 		soften(n as Light3D)
 	elif n is DirectionalLight3D:
+		# дальность и каскады тени по качеству — и у карт с проверенными тенями (после _ready сцены)
+		_apply_sun_quality.call_deferred(n as DirectionalLight3D)
 		# Карта с отдельно проверенными тенями сохраняет свой размер солнца.
 		if n.has_meta("authored_shadow"):
 			return
@@ -602,6 +604,26 @@ func apply_graphics() -> void:
 			vp.positional_shadow_atlas_size = int(_defaults.pos_shadow)
 	for we in get_tree().root.find_children("*", "WorldEnvironment", true, false):
 		_apply_env(we as WorldEnvironment)
+	for sun in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+		_apply_sun_quality(sun as DirectionalLight3D)
+
+
+## Тень солнца / Луны по качеству (Balance.SHADOW_QUALITY): исходные дальность и каскады — в meta, «высоко» их
+## возвращает; ниже — дальность не больше max_m и каскадов не больше splits (только уменьшаем: свет витрины
+## конструктора с тенью на 3 м и одним каскадом не трогается).
+func _apply_sun_quality(l: DirectionalLight3D) -> void:
+	if not is_instance_valid(l):
+		return
+	if not l.has_meta("orig_sun_shadow"):
+		l.set_meta("orig_sun_shadow", {"max_m": l.directional_shadow_max_distance, "mode": l.directional_shadow_mode})
+	var o: Dictionary = l.get_meta("orig_sun_shadow")
+	var p: Dictionary = Balance.SHADOW_QUALITY.get(quality, {})
+	var max_m: float = float(p.get("max_m", 0.0))
+	l.directional_shadow_max_distance = minf(float(o.max_m), max_m) if max_m > 0.0 else float(o.max_m)
+	var mode: DirectionalLight3D.ShadowMode = o.mode as DirectionalLight3D.ShadowMode
+	if int(p.get("splits", 4)) <= 2 and mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS:
+		mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	l.directional_shadow_mode = mode
 
 
 ## Окружение сцены по качеству; исходное (как в сцене) — в meta, «высоко» возвращает его.

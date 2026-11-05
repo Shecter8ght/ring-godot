@@ -322,7 +322,7 @@ bash tools/research/rtv/run.sh <папка вне репозитория>
 | 2 | ✅ 2026-11-04. Свет вспышки и фонаря раздельно: своя вспышка в мир не светит на руки, им — свой короткий свет; отражённый свет фонаря на руки по расстоянию до стены | `player.gd` (`_hands_light`, `_tick_hands_bounce`), `Balance.VIEWMODEL_LIGHTS` | `lean_light_test` |
 | 3 | ✅ 2026-11-04. Наклон не уходит в стену (шар 0,15 м вбок от глаза) | `player.gd` (`lean_room`), `Balance.LEAN_WALL_RADIUS` | `lean_light_test` |
 | 4 | ✅ 2026-11-05. «Трава издали» в рельефе: с края кольца травинок газон в траве светлее, ровнее, с куртинами — тёмной полосы за кольцом нет | `district_terrain.gdshader`, `district_grass.gd`, `Balance.GRASS.far_look` | `far_grass_test`, `grass_shots` |
-| 5 | Пресеты теней по качеству (дальность, каскады, тени мелочи маской слоёв) | `settings.gd`, `Balance` | `settings_test`, `perf_test` |
+| 5 | ✅ 2026-11-05. Пресеты тени солнца по качеству: «низко» — 100 м и 2 каскада, «средне» — 160 м, «высоко» — как в сцене. Зона 1: «низко» 146 → 167 к/с, «средне» ≈ +12 %. Тени мелочи маской слоёв не делались — трава и так без тени | `settings.gd`, `Balance.SHADOW_QUALITY` | `settings_test`, `zone01_trees_perf` с `ZONE01_QUALITY` |
 | 6 | Прогрев облётом под экраном загрузки | `ImpactFx.warm_up`, загрузка рейда | `first_hit_test` |
 | 7 | Ручные тактические точки с направлением для ИИ | `marauder.gd`, `ai_population.gd` | `ai_squad_test`, `prospekt_raid_check` |
 | 8 | Дальний ярус анимации ботов ~5 Гц | `CHARACTER_LOD` | `cpu_probe` |

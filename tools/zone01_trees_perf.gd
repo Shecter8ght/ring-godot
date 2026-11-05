@@ -4,7 +4,8 @@ extends Node
 ## время кадра и 1 % худших; снимок кадра — docs/screens/zone01_trees/<метка>_<точка>.png.
 ## С аргументом «off» клёны и тополя (DistrictScatter tree_maple_* / tree_poplar_*) скрыты — сравнение в одной сборке.
 ##   tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/zone01_trees_perf.tscn [-- off]
-## ZONE01_TREES_TAG=до|после — метка снимков и отчёта; ZONE01_TREES_ONLY=имя,имя — выборочно; ZONE01_TIME, ZONE01_WEATHER — условия.
+## ZONE01_TREES_TAG=до|после — метка снимков и отчёта; ZONE01_TREES_ONLY=имя,имя — выборочно; ZONE01_TIME, ZONE01_WEATHER — условия;
+## ZONE01_QUALITY=low|medium|high — качество графики на время замера (в настройки игрока не пишется).
 
 const SCENE: String = "res://scenes/levels/zone01_mall.tscn"
 const OUT_DIR: String = "res://docs/screens/zone01_trees"
@@ -37,6 +38,12 @@ func _ready() -> void:
 	var tag: String = OS.get_environment("ZONE01_TREES_TAG") if OS.get_environment("ZONE01_TREES_TAG") != "" else "снимок"
 	RaidConditions.from_host = {"time": OS.get_environment("ZONE01_TIME") if OS.has_environment("ZONE01_TIME") else "day",
 		"weather": OS.get_environment("ZONE01_WEATHER") if OS.has_environment("ZONE01_WEATHER") else "clear", "power": "on"}
+	# качество графики на время замера, без записи в настройки игрока (ZONE01_QUALITY=low|medium|high)
+	var quality: String = OS.get_environment("ZONE01_QUALITY")
+	if quality in Settings.QUALITY:
+		Settings.quality = quality
+		Settings.apply_graphics()
+		Settings.changed.emit()
 	var level: Node = (load(SCENE) as PackedScene).instantiate()
 	get_tree().root.add_child.call_deferred(level)
 	await get_tree().process_frame

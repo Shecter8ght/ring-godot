@@ -24,13 +24,22 @@ func _ready() -> void:
 	Settings.set_volume("Shots", 1.0)
 	var env := (inst.find_children("*", "WorldEnvironment", true, false)[0] as WorldEnvironment).environment
 	var sdfgi0 := env.sdfgi_enabled
+	# тень солнца по качеству (Balance.SHADOW_QUALITY): на ТЦ в сцене — 260 м и 4 каскада
+	var sun := inst.find_children("*", "DirectionalLight3D", true, false)[0] as DirectionalLight3D
+	var sun_m0: float = (sun.get_meta("orig_sun_shadow", {}) as Dictionary).get("max_m", sun.directional_shadow_max_distance)
 	Settings.set_quality("low")
 	_check("низко: без SDFGI, SSIL, SSAO, тумана; рендер 77 %", not env.sdfgi_enabled and not env.ssil_enabled and not env.ssao_enabled and not env.volumetric_fog_enabled \
 		and is_equal_approx(get_viewport().scaling_3d_scale, 0.77), "")
+	_check("низко: тень солнца до 100 м, 2 каскада", is_equal_approx(sun.directional_shadow_max_distance, minf(sun_m0, 100.0))
+		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "%.0f м, режим %d" % [sun.directional_shadow_max_distance, sun.directional_shadow_mode])
 	Settings.set_quality("medium")
 	_check("средне: SSAO и туман есть, SDFGI нет", env.ssao_enabled and env.volumetric_fog_enabled and not env.sdfgi_enabled, "")
+	_check("средне: тень солнца до 160 м, 4 каскада", is_equal_approx(sun.directional_shadow_max_distance, minf(sun_m0, 160.0))
+		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS, "%.0f м, режим %d" % [sun.directional_shadow_max_distance, sun.directional_shadow_mode])
 	Settings.set_quality("high")
 	_check("высоко — как в сцене", env.sdfgi_enabled == sdfgi0 and is_equal_approx(get_viewport().scaling_3d_scale, 1.0), "")
+	_check("высоко: тень солнца как в сцене (%.0f м, 4 каскада)" % sun_m0, is_equal_approx(sun.directional_shadow_max_distance, sun_m0)
+		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS, "%.0f м" % sun.directional_shadow_max_distance)
 	Settings.set_sens(2.0, 0.5)
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	_check("хит-маркер по умолчанию включён", Settings.hitmarker, "")

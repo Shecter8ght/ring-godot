@@ -122,7 +122,8 @@ tools/godot.cmd --headless res://tools/water_wade_test.tscn # брод в бол
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/grass_shots.tscn # трава: густой ярус, ветер, след после прохода и подъём, против солнца, кадры в секунду по ярусам; снимки grass_* (GRASS_TIME=dusk, GRASS_ONLY=eye,down)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/blood_shots.tscn # кровь у стены в зоне 1: капли, следы по углу удара, подтёки, лужа под убитым, высохла; игрок ранен — лужа, утащили — мазок; снимки blood_*
 python tools/gen_blood_maps.py                                 # карты крови: растекание лужи (перколяция), подтёки, следы капель → assets/textures/blood; затем --import
-tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики, мышь
+tools/godot.cmd --headless res://tools/settings_test.tscn   # настройки: шины громкости, качество графики (и тень солнца по качеству —
+                                                              # Balance.SHADOW_QUALITY: низко 100 м / 2 каскада, средне 160 м, высоко как в сцене), мышь
 tools/godot.cmd --headless res://tools/downed_test.tscn    # тяжёлое ранение: лечь, добить, голова/граната, поднять, тащить, спасение мародёров
 tools/godot.cmd --headless res://tools/ragdoll_test.tscn   # трупы на модели (SkinRagdoll) не рвутся нитями: «Проспект», обычная смерть, удар в голову,
                                                               # добили лежачего (руки были под полом), у стены, огромный толчок; пули по телам, разбор ящиков
@@ -448,7 +449,8 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/pro
                                                               # tools/zone01_trees/godot_assets.py (WebP, материалы) → --import; исходники — E:/Models Blender/ENVIRONMENT/RING_Zone01_Trees
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/zone01_trees_perf.tscn [-- off] # клёны и тополя зоны 1: кадры в секунду и снимки
                                                               # (двор, ряд тополей, центр, с высоты, опушка, сверху) → docs/screens/zone01_trees/<метка>_*; off — скрыты;
-                                                              # ZONE01_TREES_TAG — метка, ZONE01_TREES_ONLY=клён_вблизи,ясенелистный_вблизи,тополь_вблизи — крупные планы
+                                                              # ZONE01_TREES_TAG — метка, ZONE01_TREES_ONLY=клён_вблизи,ясенелистный_вблизи,тополь_вблизи — крупные планы;
+                                                              # ZONE01_QUALITY=low|medium|high — качество графики на время замера (в настройки игрока не пишется)
 tools/mall_study.cmd                                          # прогулка по черновику территории ТЦ 1:1 (docs/design/mall_study.md): M — план, 1–9/0, N/B — участки, F — полёт;
                                                               # проверка: --headless res://tools/mall_study.tscn -- verify (подходы A–E, галерея, наполнение и открытые куски ≤ 60 м, рельеф, брод, мостики, ж/д ветка и переезд, паркинг, двор, пристройка приёмки); -- shots — снимки
                                                               # (MALL_STUDY_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр, несколько — через «;», MALL_STUDY_OUTPUT — папка)
