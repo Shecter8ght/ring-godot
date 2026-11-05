@@ -101,6 +101,19 @@ def stamp(target, text, size, center, normal, up, depth, coll, raised=False):
               (0.0, 0.0, "EXACT", True), (0.009, -0.019, "EXACT", True), (0.0, 0.0, "FLOAT", False),
               (0.011, 0.013, "FLOAT", False), (0.023, -0.029, "EXACT", False), (-0.031, 0.027, "EXACT", True),
               (0.041, 0.037, "EXACT", False), (-0.047, -0.043, "FLOAT", False)]
+    if raised:
+        # литые выпуклые буквы — всегда вливаются телом в сетку детали (низ утоплен на 0.6 мм, верх на depth над
+        # поверхностью): объединение точным булевым на большой боковине литья давало рваные буквы (v03, владелец)
+        bm = bmesh.new(); bm.from_mesh(target.data)
+        for ob in objs:
+            bm.from_mesh(ob.data)
+            me = ob.data
+            bpy.data.objects.remove(ob, do_unlink=True)
+            bpy.data.meshes.remove(me)
+        bm.to_mesh(target.data); bm.free()
+        bpy.data.objects.remove(cut, do_unlink=True)
+        print("STAMP_RAISED_JOINED", text)
+        return
     for ob in objs:
         vol_l = abs(_volume(ob.data))
         keep = target.data.copy()

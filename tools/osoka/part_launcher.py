@@ -54,16 +54,35 @@ def grip(coll):
     c = prism_xz("_trig_slot", slot, -3.9, 3.9, coll)
     boolean_safe(o, c, name="trigger_slot")
     pp = fillet(P(D.FRAME_PANEL_PX), [4.2] * len(D.FRAME_PANEL_PX), seg=5)
-    c = rounded_prism("_panel_L", pp, D.FRAME_Y[1] - 0.8, D.FRAME_Y[1] + 3.0, 0.5, coll)
-    boolean_safe(o, c, name="grip_panel_L")
-    bm = bmesh.new(); bm.from_mesh(o.data)
-    bmesh.ops.symmetrize(bm, input=bm.verts[:] + bm.edges[:] + bm.faces[:], direction="Y", dist=1e-6)
-    bm.to_mesh(o.data); bm.free()
+    # вставки — вычитанием с обеих сторон (отражение половины оставляло по средней плоскости несваренный пилообразный
+    # шов, v03); задвоенные грани после вычитания справа — убрать
+    for side, (y0, y1) in (("L", (D.FRAME_Y[1] - 0.8, D.FRAME_Y[1] + 3.0)), ("R", (D.FRAME_Y[0] - 3.0, D.FRAME_Y[0] + 0.8))):
+        c = rounded_prism("_panel_" + side, pp, y0, y1, 0.5, coll)
+        boolean_safe(o, c, name="grip_panel_" + side)
+        drop_dup_faces(o)
     # упор пальца — после паза, вставки и отражения (булевы по чистой сетке), насечка — последней
     finger_spur(o, coll)
     for side in (1, -1):
         knurl_patch(o, pp, side * (D.FRAME_Y[1] - 0.8), side, coll)
     return [o]
+
+
+def drop_dup_faces(o):
+    """Убрать задвоенные грани (тот же набор вершин) — след точного булева на симметричной детали."""
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    seen = {}
+    dup = []
+    for f in bm.faces:
+        k = tuple(sorted(v.index for v in f.verts))
+        if k in seen:
+            dup.append(f)
+        else:
+            seen[k] = f
+    if dup:
+        bmesh.ops.delete(bm, geom=dup, context="FACES_ONLY")
+        bm.to_mesh(o.data)
+        print("DUP_FACES_DROPPED", o.name, len(dup))
+    bm.free()
 
 
 def finger_spur(grip_o, coll):
@@ -226,10 +245,11 @@ def lever(coll):
     p_end2 = Vector((tx, tz)) + n * hw1
     pts += [(p_end1.x, p_end1.y), (p_end2.x, p_end2.y)]
     pts = fillet(pts, [1.6] * len(pts), seg=3)
-    arm = rounded_prism("Lever_arm", pts, CAST_LEFT - 0.5, CAST_LEFT + 4.0, 1.2, coll, "Paint_olive_cast")
+    # плечо — над боковиной на 0.7 мм (на бобышке оси, как на шайбе): иначе при повороте шло сквозь литые буквы
+    arm = rounded_prism("Lever_arm", pts, CAST_LEFT + 0.7, CAST_LEFT + 4.7, 1.2, coll, "Paint_olive_cast")
     boss = cyl("Lever_boss", CAST_LEFT - 0.5, CAST_LEFT + 5.5, 6.5, coll, "Paint_olive_cast", seg=40, cy=px0, cz=pz0,
                axis="Y", ch=0.8)
-    knob = cyl("Lever_knob", CAST_LEFT + 1.0, CAST_LEFT + 13.0, 5.6, coll, "Paint_olive_cast", seg=40, cy=tx, cz=tz,
+    knob = cyl("Lever_knob", CAST_LEFT + 1.6, CAST_LEFT + 13.6, 5.6, coll, "Paint_olive_cast", seg=40, cy=tx, cz=tz,
                axis="Y", ch=1.6)
     o = join([arm, boss, knob], "Lever")
     set_origin(o, (px0, CAST_LEFT, pz0))
@@ -253,7 +273,7 @@ def linkage(coll):
 def cast_seam(target, coll):
     """Шов литья по диагонали (снимок: 449,527 → 528,482) — канавка 0.5 мм."""
     from lib import boolean_safe
-    a = Vector(px(449, 527)); b = Vector(px(528, 482))
+    a = Vector(px(468, 517)); b = Vector(px(528, 482))   # начало за надписью «НАКОЛ» (v04: шов резал буквы)
     d = (b - a).normalized(); n = Vector((-d.y, d.x))
     w = 0.6
     pts = [tuple(a - n * w), tuple(b - n * w), tuple(b + n * w), tuple(a + n * w)]
@@ -290,7 +310,8 @@ def tabs(coll):
     out = []
     for i, x in enumerate((391, 484, 557, 586, 734)):
         X = px_x(x)
-        zt, zb = px_z(x, 466), px_z(x, 492)
+        # первое ушко над кнопкой — короче, не наезжает на её ободок (v03)
+        zt, zb = px_z(x, 466), px_z(x, 484 if i == 0 else 492)
         pts = fillet([(X - 5.5, zb), (X + 5.5, zb), (X + 5.5, zt), (X - 5.5, zt)], [5.0, 5.0, 1.0, 1.0], seg=5)
         t = rounded_prism(f"Launcher_tab_{i}", pts, CAST_LEFT - 0.5, CAST_LEFT + 1.8, 0.7, coll, "Paint_olive_cast")
         s = slotted_screw(f"Launcher_tab_screw_{i}", (X, CAST_LEFT + 1.8, zb + 4.5), (0, 1, 0), 4.6, coll,
@@ -358,8 +379,10 @@ def nameplate(coll):
     h = Zt - Zb
     pts = fillet([(X0, Zb), (X1, Zb), (X1, Zt), (X0, Zt)], [h / 2 - 0.2] * 4, seg=8)
     y0_, y1_ = D.BOX_Y[1] - 0.3, D.BOX_Y[1] + 0.7
-    # плоская призма: штамп по простым граням надёжен; кромки скругляются после штампа
-    from lib import prism_xz
+    # плоская призма: штамп по простым граням надёжен (скругление или нарезка до штампа ломали булево); после штампа
+    # скругляется только наружный контур (общее скругление «надувало» буквы, v03), кромки букв — острые, лицо —
+    # треугольниками (большая грань с дырами-буквами показывалась клиньями)
+    from lib import prism_xz, renormal, bevel_edges
     plate = prism_xz("Nameplate", pts, y0_, y1_, coll, "Plate_alu")
     rivets = []
     for i, X in enumerate((X0 + h / 2, X1 - h / 2)):
@@ -373,7 +396,17 @@ def nameplate(coll):
     t1, t2 = D.NAMEPLATE_TEXT
     stamps.stamp(plate, t1, 5.6, (xc, y1_, zc + 2.3), (0, 1, 0), (0, 0, 1), 0.2, coll)
     stamps.stamp(plate, t2, 4.6, (xc, y1_, zc - 2.5), (0, 1, 0), (0, 0, 1), 0.2, coll)
-    finish_small(plate, 0.25, 2, 35)
+    tx0, tx1 = xc - 0.5 * (X1 - X0) + h / 2, xc + 0.5 * (X1 - X0) - h / 2
+
+    def outline(mid):
+        # рёбра контура таблички (вне поля надписи или на её торцах и задней грани)
+        return not (tx0 < mid.x < tx1 and Zb + 0.6 < mid.z < Zt - 0.6 and mid.y > y1_ - 0.35)
+    bevel_edges(plate, lambda a, b: a.angle(b) > math.radians(30), w=0.25, seg=3, where=outline)
+    bm = bmesh.new(); bm.from_mesh(plate.data)
+    big = [f for f in bm.faces if len(f.verts) > 4]
+    bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="EAR_CLIP")
+    bm.to_mesh(plate.data); bm.free()
+    renormal(plate)
     return [plate] + rivets
 
 
