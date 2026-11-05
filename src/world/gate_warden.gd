@@ -94,7 +94,13 @@ func _collect() -> void:
 		m.set_meta("gate_warden", true)
 		m.hostile_to_players = hostile
 		_guards.append(m)
-	_guards = _guards.filter(func(g: Marauder) -> bool: return is_instance_valid(g) and g.state != Marauder.State.DEAD)
+	# живые охранники; filter возвращает нетипизированный Array — его нельзя присвоить Array[Marauder] (ошибка на каждой
+	# проверке, погибшие и удалённые оставались в списке), поэтому собираем заново
+	var alive: Array[Marauder] = []
+	for g: Variant in _guards:
+		if is_instance_valid(g) and (g as Marauder).state != Marauder.State.DEAD:
+			alive.append(g as Marauder)
+	_guards = alive
 
 
 func _player_at_gate(zone_m: float) -> bool:
