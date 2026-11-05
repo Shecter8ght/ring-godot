@@ -407,7 +407,7 @@ python -X utf8 tools/build_prospekt_raid.py                   # рейдовая
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
 tools/godot.cmd --headless res://tools/bake_cover_points.tscn [-- prospekt mall_map zone01_mall] # точки укрытия карты (src/ai/cover_points.gd,
                                                               # Balance.AI_POINTS; приём Road to Vostok): «низкое укрытие» и «угол» с направлением по физике
-                                                              # и навигации → <nav_cache>/cover_points.json (запечён только «Проспект»); после навигации — заново
+                                                              # и навигации → <nav_cache>/cover_points.json (запечены «Проспект», ТЦ, «Пригород»); после навигации — заново
 tools/godot.cmd --headless res://tools/cover_points_test.tscn # точки укрытия: разметка на полигоне (ящик, конец стены, поле), «Проспект» — мародёр
                                                               # берёт точку, где его не видно с угрозы, с другой стороны угрозы — нет, занятую второй не берёт
 tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «Проспекта»: навигация, население слоями, кордон ЧВК, точки на навигации,
@@ -936,8 +936,10 @@ docs/          STATUS.md (что сделано / что дальше), реше
    `tools/research/rtv/light_tables.gd`): сила и цвет солнца и луны, рассеянный свет (половина — от неба), небо по их
    схеме (`src/world/tod_sky.gdshader`, облака — наши панорамы из `sky.json`), объёмная дымка вместо тумана по
    расстоянию, AgX; их час подбирается по высоте нашего солнца. Привыкание глаза, SSAO, SDFGI и отражения — наши.
-   `TOD_LIGHT.on = false` — прежний свет «Проспекта»; параметры стенда «Свет и атмосфера» действуют только на него
-   (общие множители — на оба). Сравнение со светом их игры — стенд `tools/rtv_look.tscn`.
+   Выбор игрока — Esc → Читы → Мир → «Свет и небо» (`Settings.sky_mode`: «tod» / прежний с расчётным небом /
+   с панорамами, в рейде сразу); `TOD_LIGHT.on = false` выключает новый свет совсем. Стенд «Свет и атмосфера» при
+   новом свете — свои ползунки `LAB_RULES.atmosphere_tod`, при прежнем — прежние. Сравнение со светом их игры —
+   стенд `tools/rtv_look.tscn`.
 
 ## Git
 
