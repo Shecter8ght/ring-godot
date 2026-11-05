@@ -35,7 +35,23 @@ func apply() -> void:
 	var level := get_parent()
 	var sun := level.get_node_or_null("Sun") as DirectionalLight3D
 	var we := level.find_child("WorldEnvironment", false, false) as WorldEnvironment
+	# во вложенной сцене (блокаут «Проспекта», территория ТЦ) свой WorldEnvironment: движок показывал его неизменное
+	# окружение, а общий свет менял невидимое — небо, рассеянный свет и погода на этих картах не менялись
+	if we:
+		for other: Node in level.find_children("*", "WorldEnvironment", true, false):
+			if other != we and other.get_parent():
+				other.get_parent().remove_child(other)
+				other.queue_free()
 	RaidLighting.prepare(we, sun)
+	# свет по схеме Road to Vostok (Balance.TOD_LIGHT): окружение — их, солнце, луну, небо и дымку ведёт DayCycle
+	if TodLight.active():
+		TodLight.prepare(we, sun)
+		_apply_power(String(c.power))
+		_day_cycle(String(c.time))
+		if level.get_node_or_null("DayCycle") == null:
+			var h: float = float(t.get("start_hour", 12.0))
+			TodLight.apply(h, DayCycle.sun_at(h), sun, we.environment if we else null, 1.0 if String(c.time) == "night" else 0.0)
+		return
 	var night := String(c.time) == "night"
 	var sky_mat: ShaderMaterial = night_sky_material() if night else null
 	if sun:

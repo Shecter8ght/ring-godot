@@ -200,6 +200,20 @@ func hdri_conf(k: String) -> Dictionary:
 func _build_sky() -> void:
 	_sky = null
 	_calc = false
+	# свет по схеме Road to Vostok: их небо с нашими облаками (TodLight)
+	if TodLight.active():
+		_conf = {}
+		_sky = TodLight.sky_material()
+		var tsky := Sky.new()
+		tsky.sky_material = _sky
+		tsky.radiance_size = Sky.RADIANCE_SIZE_256
+		var te := _env()
+		if te:
+			te.sky = tsky
+			te.background_mode = Environment.BG_SKY
+			te.background_energy_multiplier = 1.0
+			te.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		return
 	var day := hdri_conf("day")
 	var dusk := hdri_conf("dusk")
 	_conf = {"day": day, "dusk": dusk}
@@ -305,6 +319,9 @@ func _tick(delta: float, force: bool) -> void:
 func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 	var sun := _atm.get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var e := _env()
+	if TodLight.active():
+		TodLight.apply(hour, sa, sun, e, float(w.night))
+		return
 	var dc: Dictionary = Balance.DAY_CYCLE
 	if sun:
 		# днём — солнце (гаснет у горизонта), ночью — Луна (пока над горизонтом)
@@ -361,6 +378,9 @@ func _apply_light(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
 
 
 func _apply_sky(w: Dictionary, sa: Vector2, ma: Vector2) -> void:
+	if TodLight.active():
+		TodLight.apply_sky(_sky, hour, sa)
+		return
 	var to_sun := dir_from(sa.x, sa.y)
 	_sky.set_shader_parameter("night_k", float(w.night))
 	_sky.set_shader_parameter("stars_rotation", hour * 15.0)

@@ -4362,6 +4362,38 @@ const WORLD_LIGHT := {
  "ambient_k_day_overcast": 0.8, "ambient_k_dusk_overcast": 0.8, "ambient_k_night_overcast": 2.6,
 }
 const WORLD_FOG := {"clear": {"begin": 50.0, "end": 900.0, "density": 0.55, "curve": 0.6, "sky": 0.1}}
+## Свет по времени суток по схеме Road to Vostok (решение владельца 2026-11-05: их свет на все рейдовые карты; стенд
+## сравнения — tools/rtv_look.tscn). Таблица по часам (цвет неба, солнца, луны, рассеянного, дымки; сила солнца,
+## отражения неба, плотность дымки) — data/lighting/time_of_day.json, ведёт TodLight; наш час переводится в их по
+## высоте солнца. on = false — прежний свет (WORLD_LIGHT, панорамы, расчётное небо). Привыкание глаза — наше (CameraLook).
+const TOD_LIGHT := {
+	"on": true,
+	"table": "res://data/lighting/time_of_day.json",
+	## их солнце светит, пока их часы между day_from и day_to (выше горизонта), иначе — луна напротив солнца
+	"day_from": 600.0, "day_to": 1800.0,
+	## сила луны и сила солнца / луны под сплошными тучами (overcast = 1)
+	"moon_energy": 2.0, "overcast_energy": 0.5,
+	## плотность объёмной дымки = кривая fogDensity × туман погоды / fog_div
+	"fog_div": 100.0,
+	## погода (их World.gd): к чему идут тучи, ветер, туман и дождь
+	"weather": {
+		"clear": {"overcast": 0.0, "wind": 0.2, "fog": 1.0, "rain": 0.0},
+		"heat": {"overcast": 0.0, "wind": 0.2, "fog": 1.0, "rain": 0.0},
+		"overcast": {"overcast": 1.0, "wind": 1.0, "fog": 1.0, "rain": 0.0},
+		"rain": {"overcast": 1.0, "wind": 0.2, "fog": 1.0, "rain": 1.0},
+		"fog": {"overcast": 1.0, "wind": 1.0, "fog": 4.0, "rain": 0.0},
+	},
+	## тень солнца и луны: даль (качество графики её урезает, SHADOW_QUALITY), резкая (без размера диска)
+	"shadow_max_m": 200.0,
+	## облака неба — наши панорамы (sky.json: day, day_overcast), приведённые к средней яркости их облачного неба
+	## (их картинки облаков в среднем 0,765 и 0,528 в sRGB; в шейдере — линейные 0,546 и 0,241)
+	"clouds_clear": "day", "clouds_overcast": "day_overcast",
+	"clear_mean": 0.546, "overcast_mean": 0.241,
+	## разброс яркости их облаков (от просвета до облака, линейно): ясно 0,165…0,931, пасмурно 0,104…0,447
+	"clear_spread": 0.766, "overcast_spread": 0.343,
+	## облака плывут: доля оборота панорамы за игровой час (небо обновляется раз в DAY_CYCLE.sky_sec)
+	"clouds_drift": 0.03,
+}
 
 
 # --- Интерактивные стенды: нейтральные множители и допустимые пределы ---
@@ -4445,7 +4477,8 @@ func lab_atmosphere(sun: DirectionalLight3D, environment: Environment) -> void:
 		environment.background_energy_multiplier *= lab_number("atmosphere", "sky")
 		environment.tonemap_exposure *= lab_number("atmosphere", "exposure")
 		environment.fog_light_color *= LabTuning.value("atmosphere", "fog_tint") as Color
-		if environment.has_meta("shared_lighting"):
+		# свет по схеме Road to Vostok (TodLight) ставит тональную кривую, дымку и эффекты сам — стенд света их не трогает
+		if environment.has_meta("shared_lighting") and not environment.has_meta("tod"):
 			environment.tonemap_mode = int(lab_number("atmosphere", "tonemap"))
 			environment.adjustment_contrast = lab_number("atmosphere", "contrast")
 			environment.adjustment_saturation = lab_number("atmosphere", "saturation")

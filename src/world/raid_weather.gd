@@ -178,15 +178,20 @@ func _apply_static() -> void:
 		e.fog_depth_begin = float(df.begin)
 		e.fog_depth_end = float(df.end)
 		e.fog_depth_curve = float(df.curve)
+	# свет по схеме Road to Vostok (TodLight): глубинного тумана нет, туман погоды — их объёмная дымка; числа
+	# тумана ниже остаются для игры (видимость, огни при плохой видимости)
+	var tod: bool = TodLight.active()
 	if e:
-		e.fog_light_color = Color(0.62, 0.64, 0.66) if String(RaidConditions.current.time) != "night" else Color(0.05, 0.06, 0.08)
+		if not tod:
+			e.fog_light_color = Color(0.62, 0.64, 0.66) if String(RaidConditions.current.time) != "night" else Color(0.05, 0.06, 0.08)
 		# в начале рейда — сразу как есть; дальше туман сгущается и рассеивается плавно (_tick_fog)
 		if not _fog_ready:
 			_fog_ready = true
 			_fog_base = _fog_target
-			e.fog_density = _fog_base * Balance.lab_number("atmosphere", "fog")
-			e.fog_sky_affect = _fog_sky_target
-			e.fog_enabled = _fog_target > 0.0
+			if not tod:
+				e.fog_density = _fog_base * Balance.lab_number("atmosphere", "fog")
+				e.fog_sky_affect = _fog_sky_target
+				e.fog_enabled = _fog_target > 0.0
 	_update_visibility()
 	_set_overcast(RaidConditions.clouded(w))
 	_set_rain(w == "rain")
@@ -212,9 +217,10 @@ func _tick_fog(delta: float) -> void:
 	# под крышей ТЦ туман реже (у каждого peer — по своему игроку, это только картинка)
 	var ind: Dictionary = Balance.INDOOR
 	_roof = move_toward(_roof, 0.0 if _outdoor else 1.0, delta / float(ind.sec))
-	e.fog_density = _fog_base * (1.0 if depth else lerpf(1.0, float(ind.fog_k), _roof)) * Balance.lab_number("atmosphere", "fog")
-	e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
-	e.fog_enabled = e.fog_density > 0.00001
+	if not TodLight.active():
+		e.fog_density = _fog_base * (1.0 if depth else lerpf(1.0, float(ind.fog_k), _roof)) * Balance.lab_number("atmosphere", "fog")
+		e.fog_sky_affect = move_toward(e.fog_sky_affect, _fog_sky_target, 0.5 * delta / sec)
+		e.fog_enabled = e.fog_density > 0.00001
 	_update_visibility()
 
 
@@ -280,6 +286,9 @@ var _overcast: Array = []
 
 ## Дождь или пасмурно: солнце и небо тусклее (вернуть, если тучи разойдутся / уровень ушёл).
 func _set_overcast(on: bool) -> void:
+	# свет по схеме Road to Vostok: тучи гасят солнце и меняют небо сами (TodLight)
+	if TodLight.active():
+		return
 	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
 	if we and we.environment and we.environment.has_meta("procedural_weather"):
