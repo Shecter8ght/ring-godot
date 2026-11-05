@@ -103,17 +103,19 @@ def face_fill(pos, nrm, filled, tris, ax, plane_mm, axes):
 
 def white_mask(pos, nrm, filled, marks, zones):
     """Белая краска в гравировке (этап 2, владелец 05.11: «да, белой, слегка стёртой»): надписи без красной заливки
-    (ИЗЛОМ-45, калибр, номер) и знаки (кольцо и ломаная, контуры резца из zones.json)."""
-    w = np.zeros(pos.shape[:2], np.float32)
+    (ИЗЛОМ-45, калибр, номер) и знаки (кольцо и ломаная, контуры резца из zones.json) — порознь: знак в износе v3
+    серее и вытертее надписей (владелец: «знак не чисто-белый»). Возврат — (надписи, знаки)."""
+    t = np.zeros(pos.shape[:2], np.float32)
     for m in marks:
         if m.get('red', True) or not m['tris']:
             continue
-        w = np.maximum(w, face_fill(pos, nrm, filled, m['tris'], 1, m['side'] * HALF_W, (0, 2)))
-    for e in zones.get('emblems', []):
-        if e.get('tris'):
-            w = np.maximum(w, face_fill(pos, nrm, filled, e['tris'], e['axis'], e['center_mm'][e['axis']],
-                                        tuple(e['axes'])))
-    return w
+        t = np.maximum(t, face_fill(pos, nrm, filled, m['tris'], 1, m['side'] * HALF_W, (0, 2)))
+    e = np.zeros(pos.shape[:2], np.float32)
+    for em in zones.get('emblems', []):
+        if em.get('tris'):
+            e = np.maximum(e, face_fill(pos, nrm, filled, em['tris'], em['axis'], em['center_mm'][em['axis']],
+                                        tuple(em['axes'])))
+    return t, e
 
 
 def engrave_height(pos, nrm, filled, marks):
@@ -241,8 +243,11 @@ def main():
         pos, nrm, filled = d['pos'], d['nrm'].astype(np.float32), d['filled']
         red = red_mask(pos, nrm, filled, marks)
         cv2.imwrite(str(OUT / f'{name}_red.png'), np.round(red * 255).astype(np.uint8))
-        white = white_mask(pos, nrm, filled, marks, zones)
+        w_text, w_emb = white_mask(pos, nrm, filled, marks, zones)
+        white = np.maximum(w_text, w_emb)
         cv2.imwrite(str(OUT / f'{name}_white.png'), np.round(white * 255).astype(np.uint8))
+        cv2.imwrite(str(OUT / f'{name}_white_text.png'), np.round(w_text * 255).astype(np.uint8))
+        cv2.imwrite(str(OUT / f'{name}_white_emblem.png'), np.round(w_emb * 255).astype(np.uint8))
         print('WHITE', name, 'белой краски, пикселей', int((white > 0.5).sum()))
         prev = np.where(filled[..., None], np.array([110, 110, 110], np.float32), 0.0)
         prev = prev * (1.0 - red[..., None]) + red[..., None] * np.array([30, 30, 230], np.float32)

@@ -107,7 +107,10 @@ def rail_spots(pos, nrm, filled):
     m = np.zeros_like(x)
     for x0, x1, k in ((-229.0, -213.0, 0.8), (-118.0, -92.0, 1.0), (38.0, 58.0, 0.7)):
         m = np.maximum(m, k * smooth(x0 - 3.0, x0, x) * (1 - smooth(x1, x1 + 3.0, x)))
-    return np.where(filled, m * on, 0.0)
+    # внутри участка — пятнами по 2–3 мм: часть зубьев и часть кромки целые (v3: на виде сверху читались ровные
+    # белые рамки на каждом зубе)
+    breakup = smooth(-0.4, 0.5, sample(field(31, -235.0, 65.0, -15.0, 15.0, 2.5, 2.0), x, y))
+    return np.where(filled, m * on * breakup, 0.0)
 
 
 def slot(pos, nrm, filled):
@@ -258,6 +261,126 @@ def grip(pos, nrm, filled):
     return np.where(filled & inside, m, 0.0)
 
 
+# ------------------------------------------------------------------------------------------------- v3: следы с причиной
+PORT_X = (-43.0, 4.0)
+PORT_Z = (13.0, 47.5)
+
+
+def rings(pos, nrm, filled):
+    """Кольца грязи вокруг головок осей и винтов (крепёж — fasteners.json из v06): у самого края головки гуще,
+    наружу рвано сходит на нет; кольцо не замкнуто — где-то протёрто."""
+    fs = json.loads((TEX / 'fasteners.json').read_text(encoding='utf-8'))
+    x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
+    out = np.zeros_like(x)
+    fd = field(41, -480.0, 150.0, -120.0, 90.0, 0.6, 0.6, res=8.0)
+    brk = smooth(-0.5, 0.6, sample(fd, x, z))
+    for f in fs:
+        n = f['name']
+        if not (n.startswith('Pin_') or n.startswith('Stock_screw')) or n.endswith('_spring'):
+            continue
+        lo, hi = np.array(f['lo']), np.array(f['hi'])
+        cx, cz = (lo[0] + hi[0]) / 2, (lo[2] + hi[2]) / 2
+        r = (hi[0] - lo[0]) / 2
+        side = 1.0 if lo[1] > 0 else -1.0
+        plane = lo[1] if side > 0 else hi[1]                  # поверхность, к которой прилегает головка
+        near = (np.abs(y - plane) < 1.2) & (np.abs(nrm[..., 1]) > 0.6)
+        d = np.hypot(x - cx, z - cz) - r
+        ring = (1 - smooth(0.0, 2.6, d)) * (d > -0.3)
+        out = np.maximum(out, np.where(near, ring, 0.0))
+    return np.where(filled, out * (0.35 + 0.65 * brk), 0.0)
+
+
+def port(pos, nrm, filled):
+    """Окно выброса (справа): масляная плёнка по кромке и стенкам окна; латунные мазки от гильз — у задней кромки
+    окна и чуть позади, редкие косые."""
+    x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
+    right = y < -HALF_W + 3.0
+    dx = np.maximum(np.maximum(PORT_X[0] - x, x - PORT_X[1]), 0)
+    dz = np.maximum(np.maximum(PORT_Z[0] - z, z - PORT_Z[1]), 0)
+    d_out = np.hypot(dx, dz)
+    inside = (x > PORT_X[0]) & (x < PORT_X[1]) & (z > PORT_Z[0]) & (z < PORT_Z[1])
+    fo = field(51, -60.0, 15.0, 5.0, 55.0, 1.2, 3.0)
+    oil = np.where(inside, 1.0, 1 - smooth(0.3, 3.5, d_out)) * right * np.clip(sample(fo, x, z) * 0.5 + 0.6, 0, 1)
+    # латунь: 4 косых мазка от задней кромки назад-вниз
+    brass = np.zeros_like(x)
+    rng = np.random.default_rng(52)
+    for k in range(4):
+        z0 = rng.uniform(22.0, 40.0)
+        ang = math.radians(rng.uniform(-25.0, -8.0))
+        L = rng.uniform(4.0, 9.0)
+        w = rng.uniform(0.25, 0.6)
+        u = (x - PORT_X[0]) * math.cos(ang) + (z - z0) * math.sin(ang)    # вдоль мазка (назад — отрицательный x)
+        v = -(x - PORT_X[0]) * math.sin(ang) + (z - z0) * math.cos(ang)
+        line = np.exp(-(v / w) ** 2) * smooth(-L, -L * 0.6, u) * (1 - smooth(-0.3, 0.6, u))
+        brass = np.maximum(brass, line * rng.uniform(0.5, 1.0))
+    face = (nrm[..., 1] < -0.8) & right
+    return np.where(filled, oil, 0.0), np.where(filled & face, brass, 0.0)
+
+
+def muzzle(pos, nrm, filled):
+    """Нагар у дульного среза: торец колпачка и последние миллиметры снаружи, в канал — гуще."""
+    x = pos[..., 0]
+    r = np.hypot(pos[..., 1], pos[..., 2])
+    front = smooth(137.0, 141.5, x)
+    bore = (r < 6.5) & (x > 128.0)
+    fd = field(61, -20.0, 20.0, -20.0, 20.0, 0.8, 0.8)
+    n = np.clip(sample(fd, pos[..., 1], pos[..., 2]) * 0.4 + 0.7, 0, 1)
+    return np.where(filled & (x > 120.0), np.maximum(front * n, bore * 0.9), 0.0)
+
+
+def corner_scuff(x, y, z, cx, cz, r, seed, y_right, right=0.35):
+    """Ссадина на углу (тычки о пол и стены): сила падает от ребра угла (cx, cz) к радиусу r, граница рваная — шум
+    крупный и мелкий, внутри не сплошь. Правый борт (y < 0) слабее: ствол кладут и носят левым к миру, и одинаковая
+    ссадина с двух сторон выглядит штампом. Прежний акцент — прямоугольник в 8 мм от угла с мелкой крапиной —
+    в рендере читался как QR-код (v3, проба 1)."""
+    box = (cx - r - 3.0, cx + r + 3.0, cz - r - 3.0, cz + r + 3.0)
+    n_c = sample(field(seed, *box, 1.2, 1.2, res=20.0), x, z)
+    n_f = sample(field(seed + 1, *box, 0.3, 0.3, res=40.0), x, z)
+    fall = 1.0 - np.hypot(x - cx, z - cz) / r
+    m = smooth(0.0, 0.18, fall + 0.16 * n_c + 0.06 * n_f - 0.35)
+    m = m * (0.7 + 0.3 * smooth(-0.6, 0.6, n_f))
+    return m * (right + (1.0 - right) * smooth(y_right, 5.0, y))
+
+
+def accents(pos, nrm, filled, setname):
+    """Ручные акценты — по одному, «приманки для глаза»: длинная царапина на левом борту (верх), ссадина на переднем
+    нижнем углу шахты (низ), потёртость на заднем нижнем углу приклада (приклад)."""
+    x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
+    out = np.zeros_like(x)
+    if setname == 'Upper':
+        # длинная, чуть изогнутая, с переменной силой: от (−152, 33) к (−93, 25.5); проходит под головкой оси 01
+        face = (nrm[..., 1] > 0.9) & (y > HALF_W - 0.8)
+        t = np.clip((x + 152.0) / 59.0, 0.0, 1.0)
+        zc = 33.0 - 7.5 * t + 1.2 * np.sin(t * math.pi)
+        w = 0.07 + 0.06 * np.sin(t * 7.0) ** 2
+        # sin(π) в float32 бывает −1e−8: дробная степень даёт NaN — отсекаем ноль
+        ins = (0.4 + 0.6 * np.maximum(np.sin(t * math.pi), 0.0) ** 0.6) * (1 - smooth(0.92, 1.0, t)) * smooth(0.0, 0.05, t)
+        line = np.exp(-((z - zc) / w) ** 2) * ins * (x > -152.5) * (x < -92.5)
+        out = np.where(face, line, 0.0)
+    elif setname == 'Lower':
+        # передний нижний угол шахты магазина: X ≈ −33,5, Z ≈ −109,6 (замер карты положения по бортам — низ шахты
+        # Z −109,6 до X −36, у X −30 борт кончается выше; шахта наклонена назад на 21°)
+        out = corner_scuff(x, y, z, -33.5, -109.6, 9.0, 71, -HALF_W)
+        nx, ny = nrm[..., 0], nrm[..., 1]
+        inside = ((np.abs(ny) > 0.5) & (np.sign(ny) != np.sign(y))) | (nx < -0.5)
+        out = np.where(inside, 0.0, out)
+    elif setname == 'Stock':
+        # задний нижний угол корпуса приклада: X ≈ −471, Z ≈ −94 (замер: задняя кромка борта у низа X −470,6,
+        # низ борта Z −93,5…−94,1); полуширина приклада 19 мм
+        out = corner_scuff(x, y, z, -471.0, -94.0, 11.0, 72, -19.0)
+    return np.where(filled, out, 0.0)
+
+
+def up(nrm, filled):
+    """Грани, смотрящие вверх: на них оседает пыль (налёт на верхних уступах)."""
+    return np.where(filled, smooth(0.45, 0.85, nrm[..., 2]), 0.0)
+
+
+def zgrad(pos, filled, z0, z1):
+    """Крупный градиент по высоте ствола: сверху 1, снизу 0."""
+    return np.where(filled, smooth(z0, z1, pos[..., 2]), 0.0)
+
+
 def save(setname, name, m):
     OUT.mkdir(parents=True, exist_ok=True)
     m = np.clip(m, 0.0, 1.0)
@@ -278,6 +401,13 @@ def main():
         m = fn(pos, nrm, filled)
         log.append(f'Upper {name}: {save("Upper", name, m)}')
         prev = prev * (1 - m[..., None]) + m[..., None] * np.array(col, np.float32)
+    for name, m in (('rings', rings(pos, nrm, filled)), ('muzzle', muzzle(pos, nrm, filled)),
+                    ('accent', accents(pos, nrm, filled, 'Upper')), ('zgrad', zgrad(pos, filled, -60.0, 60.0))):
+        log.append(f'Upper {name}: {save("Upper", name, m)}')
+    log.append(f'Upper up: {save("Upper", "up", up(nrm, filled))}')
+    oil, brass = port(pos, nrm, filled)
+    log.append(f'Upper port_oil: {save("Upper", "port_oil", oil)}')
+    log.append(f'Upper port_brass: {save("Upper", "port_brass", brass)}')
     tone, prints = hand(pos, nrm, filled)
     log.append(f'Upper hand_tone: {save("Upper", "hand_tone", tone)}')
     log.append(f'Upper hand_prints: {save("Upper", "hand_prints", prints)}')
@@ -288,11 +418,24 @@ def main():
     pos, nrm, filled = d['pos'], d['nrm'].astype(np.float32), d['filled']
     g = grip(pos, nrm, filled)
     log.append(f'Lower grip: {save("Lower", "grip", g)}')
+    for name, m in (('rings', rings(pos, nrm, filled)), ('accent', accents(pos, nrm, filled, 'Lower')),
+                    ('zgrad', zgrad(pos, filled, -110.0, 20.0)), ('up', up(nrm, filled))):
+        log.append(f'Lower {name}: {save("Lower", name, m)}')
     prev = np.zeros(pos.shape[:2] + (3,), np.float32)
     prev[filled] = 0.25
     prev = prev * (1 - g[..., None]) + g[..., None] * np.array((0.9, 0.6, 0.2), np.float32)
     cv2.imwrite(str(OUT / 'Lower_zones_preview.png'), cv2.resize((prev[..., ::-1] * 255).astype(np.uint8), (2048, 2048),
                                                                  interpolation=cv2.INTER_AREA))
+    for setname, z0, z1 in (('Steel', -60.0, 70.0), ('Stock', -95.0, 50.0)):
+        d = np.load(TEX / f'{setname}_maps.npz')
+        pos, nrm, filled = d['pos'], d['nrm'].astype(np.float32), d['filled']
+        log.append(f'{setname} zgrad: {save(setname, "zgrad", zgrad(pos, filled, z0, z1))}')
+        log.append(f'{setname} up: {save(setname, "up", up(nrm, filled))}')
+        if setname == 'Steel':
+            log.append(f'Steel muzzle: {save("Steel", "muzzle", muzzle(pos, nrm, filled))}')
+        else:
+            log.append(f'Stock rings: {save("Stock", "rings", rings(pos, nrm, filled))}')
+            log.append(f'Stock accent: {save("Stock", "accent", accents(pos, nrm, filled, "Stock"))}')
     print('\n'.join(log))
 
 
