@@ -49,6 +49,7 @@ enum Tactic { ENGAGE, COVER_MOVE, COVER_HIDE, COVER_PEEK, FLANK, PUSH, ADVANCE, 
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE := 1.05
 const AimReaction = preload("res://src/ai/aim_reaction.gd")
+const CoverPoints = preload("res://src/ai/cover_points.gd")
 
 var state: State = State.PATROL
 var animation_event: String = ""
@@ -159,6 +160,8 @@ var _unseen_t: float = 99.0
 var _callout_t: float = 0.0
 var _tactic_t: float = 0.0
 var _cover_pos: Vector3 = Vector3.ZERO
+## Укрытие — точка карты (CoverPoints): её номер, −1 — найдено лучами.
+var _cover_point_index: int = -1
 var _peeks: int = 0
 ## Засада: сколько ещё ждать, с; у какой точки ждёт; идёт в укрытие, чтобы сесть там; шанс на эту
 ## потерю цели уже разыгран. ambush_bias — множитель шанса для тестов (0 — никогда, 100 — всегда).
@@ -2185,6 +2188,8 @@ func _try_cover(radius: float, far: bool) -> bool:
 		return false
 	_cover_miss.clear()
 	_cover_pos = best
+	# точка карты — занять (другие её не возьмут), найденная лучами — отпустить прежнюю
+	CoverPoints.claim(get_world_3d(), _cover_point_index, self)
 	_set_move_target(best)
 	if state == State.COMBAT:
 		_set_tactic(Tactic.COVER_MOVE)
@@ -2199,6 +2204,30 @@ func _cover_point(radius: float, far: bool) -> Vector3:
 	var cands: Array = []
 	# высота навмеша под собой — он лежит чуть выше пола
 	var own_y := _snap(global_position).y
+	_cover_point_index = -1
+	# точки укрытия карты (CoverPoints, Balance.AI_POINTS) — раньше случайных: место, где препятствие закрывает
+	# со стороны угрозы (угроза в конусе направления точки), ближе к себе, чем к угрозе, не занятое другим
+	var pts: Dictionary = Balance.AI_POINTS
+	if bool(pts.on):
+		var world := get_world_3d()
+		var cover_of := func(o: Object) -> Vector3:
+			var other := o as Marauder
+			return other._cover_pos if other and other.state != State.DEAD else Vector3.INF
+		for pt: Dictionary in CoverPoints.near(world, global_position, radius * float(pts.radius_k)):
+			var p: Vector3 = pt.pos
+			var flat := Vector3(last_known.x - p.x, 0.0, last_known.z - p.z)
+			if flat.length() < 2.0 or (pt.fwd as Vector3).dot(flat.normalized()) < float(pts.cone_dot):
+				continue
+			var travel := p.distance_to(global_position)
+			var to_threat := p.distance_to(last_known)
+			if absf(p.y - own_y) > 0.6 or (not far and travel >= to_threat):
+				continue
+			if CoverPoints.taken_by_other(world, int(pt.i), self, cover_of):
+				continue
+			var qp := PhysicsRayQueryParameters3D.create(threat, p + Vector3.UP * CROUCH_EYE, Hitscan.LAYER_WORLD)
+			if space.intersect_ray(qp).is_empty():
+				continue
+			cands.append([travel - (to_threat * 0.8 if far else 0.0) - float(pts.bonus), p, travel, int(pt.i)])
 	for ring in [0.35, 0.65, 1.0]:
 		for i in range(12):
 			var a := TAU * float(i) / 12.0 + _rng.randf() * 0.3
@@ -2216,7 +2245,7 @@ func _cover_point(radius: float, far: bool) -> Vector3:
 			# не лезть ближе к угрозе (кроме дробовика — ему вблизи и надо)
 			if not far and String(_spec.get("class", "")) != "SHOTGUN" and to_threat < global_position.distance_to(last_known) - 3.0:
 				score += 6.0
-			cands.append([score, cand, travel])
+			cands.append([score, cand, travel, -1])
 	cands.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) < float(y[0]))
 	# идти до укрытия — не в обход через полкарты: путь не длиннее полутора прямых + 4 м
 	var map := get_world_3d().navigation_map
@@ -2228,6 +2257,7 @@ func _cover_point(radius: float, far: bool) -> Vector3:
 			plen += path[k - 1].distance_to(path[k])
 		if path.size() >= 2 and plen <= float(c[2]) * 1.5 + 4.0:
 			best = c[1]
+			_cover_point_index = int(c[3])
 			break
 	return best
 

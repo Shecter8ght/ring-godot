@@ -471,6 +471,10 @@ func _on_nav_baked() -> void:
 	await get_tree().physics_frame
 	_nav_baked = true
 	print("sector: навмеш готов, регионов %d" % NavigationServer3D.map_get_regions(get_world_3d().navigation_map).size())
+	# точки укрытия карты (tools/bake_cover_points.tscn) — рядом с кэшем навигации; мародёр смотрит их первыми
+	var cover_n: int = Marauder.CoverPoints.load_for(get_world_3d(), String(_sector_def.get("nav_cache", "")))
+	if cover_n > 0:
+		print("sector: точек укрытия %d" % cover_n)
 	# Мародёров спавнит только хост (или синглплеер) — клиенты получат их репликацией. Связки
 	# «перелезть» нужны только там, где думает ИИ.
 	if not Net.is_networked() or multiplayer.is_server():

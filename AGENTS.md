@@ -400,6 +400,11 @@ python -X utf8 tools/prospekt_ld_plan.py                       # «Проспе�
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
+tools/godot.cmd --headless res://tools/bake_cover_points.tscn [-- prospekt mall_map zone01_mall] # точки укрытия карты (src/ai/cover_points.gd,
+                                                              # Balance.AI_POINTS; приём Road to Vostok): «низкое укрытие» и «угол» с направлением по физике
+                                                              # и навигации → <nav_cache>/cover_points.json (запечён только «Проспект»); после навигации — заново
+tools/godot.cmd --headless res://tools/cover_points_test.tscn # точки укрытия: разметка на полигоне (ящик, конец стены, поле), «Проспект» — мародёр
+                                                              # берёт точку, где его не видно с угрозы, с другой стороны угрозы — нет, занятую второй не берёт
 tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn # рейд «Проспекта»: навигация, население слоями, кордон ЧВК, точки на навигации,
                                                               # от каждого захода до всех выходов, места лута; приёмы EFT — выходы по стороне захода
                                                               # и «не каждый рейд», ворота паркинга (КТП / брелок), труба без рюкзака, решётка
