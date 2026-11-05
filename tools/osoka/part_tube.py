@@ -107,10 +107,10 @@ def bell(coll):
             return r
         # желобки: впадина ~1.6 мм, ширина ~1/3 шага; концы желобка плавно выходят на поверхность
         ph = (a * n / (2 * math.pi)) % 1.0
-        d = min(abs(ph - 0.5) / 0.17, 1.0)
+        d = min(abs(ph - 0.5) / 0.24, 1.0)
         prof_ = 0.5 * (1 + math.cos(math.pi * d)) if d < 1.0 else 0.0
-        t = min((x - xa) / 4.0, (xb - x) / 4.0, 1.0)
-        return r - 1.6 * prof_ * t
+        t = min((x - xa) / 5.0, (xb - x) / 5.0, 1.0)
+        return r - 2.8 * prof_ * t
 
     prof = []
     k = 24

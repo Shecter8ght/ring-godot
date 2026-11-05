@@ -42,32 +42,65 @@ def cast_body(coll):
     return o
 
 
-def trigger_housing(coll):
-    pts = fillet(P(D.TRIG_HOUSING_PX), [6.0, 6.0, 3.2, 3.2, 3.2, 3.2, 3.2, 3.0, 3.0], seg=5)
-    return rounded_prism("Launcher_trigger_housing", pts, D.TRIG_HOUSING_Y[0], D.TRIG_HOUSING_Y[1], 2.4, coll,
-                         "Paint_olive_cast")
-
-
 def grip(coll):
-    # радиус угла контура ≥ скругления кромки (иначе сдвинутые контуры выворачиваются)
-    pts = fillet(P(D.GRIP_PX), [5.5, 5.5, 7.0, 6.0, 6.0, 6.0, 6.0], seg=6)
-    o = rounded_prism("Launcher_grip", pts, D.GRIP_Y[0], D.GRIP_Y[1], 5.0, coll, "Paint_olive_cast")
-    # вставки с насечкой — утоплены на 0.7 мм с обеих сторон (насечка — следующим шагом, после приёмки формы)
-    pp = fillet(P(D.GRIP_PANEL_PX), [4.0] * 4, seg=5)
-    from lib import boolean_safe
-    # резец со скруглёнными кромками (R 0.4): край вставки скруглён; режем слева, правую половину — отражением
-    # (рукоять симметрична; второе вычитание справа давало задвоенную грань)
-    c = rounded_prism("_panel_L", pp, D.GRIP_Y[1] - 0.7, D.GRIP_Y[1] + 3.0, 0.4, coll)
+    """Спусковая рама и рукоять — одно литьё (v02, снимок КБМ крупно): передняя стенка с пазом под спуск, рукоять с
+    утопленной вставкой и ромбической насечкой, низ рамы до короба. Рама симметрична: паз и вставка режутся слева,
+    правая половина — отражением."""
+    from lib import boolean_safe, prism_xz
+    pts = fillet(P(D.FRAME_PX), [4.6] * len(D.FRAME_PX), seg=5)
+    o = rounded_prism("Launcher_grip", pts, D.FRAME_Y[0], D.FRAME_Y[1], 4.0, coll, "Paint_olive_cast")
+    # паз под спуск: от передней стенки внутрь за ось спуска
+    slot = fillet(P([(550, 588), (596, 588), (603, 600), (603, 632), (550, 632)]), [1.5] * 5, seg=3)
+    c = prism_xz("_trig_slot", slot, -3.9, 3.9, coll)
+    boolean_safe(o, c, name="trigger_slot")
+    pp = fillet(P(D.FRAME_PANEL_PX), [4.2] * len(D.FRAME_PANEL_PX), seg=5)
+    c = rounded_prism("_panel_L", pp, D.FRAME_Y[1] - 0.8, D.FRAME_Y[1] + 3.0, 0.5, coll)
     boolean_safe(o, c, name="grip_panel_L")
     bm = bmesh.new(); bm.from_mesh(o.data)
     bmesh.ops.symmetrize(bm, input=bm.verts[:] + bm.edges[:] + bm.faces[:], direction="Y", dist=1e-6)
     bm.to_mesh(o.data); bm.free()
-    # насечка — ромбы шагом 1.6 мм, высота 0.5 (вставка утоплена на 0.7 — вершины ниже края)
     for side in (1, -1):
-        knurl_patch(o, pp, side * (D.GRIP_Y[1] - 0.7), side, coll)
-    spur = rounded_prism("Launcher_finger_spur", fillet(P(D.FINGER_SPUR_PX), [1.8] * 4, seg=3), -4.5, 4.5, 1.5, coll,
+        knurl_patch(o, pp, side * (D.FRAME_Y[1] - 0.8), side, coll)
+    spur = rounded_prism("Launcher_finger_spur", fillet(P(D.SPUR_PX), [1.4] * 4, seg=3), -4.0, 4.0, 1.1, coll,
                          "Paint_olive_cast")
     return [o, spur]
+
+
+def frame_details(coll):
+    """Рычажок спусковой рамы слева (серебристые оси), ползунок переключателя в рамке и рычажок с винтом справа."""
+    out = []
+    (ax, ay, ad), (bx, by, bd), (cx, cy, cd) = D.FRAME_LEVER_PX
+    A = Vector(px(ax, ay)); B = Vector(px(bx, by))
+    d = (B - A).normalized(); n = Vector((-d.y, d.x))
+    arm = [tuple(A - n * 4.2 - d * 3.0), tuple(B - n * 4.2 + d * 3.0), tuple(B + n * 4.2 + d * 3.0), tuple(A + n * 4.2 - d * 3.0)]
+    arm = fillet(arm, [3.8] * 4, seg=4)
+    out.append(rounded_prism("Frame_lever", arm, CAST_LEFT - 0.4, CAST_LEFT + 2.6, 0.8, coll, "Paint_olive_cast"))
+    for i, (x, y, dd) in enumerate(((ax, ay, ad), (bx, by, bd), (cx, cy, cd))):
+        out.append(cyl(f"Frame_lever_pivot_{i}", CAST_LEFT + 1.5, CAST_LEFT + 4.2, dd / 2, coll, "Steel_bare", seg=32,
+                       cy=px_x(x), cz=px_z(x, y), axis="Y", ch=0.6))
+    # справа: ползунок в рамке (снимок 05)
+    x0, x1, y0, y1 = D.SLIDER_PX
+    X0, X1 = px_x(x1), px_x(x0)
+    Z0, Z1 = px_z(625, y1), px_z(625, y0)
+    yf = D.FRAME_Y[0]
+    rim = fillet([(X0, Z0), (X1, Z0), (X1, Z1), (X0, Z1)], [2.2] * 4, seg=4)
+    frame = rounded_prism("Slider_frame", rim, yf - 2.0, yf + 0.6, 0.6, coll, "Paint_olive_cast")
+    from lib import prism_xz, boolean_safe
+    win = prism_xz("_slider_win", fillet([(X0 + 3.0, Z0 + 3.0), (X1 - 3.0, Z0 + 3.0), (X1 - 3.0, Z1 - 3.0),
+                                          (X0 + 3.0, Z1 - 3.0)], [1.2] * 4, seg=3), yf - 3.0, yf - 0.6, coll)
+    boolean_safe(frame, win, name="slider_window")
+    kx = X0 + 0.32 * (X1 - X0)
+    knob = rounded_prism("Slider_knob", fillet([(kx - 3.0, Z0 + 3.6), (kx + 3.0, Z0 + 3.6), (kx + 3.0, Z1 - 3.6),
+                                                (kx - 3.0, Z1 - 3.6)], [1.0] * 4, seg=3), yf - 4.2, yf - 0.4, 0.9, coll,
+                         "Plastic_black")
+    out += [frame, knob]
+    # справа спереди: рычажок с винтом на литье
+    L0, L1 = Vector(px(558, 566)), Vector(px(592, 576))
+    d = (L1 - L0).normalized(); n = Vector((-d.y, d.x))
+    pl = fillet([tuple(L0 - n * 3.5), tuple(L1 - n * 2.6), tuple(L1 + n * 2.6), tuple(L0 + n * 3.5)], [2.4] * 4, seg=4)
+    out.append(rounded_prism("Right_lever", pl, D.CAST_Y[0] - 2.4, D.CAST_Y[0] + 0.4, 0.7, coll, "Paint_olive_cast"))
+    out.append(slotted_screw("Right_lever_screw", (L0.x + 1.0, D.CAST_Y[0] - 2.4, L0.y), (0, -1, 0), 5.0, coll, "Steel_bare"))
+    return out
 
 
 def knurl_patch(target, poly, y_plane, side, coll, pitch=1.6, h=0.5, inset=0.6):
@@ -134,11 +167,13 @@ def knurl_patch(target, poly, y_plane, side, coll, pitch=1.6, h=0.5, inset=0.6):
 
 
 def trigger(coll):
-    pts = fillet(P(D.TRIGGER_PX), [1.4, 1.4, 1.6, 1.4, 1.4, 1.6, 1.4], seg=4)
-    o = rounded_prism("Trigger", pts, -3.5, 3.5, 1.2, coll, "Steel_bare")
-    set_origin(o, (px_x(D.TRIGGER_PIVOT_PX[0]), 0.0, px_z(*D.TRIGGER_PIVOT_PX)))
-    pin = cyl("Trigger_pin", -D.TRIG_HOUSING_Y[1] - 0.5, D.TRIG_HOUSING_Y[1] + 0.5, 1.6, coll, "Steel_bare", seg=24,
-              cy=px_x(D.TRIGGER_PIVOT_PX[0]), cz=px_z(*D.TRIGGER_PIVOT_PX), axis="Y", ch=0.3)
+    """Спуск — изогнутое перо с задним приливом на оси в пазу рамы (снимок КБМ: ось 585, 606)."""
+    pts = fillet(P(D.TRIGGER2_PX), [1.3] * len(D.TRIGGER2_PX), seg=4)
+    o = rounded_prism("Trigger", pts, -3.0, 3.0, 1.0, coll, "Steel_bare")
+    pv = D.TRIGGER2_PIVOT_PX
+    set_origin(o, (px_x(pv[0]), 0.0, px_z(*pv)))
+    pin = cyl("Trigger_pin", -D.FRAME_Y[1] - 0.6, D.FRAME_Y[1] + 0.6, 1.6, coll, "Steel_bare", seg=24,
+              cy=px_x(pv[0]), cz=px_z(*pv), axis="Y", ch=0.3)
     return o, pin
 
 
@@ -237,7 +272,7 @@ def tabs(coll):
 def plunger(coll):
     x, y, d = D.PLUNGER_PX
     X, Z = px_x(x), px_z(x, y)
-    o = cyl("Plunger", D.TRIG_HOUSING_Y[1] - 1.0, D.TRIG_HOUSING_Y[1] + 6.0, d / 2, coll, "Plastic_black", seg=40, cy=X,
+    o = cyl("Plunger", D.FRAME_Y[1] - 1.0, D.FRAME_Y[1] + 6.0, d / 2, coll, "Plastic_black", seg=40, cy=X,
             cz=Z, axis="Y", ch=1.8)
     return o
 
@@ -260,6 +295,29 @@ def box(coll):
                     seg=32, cy=X, cz=s * (D.BOX_Y[1] + 2.6), axis="Z", ch=0.8)
             knuckles.append(k)
     return [upper, rear, lower, seam] + knuckles
+
+
+def grille(coll):
+    """Решётка звукового сигнала на нижнем коробе слева: квадратная накладка на четырёх винтах, круг с вертикальными
+    прорезями (макеты «Армия-2016», выставочный образец)."""
+    from lib import boolean_safe, prism_xz
+    x, y, d = D.GRILLE_PX
+    X, Z = px_x(x), px_z(x, y)
+    yf = D.BOX_Y[1] + 0.8
+    h = d / 2 + 1.0
+    plate = rounded_prism("Grille_plate", fillet([(X - h, Z - h), (X + h, Z - h), (X + h, Z + h), (X - h, Z + h)], [7.0] * 4,
+                                                  seg=5), yf - 0.6, yf + 1.4, 0.7, coll, "Paint_olive_cast")
+    for k in range(-3, 4):
+        sx = X + k * 4.6
+        hh = math.sqrt(max((d / 2 - 7.0) ** 2 - (k * 4.6) ** 2, 4.0))
+        c = prism_xz("_gslot", fillet([(sx - 1.2, Z - hh), (sx + 1.2, Z - hh), (sx + 1.2, Z + hh), (sx - 1.2, Z + hh)],
+                                      [1.15] * 4, seg=3), yf - 0.2, yf + 3.0, coll)
+        boolean_safe(plate, c, name="grille_slot")
+    out = [plate]
+    for i, (dx, dz) in enumerate(((-h + 4.5, -h + 4.5), (h - 4.5, -h + 4.5), (-h + 4.5, h - 4.5), (h - 4.5, h - 4.5))):
+        out.append(slotted_screw(f"Grille_screw_{i}", (X + dx, yf + 1.4, Z + dz), (0, 1, 0), 3.8, coll, "Paint_olive_cast",
+                                 slot_ang=35 * i))
+    return out
 
 
 def nameplate(coll):
@@ -305,8 +363,8 @@ def build(ctx):
     cast_seam(cast, C)
     labels(cast, C)
     linkage(C)
-    th = trigger_housing(C)
     g = grip(C)
+    fd = frame_details(C)
     trig, tpin = trigger(C)
     lv, lax = lever(C)
     btn = button(C)
@@ -314,5 +372,6 @@ def build(ctx):
     tb = tabs(C)
     pl = plunger(C)
     bx = box(C)
+    gr = grille(C)
     npl = nameplate(C)
     return {"trigger": trig, "lever": lv, "plunger": pl, "button_cap": btn[1]}

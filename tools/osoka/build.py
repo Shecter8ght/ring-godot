@@ -30,7 +30,8 @@ def reset_scene():
 # иначе литьё, короб и бобышки проходили сквозь стенку трубы в ракету (check_overlaps, v01)
 HUG = ("Saddle_body", "Saddle_side_rib", "Box_upper", "Box_rear_plate", "Box_seam_lip", "Lid_front_boss",
        "Lid_mid_boss", "Rear_sight_base", "Tube_clamp_0_ear", "Tube_clamp_1_ear", "Tube_rear_bracket", "Front_sight_base",
-       "Dust_cover_base", "Lid_top_boss", "Sling_loop_base", "Launcher_tab_")
+       "Dust_cover_base", "Lid_top_boss", "Sling_loop_base", "Launcher_tab_", "Saddle_right_flange", "Saddle_right_boss",
+       "Front_right_boss", "Mount_plate")
 
 
 def hug_tube():

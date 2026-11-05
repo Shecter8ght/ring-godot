@@ -12,17 +12,79 @@ import dims as D
 SADDLE_REAR_X = px_x(776)          # задний торец накладки (снимок: 776 пикс)
 
 
-def section(top, left, right, bottom, r_top=15.0, r_bot=7.0):
-    pts = [(right, bottom), (left, bottom), (left, top), (right, top)]
-    return fillet(pts, [r_bot, r_bot, r_top, r_top], seg=8)
+def section(top, left, right_top, bottom, r_top=15.0, r_bot=7.0):
+    """Сечение накладки: верх и левый бок, справа — только край верха (труба справа открыта, снимки 04, 05).
+    Замыкание идёт через канал трубы — его потом вычитает обжатие по трубе."""
+    pts = [(right_top, 30.0), (right_top, top), (left, top), (left, bottom), (0.0, bottom), (-6.0, -28.0)]
+    return fillet(pts, [0.0, 3.0, r_top, r_bot, 0.0, 0.0], seg=8)
 
 
 def saddle(coll):
     x0, x1 = SADDLE_REAR_X, D.SADDLE_X[1]
-    sec = section(D.SADDLE_TOP, D.SADDLE_LEFT, D.SADDLE_RIGHT, D.SADDLE_BOTTOM)
+    sec = section(D.SADDLE_TOP, D.SADDLE_LEFT, D.SADDLE_RIGHT_TOP, D.SADDLE_BOTTOM)
     o = loft_yz("Saddle_body", [(x0, sec), (x1, sec)], coll, "Paint_olive_cast")
     finish(o, w=1.6, seg=4, angle=30)
     return o
+
+
+def arc_shell(name, x0, x1, r_in, r_out, a0, a1, coll, mat, seg=48):
+    """Полка вокруг трубы: кольцевой сектор от угла a0 до a1 (град, от +Y к +Z), вытянутый по X."""
+    pts = []
+    for k in range(seg + 1):
+        a = math.radians(a0 + (a1 - a0) * k / seg)
+        pts.append((r_out * math.cos(a), r_out * math.sin(a)))
+    for k in range(seg + 1):
+        a = math.radians(a1 - (a1 - a0) * k / seg)
+        pts.append((r_in * math.cos(a), r_in * math.sin(a)))
+    o = loft_yz(name, [(x0, pts), (x1, pts)], coll, mat)
+    finish(o, w=0.7, seg=3, angle=30)
+    return o
+
+
+def right_flange(coll):
+    """Полка литья по низу трубы справа с винтами (снимок 05: горизонтальная полка, винты, бобышка с отверстием)."""
+    from part_launcher import slotted_screw
+    x0, x1 = D.RIGHT_FLANGE_X
+    a0, a1 = D.RIGHT_FLANGE_ANG
+    fl = arc_shell("Saddle_right_flange", x0, x1, D.TUBE_R + 0.1, D.TUBE_R + 3.4, a0, a1, coll, "Paint_olive_cast")
+    out = [fl]
+    am = math.radians(0.5 * (a0 + a1) - 8.0)
+    n = Vector((0.0, math.cos(am), math.sin(am)))
+    for i, x in enumerate((x0 + 22.0, x0 + 90.0, x0 + 160.0, x1 - 30.0)):
+        c = Vector((x, 0, 0)) + n * (D.TUBE_R + 3.4)
+        out.append(slotted_screw(f"Saddle_right_screw_{i}", tuple(c), tuple(n), 5.0, coll, "Paint_olive_cast",
+                                 slot_ang=25 * i))
+    # бобышка с отверстием (снимок 05: прямоугольный прилив на полке ближе к коробу)
+    from lib import box as box_
+    bx = x0 + 45.0
+    pts = fillet([(bx - 13.0, -24.0), (bx + 13.0, -24.0), (bx + 13.0, -8.0), (bx - 13.0, -8.0)], [3.0] * 4, seg=4)
+    boss = rounded_prism("Saddle_right_boss", pts, -D.TUBE_R - 6.0, -D.TUBE_R + 4.0, 1.2, coll, "Paint_olive_cast")
+    out.append(boss)
+    return out
+
+
+def front_right_plate(coll):
+    """Накладка на четырёх винтах справа спереди, за хомутом ГСН (снимки 04, 05)."""
+    from part_launcher import slotted_screw
+    x0, x1 = D.FRONT_RIGHT_PLATE_X
+    pts = fillet([(x0, -20.0), (x1, -20.0), (x1, 16.0), (x0, 16.0)], [4.0] * 4, seg=4)
+    boss = rounded_prism("Front_right_boss", pts, -D.TUBE_R - 5.0, -D.TUBE_R + 6.0, 2.0, coll, "Paint_olive_cast")
+    pts2 = fillet([(x0 + 2.5, -17.5), (x1 - 2.5, -17.5), (x1 - 2.5, 13.5), (x0 + 2.5, 13.5)], [3.0] * 4, seg=4)
+    plate = rounded_prism("Front_right_plate", pts2, -D.TUBE_R - 7.0, -D.TUBE_R - 4.5, 0.8, coll, "Paint_olive_cast")
+    out = [boss, plate]
+    for i, (dx, dz) in enumerate(((5.5, -12.0), (x1 - x0 - 5.5, -12.0), (5.5, 8.0), (x1 - x0 - 5.5, 8.0))):
+        out.append(slotted_screw(f"Front_right_screw_{i}", (x0 + dx, -D.TUBE_R - 7.0, dz), (0, -1, 0), 4.6, coll,
+                                 "Paint_olive_cast", slot_ang=40 * i))
+    return out
+
+
+def mount_plate(coll):
+    """Основание ночного прицела сверху — низкая длинная площадка за верхней крышкой (снимок 03)."""
+    x0, x1 = D.MOUNT_PLATE_X
+    zt = D.SADDLE_TOP
+    pts = fillet([(x0, zt - 3.0), (x1, zt - 3.0), (x1, zt + 3.6), (x0, zt + 3.6)], [1.6, 1.6, 2.2, 2.2], seg=4)
+    o = rounded_prism("Mount_plate", pts, -11.0, 15.0, 1.4, coll, "Paint_olive_cast")
+    return [o]
 
 
 def knurled_lid(name, d, h, coll, notches=10, depth=1.2):
@@ -204,6 +266,9 @@ def build(ctx):
     S = ctx["coll"]["Sights"]
     out = [saddle(C), side_rib(C)]
     out += lids(C)
+    out += right_flange(C)
+    out += front_right_plate(C)
+    out += mount_plate(C)
     dc = dust_cover(C)
     fs = front_sight(S)
     rs = rear_sight(S)

@@ -12,14 +12,17 @@ W, T = 30.0, 2.2          # ширина и толщина лямки (оцен�
 
 def strap_path():
     top = D.SADDLE_TOP + T / 2 + 0.2
+    top_m = D.SADDLE_TOP + 3.6 + T / 2 + 0.2          # над основанием ночного прицела (v02)
     tube_top = D.TUBE_R + T / 2 + 0.2
     clamp_top = D.CLAMP_R + T / 2 + 0.2
     pts = [
         (1318.0, D.SADDLE_LEFT + 7.0, 22.0),       # из петли
         (1314.0, D.SADDLE_LEFT + 5.0, 36.0),
-        (1306.0, D.SADDLE_LEFT - 4.0, top + 1.0),
-        (1296.0, 20.0, top),
-        (1280.0, 0.0, top),
+        (1306.0, D.SADDLE_LEFT - 4.0, top_m + 1.0),
+        (1296.0, 20.0, top_m),
+        (1280.0, 0.0, top_m),
+        (1202.0, -4.0, top_m),
+        (1190.0, -4.0, top),
         (1180.0, -4.0, top),
         (1165.0, -4.0, top - 3.0),
         (1135.0, -4.0, clamp_top),
@@ -90,7 +93,7 @@ def build(ctx):
     pad = rounded_prism("Sling_pad", pts, -27.0, 19.0, 3.4, C, "Webbing_grey")
     # пряжка-рамка спереди сверху (снимок: 630…690 пикс)
     xa, xb = px_x(690), px_x(630)
-    zt2 = D.SADDLE_TOP + 0.3
+    zt2 = D.SADDLE_TOP + 3.6 + 0.3
     frame_out = fillet([(xa, -22.0), (xb, -22.0), (xb, 14.0), (xa, 14.0)], [3.0] * 4, seg=4)
     import lib
     buckle = lib.prism_xy("Sling_buckle", frame_out, zt2, zt2 + 4.0, C, "Steel_black")
