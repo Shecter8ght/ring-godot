@@ -31,9 +31,11 @@ RES = {"Receiver": 4096, "Steel": 4096, "Stock": 2048, "Mag13": 2048, "Mag30": 2
 BBOX_MM = {"Receiver": 380.0, "Steel": 330.0, "Stock": 230.0, "Mag13": 130.0, "Mag30": 260.0}
 # красная заливка гравировки (эмаль по металлу, полумат): цвет sRGB, шероховатость
 RED = {"color": (0.62, 0.07, 0.05), "rough": 0.5, "metal": 0.0}
-# луч запекания вперёд и назад, мм: отклонение игровой сетки до 0.47 мм (одна вершина у канала ствола 1.77), глубина
-# гравировок 0.25–0.45, шагрень и рифление ~0.3; пары low/high отобраны по имени — чужая деталь в луч не попадает
-RAY_MM = 2.0
+# луч запекания вперёд и назад — доля габарита сцены (RelativeScale): FBX из Blender — в метрах (UnitScaleFactor 100),
+# как Painter переводит единицы, не проверено, а доля от них не зависит. Сцена с опущенными магазинами ~0.96 × 0.62 м:
+# 0.002 ≈ 2 мм — отклонение игровой сетки до 0.47 мм (одна вершина у канала ствола 1.77), гравировки 0.25–0.45,
+# шагрень и рифление ~0.3; пары low/high отобраны по имени — чужая деталь в луч не попадает
+RAY_REL = 0.002
 JOBS = os.environ.get("SP_BRIDGE_DIR", "")
 _handlers = {}
 
@@ -99,11 +101,11 @@ def bake_params():
     return json.dumps(out, ensure_ascii=False)
 
 
-def bake(only=None, match=1, self_occlusion=0, ray_mm=RAY_MM, units_per_mm=0.1):
+def bake(only=None, match=1, ray=RAY_REL, sub=1):
     """Карты сетки с high-poly v06 по наборам очередью: нормаль, нормаль мира, ID, AO, кривизна, положение, толщина.
-    match — отбор по имени сетки (суффиксы _low / _high); AO — тень от всей сборки (self_occlusion: «всегда»).
-    Луч — в единицах сцены (FBX из Blender — сантиметры: units_per_mm 0.1). Проект сохраняется после каждого набора
-    (Painter падал вскоре после конца запекания — handguard 2026-11-01); итог — _bake_done.txt."""
+    match — отбор по имени сетки (FilterMethod «By mesh name», суффиксы _low / _high); AO — тень от всей сборки
+    (FilterMethodSecondary «Always»). sub — 2×2 выборки на пиксель. Проект сохраняется после каждого набора (Painter
+    падал вскоре после конца запекания — handguard 2026-11-01); итог — _bake_done.txt."""
     sets = [t for t in TS.all_texture_sets() if not only or t.name() in only]
     for t in sets:
         bp = B.BakingParameters.from_texture_set(t)
@@ -111,12 +113,10 @@ def bake(only=None, match=1, self_occlusion=0, ray_mm=RAY_MM, units_per_mm=0.1):
         c = bp.common()
         n = RES.get(t.name(), 2048).bit_length() - 1
         vals = {c["OutputSize"]: (n, n), c["LowAsHigh"]: False, c["HipolyMesh"]: "file:///" + HIGH,
-                c["SubSampling"]: 2, c["RelativeScale"]: False, c["MaxHeight"]: ray_mm * units_per_mm,
-                c["MaxDepth"]: ray_mm * units_per_mm, c["IgnoreBackface"]: True, c["FilterMethod"]: match}
+                c["SubSampling"]: sub, c["RelativeScale"]: True, c["MaxHeight"]: ray, c["MaxDepth"]: ray,
+                c["IgnoreBackface"]: True, c["FilterMethod"]: match}
         vals[bp.baker(U.ID)["ColorSource"]] = 3
-        ao = bp.baker(U.AO)
-        if "SelfOcclusion" in ao:
-            vals[ao["SelfOcclusion"]] = self_occlusion
+        vals[bp.baker(U.AO)["FilterMethodSecondary"]] = 0
         B.BakingParameters.set(vals)
     queue = list(sets)
     log = []
