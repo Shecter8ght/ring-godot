@@ -39,6 +39,9 @@ def slotted_screw(name, center, normal, d, coll, mat="Steel_black", slot_ang=0.0
 def cast_body(coll):
     pts = fillet(P(D.CAST_PX), [3.0, 4.0, 5.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0], seg=5)
     o = rounded_prism("Launcher_cast", pts, D.CAST_Y[0], D.CAST_Y[1], 2.6, coll, "Paint_olive_cast")
+    # боковины — мелкой сеткой до обжатия по трубе (большие многоугольники показывались клиньями и точками у кромки)
+    from lib import grid_split
+    grid_split(o, step=4.0)
     return o
 
 
@@ -49,6 +52,10 @@ def grip(coll):
     from lib import boolean_safe, prism_xz
     pts = fillet(P(D.FRAME_PX), [4.6] * len(D.FRAME_PX), seg=5)
     o = rounded_prism("Launcher_grip", pts, D.FRAME_Y[0], D.FRAME_Y[1], 4.0, coll, "Paint_olive_cast")
+    # плоские боковины — мелкой сеткой ДО вырезов (простые многоугольники без дыр режутся надёжно): иначе после паза и
+    # вставки боковина — многоугольник на 280 вершин, показ давал тёмные клинья-«пилу» (владелец о v04–v05)
+    from lib import grid_split
+    grid_split(o, step=3.0)
     # паз под спуск: от передней стенки внутрь за ось спуска
     slot = fillet(P([(550, 588), (596, 588), (603, 600), (603, 632), (550, 632)]), [1.5] * 5, seg=3)
     c = prism_xz("_trig_slot", slot, -3.9, 3.9, coll)
@@ -227,7 +234,8 @@ def trigger(coll):
 
 
 def lever(coll):
-    """Рычаг «ИСХОДНОЕ — НАКОЛ»: ось сзади, рукоятка с головкой вперёд; поворот вокруг Y."""
+    """Рычаг «ИСХОДНОЕ — НАКОЛ»: ось спереди у горловины источника питания, рукоятка с головкой назад-вверх (v05);
+    поворот вокруг Y."""
     px0, pz0 = px_x(D.LEVER_PIVOT_PX[0]), px_z(*D.LEVER_PIVOT_PX)
     tx, tz = px_x(D.LEVER_TIP_PX[0]), px_z(*D.LEVER_TIP_PX)
     d = Vector((tx - px0, tz - pz0))
@@ -245,16 +253,16 @@ def lever(coll):
     p_end2 = Vector((tx, tz)) + n * hw1
     pts += [(p_end1.x, p_end1.y), (p_end2.x, p_end2.y)]
     pts = fillet(pts, [1.6] * len(pts), seg=3)
-    # плечо — над боковиной на 0.7 мм (на бобышке оси, как на шайбе): иначе при повороте шло сквозь литые буквы
-    arm = rounded_prism("Lever_arm", pts, CAST_LEFT + 0.7, CAST_LEFT + 4.7, 1.2, coll, "Paint_olive_cast")
-    boss = cyl("Lever_boss", CAST_LEFT - 0.5, CAST_LEFT + 5.5, 6.5, coll, "Paint_olive_cast", seg=40, cy=px0, cz=pz0,
+    # плечо — над боковиной на 2.8 мм (на высокой бобышке оси): проходит над литыми буквами и бобышками литья
+    arm = rounded_prism("Lever_arm", pts, CAST_LEFT + 2.8, CAST_LEFT + 6.8, 1.2, coll, "Paint_olive_cast")
+    boss = cyl("Lever_boss", CAST_LEFT - 0.5, CAST_LEFT + 7.6, 6.5, coll, "Paint_olive_cast", seg=40, cy=px0, cz=pz0,
                axis="Y", ch=0.8)
-    knob = cyl("Lever_knob", CAST_LEFT + 1.6, CAST_LEFT + 13.6, 5.6, coll, "Paint_olive_cast", seg=40, cy=tx, cz=tz,
+    knob = cyl("Lever_knob", CAST_LEFT + 3.6, CAST_LEFT + 15.6, 5.6, coll, "Paint_olive_cast", seg=40, cy=tx, cz=tz,
                axis="Y", ch=1.6)
     o = join([arm, boss, knob], "Lever")
     set_origin(o, (px0, CAST_LEFT, pz0))
     # шайба оси на корпусе
-    ax = cyl("Lever_axle", CAST_LEFT - 1.0, CAST_LEFT + 6.6, 2.4, coll, "Steel_black", seg=24, cy=px0, cz=pz0, axis="Y",
+    ax = cyl("Lever_axle", CAST_LEFT - 1.0, CAST_LEFT + 8.7, 2.4, coll, "Steel_black", seg=24, cy=px0, cz=pz0, axis="Y",
              ch=0.5)
     return o, ax
 
@@ -270,16 +278,23 @@ def linkage(coll):
     return [bar, sc]
 
 
-def cast_seam(target, coll):
-    """Шов литья по диагонали (снимок: 449,527 → 528,482) — канавка 0.5 мм."""
-    from lib import boolean_safe
-    a = Vector(px(468, 517)); b = Vector(px(528, 482))   # начало за надписью «НАКОЛ» (v04: шов резал буквы)
-    d = (b - a).normalized(); n = Vector((-d.y, d.x))
-    w = 0.6
-    pts = [tuple(a - n * w), tuple(b - n * w), tuple(b + n * w), tuple(a + n * w)]
-    from lib import prism_xz
-    c = prism_xz("_seam", pts, CAST_LEFT - 0.5, CAST_LEFT + 2.0, coll)
-    boolean_safe(target, c, name="cast_seam")
+def cast_pad(coll):
+    """Приподнятая площадка литья (v05): на снимках МАКС-2015 диагональ — левая кромка площадки, не прорезь
+    (тонкая канавка v01–v04 выглядела порезом)."""
+    pts = fillet(P(D.CAST_PAD_PX), [2.5, 2.5, 1.5, 1.5], seg=4)
+    return rounded_prism("Launcher_cast_pad", pts, CAST_LEFT - 0.6, CAST_LEFT + 0.9, 0.7, coll, "Paint_olive_cast")
+
+
+def cast_bosses(coll):
+    """Круглые бобышки литья за рычагом (снимок МАКС-2015): с кольцом и штифтом."""
+    out = []
+    for i, (x, y, d) in enumerate(D.CAST_BOSSES_PX):
+        X, Z = px_x(x), px_z(x, y)
+        out.append(cyl(f"Launcher_boss_{i}", CAST_LEFT - 0.5, CAST_LEFT + 2.4, d / 2, coll, "Paint_olive_cast", seg=48,
+                       cy=X, cz=Z, axis="Y", ch=0.8))
+        out.append(cyl(f"Launcher_boss_pin_{i}", CAST_LEFT + 1.6, CAST_LEFT + 3.4, d * 0.22, coll, "Steel_black", seg=32,
+                       cy=X, cz=Z, axis="Y", ch=0.4))
+    return out
 
 
 def button(coll):
@@ -383,7 +398,6 @@ def nameplate(coll):
     # скругляется только наружный контур (общее скругление «надувало» буквы, v03), кромки букв — острые, лицо —
     # треугольниками (большая грань с дырами-буквами показывалась клиньями)
     from lib import prism_xz, renormal, bevel_edges
-    plate = prism_xz("Nameplate", pts, y0_, y1_, coll, "Plate_alu")
     rivets = []
     for i, X in enumerate((X0 + h / 2, X1 - h / 2)):
         r = lathe(f"Nameplate_rivet_{i}", [(-0.3, 0.0), (-0.3, 1.5), (0.0, 1.5), (0.35, 1.3), (0.7, 0.8), (0.85, 0.0)], coll,
@@ -391,11 +405,25 @@ def nameplate(coll):
         r.data.transform(Matrix.Rotation(math.pi / 2, 4, "Z"))
         r.data.transform(Matrix.Translation(v(X, y1_, zc)))
         rivets.append(r)
-    # штамп: две строки вглубь 0.2 мм
+    # штамп: две строки вглубь 0.2 мм. Точное булево изредка не вырезает букву (от запуска к запуску) — тогда табличка
+    # собирается заново со сдвигом надписи на сотые миллиметра, пока не встанут все буквы
     xc = 0.5 * (X0 + X1)
     t1, t2 = D.NAMEPLATE_TEXT
-    stamps.stamp(plate, t1, 5.6, (xc, y1_, zc + 2.3), (0, 1, 0), (0, 0, 1), 0.2, coll)
-    stamps.stamp(plate, t2, 4.6, (xc, y1_, zc - 2.5), (0, 1, 0), (0, 0, 1), 0.2, coll)
+    for k in range(8):
+        dx, dz = 0.031 * k, -0.023 * k
+        plate = prism_xz("Nameplate", pts, y0_, y1_, coll, "Plate_alu")
+        n0 = len(stamps.FAILED)
+        stamps.stamp(plate, t1, 5.6, (xc + dx, y1_, zc + 2.3 + dz), (0, 1, 0), (0, 0, 1), 0.2, coll)
+        stamps.stamp(plate, t2, 4.6, (xc + dx, y1_, zc - 2.5 + dz), (0, 1, 0), (0, 0, 1), 0.2, coll)
+        if len(stamps.FAILED) == n0:
+            break
+        print("NAMEPLATE_RETRY", k)
+        del stamps.FAILED[n0:]
+        me = plate.data
+        bpy.data.objects.remove(plate, do_unlink=True)
+        bpy.data.meshes.remove(me)
+    else:
+        print("NAMEPLATE_FAIL")
     tx0, tx1 = xc - 0.5 * (X1 - X0) + h / 2, xc + 0.5 * (X1 - X0) - h / 2
 
     def outline(mid):
@@ -423,9 +451,9 @@ def build(ctx):
     cast = cast_body(C)
     from lib import hug_tube
     print("HUG Launcher_cast", hug_tube(cast))
-    cast_seam(cast, C)
     labels(cast, C)
-    linkage(C)
+    cast_pad(C)
+    cast_bosses(C)
     g = grip(C)
     fd = frame_details(C)
     trig, tpin = trigger(C)

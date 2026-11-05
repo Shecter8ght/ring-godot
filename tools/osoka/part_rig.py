@@ -2,7 +2,7 @@
 #   front_cap / rear_cap — крышка снята (до 0.5 — вдоль оси трубы, дальше — в сторону, влево)
 #   launcher_detach      — пусковой механизм с источником питания отстёгнут от трубы (вниз)
 #   power_out            — источник питания вынут из гнезда вдоль своей оси
-#   lever                — рычаг «ИСХОДНОЕ» (0) → «НАКОЛ» (1)
+#   lever                — рычаг «ИСХОДНОЕ» (0) → «НАКОЛ» (1): рукоятка вверх на оси спереди
 #   trigger              — спуск выжат;  button — кнопка нажата;  plunger — толкатель за рукоятью нажат
 #   front_sight / rear_sight — мушка / целик подняты (1) или сложены вниз-наружу (0)
 #   dust_cover           — прямоугольная крышка сверху откинута вперёд
@@ -90,7 +90,8 @@ def build(ctx):
 
     # рычаг: «накол» — рукоятка вверх-назад (поворот вокруг Y с минусом поднимает передний конец)
     if ob("Lever"):
-        add_driver(ob("Lever"), "rotation_euler", 1, f"-radians({D.LEVER_TRAVEL_DEG})*lever", ctrl, ["lever"])
+        # ось спереди, рукоятка назад: поворот вокруг +Y на плюс поднимает задний конец (v05)
+        add_driver(ob("Lever"), "rotation_euler", 1, f"radians({D.LEVER_TRAVEL_DEG})*lever", ctrl, ["lever"])
     # спуск: нижний конец назад
     if ob("Trigger"):
         add_driver(ob("Trigger"), "rotation_euler", 1, f"radians({TRIGGER_DEG})*trigger", ctrl, ["trigger"])

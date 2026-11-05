@@ -34,6 +34,25 @@ HUG = ("Saddle_body", "Saddle_side_rib", "Box_upper", "Box_rear_plate", "Box_sea
        "Front_right_boss", "Mount_plate")
 
 
+def flat_normals():
+    """Большие плоские грани после булевых (боковины рамы с вырезами) показывались «пилой»: нормали вершин по краю
+    грани усреднялись со скруглёнными кромками и тянулись клиньями через всю грань (владелец о v04). Взвешенные по
+    площади нормали оставляют большую грань плоской (нарезка сеткой на раме давала дыры — не годится)."""
+    for o in list(bpy.data.objects):
+        if o.type != "MESH" or o.get("_fin") or o.name.startswith(("Missile_", "Sling_strap")):
+            continue
+        if any(len(p.vertices) > 12 for p in o.data.polygons):
+            # большие многоугольники — на треугольники самим (уши): показ Blender бил их с перехлёстом — тёмная
+            # «пила» на ровной боковине (рама рукояти, v04–v05)
+            import bmesh
+            bm = bmesh.new(); bm.from_mesh(o.data)
+            big = [f for f in bm.faces if len(f.verts) > 12]
+            bmesh.ops.triangulate(bm, faces=big, quad_method="BEAUTY", ngon_method="EAR_CLIP")
+            bm.to_mesh(o.data); bm.free()
+            lib.weighted(o)
+            lib.apply_all(o)
+
+
 def hug_tube():
     # литьё пускового механизма обжимается раньше — в part_launcher, до литых надписей
     for o in list(bpy.data.objects):
@@ -52,6 +71,7 @@ def main():
     for p in PARTS:
         if p == "rig":
             hug_tube()
+            flat_normals()
         if p in stages:
             path = os.path.join(HERE, "part_" + p + ".py")
             if not os.path.exists(path):
@@ -62,6 +82,7 @@ def main():
             print("PART_DONE", p)
     if "rig" not in stages:
         hug_tube()
+        flat_normals()
     tri = sum(lib.tris(o) for o in bpy.data.objects if o.type == "MESH")
     print("OSOKA_TRIS", tri, "OBJECTS", sum(1 for o in bpy.data.objects if o.type == "MESH"))
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
