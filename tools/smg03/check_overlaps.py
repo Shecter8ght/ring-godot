@@ -10,14 +10,14 @@ from mathutils.bvhtree import BVHTree
 STATES = {
     "rest": {},
     "bolt_half": {"bolt": 0.5}, "bolt_back": {"bolt": 1.0},
-    "ch_swing": {"charging_handle": 0.2}, "ch_back": {"charging_handle": 1.0},
+    "ch_swing": {"charging_handle": 0.2}, "ch_half": {"charging_handle": 0.6}, "ch_back": {"charging_handle": 1.0},
     "trigger": {"trigger": 1.0}, "safe": {"safety": 1.0},
     "sel_2": {"selector": 0.5}, "sel_auto": {"selector": 1.0},
     "mag_release": {"mag_release": 1.0}, "mag_half_out": {"mag_out": 0.3, "mag_release": 1.0},
     "mag30": {"mag30": 1.0},
     "sights_down": {"front_sight": 0.0, "rear_sight": 0.0}, "sights_half": {"front_sight": 0.5, "rear_sight": 0.5},
     "stock_half": {"stock_fold": 0.5, "stock_latch": 1.0}, "stock_folded": {"stock_fold": 1.0},
-    "buttons": {"bolt_release": 1.0, "side_buttons": 1.0},
+    "catch": {"bolt_catch": 1.0}, "release": {"bolt_release": 1.0},
 }
 
 
