@@ -198,6 +198,12 @@ func _apply_static() -> void:
 	changed.emit()
 
 
+## Окружение сменилось (RaidAtmosphere.relight) — взять заново; пелена туч и пересвет — от нового.
+func forget_environment() -> void:
+	_e = null
+	_overcast.clear()
+
+
 func _env() -> Environment:
 	if _e == null:
 		var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment

@@ -30,10 +30,12 @@ static func light_conf() -> Dictionary:
 	return Balance.WORLD_LIGHT.duplicate(true)
 
 
+## Привыкание глаза — ползунки стенда света той схемы, что включена (свой набор у света Road to Vostok).
 static func look() -> Dictionary:
-	return {"exposure_scale_raid": Balance.lab_number("atmosphere", "adapt_scale"),
-		"adapt_up": Balance.lab_number("atmosphere", "adapt_up"),
-		"adapt_up_indoor": Balance.lab_number("atmosphere", "adapt_indoor")}
+	var domain: String = TodLight.LAB_DOMAIN if TodLight.active() else "atmosphere"
+	return {"exposure_scale_raid": Balance.lab_number(domain, "adapt_scale"),
+		"adapt_up": Balance.lab_number(domain, "adapt_up"),
+		"adapt_up_indoor": Balance.lab_number(domain, "adapt_indoor")}
 
 
 static func fog(weather: String) -> Dictionary:

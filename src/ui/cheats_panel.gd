@@ -124,7 +124,7 @@ func refresh() -> void:
 	_world.add_child(_hour_row())
 	_world.add_child(Pause._label("Погода"))
 	_world.add_child(_cond_option(Balance.RAID_WEATHER, false))
-	_world.add_child(Pause._label("Небо"))
+	_world.add_child(Pause._label("Свет и небо"))
 	_world.add_child(_sky_option())
 	_world.add_child(Pause._label("Переместиться"))
 	_world.add_child(_teleport_option())
@@ -217,11 +217,12 @@ func _cond_option(table: Dictionary, is_time: bool) -> OptionButton:
 	return ob
 
 
-## Небо смены суток: из фотопанорам или расчётное — только картинка, у каждого игрока своя.
+## Свет и небо рейда: свет Road to Vostok или прежний свет «Проспекта» с расчётным небом / фотопанорамами —
+## только картинка, у каждого игрока своя; в рейде меняется сразу (сравнить на месте).
 func _sky_option() -> OptionButton:
 	var ob: OptionButton = OptionButton.new()
 	ob.focus_mode = Control.FOCUS_NONE
-	ob.tooltip_text = "Из фотопанорам — как было; расчётное — цвет неба по положению солнца (рассвет, синий час). Свет на земле одинаковый. Действует там, где идут часы (зона 1)."
+	ob.tooltip_text = "Road to Vostok — их свет по часам, их схема неба с нашими облаками (основной). Прежний — свет «Проспекта» с расчётным небом или фотопанорамами. Только картинка; в рейде меняется сразу."
 	for m: String in Settings.SKY_MODES:
 		ob.add_item(String(Settings.SKY_MODE_NAMES[m]))
 	ob.selected = maxi(0, Settings.SKY_MODES.find(Settings.sky_mode))

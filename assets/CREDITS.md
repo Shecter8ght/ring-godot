@@ -293,6 +293,7 @@
 - `assets/sky/kloppenheim_01_puresky.hdr` — Kloppenheim 01 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_01_puresky — закат в дождь и туман
 - `assets/sky/kloppenheim_03_puresky.hdr` — Kloppenheim 03 (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/kloppenheim_03_puresky — день ясный, переменная облачность
 - `assets/sky/kloofendal_overcast_puresky.hdr` — Kloofendal Overcast (Pure Sky), Greg Zaal, CC0 1.0, https://polyhaven.com/a/kloofendal_overcast_puresky — день в дождь и туман
+- `assets/sky/kloofendal_48d_partly_cloudy_puresky.hdr` — Kloofendal 48d Partly Cloudy (Pure Sky), Greg Zaal, CC0 1.0, https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky — облака неба при свете Road to Vostok (TodLight): кучевые на голубом
 - `assets/sky/moon_lroc_color.jpg` — CGI Moon Kit — Lunar Surface in Color (LRO LROC), NASA's Scientific Visualization Studio, Public Domain (NASA), https://svs.gsfc.nasa.gov/4720 — диск Луны в шейдере неба
 
 ## Рюкзаки (assets/items/models/bp_*.glb, иконки assets/icons/bp_*.png)

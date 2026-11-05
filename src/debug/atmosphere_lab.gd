@@ -1,22 +1,24 @@
 class_name AtmosphereLab
 extends DevelopmentLab
-## Свет на настоящем цикле суток и погоде игры; часы и лампа — условия осмотра стенда.
+## Свет на настоящем цикле суток и погоде игры; часы и лампа — условия осмотра стенда. Ползунки — той схемы света,
+## что выбрана («Свет и небо»): у света Road to Vostok свой набор (LAB_RULES.atmosphere_tod), у прежнего — свой.
 
 var _lamp: OmniLight3D
-var _sky_mode_before: String = "calc"
+var _sky_mode_before: String = "tod"
 
 
 func _ready() -> void:
 	_sky_mode_before = Settings.sky_mode
+	lab_domain = TodLight.LAB_DOMAIN if TodLight.active() else "atmosphere"
 	super._ready()
 	_build_samples()
 	start_atmosphere(16.0)
 	panel.option("Погода для просмотра", ["Ясно", "Пасмурно", "Дождь", "Туман", "Жара"], set_weather)
-	var sky_mode: OptionButton = panel.option("Небо для просмотра", ["Расчётное", "Панорамы HDRI"], func(index: int) -> void:
-		Settings.sky_mode = "calc" if index == 0 else "hdri"
-		if DayCycle.current:
-			DayCycle.current.rebuild())
-	sky_mode.select(0 if Settings.sky_mode == "calc" else 1)
+	var names: Array[String] = []
+	for mode: String in Settings.SKY_MODES:
+		names.append(String(Settings.SKY_MODE_NAMES[mode]))
+	var sky_mode: OptionButton = panel.option("Свет и небо", names, _set_light_model)
+	sky_mode.select(maxi(0, Settings.SKY_MODES.find(Settings.sky_mode)))
 	panel.number("Часы · 0–24 (условие просмотра)", 16.0, 0.0, 23.95, 0.1, set_hour)
 	panel.number("Лампа в комнате · яркость", 4.0, 0.0, 16.0, 0.1,
 		func(value: float) -> void: _lamp.light_energy = value)
@@ -24,10 +26,29 @@ func _ready() -> void:
 	weapon_selector()
 	panel.label(panel.context, "Общий профиль всех рейдовых карт, включая будущие. Во вкладке «Варианты» включи «Применять на всех картах» и сохрани. Часы, погода и лампа — только условия осмотра.", 14)
 	panel.use_in_game.text = "Применять на всех картах после сохранения"
-	if LabTuning.names("atmosphere").is_empty():
+	if LabTuning.names(lab_domain).is_empty():
 		panel.use_in_game.set_pressed_no_signal(true)
-	panel.status.text = "Общий свет всех карт · исходный профиль Проспекта."
+	_update_status()
 	_settings_changed()
+
+
+## Схема света для осмотра: ползунки — её набора; в игре выбор — Esc → Читы → Мир → «Свет и небо».
+func _set_light_model(index: int) -> void:
+	var mode: String = String(Settings.SKY_MODES[index])
+	var model_changed: bool = (mode == "tod") != (Settings.sky_mode == "tod")
+	Settings.sky_mode = mode
+	if model_changed:
+		set_domain(TodLight.LAB_DOMAIN if mode == "tod" else "atmosphere")
+		if atmosphere:
+			atmosphere.relight()
+	elif DayCycle.current:
+		DayCycle.current.rebuild()
+	_update_status()
+	_settings_changed()
+
+
+func _update_status() -> void:
+	panel.status.text = "Общий свет всех карт · свет Road to Vostok (их числа по часам)." if TodLight.active() else "Общий свет всех карт · прежний профиль Проспекта."
 
 
 func _build_samples() -> void:

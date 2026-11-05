@@ -61,6 +61,12 @@ SKY = {
         "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloofendal_overcast_puresky_4k.hdr",
         "file": "kloofendal_overcast_puresky.hdr", "role": "день в дождь и туман",
     },
+    "kloofendal_48d_partly_cloudy_puresky": {
+        "title": "Kloofendal 48d Partly Cloudy (Pure Sky)", "author": "Greg Zaal", "license": "CC0 1.0",
+        "source": "https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky",
+        "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/kloofendal_48d_partly_cloudy_puresky_4k.hdr",
+        "file": "kloofendal_48d_partly_cloudy_puresky.hdr", "role": "облака неба при свете Road to Vostok (TodLight): кучевые на голубом",
+    },
     "moon_lroc_color": {
         "title": "CGI Moon Kit — Lunar Surface in Color (LRO LROC)", "author": "NASA's Scientific Visualization Studio",
         "license": "Public Domain (NASA)", "source": "https://svs.gsfc.nasa.gov/4720",

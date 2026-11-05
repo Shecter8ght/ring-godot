@@ -54,6 +54,7 @@ func _ready() -> void:
 	_check("лёжа — тело на земле", String(prone.clip).begins_with("prone") and float(prone.hips) < 0.45, "%s, таз %.2f" % [prone.clip, prone.hips])
 	_check("лёжа: оружие в руке, у земли", float(prone.gun_hand) < 0.25 and float(prone.gun_y) < 0.6, "от руки %.2f м, высота %.2f" % [prone.gun_hand, prone.gun_y])
 	print("anim_test: провалено %d" % _fails)
+	await _far_tier()
 	get_tree().quit(1 if _fails > 0 else 0)
 
 
@@ -111,6 +112,36 @@ func _record_hands() -> void:
 
 func _bone_y(bone: String) -> float:
 	return (_sk.global_transform * _sk.get_bone_global_pose(_sk.find_bone(bone))).origin.y - _p.global_position.y
+
+
+## Дальний ярус анимации (Balance.CHARACTER_LOD.anim_far_m): вдали клип двигается anim_far_hz раз в секунду при
+## любой частоте кадров; вблизи — снова каждый кадр. Мародёр выключен — его аниматор включаем отдельно.
+func _far_tier() -> void:
+	var m: Node3D = get_tree().get_first_node_in_group("marauders") as Node3D
+	var an: CharacterAnimator = m.get_node_or_null("CharacterAnimator") as CharacterAnimator if m else null
+	if an == null:
+		_check("дальний ярус: есть мародёр с аниматором", false, "")
+		return
+	an.process_mode = Node.PROCESS_MODE_ALWAYS
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	var hz: float = float(Balance.CHARACTER_LOD.anim_far_hz)
+	m.global_position = cam.global_position + Vector3(230.0, -1.6, 0.0)
+	await get_tree().create_timer(1.0).timeout
+	var moves: int = 0
+	var prev: float = an._lod_acc
+	var t: float = 0.0
+	while t < 2.0:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+		if an._lod_acc < prev:
+			moves += 1
+		prev = an._lod_acc
+	_check("вдали (230 м) клип двигается %d раз в секунду при %d к/с" % [int(hz), FPS],
+		an._lod_interval > 0.0 and absf(float(moves) - hz * 2.0) <= 2.0, "за 2 с — %d" % moves)
+	m.global_position = cam.global_position + Vector3(20.0, -1.6, 0.0)
+	await get_tree().create_timer(1.0).timeout
+	_check("вблизи (20 м) — снова каждый кадр", an._lod_interval == 0.0 and an._lod_skip == 1,
+		"раз в %.2f с, через %d кадра" % [an._lod_interval, an._lod_skip])
 
 
 func _check(what: String, ok: bool, info: String) -> void:

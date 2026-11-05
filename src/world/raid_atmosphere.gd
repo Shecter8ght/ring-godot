@@ -99,6 +99,25 @@ func apply() -> void:
 		Balance.lab_atmosphere(sun, we.environment if we else null)
 
 
+## Сменилась схема света посреди рейда (Settings.sky_mode: Road to Vostok ↔ прежний): окружение — заново с общей
+## основы (RaidLighting.prepare), тень солнца — как в сцене, дальше свет и погода как на старте.
+func relight() -> void:
+	var level := get_parent()
+	var we := level.find_child("WorldEnvironment", false, false) as WorldEnvironment
+	if we and we.environment:
+		we.environment.remove_meta("shared_lighting")
+	var sun := level.get_node_or_null("Sun") as DirectionalLight3D
+	if sun and sun.has_meta("pre_tod_shadow"):
+		sun.set_meta("orig_sun_shadow", sun.get_meta("pre_tod_shadow"))
+		sun.remove_meta("pre_tod_shadow")
+		Settings._apply_sun_quality(sun)
+	apply()
+	var weather := level.get_node_or_null("Weather") as RaidWeather
+	if weather:
+		weather.forget_environment()
+		weather.conditions_changed()
+
+
 ## Свой процедурный небосвод карты: серое небо вместо ясного под сплошными тучами.
 ## _apply_night уже вернул исходное дневное небо, поэтому переключения не копят множители
 ## и не меняют общий ресурс неба, который нужен следующему ясному дню.

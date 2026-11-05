@@ -116,6 +116,8 @@ var _lod_shadows: bool = true
 var _lod_shown: bool = true
 var _lod_ik: bool = true
 var _lod_skip: int = 1
+## Дальний ярус: клип двигается раз в столько секунд (0 — по кадрам, _lod_skip).
+var _lod_interval: float = 0.0
 var _lod_acc: float = 0.0
 var _logic_acc: float = 0.0
 var _lod_frame: int = 0
@@ -435,9 +437,9 @@ static func _ring_at(ring: Array, phi: float) -> Dictionary:
 ## рисует тени на сотни метров — два десятка мародёров по всей карте давали миллионы треугольников в
 ## каждом проходе теней. Дальше shadows_m персонаж теней не отбрасывает, дальше hide_m — не рисуется.
 ## Процессор: дальше ik_m руки не подгоняются к оружию и стенам (IK с лучами физики), дальше anim_m[0]
-## клип считается через кадр, дальше anim_m[1] — раз в четыре кадра (вдали этого не видно), живость
-## поверх клипов (BodyMotion) тогда не считается. Проверка — раз в every секунд, у каждого в свой
-## момент; своё тело игрока не трогаем.
+## клип считается через кадр, дальше anim_m[1] — раз в четыре кадра (вдали этого не видно), дальше anim_far_m —
+## anim_far_hz раз в секунду при любой частоте кадров; живость поверх клипов (BodyMotion) тогда не считается.
+## Проверка — раз в every секунд, у каждого в свой момент; своё тело игрока не трогаем.
 func _tick_lod(delta: float) -> void:
 	_lod_t -= delta
 	if _lod_t > 0.0:
@@ -466,6 +468,8 @@ func _tick_lod(delta: float) -> void:
 			_collision_ik.active = ik
 	var steps: Array = lod.anim_m
 	var skip: int = 4 if d > float(steps[1]) else (2 if d > float(steps[0]) else 1)
+	var far_m: float = float(lod.get("anim_far_m", INF))
+	_lod_interval = 1.0 / float(lod.anim_far_hz) if d > far_m - (keep if _lod_interval > 0.0 else 0.0) else 0.0
 	if skip != _lod_skip:
 		_lod_skip = skip
 		# вдали клип двигаем сами, реже; вблизи — снова каждый кадр
@@ -511,8 +515,11 @@ func _process(delta: float) -> void:
 		_lod_acc += delta
 		_logic_acc += delta
 		_lod_frame += 1
-		if _lod_frame % _lod_skip != 0:
-			# вдали и логика аниматора — в кадр, когда двигается дерево, со всем накопленным временем
+		# вдали и логика аниматора — в кадр, когда двигается дерево, со всем накопленным временем
+		if _lod_interval > 0.0:
+			if _lod_acc < _lod_interval:
+				return
+		elif _lod_frame % _lod_skip != 0:
 			return
 		_tree.advance(_lod_acc)
 		_lod_acc = 0.0

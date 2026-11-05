@@ -19,6 +19,7 @@ func _ready() -> void:
 	Profile.use_file("user://profile_cover_points_test.json", true)
 	await get_tree().process_frame
 	await _classify_cases()
+	_map_files()
 	await _prospekt_cases()
 	print("cover_points_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
@@ -135,6 +136,15 @@ func _place(m: Marauder, at: Vector3, threat: Vector3) -> void:
 	m.global_position = at
 	m.last_known = threat
 	m._cover_miss.clear()
+
+
+## Точки запечены на всех рейдовых картах (владелец 2026-11-05: «чтобы были умными везде») — файл каждой читается.
+func _map_files() -> void:
+	var world := World3D.new()
+	for sector: String in ["res://data/sectors/prospekt.json", "res://data/sectors/mall_map.json", "res://data/sectors/zone01_mall.json"]:
+		var cache: String = String(SectorBuilder.load_def(sector).get("nav_cache", ""))
+		var n: int = CoverPoints.load_for(world, cache)
+		_check("точки укрытия карты %s: %d" % [sector.get_file().get_basename(), n], n > 500, cache)
 
 
 func _check(what: String, ok: bool, detail: String = "") -> void:

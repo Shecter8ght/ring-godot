@@ -52,5 +52,8 @@
   "sun_k": 0.0,
   "veil": 0.6,
   "haze": 0.45
+ },
+ "tod_clouds": {
+  "a": "res://assets/sky/kloofendal_48d_partly_cloudy_puresky.hdr"
  }
 }

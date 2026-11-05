@@ -795,6 +795,8 @@ func _set_rtv_light(on: bool) -> void:
 		for layer: Node in _weather.find_children("*", "CanvasLayer", true, false):
 			(layer as CanvasLayer).visible = false
 		_sun.visible = false
+		# наше окружение могли пересобрать (Esc → Читы → «Свет и небо») — вернуть именно нынешнее
+		_our_env = _we.environment
 		_we.environment = _rtv.get("environment") as Environment
 		_rtv.call("set_active", true)
 		_saved_view = {"msaa": vp.msaa_3d, "ssaa": vp.screen_space_aa, "taa": vp.use_taa}
@@ -952,6 +954,28 @@ func _check_toggle() -> void:
 		fails += _ok("наш свет: сглаживание как было", vp.msaa_3d == msaa)
 	_goto("rtv")
 	fails += _ok("F4: игрок на их поляне", not _rtv_ok or player.global_position.distance_to(CENTERS.rtv) < HALF)
+	# наш свет: прежний и обратно (Esc → Читы → «Свет и небо»), ползунок стенда света действует
+	_goto("ours")
+	var keep: String = Settings.sky_mode
+	Settings.set_sky_mode("calc")
+	await _frames(3)
+	fails += _ok("прежний свет: окружение без их схемы", not _we.environment.has_meta("tod"))
+	fails += _ok("прежний свет: небо прежнее", DayCycle.current != null and DayCycle.current._sky != null
+		and not DayCycle.current._sky.shader.resource_path.ends_with("tod_sky.gdshader"))
+	Settings.set_sky_mode("tod")
+	await _frames(3)
+	_our_env = _we.environment
+	fails += _ok("снова их свет: окружение их схемы", _we.environment.has_meta("tod"))
+	fails += _ok("снова их свет: небо их схемы", DayCycle.current != null and DayCycle.current._sky != null
+		and DayCycle.current._sky.shader.resource_path.ends_with("tod_sky.gdshader"))
+	var base_sun: float = _sun.light_energy
+	LabTuning.preview(TodLight.LAB_DOMAIN, {"sun": 2.0, "moon": 2.0})
+	DayCycle.current.set_hour(DayCycle.current.hour)
+	fails += _ok("стенд света: солнце ×2 (%.2f → %.2f)" % [base_sun, _sun.light_energy], is_equal_approx(_sun.light_energy, base_sun * 2.0))
+	LabTuning.end_preview(TodLight.LAB_DOMAIN)
+	DayCycle.current.set_hour(DayCycle.current.hour)
+	if keep != Settings.sky_mode:
+		Settings.set_sky_mode(keep)
 	_stats["check_fails"] = fails
 
 

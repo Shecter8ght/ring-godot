@@ -82,12 +82,13 @@ var raid_weather: String = ""
 ## Точное время рейда, часы (0..24); < 0 — по времени суток (начало дня / заката / ночи).
 ## В рейде меняется сразу (одиночная игра, хост), следующий рейд начнётся с него.
 var raid_hour: float = -1.0
-## Небо смены суток: "calc" — расчётное с облаками (AtmosphereSky; по умолчанию — решение владельца
-## 2026-10-17), "hdri" — из фотопанорам, как было. Раздел graphics, ключ sky_v2; меняется в Esc → Читы →
-## Мир, в рейде — сразу. Свет на земле от режима почти не зависит.
-const SKY_MODES := ["calc", "hdri"]
-const SKY_MODE_NAMES := {"calc": "Расчётное", "hdri": "Из фотопанорам"}
-var sky_mode: String = "calc"
+## Свет и небо рейдов: "tod" — свет Road to Vostok (TodLight, их схема неба с нашими облаками; по умолчанию —
+## решение владельца 2026-11-05), прежний свет «Проспекта» с небом "calc" — расчётным с облаками (AtmosphereSky)
+## или "hdri" — из фотопанорам. Раздел graphics, ключ sky_v3; меняется в Esc → Читы → Мир и на стенде света,
+## в рейде — сразу.
+const SKY_MODES := ["tod", "calc", "hdri"]
+const SKY_MODE_NAMES := {"tod": "Road to Vostok", "calc": "Прежний · расчётное небо", "hdri": "Прежний · фотопанорамы"}
+var sky_mode: String = "tod"
 ## Свои клавиши поверх project.godot: действие → {"t": "k", "c": физ. код} или {"t": "m", "b": кнопка
 ## мыши}. Раздел keys; меняются в меню Esc → «Управление».
 var keys: Dictionary = {}
@@ -125,9 +126,9 @@ func _load() -> void:
 	lens_fx = bool(cfg.get_value("graphics", "lens_fx", lens_fx))
 	# ключ сменён: прежнее «включено по умолчанию» уже записано у игроков — с 2026-10-07 выключено
 	motion_blur = bool(cfg.get_value("graphics", "motion_blur_v2", motion_blur))
-	# ключ сменён: прежнее умолчание «из панорам» уже записано у игроков — с 2026-10-17 по умолчанию расчётное
-	var sm := String(cfg.get_value("graphics", "sky_v2", sky_mode))
-	sky_mode = sm if sm in SKY_MODES else "calc"
+	# ключ сменён: прежний выбор неба уже записан у игроков — с 2026-11-05 по умолчанию свет Road to Vostok
+	var sm := String(cfg.get_value("graphics", "sky_v3", sky_mode))
+	sky_mode = sm if sm in SKY_MODES else "tod"
 	sens_fps = clampf(float(cfg.get_value("mouse", "fps", sens_fps)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_iso = clampf(float(cfg.get_value("mouse", "iso", sens_iso)), SENS_RANGE[0], SENS_RANGE[1])
 	sens_ads = clampf(float(cfg.get_value("mouse", "ads", sens_ads)), SENS_RANGE[0], SENS_RANGE[1])
@@ -163,9 +164,10 @@ func save() -> void:
 	cfg.set_value("graphics", "window", window_mode)
 	cfg.set_value("graphics", "lens_fx", lens_fx)
 	cfg.set_value("graphics", "motion_blur_v2", motion_blur)
-	cfg.set_value("graphics", "sky_v2", sky_mode)
-	if cfg.has_section_key("graphics", "sky"):
-		cfg.erase_section_key("graphics", "sky")
+	cfg.set_value("graphics", "sky_v3", sky_mode)
+	for old_key: String in ["sky", "sky_v2"]:
+		if cfg.has_section_key("graphics", old_key):
+			cfg.erase_section_key("graphics", old_key)
 	if cfg.has_section_key("graphics", "motion_blur"):
 		cfg.erase_section_key("graphics", "motion_blur")
 	cfg.set_value("mouse", "fps", sens_fps)
@@ -211,14 +213,18 @@ func set_raid_hour(h: float) -> void:
 		DayCycle.current.set_hour(h)
 
 
-## Небо из панорам или расчётное: сразу в рейде (небо пересобирается) и в следующих.
+## Свет и небо: сразу в рейде и в следующих. Смена схемы света (Road to Vostok ↔ прежний) пересобирает окружение,
+## смена неба внутри прежнего — только небо.
 func set_sky_mode(m: String) -> void:
 	if not m in SKY_MODES:
 		return
+	var model_changed: bool = (m == "tod") != (sky_mode == "tod")
 	sky_mode = m
 	save()
 	changed.emit()
-	if DayCycle.current:
+	if model_changed and RaidAtmosphere.current and RaidAtmosphere.current.is_inside_tree():
+		RaidAtmosphere.current.relight()
+	elif DayCycle.current:
 		DayCycle.current.rebuild()
 
 

@@ -9,15 +9,26 @@ extends RefCounted
 ## заходящей). Ночью светит луна напротив солнца, как у них. Свой код; их файлы игре не нужны.
 
 const SKY_SHADER: String = "res://src/world/tod_sky.gdshader"
+const LAB_DOMAIN: String = "atmosphere_tod"
 
 static var _table: Dictionary = {}
 static var _cloud_blur: Dictionary = {}
 static var _cloud_spread: Dictionary = {}
 
 
-## Включён ли их свет (Balance.TOD_LIGHT.on и таблица на месте).
+## Включён ли их свет: Balance.TOD_LIGHT.on, выбор игрока (Settings.sky_mode = "tod" — читы «Свет и небо»,
+## стенд света) и таблица на месте.
 static func active() -> bool:
-	return bool(Balance.TOD_LIGHT.get("on", false)) and not table().is_empty()
+	return bool(Balance.TOD_LIGHT.get("on", false)) and Settings.sky_mode == "tod" and not table().is_empty()
+
+
+## Ползунок стенда «Свет и атмосфера» при их свете (LAB_RULES.atmosphere_tod; без стенда — исходное число).
+static func lab(key: String) -> float:
+	return Balance.lab_number(LAB_DOMAIN, key)
+
+
+static func lab_color(key: String) -> Color:
+	return LabTuning.value(LAB_DOMAIN, key) as Color
 
 
 static func table() -> Dictionary:
@@ -120,7 +131,10 @@ static func prepare(we: WorldEnvironment, sun: DirectionalLight3D) -> void:
 		sun.directional_shadow_blend_splits = true
 		sun.shadow_enabled = true
 		var o: Dictionary = sun.get_meta("orig_sun_shadow", {}) as Dictionary
-		sun.set_meta("orig_sun_shadow", {"max_m": float(Balance.TOD_LIGHT.shadow_max_m),
+		# тень как в сцене — на случай возврата к прежнему свету (RaidAtmosphere.relight)
+		if not sun.has_meta("pre_tod_shadow") and not o.is_empty():
+			sun.set_meta("pre_tod_shadow", o)
+		sun.set_meta("orig_sun_shadow", {"max_m": lab("shadow_m"),
 			"mode": int(o.get("mode", DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS))})
 		Settings._apply_sun_quality(sun)
 
@@ -150,8 +164,9 @@ static func sky_material() -> ShaderMaterial:
 		m.set_shader_parameter("overcast_blur", _blur(over_path))
 		m.set_shader_parameter("clear_mean", float(Balance.TOD_LIGHT.clear_mean))
 		m.set_shader_parameter("overcast_mean", float(Balance.TOD_LIGHT.overcast_mean))
-		m.set_shader_parameter("clear_contrast", _contrast(clear_path, float(Balance.TOD_LIGHT.clear_spread), float(Balance.TOD_LIGHT.clear_mean)))
-		m.set_shader_parameter("overcast_contrast", _contrast(over_path, float(Balance.TOD_LIGHT.overcast_spread), float(Balance.TOD_LIGHT.overcast_mean)))
+		# своя поправка контраста панорамы; ползунки стенда множат её в apply_sky
+		m.set_meta("clear_contrast", _contrast(clear_path, float(Balance.TOD_LIGHT.clear_spread), float(Balance.TOD_LIGHT.clear_mean)))
+		m.set_meta("overcast_contrast", _contrast(over_path, float(Balance.TOD_LIGHT.overcast_spread), float(Balance.TOD_LIGHT.overcast_mean)))
 		m.set_shader_parameter("has_clouds", true)
 	var night: ShaderMaterial = RaidAtmosphere.night_sky_material()
 	for key: String in ["stars_tex", "has_stars_tex", "stars_energy", "stars_floor", "stars_max", "moon_tex", "has_moon_tex"]:
@@ -217,11 +232,11 @@ static func apply(hour: float, sa: Vector2, sun: DirectionalLight3D, e: Environm
 		var to: Vector3 = to_sun if day else to_moon
 		sun.global_basis = Basis.looking_at(-to, Vector3.UP if absf(to.y) < 0.99 else Vector3.FORWARD)
 		if day:
-			sun.light_energy = remap(overcast, 0.0, 1.0, value_at("sunEnergy", t), float(tb.overcast_energy))
-			sun.light_color = color_at("sunColor", t)
+			sun.light_energy = remap(overcast, 0.0, 1.0, value_at("sunEnergy", t), lab("overcast_light")) * lab("sun")
+			sun.light_color = color_at("sunColor", t) * lab_color("sun_tint")
 		else:
-			sun.light_energy = remap(overcast, 0.0, 1.0, float(tb.moon_energy), float(tb.overcast_energy))
-			sun.light_color = color_at("moonColor", t)
+			sun.light_energy = remap(overcast, 0.0, 1.0, float(tb.moon_energy), lab("overcast_light")) * lab("moon")
+			sun.light_color = color_at("moonColor", t) * lab_color("sun_tint")
 		sun.visible = sun.light_energy > 0.001
 		sun.shadow_enabled = true
 		sun.light_volumetric_fog_energy = 1.0
@@ -229,19 +244,24 @@ static func apply(hour: float, sa: Vector2, sun: DirectionalLight3D, e: Environm
 		var sky_color: Color = color_at("skyColor", t)
 		e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 		e.ambient_light_color = color_at("ambientColor", t).lerp(color_at("overcastColor", t), overcast)
-		e.ambient_light_sky_contribution = float((table().get("environment", {}) as Dictionary).get("ambient_light_sky_contribution", 0.5))
-		e.ambient_light_energy = 1.0
+		e.ambient_light_sky_contribution = lab("sky_share")
+		e.ambient_light_energy = lab("ambient")
 		e.background_energy_multiplier = 1.0
 		e.tonemap_exposure = 1.0
-		e.volumetric_fog_density = value_at("fogDensity", t) * fog / float(tb.fog_div)
-		e.volumetric_fog_emission = sky_color
+		e.tonemap_agx_white = lab("agx_white")
+		e.tonemap_agx_contrast = lab("agx_contrast")
+		e.adjustment_saturation = lab("saturation")
+		e.adjustment_enabled = not is_equal_approx(e.adjustment_saturation, 1.0)
+		e.volumetric_fog_density = value_at("fogDensity", t) * fog / float(tb.fog_div) * lab("fog")
+		e.volumetric_fog_emission = sky_color * lab_color("fog_tint")
+		e.volumetric_fog_emission_energy = lab("fog_glow")
+		e.volumetric_fog_anisotropy = lab("fog_forward")
 		e.volumetric_fog_albedo = color_at("sunScatter", t)
 		# свечение — только ночью, вокруг фонарей и ракет (наше: у них свечения нет совсем)
 		e.glow_hdr_threshold = float(Balance.NIGHT_ENV.glow_threshold)
 		e.glow_intensity = float(Balance.NIGHT_ENV.glow_intensity) * night_w
 		e.glow_bloom = 0.0
 		e.glow_enabled = bool(e.get_meta("tod_glow", true)) and e.glow_intensity > 0.001
-	Balance.lab_atmosphere(sun, e)
 
 
 ## Их небо на наш час: цвет неба, горизонта и земли, тучи, отражения, солнце и луна (луна — напротив солнца).
@@ -250,13 +270,17 @@ static func apply_sky(sky: ShaderMaterial, hour: float, sa: Vector2) -> void:
 	if sky == null:
 		return
 	var t: float = time_for(hour, sa)
-	var sky_color: Color = color_at("skyColor", t)
+	var sky_color: Color = color_at("skyColor", t) * lab("sky")
 	var to_sun: Vector3 = DayCycle.dir_from(sa.x, sa.y)
 	sky.set_shader_parameter("overcast", float(weather(String(RaidConditions.current.weather)).overcast))
 	sky.set_shader_parameter("sky_color", sky_color)
 	sky.set_shader_parameter("horizon_color", sky_color * 0.8)
 	sky.set_shader_parameter("ground_color", sky_color * 0.5)
-	sky.set_shader_parameter("reflection", value_at("skyReflection", t))
+	sky.set_shader_parameter("reflection", value_at("skyReflection", t) * lab("reflection"))
+	sky.set_shader_parameter("clear_mean", float(Balance.TOD_LIGHT.clear_mean) * lab("clouds_bright"))
+	sky.set_shader_parameter("overcast_mean", float(Balance.TOD_LIGHT.overcast_mean) * lab("clouds_bright"))
+	sky.set_shader_parameter("clear_contrast", float(sky.get_meta("clear_contrast", 1.0)) * lab("clouds_contrast"))
+	sky.set_shader_parameter("overcast_contrast", float(sky.get_meta("overcast_contrast", 1.0)) * lab("clouds_contrast"))
 	sky.set_shader_parameter("sun_dir", to_sun)
 	sky.set_shader_parameter("moon_dir", -to_sun)
 	sky.set_shader_parameter("clouds_shift", fposmod(hour * float(Balance.TOD_LIGHT.clouds_drift), 1.0))
