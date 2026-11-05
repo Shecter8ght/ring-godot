@@ -85,6 +85,37 @@ def red_mask(pos, nrm, filled, marks):
     return red
 
 
+def face_fill(pos, nrm, filled, tris, ax, plane_mm, axes):
+    """Заливка лица контура (треугольники в осях axes плоскости ax = plane_mm) с мягким краем, у самой плоскости."""
+    q = pos - nrm * INSET_MM
+    a0, a1 = axes
+    us = [p[0] for t in tris for p in t]
+    vs = [p[1] for t in tris for p in t]
+    b0, b1, c0, c1 = min(us) - 2.0, max(us) + 2.0, min(vs) - 2.0, max(vs) + 2.0
+    near = filled & (np.abs(pos[..., ax] - plane_mm) < 1.0) & (q[..., a0] > b0) & (q[..., a0] < b1) & \
+        (q[..., a1] > c0) & (q[..., a1] < c1)
+    if not near.any():
+        return np.zeros(pos.shape[:2], np.float32)
+    sd = signed_distance(raster(tris, b0, b1, c0, c1, R_RES), R_RES) + GROW_MM
+    val = np.clip(0.5 + sample(sd, q[..., a0], q[..., a1], b0, c1, R_RES) / EDGE_MM, 0.0, 1.0)
+    return np.where(near, val, 0.0).astype(np.float32)
+
+
+def white_mask(pos, nrm, filled, marks, zones):
+    """Белая краска в гравировке (этап 2, владелец 05.11: «да, белой, слегка стёртой»): надписи без красной заливки
+    (ИЗЛОМ-45, калибр, номер) и знаки (кольцо и ломаная, контуры резца из zones.json)."""
+    w = np.zeros(pos.shape[:2], np.float32)
+    for m in marks:
+        if m.get('red', True) or not m['tris']:
+            continue
+        w = np.maximum(w, face_fill(pos, nrm, filled, m['tris'], 1, m['side'] * HALF_W, (0, 2)))
+    for e in zones.get('emblems', []):
+        if e.get('tris'):
+            w = np.maximum(w, face_fill(pos, nrm, filled, e['tris'], e['axis'], e['center_mm'][e['axis']],
+                                        tuple(e['axes'])))
+    return w
+
+
 def engrave_height(pos, nrm, filled, marks):
     """Высота гравировки (мм, ≤ 0) в каждом пикселе: по контурам букв своей стороны у плоскости борта; от края фаски
     (−BEVEL_MM снаружи стенки) до полной глубины (RAMP_IN_MM внутрь)."""
@@ -210,6 +241,9 @@ def main():
         pos, nrm, filled = d['pos'], d['nrm'].astype(np.float32), d['filled']
         red = red_mask(pos, nrm, filled, marks)
         cv2.imwrite(str(OUT / f'{name}_red.png'), np.round(red * 255).astype(np.uint8))
+        white = white_mask(pos, nrm, filled, marks, zones)
+        cv2.imwrite(str(OUT / f'{name}_white.png'), np.round(white * 255).astype(np.uint8))
+        print('WHITE', name, 'белой краски, пикселей', int((white > 0.5).sum()))
         prev = np.where(filled[..., None], np.array([110, 110, 110], np.float32), 0.0)
         prev = prev * (1.0 - red[..., None]) + red[..., None] * np.array([30, 30, 230], np.float32)
         cv2.imwrite(str(OUT / f'{name}_preview.png'), cv2.resize(prev.astype(np.uint8), (2048, 2048),

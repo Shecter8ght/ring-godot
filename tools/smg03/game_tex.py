@@ -688,9 +688,19 @@ def red_marks_json():
     (OUT / 'marks.json').write_text(json.dumps(out, ensure_ascii=False), encoding='utf-8', newline='\n')
     log('надписей и меток', len(out), '→', OUT / 'marks.json')
     # зоны местной нарезки (там браки high-poly) и сами знаки — tex_masks.clean_planes выравнивает зону, обходя знак
+    emblems = []
+    for c, r, n in part_stamps.emblem_places():
+        ax = [i for i, v in enumerate(n) if v][0]
+        axes = [i for i in range(3) if i != ax]
+        # лицо резца в плоскости знака (кольцо и ломаная) — контур гравировки знака для белой заливки (этап 2)
+        e = part_stamps.emblem_cutter(r, 0.45, coll)
+        part_stamps.place(e, c, n, (0, 0, 1), 0.0, anchor)
+        e.data.calc_loop_triangles()
+        tris = [[[round(e.data.vertices[i].co[a] * 1000, 4) for a in axes] for i in t.vertices]
+                for t in e.data.loop_triangles if abs(t.normal[ax]) > 0.5]
+        emblems.append({'center_mm': list(c), 'r_mm': r, 'axis': ax, 'axes': axes, 'tris': tris})
     zones = {'cuts': [{'center_mm': list(c), 'half_mm': r, 'axis': ax, 'plane_mm': pl} for c, r, ax, pl in stamp_zones()],
-             'emblems': [{'center_mm': list(c), 'r_mm': r, 'axis': [i for i, v in enumerate(n) if v][0]}
-                         for c, r, n in part_stamps.emblem_places()]}
+             'emblems': emblems}
     (OUT / 'zones.json').write_text(json.dumps(zones, ensure_ascii=False), encoding='utf-8', newline='\n')
     log('зон нарезки', len(zones['cuts']), 'знаков', len(zones['emblems']), '→', OUT / 'zones.json')
 
