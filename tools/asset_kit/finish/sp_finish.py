@@ -339,6 +339,15 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
             sp_lib.mask_proc(lay, "grunge_wipe_smudgy_soft/grunge_wipe_smudgy_soft",
                              {"Balance": 0.55, "Contrast": 0.3}, scale=1.4 * card_k)
             n = lay
+        elif sp["type"] == "mottle":
+            # неровность распыла краски («Осока» 05.11, самопроверка: однотонно на ~1 см): пятна тона и блеска с чётким
+            # краем (BnW spots + Histogram Scan, не мягкий шум — мягкое самопроверка зовёт «мылом»); плитка — mm
+            lay = rel("краска — неровность распыла", above(n), color=(0.62, 0.62, 0.62), cop=sp.get("color", 0.03),
+                      rough=sp.get("rough", 0.05))
+            mf = sp_lib.mask_proc(lay, "noise_bnw_spots_2/bnw_spots_2", scale=bbox_mm / sp.get("mm", 60.0),
+                                  tri=True)
+            _mfilter(mf, "histogram_scan", {"Position": 0.5, "Contrast": 0.85})
+            n = lay
         elif sp["type"] == "photo":
             # фотоматериал CC0 по развёртке (сырьё — sp["set"]: <путь>_Color/_Roughness/_Displacement.jpg): тон
             # и волокна — наложением на основу (свой оттенок отделки остаётся), рельеф — картой высоты, блеск — картой
