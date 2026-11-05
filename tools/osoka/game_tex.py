@@ -7,8 +7,9 @@
   Osoka_high.fbx  — принятая форма v07 теми же группами «<набор>__<слот>_high» (детали игровой и принятой совпадают
                     по именам один к одному): Painter печёт AO, кривизну, толщину, положение с отбором по имени сетки;
   meshes.json     — набор → слот → сетки и отделка (для sp_finish.build_set); scene.json — габарит сцены;
-  <набор>_maps.npz — положение (мм) и нормаль в каждом пикселе развёртки (Tube, Missile) — маски трафарета и отсека
-                    ракеты считает tools/osoka/tex_masks.py;
+  <набор>_maps.npz — положение (мм), нормаль и номер детали (pid) в каждом пикселе развёртки всех наборов — маски
+                    трафарета и отсека ракеты считает tools/osoka/tex_masks.py, места износа — tools/osoka/wear_zones.py;
+  parts.json      — номер детали → имя, слот, габарит (мм);
   normals/<набор>_normal.png — карта нормалей запеканием в Blender (Painter 12.1 пересчитывает нормали игровой сетки
                     по-своему — у ИЗЛОМ-45 вокруг надписей шёл веер, у кромок полосы; приём tools/smg03/game_tex.py).
 Копии внахлёст (uv_stack) на время запекания уходят за квадрат развёртки: Painter и Blender пекут только 0…1, копия берёт
@@ -38,11 +39,13 @@ SPEC = MODEL / 'finish-spec.json'
 OUT = ROOT / '_asset_src/osoka/tex'
 UV = 'GameUV'
 RES = {'Tube': 4096, 'Launcher': 4096, 'Missile': 2048}
-MAP_SETS = ('Tube', 'Missile')
+MAP_SETS = ('Tube', 'Missile', 'Launcher')
 CAGE_M = 0.0008                    # луч нормали стартует на 0.8 мм снаружи игровой сетки
 CAGE_NEAR_M = 0.00015              # второе запекание — с 0.15 мм (пазы у.же клетки, как у ИЗЛОМ-45)
 RAY_M = 0.003                      # и идёт до 2.2 мм внутрь: отклонение игровой сетки до 0.9 мм, буквы 0.35
 PAIRS = []
+PARTS = []                         # номер детали (атрибут граней «pid» до слияния слота) → имя, слот, габарит, мм
+PID_SCALE = 1.0 / 1024.0           # номер в карте развёртки: излучение pid / 1024 (float, точно до целого)
 log = lambda *a: print('OSOKA_TEX', *a, flush=True)
 
 
@@ -92,6 +95,18 @@ def world_copy(o, name, coll, triangulate=False, keep_uv=True):
         ob.data = me2
         me2.name = name
         bpy.data.meshes.remove(old)
+    return ob
+
+
+def tag_part(ob, name, sid):
+    """Номер детали — целым атрибутом граней (в FBX не уходит: экспортёр пишет только цвета): после слияния слота
+    карта «pid» развёртки говорит, какой детали пиксель (маски мест износа, tools/osoka/wear_zones.py)."""
+    i = len(PARTS) + 1
+    pts = np.array([v.co for v in ob.data.vertices]) * 1000.0
+    PARTS.append({'pid': i, 'name': name, 'slot': sid, 'lo': pts.min(0).round(2).tolist(),
+                  'hi': pts.max(0).round(2).tolist()})
+    a = ob.data.attributes.new('pid', 'INT', 'FACE')
+    a.data.foreach_set('value', [i] * len(ob.data.polygons))
     return ob
 
 
@@ -159,7 +174,7 @@ def build_fbx():
     meshes, low_out, high_out = {}, [], []
     for (atlas, sid), objs in sorted(groups.items()):
         key = f'{atlas}__{sid}'
-        lo = join([world_copy(o, 'lc_' + o.name, lo_coll) for o in objs], key + '_low', lo_coll)
+        lo = join([tag_part(world_copy(o, 'lc_' + o.name, lo_coll), o.name, sid) for o in objs], key + '_low', lo_coll)
         set_material(lo, atlas)
         shifted = kit_uv.shift_stack_copies([lo], 1.0, uv=UV)
         miss = [o.name for o in objs if o.name not in hp]
@@ -174,6 +189,7 @@ def build_fbx():
     export_fbx(low_out, OUT / 'Osoka_low.fbx')
     export_fbx(high_out, OUT / 'Osoka_high.fbx')
     (OUT / 'meshes.json').write_text(json.dumps(meshes, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+    (OUT / 'parts.json').write_text(json.dumps(PARTS, ensure_ascii=False, indent=0), encoding='utf-8', newline='\n')
     cs = np.array([Vector(c) for ob in low_out for c in ob.bound_box]) * 1000.0
     scene = {'min_mm': cs.min(0).round(1).tolist(), 'max_mm': cs.max(0).round(1).tolist(),
              'size_mm': float((cs.max(0) - cs.min(0)).max().round(1))}
@@ -196,13 +212,23 @@ def _emit_material(kind, off, scale):
     out = nt.nodes.new('ShaderNodeOutputMaterial')
     em = nt.nodes.new('ShaderNodeEmission')
     nt.links.new(em.outputs[0], out.inputs[0])
-    geo = nt.nodes.new('ShaderNodeNewGeometry')
-    a = nt.nodes.new('ShaderNodeVectorMath')
-    a.operation = 'MULTIPLY_ADD'
-    nt.links.new(geo.outputs['Position' if kind == 'pos' else 'Normal'], a.inputs[0])
-    a.inputs[1].default_value = scale
-    a.inputs[2].default_value = off
-    nt.links.new(a.outputs[0], em.inputs['Color'])
+    if kind == 'pid':
+        at = nt.nodes.new('ShaderNodeAttribute')
+        at.attribute_type = 'GEOMETRY'
+        at.attribute_name = 'pid'
+        a = nt.nodes.new('ShaderNodeMath')
+        a.operation = 'MULTIPLY'
+        nt.links.new(at.outputs['Fac'], a.inputs[0])
+        a.inputs[1].default_value = PID_SCALE
+        nt.links.new(a.outputs[0], em.inputs['Color'])
+    else:
+        geo = nt.nodes.new('ShaderNodeNewGeometry')
+        a = nt.nodes.new('ShaderNodeVectorMath')
+        a.operation = 'MULTIPLY_ADD'
+        nt.links.new(geo.outputs['Position' if kind == 'pos' else 'Normal'], a.inputs[0])
+        a.inputs[1].default_value = scale
+        a.inputs[2].default_value = off
+        nt.links.new(a.outputs[0], em.inputs['Color'])
     tex = nt.nodes.new('ShaderNodeTexImage')
     nt.nodes.active = tex
     return mat, tex
@@ -231,7 +257,7 @@ def bake_maps(set_name, objs, size):
     bpy.context.view_layer.objects.active = objs[0]
     old = {o.name: list(o.data.materials) for o in objs}
     res = {}
-    for kind, off, scale in (('pos', tuple(-lo * sc), tuple(sc)), ('nrm', (0.5,) * 3, (0.5,) * 3)):
+    for kind, off, scale in (('pos', tuple(-lo * sc), tuple(sc)), ('nrm', (0.5,) * 3, (0.5,) * 3), ('pid', None, None)):
         mat, tex = _emit_material(kind, off, scale)
         img = bpy.data.images.new('tm_' + kind, size, size, float_buffer=True, alpha=False)
         img.colorspace_settings.name = 'Non-Color'
@@ -252,7 +278,8 @@ def bake_maps(set_name, objs, size):
     nrm = res['nrm'] * 2.0 - 1.0
     nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True) + 1e-6
     path = OUT / f'{set_name}_maps.npz'
-    np.savez_compressed(path, pos=pos, nrm=nrm.astype(np.float16), filled=filled)
+    pid = np.round(res['pid'][..., 0] / PID_SCALE).astype(np.int16)
+    np.savez_compressed(path, pos=pos, nrm=nrm.astype(np.float16), filled=filled, pid=pid)
     log('карты развёртки', set_name, size, 'пикселей на сетке', int(filled.sum()), '→', path)
 
 
