@@ -6,6 +6,9 @@ extends Node
 ## godot --headless res://tools/anim_test.tscn
 
 const FPS := 144
+## Где ходить: площадь к югу от ТЦ на карте ТЦ — ровная земля, вдоль +X свободно 80 м (прежняя точка (100; −5) была
+## на кольце Ø250 во внешних магазинах, у ТЦ Ø200 r 100 — стена фасада: игрок стоял в ней и не шёл).
+const WALK_AT := Vector2(90.0, 150.0)
 
 var _fails: int = 0
 var _p: Player
@@ -61,7 +64,12 @@ func _ready() -> void:
 ## Стойка и движение 1 с на разгон, потом 2 с замера: клип, сколько раз сменился, нижняя точка
 ## носков и таз (от пола капсулы).
 func _run(stance: int, move: String, sprint: bool) -> Dictionary:
-	_p.global_position = Vector3(100.0, 0.1, -5.0)
+	_p.global_position = _ground(WALK_AT) + Vector3(0.0, 0.1, 0.0)
+	_p.velocity = Vector3.ZERO
+	# из глаз ход задаёт взгляд (CameraRig._look_yaw → Player.look_yaw), сверху — поворот камеры: оба — вдоль +X
+	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
+	rig._look_yaw = atan2(1.0, 0.0)
+	rig.rotation.y = atan2(-1.0, 0.0)
 	_p.stance = stance
 	_p._apply_stance()
 	if move != "":
@@ -108,6 +116,14 @@ func _run(stance: int, move: String, sprint: bool) -> Dictionary:
 func _record_hands() -> void:
 	for side: String in ["Right", "Left"]:
 		_hands[side] = (_sk.global_transform * _sk.get_bone_global_pose(_sk.find_bone("mixamorig_" + side + "Hand"))).origin
+
+
+## Точка карты по углу и радиусу (SectorBuilder.polar) — на земле: рельеф территории ТЦ не на нуле.
+func _ground(ar: Vector2) -> Vector3:
+	var p := SectorBuilder.polar(ar.x, ar.y)
+	var hit := get_viewport().get_world_3d().direct_space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(p + Vector3.UP * 60.0, p + Vector3.DOWN * 60.0, 1))
+	return hit.position as Vector3 if not hit.is_empty() else p
 
 
 func _bone_y(bone: String) -> float:
