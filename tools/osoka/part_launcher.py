@@ -50,14 +50,17 @@ def grip(coll):
     утопленной вставкой и ромбической насечкой, низ рамы до короба. Рама симметрична: паз и вставка режутся слева,
     правая половина — отражением."""
     from lib import boolean_safe, prism_xz
-    pts = fillet(P(D.FRAME_PX), [4.6] * len(D.FRAME_PX), seg=5)
+    # внутренний угол выреза под спуск (верх выреза — передняя грань рукояти) — малым радиусом: снимок КБМ
+    rad = [4.6] * len(D.FRAME_PX)
+    rad[D.FRAME_PX.index((596.5, 597.2))] = 1.5
+    pts = fillet(P(D.FRAME_PX), rad, seg=5)
     o = rounded_prism("Launcher_grip", pts, D.FRAME_Y[0], D.FRAME_Y[1], 4.0, coll, "Paint_olive_cast")
     # плоские боковины — мелкой сеткой ДО вырезов (простые многоугольники без дыр режутся надёжно): иначе после паза и
     # вставки боковина — многоугольник на 280 вершин, показ давал тёмные клинья-«пилу» (владелец о v04–v05)
     from lib import grid_split
     grid_split(o, step=3.0)
-    # паз под спуск: от передней стенки внутрь за ось спуска
-    slot = fillet(P([(550, 588), (596, 588), (603, 600), (603, 632), (550, 632)]), [1.5] * 5, seg=3)
+    # паз под язык спуска: от выреза вверх до оси качания и назад в переднюю грань рукояти (ход пера 10°)
+    slot = fillet(P(D.TRIGGER_SLOT_PX), [1.5] * len(D.TRIGGER_SLOT_PX), seg=3)
     c = prism_xz("_trig_slot", slot, -3.9, 3.9, coll)
     boolean_safe(o, c, name="trigger_slot")
     pp = fillet(P(D.FRAME_PANEL_PX), [4.2] * len(D.FRAME_PANEL_PX), seg=5)
@@ -222,14 +225,63 @@ def knurl_patch(target, poly, y_plane, side, coll, pitch=1.6, h=0.5, inset=0.6):
     bpy.data.meshes.remove(me)
 
 
+def _y_cutter(name, prof, cx, cz, coll, seg=40):
+    """Резец — тело вращения вокруг оси, параллельной Y, через (cx, cz); prof = [(y, r), ...]."""
+    o = lathe(name, prof, coll, None, seg, 0.0, 0.0, smooth=True, closed=True)
+    o.rotation_euler = (0, 0, math.pi / 2)
+    o.location = v(cx, 0, cz)
+    return o
+
+
 def trigger(coll):
-    """Спуск — изогнутое перо с задним приливом на оси в пазу рамы (снимок КБМ: ось 585, 606)."""
-    pts = fillet(P(D.TRIGGER2_PX), [1.3] * len(D.TRIGGER2_PX), seg=4)
-    o = rounded_prism("Trigger", pts, -3.0, 3.0, 1.0, coll, "Steel_bare")
-    pv = D.TRIGGER2_PIVOT_PX
-    set_origin(o, (px_x(pv[0]), 0.0, px_z(*pv)))
-    pin = cyl("Trigger_pin", -D.FRAME_Y[1] - 0.6, D.FRAME_Y[1] + 0.6, 1.6, coll, "Steel_bare", seg=24,
-              cy=px_x(pv[0]), cz=px_z(*pv), axis="Y", ch=0.3)
+    """Спуск v06 (владелец о v05: «спусковой крючок неправильно сделан» — был узкий «клюв», рама закрывала перо
+    наискось). По снимку КБМ ×9 и снимкам Кузьмина: плоское перо 7 мм висит в открытом вырезе рамы, видно целиком —
+    передняя кромка наискось к носику, низ почти прямой, тёмное отверстие оси тяги; сзади внизу полукруглая ступенька,
+    под ней прилив тоньше пера. Язык пера уходит в паз рамы к оси качания над вырезом; выжим — 10° назад."""
+    from lib import boolean_safe, grid_split
+    T, Tt = D.TRIGGER_T, D.TRIGGER_TAIL_T
+    pts = fillet(P(D.TRIGGER3_PX), D.TRIGGER3_FILLET, seg=5)
+    o = rounded_prism("Trigger", pts, -T / 2, T / 2, 1.4, coll, "Steel_bare", smooth=(0.4, 1))
+    # полоса прилива — то же скругление кромки, что у пера: по низу одна кромка от носика до заднего края
+    tp = fillet(P(D.TRIGGER_TAIL_PX), [1.6] * len(D.TRIGGER_TAIL_PX), seg=5)
+    tail = rounded_prism("_trigger_tail", tp, -Tt / 2, Tt / 2, 1.4, coll, "Steel_bare", smooth=(0.4, 1))
+    # боковины мелкой сеткой до отверстий (большой многоугольник после булева показывался клиньями)
+    grid_split(o, step=1.2)
+    lx, ly, ld = D.TRIGGER_LINK_PX
+    LX, LZ = px_x(lx), px_z(lx, ly)
+    r = ld / 2
+    # отверстие оси тяги с фаской 0.5 мм по обеим сторонам — без острой кромки
+    h = T / 2
+    c = _y_cutter("_trig_link_hole", [(-h - 1.0, 0.0), (-h - 1.0, r + 1.5), (-h + 0.5, r), (h - 0.5, r), (h + 1.0, r + 1.5),
+                                      (h + 1.0, 0.0)], LX, LZ, coll)
+    boolean_safe(o, c, name="trigger_link_hole")
+    pv = D.TRIGGER3_PIVOT_PX
+    PX, PZ = px_x(pv[0]), px_z(*pv)
+    rp = 1.8
+    c = _y_cutter("_trig_pivot_hole", [(-h - 1.0, 0.0), (-h - 1.0, rp + 0.6), (-h + 0.3, rp + 0.12), (h - 0.3, rp + 0.12),
+                                       (h + 1.0, rp + 0.6), (h + 1.0, 0.0)], PX, PZ, coll)
+    boolean_safe(o, c, name="trigger_pivot_hole")
+    # ось тяги — утоплена на 0.5 мм, тёмная (снимки: тёмный кружок на пере)
+    link = cyl("_trigger_link", -h + 0.5, h - 0.5, r - 0.1, coll, "Steel_black", seg=28, cy=LX, cz=LZ, axis="Y", ch=0.25)
+    apply_transform(link)
+    o = join([o, tail, link], "Trigger")
+    # плоские щёки после отверстий: точное булево протянуло от отверстия длинные треугольники через всю щёку, а нормали
+    # кромки фаски (45°) сглаживались со щекой — светлая полоса сверху донизу (v06 проба). Кромки фасок — жёсткие,
+    # вырожденные треугольники — прочь, нормали по площади граней
+    from lib import weighted, apply_all, clean
+    clean(o, dist=0.02)
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    for e in bm.edges:
+        if len(e.link_faces) == 2 and e.calc_face_angle(0.0) > math.radians(40.0):
+            e.smooth = False
+    bm.to_mesh(o.data); bm.free()
+    weighted(o)
+    apply_all(o)
+    set_origin(o, (PX, 0.0, PZ))
+    # ось качания — сквозь раму, торцы заподлицо с боковинами (на снимках над пером головок не видно)
+    pin = cyl("Trigger_pin", D.FRAME_Y[0] - 0.1, D.FRAME_Y[1] + 0.1, rp, coll, "Steel_bare", seg=28, cy=PX, cz=PZ,
+              axis="Y", ch=0.08)
+    print("TRIGGER pivot", round(PX, 2), round(PZ, 2), "link", round(LX, 2), round(LZ, 2))
     return o, pin
 
 
