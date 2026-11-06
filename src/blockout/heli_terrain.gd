@@ -2,7 +2,10 @@ extends "res://src/world/district_terrain.gd"
 ## Рельеф серого стенда «Вертолёт» (tools/heli_study.gd): карта высот, шейдер и текстуры — как у DistrictTerrain,
 ## но горы видно на 2–3 км, поэтому у каждой плитки три ступени детализации: вблизи — шаг карты, дальше — ×4 и ×16.
 ## Стыки ступеней закрыты «юбками» — полосой вниз по краю плитки. Подробная ступень и коллизия — только у
-## плиток рядом с тем местом, где ходят (detail_rect, collision_rect); маска земли — PNG без импорта.
+## плиток рядом с тем местом, где ходят (detail_rect, collision_rect); маска земли — PNG без импорта. Шейдер свой
+## (heli_terrain.gdshader): слои зоны 1, а на крутых склонах камень с трёх сторон — стены ущелья без растянутых полос.
+
+const HELI_SHADER: Shader = preload("res://src/blockout/heli_terrain.gdshader")
 
 ## Где кончается подробная ступень и где начинается самая грубая, м (по центру плитки).
 @export var lod_ranges: Vector2 = Vector2(360.0, 1150.0)
@@ -29,7 +32,7 @@ func _build() -> void:
 	root.name = "_Generated"
 	add_child(root)
 	var material: ShaderMaterial = ShaderMaterial.new()
-	material.shader = SHADER
+	material.shader = HELI_SHADER
 	var textures: Dictionary = terrain.get("textures", {}) as Dictionary
 	for key: String in ["albedo_array", "normal_array", "arm_array", "noise"]:
 		var path: String = String(textures.get(key, ""))

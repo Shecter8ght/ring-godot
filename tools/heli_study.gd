@@ -7,6 +7,8 @@ extends Node3D
 ##   tools/godot.cmd --headless res://tools/heli_study.tscn -- check                   — сборка, счёт, земля под местами
 ##   tools/godot.cmd --windowed --resolution 1920x1080 --disable-vsync res://tools/heli_study.tscn -- perf
 ##                                                 — кадры в секунду с точек plan.views → docs/screens/heli_v04/<метка>_*
+##   … то же с окном -- shots — одиночные кадры plan.shots (на плотину, с плотины, места, вертолёт, с воздуха)
+##                                                 → docs/screens/heli_v04/shots/; HELI_SHOTS_ONLY=имя,имя — выборочно
 ## HELI_FOREST=0…1 — доля деревьев (0 — без леса), HELI_TREE_NEAR — до скольких метров полные модели деревьев (300),
 ## HELI_QUALITY=low|medium|high, HELI_TIME=day|dusk|night, HELI_WEATHER=clear|overcast|rain|fog, HELI_TAG — метка замера.
 ## Прогулка: WASD, Shift — бег, Space — прыжок, C — присесть, F — полёт, M — план, 1–9/0 — места, N/B — следующее /
@@ -68,7 +70,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["check", "perf"]:
+		if arg in ["check", "perf", "shots"]:
 			mode = arg
 	plan = JSON.parse_string(FileAccess.get_file_as_string(PLAN_PATH)) as Dictionary
 	y0 = float(plan.y_offset)
@@ -100,6 +102,10 @@ func _ready() -> void:
 	if mode == "perf":
 		walker.set("is_probe", true)
 		await _perf()
+		return
+	if mode == "shots":
+		walker.set("is_probe", true)
+		await _shots()
 		return
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	print("heli_study: прогулка; сборка %d мс, деревьев %d" % [int(stats.build_ms), int(stats.get("trees", 0))])
@@ -880,4 +886,59 @@ func _perf() -> void:
 	var f: FileAccess = FileAccess.open(ProjectSettings.globalize_path("%s/perf_%s.txt" % [OUT_DIR, tag]), FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")
 	f.close()
+	get_tree().quit()
+
+
+## Вертолёт — в ближайшую к (x, z) точку маршрута, носом по ходу, и стоит (для кадра).
+func _park_heli(xz: Array) -> void:
+	var target: Vector2 = Vector2(float(xz[0]), float(xz[1]))
+	var end: float = heli_len[heli_len.size() - 1]
+	var best: float = 0.0
+	var best_d: float = INF
+	var s: float = 0.0
+	while s <= end:
+		var p: Vector3 = _heli_at(s)
+		var d: float = Vector2(p.x, p.z).distance_to(target)
+		if d < best_d:
+			best_d = d
+			best = s
+		s += 5.0
+	heli_s = best
+	heli.position = _heli_at(best)
+	var ahead: Vector3 = _heli_at(minf(best + 5.0, end)) - heli.position
+	heli.rotation.y = atan2(-ahead.x, -ahead.z)
+	heli_wait = 1.0e9
+
+
+func _shots() -> void:
+	hud.visible = false
+	var camera: Camera3D = Camera3D.new()
+	camera.far = 4000.0
+	add_child(camera)
+	camera.make_current()
+	var dir: String = OUT_DIR + "/shots"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
+	var only: PackedStringArray = OS.get_environment("HELI_SHOTS_ONLY").split(",", false)
+	for v: Dictionary in plan.shots:
+		var shot: String = String(v.name)
+		if not only.is_empty() and not shot in only:
+			continue
+		var at: Array = v.at
+		var pos: Vector3
+		if at.size() > 2:
+			pos = Vector3(float(at[0]), y0 + float(at[2]), float(at[1]))
+		else:
+			pos = Vector3(float(at[0]), ground(float(at[0]), float(at[1])) + float(v.get("up", 1.7)), float(at[1]))
+		var look: Array = v.look
+		# вне кадра с вертолётом он стоит за краем карты на севере, чтобы не попадал случайно
+		_park_heli(v.get("heli", [0.0, -1700.0]))
+		camera.fov = float(v.get("fov", Settings.fps_fov_v()))
+		walker.global_position = pos - Vector3(0, 1.7, 0)
+		camera.global_position = pos
+		camera.look_at(Vector3(float(look[0]), y0 + float(look[2]), float(look[1])), Vector3.UP)
+		# освещение экрана (SDFGI, засветка, глаз) догоняет новую точку
+		await _frames(110)
+		var img: Image = get_viewport().get_texture().get_image()
+		img.save_jpg(ProjectSettings.globalize_path("%s/%s.jpg" % [dir, shot]), 0.9)
+		print("heli_study shots: %s" % shot)
 	get_tree().quit()
