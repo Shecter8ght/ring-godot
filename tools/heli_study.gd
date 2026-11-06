@@ -1,5 +1,5 @@
 extends Node3D
-## Серый стенд карты «Вертолёт» (docs/design/mission_helicopter.md): HELI_PLAN=v05 (по умолчанию) — «плотина над долиной»
+## Серый стенд карты «Плотина» — на ней задание «Вертолёт» (docs/design/mission_helicopter.md): HELI_PLAN=v05 (по умолчанию) — «плотина над долиной»
 ## (tools/mission_helicopter_v05.py: озеро и вся игра ниже арочной плотины 260 м, водохранилище выше, водослив на севере),
 ## HELI_PLAN=v04 — прежняя «карта вокруг плотины» (tools/mission_helicopter_v04*.py). Рельеф 2 × 3 км (ходят по ядру, дальше
 ## горы видом), вода, плотина, места и остановки коробками, лес зоны 1 (ели, сосны, берёзы с дальними карточками), вертолёт
@@ -10,6 +10,7 @@ extends Node3D
 ##                                                 — кадры в секунду с точек plan.views → docs/screens/heli_v04/<метка>_*
 ##   … то же с окном -- shots — одиночные кадры plan.shots (на плотину, с плотины, места, вертолёт, с воздуха)
 ##                                                 → docs/screens/heli_v04/shots/; HELI_SHOTS_ONLY=имя,имя — выборочно
+##   tools/dam_play.cmd — та же карта с настоящим игроком, оружием и ботами (мир — этот стенд без ходока)
 ##   … то же с окном -- ortho — ортографические кадры мест и остановок по рамкам plan.ortho: план сверху и вид под углом,
 ##                                                 без дымки → docs/screens/heli_<версия>/ortho/; HELI_ORTHO_ONLY=имя — выборочно
 ## HELI_FOREST=0…1 — доля деревьев (0 — без леса), HELI_TREE_NEAR — до скольких метров полные модели деревьев (300),
@@ -64,7 +65,9 @@ var status_timer: float = 0.0
 
 
 func _enter_tree() -> void:
-	Profile.use_file("user://profile_heli_study_test.json", true)
+	# внутри «игрока и ботов» (tools/dam_play.gd) профиль ставит он
+	if not has_meta("embedded"):
+		Profile.use_file("user://profile_heli_study_test.json", true)
 
 
 func _ready() -> void:
@@ -74,12 +77,15 @@ func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if arg in ["check", "perf", "shots", "ortho"]:
 			mode = arg
+	# мир для tools/dam_play.gd: только карта, свет и вертолёт — без ходока, интерфейса и клавиш прогулки
+	if has_meta("embedded"):
+		mode = "embed"
 	var version: String = _env("HELI_PLAN", "v05")
 	plan_path = "res://data/blockouts/heli_%s.json" % version
 	veg_path = "res://data/blockouts/heli_%s_vegetation.json" % version
 	thin_path = "user://heli_%s_vegetation_thin.json" % version
 	out_dir = "res://docs/screens/heli_%s" % version
-	DisplayServer.window_set_title("RING · «Вертолёт» %s · серый стенд" % version)
+	DisplayServer.window_set_title("RING · «Плотина» %s · серый стенд (задание «Вертолёт»)" % version)
 	plan = JSON.parse_string(FileAccess.get_file_as_string(plan_path)) as Dictionary
 	y0 = float(plan.y_offset)
 	var quality: String = OS.get_environment("HELI_QUALITY")
@@ -97,6 +103,8 @@ func _ready() -> void:
 	_walls()
 	_helicopter()
 	stats.build_ms = Time.get_ticks_msec() - started
+	if mode == "embed":
+		return
 	walker = Walker.new()
 	walker.name = "StudyWalker"
 	add_child(walker)
@@ -718,7 +726,7 @@ func _jump(i: int) -> void:
 	var target: Array = _place_at(current)
 	walker.call("teleport", target[0], target[1])
 	if title:
-		title.text = "«Вертолёт» v04 · %s" % String((places[current] as Dictionary).name)
+		title.text = "«Плотина» %s · %s" % [_env("HELI_PLAN", "v05"), String((places[current] as Dictionary).name)]
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -884,7 +892,7 @@ func _perf() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	var size: Vector2i = DisplayServer.window_get_size()
 	var lines: PackedStringArray = [
-		"«Вертолёт» %s, серый стенд · %s" % [out_dir.get_file().trim_prefix("heli_"), tag],
+		"«Плотина» %s, серый стенд · %s" % [out_dir.get_file().trim_prefix("heli_"), tag],
 		"%s · %dx%d · качество %s · %s, %s · лес %.0f %% (%d деревьев, полные модели до %s м) · сборка %d мс" % [
 			RenderingServer.get_video_adapter_name(), size.x, size.y, Settings.quality, String(RaidConditions.current.time),
 			String(RaidConditions.current.weather), float(stats.forest_share) * 100.0, int(stats.trees), _env("HELI_TREE_NEAR", "300"),

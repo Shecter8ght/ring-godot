@@ -394,6 +394,12 @@ python -X utf8 tools/dorm_light_archive.py --verify           # r6: хеши а�
 python -X utf8 tools/dorm_light_r61_archive.py --verify       # r6.1: 46 побайтных файлов «до» light6_* (42 вида, два JSON, две калибровки)
 tools/godot.cmd --headless --script res://tools/dorm_light_geometry_check.gd # r6: те же треугольники / нормали / UV / коллизии при группировке по этажам и наружным граням
 python -X utf8 tools/dorm_light_report.py                      # r6.1: проверка 149 кадров / 83 серий, новые 48 кадров / 36 серий, неизменные камеры и калибровка → light61_summary.json
+tools/heli_study.cmd                                          # карта «Плотина» (на ней задание «Вертолёт», docs/design/mission_helicopter.md), серый стенд v05:
+                                                              # прогулка (F — полёт, M — план, 1–9/0 — места); -- check | perf | shots | ortho — снимки docs/screens/heli_v05;
+                                                              # HELI_PLAN=v04 — прежняя версия; схемы и данные — python -X utf8 tools/mission_helicopter_v05.py [plans] [data]
+tools/dam_play.cmd                                            # «Плотина» с настоящим игроком, оружием и ботами (как dorm_play): в полёте расставить ботов (ЛКМ / ПКМ,
+                                                              # 1–6 — кого, R — что делает, N / B — места, G — игрок сюда), Enter — в тело игрока; навигация ботов печётся
+                                                              # кусками 128 м вокруг игрока и ботов; --headless res://tools/dam_play.tscn -- check, с окном -- shots
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
                                                               # --headless res://tools/prospekt_study.tscn -- verify — здания, места лута, уровни, 16 мест, 7 маршрутов пешком (пролог
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон
