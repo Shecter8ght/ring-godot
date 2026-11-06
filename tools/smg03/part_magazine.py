@@ -15,6 +15,7 @@ import math
 import bpy
 import bmesh
 from mathutils import Matrix, Vector
+import lib
 from lib import material, MM, MAG_W, MAG_D, MAG_ANGLE, lathe, boolean, fillet, finish_small, weighted, apply_all
 from part_receiver import mag_frame, MAG_CENTER
 
@@ -203,15 +204,18 @@ def glock_body(name, z_bottom, C, holes=(4, 13)):
     front = [(D - 2.6, -4.0), (D + 3.0, -4.0), (D + 3.0, 4.0), (D - 2.6, 4.0)]
     local_cut(o, "_catch", [prism_local_xu(side, -W - 3.0, W + 3.0), prism_local_xy(front, uc - 3.6, uc + 3.6)], C)
     # контрольные окна сзади (Ø3 мм, сквозные: в них видно латунь) — у патронов holes[0]…holes[1], два ряда
+    # источник игровой сетки (SMG03_LP_SOURCE=1 build.py) — без контрольных окон: их даёт карта нормалей с high-poly
     tu = top_round_u()
     circle = [(1.5 * math.cos(2 * math.pi * k / 16), 1.5 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
-    holes_s = []
+    holes_s = [] if lib.MARKINGS_GEOMETRY else None
     for n in range(holes[0], holes[1] + 1):
         uu = round_u(n - 1, tu)
         yy = round_y(n - 1) * 0.85
-        holes_s.append([[(-D - 3.0, yy + cy, uu + cu) for cy, cu in circle], [(-D + WALL + 1.0, yy + cy, uu + cu)
-                                                                             for cy, cu in circle]])
-    local_cut(o, "_witness", holes_s, C)
+        if holes_s is not None:
+            holes_s.append([[(-D - 3.0, yy + cy, uu + cu) for cy, cu in circle], [(-D + WALL + 1.0, yy + cy, uu + cu)
+                                                                                 for cy, cu in circle]])
+    if holes_s:
+        local_cut(o, "_witness", holes_s, C)
     finish_small(o, w=0.4, seg=3)
     return o
 
@@ -262,13 +266,36 @@ def sleeve30(name, C):
     # углами и с заходом на борта (на снимке KRISS зубцы видны и спереди, и на профиле); резак — «подкова» между
     # контуром рукава, сдвинутым внутрь на 1 мм, и контуром снаружи (прямой заход на борта резал скругление ломтиками)
     u_front = u_at(Z_SLEEVE, ds) - 5.0
-    # канавка кончается на скруглении угла, в 0.6 мм за началом дуги: там, где дуга переходит в плоский борт, линии
-    # перехода у рукава и у резака совпадали — точное булево оставляло дыры на каждой канавке
+    # канавки — со стенками под 45° (дно 0.4 мм, по поверхности 2 мм, глубина 0.8): отвесные стенки карта нормалей
+    # не передаёт, и рифление на игровой сетке не читалось; путь — контур рукава по передней грани и скруглениям углов,
+    # концы — в 0.6 мм за началом дуг (там линии перехода рукава и резака совпадали — точное булево оставляло дыры)
     x0 = ds - 8.5 + 0.6
-    y_in = (ws - 8.5) + math.sqrt(7.5 ** 2 - 0.6 ** 2)
-    inner = [q for q in section(ds - 1.0, ws - 1.0, 7.5, 3.5) if q[0] > x0]
-    outer = [q for q in section(ds + 3.0, ws + 3.0, 11.5, 7.5) if q[0] > x0]
-    groove = [(x0, -ws - 3.0)] + outer + [(x0, ws + 3.0), (x0, y_in)] + list(reversed(inner)) + [(x0, -y_in)]
+    path = [q for q in section(ds, ws, 8.5, 4.5, seg=10) if q[0] > x0]
+    dense = []
+    for a, b in zip(path, path[1:]):
+        n_seg = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) / 1.5))
+        for k in range(n_seg):
+            t = k / n_seg
+            dense.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+    dense.append(path[-1])
+    cx_arc = ds - 8.5
+
+    def outward(q):
+        # наружу: на дугах — от центра дуги, на передней грани — вперёд
+        if abs(q[1]) <= ws - 8.5 + 1e-6:
+            return (1.0, 0.0)
+        cy = math.copysign(ws - 8.5, q[1])
+        dx, dy = q[0] - cx_arc, q[1] - cy
+        r = math.hypot(dx, dy) or 1.0
+        return (dx / r, dy / r)
+    profile = ((-0.8, -0.2), (-0.8, 0.2), (0.4, 1.4), (0.4, -1.4))   # (глубина от поверхности, сдвиг вдоль оси)
+
+    def groove_rings(uc):
+        rings = []
+        for q in dense:
+            nx, ny = outward(q)
+            rings.append([(q[0] + nx * d, q[1] + ny * d, uc + du) for d, du in profile])
+        return rings
     length = u_front - U_BOT30
     gs = []
     k = 0
@@ -276,10 +303,13 @@ def sleeve30(name, C):
         uc = u_front - k * 3.2
         if uc < u_front - 0.62 * length:
             break
-        gs.append(prism_local_xy(groove, uc - 0.8, uc + 0.8))
+        gs.append(groove_rings(uc))
         k += 1
-    # с учётом самопересечений: без него на каждой канавке оставались открытые рёбра у края на дуге
-    local_cut(o, "_grooves", gs, C, self_x=True)
+    # с учётом самопересечений: без него на каждой канавке оставались открытые рёбра у края на дуге; у источника
+    # игровой сетки рифления и окон нет — они в карте нормалей (канавки в упрощённой сетке рвали развёртку на сотни
+    # островов, и запекание в них било изнанку)
+    if lib.MARKINGS_GEOMETRY:
+        local_cut(o, "_grooves", gs, C, self_x=True)
     # окна 16–30 сзади, сквозь стенку рукава
     tu = top_round_u()
     circle = [(1.6 * math.cos(2 * math.pi * k / 16), 1.6 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
@@ -291,7 +321,8 @@ def sleeve30(name, C):
         yy = round_y(n - 1) * 0.9
         hs.append([[(-ds - 3.0, yy + cy, uu + cu) for cy, cu in circle], [(-ds + SLV_T + 0.6, yy + cy, uu + cu)
                                                                           for cy, cu in circle]])
-    local_cut(o, "_witness", hs, C)
+    if lib.MARKINGS_GEOMETRY:
+        local_cut(o, "_witness", hs, C)
     # рамки защёлки у дна на обоих бортах: выступ 0.9 мм, в нём прорезь глубиной 1.5 (виден язычок трубки)
     ub = U_BOT30 + 13.0
     frame = fillet([(-14.0, ub - 5.0), (10.0, ub - 5.0), (10.0, ub + 5.0), (-14.0, ub + 5.0)], 3.0, 6)

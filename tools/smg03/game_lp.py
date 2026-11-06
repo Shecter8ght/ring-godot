@@ -123,6 +123,30 @@ for nm in ('Pin_02_L', 'Pin_03_L', 'Pin_03_R', 'Pin_04_L', 'Pin_04_R', 'Pin_05_L
 log = lambda *a: print('SMG03_LP', *a, flush=True)
 
 
+def show_hidden_mags(prefix=('Magazine13', 'Magazine30')) -> int:
+    """Детали магазинов, спрятанные драйверами (13 или 30 — по свойству mag30 пустышки SMG03_Controls), — показать без
+    драйверов (только в памяти, исходник не сохраняется): у скрытого объекта Blender не пересчитывает matrix_world, и
+    копии патронов магазина на 30 вставали в начало координат (игровая сетка и high-poly магазинов v2, 06.11)."""
+    n = 0
+    for o in bpy.data.objects:
+        if not o.name.startswith(prefix):
+            continue
+        for path in ('hide_viewport', 'hide_render'):
+            try:
+                o.driver_remove(path)
+            except TypeError:
+                pass
+        o.hide_viewport = False
+        o.hide_render = False
+        n += 1
+    refresh()
+    for o in bpy.data.objects:
+        if o.name.startswith(prefix):
+            o.hide_set(False)
+    refresh()
+    return n
+
+
 def simplify(o, budget: int) -> int:
     """Упрощение по бюджету только схлопыванием рёбер. Плоское растворение (как у ГРАНЬ-15) сливало плоскость
     с вырезами в многоугольник «с дырами» через разрез, и разбиение на треугольники закрывало дыры: у целика окна

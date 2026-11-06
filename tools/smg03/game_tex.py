@@ -21,6 +21,7 @@ from __future__ import annotations
 import fnmatch
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -38,10 +39,12 @@ from ar15.game_lp import evaluated_copy, tris  # noqa: E402
 from asset_kit import uv as kit_uv  # noqa: E402
 import receiver_seam  # noqa: E402
 
-SRC = Path('E:/Models Blender/WEAPONS/Vector — модель/ПП-Vector_геометрия_v06.blend')
+# магазины v2 отдельно (game_lp_mags.py): SMG03_TEX_SRC — геометрия v07, SMG03_TEX_LP — игровая сетка магазинов,
+# SMG03_TEX_OUT — своя папка; корпус и остальное при этом не трогаются
+SRC = Path(os.environ.get('SMG03_TEX_SRC', 'E:/Models Blender/WEAPONS/Vector — модель/ПП-Vector_геометрия_v06.blend'))
 SPEC = Path('E:/Models Blender/WEAPONS/Vector — модель/finish-spec.json')
-LP = ROOT / '_asset_src/smg03/game/lp/SMG03_Game_LP.blend'
-OUT = ROOT / '_asset_src/smg03/tex'
+LP = Path(os.environ.get('SMG03_TEX_LP', str(ROOT / '_asset_src/smg03/game/lp/SMG03_Game_LP.blend')))
+OUT = Path(os.environ.get('SMG03_TEX_OUT', str(ROOT / '_asset_src/smg03/tex')))
 # половины корпуса: атлас игровой сетки → слот finish-spec.json; high-poly делится со сдвигом точки грани внутрь, мм
 RECEIVER_HALF = {'Upper': 'receiver_upper', 'Lower': 'receiver_lower'}
 HP_INSET_MM = 0.3
@@ -515,6 +518,9 @@ def build_fbx():
     spec, table = slot_table()
     finish_of = {sid: fin for sid, _, fin in table}
     bpy.ops.wm.open_mainfile(filepath=str(SRC))
+    # магазины 13 и 30 спрятаны драйверами: у скрытых matrix_world не пересчитан (патроны на 30 — в начале координат)
+    from game_lp import show_hidden_mags
+    log('магазины показаны:', show_hidden_mags())
     hp = {o.name: o for o in bpy.data.objects if o.type == 'MESH'}
     with bpy.data.libraries.load(str(LP)) as (src, dst):
         dst.objects = list(src.objects)
@@ -525,7 +531,7 @@ def build_fbx():
         work.objects.link(o)
     need = sorted({n for o in lows for n in o['hp']})
     high = {n: evaluated_copy(hp[n], 'hpc_' + n, work) for n in need}
-    snapped = flatten_dents(high['Receiver'])
+    snapped = flatten_dents(high['Receiver']) if 'Receiver' in high else 0
     log('high-poly корпуса: вмятин нарезки выровнено вершин', snapped)
     for o in high.values():
         snapped += planar_snap(o)
@@ -533,7 +539,8 @@ def build_fbx():
         keep_normals(o.data)
     log('high-poly: вершин сведено в плоскости', snapped)
     log('деталей high-poly', len(high), 'треугольников', sum(tris(o.data) for o in high.values()))
-    halves = {a: half_copy(high['Receiver'], a == 'Upper', 'hpc_Receiver_' + a, work) for a in RECEIVER_HALF}
+    halves = ({a: half_copy(high['Receiver'], a == 'Upper', 'hpc_Receiver_' + a, work) for a in RECEIVER_HALF}
+              if 'Receiver' in high else {})
     log('high-poly корпуса по шву:', {a: tris(o.data) for a, o in halves.items()})
     lo_coll = bpy.data.collections.new('LOW')
     hi_coll = bpy.data.collections.new('HIGH')
