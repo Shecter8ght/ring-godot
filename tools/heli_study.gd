@@ -10,6 +10,8 @@ extends Node3D
 ##                                                 — кадры в секунду с точек plan.views → docs/screens/heli_v04/<метка>_*
 ##   … то же с окном -- shots — одиночные кадры plan.shots (на плотину, с плотины, места, вертолёт, с воздуха)
 ##                                                 → docs/screens/heli_v04/shots/; HELI_SHOTS_ONLY=имя,имя — выборочно
+##   … то же с окном -- ortho — ортографические кадры мест и остановок по рамкам plan.ortho: план сверху и вид под углом,
+##                                                 без дымки → docs/screens/heli_<версия>/ortho/; HELI_ORTHO_ONLY=имя — выборочно
 ## HELI_FOREST=0…1 — доля деревьев (0 — без леса), HELI_TREE_NEAR — до скольких метров полные модели деревьев (300),
 ## HELI_QUALITY=low|medium|high, HELI_TIME=day|dusk|night, HELI_WEATHER=clear|overcast|rain|fog, HELI_TAG — метка замера.
 ## Прогулка: WASD, Shift — бег, Space — прыжок, C — присесть, F — полёт, M — план, 1–9/0 — места, N/B — следующее /
@@ -70,7 +72,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["check", "perf", "shots"]:
+		if arg in ["check", "perf", "shots", "ortho"]:
 			mode = arg
 	var version: String = _env("HELI_PLAN", "v05")
 	plan_path = "res://data/blockouts/heli_%s.json" % version
@@ -112,6 +114,10 @@ func _ready() -> void:
 	if mode == "shots":
 		walker.set("is_probe", true)
 		await _shots()
+		return
+	if mode == "ortho":
+		walker.set("is_probe", true)
+		await _ortho()
 		return
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	print("heli_study: прогулка; сборка %d мс, деревьев %d" % [int(stats.build_ms), int(stats.get("trees", 0))])
@@ -992,3 +998,164 @@ func _shots() -> void:
 		img.save_jpg(ProjectSettings.globalize_path("%s/%s.jpg" % [dir, shot]), 0.9)
 		print("heli_study shots: %s" % shot)
 	get_tree().quit()
+
+
+## Ортографические кадры мест: рамка с плана (центр, ширина × глубина) целиком в кадре. План — сверху, север вверху;
+## вид — под углом с заданной стороны (или с той, что стенд выберет сам, _open_yaw), кадр — ровно по рамке, склоны, лес
+## и постройки перед местом срезаны ближней плоскостью; где срез прошёл через склон, видна тёмная подложка — как разрез
+## на чертеже. Дымку и туман на время кадров выключаем — иначе даль мутная.
+func _ortho() -> void:
+	hud.visible = false
+	var we: WorldEnvironment = get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if we and we.environment:
+		we.environment.fog_enabled = false
+		we.environment.volumetric_fog_enabled = false
+	var sun: DirectionalLight3D = get_node_or_null("Sun") as DirectionalLight3D
+	if sun:
+		sun.directional_shadow_max_distance = 900.0
+	var camera: Camera3D = Camera3D.new()
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.far = 3000.0
+	add_child(camera)
+	camera.make_current()
+	_park_heli([0.0, -1700.0])
+	_terrain_full_detail()
+	# подложка разреза: лучи, ушедшие под срезанный склон, упираются в неё, а не в небо
+	var section: MeshInstance3D = MeshInstance3D.new()
+	var plane: PlaneMesh = PlaneMesh.new()
+	plane.size = Vector2(8000.0, 8000.0)
+	var dark: StandardMaterial3D = StandardMaterial3D.new()
+	dark.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dark.albedo_color = Color(0.16, 0.16, 0.17)
+	plane.material = dark
+	section.mesh = plane
+	section.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(section)
+	var dir: String = out_dir + "/ortho"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
+	var only: PackedStringArray = OS.get_environment("HELI_ORTHO_ONLY").split(",", false)
+	var view_size: Vector2 = get_viewport().get_visible_rect().size
+	var aspect: float = view_size.x / maxf(view_size.y, 1.0)
+	for v: Dictionary in plan.get("ortho", []):
+		var shot: String = String(v.name)
+		if not only.is_empty() and not shot in only:
+			continue
+		var c: Array = v.center
+		var cx: float = float(c[0])
+		var cz: float = float(c[1])
+		var w: float = float(v.w)
+		var h: float = float(v.h)
+		var top: float = float(v.top)
+		# низ рамки — земля в центре или уровень воды (башня в водохранилище, дебаркадер на озере)
+		var gy: float = ground(cx, cz) if v.get("base") == null else y0 + float(v.base)
+		walker.global_position = Vector3(cx, gy + 1.0, cz)
+		for kind: String in v.views:
+			if kind == "top":
+				# по ширине кадра — ширина рамки, по высоте — глубина; север вверху. Камера выше всего, что попало
+				# в кадр (склон хребта у края выше места — иначе камера в горе и там дыра), тени — на всю глубину кадра.
+				camera.size = maxf(h, w / aspect) * 1.08
+				var half: Vector2 = Vector2(camera.size * aspect, camera.size) * 0.5
+				var hmin: float = gy
+				var hmax: float = gy + top
+				for i: int in range(25):
+					for j: int in range(25):
+						var g: float = ground(cx - half.x + half.x * 2.0 * i / 24.0, cz - half.y + half.y * 2.0 * j / 24.0)
+						hmin = minf(hmin, g)
+						hmax = maxf(hmax, g)
+				var pos: Vector3 = Vector3(cx, hmax + 40.0, cz)
+				section.position.y = hmin - 25.0
+				camera.near = 1.0
+				camera.far = pos.y - hmin + 60.0
+				camera.look_at_from_position(pos, pos + Vector3.DOWN, Vector3(0, 0, -1))
+			else:
+				# рамка места по точкам сетки (земля и верх построек) в осях камеры: кадр — ровно по ним, ближняя
+				# плоскость — сразу перед ближней точкой места, всё перед ним (склон, лес, соседние постройки) срезано
+				var pitch: float = deg_to_rad(float(v.pitch))
+				var yaw: float = _open_yaw(cx, cz, w, h, gy, pitch, sun) if v.get("yaw") == null else deg_to_rad(float(v.yaw))
+				var target: Vector3 = Vector3(cx, gy + float(v.focus), cz)
+				var off: Vector3 = Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch))
+				var forward: Vector3 = -off
+				var right: Vector3 = forward.cross(Vector3.UP).normalized()
+				var up: Vector3 = right.cross(forward)
+				var lo: Vector3 = Vector3(INF, INF, INF)
+				var hi: Vector3 = Vector3(-INF, -INF, -INF)
+				var gmin: float = gy
+				for i: int in range(9):
+					for j: int in range(9):
+						var x: float = cx - w * 0.5 + w * i / 8.0
+						var z: float = cz - h * 0.5 + h * j / 8.0
+						# склон ниже места (место на вершине или уступе) в кадр не тянем: низ рамки — не ниже 10 м под центром
+						var g: float = maxf(ground(x, z), gy if v.get("base") != null else gy - 10.0)
+						gmin = minf(gmin, ground(x, z))
+						for y: float in [g, maxf(g, gy + top)]:
+							var q: Vector3 = Vector3(x, y, z) - target
+							var s: Vector3 = Vector3(q.dot(right), q.dot(up), q.dot(forward))
+							lo = lo.min(s)
+							hi = hi.max(s)
+				var centre: Vector3 = target + right * (lo.x + hi.x) * 0.5 + up * (lo.y + hi.y) * 0.5
+				camera.size = maxf(hi.y - lo.y, (hi.x - lo.x) / aspect) * 1.06
+				var back: float = 600.0
+				camera.near = back + lo.z - 6.0
+				camera.far = back + hi.z + 400.0
+				camera.look_at_from_position(centre + off * back, centre, Vector3.UP)
+				section.position.y = gmin - 25.0
+				print("heli_study ortho: %s — курс %d°" % [shot, roundi(rad_to_deg(yaw))])
+			if sun:
+				sun.directional_shadow_max_distance = camera.far
+			await _frames(70)
+			var img: Image = get_viewport().get_texture().get_image()
+			var label: String = "план" if kind == "top" else "вид"
+			img.save_jpg(ProjectSettings.globalize_path("%s/%s_%s.jpg" % [dir, shot, label]), 0.9)
+			print("heli_study ortho: %s_%s" % [shot, label])
+	get_tree().quit()
+
+
+## Земля в кадрах — самой подробной ступенью у каждой плитки: ступени переключаются по расстоянию до камеры, а ортокамера
+## стоит далеко — на стыке ступеней в плане оставались дыры.
+func _terrain_full_detail() -> void:
+	var finest: Dictionary = {}
+	var tiles: Array[MeshInstance3D] = []
+	for n: Node in terrain.find_children("Terrain_*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = n as MeshInstance3D
+		# имя плитки — Terrain_<x>_<z>_s<шаг>
+		var parts: PackedStringArray = String(mi.name).split("_")
+		var key: String = parts[1] + "_" + parts[2]
+		var step: int = int(parts[3].substr(1))
+		tiles.append(mi)
+		if not finest.has(key) or step < int(finest[key]):
+			finest[key] = step
+	for mi: MeshInstance3D in tiles:
+		var parts: PackedStringArray = String(mi.name).split("_")
+		mi.visible = int(parts[3].substr(1)) == int(finest[parts[1] + "_" + parts[2]])
+		mi.visibility_range_begin = 0.0
+		mi.visibility_range_end = 0.0
+
+
+## Сторона взгляда для вида под углом (перебор через 15°): склон перед местом не должен вставать выше луча взгляда —
+## ближняя плоскость его срежет, и в кадре будет разрез, а не место; против солнца место в тени — штраф.
+func _open_yaw(cx: float, cz: float, w: float, h: float, gy: float, pitch: float, sun: DirectionalLight3D) -> float:
+	var to_sun: Vector2 = Vector2.ZERO
+	if sun:
+		var z: Vector3 = sun.global_basis.z
+		to_sun = Vector2(z.x, z.z).normalized()
+	var best: float = 0.0
+	var best_score: float = INF
+	for k: int in range(24):
+		var yaw: float = deg_to_rad(15.0 * k)
+		# back — от места к камере по земле, side — поперёк взгляда
+		var back: Vector2 = Vector2(sin(yaw), cos(yaw))
+		var side: Vector2 = Vector2(back.y, -back.x)
+		var depth: float = absf(w * 0.5 * back.x) + absf(h * 0.5 * back.y)
+		var width: float = absf(w * 0.5 * side.x) + absf(h * 0.5 * side.y)
+		var score: float = 0.0
+		for i: int in range(13):
+			var d: float = 10.0 * i
+			for j: int in range(9):
+				var u: float = (float(j) / 4.0 - 1.0) * width * 1.4
+				var q: Vector2 = Vector2(cx, cz) + back * (depth + d) + side * u
+				score += maxf(0.0, ground(q.x, q.y) - (gy + d * tan(pitch)))
+		score += maxf(0.0, (-back).dot(to_sun)) * 400.0
+		if score < best_score:
+			best_score = score
+			best = yaw
+	return best
