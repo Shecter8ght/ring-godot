@@ -119,14 +119,42 @@ func _iron_action() -> void:
 		_player.cycle_fire_mode()
 		await get_tree().create_timer(1.0).timeout
 		print("smg03_shots: режим ", _player.fire_mode(), " — флажок ", _lever_deg("SelectorR_Steel"), "°")
+	# клипы рук: проверка магазина (держать R) и осмотр оружия (I)
+	if _camera._viewmodel is ViewmodelClips:
+		Input.action_press("reload")
+		await get_tree().create_timer(1.6).timeout
+		await _shot("iron_check")
+		Input.action_release("reload")
+		await get_tree().create_timer(2.5).timeout
+		_player.weapon_inspect_t = float((WeaponDb.weapon(ID).get("viewmodel", {}) as Dictionary).get("inspect_sec", 4.0))
+		await get_tree().create_timer(1.0).timeout
+		await _shot("iron_inspect_right")
+		await get_tree().create_timer(1.4).timeout
+		await _shot("iron_inspect_left")
+		await get_tree().create_timer(2.0).timeout
 
 
 func _bolt_off() -> float:
+	# вьюмодель с клипами рук (smg03_viewmodel.gltf): затвор — кость Bolt рига оружия (ось кости — к дулу)
+	var vm: ViewmodelClips = _camera._viewmodel as ViewmodelClips
+	if vm and vm._weapon_skel:
+		var b: int = vm._weapon_skel.find_bone("Bolt")
+		if b < 0:
+			return -1.0
+		var rest: Transform3D = vm._weapon_skel.get_bone_rest(b)
+		return -(rest.basis.inverse() * (vm._weapon_skel.get_bone_pose_position(b) - rest.origin)).y
 	var c: Node3D = _camera._vm_frame().find_child("Bolt_Steel", true, false) as Node3D
 	return (c.get_meta("rest") as Transform3D).origin.z - c.position.z if c and c.has_meta("rest") else -1.0
 
 
 func _lever_deg(node_name: String) -> float:
+	var vm: ViewmodelClips = _camera._viewmodel as ViewmodelClips
+	if vm and vm._weapon_skel:
+		var b: int = vm._weapon_skel.find_bone("Selector")
+		if b < 0:
+			return -999.0
+		var turn: Quaternion = vm._weapon_skel.get_bone_rest(b).basis.get_rotation_quaternion().inverse() * vm._weapon_skel.get_bone_pose_rotation(b)
+		return snappedf(rad_to_deg(turn.get_angle()), 0.1)
 	var n: Node3D = _camera._vm_frame().find_child(node_name, true, false) as Node3D
 	if n == null or not n.has_meta("rest"):
 		return -999.0

@@ -92,7 +92,8 @@ func _weapon(id: String, mods: Dictionary) -> void:
 		vm._scale_hands()
 		var hand: Node3D = model.find_child("FPS_Arms*", true, false) as Node3D
 		_check(tag + " имеет собственные руки", hand != null)
-		_check_hand_scale(tag, vm._hand_pose)
+		# сцены на мастере FPS-рук v14 (viewmodel.hands_fixed) — кисти уже настоящего размера, игра их не уменьшает
+		_check_hand_scale(tag, vm._hand_pose, 1.0 if bool(vm.config.get("hands_fixed", false)) else 0.8)
 	else:
 		model.rotation.y = PI
 		model.position = Balance.FPS_HIP_POSE

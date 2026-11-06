@@ -116,6 +116,8 @@ var _reload_insert: bool = false
 ## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
 var mag_inspect: bool = false
 var inspect_turn: Vector2 = Vector2.ZERO
+## Осмотр оружия (клавиша I): сколько ещё идёт клип осмотра (ViewmodelClips, viewmodel.inspect_sec ствола), с.
+var weapon_inspect_t: float = 0.0
 ## Дыхание в прицеле: запас воздуха 0…1, задержано ли сейчас (держат «бег» в прицеле), сколько ещё
 ## длится одышка после полной задержки, с.
 var breath: float = 1.0
@@ -1645,6 +1647,12 @@ func _combat(delta: float) -> void:
 			_finish_reload(spec)
 		return
 	ammo_check_t = maxf(0.0, ammo_check_t - delta)
+	# осмотр оружия (I): у ствола со своими клипами рук — клип осмотра; прицел, бег, выстрел, перезарядка — прерывают
+	weapon_inspect_t = maxf(0.0, weapon_inspect_t - delta)
+	if weapon_inspect_t > 0.0 and (aiming or sprint_held() or Input.is_action_pressed("fire") or Input.is_action_just_pressed("reload")):
+		weapon_inspect_t = 0.0
+	if InputMap.has_action("inspect_weapon") and Input.is_action_just_pressed("inspect_weapon") and weapon_inspect_t <= 0.0 			and not aiming and not mag_inspect and ViewmodelClips.available(weapon_id):
+		weapon_inspect_t = float((WeaponDb.weapon(weapon_id).get("viewmodel", {}) as Dictionary).get("inspect_sec", 0.0))
 	# проверка магазина: пока R держат — магазин в руке перед глазами; отпустили (или выстрел) — убрать
 	if mag_inspect:
 		if Input.is_action_pressed("reload") and not Input.is_action_pressed("fire"):

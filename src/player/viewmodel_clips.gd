@@ -18,6 +18,9 @@ extends Node3D
 ## jam_clear: правая отводит затвор, гильза выпадает.
 ## Патроны в магазине — узлы Round_NN (1 — верхний), подаватель — по счёту (служебный клип
 ## follower_by_rounds). Обвесы и метки — у узла WeaponFrame (оси игры у пистолетной рукоятки).
+## Осмотр оружия (Player.weapon_inspect_t, клавиша I): клип clips.inspect на время осмотра; выстрел — в стойку.
+## Затворная задержка (config.hold_open, ИЗЛОМ-45): после последнего патрона затвор стоит сзади (таблица bolt_travel),
+## пока клип перезарядки не дошлёт его. Кисти, исправленные в исходнике (config.hands_fixed), игра не уменьшает.
 ## Переводчик огня (кость Selector) стоит по режиму Player.fire_mode (служебный клип selector_by_mode: запись на
 ## положение в порядке fire_modes ствола); X — клип большого пальца на этот переход (clips.fire_mode_<откуда>_<куда>,
 ## у ВЕРАС-54 auto_burst, burst_semi, semi_auto), рычаг идёт между положениями на участке клипа config.fire_mode_push.
@@ -50,6 +53,7 @@ var _rounds_after: int = 0
 var _swap_frame: int = -1
 var _last_reload: float = 0.0
 var _last_check: float = 0.0
+var _last_inspect: float = 0.0
 var _last_ammo: int = -1
 var _kick: float = 0.0
 var _sight_cache: Array = []
@@ -424,6 +428,15 @@ func update(pl: Player, delta: float) -> void:
 		_swap_frame = -1
 		_play(_clip_name("check"), BLEND_IN)
 	_last_check = pl.ammo_check_t
+	# осмотр оружия: клип на время осмотра; кончился или прервали — в стойку
+	if pl.weapon_inspect_t > _last_inspect + 0.5 and _clip == "" and _base_clip("inspect") != "":
+		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_after = _rounds_before
+		_swap_frame = -1
+		_play(_clip_name("inspect"), BLEND_IN, pl.weapon_inspect_t)
+	elif pl.weapon_inspect_t <= 0.0 and _last_inspect > 0.0 and _clip != "" and _clip == _clip_name("inspect"):
+		_play(_clip_name("idle"), BLEND_OUT)
+	_last_inspect = pl.weapon_inspect_t
 	# переводчик: большой палец правой руки переводит рычаг (клип своего перехода, растянут на время щелчка)
 	if pl.fire_mode_switch_t > _last_switch + 0.05 and (_clip == "" or _clip.begins_with("fire_mode_")):
 		var modes: Array[String] = WeaponDb.fire_modes(weapon_id)
@@ -432,8 +445,8 @@ func update(pl: Player, delta: float) -> void:
 	_last_switch = pl.fire_mode_switch_t
 	if _last_ammo >= 0 and pl.ammo < _last_ammo:
 		_kick = BOLT_KICK_SEC
-		if _clip == _clip_name("check"):
-			# выстрел посреди проверки — руки сразу на оружие
+		if _clip == _clip_name("check") or (_clip != "" and _clip == _clip_name("inspect")):
+			# выстрел посреди проверки или осмотра — руки сразу на оружие
 			_play(_clip_name("idle"), 0.1)
 	_last_ammo = pl.ammo
 	_restore_arm()
@@ -490,7 +503,9 @@ func update(pl: Player, delta: float) -> void:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
 	# штатный подаватель — таблица на 30 (у магазина со своей моделью он скрыт, его подаватель — выше)
-	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip)
+	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
+	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and _clip == "" and not jammed
+	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip, held)
 	_selector_pose(pl)
 	_inspect_turn(pl, delta)
 	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
@@ -502,7 +517,7 @@ func update(pl: Player, delta: float) -> void:
 ## Размер кистей (Balance.FPS_HAND_SCALE) — последним, поверх клипа и подгонки хвата; поза до него
 ## сохраняется, и следующий кадр начинается с неё (у клипов не все кости записывают масштаб).
 func _scale_hands() -> void:
-	var k: float = HandGripPose.hand_scale()
+	var k: float = HandGripPose.hand_scale_for(bool(config.get("hands_fixed", false)))
 	if _arm_skel == null or is_equal_approx(k, 1.0):
 		return
 	_hand_pose.capture_once()
@@ -661,12 +676,14 @@ func _inspect_turn(pl: Player, delta: float) -> void:
 
 
 ## jam_hold — задержка не устранена: затвор стоит недозакрытым на зажатой гильзе (config.jam_open — доля хода).
-func _pose_overrides(shown: int, delta: float, jam_hold: bool = false) -> void:
+func _pose_overrides(shown: int, delta: float, jam_hold: bool = false, held_open: bool = false) -> void:
 	if _weapon_skel == null:
 		return
 	if _follower >= 0 and _follower_src:
 		_apply_sample(_follower_src, "MagazineFollower", _follower, _table_time(_follower_src, float(shown), 31))
 	var open: float = float(config.get("jam_open", 0.4)) if jam_hold else 0.0
+	if held_open:
+		open = 1.0
 	if _kick > 0.0:
 		_kick = maxf(0.0, _kick - delta)
 		open = maxf(open, sin(PI * (1.0 - _kick / BOLT_KICK_SEC)))

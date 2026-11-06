@@ -1,0 +1,29 @@
+{
+ "parts": [
+  "Part_Bolt",
+  "Part_BoltCatch",
+  "Part_ChargingHandle",
+  "Part_ChargingSlider",
+  "Part_FrontSight",
+  "Part_JamCase",
+  "Part_MagReleaseL",
+  "Part_MagReleaseR",
+  "Part_Magazine",
+  "Part_MagazineFollower",
+  "Part_RearSight",
+  "Part_Safety",
+  "Part_Selector",
+  "Part_Stock",
+  "Part_Trigger",
+  "Part_WeaponRoot"
+ ],
+ "tris": 62753,
+ "tris_weapon": 57993,
+ "clips": {
+  "reload_tactical": 72,
+  "reload_full": 86,
+  "mag_check": 100,
+  "inspect": 120,
+  "jam_clear": 62
+ }
+}

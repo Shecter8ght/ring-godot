@@ -1353,7 +1353,34 @@
     "asset": "res://assets/models/weapons/smg03/smg03.gltf",
     "asset_kind": "static",
     "viewmodel": {
+     "scene": "res://assets/models/weapons/smg03/smg03_viewmodel.gltf",
+     "fps": 30,
+     "clips": {
+      "idle": "idle",
+      "reload": "reload_tactical",
+      "reload_empty": "reload_full",
+      "check": "mag_check",
+      "clear": "jam_clear",
+      "inspect": "inspect"
+     },
+     "check_hold": [
+      38,
+      56
+     ],
+     "swap_frame": {
+      "reload_tactical": 38,
+      "reload_full": 38
+     },
+     "jam_open": 0.3,
+     "inspect_sec": 4.0,
+     "hold_open": true,
+     "hands_fixed": true,
      "ads_z": 0.17,
+     "hip_offset": [
+      -0.03,
+      0.025,
+      -0.077
+     ],
      "hip_pose": [
       0.11,
       -0.14,
@@ -3572,7 +3599,8 @@
     "reliability": 0.97,
     "look": "asset",
     "asset": "res://assets/models/weapons/smg03/smg03_mag30.gltf",
-    "asset_detail": "res://assets/models/weapons/smg03/smg03_mag30.gltf"
+    "asset_detail": "res://assets/models/weapons/smg03/smg03_mag30.gltf",
+    "viewmodel_set": "mag30"
    },
    "flavor": "Рабочая ёмкость без крайностей: достаточно для схватки и ещё не мешает управлять оружием.",
    "model": "res://assets/models/weapons/smg03/smg03_mag30.gltf"

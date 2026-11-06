@@ -24,6 +24,15 @@ ADS_Z = 0.17
 # у бедра — дальше и ниже общей позы (Balance.FPS_HIP_POSE 0.09, −0.12, −0.35): коробка Vector высокая и короткая,
 # на общем месте она заслоняла пол-кадра
 HIP_POSE = [0.11, -0.14, -0.42]
+# клипы рук (tools/smg03/clips: риг на мастере FPS-рук v14, сценарии build_clips.py, выгрузка export_viewmodel.py) — сцена
+# в осях камеры; рукоятка в Blender стоит там же, где у ВЕРАСа (0.14, −0.165, −0.343 от глаза), hip_offset уводит её на HIP_POSE
+VIEWMODEL = {'scene': 'res://assets/models/weapons/smg03/smg03_viewmodel.gltf', 'fps': 30,
+             'clips': {'idle': 'idle', 'reload': 'reload_tactical', 'reload_empty': 'reload_full', 'check': 'mag_check',
+                       'clear': 'jam_clear', 'inspect': 'inspect'},
+             'check_hold': [38, 56], 'swap_frame': {'reload_tactical': 38, 'reload_full': 38}, 'jam_open': 0.3,
+             'inspect_sec': 4.0, 'hold_open': True, 'hands_fixed': True, 'ads_z': ADS_Z,
+             'hip_offset': [round(HIP_POSE[0] - 0.14, 3), round(HIP_POSE[1] + 0.165, 3), round(HIP_POSE[2] + 0.343, 3)],
+             'hip_pose': HIP_POSE}
 # свободные участки верхней планки (оси игры z от хвата): за основанием целика (X −205 мм исходника) до середины коробки
 # и от неё до основания мушки (X 80 мм) — откидные прицельные стоят на планке и занимают её концы
 FREE_TOP = {'optic_primary': (-0.205 - GX, -0.040 - GX), 'top_front': (-0.025 - GX, 0.080 - GX)}
@@ -97,6 +106,9 @@ def mag(capacity: int, base: dict, item: str) -> dict:
     m['name'] = f'Магазин ИЗЛОМ-45 .45 на {capacity}'
     m['mag'] = dict(base['mag'])
     m['mag'].update({'look': 'asset', 'asset': ASSET + item, 'asset_detail': ASSET + item})
+    # на 30 в руках — своей моделью на метке MagAsset вьюмодели (клипы те же, что у штатного на 13)
+    if capacity == 30:
+        m['mag']['viewmodel_set'] = 'mag30'
     m['model'] = ASSET + item
     return m
 
@@ -121,7 +133,7 @@ def main():
                     'side_right': 'RAIL_SIDE', 'underbarrel': 'RAIL_BOTTOM', 'muzzle': 'THREAD_45', 'stock': 'STOCK_SMG'}
     ww['asset'] = ASSET + 'smg03.gltf'
     ww['asset_kind'] = 'static'
-    ww['viewmodel'] = {'ads_z': ADS_Z, 'hip_pose': HIP_POSE}
+    ww['viewmodel'] = dict(VIEWMODEL)
     d['magazines']['mag_45_vector13'] = mag(13, d['magazines']['mag_45_vector13'], 'smg03_mag13.gltf')
     d['magazines']['mag_45_vector30'] = mag(30, d['magazines']['mag_45_vector30'], 'smg03_mag30.gltf')
     WEAPONS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
