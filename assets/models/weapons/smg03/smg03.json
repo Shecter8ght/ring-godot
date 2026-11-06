@@ -1,5 +1,5 @@
 {
- "version": "v1 (2026-11-06): геометрия v06, игровая сетка v3, отделка этап 1 v4 + износ этап 2 v3",
+ "version": "v2 (2026-11-06): геометрия v06 (магазины — v07), игровая сетка v3 (магазины v2), отделка этап 1 v4 + износ этап 2 v3; магазины — отделка и износ v2",
  "source": "E:\\Models Blender\\WEAPONS\\Vector — модель\\ПП-Vector_геометрия_v06.blend",
  "grip_source_m": [
   -0.21220000088214874,
@@ -12,7 +12,7 @@
   "ChargingHandle_Steel": 997,
   "ChargingSlider_Steel": 249,
   "FrontSightLeaf_Steel": 2840,
-  "Magazine": 1697,
+  "Magazine": 2341,
   "MagReleaseL_Steel": 420,
   "MagReleaseR_Steel": 142,
   "MuzzleDevice": 616,
@@ -29,8 +29,8 @@
   "StockLatch_Stock": 450,
   "Trigger_Steel": 633
  },
- "smg03_mag13_tris": 1697,
- "smg03_mag30_tris": 2339,
+ "smg03_mag13_tris": 2341,
+ "smg03_mag30_tris": 3369,
  "pivots_game_m": {
   "Bolt_Steel": [
    0.0,
@@ -115,10 +115,10 @@
  },
  "size_game_m": [
   0.0585,
-  0.2247,
+  0.218,
   0.6203
  ],
- "tris_in_hands": 57115,
+ "tris_in_hands": 57759,
  "marks_game_m": {
   "Muzzle": [
    0.0,

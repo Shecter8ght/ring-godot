@@ -30,6 +30,13 @@ from mathutils import Matrix, Vector
 ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / '_asset_src/smg03/game'
 MAPS = Path('E:/Models Blender/WEAPONS/Vector — модель/Текстуры_этап2_v3')
+# магазины v2 (Glock 21 на 13 и с удлинителем на 30; приняты владельцем 06.11 с износом v2) — свои карты из своего
+# проекта Painter (sp_smg03_mags.py), сетки — game_lp_mags.py → game_lp_mags_merge.py
+MAGS_MAPS = Path('E:/Models Blender/WEAPONS/Vector — модель/Текстуры_магазины_v2_износ_v2')
+MAG_ATLASES = ('Mag13', 'Mag30')
+# точка гнезда магазина (м, исходник) — та же, что у магазинов v1 (smg03.json: MagMount): от неё сокет магазина в
+# data/weapons.json, хват левой руки при перезарядке и начало моделей-предметов — с новыми магазинами не сдвигаются
+MAG_MOUNT = Vector((-0.03546, 0.0, -0.0116))
 OUT = ROOT / 'assets/models/weapons/smg03'
 OUT.mkdir(parents=True, exist_ok=True)
 REC = json.loads((WORK / 'lp/parts.json').read_text(encoding='utf-8'))
@@ -63,7 +70,7 @@ def game_point(p) -> list:
 def copy_maps(folder: Path) -> None:
     for at in ATLASES:
         for src, kind in MAP_KIND.items():
-            f = folder / f'{at}_{src}.png'
+            f = (MAGS_MAPS if at in MAG_ATLASES else folder) / f'{at}_{src}.png'
             if not f.exists():
                 raise SystemExit(f'нет карты {f}')
             shutil.copy2(f, OUT / f'smg03_{at}_100_{kind}.png')
@@ -197,7 +204,8 @@ def main():
         for a in ('uv_stack', 'uv_group', 'hp_part'):
             if a in o.data.attributes:
                 o.data.attributes.remove(o.data.attributes[a])
-    rep = {'version': 'v1 (2026-11-06): геометрия v06, игровая сетка v3, отделка этап 1 v4 + износ этап 2 v3',
+    rep = {'version': 'v2 (2026-11-06): геометрия v06 (магазины — v07), игровая сетка v3 (магазины v2), отделка этап 1 '
+                      'v4 + износ этап 2 v3; магазины — отделка и износ v2',
            'source': REC['source'], 'grip_source_m': list(GRIP), 'nodes': {}}
     # точка гнезда магазина — середина верха корпуса магазина на 13 (там, где он входит в шахту)
     mag13 = bpy.data.objects['Mag13']
@@ -205,8 +213,10 @@ def main():
     vs = [mag13.matrix_world @ v.co for v in mag13.data.vertices]
     top = max(v.z for v in vs)
     near = [v for v in vs if v.z > top - 0.004]
-    mount = Vector((sum(v.x for v in near) / len(near), 0.0, top))
-    log('гнездо магазина (исходник, мм)', [round(c * 1000, 1) for c in mount])
+    geo = Vector((sum(v.x for v in near) / len(near), 0.0, top))
+    mount = MAG_MOUNT.copy()
+    log('гнездо магазина (исходник, мм)', [round(c * 1000, 1) for c in mount], 'по верху сетки было бы',
+        [round(c * 1000, 1) for c in geo])
     for src, name in ((mag13, 'smg03_mag13'), (mag30, 'smg03_mag30')):
         c = src.copy()
         c.data = src.data.copy()
