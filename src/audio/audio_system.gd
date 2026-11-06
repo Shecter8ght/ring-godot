@@ -2,6 +2,7 @@ extends Node
 ## Явные записи без постобработки. Движок выбирает запись места и считает пространственную громкость.
 
 const REGISTRY: String = "res://data/audio_events.json"
+const MIX_PATH: String = "res://data/audio_mix.json"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
 
 signal stepped(kind: String, surface: String, pos: Vector3)
@@ -20,9 +21,26 @@ var _preview: Dictionary = {}
 var _scan_needed: bool = true
 var _scene_paths: Dictionary = {}
 var _object_bindings: Dictionary = {}
+var _surface_steps: Dictionary = {}
+var _surface_shells: Dictionary = {}
+var _stream_files: Dictionary = {}
+var _mix: Dictionary = {"schemaVersion": 1, "events": {}, "files": {}}
+var mix_save_path: String = MIX_PATH
+var _map_ambient: AudioStreamPlayer
+var _map_scene_id: int = 0
+var _map_event: String = ""
+var _map_paths: Dictionary = {}
 
 func _ready() -> void:
 	_rng.randomize()
+	_load_mix()
+	var surface_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/audio_surfaces.json")) as Dictionary
+	for entry: Dictionary in surface_data.get("footsteps", []):
+		for surface: String in entry.surfaces:
+			_surface_steps[surface] = String(entry.hook)
+	for entry: Dictionary in surface_data.get("casings", []):
+		for surface: String in entry.surfaces:
+			_surface_shells[surface] = String(entry.hook)
 	reload_events()
 	get_tree().node_added.connect(_on_audio_node_added)
 	for node: Node in get_tree().root.find_children("*", "", true, false):
@@ -34,8 +52,14 @@ func reload_events() -> void:
 	_events.clear()
 	_bindings.clear()
 	_samples.clear()
+	_stream_files.clear()
+	_triggered.clear()
+	_map_scene_id = 0
+	if is_instance_valid(_map_ambient):
+		_map_ambient.queue_free()
 	_scene_paths.clear()
 	_object_bindings.clear()
+	_map_paths.clear()
 	_last_pick.clear()
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(REGISTRY))
 	if not raw is Dictionary or int((raw as Dictionary).get("schemaVersion", 0)) != 2:
@@ -49,6 +73,8 @@ func reload_events() -> void:
 		if id == "" or not bool(event.get("enabled", true)):
 			continue
 		_events[id] = event
+		if event.has("map_scene"):
+			_map_paths[String(event.map_scene)] = id
 		var binding: Dictionary = event.get("binding", {}) as Dictionary
 		if String(binding.get("type", "action")) == "action":
 			_bindings[String(binding.get("hook", id))] = id
@@ -67,7 +93,11 @@ func reload_events() -> void:
 			var stream: AudioStream = _load_audio_file("res://assets/audio/" + rel)
 			if stream != null:
 				streams.append(stream)
+				_stream_files[stream.get_instance_id()] = rel
 		_samples[id] = streams
+	for node: Node in get_tree().root.find_children("*", "Node3D", true, false):
+		if _map_paths.has(node.scene_file_path):
+			node.add_to_group("sonora_map_roots")
 	if is_instance_valid(_ambient):
 		_ambient.queue_free()
 	var background: AudioStream = _pick("loop:ambient", Vector3.ZERO)
@@ -148,7 +178,7 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 		return
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
-	player.volume_db = float(spec.db) + extra_db
+	_tag_mix(player, id, stream, float(spec.db) + extra_db)
 	player.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
@@ -172,6 +202,13 @@ func _is_weapon_shot(hook: String) -> bool:
 func _kind_spec(hook: String) -> Dictionary:
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
 	var profile: String = String(event.get("profile", ""))
+	if String(event.get("action", "")).begins_with("shell_") or String(event.get("id", "")).begins_with("shell_"):
+		var shell_profile: String = "shell_metal" if String(event.get("action", event.get("id", ""))) == "shell_metal" else "shell_hard"
+		var spec: Dictionary = (Balance.AUDIO_EVENT_PROFILES[shell_profile] as Dictionary).duplicate()
+		spec.db = float(spec.db) + float(Balance.SHELL_DROP.db)
+		return spec
+	if profile.begins_with("osoka_"):
+		return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.SONORA_AUDIO.world)
 	if String(event.get("weapon", "")) != "":
 		if String(event.get("action", "")).begins_with("shot"):
 			return Balance.SONORA_AUDIO.shot
@@ -191,9 +228,129 @@ func _configure_recorded_player(player: AudioStreamPlayer3D) -> void:
 
 func _bus_for(hook: String) -> StringName:
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
+	if event.has("map_scene") or String(event.get("profile", "")) == "ambient":
+		return &"Ambient"
+	if String(event.get("profile", "")) in ["osoka_launch", "osoka_motor"]:
+		return &"Shots"
 	if String(event.get("weapon", "")) != "" and String(event.get("action", "")).begins_with("shot"):
 		return &"Shots"
 	return Settings.bus_for(hook)
+
+
+func _load_mix() -> void:
+	if FileAccess.file_exists(MIX_PATH):
+		var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(MIX_PATH))
+		if saved is Dictionary and int(saved.get("schemaVersion", 0)) == 1:
+			_mix = saved
+	if not OS.has_feature("editor"):
+		mix_save_path = "user://audio_mix.json"
+		if FileAccess.file_exists(mix_save_path):
+			var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(mix_save_path))
+			if saved is Dictionary and int(saved.get("schemaVersion", 0)) == 1:
+				_mix = saved
+
+
+func mix_gain(id: String, file: String = "") -> float:
+	return float((_mix.files if file != "" else _mix.events).get(file if file != "" else id, 0.0))
+
+
+## Общая громкость события и поправка отдельной записи применяются тем же путём в игре и на стенде.
+func set_mix_gain(id: String, db: float, file: String = "") -> void:
+	var values: Dictionary = _mix.files if file != "" else _mix.events
+	var key: String = file if file != "" else id
+	if is_zero_approx(db):
+		values.erase(key)
+	else:
+		values[key] = clampf(db, -60.0, 24.0)
+	for node: Node in get_tree().get_nodes_in_group("sonora_mixed_players"):
+		_apply_mix(node)
+
+
+func save_mix() -> Error:
+	var target: String = ProjectSettings.globalize_path(mix_save_path)
+	var file: FileAccess = FileAccess.open(target + ".tmp", FileAccess.WRITE)
+	if file == null:
+		return FileAccess.get_open_error()
+	file.store_string(JSON.stringify(_mix, "  ") + "\n")
+	file.close()
+	return DirAccess.rename_absolute(target + ".tmp", target)
+
+
+func _tag_mix(player: Node, id: String, stream: AudioStream, base_db: float) -> void:
+	player.set_meta("audio_event", id)
+	player.set_meta("audio_file", String(_stream_files.get(stream.get_instance_id(), "")))
+	player.set_meta("audio_base_db", base_db)
+	player.add_to_group("sonora_mixed_players")
+	_apply_mix(player)
+
+
+func _apply_mix(player: Node) -> void:
+	var id: String = String(player.get_meta("audio_event", ""))
+	var file: String = String(player.get_meta("audio_file", ""))
+	player.set("volume_db", float(player.get_meta("audio_base_db", 0.0)) + mix_gain(id) + (mix_gain(id, file) if file != "" else 0.0))
+
+
+func _update_map_ambient() -> void:
+	var found: Node = null
+	var event_id: String = ""
+	for scene_path: String in _map_paths:
+		var id: String = _map_paths[scene_path]
+		if not has_sound(id):
+			continue
+		for node: Node in get_tree().get_nodes_in_group("sonora_map_roots"):
+			if node.scene_file_path == scene_path:
+				found = node
+				event_id = id
+				break
+		if found != null:
+			break
+	var scene_id: int = found.get_instance_id() if found != null else 0
+	if scene_id == _map_scene_id and event_id == _map_event:
+		return
+	_map_scene_id = scene_id
+	_map_event = event_id
+	if is_instance_valid(_map_ambient):
+		_map_ambient.queue_free()
+	if found == null:
+		return
+	var stream: AudioStream = _pick(event_id, Vector3.ZERO)
+	make_loop(stream)
+	_map_ambient = AudioStreamPlayer.new()
+	_map_ambient.stream = stream
+	_map_ambient.bus = &"Ambient"
+	_tag_mix(_map_ambient, event_id, stream, float(Balance.SONORA_AUDIO.ambient_db))
+	found.add_child(_map_ambient)
+	_map_ambient.play()
+
+
+## Стенд выбирает конкретную запись, но использует тот же профиль, шину и пространственную подачу.
+func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = false) -> Node:
+	var records: Array = _samples.get(id, [])
+	if records.is_empty():
+		return null
+	var stream: AudioStream = records[clampi(variant, 0, records.size() - 1)] if variant >= 0 else _pick_from(records, id)
+	var spec: Dictionary = _kind_spec(id)
+	if _bus_for(id) == &"Ambient" or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
+		var player: AudioStreamPlayer = AudioStreamPlayer.new()
+		player.stream = stream
+		player.bus = _bus_for(id)
+		_tag_mix(player, id, stream, float(Balance.SONORA_AUDIO.ambient_db) if _bus_for(id) == &"Ambient" else float(Balance.OSOKA.tone_db))
+		player.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(player)
+		if looped:
+			player.finished.connect(player.play)
+		else:
+			player.finished.connect(player.queue_free)
+		player.play()
+		return player
+	_play_now(id, id, stream, pos, 0.0, spec)
+	var players: Array[Node] = get_tree().get_nodes_in_group("sonora_mixed_players")
+	var player: AudioStreamPlayer3D = players.back() as AudioStreamPlayer3D
+	player.process_mode = Node.PROCESS_MODE_ALWAYS
+	if looped:
+		player.finished.disconnect(player.queue_free)
+		player.finished.connect(player.play)
+	return player
 
 func play_ui(hook: String, extra_db: float = 0.0) -> void:
 	var stream: AudioStream = _pick(hook, _listener_pos())
@@ -201,26 +358,42 @@ func play_ui(hook: String, extra_db: float = 0.0) -> void:
 		return
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.stream = stream
-	player.volume_db = extra_db
-	player.bus = &"World"
+	_tag_mix(player, resolve_event(hook), stream, extra_db)
+	player.bus = _bus_for(hook)
 	player.finished.connect(player.queue_free)
 	add_child(player)
 	player.play()
 	event_played.emit(resolve_event(hook), hook, _listener_pos())
 
 func start_loop(hook: String, parent: Node3D, extra_db: float = 0.0) -> AudioStreamPlayer3D:
-	var stream: AudioStream = _pick(hook, parent.global_position)
-	if stream == null:
+	var original: AudioStream = _pick(hook, parent.global_position)
+	if original == null:
 		return null
+	var stream: AudioStream = original.duplicate() as AudioStream
 	make_loop(stream)
 	var spec: Dictionary = _kind_spec(hook)
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
-	player.volume_db = float(spec.db) + extra_db
+	_tag_mix(player, resolve_event(hook), original, float(spec.db) + extra_db)
 	player.unit_size = float(spec.unit)
 	player.max_distance = float(spec["max"])
 	_configure_recorded_player(player)
 	player.bus = _bus_for(hook)
+	parent.add_child(player)
+	player.play()
+	return player
+
+
+func start_ui_loop(hook: String, parent: Node, base_db: float) -> AudioStreamPlayer:
+	var original: AudioStream = _pick(hook, Vector3.ZERO)
+	if original == null:
+		return null
+	var stream: AudioStream = original.duplicate() as AudioStream
+	make_loop(stream)
+	var player: AudioStreamPlayer = AudioStreamPlayer.new()
+	player.stream = stream
+	player.bus = _bus_for(hook)
+	_tag_mix(player, resolve_event(hook), original, base_db)
 	parent.add_child(player)
 	player.play()
 	return player
@@ -245,6 +418,8 @@ func set_preview(streams: Dictionary) -> void:
 	_last_pick.clear()
 
 func _on_audio_node_added(node: Node) -> void:
+	if _map_paths.has(node.scene_file_path):
+		node.add_to_group("sonora_map_roots")
 	if node is AudioStreamPlayer3D:
 		_configure_recorded_player(node as AudioStreamPlayer3D)
 	if node is Node3D and _scene_paths.has(node.scene_file_path):
@@ -258,6 +433,7 @@ func _on_audio_node_added(node: Node) -> void:
 				play_ui("ui_hover", -11.0))
 
 func _process(_delta: float) -> void:
+	_update_map_ambient()
 	# Уровни могут создаваться и выгружаться внутри Raid; привязки ищутся в их собственных сценах.
 	if not _scan_needed:
 		return
@@ -377,12 +553,12 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	# вброд — плеск, что бы ни было на дне
 	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
 		surf = "water"
-	var sset := String(STEP_SET.get(surf, "stone"))
+	var kind: String = step_hook(surf, run)
 	var db := extra_db + (1.5 if ai else 0.0)
-	var has_run_set := sset in ["stone", "dirt", "snow"]
-	var kind := "step_%s%s" % [sset, "_run" if run and has_run_set else ""]
-	if surf == "asphalt" and not run and _wet_asphalt_at(pos):
-		kind = "step_asphalt_wet"
+	if run and kind != "step_stone_run":
+		db += 3.0
+	if surf == "asphalt" and _wet_asphalt_at(pos):
+		kind = "step_water"
 	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
 	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
 	play(kind, sound_pos, db)
@@ -409,15 +585,22 @@ func shell_drop(from: Vector3, right: Vector3, extra_db: float = 0.0, weapon_id:
 func _shell_land(land: Vector3, extra_db: float, weapon_id: String = "") -> void:
 	var cfg: Dictionary = Balance.SHELL_DROP
 	var surf := _surface_under(land)
-	var kind := "shell_soft"
-	if surf in (cfg.metal as Array):
-		kind = "shell_metal"
-	elif surf in (cfg.hard as Array):
-		kind = "shell_hard"
-	play(weapon_id + "_" + kind if weapon_id != "" else kind, land, float(cfg.db) + extra_db)
-	if kind != "shell_soft" and _rng.randf() < float(cfg.roll_chance):
-		get_tree().create_timer(float(cfg.roll_delay)).timeout.connect(
-			func() -> void: play(weapon_id + "_shell_roll" if weapon_id != "" else "shell_roll", land, float(cfg.db) + extra_db))
+	if WaterBody.depth_at(land) > 0.0:
+		surf = "water"
+	play(shell_hook(surf, weapon_id), land, extra_db)
+
+
+func step_hook(surface: String, run: bool = false) -> String:
+	var hook: String = String(_surface_steps.get(surface, "step_concrete"))
+	if run and hook == "step_stone" and has_sound("step_stone_run"):
+		return "step_stone_run"
+	return hook
+
+
+func shell_hook(surface: String, weapon_id: String = "") -> String:
+	var hook: String = String(_surface_shells.get(surface, "shell_concrete"))
+	var own: String = weapon_id + "_" + hook
+	return own if weapon_id != "" and has_sound(own) else hook
 
 
 ## Под навесом асфальт сухой, как в шейдере покрытия; погода проверяется у шагающего, не у слушателя.
@@ -506,8 +689,8 @@ func make_loop(st: AudioStream) -> void:
 ## Отдельные записи по путям относительно assets/audio (назначенные в data/sound_active.json).
 
 const STEP_SET: Dictionary = {
-	"tile": "stone", "concrete": "stone", "plastic": "stone", "wood": "wood", "glass": "glass",
-	"metal": "metal", "asphalt": "dirt", "cardboard": "cardboard", "fabric": "carpet", "snow": "snow",
-	"water": "water", "trash": "trash", "rubble": "rubble", "gravel": "gravel", "grass": "grass",
+	"tile": "stone", "concrete": "concrete", "asphalt": "concrete", "plastic": "trash", "wood": "wood", "glass": "glass",
+	"metal": "metal", "cardboard": "trash", "fabric": "carpet", "carpet": "carpet", "snow": "dirt", "sand": "sand",
+	"water": "water", "trash": "trash", "trash_bags": "trash", "rubble": "gravel", "gravel": "gravel", "grass": "grass", "leaves": "grass",
 	"dirt": "dirt", "mud": "dirt",
 }

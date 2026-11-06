@@ -1,0 +1,35 @@
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('sonora', {
+  openAudio: () => ipcRenderer.invoke('audio:open'),
+  decodeAudio: (bytes, extension) => ipcRenderer.invoke('audio:decode', bytes, extension),
+  processAudio: (bytes, options) => ipcRenderer.invoke('audio:process',bytes,options),
+  saveProject: (document, saveAs) => ipcRenderer.invoke('project:save', document, saveAs),
+  openProject: () => ipcRenderer.invoke('project:open'),
+  adoptProject: source => ipcRenderer.invoke('project:adopt', source),
+  openPreset: () => ipcRenderer.invoke('preset:open'),
+  savePreset: (name, text) => ipcRenderer.invoke('preset:save', name, text),
+  chooseExport: options => ipcRenderer.invoke('export:choose', options),
+  writeExport: (bytes, options) => ipcRenderer.invoke('export:write', bytes, options),
+  revealExport: () => ipcRenderer.invoke('export:reveal'),
+  setTitle: title => ipcRenderer.invoke('app:title', title),
+  openRing: () => ipcRenderer.invoke('ring:open'),
+  sendToRing: items => ipcRenderer.invoke('ring:send', items),
+  ring: {
+    state: refresh => ipcRenderer.invoke('ring:state',refresh),
+    locations: () => ipcRenderer.invoke('ring:locations'),
+    edit: options => ipcRenderer.invoke('ring:edit',options),
+    chooseProject: () => ipcRenderer.invoke('ring:project'),
+    chooseGodot: () => ipcRenderer.invoke('ring:godot'),
+    openFiles: () => ipcRenderer.invoke('ring:files'),
+    stage: (bytes,name) => ipcRenderer.invoke('ring:stage',bytes,name),
+    remove: id => ipcRenderer.invoke('ring:remove',id),
+    audio: (id,game=false) => ipcRenderer.invoke('ring:audio',id,game),
+    approve: options => ipcRenderer.invoke('ring:approve',options),
+    invalidate: () => ipcRenderer.invoke('ring:invalidate'),
+    import: id => ipcRenderer.invoke('ring:import',id),
+    undo: id => ipcRenderer.invoke('ring:undo',id),
+    reveal: () => ipcRenderer.invoke('ring:reveal'),
+    backups: () => ipcRenderer.invoke('ring:backups'),
+    onIncoming: callback => { const handler=(_,ids)=>callback(ids);ipcRenderer.on('ring:incoming',handler);return()=>ipcRenderer.removeListener('ring:incoming',handler); }
+  }
+});

@@ -113,6 +113,7 @@ func _ready() -> void:
 	_main.add_child(_button("Продолжить", close_menu))
 	_main.add_child(_button("Управление", func() -> void: _show_side(_controls)))
 	_main.add_child(_button("Настройки", func() -> void: _show_side(_settings)))
+	_main.add_child(_button("Звуковой стенд", open_audio_bench))
 	_main.add_child(_button("Читы", open_cheats))
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
@@ -143,6 +144,14 @@ func _button(text: String, cb: Callable) -> Button:
 	b.focus_mode = Control.FOCUS_NONE
 	b.pressed.connect(cb)
 	return b
+
+
+func open_audio_bench() -> void:
+	for node: Node in get_tree().get_nodes_in_group("esc_windows"):
+		if node.get_script() == load("res://src/ui/audio_bench.gd"):
+			return
+	var bench: CanvasLayer = (load("res://src/ui/audio_bench.gd") as Script).new() as CanvasLayer
+	get_tree().root.add_child(bench)
 
 
 func _fill_controls() -> void:

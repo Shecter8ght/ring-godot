@@ -1,0 +1,33 @@
+const paths = {
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>',
+  play: '<path d="m9 5 10 7-10 7Z" fill="currentColor" stroke="none"/>', pause: '<path d="M8 5v14M16 5v14" stroke-width="4"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/>',
+  rewind: '<path d="M5 5v14m14-14-10 7 10 7Z"/>', loop: '<path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"/>',
+  undo: '<path d="m8 5-5 5 5 5m-5-5h11a6 6 0 0 1 6 6v3"/>', redo: '<path d="m16 5 5 5-5 5m5-5H10a6 6 0 0 0-6 6v3"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
+  save: '<path d="M5 3h12l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 0v6h10V3M7 21v-8h10v8"/>',
+  export: '<path d="M12 15V3m-5 5 5-5 5 5M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>',
+  import: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+  cursor: '<path d="m5 3 14 9-7 1-3 7Z"/>', range: '<rect x="4" y="5" width="16" height="14" rx="1" stroke-dasharray="3 3"/><path d="M8 8v8m8-8v8"/>',
+  scissors: '<circle cx="5" cy="6" r="3"/><circle cx="5" cy="18" r="3"/><path d="m8 7 13 13M8 17 21 4"/>',
+  join: '<path d="M9 7H4v10h5m6-10h5v10h-5M8 12h8m-6-3 3 3-3 3"/>',
+  copy: '<rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h4"/>',
+  trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 14h12l1-14M10 10v6m4-6v6"/>',
+  fit: '<path d="M8 4H4v16h4m8-16h4v16h-4M8 12h8m-5-3-3 3 3 3m2-6 3 3-3 3"/>',
+  magnet: '<path d="M5 4v9a7 7 0 0 0 14 0V4h-5v9a2 2 0 0 1-4 0V4ZM5 8h5m4 0h5"/>',
+  sliders: '<path d="M5 3v5m0 6v7m7-18v11m0 6v1m7-18v2m0 6v10M2 8h6v6H2Zm7 6h6v6H9Zm7-9h6v6h-6Z"/>',
+  wave: '<path d="M2 10v4m4-9v14m4-11v8m4-13v18m4-15v12m4-8v4"/>',
+  mouse: '<rect x="6" y="2" width="12" height="20" rx="6"/><path d="M12 6v4"/>',
+  power: '<path d="M12 2v10M6 5a9 9 0 1 0 12 0"/>', reset: '<path d="M3 3v6h6M3 9a9 9 0 1 1 1 9"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 1-1 1-1 3m0 3h.01"/>',
+  close: '<path d="m6 6 12 12M6 18 18 6"/>',
+  mix: '<path d="M4 5h6v6H4Zm10 0h6v6h-6ZM7 11v6h10v-6m-5 6v4"/>',
+  tracks: '<rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/>',
+  chevron: '<path d="m9 5 7 7-7 7"/>', headphones: '<path d="M3 13v-1a9 9 0 0 1 18 0v1M3 12h4v9H5a2 2 0 0 1-2-2Zm14 0h4v7a2 2 0 0 1-2 2h-2Z"/>',
+  volume: '<path d="M3 9h4l5-5v16l-5-5H3Zm13-1a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/>'
+};
+export function icon(name, cls = '') { return `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.wave}</svg>`; }
+export function hydrateIcons(root = document) { for (const element of root.querySelectorAll('[data-icon]')) element.innerHTML = icon(element.dataset.icon); }

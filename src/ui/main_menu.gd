@@ -73,6 +73,7 @@ func _build() -> void:
 	left.add_child(_big("Оружие и хват рук", func() -> void:
 		Net.change_scene("res://scenes/debug/weapon_pose_lab.tscn", "Стенд настройки оружия")))
 	left.add_child(_big("Отладочные стенды", _show_labs))
+	left.add_child(_big("Звуковой стенд", func() -> void: Pause.open_audio_bench()))
 	left.add_child(_big("Выход", func() -> void: get_tree().quit()))
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL

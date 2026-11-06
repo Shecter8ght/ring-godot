@@ -250,36 +250,76 @@
       "group": "Обращение с оружием"
     },
     {
-      "id": "shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "file": "shell_hard",
+      "id": "shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "file": "shell_concrete",
       "wired": true,
-      "condition": "all",
-      "group": "Гильза"
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "concrete"
+    },
+    {
+      "id": "shell_water",
+      "name": "Гильза — вода",
+      "file": "shell_water",
+      "wired": true,
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "water"
+    },
+    {
+      "id": "shell_gravel",
+      "name": "Гильза — гравий",
+      "file": "shell_gravel",
+      "wired": true,
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "gravel"
+    },
+    {
+      "id": "shell_wood",
+      "name": "Гильза — дерево",
+      "file": "shell_wood",
+      "wired": true,
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "wood"
+    },
+    {
+      "id": "shell_carpet",
+      "name": "Гильза — ковёр",
+      "file": "shell_carpet",
+      "wired": true,
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "carpet"
     },
     {
       "id": "shell_metal",
       "name": "Гильза — металл",
       "file": "shell_metal",
       "wired": true,
-      "condition": "all",
-      "group": "Гильза"
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "metal"
     },
     {
-      "id": "shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "file": "shell_soft",
+      "id": "shell_sand",
+      "name": "Гильза — песок",
+      "file": "shell_sand",
       "wired": true,
-      "condition": "all",
-      "group": "Гильза"
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "sand"
     },
     {
-      "id": "shell_roll",
-      "name": "Гильза катится",
-      "file": "shell_roll",
+      "id": "shell_tile",
+      "name": "Гильза — плитка",
+      "file": "shell_tile",
       "wired": true,
-      "condition": "all",
-      "group": "Гильза"
+      "condition": "ejects_case",
+      "group": "Гильза",
+      "surface": "tile"
     }
   ]
 }

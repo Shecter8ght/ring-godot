@@ -17,6 +17,8 @@ var powered: bool = false
 var angle_deg: float = 999.0
 var _power_t: float = 0.0
 var _tone: ProcSound
+var _recorded_tone: AudioStreamPlayer
+var _recorded_hook: String = ""
 
 
 func locked() -> bool:
@@ -25,6 +27,7 @@ func locked() -> bool:
 
 ## Головка выключена (опустил, убрал, пуск): писк стихает, захват сброшен; powered — остаётся ли рычаг на «НАКОЛ».
 func reset(keep_power: bool = false) -> void:
+	_stop_recorded_tone()
 	state = State.OFF
 	target = null
 	progress = 0.0
@@ -118,9 +121,20 @@ func _angle(pl: Player, n: Node3D, eye: Vector3, look: Vector3) -> float:
 
 
 func _set_tone(pl: Player, level: float, hz: float, gate: float) -> void:
+	var hook: String = "osoka_seeker_lock" if state == State.LOCK else "osoka_seeker_track"
+	if level <= 0.0:
+		_stop_recorded_tone()
+	elif Audio.has_sound(hook):
+		if is_instance_valid(_tone):
+			_tone.level = 0.0
+		if _recorded_hook != hook or not is_instance_valid(_recorded_tone):
+			_stop_recorded_tone()
+			_recorded_tone = Audio.start_ui_loop(hook, pl, float(Balance.OSOKA.tone_db))
+			_recorded_hook = hook
+		return
+	else:
+		_stop_recorded_tone()
 	if level > 0.0 and not is_instance_valid(_tone):
-		if Audio.has_sound("osoka_seeker"):
-			return
 		_tone = ProcSound.make_ui(pl, ProcSound.Kind.TONE, float(Balance.OSOKA.tone_db))
 	if not is_instance_valid(_tone):
 		return
@@ -128,3 +142,10 @@ func _set_tone(pl: Player, level: float, hz: float, gate: float) -> void:
 	if hz > 0.0:
 		_tone.tone_hz = hz
 	_tone.gate_hz = gate
+
+
+func _stop_recorded_tone() -> void:
+	if is_instance_valid(_recorded_tone):
+		_recorded_tone.stop()
+		_recorded_tone.queue_free()
+	_recorded_hook = ""

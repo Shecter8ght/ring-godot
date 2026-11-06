@@ -417,66 +417,6 @@
       ]
     },
     {
-      "id": "wpn_hg_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_hg_02_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -848,66 +788,6 @@
       "files": []
     },
     {
-      "id": "wpn_hg_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_hg_03_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -1262,66 +1142,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_hg_03_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -1703,66 +1523,6 @@
       "files": []
     },
     {
-      "id": "wpn_smg_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_smg_02_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -2132,66 +1892,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_smg_02_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -2573,66 +2273,6 @@
       "files": []
     },
     {
-      "id": "wpn_smg_03_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_smg_04_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -3002,66 +2642,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_smg_04_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -3443,66 +3023,6 @@
       "files": []
     },
     {
-      "id": "wpn_smg_05_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_ar_01_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -3872,66 +3392,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_ar_01_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -4313,66 +3773,6 @@
       "files": []
     },
     {
-      "id": "wpn_sp_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_sp_02_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -4742,66 +4142,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_sp_02_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -5183,66 +4523,6 @@
       "files": []
     },
     {
-      "id": "wpn_ar_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_ar_03_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -5612,66 +4892,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_ar_03_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -6053,66 +5273,6 @@
       "files": []
     },
     {
-      "id": "wpn_ar_04_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_ar_05_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -6488,66 +5648,6 @@
       "files": []
     },
     {
-      "id": "wpn_ar_05_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_dmr_01_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -6908,66 +6008,6 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_dmr_02_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -7322,66 +6362,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_dmr_02_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -7763,66 +6743,6 @@
       "files": []
     },
     {
-      "id": "wpn_sr_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_sr_02_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -8117,66 +7037,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_sr_02_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -8492,66 +7352,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_sg_01_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -8918,66 +7718,6 @@
       "files": []
     },
     {
-      "id": "wpn_sg_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_sg_03_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -9308,66 +8048,6 @@
       "files": []
     },
     {
-      "id": "wpn_sg_03_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "wpn_lmg_01_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -9677,66 +8357,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_lmg_01_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_01_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_01_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_01_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -10118,66 +8738,6 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_02_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shell_roll"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
       "id": "signal_launcher_shot",
       "name": "Выстрел — основной",
       "category": "Оружие",
@@ -10427,66 +8987,6 @@
       "binding": {
         "type": "action",
         "hook": "signal_launcher_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "signal_launcher_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "signal_launcher_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "signal_launcher_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "signal_launcher_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -10862,66 +9362,6 @@
       "binding": {
         "type": "action",
         "hook": "wpn_ar_09_ads_lower"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shell_hard",
-      "name": "Гильза — плитка / бетон",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_hard",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_hard"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_metal"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shell_soft",
-      "name": "Гильза — мягкая поверхность",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_soft",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_soft"
-      },
-      "type": "one",
-      "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shell_roll",
-      "name": "Гильза катится",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_roll",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_roll"
       },
       "type": "one",
       "profile": "reload",
@@ -11459,9 +9899,9 @@
     },
     {
       "id": "step_tile",
-      "name": "Шаг: плитка, бетон",
+      "name": "Шаг по плитке",
       "category": "Шаги и движение",
-      "group": "Шаги внутри ТЦ",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_stone"
@@ -11481,13 +9921,14 @@
         "steps/stone_10.ogg",
         "steps/stone_11.ogg",
         "steps/stone_12.ogg"
-      ]
+      ],
+      "custom": true
     },
     {
       "id": "step_tile_run",
-      "name": "Бег: плитка, бетон",
+      "name": "Бег по плитке",
       "category": "Шаги и движение",
-      "group": "Шаги внутри ТЦ",
+      "group": "Бег — отдельная запись",
       "binding": {
         "type": "action",
         "hook": "step_stone_run"
@@ -11511,54 +9952,55 @@
     },
     {
       "id": "step_carpet",
-      "name": "Шаг по ковролину",
+      "name": "Шаг по ковру",
       "category": "Шаги и движение",
-      "group": "Шаги внутри ТЦ",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_carpet"
       },
       "type": "one",
-      "profile": "step_carpet",
+      "profile": "step_stone",
       "files": []
     },
     {
       "id": "step_wood",
-      "name": "Шаг: дерево",
+      "name": "Шаг по дереву",
       "category": "Шаги и движение",
-      "group": "Шаги внутри ТЦ",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_wood"
       },
       "type": "one",
-      "profile": "step_wood",
+      "profile": "step_stone",
       "files": []
     },
     {
       "id": "step_metal",
-      "name": "Шаг: металл — звонкий слой",
+      "name": "Шаг по металлу",
       "category": "Шаги и движение",
-      "group": "Шаги внутри ТЦ",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_metal"
       },
       "type": "one",
-      "profile": "step_metal",
-      "files": []
+      "profile": "step_stone",
+      "files": [],
+      "custom": true
     },
     {
       "id": "step_asphalt",
-      "name": "Шаг: асфальт, земля, картон",
+      "name": "Шаг по грунту",
       "category": "Шаги и движение",
-      "group": "Шаги снаружи",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_dirt"
       },
       "type": "one",
-      "profile": "step_dirt",
+      "profile": "step_stone",
       "files": [
         "steps/dirt_01.ogg",
         "steps/dirt_02.ogg",
@@ -11572,221 +10014,77 @@
         "steps/dirt_10.ogg",
         "steps/dirt_11.ogg",
         "steps/dirt_12.ogg"
-      ]
-    },
-    {
-      "id": "step_asphalt_wet",
-      "name": "Шаг: мокрый асфальт с лужами",
-      "category": "Шаги и движение",
-      "group": "Шаги снаружи",
-      "binding": {
-        "type": "action",
-        "hook": "step_asphalt_wet"
-      },
-      "type": "one",
-      "profile": "step_asphalt_wet",
-      "files": [
-        "steps/asphalt_wet_01.ogg",
-        "steps/asphalt_wet_02.ogg",
-        "steps/asphalt_wet_03.ogg",
-        "steps/asphalt_wet_04.ogg",
-        "steps/asphalt_wet_05.ogg",
-        "steps/asphalt_wet_06.ogg",
-        "steps/asphalt_wet_07.ogg",
-        "steps/asphalt_wet_08.ogg",
-        "steps/asphalt_wet_09.ogg",
-        "steps/asphalt_wet_10.ogg",
-        "steps/asphalt_wet_11.ogg",
-        "steps/asphalt_wet_12.ogg",
-        "steps/asphalt_wet_13.ogg",
-        "steps/asphalt_wet_14.ogg",
-        "steps/asphalt_wet_15.ogg",
-        "steps/asphalt_wet_16.ogg"
-      ]
-    },
-    {
-      "id": "step_asphalt_run",
-      "name": "Бег: асфальт, земля",
-      "category": "Шаги и движение",
-      "group": "Шаги снаружи",
-      "binding": {
-        "type": "action",
-        "hook": "step_dirt_run"
-      },
-      "type": "one",
-      "profile": "step_dirt_run",
-      "files": [
-        "steps/dirt_run_01.ogg",
-        "steps/dirt_run_02.ogg",
-        "steps/dirt_run_03.ogg",
-        "steps/dirt_run_04.ogg",
-        "steps/dirt_run_05.ogg",
-        "steps/dirt_run_06.ogg",
-        "steps/dirt_run_07.ogg",
-        "steps/dirt_run_08.ogg",
-        "steps/dirt_run_09.ogg",
-        "steps/dirt_run_10.ogg",
-        "steps/dirt_run_11.ogg",
-        "steps/dirt_run_12.ogg"
-      ]
+      ],
+      "custom": true
     },
     {
       "id": "step_gravel",
-      "name": "Шаг по гравию, щебню",
+      "name": "Шаг по гравию и камушкам",
       "category": "Шаги и движение",
-      "group": "Шаги снаружи",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_gravel"
       },
       "type": "one",
-      "profile": "step_gravel",
+      "profile": "step_stone",
       "files": []
     },
     {
       "id": "step_grass",
-      "name": "Шаг по траве",
+      "name": "Шаг по листьям",
       "category": "Шаги и движение",
-      "group": "Шаги снаружи",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_grass"
       },
       "type": "one",
-      "profile": "step_grass",
+      "profile": "step_stone",
       "files": []
     },
     {
       "id": "step_water",
-      "name": "Шаг по луже",
+      "name": "Шаг по лужам",
       "category": "Шаги и движение",
-      "group": "Шаги снаружи",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_water"
       },
       "type": "one",
-      "profile": "step_water",
+      "profile": "step_stone",
       "files": [
         "steps/water_01.wav"
-      ]
-    },
-    {
-      "id": "step_snow",
-      "name": "Шаг: снег",
-      "category": "Шаги и движение",
-      "group": "Шаги снаружи",
-      "binding": {
-        "type": "action",
-        "hook": "step_snow"
-      },
-      "type": "one",
-      "profile": "step_snow",
-      "files": [
-        "steps/snow_01.ogg",
-        "steps/snow_02.ogg",
-        "steps/snow_03.ogg",
-        "steps/snow_04.ogg",
-        "steps/snow_05.ogg",
-        "steps/snow_06.ogg",
-        "steps/snow_07.ogg",
-        "steps/snow_08.ogg",
-        "steps/snow_09.ogg",
-        "steps/snow_10.ogg",
-        "steps/snow_11.ogg",
-        "steps/snow_12.ogg"
-      ]
-    },
-    {
-      "id": "step_snow_run",
-      "name": "Бег: снег",
-      "category": "Шаги и движение",
-      "group": "Шаги снаружи",
-      "binding": {
-        "type": "action",
-        "hook": "step_snow_run"
-      },
-      "type": "one",
-      "profile": "step_snow_run",
-      "files": [
-        "steps/snow_run_01.ogg",
-        "steps/snow_run_02.ogg",
-        "steps/snow_run_03.ogg",
-        "steps/snow_run_04.ogg",
-        "steps/snow_run_05.ogg",
-        "steps/snow_run_06.ogg",
-        "steps/snow_run_07.ogg",
-        "steps/snow_run_08.ogg",
-        "steps/snow_run_09.ogg",
-        "steps/snow_run_10.ogg",
-        "steps/snow_run_11.ogg",
-        "steps/snow_run_12.ogg"
-      ]
+      ],
+      "custom": true
     },
     {
       "id": "step_glass",
-      "name": "Шаг по битому стеклу",
+      "name": "Шаг по стеклу",
       "category": "Шаги и движение",
-      "group": "Мусор и обломки под ногами",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_glass"
       },
       "type": "one",
-      "profile": "step_glass",
+      "profile": "step_stone",
       "files": []
     },
     {
       "id": "step_trash",
-      "name": "Шаг по мусору — бумага, пакеты, пластик",
+      "name": "Шаг по мусорным пакетам",
       "category": "Шаги и движение",
-      "group": "Мусор и обломки под ногами",
+      "group": "Поверхности под ногами",
       "binding": {
         "type": "action",
         "hook": "step_trash"
       },
       "type": "one",
-      "profile": "step_trash",
-      "files": []
-    },
-    {
-      "id": "step_rubble",
-      "name": "Шаг по обломкам, штукатурке",
-      "category": "Шаги и движение",
-      "group": "Мусор и обломки под ногами",
-      "binding": {
-        "type": "action",
-        "hook": "step_rubble"
-      },
-      "type": "one",
-      "profile": "step_rubble",
-      "files": []
-    },
-    {
-      "id": "step_cardboard",
-      "name": "Шаг по картону",
-      "category": "Шаги и движение",
-      "group": "Мусор и обломки под ногами",
-      "binding": {
-        "type": "action",
-        "hook": "step_cardboard"
-      },
-      "type": "one",
-      "profile": "step_cardboard",
-      "files": []
-    },
-    {
-      "id": "step_crouch",
-      "name": "Шаг вприсядку — мягко, шорох одежды",
-      "category": "Шаги и движение",
-      "group": "Стойки и движения",
-      "binding": {
-        "type": "action",
-        "hook": "step_crouch"
-      },
-      "type": "one",
-      "profile": "step_crouch",
-      "files": []
+      "profile": "step_stone",
+      "files": [],
+      "custom": true
     },
     {
       "id": "crawl",
@@ -12919,6 +11217,2843 @@
       "type": "one",
       "profile": "shutter_rattle",
       "files": []
+    },
+    {
+      "id": "step_concrete",
+      "binding": {
+        "type": "action",
+        "hook": "step_concrete"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Шаг по бетону и асфальту",
+      "category": "Шаги и движение",
+      "profile": "step_stone",
+      "custom": true,
+      "group": "Поверхности под ногами"
+    },
+    {
+      "id": "step_sand",
+      "binding": {
+        "type": "action",
+        "hook": "step_sand"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Шаг по песку",
+      "category": "Шаги и движение",
+      "profile": "step_stone",
+      "custom": true,
+      "group": "Поверхности под ногами"
+    },
+    {
+      "id": "shell_concrete",
+      "binding": {
+        "type": "action",
+        "hook": "shell_concrete"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — бетон и асфальт",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_water",
+      "binding": {
+        "type": "action",
+        "hook": "shell_water"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — вода",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_gravel",
+      "binding": {
+        "type": "action",
+        "hook": "shell_gravel"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — гравий",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_wood",
+      "binding": {
+        "type": "action",
+        "hook": "shell_wood"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — дерево",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_carpet",
+      "binding": {
+        "type": "action",
+        "hook": "shell_carpet"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — ковёр",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_metal",
+      "binding": {
+        "type": "action",
+        "hook": "shell_metal"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — металл",
+      "category": "Гильзы",
+      "profile": "shell_metal",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_sand",
+      "binding": {
+        "type": "action",
+        "hook": "shell_sand"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — песок",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "shell_tile",
+      "binding": {
+        "type": "action",
+        "hook": "shell_tile"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Падение гильзы — плитка",
+      "category": "Гильзы",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности"
+    },
+    {
+      "id": "wpn_hg_01_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_hg_01_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_hg_01_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_hg_01_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_hg_01_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_hg_01_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_hg_01_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_hg_02_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_hg_02_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_hg_02_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_hg_02_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_hg_02_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_hg_02_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_hg_02_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_smg_03_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_smg_03_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_smg_03_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_smg_03_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_smg_03_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_smg_03_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_smg_03_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_smg_04_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_smg_04_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_smg_04_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_smg_04_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_smg_04_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_smg_04_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_smg_04_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_smg_05_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_smg_05_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_smg_05_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_smg_05_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_smg_05_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_smg_05_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_smg_05_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_ar_01_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_ar_01_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_ar_01_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_ar_01_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_ar_01_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_ar_01_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_ar_01_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_sp_02_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_sp_02_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_sp_02_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_sp_02_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_sp_02_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_sp_02_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_sp_02_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_ar_05_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_ar_05_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_ar_05_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_ar_05_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_ar_05_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_ar_05_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_ar_05_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_dmr_01_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_dmr_01_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_dmr_01_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_dmr_01_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_dmr_01_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_dmr_01_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_dmr_01_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_sr_01_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_sr_01_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_sr_01_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_sr_01_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_sr_01_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_sr_01_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_sr_01_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_sg_02_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_sg_02_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_sg_02_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_sg_02_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_sg_02_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_sg_02_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_sg_02_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_sg_03_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_sg_03_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_sg_03_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_sg_03_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_sg_03_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_sg_03_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_sg_03_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_lmg_01_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_lmg_01_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_lmg_01_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_lmg_01_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_lmg_01_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_lmg_01_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_lmg_01_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "signal_launcher_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "signal_launcher_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "signal_launcher_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "signal_launcher_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "signal_launcher_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "signal_launcher_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "signal_launcher_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_ar_09_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_ar_09_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_ar_09_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_ar_09_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_ar_09_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_ar_09_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_ar_09_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_sr_03_shot",
+      "name": "Выстрел — основной",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shot",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shot"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_shot_outdoor",
+      "name": "Выстрел на улице",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shot_outdoor",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shot_outdoor"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_shot_room",
+      "name": "Выстрел в небольшом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shot_room",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shot_room"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_shot_hall",
+      "name": "Выстрел в большом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shot_hall",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shot_hall"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_mechanism",
+      "name": "Механика выстрела",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "mechanism",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_mechanism"
+      },
+      "type": "one",
+      "profile": "mechanism",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_dry_fire",
+      "name": "Сухой спуск",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "dry_fire",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_dry_fire"
+      },
+      "type": "one",
+      "profile": "dry_fire",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_jam",
+      "name": "Задержка / осечка",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_jam"
+      },
+      "type": "one",
+      "profile": "jam",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_clear_jam",
+      "name": "Устранить задержку — затвор назад",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "clear_jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_clear_jam"
+      },
+      "type": "one",
+      "profile": "clear_jam",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_clear_jam_release",
+      "name": "Устранить задержку — затвор вперёд",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "clear_jam_release",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_clear_jam_release"
+      },
+      "type": "one",
+      "profile": "clear_jam_release",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_reload",
+      "name": "Перезарядка целиком",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "reload",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_reload"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_round_insert",
+      "name": "Вложить патрон",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "round_insert",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_round_insert"
+      },
+      "type": "one",
+      "profile": "round_insert",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_charge",
+      "name": "Затвор вперёд / дослать патрон",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "charge",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_charge"
+      },
+      "type": "one",
+      "profile": "charge",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_cycle",
+      "name": "Ручной цикл затвора",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "cycle",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_cycle"
+      },
+      "type": "one",
+      "profile": "cycle",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_mag_check",
+      "name": "Проверить боезапас",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "mag_check",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_mag_check"
+      },
+      "type": "one",
+      "profile": "mag_check",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_draw",
+      "name": "Достать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "draw",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_draw"
+      },
+      "type": "one",
+      "profile": "draw",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_holster",
+      "name": "Убрать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "holster",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_holster"
+      },
+      "type": "one",
+      "profile": "holster",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_ads_raise",
+      "name": "Поднять оружие",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "ads_raise",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_ads_raise"
+      },
+      "type": "one",
+      "profile": "ads_raise",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_ads_lower",
+      "name": "Опустить оружие",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "ads_lower",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_ads_lower"
+      },
+      "type": "one",
+      "profile": "ads_lower",
+      "files": []
+    },
+    {
+      "id": "wpn_sr_03_shell_concrete",
+      "name": "Гильза — бетон и асфальт",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_concrete",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_concrete"
+      },
+      "type": "one",
+      "profile": "shell_concrete",
+      "files": [],
+      "surface": "concrete"
+    },
+    {
+      "id": "wpn_sr_03_shell_water",
+      "name": "Гильза — вода",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_water",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_water"
+      },
+      "type": "one",
+      "profile": "shell_water",
+      "files": [],
+      "surface": "water"
+    },
+    {
+      "id": "wpn_sr_03_shell_gravel",
+      "name": "Гильза — гравий",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_gravel",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_gravel"
+      },
+      "type": "one",
+      "profile": "shell_gravel",
+      "files": [],
+      "surface": "gravel"
+    },
+    {
+      "id": "wpn_sr_03_shell_wood",
+      "name": "Гильза — дерево",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_wood",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_wood"
+      },
+      "type": "one",
+      "profile": "shell_wood",
+      "files": [],
+      "surface": "wood"
+    },
+    {
+      "id": "wpn_sr_03_shell_carpet",
+      "name": "Гильза — ковёр",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_carpet",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_carpet"
+      },
+      "type": "one",
+      "profile": "shell_carpet",
+      "files": [],
+      "surface": "carpet"
+    },
+    {
+      "id": "wpn_sr_03_shell_sand",
+      "name": "Гильза — песок",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_sand",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_sand"
+      },
+      "type": "one",
+      "profile": "shell_sand",
+      "files": [],
+      "surface": "sand"
+    },
+    {
+      "id": "wpn_sr_03_shell_tile",
+      "name": "Гильза — плитка",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_tile",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_tile"
+      },
+      "type": "one",
+      "profile": "shell_tile",
+      "files": [],
+      "surface": "tile"
+    },
+    {
+      "id": "wpn_mp_01_shot",
+      "name": "Выстрел — основной",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "shot",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_shot"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_shot_outdoor",
+      "name": "Выстрел на улице",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "shot_outdoor",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_shot_outdoor"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_shot_room",
+      "name": "Выстрел в небольшом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "shot_room",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_shot_room"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_shot_hall",
+      "name": "Выстрел в большом помещении",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "shot_hall",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_shot_hall"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_mechanism",
+      "name": "Механика выстрела",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "mechanism",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_mechanism"
+      },
+      "type": "one",
+      "profile": "mechanism",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_dry_fire",
+      "name": "Сухой спуск",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "dry_fire",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_dry_fire"
+      },
+      "type": "one",
+      "profile": "dry_fire",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_jam",
+      "name": "Задержка / осечка",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_jam"
+      },
+      "type": "one",
+      "profile": "jam",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_clear_jam",
+      "name": "Устранить задержку — затвор назад",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "clear_jam",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_clear_jam"
+      },
+      "type": "one",
+      "profile": "clear_jam",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_clear_jam_release",
+      "name": "Устранить задержку — затвор вперёд",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "clear_jam_release",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_clear_jam_release"
+      },
+      "type": "one",
+      "profile": "clear_jam_release",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_reload",
+      "name": "Перезарядка целиком",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "reload",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_reload"
+      },
+      "type": "one",
+      "profile": "reload",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_round_insert",
+      "name": "Вложить патрон",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "round_insert",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_round_insert"
+      },
+      "type": "one",
+      "profile": "round_insert",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_charge",
+      "name": "Затвор вперёд / дослать патрон",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "charge",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_charge"
+      },
+      "type": "one",
+      "profile": "charge",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_mag_check",
+      "name": "Проверить боезапас",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "mag_check",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_mag_check"
+      },
+      "type": "one",
+      "profile": "mag_check",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_draw",
+      "name": "Достать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "draw",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_draw"
+      },
+      "type": "one",
+      "profile": "draw",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_holster",
+      "name": "Убрать оружие",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "holster",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_holster"
+      },
+      "type": "one",
+      "profile": "holster",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_ads_raise",
+      "name": "Поднять оружие",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "ads_raise",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_ads_raise"
+      },
+      "type": "one",
+      "profile": "ads_raise",
+      "files": []
+    },
+    {
+      "id": "wpn_mp_01_ads_lower",
+      "name": "Опустить оружие",
+      "category": "Оружие",
+      "weapon": "wpn_mp_01",
+      "action": "ads_lower",
+      "group": "Обращение с оружием",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_mp_01_ads_lower"
+      },
+      "type": "one",
+      "profile": "ads_lower",
+      "files": []
+    },
+    {
+      "id": "osoka_launch",
+      "binding": {
+        "type": "action",
+        "hook": "osoka_launch"
+      },
+      "type": "one",
+      "files": [],
+      "name": "Пуск — вышибной заряд",
+      "category": "Оружие",
+      "profile": "osoka_launch",
+      "custom": true,
+      "weapon": "wpn_mp_01",
+      "action": "osoka_launch",
+      "group": "Ракета и самонаведение"
+    },
+    {
+      "id": "osoka_motor",
+      "binding": {
+        "type": "action",
+        "hook": "osoka_motor"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Маршевый двигатель ракеты",
+      "category": "Оружие",
+      "profile": "osoka_motor",
+      "custom": true,
+      "weapon": "wpn_mp_01",
+      "action": "osoka_motor",
+      "group": "Ракета и самонаведение"
+    },
+    {
+      "id": "osoka_seeker_track",
+      "binding": {
+        "type": "action",
+        "hook": "osoka_seeker_track"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Головка — сопровождение цели",
+      "category": "Оружие",
+      "profile": "osoka_seeker_track",
+      "custom": true,
+      "weapon": "wpn_mp_01",
+      "action": "osoka_seeker_track",
+      "group": "Ракета и самонаведение"
+    },
+    {
+      "id": "osoka_seeker_lock",
+      "binding": {
+        "type": "action",
+        "hook": "osoka_seeker_lock"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Головка — цель захвачена",
+      "category": "Оружие",
+      "profile": "osoka_seeker_lock",
+      "custom": true,
+      "weapon": "wpn_mp_01",
+      "action": "osoka_seeker_lock",
+      "group": "Ракета и самонаведение"
+    },
+    {
+      "id": "ambient_zone01",
+      "binding": {
+        "type": "action",
+        "hook": "ambient_zone01"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Окружение — Зона 1 · Пригород",
+      "category": "Окружение карт",
+      "profile": "ambient",
+      "custom": true,
+      "map_scene": "res://scenes/levels/zone01_mall.tscn",
+      "group": "Фоновая петля карты"
+    },
+    {
+      "id": "ambient_mall",
+      "binding": {
+        "type": "action",
+        "hook": "ambient_mall"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Окружение — ТЦ «РИНГ» · территория",
+      "category": "Окружение карт",
+      "profile": "ambient",
+      "custom": true,
+      "map_scene": "res://scenes/levels/mall_map.tscn",
+      "group": "Фоновая петля карты"
+    },
+    {
+      "id": "ambient_prospekt",
+      "binding": {
+        "type": "action",
+        "hook": "ambient_prospekt"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Окружение — Проспект",
+      "category": "Окружение карт",
+      "profile": "ambient",
+      "custom": true,
+      "map_scene": "res://scenes/levels/prospekt.tscn",
+      "group": "Фоновая петля карты"
+    },
+    {
+      "id": "ambient_hideout",
+      "binding": {
+        "type": "action",
+        "hook": "ambient_hideout"
+      },
+      "type": "loop",
+      "files": [],
+      "name": "Окружение — Убежище",
+      "category": "Окружение карт",
+      "profile": "ambient",
+      "custom": true,
+      "map_scene": "res://scenes/levels/hideout.tscn",
+      "group": "Фоновая петля карты"
+    },
+    {
+      "id": "wpn_hg_01_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_hg_01",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_01_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_hg_02_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_hg_02",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_hg_02_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_smg_03_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_smg_04_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_smg_04",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_04_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_smg_05_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_smg_05",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_05_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_ar_01_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_ar_01",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_01_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_sp_02_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_sp_02",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sp_02_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_ar_05_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_ar_05",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_05_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_dmr_01_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_dmr_01",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_dmr_01_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_sr_01_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_sr_01",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_01_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_sg_02_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_sg_02",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_02_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_sg_03_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_sg_03",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sg_03_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_lmg_01_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_lmg_01",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_lmg_01_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "signal_launcher_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "signal_launcher",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "signal_launcher_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_ar_09_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_ar_09",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_ar_09_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
+    },
+    {
+      "id": "wpn_sr_03_shell_metal",
+      "name": "Гильза — металл",
+      "category": "Оружие",
+      "weapon": "wpn_sr_03",
+      "action": "shell_metal",
+      "group": "Гильза",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_sr_03_shell_metal"
+      },
+      "type": "one",
+      "profile": "shell_metal",
+      "files": [],
+      "surface": "metal"
     }
   ]
 }

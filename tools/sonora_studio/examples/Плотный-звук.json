@@ -1,0 +1,15 @@
+{
+  "name": "Плотный звук с мягким верхом",
+  "bands": [
+    {"frequency":31,"gain":0,"q":0.707},
+    {"frequency":63,"gain":3,"q":0.707},
+    {"frequency":125,"gain":4,"q":0.8},
+    {"frequency":250,"gain":-2,"q":1},
+    {"frequency":500,"gain":-1,"q":0.707},
+    {"frequency":1000,"gain":1,"q":0.707},
+    {"frequency":2000,"gain":2,"q":1},
+    {"frequency":4000,"gain":1,"q":0.707},
+    {"frequency":8000,"gain":-3,"q":0.8},
+    {"frequency":16000,"gain":-4,"q":0.707}
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "footsteps": [
+    {
+      "hook": "step_concrete",
+      "name": "Шаг по бетону и асфальту",
+      "surfaces": [
+        "concrete",
+        "asphalt"
+      ]
+    },
+    {
+      "hook": "ladder_step",
+      "name": "Шаг по вертикальной лестнице",
+      "surfaces": [
+        "ladder"
+      ]
+    },
+    {
+      "hook": "step_gravel",
+      "name": "Шаг по гравию и камушкам",
+      "surfaces": [
+        "gravel",
+        "rubble"
+      ]
+    },
+    {
+      "hook": "step_dirt",
+      "name": "Шаг по грунту",
+      "surfaces": [
+        "dirt",
+        "mud",
+        "snow"
+      ]
+    },
+    {
+      "hook": "step_wood",
+      "name": "Шаг по дереву",
+      "surfaces": [
+        "wood"
+      ]
+    },
+    {
+      "hook": "step_carpet",
+      "name": "Шаг по ковру",
+      "surfaces": [
+        "carpet",
+        "fabric"
+      ]
+    },
+    {
+      "hook": "step_metal",
+      "name": "Шаг по металлу",
+      "surfaces": [
+        "metal"
+      ]
+    },
+    {
+      "hook": "step_sand",
+      "name": "Шаг по песку",
+      "surfaces": [
+        "sand"
+      ]
+    },
+    {
+      "hook": "step_stone",
+      "name": "Шаг по плитке",
+      "surfaces": [
+        "tile"
+      ]
+    },
+    {
+      "hook": "step_grass",
+      "name": "Шаг по листьям",
+      "surfaces": [
+        "leaves",
+        "grass"
+      ]
+    },
+    {
+      "hook": "step_water",
+      "name": "Шаг по лужам",
+      "surfaces": [
+        "water",
+        "puddle"
+      ]
+    },
+    {
+      "hook": "step_trash",
+      "name": "Шаг по мусорным пакетам",
+      "surfaces": [
+        "trash",
+        "trash_bags",
+        "plastic",
+        "cardboard"
+      ]
+    },
+    {
+      "hook": "step_glass",
+      "name": "Шаг по стеклу",
+      "surfaces": [
+        "glass"
+      ]
+    }
+  ],
+  "casings": [
+    {
+      "hook": "shell_concrete",
+      "name": "бетон и асфальт",
+      "surfaces": [
+        "concrete",
+        "asphalt"
+      ]
+    },
+    {
+      "hook": "shell_water",
+      "name": "вода",
+      "surfaces": [
+        "water",
+        "puddle"
+      ]
+    },
+    {
+      "hook": "shell_gravel",
+      "name": "гравий",
+      "surfaces": [
+        "gravel",
+        "rubble"
+      ]
+    },
+    {
+      "hook": "shell_wood",
+      "name": "дерево",
+      "surfaces": [
+        "wood"
+      ]
+    },
+    {
+      "hook": "shell_carpet",
+      "name": "ковёр",
+      "surfaces": [
+        "carpet",
+        "fabric"
+      ]
+    },
+    {
+      "hook": "shell_metal",
+      "name": "металл",
+      "surfaces": [
+        "metal"
+      ]
+    },
+    {
+      "hook": "shell_sand",
+      "name": "песок",
+      "surfaces": [
+        "sand",
+        "dirt",
+        "mud",
+        "snow",
+        "grass",
+        "leaves",
+        "trash",
+        "trash_bags",
+        "plastic",
+        "cardboard"
+      ]
+    },
+    {
+      "hook": "shell_tile",
+      "name": "плитка",
+      "surfaces": [
+        "tile",
+        "glass"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+const { _electron: electron } = require('playwright');
+const fs = require('node:fs/promises'), path = require('node:path'), assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '..'), qa = path.resolve(root, '../../_asset_src/sonora_qa/catalog-ui');
+let app, bench;
+(async () => {
+  await fs.mkdir(qa, { recursive: true });
+  const before = await fs.readFile('E:/Games/RING-godot/data/audio_events.json');
+  const profile = await fs.mkdtemp(path.join(qa, 'profile-'));
+  const env = { ...process.env, SONORA_USER_DATA: profile }; delete env.ELECTRON_RUN_AS_NODE;
+  app = await electron.launch({ ...(process.env.SONORA_TEST_EXECUTABLE ? { executablePath: process.env.SONORA_TEST_EXECUTABLE, args: [] } : { args: [root] }), env });
+  const page = await app.firstWindow(); await page.locator('#open-ring').waitFor();
+  assert.equal(await app.evaluate(({app}) => app.getVersion()), '1.6.0');
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  const ready = app.waitForEvent('window'); await page.locator('#open-ring').click(); bench = await ready;
+  bench.on('pageerror', error => errors.push(error.message));
+  await bench.locator('[data-weapon="wpn_sr_03"]').click();
+  assert.ok(await bench.locator('[data-event]').count() > 0);
+  await bench.locator('[data-weapon="wpn_mp_01"]').click();
+  assert.ok(await bench.locator('[data-event="osoka_seeker_lock"]').count());
+  console.log('PASS Mosin and Osoka have selectable actions');
+  await bench.locator('#new-type').click(); await bench.locator('#new-trigger').selectOption('action');
+  await bench.locator('#new-search').fill('песку');
+  assert.equal(await bench.locator('#new-action option').count(), 1);
+  assert.equal(await bench.locator('#new-action').inputValue(), 'step_sand');
+  await bench.screenshot({ path: path.join(qa, 'new-search.png') });
+  await bench.locator('#new-search').fill('ковру');
+  assert.equal(await bench.locator('#new-action option').count(), 0);
+  await bench.locator('[data-new-tab="ready"]').click();
+  assert.equal(await bench.locator('#new-action').inputValue(), 'step_carpet');
+  await bench.locator('#new-type-continue').click();
+  await bench.waitForFunction(() => !document.getElementById('new-type-dialog').open);
+  assert.match(await bench.locator('#event-name').textContent(), /ковру/);
+  console.log('PASS search, default empty tab, assigned tab and opening existing sound without duplication');
+  await bench.locator('#search').fill('шаг');
+  await bench.locator('[data-assignment-tab="ready"]').click();
+  const assigned = await bench.locator('[data-event]').count(); assert.ok(assigned > 0);
+  await bench.locator('[data-assignment-tab="empty"]').click();
+  assert.ok(await bench.locator('[data-event]').count() > 0);
+  await bench.locator('[data-assignment-tab="all"]').click();
+  assert.ok(await bench.locator('[data-event]').count() > assigned);
+  await bench.screenshot({ path: path.join(qa, 'catalog-tabs.png') });
+  assert.deepEqual(errors, []);
+  assert.equal(Buffer.compare(before, await fs.readFile('E:/Games/RING-godot/data/audio_events.json')), 0);
+  console.log('PASS main tabs, no renderer errors, production assignments unchanged');
+})().catch(async error => {
+  console.error(error); process.exitCode = 1;
+  if (bench) await bench.screenshot({ path: path.join(qa, 'failure.png') }).catch(() => {});
+}).finally(async () => {
+  if (app) { await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().forEach(window => window.destroy())).catch(() => {}); await app.close().catch(() => {}); }
+});

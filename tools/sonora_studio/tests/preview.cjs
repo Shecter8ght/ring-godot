@@ -1,0 +1,25 @@
+const { _electron: electron } = require('playwright');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+(async () => {
+  const root = path.resolve(__dirname, '..');
+  const destination = path.resolve(root, '..', 'qa'); await fs.mkdir(destination, { recursive: true });
+  const env = { ...process.env, SONORA_USER_DATA: path.join(destination, 'user-data') }; delete env.ELECTRON_RUN_AS_NODE;
+  const app = await electron.launch({ args: [root], env, timeout: 30000 });
+  const page = await app.firstWindow();
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.waitForLoadState('domcontentloaded'); await page.locator('#load-demo').waitFor();
+  await page.screenshot({ path: path.join(destination, '01-empty.png') });
+  await page.locator('#load-demo').click(); await page.locator('.track-row').first().waitFor();
+  await page.locator('#busy-dialog').waitFor({ state: 'hidden' });
+  await page.screenshot({ path: path.join(destination, '02-demo.png') });
+  console.log(await page.evaluate(() => Object.fromEntries(['.eq-panel','.eq-toolbar','.eq-content','.eq-graph-wrap','#eq-graph','.graph-caption','.eq-band','.eq-gain-wrap','.band-q-wrap'].map(selector => { const r = document.querySelector(selector).getBoundingClientRect(); return [selector, {y:r.y,height:r.height,bottom:r.bottom}]; }))));
+  await page.locator('#export').click();
+  await page.screenshot({ path: path.join(destination, '03-export.png') });
+  await page.locator('[data-close-dialog="export-dialog"]').first().click();
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 780));
+  await page.screenshot({ path: path.join(destination, '04-compact.png') });
+  console.log(JSON.stringify({ title: await page.title(), tracks: await page.locator('.track-row').count(), errors, viewport: page.viewportSize() }));
+  await page.evaluate(async () => { const { studio } = await import('./app.mjs'); studio.dirty = false; });
+  await app.close();
+})().catch(error => { console.error(error); process.exitCode = 1; });

@@ -174,6 +174,8 @@ static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
 	var internal := w.has("internal_mag")
 	var action := String(w.get("action", ""))
 	match condition:
+		"ejects_case":
+			return String(w.get("class", "")) != "SPECIAL"
 		"rig_suppressor":
 			return (w.get("rig", {}) as Dictionary).has("suppressor") and (w.get("mounts", {}) as Dictionary).has("muzzle")
 		"suppressible":

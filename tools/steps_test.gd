@@ -29,7 +29,7 @@ func _ready() -> void:
 			if s == "asphalt" and asphalt_at == Vector3.INF:
 				asphalt_at = p
 	_check("под ногами разные поверхности (плитка, бетон, асфальт)", seen.size() >= 3, str(seen))
-	_check("асфальт — шаги по грунту", asphalt_at != Vector3.INF and Audio.STEP_SET["asphalt"] == "dirt", str(asphalt_at))
+	_check("асфальт — отдельный набор бетона и асфальта", asphalt_at != Vector3.INF and Audio.step_hook("asphalt") == "step_concrete", str(asphalt_at))
 	# темп: болванка с Footsteps едет с заданной скоростью
 	# рядом с игроком (уши на нём): дальние шаги не считаются вовсе
 	var home := (get_tree().get_first_node_in_group("players") as Node3D).global_position

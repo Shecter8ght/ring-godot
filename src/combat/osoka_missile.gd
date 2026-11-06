@@ -40,6 +40,7 @@ var _flame: MeshInstance3D
 var _light: OmniLight3D
 var _trail: GPUParticles3D
 var _motor_sound: ProcSound
+var _recorded_motor: AudioStreamPlayer3D
 var _done: bool = false
 var _hit_cb: Callable
 
@@ -226,7 +227,7 @@ func _ignite() -> void:
 	_flame.visible = true
 	_motor_sound = null
 	if Audio.has_sound("osoka_motor"):
-		Audio.play("osoka_motor", global_position)
+		_recorded_motor = Audio.start_loop("osoka_motor", self)
 	else:
 		_motor_sound = ProcSound.make_3d(self, ProcSound.Kind.MOTOR, 35.0, 4000.0, 6.0, &"Shots")
 	_trail = _make_trail()
@@ -235,6 +236,9 @@ func _ignite() -> void:
 
 
 func _burn_out() -> void:
+	if is_instance_valid(_recorded_motor):
+		_recorded_motor.stop()
+		_recorded_motor.queue_free()
 	_flame.visible = false
 	_light.light_energy = 0.0
 	if _trail:

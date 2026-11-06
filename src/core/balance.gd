@@ -4314,6 +4314,10 @@ const CAR_DELIVERY_LABEL := {"crate_range_m": 12.0, "hood_range_m": 4.5}
 const POUCH_VELCRO := {"hidden_k": 0.34, "height_m": 1.25}
 
 const AUDIO_EVENT_PROFILES: Dictionary = {
+	"osoka_launch": {"db": 0.0, "unit": 6.0, "max": 500.0, "occlude": true, "far": true},
+	"osoka_motor": {"db": 6.0, "unit": 35.0, "max": 4000.0, "occlude": true},
+	"osoka_seeker_track": {"db": -12.0, "unit": 1.0, "max": 10.0},
+	"osoka_seeker_lock": {"db": -12.0, "unit": 1.0, "max": 10.0},
 	# выстрелы слышно далеко (бой на сотни метров): дальше — тише, глуше (фильтр) и позже (звук
 	# идёт 343 м/с — Audio.play задерживает); по расстоянию сменяются слои записей (LAYERS)
 	"shot_pistol": {"db": 2.0, "unit": 10.0, "max": 450.0, "far": true},

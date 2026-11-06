@@ -102,7 +102,7 @@ func _process(delta: float) -> void:
 	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
 		WaterBody.splash(get_tree(), pos, clampf(_speed / 5.0, 0.2, 1.0))
 	var special := String(movement_kind.call()) if movement_kind.is_valid() else ""
-	if special != "":
+	if special != "" and special != "step_crouch":
 		Audio.play(special, pos, extra)
 		return
 	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left, (get_parent() as Node3D).global_basis.x)

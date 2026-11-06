@@ -307,7 +307,7 @@
     },
     {
       "hook": "step_stone",
-      "name": "Шаг: плитка, бетон",
+      "name": "Шаг по плитке",
       "category": "Шаги и движение",
       "type": "one",
       "profile": "step_stone",
@@ -323,130 +323,74 @@
     },
     {
       "hook": "step_carpet",
-      "name": "Шаг по ковролину",
+      "name": "Шаг по ковру",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_carpet",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_wood",
-      "name": "Шаг: дерево",
+      "name": "Шаг по дереву",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_wood",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_metal",
-      "name": "Шаг: металл — звонкий слой",
+      "name": "Шаг по металлу",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_metal",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_dirt",
-      "name": "Шаг: асфальт, земля, картон",
+      "name": "Шаг по грунту",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_dirt",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_asphalt_wet",
-      "name": "Шаг: мокрый асфальт с лужами",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_asphalt_wet",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_dirt_run",
-      "name": "Бег: асфальт, земля",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_dirt_run",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_gravel",
-      "name": "Шаг по гравию, щебню",
+      "name": "Шаг по гравию и камушкам",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_gravel",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_grass",
-      "name": "Шаг по траве",
+      "name": "Шаг по листьям",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_grass",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_water",
-      "name": "Шаг по луже",
+      "name": "Шаг по лужам",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_water",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_snow",
-      "name": "Шаг: снег",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_snow",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_snow_run",
-      "name": "Бег: снег",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_snow_run",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_glass",
-      "name": "Шаг по битому стеклу",
+      "name": "Шаг по стеклу",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_glass",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
       "hook": "step_trash",
-      "name": "Шаг по мусору — бумага, пакеты, пластик",
+      "name": "Шаг по мусорным пакетам",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "step_trash",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_rubble",
-      "name": "Шаг по обломкам, штукатурке",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_rubble",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_cardboard",
-      "name": "Шаг по картону",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_cardboard",
-      "supportsObject": false
-    },
-    {
-      "hook": "step_crouch",
-      "name": "Шаг вприсядку — мягко, шорох одежды",
-      "category": "Шаги и движение",
-      "type": "one",
-      "profile": "step_crouch",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
@@ -483,10 +427,10 @@
     },
     {
       "hook": "ladder_step",
-      "name": "Лестница — перекладина под ногой и в руке",
+      "name": "Шаг по вертикальной лестнице",
       "category": "Шаги и движение",
       "type": "one",
-      "profile": "ladder_step",
+      "profile": "step_stone",
       "supportsObject": false
     },
     {
@@ -1138,19 +1082,155 @@
       "supportsObject": false
     },
     {
-      "hook": "loop:ambient",
-      "name": "Фоновый звук мира",
-      "category": "Мир",
-      "type": "loop",
-      "profile": "ambient",
-      "supportsObject": false
-    },
-    {
       "hook": "shutter_rattle",
       "name": "shutter_rattle",
       "category": "Другие действия",
       "type": "one",
       "profile": "shutter_rattle",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_concrete",
+      "name": "Шаг по бетону и асфальту",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_stone",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_sand",
+      "name": "Шаг по песку",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_stone",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_concrete",
+      "name": "Падение гильзы — бетон и асфальт",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_water",
+      "name": "Падение гильзы — вода",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_gravel",
+      "name": "Падение гильзы — гравий",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_wood",
+      "name": "Падение гильзы — дерево",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_carpet",
+      "name": "Падение гильзы — ковёр",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_metal",
+      "name": "Падение гильзы — металл",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_metal",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_sand",
+      "name": "Падение гильзы — песок",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_tile",
+      "name": "Падение гильзы — плитка",
+      "category": "Гильзы",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "osoka_launch",
+      "name": "Пуск — вышибной заряд",
+      "category": "Осока",
+      "type": "one",
+      "profile": "osoka_launch",
+      "supportsObject": false
+    },
+    {
+      "hook": "osoka_motor",
+      "name": "Маршевый двигатель ракеты",
+      "category": "Осока",
+      "type": "loop",
+      "profile": "osoka_motor",
+      "supportsObject": false
+    },
+    {
+      "hook": "osoka_seeker_track",
+      "name": "Головка — сопровождение цели",
+      "category": "Осока",
+      "type": "loop",
+      "profile": "osoka_seeker_track",
+      "supportsObject": false
+    },
+    {
+      "hook": "osoka_seeker_lock",
+      "name": "Головка — цель захвачена",
+      "category": "Осока",
+      "type": "loop",
+      "profile": "osoka_seeker_lock",
+      "supportsObject": false
+    },
+    {
+      "hook": "ambient_zone01",
+      "name": "Окружение — Зона 1 · Пригород",
+      "category": "Окружение карт",
+      "type": "loop",
+      "profile": "ambient",
+      "supportsObject": false
+    },
+    {
+      "hook": "ambient_mall",
+      "name": "Окружение — ТЦ «РИНГ» · территория",
+      "category": "Окружение карт",
+      "type": "loop",
+      "profile": "ambient",
+      "supportsObject": false
+    },
+    {
+      "hook": "ambient_prospekt",
+      "name": "Окружение — Проспект",
+      "category": "Окружение карт",
+      "type": "loop",
+      "profile": "ambient",
+      "supportsObject": false
+    },
+    {
+      "hook": "ambient_hideout",
+      "name": "Окружение — Убежище",
+      "category": "Окружение карт",
+      "type": "loop",
+      "profile": "ambient",
       "supportsObject": false
     }
   ]
