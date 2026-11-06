@@ -1,8 +1,9 @@
 extends Node3D
-## Серый стенд карты «Вертолёт» v04 — предложение «карта вокруг плотины» (docs/design/mission_helicopter.md; схемы и данные —
-## tools/mission_helicopter_v04.py и tools/mission_helicopter_v04_data.py). Рельеф 2 × 3 км (ходят по ядру 1,2 × 1,6 км,
-## дальше горы видом), озеро, арочная плотина 260 м, ущелье с ГЭС, места и остановки коробками, лес зоны 1 (ели, сосны,
-## берёзы с дальними карточками), вертолёт по маршруту. Это проба геометрии и производительности, не рейд.
+## Серый стенд карты «Вертолёт» (docs/design/mission_helicopter.md): HELI_PLAN=v05 (по умолчанию) — «плотина над долиной»
+## (tools/mission_helicopter_v05.py: озеро и вся игра ниже арочной плотины 260 м, водохранилище выше, водослив на севере),
+## HELI_PLAN=v04 — прежняя «карта вокруг плотины» (tools/mission_helicopter_v04*.py). Рельеф 2 × 3 км (ходят по ядру, дальше
+## горы видом), вода, плотина, места и остановки коробками, лес зоны 1 (ели, сосны, берёзы с дальними карточками), вертолёт
+## по маршруту. Это проба геометрии и производительности, не рейд. Снимки и замеры — docs/screens/heli_<версия>/.
 ##   tools/heli_study.cmd                                                              — прогулка
 ##   tools/godot.cmd --headless res://tools/heli_study.tscn -- check                   — сборка, счёт, земля под местами
 ##   tools/godot.cmd --windowed --resolution 1920x1080 --disable-vsync res://tools/heli_study.tscn -- perf
@@ -14,10 +15,6 @@ extends Node3D
 ## Прогулка: WASD, Shift — бег, Space — прыжок, C — присесть, F — полёт, M — план, 1–9/0 — места, N/B — следующее /
 ## прошлое, H — к вертолёту, R — к текущему месту, Esc — мышь.
 
-const PLAN_PATH: String = "res://data/blockouts/heli_v04.json"
-const VEG_PATH: String = "res://data/blockouts/heli_v04_vegetation.json"
-const THIN_PATH: String = "user://heli_v04_vegetation_thin.json"
-const OUT_DIR: String = "res://docs/screens/heli_v04"
 const Walker = preload("res://src/blockout/study_walker.gd")
 const Terrain = preload("res://src/blockout/heli_terrain.gd")
 const WATER_SHADER: Shader = preload("res://src/world/district_water.gdshader")
@@ -38,6 +35,10 @@ const MEASURE: int = 300
 
 var plan: Dictionary
 var y0: float = 0.0
+var plan_path: String = ""
+var veg_path: String = ""
+var thin_path: String = ""
+var out_dir: String = ""
 var terrain: Node3D
 var walker: CharacterBody3D
 var heli: Node3D
@@ -65,14 +66,19 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	DisplayServer.window_set_title("RING · «Вертолёт» v04 · серый стенд")
 	get_node("/root/Pause").set_process_input(false)
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
 		if arg in ["check", "perf", "shots"]:
 			mode = arg
-	plan = JSON.parse_string(FileAccess.get_file_as_string(PLAN_PATH)) as Dictionary
+	var version: String = _env("HELI_PLAN", "v05")
+	plan_path = "res://data/blockouts/heli_%s.json" % version
+	veg_path = "res://data/blockouts/heli_%s_vegetation.json" % version
+	thin_path = "user://heli_%s_vegetation_thin.json" % version
+	out_dir = "res://docs/screens/heli_%s" % version
+	DisplayServer.window_set_title("RING · «Вертолёт» %s · серый стенд" % version)
+	plan = JSON.parse_string(FileAccess.get_file_as_string(plan_path)) as Dictionary
 	y0 = float(plan.y_offset)
 	var quality: String = OS.get_environment("HELI_QUALITY")
 	if quality in Settings.QUALITY:
@@ -149,7 +155,7 @@ func _build_terrain() -> void:
 	t.position = Vector3(0.0, y0, 0.0)
 	t.set("detail_rect", Rect2(float(w[0]) - 200.0, float(w[2]) - 200.0, float(w[1]) - float(w[0]) + 400.0, float(w[3]) - float(w[2]) + 400.0))
 	t.set("collision_rect", Rect2(float(w[0]) - 40.0, float(w[2]) - 40.0, float(w[1]) - float(w[0]) + 80.0, float(w[3]) - float(w[2]) + 80.0))
-	t.set("data_path", PLAN_PATH)
+	t.set("data_path", plan_path)
 	add_child(t)
 	terrain = t
 	stats.tiles = t.get("built")
@@ -177,8 +183,25 @@ func _water_material() -> ShaderMaterial:
 	return m
 
 
-## Озеро — один многоугольник по берегам и верховой грани плотины, реки — лентами по руслам.
+## Вода: плоские многоугольники (озеро, водохранилище) на своём уровне и реки лентами по руслам. v05 описывает их
+## в данных; у v04 — озеро по берегам и верховой грани плотины.
 func _water() -> void:
+	var material: ShaderMaterial = _water_material()
+	var root: Node3D = Node3D.new()
+	root.name = "Water"
+	add_child(root)
+	if plan.has("water"):
+		for body: Dictionary in plan.water:
+			var outline: PackedVector2Array = PackedVector2Array()
+			for q: Array in body.poly:
+				outline.append(Vector2(float(q[0]), float(q[1])))
+			root.add_child(_flat_water(String(body.name), outline, y0 + float(body.level), material))
+		for river: Dictionary in plan.rivers:
+			var table: Array = []
+			for q: Array in river.points:
+				table.append([q[1], q[0]])
+			root.add_child(_river(String(river.name), table, float(river.width), material))
+		return
 	var lake: Dictionary = plan.lake
 	var poly: PackedVector2Array = PackedVector2Array()
 	for p: Array in lake.west:
@@ -189,22 +212,24 @@ func _water() -> void:
 	var east: Array = lake.east
 	for k: int in range(east.size() - 1, -1, -1):
 		poly.append(Vector2(float(east[k][1]), float(east[k][0])))
+	root.add_child(_flat_water("Lake", poly, y0, material))
+	root.add_child(_river("RiverNorth", plan.river_north, 24.0, material))
+	root.add_child(_river("RiverGorge", plan.river_gorge, 34.0, material))
+
+
+## Плоская вода по контуру: край выпущен на 7 м под берег и в тело плотины — щелей у кромки не видно.
+func _flat_water(node_name: String, outline: PackedVector2Array, level: float, material: Material) -> MeshInstance3D:
+	var poly: PackedVector2Array = outline
 	var grown: Array = Geometry2D.offset_polygon(poly, 7.0)
 	if not grown.is_empty():
 		poly = grown[0]
 	var tris: PackedInt32Array = Geometry2D.triangulate_polygon(poly)
-	var material: ShaderMaterial = _water_material()
-	var root: Node3D = Node3D.new()
-	root.name = "Water"
-	add_child(root)
 	var verts: PackedVector3Array = PackedVector3Array()
 	var normals: PackedVector3Array = PackedVector3Array()
 	for idx: int in tris:
-		verts.append(Vector3(poly[idx].x, y0, poly[idx].y))
+		verts.append(Vector3(poly[idx].x, level, poly[idx].y))
 		normals.append(Vector3.UP)
-	root.add_child(_mesh_instance("Lake", verts, normals, material))
-	root.add_child(_river("RiverNorth", plan.river_north, 24.0, material))
-	root.add_child(_river("RiverGorge", plan.river_gorge, 34.0, material))
+	return _mesh_instance(node_name, verts, normals, material)
 
 
 func _river(node_name: String, table: Array, width: float, material: Material) -> MeshInstance3D:
@@ -247,10 +272,17 @@ func _mesh_instance(node_name: String, verts: PackedVector3Array, normals: Packe
 	return mi
 
 
-func _arc_point(a: float, r: float, y: float) -> Vector3:
+## Центр кривизны арки по z и сторона: +1 — верховая грань южнее центра (v05), −1 — севернее (v04).
+func _dam_frame() -> Vector2:
 	var d: Dictionary = plan.dam
-	var cz: float = float(d.apex) + float(d.radius)
-	return Vector3(r * sin(a), y0 + y, cz - r * cos(a))
+	if d.has("center"):
+		return Vector2(float((d.center as Array)[1]), float(d.dir))
+	return Vector2(float(d.apex) + float(d.radius), -1.0)
+
+
+func _arc_point(a: float, r: float, y: float) -> Vector3:
+	var f: Vector2 = _dam_frame()
+	return Vector3(r * sin(a), y0 + y, f.x + f.y * r * cos(a))
 
 
 ## Арочная плотина: верховая грань по дуге наброска, низовая — с уклоном (10 м по гребню → 60 м у подошвы),
@@ -268,11 +300,12 @@ func _dam() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n: int = 72
 	var lean: float = (t_base - t_top) / (top - foot)
+	var side: float = _dam_frame().y
 	for i: int in range(n):
 		var a0: float = lerpf(-half, half, float(i) / float(n))
 		var a1: float = lerpf(-half, half, float(i + 1) / float(n))
-		var out0: Vector3 = Vector3(sin(a0), 0.0, -cos(a0))
-		var out1: Vector3 = Vector3(sin(a1), 0.0, -cos(a1))
+		var out0: Vector3 = Vector3(sin(a0), 0.0, side * cos(a0))
+		var out1: Vector3 = Vector3(sin(a1), 0.0, side * cos(a1))
 		# верховая грань (к озеру)
 		_quad(st, _arc_point(a0, r, foot), _arc_point(a1, r, foot), _arc_point(a1, r, top), _arc_point(a0, r, top), out0, out1)
 		# низовая грань (к ущелью), чуть смотрит вверх
@@ -298,13 +331,20 @@ func _dam() -> void:
 	body.name = "DamBody"
 	body.set_meta("surface", "concrete")
 	var col: CollisionShape3D = CollisionShape3D.new()
-	col.shape = mesh.create_trimesh_shape()
+	var shape: ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	# развёрнутая арка (v05) зеркалит обход треугольников: коллизия с обеих сторон, иначе гребень «пустой» сверху
+	shape.backface_collision = true
+	col.shape = shape
 	body.add_child(col)
 	add_child(body)
 
 
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, e: Vector3, na: Vector3, nb: Vector3) -> void:
-	for pair: Array in [[a, na], [b, nb], [c, nb], [a, na], [c, nb], [e, na]]:
+	# развёрнутая арка (v05) зеркалит обход: лицевая сторона должна смотреть по нормали, иначе гребень и грани тёмные
+	var order: Array = [[a, na], [b, nb], [c, nb], [a, na], [c, nb], [e, na]]
+	if _dam_frame().y > 0.0:
+		order = [[a, na], [c, nb], [b, nb], [a, na], [e, na], [c, nb]]
+	for pair: Array in order:
 		st.set_normal(pair[1])
 		st.add_vertex(pair[0])
 
@@ -386,8 +426,10 @@ func _solid(root: Node3D, s: Dictionary) -> void:
 			var g: float = ground(x + off.x, z + off.y)
 			low = minf(low, g)
 			high = maxf(high, g)
-		base_y = low - 0.3
-		h += high - low + 0.3
+		# на крутом склоне коробка не тянется столбом до самого низа: садится у центра, в гору уходит в склон
+		var centre: float = ground(x, z)
+		base_y = maxf(low, centre - 3.0) - 0.3
+		h += minf(high - base_y, 6.0) + 0.3
 	elif base is String:
 		base_y = ground(x, z) + float(String(base).trim_prefix("top+"))
 	else:
@@ -476,8 +518,8 @@ func _forest() -> void:
 	stats.forest_share = share
 	if share <= 0.0:
 		return
-	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(VEG_PATH)) as Dictionary
-	var path: String = VEG_PATH
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(veg_path)) as Dictionary
+	var path: String = veg_path
 	if share < 1.0:
 		var thin: Dictionary = {}
 		for key: String in data:
@@ -488,11 +530,11 @@ func _forest() -> void:
 				if fposmod(float(i) * 0.6180339, 1.0) < share:
 					kept.append(list[i])
 			thin[key] = kept
-		var f: FileAccess = FileAccess.open(THIN_PATH, FileAccess.WRITE)
+		var f: FileAccess = FileAccess.open(thin_path, FileAccess.WRITE)
 		f.store_string(JSON.stringify(thin))
 		f.close()
 		data = thin
-		path = THIN_PATH
+		path = thin_path
 	var root: Node3D = Node3D.new()
 	root.name = "Forest"
 	add_child(root)
@@ -531,19 +573,26 @@ func _walls() -> void:
 	for pair: Array in [[Vector2(x0, z0), Vector2(x1, z0)], [Vector2(x1, z0), Vector2(x1, z1)], [Vector2(x1, z1), Vector2(x0, z1)],
 			[Vector2(x0, z1), Vector2(x0, z0)]]:
 		_invisible(root, pair[0], pair[1], y0 - 320.0, y0 + 900.0)
-	var lake: Dictionary = plan.lake
-	var boom: float = float(lake.boom_z)
-	for side: Array in [[lake.west, 1.5], [lake.east, -1.5]]:
-		var table: Array = side[0]
-		for k: int in range(table.size() - 1):
-			var za: float = float(table[k][0])
-			var zb: float = float(table[k + 1][0])
-			if zb < boom:
-				continue
-			var a: Vector2 = Vector2(float(table[k][1]) + float(side[1]), maxf(za, boom))
-			var b: Vector2 = Vector2(float(table[k + 1][1]) + float(side[1]), zb)
-			# верх стенки чуть над водой: пирс, понтоны и мостик к башне проходят поверху, с берега в озеро — нет
-			_invisible(root, a, b, y0 - 4.0, y0 + 0.25)
+	if plan.has("barriers"):
+		for bar: Dictionary in plan.barriers:
+			var pts: Array = bar.points
+			for k: int in range(pts.size() - 1):
+				_invisible(root, Vector2(float(pts[k][0]), float(pts[k][1])), Vector2(float(pts[k + 1][0]), float(pts[k + 1][1])),
+					y0 + float(bar.bottom), y0 + float(bar.top))
+	else:
+		var lake: Dictionary = plan.lake
+		var boom: float = float(lake.boom_z)
+		for side: Array in [[lake.west, 1.5], [lake.east, -1.5]]:
+			var table: Array = side[0]
+			for k: int in range(table.size() - 1):
+				var za: float = float(table[k][0])
+				var zb: float = float(table[k + 1][0])
+				if zb < boom:
+					continue
+				var a: Vector2 = Vector2(float(table[k][1]) + float(side[1]), maxf(za, boom))
+				var b: Vector2 = Vector2(float(table[k + 1][1]) + float(side[1]), zb)
+				# верх стенки чуть над водой: пирс, понтоны и мостик к башне проходят поверху, с берега в озеро — нет
+				_invisible(root, a, b, y0 - 4.0, y0 + 0.25)
 	var d: Dictionary = plan.dam
 	var half: float = deg_to_rad(float(d.half_angle_deg))
 	for i: int in range(24):
@@ -803,7 +852,8 @@ func _check() -> void:
 				at.y - (hit.position as Vector3).y, ground(at.x, at.z) - y0]]
 		print("  %s %s: %s" % ["ok  " if ok else "НЕТ ", String((places[i] as Dictionary).name), where])
 	# гребень — на плотине, а не в воздухе
-	var crest: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(Vector3(0, y0 + 60.0, 400.0), Vector3(0, y0 - 300.0, 400.0), 1)
+	var mid: Vector3 = _arc_point(0.0, float((plan.dam as Dictionary).radius) - 5.0, float((plan.dam as Dictionary).crest))
+	var crest: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(mid + Vector3.UP * 50.0, mid - Vector3.UP * 400.0, 1)
 	var hit_crest: Dictionary = space.intersect_ray(crest)
 	var crest_ok: bool = not hit_crest.is_empty() and absf((hit_crest.position as Vector3).y - y0 - float((plan.dam as Dictionary).crest)) < 1.5
 	if not crest_ok:
@@ -825,10 +875,10 @@ func _perf() -> void:
 	var vp: RID = get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	var tag: String = _env("HELI_TAG", "замер")
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	var size: Vector2i = DisplayServer.window_get_size()
 	var lines: PackedStringArray = [
-		"«Вертолёт» v04, серый стенд · %s" % tag,
+		"«Вертолёт» %s, серый стенд · %s" % [out_dir.get_file().trim_prefix("heli_"), tag],
 		"%s · %dx%d · качество %s · %s, %s · лес %.0f %% (%d деревьев, полные модели до %s м) · сборка %d мс" % [
 			RenderingServer.get_video_adapter_name(), size.x, size.y, Settings.quality, String(RaidConditions.current.time),
 			String(RaidConditions.current.weather), float(stats.forest_share) * 100.0, int(stats.trees), _env("HELI_TREE_NEAR", "300"),
@@ -878,12 +928,12 @@ func _perf() -> void:
 			total += mean
 			count += 1
 		var img: Image = get_viewport().get_texture().get_image()
-		img.save_png(ProjectSettings.globalize_path("%s/%s_%s.png" % [OUT_DIR, tag, view_name]))
+		img.save_png(ProjectSettings.globalize_path("%s/%s_%s.png" % [out_dir, tag, view_name]))
 	if count > 0:
 		var avg: String = "  среднее по %d точкам на высоте глаз: %.1f к/с (%.2f мс)" % [count, 1000.0 / (total / count), total / count]
 		print(avg)
 		lines.append(avg)
-	var f: FileAccess = FileAccess.open(ProjectSettings.globalize_path("%s/perf_%s.txt" % [OUT_DIR, tag]), FileAccess.WRITE)
+	var f: FileAccess = FileAccess.open(ProjectSettings.globalize_path("%s/perf_%s.txt" % [out_dir, tag]), FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")
 	f.close()
 	get_tree().quit()
@@ -916,7 +966,7 @@ func _shots() -> void:
 	camera.far = 4000.0
 	add_child(camera)
 	camera.make_current()
-	var dir: String = OUT_DIR + "/shots"
+	var dir: String = out_dir + "/shots"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
 	var only: PackedStringArray = OS.get_environment("HELI_SHOTS_ONLY").split(",", false)
 	for v: Dictionary in plan.shots:
