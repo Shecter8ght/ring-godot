@@ -729,6 +729,7 @@ const TRADER_BUY_PRICES := {
 	"water_purification": 6200,
 	"weapon_cleaning_kit": 11000,
 	"weapon_gauges": 19000,
+	"msl_zr36": 450000,
 	"wires": 1000,
 	"work_gloves": 650,
 	"wpn_ar_01": 180000,
@@ -738,6 +739,7 @@ const TRADER_BUY_PRICES := {
 	"wpn_hg_01": 10000,
 	"wpn_hg_02": 60000,
 	"wpn_lmg_01": 1150000,
+	"wpn_mp_01": 1900000,
 	"wpn_sg_02": 145000,
 	"wpn_sg_03": 35000,
 	"wpn_smg_03": 450000,
@@ -1625,6 +1627,32 @@ const SKY_FLARE := {"air_sec": 15.0, "rise_m": 75.0, "rise_sec": 2.4, "fall_spee
 	"color": Color(1.0, 0.24, 0.16), "energy": 5.0, "range": 240.0, "angle": 74.0, "attenuation": 0.35,
 	"edge": 0.5, "blur": 4.0, "indirect": 1.6, "fog": 2.2, "lit_radius": 110.0, "drift": 0.28,
 	"core_m": 2.2, "halo_m": 18.0, "noise_m": 110.0}
+## ПЗРК «Осока» (wpn_mp_01; OsokaSeeker, OsokaMissile). Головка самонаведения включается, когда комплекс вскинут
+## к прицелу: рычаг «НАКОЛ», через power_sec батарея и гироскоп готовы. Тепловая цель (группа "heat_targets") в конусе
+## cone_deg от линии прицела ближе lock_range_m и на виду — поиск: прерывистый писк, жёлтая метка; продержал lock_sec —
+## захват: ровный писк, лампа на целике, метка зелёная; захват держится, пока цель в track_deg от линии. Без захвата
+## пуска нет (need_lock). Ракета выходит из трубы со скоростью eject_mps, двигатель — через ignite_m (рули и
+## стабилизаторы раскрываются за fins_sec), разгон до speed_mps за boost_sec, двигатель горит burn_sec (дымный след),
+## через life_sec — самоликвидация. Наведение пропорциональное (nav_k) с пределом перегрузки max_g; взрыватель —
+## ближе fuse_m к цели или удар. Боевая часть: урон damage в радиусе radius_m (с прямой видимостью, как у гранаты),
+## толчок push. roll_hz — вращение ракеты в полёте (вид). Пуск слышно на noise_m; тряска камеры — shake.
+## След (trail_*): частица на каждые step_m, живёт life_sec, растёт от size[0] до size[1] м.
+## Писк ГСН (tone_*): частота поиска / захвата, Гц; громкость, дБ; прерывистый — beep_hz в секунду в начале захвата
+## и beep_fast_hz к его концу.
+const OSOKA := {"power_sec": 0.9, "cone_deg": 3.0, "lock_sec": 1.6, "track_deg": 9.0, "lock_range_m": 5500.0,
+	"need_lock": true, "eject_mps": 28.0, "ignite_m": 5.5, "fins_sec": 0.12, "speed_mps": 570.0, "boost_sec": 1.8,
+	"burn_sec": 8.0, "life_sec": 14.0, "nav_k": 4.0, "max_g": 28.0, "fuse_m": 4.0, "damage": 650.0, "radius_m": 7.0,
+	"push": 9.0, "roll_hz": 2.5, "noise_m": 220.0, "shake": 0.55,
+	"trail_step_m": 1.6, "trail_life_sec": 9.0, "trail_size": [0.35, 2.6],
+	"tone_hz": [760.0, 1180.0], "tone_db": -9.0, "beep_hz": 3.0, "beep_fast_hz": 9.0}
+## Учебная цель для ПЗРК (HeliTarget, стенд tools/osoka_range.tscn): процедурный вертолёт кружит над точкой стенда —
+## радиус radius_m, высота alt_m над землёй (± alt_wave_m), скорость speed_mps, крен в вираже bank_deg; несущий винт —
+## rotor_hz оборотов в секунду (лопастей blades), рулевой — tail_hz. Звук винтов — процедурный: слышен издалека
+## (unit_m — расстояние, на котором громкость полная; до max_m), громкость db. Подбили — горит и падает
+## (fall_spin — оборотов в секунду к земле), на земле — взрыв; через respawn_sec — новый заход.
+const HELI_TARGET := {"radius_m": 380.0, "alt_m": 120.0, "alt_wave_m": 18.0, "speed_mps": 42.0, "bank_deg": 12.0,
+	"rotor_hz": 4.3, "blades": 4, "tail_hz": 19.0, "unit_m": 70.0, "max_m": 4500.0, "db": 4.0, "fall_spin": 0.7,
+	"respawn_sec": 12.0}
 ## Брошенный свет после приземления: медленнее settle_speed м/с дольше settle_sec — замирает
 ## (не катается, свет не скачет); не позже max_roll_sec после первого касания.
 ## Наружный свет — одна система (RaidWeather): темно (не день) — горят уличные фонари и заградительные

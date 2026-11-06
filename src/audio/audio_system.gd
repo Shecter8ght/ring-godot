@@ -90,6 +90,10 @@ func resolve_event(hook: String, place: String = "") -> String:
 		return actual
 	return String(_bindings.get(actual, ""))
 
+## Назначена ли действию запись (иначе play() молчит): у «Осоки» без записи звучит процедурная заглушка.
+func has_sound(hook: String) -> bool:
+	return _preview.has(hook) or not (_samples.get(resolve_event(hook), []) as Array).is_empty()
+
 func _pick(hook: String, _pos: Vector3, place: String = "") -> AudioStream:
 	var preview: Array = _preview.get(hook, []) as Array
 	if not preview.is_empty():

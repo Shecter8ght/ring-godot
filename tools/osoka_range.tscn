@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/osoka_range.gd" id="1_osoka"]
+
+[node name="OsokaRange" type="Node3D"]
+script = ExtResource("1_osoka")

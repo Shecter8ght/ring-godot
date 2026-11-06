@@ -1,0 +1,250 @@
+{
+ "version": "v1 (2026-11-06): форма v07, игровая сетка v01, отделка этап 1 v1 + износ этап 2 v1",
+ "grip_source_m": [
+  1.2585999965667725,
+  0.0,
+  -0.17499999701976776
+ ],
+ "nodes": {
+  "Trigger_Launcher": 817,
+  "Lever_Launcher": 384,
+  "Button_Launcher": 160,
+  "Plunger_Launcher": 160,
+  "RearSight_Launcher": 500,
+  "SightLamp_Launcher": 156,
+  "FrontSight_Launcher": 405,
+  "DustCover_Launcher": 217,
+  "FrontCap_Tube": 1931,
+  "RearCap_Tube": 1469,
+  "Power_Tube": 800,
+  "MissileNose_Missile": 912,
+  "Body_Launcher": 16860,
+  "Body_Tube": 13697
+ },
+ "missile_nodes": {
+  "Fin0_Missile": 84,
+  "Fin1_Missile": 84,
+  "Fin2_Missile": 84,
+  "Fin3_Missile": 84,
+  "RudderTop_Missile": 260,
+  "RudderBottom_Missile": 260,
+  "Body_Missile": 8320
+ },
+ "size_game_m": [
+  0.1544,
+  0.3253,
+  1.7098
+ ],
+ "missile_size_game_m": [
+  0.073,
+  0.073,
+  1.602
+ ],
+ "tris_in_hands": 38468,
+ "missile_tris": 9176,
+ "pivots_game_m": {
+  "Trigger_Launcher": [
+   -0.00098,
+   0.06719,
+   0.03019
+  ],
+  "Lever_Launcher": [
+   0.02148,
+   0.09808,
+   0.18697
+  ],
+  "Button_Launcher": [
+   0.02684,
+   0.13635,
+   0.16013
+  ],
+  "Plunger_Launcher": [
+   0.01897,
+   0.05473,
+   -0.01925
+  ],
+  "RearSight_Launcher": [
+   0.04879,
+   0.20318,
+   -0.10781
+  ],
+  "SightLamp_Launcher": [
+   0.05022,
+   0.20859,
+   -0.08825
+  ],
+  "FrontSight_Launcher": [
+   0.04884,
+   0.20398,
+   0.16877
+  ],
+  "DustCover_Launcher": [
+   -0.00646,
+   0.25011,
+   0.21085
+  ],
+  "FrontCap_Tube": [
+   -0.01107,
+   0.21865,
+   0.3731
+  ],
+  "RearCap_Tube": [
+   0.0369,
+   0.03096,
+   -1.28578
+  ],
+  "Power_Tube": [
+   -0.00723,
+   0.10033,
+   0.24598
+  ],
+  "MissileNose_Missile": [
+   -0.00904,
+   0.21002,
+   0.30277
+  ],
+  "Body_Launcher": [
+   0.00861,
+   0.09339,
+   -0.01112
+  ],
+  "Body_Tube": [
+   0.01326,
+   0.07846,
+   -0.45541
+  ]
+ },
+ "missile_pivots_game_m": {
+  "Fin0_Missile": [
+   0.02101,
+   0.02253,
+   0.019
+  ],
+  "Fin1_Missile": [
+   -0.02253,
+   0.02101,
+   0.019
+  ],
+  "Fin2_Missile": [
+   -0.02101,
+   -0.02253,
+   0.019
+  ],
+  "Fin3_Missile": [
+   0.02253,
+   -0.02101,
+   0.019
+  ],
+  "RudderTop_Missile": [
+   0.0,
+   0.0338,
+   1.2818
+  ],
+  "RudderBottom_Missile": [
+   0.0,
+   -0.0338,
+   1.2818
+  ],
+  "Body_Missile": [
+   0.0,
+   0.0,
+   0.801
+  ]
+ },
+ "marks_game_m": {
+  "Muzzle": [
+   -0.01049,
+   0.21567,
+   0.35313
+  ],
+  "Breech": [
+   0.03649,
+   0.03359,
+   -1.27172
+  ],
+  "SightRear": [
+   0.05176,
+   0.22232,
+   -0.10762
+  ],
+  "SightFront": [
+   0.05176,
+   0.22232,
+   0.17087
+  ],
+  "MissileMount": [
+   0.03592,
+   0.03582,
+   -1.25185
+  ]
+ },
+ "tube_above_sight_deg": 6.6,
+ "missile_deploy": {
+  "Fin0_Missile": {
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "deg": -90.0
+  },
+  "Fin1_Missile": {
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "deg": -90.0
+  },
+  "Fin2_Missile": {
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "deg": -90.0
+  },
+  "Fin3_Missile": {
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "deg": -90.0
+  },
+  "RudderTop_Missile": {
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "deg": 90.0
+  },
+  "RudderBottom_Missile": {
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "deg": -90.0
+  }
+ },
+ "levers_game": {
+  "Lever_Launcher": {
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "deg": 18.0
+  },
+  "Trigger_Launcher": {
+   "axis": [
+    1,
+    0,
+    0
+   ],
+   "deg": 10.0
+  }
+ }
+}

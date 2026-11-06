@@ -211,6 +211,15 @@ static func apply_markers(meta_root: Node3D, model: Node3D, ads_z: float) -> voi
 	if rear:
 		meta_root.set_meta("sight_h", between(meta_root, rear).origin.y)
 		meta_root.set_meta("sight_h_iron", meta_root.get_meta("sight_h"))
+		# прицельные сбоку от оси (у «Осоки» диоптр левее трубы на 5 см): взгляд в прицеле — через них
+		var rear_x: float = between(meta_root, rear).origin.x
+		if absf(rear_x) > 0.005:
+			meta_root.set_meta("sight_x", rear_x)
+	# ПЗРК: задний торец трубы и сопло ракеты в ней — ось пуска (Player._osoka_launch_line)
+	for mark: Array in [["Breech", "breech"], ["MissileMount", "missile_mount"]]:
+		var node: Node3D = model.find_child(String(mark[0]), true, false) as Node3D
+		if node:
+			meta_root.set_meta(String(mark[1]), between(meta_root, node).origin)
 	meta_root.set_meta("ads_z", ads_z)
 	for node: Node in model.find_children("*MuzzleDevice*", "MeshInstance3D", true, false):
 		node.set_meta("part", "muzzle_device")

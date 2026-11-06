@@ -36,6 +36,13 @@ var _bolt_kick: float = 0.0
 var _bolt_held: bool = false
 ## Флажки переводчика и спуск статичной модели: [узел, ось, {режим: градусы} или градусы выжима, текущий угол].
 var _levers: Array = []
+## ПЗРК «Осока» в руках (_tick_osoka_view): модель, её узлы (рычаг, лампа, крышки, нос ракеты), свечение лампы,
+## доля хода рычага и метка цели на экране.
+var _osoka_vm: Node3D
+var _osoka_nodes: Dictionary = {}
+var _osoka_lamp_mat: StandardMaterial3D
+var _osoka_lever_k: float = 0.0
+var _osoka_hud: OsokaHud
 var _bolt_ammo: int = -1
 # продольно-скользящий затвор (models.<ключ>.action.kind = "bolt", Мосин): после выстрела — рукоять вверх, отвод,
 # подача, вниз; на перезарядке затвор стоит открытым. Правая кисть на это время — на шаре рукояти (метка BoltHand)
@@ -919,6 +926,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var cant := Basis(Vector3(0, 0, 1), -sroll)
 	var ads_pos := -(Basis(Vector3.UP, PI) * cant * Vector3(sx, sh, 0.0)) + Vector3(0.0, 0.0, -az)
 	var hip_pos := Balance.FPS_HIP_POSE
+	# своя поза «у бедра» у ствола (viewmodel.hip_pose): ПЗРК лежит на плече — и не вскинутый он у головы
+	var vm_spec: Dictionary = WeaponDb.weapon(wid).get("viewmodel", {}) as Dictionary
+	if vm_spec.has("hip_pose"):
+		hip_pos = WeaponGrips.vector(vm_spec.hip_pose as Array)
 	if pl.stance == Player.Stance.PRONE: hip_pos.y += float(Balance.WEAPON_CLEARANCE.prone_hip_lift)
 	# На ходу у бедра оружие покачивается в темп шагов (та же фаза, что у камеры, руки чуть позже
 	# головы); размах следует реальной скорости — при разгоне и остановке не включается рывком.
@@ -952,6 +963,11 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		vt.basis = Basis(Vector3.UP, kick_side) * Basis(Vector3.RIGHT, flip * 0.05) * Basis(Vector3.FORWARD, pl.recoil_h() * 1.5) * vt.basis
 		vt.origin += bob + Vector3(0.0, flip * 0.004, kick_back * 0.028)
 		_viewmodel.transform = vt
+	# в прицеле на ходу руки ходят ходуном относительно головы (CameraMotion.weapon_bob_ads)
+	if k > 0.0:
+		var hk: float = k * float(Balance.CAMERA_MOTION_INTENSITY) * Settings.camera_motion
+		var wobble := Transform3D(Basis(Vector3(0, 0, 1), _motion.weapon_roll_ads * hk), _motion.weapon_bob_ads * hk)
+		_viewmodel.transform = wobble * _viewmodel.transform
 	_carry_pose(pl, delta)
 	var pose_profiles: Dictionary = weapon_pose_profiles if weapon_pose_preview else WeaponPoseProfiles.active()
 	_viewmodel.transform = WeaponPoseProfiles.apply(_viewmodel.transform, pose_profiles, wid, k, maxf(_carry_k, 0.0))
@@ -965,6 +981,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 			_viewmodel_rig.set_ammo_state(pl.ammo)
 	weapon_clearance.refresh_action(_viewmodel, _viewmodel_rig)
 	_tick_action(pl, delta)
+	_tick_osoka_view(pl, delta)
 	if wid != "":
 		# Лёжа отводим ствол вбок: вертикальная поза упирала приклад в пол.
 		weapon_clearance.sideways = pl.stance == Player.Stance.PRONE
@@ -1344,6 +1361,71 @@ func _tick_action(pl: Player, delta: float) -> void:
 		var brest: Transform3D = _bolt.get_meta("rest")
 		_bolt.transform = Transform3D(brest.basis * Basis(Vector3.BACK, deg_to_rad(float(act.get("unlock_deg", 0.0))) * turn),
 			brest.origin - Vector3(0.0, 0.0, back))
+
+
+## ПЗРК «Осока» в руках (models.osoka.manpads): передняя крышка снята, задняя и нос ракеты в раструбе — пока в трубе
+## ракета (после пуска крышку вышибло, труба пустая); рычаг на «НАКОЛ», пока головка включена; колпачок индикатора
+## на целике светится при захвате и мигает при сопровождении; метка цели на экране — OsokaHud.
+func _tick_osoka_view(pl: Player, delta: float) -> void:
+	if _osoka_hud == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 11
+		add_child(layer)
+		_osoka_hud = OsokaHud.new()
+		layer.add_child(_osoka_hud)
+	_osoka_hud.player = pl
+	_osoka_hud.cam = _ads_cam
+	var on: bool = pl.is_manpads() and _viewmodel != null and not _viewmodel is ViewmodelClips
+	if not on:
+		return
+	var mp: Dictionary = WeaponDb.model(String(WeaponDb.weapon(pl.weapon_id).get("model", ""))).get("manpads", {}) as Dictionary
+	if _osoka_vm != _viewmodel:
+		_osoka_vm = _viewmodel
+		_osoka_nodes.clear()
+		for key: String in ["lever", "lamp"]:
+			var n: Node3D = _viewmodel.find_child(String(mp.get(key, "")), true, false) as Node3D if String(mp.get(key, "")) != "" else null
+			if n:
+				if not n.has_meta("rest"):
+					n.set_meta("rest", n.transform)
+				_osoka_nodes[key] = n
+		for key2: String in ["hidden", "loaded", "hide_ads"]:
+			var list: Array = []
+			for part: Variant in mp.get(key2, []):
+				var p: Node3D = _viewmodel.find_child(String(part), true, false) as Node3D
+				if p:
+					list.append(p)
+			_osoka_nodes[key2] = list
+		_osoka_lamp_mat = null
+		var lamp: MeshInstance3D = _osoka_nodes.get("lamp") as MeshInstance3D
+		if lamp and lamp.mesh and lamp.mesh.get_surface_count() > 0:
+			var base: BaseMaterial3D = lamp.get_active_material(0) as BaseMaterial3D
+			_osoka_lamp_mat = (base.duplicate() as StandardMaterial3D) if base is StandardMaterial3D else StandardMaterial3D.new()
+			_osoka_lamp_mat.emission_enabled = true
+			_osoka_lamp_mat.emission = Color(0.55, 1.0, 0.35)
+			_osoka_lamp_mat.emission_energy_multiplier = 0.0
+			lamp.material_override = _osoka_lamp_mat
+	for p2: Node3D in _osoka_nodes.get("hidden", []):
+		p2.visible = false
+	for p3: Node3D in _osoka_nodes.get("loaded", []):
+		p3.visible = pl.ammo > 0
+	# вскинул к глазу: целик в паре сантиметров от глаза — размытая тень, не коробка во весь вид; видно кольцо мушки
+	for p4: Node3D in _osoka_nodes.get("hide_ads", []):
+		p4.visible = smoothstep(0.0, 1.0, _aim_pose) < 0.6
+	var seeker: OsokaSeeker = pl.osoka
+	var lever: Node3D = _osoka_nodes.get("lever") as Node3D
+	if lever:
+		_osoka_lever_k = move_toward(_osoka_lever_k, 1.0 if seeker.powered else 0.0, delta * 5.0)
+		var lrest: Transform3D = lever.get_meta("rest")
+		var lspec: Dictionary = mp.get("lever_turn", {"axis": [1, 0, 0], "deg": 18.0}) as Dictionary
+		lever.transform = Transform3D(Basis(WeaponGrips.vector(lspec.axis as Array).normalized(),
+			deg_to_rad(float(lspec.deg) * _osoka_lever_k)) * lrest.basis, lrest.origin)
+	if _osoka_lamp_mat:
+		var glow: float = 0.0
+		if seeker.state == OsokaSeeker.State.LOCK:
+			glow = 3.0
+		elif seeker.state == OsokaSeeker.State.TRACK:
+			glow = 1.6 if fmod(Time.get_ticks_msec() / 1000.0 * lerpf(3.0, 9.0, seeker.progress), 1.0) < 0.5 else 0.0
+		_osoka_lamp_mat.emission_energy_multiplier = glow
 
 
 ## Флажки переводчика (action.levers: {узел: {axis, deg: {режим: градусы}}}) и спуск (action.trigger: {node, axis,

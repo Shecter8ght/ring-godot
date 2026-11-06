@@ -39,6 +39,9 @@
   },
   "signal_26": {
    "name": "Сигнальный патрон"
+  },
+  "zr36": {
+   "name": "Ракета ЗР-36 (ПЗРК)"
   }
  },
  "models": {
@@ -647,6 +650,63 @@
      0.07512,
      0.3975
     ]
+   }
+  },
+  "osoka": {
+   "anim": "rifle",
+   "action": {
+    "carrier": "Body_Launcher",
+    "bolt": "Body_Launcher",
+    "travel": 0.0,
+    "bolt_lag": 0.0,
+    "unlock": [
+     0.0,
+     0.0
+    ],
+    "unlock_deg": 0.0,
+    "trigger": {
+     "node": "Trigger_Launcher",
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": 10.0
+    }
+   },
+   "sockets": {
+    "muzzle": {
+     "pos": [
+      -0.01,
+      0.216,
+      0.353
+     ],
+     "bore_r": 0.036
+    }
+   },
+   "manpads": {
+    "hidden": [
+     "FrontCap_Tube"
+    ],
+    "loaded": [
+     "RearCap_Tube",
+     "MissileNose_Missile"
+    ],
+    "hide_ads": [
+     "RearSight_Launcher",
+     "SightLamp_Launcher"
+    ],
+    "lever": "Lever_Launcher",
+    "lever_turn": {
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "deg": 18.0
+    },
+    "lamp": "SightLamp_Launcher",
+    "missile": "res://assets/models/weapons/osoka/osoka_missile.gltf"
    }
   },
   "smg03": {
@@ -2438,6 +2498,67 @@
     }
    },
    "flavor": "Пять патронов, один выдох и долгий ход затвора: этой винтовке не нужно спешить."
+  },
+  "wpn_mp_01": {
+   "name": "ПЗРК «Осока»",
+   "cat": "weapon",
+   "size": [
+    6,
+    2
+   ],
+   "value": 1200000,
+   "stack": 1,
+   "weight": 17.3,
+   "tier": 5,
+   "rarity": "rare",
+   "tags": [],
+   "code": "ТП-36 / ПМ-52",
+   "short": "ОСОКА",
+   "desc": "Переносной зенитный ракетный комплекс: труба ТП-36 с ракетой ЗР-36, пусковой механизм ПМ-52 с источником питания. Тепловая головка самонаведения: вскинь к прицелу (ПКМ) — рычаг на «НАКОЛ», головка готовится; держи цель в кольце мушки — писк учащается, через пару секунд захват: ровный писк, лампа на целике, метка зеленеет. ЛКМ — пуск, дальше ракета летит на цель сама. Без захвата пуска нет. Цели — вертолёты и горящие осветительные ракеты. R — новая труба с ракетой.",
+   "weapon": {
+    "slot": "primary",
+    "class": "SPECIAL",
+    "caliber": "zr36",
+    "model": "osoka",
+    "scale": 1.0,
+    "length": 1.71,
+    "internal_mag": 1,
+    "manpads": true,
+    "stats": {
+     "spread": 0.0,
+     "ads_spread": 0.0,
+     "ads_fov": 66,
+     "kick": 0.006,
+     "kick_h": 0.002,
+     "kick_bias": 0.0,
+     "recover": 0.6,
+     "shake": 0.3,
+     "ergo": 22,
+     "rpm": 20,
+     "auto": false,
+     "reload": 9.0,
+     "range": 5500,
+     "noise": 140,
+     "reliability": 1.0,
+     "wear": 0.0
+    },
+    "mounts": {},
+    "sound": "",
+    "reload_sound": "reload_rifle",
+    "cycle_sound": "",
+    "asset": "res://assets/models/weapons/osoka/osoka.gltf",
+    "asset_kind": "static",
+    "viewmodel": {
+     "ads_z": 0.188,
+     "hip_pose": [
+      0.12,
+      -0.27,
+      -0.2
+     ]
+    },
+    "carry": false
+   },
+   "flavor": "Тяжёлая, неудобная и честная: пищит — значит видит."
   }
  },
  "ammo": {
@@ -3459,6 +3580,32 @@
     "velocity": 45
    },
    "raid_only": true
+  },
+  "msl_zr36": {
+   "name": "Ракета ЗР-36 в трубе",
+   "cat": "ammo",
+   "cells": 6,
+   "size": [
+    6,
+    1
+   ],
+   "value": 300000,
+   "stack": 1,
+   "weight": 12.5,
+   "tier": 5,
+   "rarity": "rare",
+   "tags": [],
+   "short": "ЗР-36",
+   "desc": "Зенитная ракета с тепловой головкой самонаведения в транспортно-пусковой трубе ТП-36 — выстрел к ПЗРК «Осока». R с комплексом в руках — пусковой механизм ставят на новую трубу.",
+   "ammo": {
+    "caliber": "zr36",
+    "effect": "missile",
+    "damage": 0,
+    "pen": 0,
+    "armor_dmg": 0,
+    "pellets": 1,
+    "velocity": 28
+   }
   }
  },
  "magazines": {

@@ -210,6 +210,18 @@
   Сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
 <!-- SMG03_END -->
 
+## ПЗРК «Осока» (по образцу 9К333 «Верба»)
+
+- `assets/models/weapons/osoka/` (комплекс `osoka.gltf`, ракета в полёте `osoka_missile.gltf`, атласы
+  `osoka_<набор>_100_*`) — собственная модель (Blender, форма v07, игровая сетка v01), отделка в Substance Painter
+  (этап 1 v1, износ этап 2 v1); игровые файлы — `tools/osoka/game_export.py`; исходники —
+  `E:/Models Blender/WEAPONS/Верба — модель/`, `_asset_src/osoka/`. Названия и маркировка вымышленные (ТП-36, ЗР-36, ПМ-52).
+- Рисунок износа в запечённых картах — фото-маски CC0 1.0 ambientCG (https://ambientcg.com, лицензия
+  https://docs.ambientcg.com/license/) — Smear004, Smear006, Fingerprints003, Fingerprints005.
+  Сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
+- Учебный вертолёт стенда (`src/world/heli_target.gd`) — примитивы Godot; звуки винтов, пуска, двигателя ракеты и писк
+  головки — процедурные (`src/combat/proc_sound.gd`), записей нет.
+
 <!-- VSS_OPTICS_START -->
 ## Отдельная оптика ВСС
 

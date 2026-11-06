@@ -20,6 +20,8 @@ var _first_person_on: bool = false
 
 var stance: Stance = Stance.STAND
 var aiming: bool = false
+## Головка самонаведения ПЗРК «Осока» (только у своего игрока; OsokaSeeker): захват цели, писк, метка.
+var osoka: OsokaSeeker = OsokaSeeker.new()
 ## Прицел от первого лица включён — ставит CameraRig.
 var ads: bool = false
 ## Наклон (Q/E) от первого лица: -1 — влево, 1 — вправо; синхронизируется (AI видит высунувшегося).
@@ -1608,6 +1610,7 @@ func _combat(delta: float) -> void:
 		return
 	_tick_nvg(delta)
 	_tick_breath(delta)
+	_tick_osoka(delta)
 	if weapon_id == "":
 		return
 	if Input.is_action_just_pressed("flashlight"):
@@ -2514,6 +2517,9 @@ func _fire(spec: Dictionary) -> void:
 	if is_signal_launcher():
 		_fire_signal(spec)
 		return
+	if is_manpads():
+		_fire_osoka(spec)
+		return
 	if bool(spec.get("broken", false)):
 		fire_timer = float(spec.interval)
 		_say("Оружие сломано — нужен ремонт на верстаке")
@@ -2624,6 +2630,110 @@ func _fire(spec: Dictionary) -> void:
 	# остальным — то же (пули и урон уже посчитаны здесь и у хоста)
 	if Net.is_networked():
 		Net.broadcast_scene(self, &"_rpc_shot_fx", [muzzle, String(spec.sound), float(spec.db), float(spec.flash), String(spec.cycle_sound), _weapon_sound(spec, "mechanism"), ammo], false)
+
+
+## ПЗРК в руках («manpads» у ствола в data/weapons.json — «Осока»).
+func is_manpads() -> bool:
+	return weapon_id != "" and bool(WeaponDb.weapon(weapon_id).get("manpads", false))
+
+
+## Головка «Осоки»: работает, пока комплекс вскинут к прицелу и в трубе ракета (OsokaSeeker).
+func _tick_osoka(delta: float) -> void:
+	if not is_manpads() or not is_local():
+		if osoka.powered or osoka.state != OsokaSeeker.State.OFF:
+			osoka.reset(false)
+		return
+	var on: bool = aiming and aim_progress() > 0.8 and ammo > 0 and reload_timer <= 0.0 and not is_downed() \
+		and weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold)
+	osoka.tick(self, delta, on)
+
+
+## Пуск «Осоки»: только с захватом (Balance.OSOKA.need_lock). Труба одноразовая на выстрел — в ней одна ракета
+## (internal_mag 1), R ставит пусковой механизм на новую трубу из рюкзака. Ракета летит у всех peer одинаково,
+## урон считает стрелок (OsokaMissile).
+func _fire_osoka(spec: Dictionary) -> void:
+	fire_timer = 0.4
+	if bool(spec.get("broken", false)):
+		_say("Комплекс неисправен — нужен ремонт на верстаке")
+		return
+	# под крышей не пускают (реактивная струя назад; тир убежища — тоже под крышей); стойка тира на открытой карте
+	# (стенды tools/dam_play, tools/osoka_range) — можно
+	var roof := PhysicsRayQueryParameters3D.create(eye_position(), eye_position() + Vector3.UP * 30.0,
+		Hitscan.LAYER_WORLD | Hitscan.LAYER_ROOF, [get_rid()])
+	if not get_world_3d().direct_space_state.intersect_ray(roof).is_empty():
+		_say("Под крышей ракеты не пускают — выйди на открытое место")
+		return
+	if weapon_obstruction > float(Balance.WEAPON_CLEARANCE.fire_threshold):
+		return
+	var locked: bool = osoka.locked()
+	if bool(Balance.OSOKA.need_lock) and not locked:
+		if not aiming:
+			_say("Вскинь комплекс к прицелу (ПКМ) и поймай цель в кольцо мушки")
+		elif osoka.state == OsokaSeeker.State.WARMUP:
+			_say("Головка ещё не готова — подожди писка")
+		else:
+			_say("Нет захвата — держи цель в кольце мушки, пока писк не станет ровным")
+		return
+	var st: Dictionary = _ws[weapon_slot]
+	_take_round(st)
+	ammo = _state_rounds(weapon_slot)
+	weapon_rounds = ammo
+	_weapon_action("shot", true, 0.0, ammo, false)
+	var worn_entry: Dictionary = entry_of(weapon_slot)
+	WeaponCondition.wear_shots(worn_entry, 1)
+	st.dur = WeaponCondition.percent(worn_entry)
+	st["shots"] = int(st.get("shots", 0)) + 1
+	_ws_dirty = true
+	_ws_sync_t = 0.6
+	fire_timer = float(spec.interval)
+	last_shot_ms = Time.get_ticks_msec()
+	var line: Array = _osoka_launch_line()
+	var target: Node3D = osoka.target if locked else null
+	var path: String = String(get_tree().current_scene.get_path_to(target)) if target else ""
+	osoka.reset(true)
+	_launch_osoka(line[0], line[1], target, true)
+	if Net.is_networked():
+		Net.broadcast_scene(self, &"_rpc_osoka_launch", [line[0], line[1], path], false)
+	if Raid.current and is_local():
+		Raid.current.analytics.on_shot(false)
+	_apply_recoil(spec, stance != Stance.STAND, _camera_rig as CameraRig)
+	if _camera_rig is CameraRig:
+		(_camera_rig as CameraRig).add_shake(float(Balance.OSOKA.shake))
+
+
+## Откуда и куда уходит ракета: сопло ракеты в трубе и ось трубы (метки MissileMount, Breech → Muzzle) — у модели
+## в руках, иначе у модели на теле; нет меток — от глаза по взгляду.
+func _osoka_launch_line() -> Array:
+	var model: Node3D = null
+	if ads and _camera_rig is CameraRig:
+		model = (_camera_rig as CameraRig)._vm_frame()
+	elif _weapon_model:
+		model = _weapon_model
+	if model and model.has_meta("missile_mount") and model.has_meta("breech"):
+		var a: Vector3 = model.to_global(model.get_meta("breech"))
+		var b: Vector3 = model.to_global(model.get_meta("muzzle", Vector3.ZERO))
+		return [model.to_global(model.get_meta("missile_mount")), (b - a).normalized()]
+	return [eye_position() + look_dir() * 0.3, look_dir()]
+
+
+func _launch_osoka(from: Vector3, dir: Vector3, target: Node3D, own: bool) -> void:
+	var on_hit: Callable = _osoka_hit if own and is_local() else Callable()
+	OsokaMissile.launch(get_tree().current_scene, from, dir, target, get_rid(), own, -1 if own else 0, on_hit)
+
+
+## Ракета напарника: та же точка, направление и цель (путь узла цели в сцене; не нашлась — летит без неё).
+@rpc("authority", "call_remote", "reliable")
+func _rpc_osoka_launch(from: Vector3, dir: Vector3, target_path: String) -> void:
+	var target: Node3D = get_tree().current_scene.get_node_or_null(NodePath(target_path)) as Node3D if target_path != "" else null
+	weapon_rounds = 0
+	_weapon_action("shot", true, 0.0, 0, false)
+	_launch_osoka(from, dir, target, false)
+
+
+func _osoka_hit(_target: Node3D) -> void:
+	if _camera_rig is CameraRig:
+		(_camera_rig as CameraRig).show_hitmarker(true)
+	_say("Попадание!")
 
 
 func is_signal_launcher() -> bool:

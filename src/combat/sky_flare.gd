@@ -24,6 +24,8 @@ var _core_mat: StandardMaterial3D
 var _halo_mat: StandardMaterial3D
 var _signal: bool = false
 var _shot_sound: bool = true
+## Сбита ракетой ПЗРК: секунд с попадания (меньше нуля — горит).
+var _kill_t: float = -1.0
 
 
 ## Запуск из точки from по направлению dir (вверх, с небольшим уклоном по взгляду).
@@ -43,6 +45,9 @@ func _ready() -> void:
 	var cfg: Dictionary = Balance.SKY_FLARE
 	add_to_group("flares")
 	add_to_group("supply_signals" if _signal else "sky_flares")
+	# горящая осветительная звезда — тепловая цель для ГСН «Осоки» (OsokaSeeker), её можно сбить
+	if not _signal:
+		add_to_group("heat_targets")
 	global_position = _from
 	# куда долетит: до вершины или до потолка над головой; где под вершиной земля
 	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
@@ -123,11 +128,40 @@ func _process(delta: float) -> void:
 	global_position = position_at(_t)
 	# разгорается на подъёме, горит неровно, к концу гаснет
 	var burn: float = smoothstep(0.0, float(cfg.rise_sec) * 0.6, _t) * clampf((air - _t) / float(cfg.fade_sec), 0.0, 1.0)
+	# сбита ракетой ПЗРК — гаснет за полсекунды
+	if _kill_t >= 0.0:
+		_kill_t += delta
+		burn *= clampf(1.0 - _kill_t / 0.5, 0.0, 1.0)
+		if _kill_t >= 0.5:
+			queue_free()
+			return
 	var flicker: float = 1.0 + 0.07 * sin(_t * 23.0 + _seed) + 0.05 * sin(_t * 41.0 + _seed * 2.0)
 	_light.light_energy = 0.0 if _signal else float(cfg.energy) * burn * flicker
 	_core_mat.albedo_color.a = burn
 	_halo_mat.albedo_color.a = 0.55 * burn * flicker
 	_sparks.emitting = burn > 0.2
+
+
+## Тепловая цель для ПЗРК (группа "heat_targets"): звезда, её скорость, горит ли ещё.
+func heat_point() -> Vector3:
+	return global_position
+
+
+func heat_velocity() -> Vector3:
+	return (position_at(_t + 0.1) - position_at(_t)) / 0.1
+
+
+func heat_alive() -> bool:
+	return time_left() > float(Balance.SKY_FLARE.fade_sec)
+
+
+## Ракета ПЗРК попала: звезда разлетается искрами и гаснет.
+func missile_hit(_pos: Vector3) -> bool:
+	if not heat_alive():
+		return false
+	_kill_t = 0.0
+	remove_from_group("heat_targets")
+	return true
 
 
 ## Где ракета через t секунд после выстрела.

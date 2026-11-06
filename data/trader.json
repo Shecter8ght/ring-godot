@@ -30,7 +30,7 @@
    "n": 5,
    "step": 40,
    "name": "Тяжёлое и снайперское",
-   "what": "MR762, MCX Spear, AWM, ПКМ. Оптика 8× и 12×, тормоза и глушители крупных калибров."
+   "what": "MR762, MCX Spear, AWM, ПКМ, ПЗРК «Осока» и ракеты к нему. Оптика 8× и 12×, тормоза и глушители крупных калибров."
   }
  ],
  "stock": [
@@ -155,6 +155,7 @@
   "wpn_ar_05",
   "wpn_dmr_01",
   "wpn_lmg_01",
+  "wpn_mp_01",
   "wpn_sr_01",
   "ammo_338_ap",
   "ammo_338_match",
@@ -165,6 +166,7 @@
   "ammo_76251_match",
   "ammo_76251_std",
   "ammo_939_sp6",
+  "msl_zr36",
   "mag_338_awm5",
   "mag_45_vector30",
   "mag_68_spear20",
@@ -303,6 +305,7 @@
   "wpn_ar_05": 5,
   "wpn_dmr_01": 5,
   "wpn_lmg_01": 5,
+  "wpn_mp_01": 5,
   "wpn_sr_01": 5,
   "ammo_338_ap": 5,
   "ammo_338_match": 5,
@@ -313,6 +316,7 @@
   "ammo_76251_match": 5,
   "ammo_76251_std": 5,
   "ammo_939_sp6": 5,
+  "msl_zr36": 5,
   "mag_338_awm5": 5,
   "mag_45_vector30": 5,
   "mag_68_spear20": 5,
