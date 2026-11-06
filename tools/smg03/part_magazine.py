@@ -1,26 +1,49 @@
-# ПП по мотивам KRISS Vector: магазины .45 ACP типа Glock 21 — штатный на 13 (в игре mag_45_vector13) и на 30 с
-# удлинителем (mag_45_vector30, как на снимках KRISS и владельца). Корпус — в осях магазина (наклон 21° низом назад,
-# part_receiver.mag_frame): сечение — прямоугольник 25.5 × 37.5 со скруглёнными углами (оценка, см. asset-state.md),
-# сверху губки, снизу донышко; сзади — контрольные окна с числами (рельефом). Патроны в два ряда в шахматку,
-# подаватель. 30-зарядный — в отдельной коллекции Magazine_30 (выключена), ставится на то же место.
+# ПП по мотивам KRISS Vector: магазины .45 ACP — штатный Glock 21 на 13 (в игре mag_45_vector13) и на 30 с удлинителем
+# типа KRISS MagEx2 (mag_45_vector30). v2 (владелец 2026-11-06: «магазины сделай как у настоящего вектора, а то это
+# поделка какая-то»), по снимкам: Glock 21 Gen4/Gen5 сбоку (refs/web/glock21_*), комплект MagEx2 .45 и магазин на 30 в
+# оружии (refs/web/kriss_usa, магазин снят — refs/05).
+#   Glock 21: корпус — параллелограмм: ось наклонена (21°, part_receiver.mag_frame), а верх губок и донышко
+#   горизонтальны, как у пистолета; вверху корпус сужается к губкам (подача в один ряд), губки — длинные сзади, спереди
+#   ступенька под носик пули; окна защёлки на обоих бортах у передней грани и спереди; контрольные окна сзади в два ряда;
+#   донышко выступает по контуру, спереди «носик».
+#   На 30: тот же корпус Glock сверху, ниже шахты — рукав удлинителя (толще корпуса, верх по низу шахты горизонтален),
+#   по передней грани поперечное рифление с заходом на борта, сзади окна 16–30, на бортах у дна — рамка с прорезью
+#   защёлки, снизу донышко поперёк оси.
+#   Патроны лежат горизонтально (параллельно стволу), стопка идёт вдоль наклонённой оси: верхний — посередине губок,
+#   ниже — в два ряда шахматкой. Числа у окон и надписи — рисунком на текстурах, не геометрией.
 import math
 import bpy
 import bmesh
 from mathutils import Matrix, Vector
-from lib import (material, MM, MAG_W, MAG_D, BORE_R, lathe, prism_xz, prism_yz, boolean, rounded_prism, fillet, finish_small,
-                 set_origin, v)
-from part_receiver import mag_frame, MAG_CENTER, rounded_rect_xz
+from lib import material, MM, MAG_W, MAG_D, MAG_ANGLE, lathe, boolean, fillet, finish_small, weighted, apply_all
+from part_receiver import mag_frame, MAG_CENTER
 
-U_TOP = 98.4                   # верх губок вдоль оси от середины горловины: задний угол верха — Z −11.5 (под затвором)
-LEN13 = 128.0                  # длина магазина на 13 с донышком (оценка)
-LEN30 = 243.0                  # на 30 с удлинителем (снимок KRISS: низ Z −244.6)
+A = math.radians(MAG_ANGLE)
+CX, CZ = MAG_CENTER[0], MAG_CENTER[2]
+D, W = MAG_D / 2, MAG_W / 2      # полуглубина и полуширина сечения поперёк оси
 WALL = 1.7
-CASE_R = 6.0                   # .45 ACP: гильза Ø12.0, длина 22.8, патрон 32.4
+Z_TOP = -11.5                   # верх губок сзади (под затвором; прежний задний угол верха — Z −11.4)
+STEP = 5.0                      # спереди губки ниже на столько (под носик пули)
+STEP_X = 3.0                    # где начинается ступенька, локальный x (от середины вперёд)
+Z_BOT13 = -131.5                # низ корпуса Glock на 13 (донышко ниже)
+PLATE_H = 5.5
+Z_SLEEVE = -111.2               # верх рукава удлинителя спереди — сразу под низом шахты (Z −110 у передней кромки)
+SLEEVE_SLOPE = 0.0925           # к заду верх рукава ниже — по низу корпуса за шахтой (Z −114.6 у X −86)
+U_BOT30 = -139.6                # низ рукава вдоль оси (низ донышка — u −143.6, Z −244: снимок KRISS)
+BASE_H = 4.0
+SLV_T = 2.2                     # рукав толще корпуса на столько с каждой стороны
+CASE_R = 6.0                    # .45 ACP: гильза Ø12.0, длина 22.8, патрон 32.4
 CASE_LEN = 22.8
 CART_LEN = 32.4
-COL_OFF = 4.7                 # смещение рядов от середины
-PITCH = 6.78                   # шаг по оси между соседними патронами (шахматка)
+COL_OFF = 5.0                   # смещение рядов от середины (внутри 22.1 мм: ряды вплотную к стенкам)
+PITCH_U = 7.15                  # шаг стопки вдоль оси между соседними патронами (разные ряды, касаются)
+TOP_DROP = 5.6                  # середина верхнего патрона ниже верха губок: в горловине 10 мм он ниже губок
+# верх стопки: верхний — посередине, два следующих — ближе к середине (корпус к губкам сужен), дальше шахматка
+TOP_STEPS = (12.3, 10.1, 8.8)
+TOP_Y = (0.0, 3.6, -3.8)
 
+
+# ---------- оси магазина ----------
 
 def frame_matrix():
     up, fwd = mag_frame()
@@ -33,72 +56,268 @@ def to_frame(o):
     o.data.transform(frame_matrix())
 
 
-def section(d_half, w_half, rf, rr):
-    """Сечение корпуса (вид сверху вдоль оси): x — вперёд, y — поперёк; передние углы rf, задние rr."""
-    return fillet([(-d_half, -w_half), (d_half, -w_half), (d_half, w_half), (-d_half, w_half)], [rr, rf, rf, rr], 6)
+def u_at(z, x):
+    """Где горизонтальная плоскость Z = z (мм оружия) пересекает ось магазина при локальном x: u вдоль оси."""
+    return (z - CZ + x * math.sin(A)) / math.cos(A)
 
 
-def shell(name, length, C, mat="Polymer"):
-    """Корпус: призма по сечению вдоль оси от низа до верха, внутри — полость, сверху губки (вырез посередине)."""
-    d, w = MAG_D / 2, MAG_W / 2
-    sec = section(d, w, 5.5, 3.2)
-    u0, u1 = U_TOP - length + 5.0, U_TOP
+def world(x, y, u):
+    """Точка в осях магазина (мм) → мм оружия."""
+    return Vector((CX + x * math.cos(A) + u * math.sin(A), y, CZ - x * math.sin(A) + u * math.cos(A)))
+
+
+def section(d_half, w_half, rf, rr, seg=6):
+    """Сечение поперёк оси (вид вдоль оси): x — вперёд, y — поперёк; передние углы rf, задние rr."""
+    return fillet([(-d_half, -w_half), (d_half, -w_half), (d_half, w_half), (-d_half, w_half)], [rr, rf, rf, rr], seg)
+
+
+# ---------- сетки ----------
+
+def _solid(name, rings, C, mat=None):
+    """Замкнутое тело из колец точек (мм) одинаковой длины: боковые грани и две крышки."""
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
-    a = [bm.verts.new(Vector((x * MM, y * MM, u0 * MM))) for x, y in sec]
-    b = [bm.verts.new(Vector((x * MM, y * MM, u1 * MM))) for x, y in sec]
-    bm.faces.new(list(reversed(a))); bm.faces.new(b)
-    for i in range(len(sec)):
-        j = (i + 1) % len(sec)
-        bm.faces.new((a[i], a[j], b[j], b[i]))
+    vr = [[bm.verts.new(Vector(p) * MM) for p in ring] for ring in rings]
+    n = len(rings[0])
+    for r0, r1 in zip(vr, vr[1:]):
+        for i in range(n):
+            j = (i + 1) % n
+            bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+    caps = [bm.faces.new(list(reversed(vr[0]))), bm.faces.new(vr[-1])]
+    # крышки — сразу на треугольники ушами: вогнутый многоугольник точное булево разбивает неверно
+    bmesh.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="EAR_CLIP")
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me); bm.free()
+    bm.to_mesh(me)
+    bm.free()
     o = bpy.data.objects.new(name, me)
     C.objects.link(o)
-    o.data.materials.append(material(mat))
-    # полость
-    inner = section(d - WALL, w - WALL, 4.0, 1.8)
-    me2 = bpy.data.meshes.new("_in")
+    if mat:
+        o.data.materials.append(material(mat))
+    return o
+
+
+def _multi(name, solids, C):
+    """Один резак из нескольких непересекающихся тел (списки колец) — одно булево вместо десятков."""
+    me = bpy.data.meshes.new(name)
     bm = bmesh.new()
-    a = [bm.verts.new(Vector((x * MM, y * MM, (u0 + 3.0) * MM))) for x, y in inner]
-    b = [bm.verts.new(Vector((x * MM, y * MM, (u1 + 2.0) * MM))) for x, y in inner]
-    bm.faces.new(list(reversed(a))); bm.faces.new(b)
-    for i in range(len(inner)):
-        j = (i + 1) % len(inner)
-        bm.faces.new((a[i], a[j], b[j], b[i]))
+    for rings in solids:
+        vr = [[bm.verts.new(Vector(p) * MM) for p in ring] for ring in rings]
+        n = len(rings[0])
+        for r0, r1 in zip(vr, vr[1:]):
+            for i in range(n):
+                j = (i + 1) % n
+                bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
+        caps = [bm.faces.new(list(reversed(vr[0]))), bm.faces.new(vr[-1])]
+        bmesh.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="EAR_CLIP")
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me2); bm.free()
-    cut = bpy.data.objects.new("_in", me2)
-    C.objects.link(cut)
-    boolean(o, cut)
-    # губки: вырез по оси сверху (ширина 9 мм) — сзади до 3/4 длины верхнего патрона, загибы — продолжение стенок
-    lip = bpy.data.objects.new("_lip", bpy.data.meshes.new("_lip"))
-    C.objects.link(lip)
-    bm = bmesh.new()
-    bmesh.ops.create_cube(bm, size=1.0)
-    for vv in bm.verts:
-        vv.co.x = (-(d - 9.0) if vv.co.x < 0 else d + 2) * MM
-        vv.co.y = (-4.6 if vv.co.y < 0 else 4.6) * MM
-        vv.co.z = ((u1 - 4.0) if vv.co.z < 0 else u1 + 2) * MM
-    bm.to_mesh(lip.data); bm.free()
-    boolean(o, lip)
-    return o, u0, u1
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    C.objects.link(o)
+    return o
 
 
-def witness(o, u1, counts, C):
-    """Контрольные окна на задней стенке с числами патронов (окна — круглые, Ø3.2)."""
-    for n in counts:
-        uc = u1 - CASE_R - 0.6 - (n - 1) * PITCH          # на уровне n-го патрона сверху
-        me = bpy.data.meshes.new("_w")
-        h = bpy.data.objects.new("_w", me)
-        C.objects.link(h)
-        bm = bmesh.new()
-        bmesh.ops.create_cone(bm, cap_ends=True, segments=24, radius1=1.6 * MM, radius2=1.6 * MM, depth=8 * MM)
-        bmesh.ops.rotate(bm, verts=bm.verts, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "Y"))
-        bmesh.ops.translate(bm, verts=bm.verts, vec=Vector((-MAG_D / 2 * MM, 0, uc * MM)))
-        bm.to_mesh(me); bm.free()
-        boolean(o, h)
+def loft_local(name, sections, C, mat=None):
+    """Тело вдоль оси магазина: [(u, сечение [(x, y)…])…] в осях магазина → в оси оружия."""
+    o = _solid(name, [[(x, y, u) for x, y in sec] for u, sec in sections], C, mat)
+    to_frame(o)
+    return o
 
+
+def prism_local_xu(pts, y0, y1):
+    """Кольца призмы: контур в плоскости (x, u) магазина, выдавленный по y."""
+    return [[(x, y0, u) for x, u in pts], [(x, y1, u) for x, u in pts]]
+
+
+def prism_local_xy(pts, u0, u1):
+    """Кольца призмы: контур поперёк оси (x, y), выдавленный вдоль оси u0…u1."""
+    return [[(x, y, u0) for x, y in pts], [(x, y, u1) for x, y in pts]]
+
+
+def gun_box(name, x0, x1, y0, y1, z0, z1, C):
+    """Брусок в осях оружия (мм)."""
+    pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    return _solid(name, [[(x, y, z0) for x, y in pts], [(x, y, z1) for x, y in pts]], C)
+
+
+def gun_prism_xz(name, pts, y0, y1, C):
+    """Контур в плоскости XZ оружия (мм), выдавленный по Y."""
+    return _solid(name, [[(x, y0, z) for x, z in pts], [(x, y1, z) for x, z in pts]], C)
+
+
+def local_cut(o, name, solids, C, **kw):
+    c = _multi(name, solids, C)
+    to_frame(c)
+    boolean(o, c, **kw)
+
+
+# ---------- корпус Glock 21 ----------
+
+def round_u(i, top_u):
+    """Середина i-го патрона сверху вдоль оси: верхние — по шагам TOP_STEPS (переход к одному ряду), ниже — шахматкой
+    с шагом PITCH_U."""
+    u = top_u
+    for k in range(min(i, len(TOP_STEPS))):
+        u -= TOP_STEPS[k]
+    return u - max(0, i - len(TOP_STEPS)) * PITCH_U
+
+
+def round_y(i):
+    return TOP_Y[i] if i < len(TOP_Y) else COL_OFF * (1 if i % 2 else -1)
+
+
+def top_round_u():
+    return u_at(Z_TOP - TOP_DROP, 0.5)
+
+
+def glock_body(name, z_bottom, C, holes=(4, 13)):
+    """Корпус Glock 21: сужение к губкам, горизонтальный верх со ступенькой спереди, горловина, окна защёлки,
+    контрольные окна сзади (патроны holes[0]…holes[1])."""
+    u_lo = u_at(z_bottom, -D) - 4.0
+    u_hi = u_at(Z_TOP, D) + 4.0
+    u_sh = u_at(Z_TOP, -D) - 16.0
+    full = section(D, W, 7.0, 3.0)
+    narrow = section(D, W - 1.0, 7.0, 3.0)
+    o = loft_local(name, [(u_lo, full), (u_sh, full), (u_sh + 4.0, narrow), (u_hi, narrow)], C, "Polymer")
+    # верх и низ — горизонтальные плоскости оружия
+    boolean(o, gun_box("_top", -400, 400, -60, 60, Z_TOP, Z_TOP + 200, C))
+    boolean(o, gun_box("_bot", -400, 400, -60, 60, z_bottom - 300, z_bottom, C))
+    # ступенька губок спереди (носик пули): со скосом 3 мм
+    xs = world(STEP_X, 0, u_at(Z_TOP, STEP_X)).x
+    boolean(o, gun_prism_xz("_step", [(xs - 3.0, Z_TOP + 1.0), (xs, Z_TOP - STEP), (xs + 80, Z_TOP - STEP),
+                                      (xs + 80, Z_TOP + 60), (xs - 3.0, Z_TOP + 60)], -60, 60, C))
+    # полость: внутри стенок, сверху — под губками (толщина губки 1.8), снизу открыта (донышко отдельно)
+    inner_full = section(D - WALL, W - WALL, 5.3, 1.3)
+    inner_narrow = section(D - WALL, W - WALL - 1.0, 5.3, 1.3)
+    cav = loft_local("_cav", [(u_lo - 6, inner_full), (u_sh, inner_full), (u_sh + 4.0, inner_narrow),
+                              (u_hi + 6, inner_narrow)], C)
+    boolean(cav, gun_box("_cavtop", -400, 400, -60, 60, Z_TOP - 1.8, Z_TOP + 200, C))
+    boolean(o, cav)
+    # горловина между губками: от задней стенки (донце гильзы под губками) — 10 мм, к переду шире (14 мм)
+    xr = world(-D + WALL + 0.3, 0, u_at(Z_TOP, -D + WALL + 0.3)).x
+    slot = fillet([(xr, -5.0), (xr + 60, -7.0), (xr + 60, 7.0), (xr, 5.0)], [1.5, 0, 0, 1.5], 4)
+    boolean(o, _solid("_slot", [[(x, y, Z_TOP - 4.0) for x, y in slot], [(x, y, Z_TOP + 60) for x, y in slot]], C))
+    # окна защёлки: на обоих бортах у передней грани (Gen4/5) и на передней грани (Gen3), ~36 мм ниже губок
+    uc = u_at(Z_TOP - STEP, D - 5.0) - 34.0
+    side = [(D - 8.5, uc - 3.6), (D - 2.6, uc - 3.6), (D - 2.6, uc + 3.6), (D - 8.5, uc + 3.6)]
+    front = [(D - 2.6, -4.0), (D + 3.0, -4.0), (D + 3.0, 4.0), (D - 2.6, 4.0)]
+    local_cut(o, "_catch", [prism_local_xu(side, -W - 3.0, W + 3.0), prism_local_xy(front, uc - 3.6, uc + 3.6)], C)
+    # контрольные окна сзади (Ø3 мм, сквозные: в них видно латунь) — у патронов holes[0]…holes[1], два ряда
+    tu = top_round_u()
+    circle = [(1.5 * math.cos(2 * math.pi * k / 16), 1.5 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
+    holes_s = []
+    for n in range(holes[0], holes[1] + 1):
+        uu = round_u(n - 1, tu)
+        yy = round_y(n - 1) * 0.85
+        holes_s.append([[(-D - 3.0, yy + cy, uu + cu) for cy, cu in circle], [(-D + WALL + 1.0, yy + cy, uu + cu)
+                                                                             for cy, cu in circle]])
+    local_cut(o, "_witness", holes_s, C)
+    finish_small(o, w=0.4, seg=3)
+    return o
+
+
+def floorplate13(name, C):
+    """Донышко Glock 21: горизонтальная пластина по контуру низа корпуса, по бортам и сзади шире на 1.4 мм, спереди —
+    «носик» на 3 мм."""
+    sec = fillet([(-D - 1.4, -W - 1.4), (D + 3.0, -W - 1.4), (D + 3.0, W + 1.4), (-D - 1.4, W + 1.4)],
+                 [4.5, 8.0, 8.0, 4.5], 6)
+    # контур поперёк оси → горизонтальный срез корпуса на высоте низа (наклон оси вытягивает его по X)
+    pts = []
+    for x, y in sec:
+        p = world(x, y, u_at(Z_BOT13, x))
+        pts.append((p.x, p.y))
+    o = _solid(name, [[(x, y, Z_BOT13 - PLATE_H) for x, y in pts], [(x, y, Z_BOT13) for x, y in pts]], C, "Polymer")
+    finish_small(o, w=0.9, seg=3)
+    return o
+
+
+def follower(name, z_top, C):
+    """Подаватель под нижним патроном: верх горизонтален (патроны лежат параллельно стволу, наискось к оси), высота 8."""
+    sec = section(D - WALL - 0.3, W - WALL - 0.3, 4.5, 1.0)
+    u0, u1 = u_at(z_top - 8.0, -D) - 1.0, u_at(z_top, D) + 1.0
+    o = loft_local(name, [(u0, sec), (u1, sec)], C, "Polymer")
+    boolean(o, gun_box("_ftop", -400, 400, -60, 60, z_top, z_top + 200, C))
+    boolean(o, gun_box("_fbot", -400, 400, -60, 60, z_top - 300, z_top - 8.0, C))
+    return o
+
+
+# ---------- удлинитель на 30 ----------
+
+def sleeve30(name, C):
+    """Рукав удлинителя: толще корпуса на SLV_T, верх горизонтален под шахтой, внутри — по корпусу, дно 3 мм;
+    рифление спереди, окна 16–30 сзади, рамки защёлки на бортах."""
+    ds, ws = D + SLV_T, W + SLV_T
+    outer = section(ds, ws, 8.5, 4.5)
+    u_hi = u_at(Z_SLEEVE, ds) + 4.0
+    o = loft_local(name, [(U_BOT30, outer), (u_hi, outer)], C, "Polymer")
+    # верх рукава — по линии низа корпуса: спереди Z_SLEEVE у передней кромки шахты (X −33.5), к заду ниже
+    zf = lambda xg: Z_SLEEVE + (xg + 33.5) * SLEEVE_SLOPE
+    boolean(o, gun_prism_xz("_stop", [(-400, zf(-400)), (400, zf(400)), (400, 300), (-400, 300)], -60, 60, C))
+    cav = loft_local("_scav", [(U_BOT30 + 3.0, section(D, W, 7.0, 3.0)), (u_hi + 6.0, section(D, W, 7.0, 3.0))], C)
+    boolean(o, cav)
+    # крупные кромки (верхний срез, устье) скругляются до мелочи: фаска по сотне канавок рифления не ложилась
+    finish_small(o, w=0.6, seg=3)
+    o["_fin"] = 0
+    # рифление: поперёк оси, шаг 3.2, ширина 1.6, глубина 1 мм ровно по контуру передней грани вместе со скруглёнными
+    # углами и с заходом на борта (на снимке KRISS зубцы видны и спереди, и на профиле); резак — «подкова» между
+    # контуром рукава, сдвинутым внутрь на 1 мм, и контуром снаружи (прямой заход на борта резал скругление ломтиками)
+    u_front = u_at(Z_SLEEVE, ds) - 5.0
+    # канавка кончается на скруглении угла, в 0.6 мм за началом дуги: там, где дуга переходит в плоский борт, линии
+    # перехода у рукава и у резака совпадали — точное булево оставляло дыры на каждой канавке
+    x0 = ds - 8.5 + 0.6
+    y_in = (ws - 8.5) + math.sqrt(7.5 ** 2 - 0.6 ** 2)
+    inner = [q for q in section(ds - 1.0, ws - 1.0, 7.5, 3.5) if q[0] > x0]
+    outer = [q for q in section(ds + 3.0, ws + 3.0, 11.5, 7.5) if q[0] > x0]
+    groove = [(x0, -ws - 3.0)] + outer + [(x0, ws + 3.0), (x0, y_in)] + list(reversed(inner)) + [(x0, -y_in)]
+    length = u_front - U_BOT30
+    gs = []
+    k = 0
+    while True:
+        uc = u_front - k * 3.2
+        if uc < u_front - 0.62 * length:
+            break
+        gs.append(prism_local_xy(groove, uc - 0.8, uc + 0.8))
+        k += 1
+    # с учётом самопересечений: без него на каждой канавке оставались открытые рёбра у края на дуге
+    local_cut(o, "_grooves", gs, C, self_x=True)
+    # окна 16–30 сзади, сквозь стенку рукава
+    tu = top_round_u()
+    circle = [(1.6 * math.cos(2 * math.pi * k / 16), 1.6 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
+    hs = []
+    for n in range(16, 31):
+        uu = round_u(n - 1, tu)
+        if uu < U_BOT30 + 6.0:
+            continue
+        yy = round_y(n - 1) * 0.9
+        hs.append([[(-ds - 3.0, yy + cy, uu + cu) for cy, cu in circle], [(-ds + SLV_T + 0.6, yy + cy, uu + cu)
+                                                                          for cy, cu in circle]])
+    local_cut(o, "_witness", hs, C)
+    # рамки защёлки у дна на обоих бортах: выступ 0.9 мм, в нём прорезь глубиной 1.5 (виден язычок трубки)
+    ub = U_BOT30 + 13.0
+    frame = fillet([(-14.0, ub - 5.0), (10.0, ub - 5.0), (10.0, ub + 5.0), (-14.0, ub + 5.0)], 3.0, 6)
+    boss = _multi("_boss", [prism_local_xu(frame, ws - 0.3, ws + 0.9), prism_local_xu(frame, -ws - 0.9, -ws + 0.3)], C)
+    to_frame(boss)
+    boolean(o, boss, op="UNION")
+    slot = fillet([(-9.5, ub - 1.8), (5.5, ub - 1.8), (5.5, ub + 1.8), (-9.5, ub + 1.8)], 1.7, 6)
+    local_cut(o, "_lock", [prism_local_xu(slot, ws - 1.5, ws + 3.0), prism_local_xu(slot, -ws - 3.0, -ws + 1.5)], C)
+    # мелочь — узкой фаской только по острым кромкам вырезов (крупные уже скруглены: угол между гранями там мал)
+    finish_small(o, w=0.15, seg=2, angle=60.0)
+    # если мелкая фаска не легла (рифление узкое), плоскости всё равно держит Weighted Normal — без него по бортам
+    # шли косые пятна затенения от треугольников после булевых
+    weighted(o)
+    apply_all(o)
+    return o
+
+
+def base30(name, C):
+    """Донышко трубки удлинителя — поперёк оси, по контуру рукава чуть шире."""
+    sec = section(D + SLV_T + 0.4, W + SLV_T + 0.4, 8.8, 4.8)
+    o = loft_local(name, [(U_BOT30 - BASE_H, sec), (U_BOT30, sec)], C, "Polymer")
+    finish_small(o, w=0.8, seg=3)
+    return o
+
+
+# ---------- патроны ----------
 
 def cartridge(name, C):
     """Патрон .45 ACP вдоль +x (пуля вперёд): гильза с проточкой и закраиной, оболочечная пуля с круглым носом."""
@@ -114,136 +333,55 @@ def cartridge(name, C):
     return case, bullet
 
 
-def rounds(prefix, count, u1, C, coll_name):
-    """count патронов: верхний — в губках по середине-ряду, ниже шахматкой; пуля вперёд (по fwd), поперёк оси."""
+def rounds(prefix, count, C):
+    """count патронов горизонтально (пуля вперёд, параллельно стволу): верхний — посередине губок, ниже — шахматкой."""
     objs = []
     base_case, base_bullet = cartridge(prefix + "_proto", C)
+    tu = top_round_u()
     for i in range(count):
-        uc = u1 - CASE_R - 0.6 - i * PITCH
-        yc = COL_OFF * (1 if i % 2 == 0 else -1)
+        p = world(0.5, round_y(i), round_u(i, tu)) * MM
         for src, nm in ((base_case, "case"), (base_bullet, "bullet")):
             o = bpy.data.objects.new(f"{prefix}_{i:02d}_{nm}", src.data)
             C.objects.link(o)
-            o.location = Vector((0.5 * MM, yc * MM, uc * MM))
-            o.matrix_world = frame_matrix() @ o.matrix_basis
+            o.matrix_world = Matrix.Translation(p)
             objs.append(o)
     for o in (base_case, base_bullet):
         bpy.data.objects.remove(o, do_unlink=True)
-    return objs
+    # низ нижнего патрона (Z): под ним подаватель
+    return objs, world(0.5, 0, round_u(count - 1, tu)).z - CASE_R - 0.4
 
 
-def magazine(name, length, count, counts, C):
-    o, u0, u1 = shell(name + "_body", length, C)
-    witness(o, u1, counts, C)
-    finish_small(o, w=0.4, seg=3)
-    # донышко: пластина с выступом-«пяткой» спереди
-    d, w = MAG_D / 2, MAG_W / 2
-    bp = bpy.data.objects.new(name + "_floorplate", bpy.data.meshes.new(name + "_floorplate"))
-    C.objects.link(bp)
-    bm = bmesh.new()
-    sec = section(d + 1.2, w + 1.0, 6.5, 4.0)
-    a = [bm.verts.new(Vector((x * MM, y * MM, (u0 - 4.0) * MM))) for x, y in sec]
-    b = [bm.verts.new(Vector((x * MM, y * MM, (u0 + 2.0) * MM))) for x, y in sec]
-    bm.faces.new(list(reversed(a))); bm.faces.new(b)
-    for i in range(len(sec)):
-        j = (i + 1) % len(sec)
-        bm.faces.new((a[i], a[j], b[j], b[i]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(bp.data); bm.free()
-    bp.data.materials.append(material("Polymer"))
-    finish_small(bp, w=0.5, seg=3)
-    # подаватель — под нижним патроном
-    fu = u1 - CASE_R - 0.6 - (count - 1) * PITCH - CASE_R - 1.5
-    fl = bpy.data.objects.new(name + "_follower", bpy.data.meshes.new(name + "_follower"))
-    C.objects.link(fl)
-    bm = bmesh.new()
-    sec = section(d - WALL - 0.3, w - WALL - 0.3, 3.5, 1.5)
-    a = [bm.verts.new(Vector((x * MM, y * MM, (fu - 6.0) * MM))) for x, y in sec]
-    b = [bm.verts.new(Vector((x * MM, y * MM, fu * MM))) for x, y in sec]
-    bm.faces.new(list(reversed(a))); bm.faces.new(b)
-    for i in range(len(sec)):
-        j = (i + 1) % len(sec)
-        bm.faces.new((a[i], a[j], b[j], b[i]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(fl.data); bm.free()
-    fl.data.materials.append(material("Polymer"))
-    finish_small(fl, w=0.4, seg=3)
-    for x in (o, bp, fl):
-        to_frame(x)
-    bp["owner"] = o.name
-    fl["owner"] = o.name
-    rs = rounds(name + "_round", count, u1, C, C.name)
-    for r in rs:
-        r.parent = None
-    o["mag_capacity"] = count
-    return o, bp, fl, rs
+# ---------- сборка ----------
+
+def magazine13(C):
+    body = glock_body("Magazine13_body", Z_BOT13, C)
+    plate = floorplate13("Magazine13_floorplate", C)
+    rs, z_last = rounds("Magazine13_round", 13, C)
+    fl = follower("Magazine13_follower", z_last, C)
+    for x in (plate, fl):
+        x["owner"] = body.name
+    body["mag_capacity"] = 13
+    return body, plate, fl, rs
+
+
+def magazine30(C):
+    # корпус Glock сверху; ниже шахты его закрывает рукав — внутри рукава корпус кончается (не виден)
+    body = glock_body("Magazine30_body", Z_SLEEVE - 30.0, C)
+    sl = sleeve30("Magazine30_sleeve", C)
+    base = base30("Magazine30_floorplate", C)
+    rs, z_last = rounds("Magazine30_round", 30, C)
+    fl = follower("Magazine30_follower", z_last, C)
+    for x in (sl, base, fl):
+        x["owner"] = body.name
+    body["mag_capacity"] = 30
+    return body, base, fl, rs
 
 
 def build(ctx):
     C = ctx["coll"]["Magazine"]
-    m13 = magazine("Magazine13", LEN13, 13, (6, 9, 13), C)
+    m13 = magazine13(C)
     C30 = bpy.data.collections.get("Magazine_30") or bpy.data.collections.new("Magazine_30")
     if C30.name not in [c.name for c in ctx["coll"]["Magazine"].children]:
         ctx["coll"]["Magazine"].children.link(C30)
-    m30 = magazine("Magazine30", LEN30, 30, (10, 20, 30), C30)
-    sleeve(m30[0], LEN30, C30)
+    m30 = magazine30(C30)
     return {"mag13": m13, "mag30": m30, "coll30": C30}
-
-
-def sleeve(body, length, C):
-    """Удлинитель 30-зарядного (снимки KRISS A/B, владельца 01/04): рукав поверх нижней части корпуса — толще на 0.9
-    с каждой стороны, сверху уступ со скосом, спереди — поперечные рёбра (канавки шагом 3.6 по плоской части передней
-    грани), сзади — гладкий."""
-    d, w = MAG_D / 2 + 0.9, MAG_W / 2 + 0.9
-    u_top = U_TOP - length + 5.0 + 128.0          # верх рукава — там, где кончился бы штатный на 13
-    u_bot = U_TOP - length + 5.0
-    sec = section(d, w, 6.0, 3.6)
-    me = bpy.data.meshes.new("Magazine30_sleeve")
-    bm = bmesh.new()
-    rings = []
-    for uu, k in ((u_bot, 0.0), (u_top - 2.0, 0.0), (u_top, 0.9)):
-        rings.append([bm.verts.new(Vector(((x - math.copysign(k, x)) * MM, (y - math.copysign(k, y)) * MM, uu * MM)))
-                      for x, y in sec])
-    bm.faces.new(list(reversed(rings[0]))); bm.faces.new(rings[-1])
-    for r0, r1 in zip(rings, rings[1:]):
-        for i in range(len(sec)):
-            j = (i + 1) % len(sec)
-            bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me); bm.free()
-    o = bpy.data.objects.new("Magazine30_sleeve", me)
-    C.objects.link(o)
-    o.data.materials.append(material("Polymer"))
-    # внутри — по корпусу магазина (рукав надет на него)
-    inn = section(MAG_D / 2 - 0.02, MAG_W / 2 - 0.02, 5.5, 3.2)
-    me2 = bpy.data.meshes.new("_sin")
-    bm = bmesh.new()
-    a = [bm.verts.new(Vector((x * MM, y * MM, (u_bot - 5.0) * MM))) for x, y in inn]
-    b = [bm.verts.new(Vector((x * MM, y * MM, (u_top + 5.0) * MM))) for x, y in inn]
-    bm.faces.new(list(reversed(a))); bm.faces.new(b)
-    for i in range(len(inn)):
-        j = (i + 1) % len(inn)
-        bm.faces.new((a[i], a[j], b[j], b[i]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me2); bm.free()
-    ci = bpy.data.objects.new("_sin", me2)
-    C.objects.link(ci)
-    boolean(o, ci)
-    # рёбра спереди: канавки поперёк передней грани (в осях магазина — по x = +d), ширина 1.5, глубина 0.8
-    n = int((u_top - u_bot - 12.0) / 3.6)
-    for i in range(n):
-        uc = u_bot + 8.0 + i * 3.6
-        g = bpy.data.objects.new("_sg", bpy.data.meshes.new("_sg"))
-        C.objects.link(g)
-        bm = bmesh.new()
-        bmesh.ops.create_cube(bm, size=1.0)
-        for vv in bm.verts:
-            vv.co.x = ((d - 0.8) if vv.co.x < 0 else d + 2.0) * MM
-            vv.co.y = ((-w + 4.2) if vv.co.y < 0 else (w - 4.2)) * MM
-            vv.co.z = ((uc - 0.75) if vv.co.z < 0 else (uc + 0.75)) * MM
-        bm.to_mesh(g.data); bm.free()
-        boolean(o, g)
-    finish_small(o, w=0.4, seg=3)
-    to_frame(o)
-    o["owner"] = body.name
-    return o
