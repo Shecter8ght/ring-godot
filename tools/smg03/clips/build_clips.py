@@ -538,6 +538,38 @@ kw = Keyer(wc)
 for k in WEAPON:
     kw.at(k[0], AWI @ weapon_delta(k[0]) @ AW @ WC_READY)
 
+# ---------------------------------------------------------------- пальцы: суставы в пределах, ключи в осях сустава
+# Палец гнётся вокруг своей оси (X кости) и разводится только у основания, без кручения; концевая — вслед за средней
+# (tools/anim_from_video/hand_solver.py, опыт 2026-11-06). Ключи — в порядке Эйлера YZX (= сгиб · развод · кручение):
+# между ключами палец идёт прямо по сгибу, а не через «равный поворот» в XYZ — так в переходах ломались суставы.
+# Основание большого — как есть (у рига свой покой).
+sys.path.insert(0, str(ROOT / 'tools/anim_from_video'))
+import hand_solver as hs  # noqa: E402
+
+
+def arm_fcurves():
+    return [fc for layer in arm_act.layers for strip in layer.strips for bag in strip.channelbags for fc in bag.fcurves]
+
+
+FINGER_BONES = {(s, f): [f'{f}.{j:02d}.{s}' for j in (1, 2, 3)] for s in ('L', 'R') for f in hs.FINGERS}
+FINGER_NAMES = {n for ns in FINGER_BONES.values() for n in ns}
+key_frames = {}
+for fc in arm_fcurves():
+    if fc.data_path.endswith('.rotation_euler'):
+        key_frames.setdefault(fc.data_path.split('"')[1], set()).update(int(round(k.co.x)) for k in fc.keyframe_points)
+finger_keys = {}
+for (s, f), names in FINGER_BONES.items():
+    for fr in sorted(set().union(*(key_frames.get(n, set()) for n in names))):
+        sc.frame_set(fr)
+        finger_keys[(s, f, fr)] = hs.anatomical(hs.read(arms, s, f), f)
+for fc in arm_fcurves():
+    if fc.data_path.endswith('.rotation_euler') and fc.data_path.split('"')[1] in FINGER_NAMES:
+        fc.keyframe_points.clear()
+for (s, f, fr), vals in finger_keys.items():
+    hs.write(arms, s, f, vals)
+    for n in FINGER_BONES[(s, f)]:
+        arms.pose.bones[n].keyframe_insert('rotation_euler', frame=fr)
+
 
 def fcurves(act):
     out = []
