@@ -24,6 +24,18 @@ static func hand_scale() -> float:
 	return _env_scale if _env_scale > 0.0 else float(Balance.FPS_HAND_SCALE.k)
 
 
+## Размер кистей для конкретных рук: у выгрузки с исправленными пропорциями (tools/fps_hands_fix.py, в её .json —
+## hands_fix; владелец 2026-11-06: «руки в порядок привести») кисть уже настоящего размера — 1.0; у прежних (клипы
+## ВЕРАСа, руки гранаты) — Balance.FPS_HAND_SCALE.k. Проба стенда и FPS_HAND_SCALE из окружения — поверх обоих.
+static func hand_scale_for(fixed: bool) -> float:
+	if scale_override > 0.0:
+		return scale_override
+	hand_scale()
+	if _env_scale > 0.0:
+		return _env_scale
+	return 1.0 if fixed else float(Balance.FPS_HAND_SCALE.k)
+
+
 func configure(sk: Skeleton3D, clips: bool) -> void:
 	skeleton = sk
 	chains.clear()

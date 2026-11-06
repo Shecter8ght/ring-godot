@@ -175,7 +175,9 @@ func _exercise(label: String, clips: bool) -> void:
 	for side: String in HandGripProfiles.SIDES:
 		var bones: Array = overlay.chains[side]
 		var ratio: Vector3 = sk.get_bone_global_pose(bones[2]).basis.get_scale() / sk.get_bone_global_pose(bones[0]).basis.get_scale()
-		_check(label + " " + side + " actual hand size is eighty percent", ratio.distance_to(Vector3.ONE * 0.8) < 0.0001)
+		# общие руки с исправленными кистями (veras_arms.json: hands_fix) игра не уменьшает, клипы ВЕРАСа — 80 %
+		var expected: float = 0.8 if clips or not _lab._rig._arms.hands_fixed else 1.0
+		_check(label + " " + side + " actual hand size is %d percent" % roundi(expected * 100.0), ratio.distance_to(Vector3.ONE * expected) < 0.0001)
 	_lab._panel.grip._position[2].value = 3.0
 	await _frames(30)
 	var shifted: Transform3D = _relative_wrist(sk, left)

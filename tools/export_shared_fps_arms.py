@@ -3,6 +3,10 @@
 Blender --background --factory-startup --python-exit-code 1 --python tools/export_shared_fps_arms.py
 Сетка, UV и карты остаются от ВЕРАСа. Оси пальцев и имена рабочего скелета
 согласованы с существующими профилями хватов Persona; их анимации не импортируются.
+Источник — мастер FPS-рук с исправленными кистями (tools/fps_hands_master.py → FPS-руки/FPS_Arms_v14.blend, владелец
+2026-11-06: «руки в порядок привести … исходник рук и трогай»): ладонь короче и уже, пальцы короче — запястье → кончик
+~19 см; игра такие руки больше не уменьшает (в veras_arms.json — hands_fix, HandGripPose.hand_scale_for). Прежний
+источник — Клипы v13/VERAS54_Reload_Full_v13.blend (риг и сетка те же, до правки кистей).
 """
 from __future__ import annotations
 
@@ -15,13 +19,14 @@ import struct
 
 import bpy
 from mathutils import Matrix, Quaternion, Vector
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fps_hands_fix as HF  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path(
-    "E:/Models Blender/WEAPONS/ВЕРАС-54 — модель и обвесы/ВЕРАС-54/Игровая версия/"
-    "Клипы v13/VERAS54_Reload_Full_v13.blend"
-)
+SOURCE = Path("E:/Models Blender/WEAPONS/FPS-руки/FPS_Arms_v14.blend")
 REFERENCE = ROOT / "assets/models/characters/persona_arms.glb"
 TEXTURES = ROOT / "assets/models/weapons/veras54"
 WORK = ROOT / "_asset_src/shared_fps_arms"
@@ -77,6 +82,14 @@ def main() -> None:
     source_weights = []
     for vertex in mesh.data.vertices:
         source_weights.append({mesh.vertex_groups[g.group].name: g.weight for g in vertex.groups})
+    # Кисти мастера уже исправлены (fps_hands_master.py): здесь — только замер и пометка для игры
+    if "hands_fix" not in original:
+        raise SystemExit("в источнике нет hands_fix: руки не из мастера с исправленными кистями")
+    hands_fix = json.loads(original["hands_fix"])
+    heads = {b.name: tuple(original.matrix_world @ b.head_local) for b in original.data.bones}
+    world = mesh.matrix_world.copy()
+    hands_after = HF.measure(heads, [tuple(world @ v.co) for v in mesh.data.vertices], source_weights)
+    print("SHARED_FPS_ARMS кисти, см:", hands_after)
     mesh.animation_data_clear()
     mesh.parent = None
     mesh.matrix_world = Matrix.Identity(4)
@@ -165,6 +178,7 @@ def main() -> None:
             image.reload()
     rig["hands_source"] = "VERAS54_FPS_ArmsRig"
     rig["palm_offsets"] = offsets
+    rig["hands_fix"] = json.dumps(hands_fix)
     for obj in bpy.context.scene.objects:
         obj.select_set(obj in (mesh, rig))
     bpy.context.view_layer.objects.active = rig
@@ -188,8 +202,10 @@ def main() -> None:
         "reference_axes": str(REFERENCE.relative_to(ROOT)), "reference_sha256": sha(REFERENCE),
         "vertices": len(mesh.data.vertices), "triangles": sum(len(p.vertices) - 2 for p in mesh.data.polygons),
         "bones": len(data.bones), "palm_offsets": offsets,
+        "hands_fix": {"params": hands_fix, "cm": hands_after, "tool": "tools/fps_hands_master.py"},
         "textures": {p.name: sha(p) for p in TEXTURES.glob("arm*.png")},
-        "note": "Сетка/UV ВЕРАС-54; отдельный скелет для прежних профилей хвата, без клипов оружия. Исходники не изменены.",
+        "note": "Сетка/UV ВЕРАС-54 из мастера FPS-рук v14 (кисти исправлены — hands_fix, игра их не уменьшает); "
+                "отдельный скелет для прежних профилей хвата, без клипов оружия.",
     }
     (OUT / "veras_arms.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("SHARED_FPS_ARMS", json.dumps(report, ensure_ascii=False))

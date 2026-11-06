@@ -1353,7 +1353,12 @@
     "asset": "res://assets/models/weapons/smg03/smg03.gltf",
     "asset_kind": "static",
     "viewmodel": {
-     "ads_z": 0.12
+     "ads_z": 0.17,
+     "hip_pose": [
+      0.11,
+      -0.14,
+      -0.42
+     ]
     }
    },
    "flavor": "Нажал слишком долго — магазин уже пуст; удержал очередь — коридор тоже."

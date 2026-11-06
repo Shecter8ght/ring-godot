@@ -20,6 +20,7 @@ func _ready() -> void:
 	add_child(_arms)
 	_check("общие руки загружены", _arms.skeleton != null)
 	_check("размер ладони взят из новой сетки", _arms._palm_offsets.size() == 2)
+	_check("общие руки — с исправленными кистями, игра их не уменьшает", _arms.hands_fixed and is_equal_approx(HandGripPose.hand_scale_for(true), 1.0))
 	_check("геометрия Persona отсутствует", _arms.find_children("Human*", "MeshInstance3D", true, false).is_empty())
 	for raw: Variant in WeaponDb.ids("weapons"):
 		var id: String = String(raw)
@@ -100,7 +101,7 @@ func _weapon(id: String, mods: Dictionary) -> void:
 		_check(tag + " руки видимы", _arms.visible)
 		_check(tag + " запястья достигают хвата", _arms.max_grip_error < 0.001)
 		_check(tag + " кости не растянуты", _arms.max_length_error < 0.001)
-		_check_hand_scale(tag, _arms._hand_pose)
+		_check_hand_scale(tag, _arms._hand_pose, 1.0 if _arms.hands_fixed else 0.8)
 		entry["grip_error"] = _arms.max_grip_error
 		entry["length_error"] = _arms.max_length_error
 		if id == "wpn_hg_02":
@@ -135,7 +136,7 @@ func _independent_hands(model: Node3D) -> void:
 	target.free()
 
 
-func _check_hand_scale(label: String, pose: HandGripPose) -> void:
+func _check_hand_scale(label: String, pose: HandGripPose, expected: float = 0.8) -> void:
 	for side: String in HandGripProfiles.SIDES:
 		if not pose.chains.has(side):
 			_check(label + " · есть цепь " + side, false)
@@ -143,7 +144,7 @@ func _check_hand_scale(label: String, pose: HandGripPose) -> void:
 		var bones: Array = pose.chains[side]
 		var upper: Vector3 = pose.skeleton.get_bone_global_pose(bones[0]).basis.get_scale()
 		var wrist: Vector3 = pose.skeleton.get_bone_global_pose(bones[2]).basis.get_scale()
-		_check(label + " · кисть " + side + " 80%", (wrist / upper).distance_to(Vector3.ONE * 0.8) < 0.0001)
+		_check(label + " · кисть " + side + " %d%%" % roundi(expected * 100.0), (wrist / upper).distance_to(Vector3.ONE * expected) < 0.0001)
 
 
 func _palm_contacts(pose: HandGripPose) -> Dictionary:

@@ -10,6 +10,8 @@ var skeleton: Skeleton3D
 var _rest: Array[Transform3D] = []
 var _frames: Dictionary = {}
 var _palm_offsets: Dictionary = {}
+## Кисти исправлены при выгрузке (veras_arms.json: hands_fix) — игра их не уменьшает.
+var hands_fixed: bool = false
 var _grips: Dictionary = {}
 var _weapon: Node3D
 var _actions: Dictionary = {}
@@ -29,6 +31,7 @@ func _ready() -> void:
 	add_child(model)
 	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODEL.get_basename() + ".json")) as Dictionary
 	_palm_offsets = profile.get("palm_offsets", {}) as Dictionary
+	hands_fixed = profile.has("hands_fix")
 	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	for mesh: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
@@ -86,7 +89,7 @@ func update_pose() -> void:
 	for side: String in ["Right", "Left"]:
 		_solve(side, _grips[side] as Node3D)
 	# Размер кистей — поверх готового хвата, вокруг точки хвата на ладони (Balance.FPS_HAND_SCALE).
-	var k: float = HandGripPose.hand_scale()
+	var k: float = HandGripPose.hand_scale_for(hands_fixed)
 	for side: String in ["Right", "Left"]:
 		_hand_pose.scale_hand(side, k)
 

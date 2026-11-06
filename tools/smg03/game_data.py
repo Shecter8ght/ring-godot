@@ -18,8 +18,12 @@ GRIPS = ROOT / 'data/weapon_grips.json'
 CLAMP_HALF = 0.015                      # половина зажима обвеса по умолчанию (weapon_build.gd: clamp_m 0,03)
 ASSET = 'res://assets/models/weapons/smg03/'
 GX = REP['grip_source_m'][0]
-# глаз в прицеливании — над гребнем приклада, ~12 см за целиком (как у ГРАНЬ-15)
-ADS_Z = 0.12
+# глаз в прицеливании — над гребнем приклада за целиком; v1 — 12 см (как у ГРАНЬ-15), владелец 06.11: «ощущение, что
+# он толстый» — у Vector за целиком высокий задний блок, вблизи он закрывал низ кадра: 17 см (сравнение A/B/C)
+ADS_Z = 0.17
+# у бедра — дальше и ниже общей позы (Balance.FPS_HIP_POSE 0.09, −0.12, −0.35): коробка Vector высокая и короткая,
+# на общем месте она заслоняла пол-кадра
+HIP_POSE = [0.11, -0.14, -0.42]
 # свободные участки верхней планки (оси игры z от хвата): за основанием целика (X −205 мм исходника) до середины коробки
 # и от неё до основания мушки (X 80 мм) — откидные прицельные стоят на планке и занимают её концы
 FREE_TOP = {'optic_primary': (-0.205 - GX, -0.040 - GX), 'top_front': (-0.025 - GX, 0.080 - GX)}
@@ -117,7 +121,7 @@ def main():
                     'side_right': 'RAIL_SIDE', 'underbarrel': 'RAIL_BOTTOM', 'muzzle': 'THREAD_45', 'stock': 'STOCK_SMG'}
     ww['asset'] = ASSET + 'smg03.gltf'
     ww['asset_kind'] = 'static'
-    ww['viewmodel'] = {'ads_z': ADS_Z}
+    ww['viewmodel'] = {'ads_z': ADS_Z, 'hip_pose': HIP_POSE}
     d['magazines']['mag_45_vector13'] = mag(13, d['magazines']['mag_45_vector13'], 'smg03_mag13.gltf')
     d['magazines']['mag_45_vector30'] = mag(30, d['magazines']['mag_45_vector30'], 'smg03_mag30.gltf')
     WEAPONS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
