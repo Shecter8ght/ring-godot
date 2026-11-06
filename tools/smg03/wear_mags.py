@@ -138,6 +138,10 @@ class Section:
 
 
 BODY = Section(-D, D, W, 3.0, 7.0)
+BODY_N = Section(-D, D, W - 1.0, 3.0, 7.0)            # выше плечика корпус к губкам уже на 1 мм с каждой стороны
+# голова магазина (владелец 06.11, v2: «больше износа на голову магазина, на место, где держатся патроны, и вдоль всего
+# корпуса примерно на треть длины, почётче»): от верха губок вниз на столько (мм по высоте), нижний край рваный
+HEAD_MM = 44.0
 SLEEVE = Section(-D - SLV_T, D + SLV_T, W + SLV_T, 4.5, 8.5)
 PLATE13 = Section(-D - 1.4, D + 3.0, W + 1.4, 4.5, 8.0)
 BASE30 = Section(-D - SLV_T - 0.4, D + SLV_T + 0.4, W + SLV_T + 0.4, 4.8, 8.8)
@@ -255,7 +259,12 @@ def streak(px, sec, s, h, spec, fd_edge, fd_grain, rng):
     wob = spec.get('wob', 0.25) * fd_edge(np.full_like(hh, s0 + 37.0), hh * 0.35)
     wv = w * (0.75 + 0.25 * np.clip(fd_edge(np.full_like(hh, s0 + 11.0), hh * 0.6), -2, 2))
     d = sec.ds(s, s0 + wob)
-    prof = np.exp(-0.5 * (d / np.maximum(wv * 0.5, 0.12)) ** 2)
+    if spec.get('crisp', False):
+        # чёткий край (v2, «почётче»): плоская середина, переход ~0.2 ширины; рваность края — зерном ниже
+        hw_ = np.maximum(wv * 0.5, 0.15)
+        prof = 1.0 - smooth(hw_ * 0.62, hw_ * 1.08, np.abs(d))
+    else:
+        prof = np.exp(-0.5 * (d / np.maximum(wv * 0.5, 0.12)) ** 2)
     # рваность: обрывы по высоте и рваный край
     br = spec.get('broken', 0.3)
     if br > 0:
@@ -270,7 +279,11 @@ def streak(px, sec, s, h, spec, fd_edge, fd_grain, rng):
         benv = smooth(bh0, bh0 + 0.03, h) * (1.0 - smooth(bh1 - 0.05, bh1, h))
         bcut = fd_edge(np.full_like(hh, s0 + 133.0), hh * 1.7)
         benv = benv * smooth(0.2, 0.7, bcut + spec['bare'] * 1.2 - 0.6)
-        bprof = np.exp(-0.5 * (d / np.maximum(wv * 0.16, 0.1)) ** 2)
+        if spec.get('crisp', False):
+            bw = np.maximum(wv * 0.18, 0.1)
+            bprof = 1.0 - smooth(bw * 0.6, bw * 1.15, np.abs(d))
+        else:
+            bprof = np.exp(-0.5 * (d / np.maximum(wv * 0.16, 0.1)) ** 2)
         core = spec['bare'] * benv * bprof * smooth(0.25, 0.6, fd_grain(s * 1.0 + 3.0, h * 100.0 + phase * 1.3) + 0.5)
     return val, core
 
@@ -387,13 +400,15 @@ def body_zones(px, setname, Z):
     rng = np.random.default_rng(SEED[setname])
     sec = BODY
     on, sd, _ = outward(px, sec, px.x, px.y)
+    u_sh = u_at(Z_TOP, -D) - 16.0                          # плечико сужения к губкам (part_magazine.glock_body)
+    on_n, _, _ = outward(px, BODY_N, px.x, px.y)
+    on = on | (on_n & (px.u > u_sh))
     if setname == 'Mag30':
         on &= px.g[:, 2] > zf(px.g[:, 0]) - 0.3            # ниже — рукав
     else:
         on &= px.g[:, 2] > Z_BOT13 + 0.2                    # ниже — донышко
     s = sec.param(px.x, px.y)
     h = well_h(px)
-    u_sh = u_at(Z_TOP, -D) - 16.0                          # плечико сужения к губкам (part_magazine.glock_body)
     fd_edge = Field(SEED[setname] + 1, sec.P, 0.0, 200.0, 3.0, 4.0, res=2.0)
     fd_grain = Field(SEED[setname] + 2, sec.P, 0.0, 200.0, 0.10, 2.5, res=10.0)
     fd_big = Field(SEED[setname] + 3, sec.P, 0.0, 200.0, 6.0, 10.0, res=1.0)
@@ -411,7 +426,8 @@ def body_zones(px, setname, Z):
     for face, t, h0, h1, w, a, br, bare_k in spec_list:
         if w >= 0.3:                                       # списочные (не волоски) — шире: в кадре читались нитками
             w = w * 1.6
-        spec = {'at': (face, t), 'h': (h0, h1), 'w': w, 'a': a, 'broken': br, 'bare': bare_k, 'wob': 0.25 * w + 0.1}
+        spec = {'at': (face, t), 'h': (h0, h1), 'w': w, 'a': a, 'broken': br, 'bare': bare_k, 'wob': 0.25 * w + 0.1,
+                'crisp': w >= 0.3, 'taper': (0.03, 0.06)}
         val, core = streak(px, sec, sI, hI, spec, fd_edge, fd_grain, rng)
         if side_of(face, t):
             k = 1.0 - smooth(u_sh - 2.0, u_sh + 2.5, uI)
@@ -420,6 +436,40 @@ def body_zones(px, setname, Z):
         streaks = np.maximum(streaks, val)
         if core is not None:
             bare = np.maximum(bare, core)
+    # голова магазина: плотные чёткие полосы от верха вниз на ~треть длины по всему контуру — у углов гуще и до стали
+    zt = np.where(px.x > STEP_X, Z_TOP - STEP, Z_TOP)
+    dtop = (zt - px.g[:, 2])[ii]
+    in_well = (zt - (zf(px.g[:, 0]) + 1.0))[ii]                  # длина корпуса в шахте у этого места, мм
+    head_lim = HEAD_MM + 7.0 * np.clip(fd_big(sI + 21.0, 0.0 * sI), -1.5, 1.5)
+    head_w = 1.0 - smooth(head_lim - 7.0, head_lim + 3.0, dtop)
+    hrng = np.random.default_rng(SEED[setname] + 40)
+    mean_len = float(np.median(in_well))
+    head_specs = []
+    for face, t0, t1, step, corner in (('arc_rl', 0.0, 1.0, 1.6, True), ('left', 0.0, 1.0, 3.2, False),
+                                       ('arc_fl', 0.0, 1.0, 2.2, True), ('front', 0.0, 1.0, 2.6, False),
+                                       ('arc_fr', 0.0, 1.0, 2.2, True), ('right', 0.0, 1.0, 3.2, False),
+                                       ('arc_rr', 0.0, 1.0, 1.6, True), ('rear_r', 0.0, 1.0, 3.0, False),
+                                       ('rear_l', 0.0, 1.0, 3.0, False)):
+        ln = sec.seg[face][1]
+        n = max(1, int(ln / step))
+        for k in range(n):
+            if not corner and hrng.random() < 0.3:              # на плоскостях — не подряд
+                continue
+            t = min(max((k + hrng.uniform(0.2, 0.8)) / n, t0), t1)
+            length = hrng.uniform(16.0, 50.0) * (1.15 if corner else 1.0)
+            h1 = 1.0 - hrng.uniform(0.0, 0.04)
+            h0 = h1 - length / mean_len
+            w = hrng.uniform(0.7, 1.7) if corner else hrng.uniform(0.35, 1.2)
+            a = hrng.uniform(0.7, 1.0) if corner else hrng.uniform(0.45, 0.85)
+            bare_k = hrng.uniform(0.5, 0.9) if (corner and hrng.random() < 0.7) or hrng.random() < 0.22 else 0.0
+            head_specs.append({'at': (face, t), 'h': (h0, h1), 'w': w, 'a': a, 'broken': hrng.uniform(0.1, 0.3),
+                               'bare': bare_k, 'bare_h': (h1 - (h1 - h0) * 0.7, h1), 'wob': 0.2 * w + 0.1,
+                               'crisp': True, 'taper': (0.05, 0.02)})
+    for spec in head_specs:
+        val, core = streak(px, sec, sI, hI, spec, fd_edge, fd_grain, hrng)
+        streaks = np.maximum(streaks, val * head_w)
+        if core is not None:
+            bare = np.maximum(bare, core * head_w)
     # заглажено широко: у рёбер граней, рвано крупными пятнами; у входа в шахту мягко начинается
     pol = np.zeros(len(ii), np.float32)
     for face, t, w, a in POLISH[setname]:
@@ -430,6 +480,9 @@ def body_zones(px, setname, Z):
         pol = np.maximum(pol, g)
     pol = pol * smooth(-0.04, 0.10, hI) * (1.0 - smooth(0.97, 1.03, hI))
     pol = pol * np.clip(0.55 + 0.45 * fd_big(sI, hI * 100.0), 0.0, 1.0) * (0.8 + 0.2 * fd_grain(sI + 7.0, hI * 100.0))
+    # голова — заглажена вся, пятнами сильнее
+    pol = np.maximum(pol, head_w * np.clip(0.62 + 0.38 * fd_big(sI + 50.0, hI * 100.0), 0.0, 1.0) *
+                     (0.85 + 0.15 * fd_grain(sI + 9.0, hI * 100.0)))
     Z['polish'][ii] = np.clip(pol, 0, 1)
     Z['streaks'][ii] = np.clip(streaks, 0, 1)
     Z['bare'][ii] = np.clip(bare, 0, 1)
@@ -470,21 +523,29 @@ def lips_zones(px, setname, Z, s, h):
     fx = Field(SEED[setname] + 5, 400.0, -30.0, 30.0, 3.0, 0.08, res=12.0)   # полосы вдоль X оружия
     stripes = 0.8 + 0.2 * fx(gx + 200.0, px.y)
     fl = Field(SEED[setname] + 8, 400.0, -30.0, 30.0, 5.0, 2.0, res=4.0)
-    patches = smooth(-0.5, 0.6, fl(gx + 200.0, px.y))           # затвор трёт не весь верх — местами
-    lips = np.where(top, 0.6 * stripes * patches * (0.5 + 0.5 * smooth(-6.0, -1.0, sd)), 0.0)
+    patches = smooth(-1.1, 0.2, fl(gx + 200.0, px.y))           # затвор трёт почти весь верх (v2)
+    lips = np.where(top, 0.9 * stripes * patches * (0.6 + 0.4 * smooth(-6.0, -1.0, sd)), 0.0)
     Z['lips'][:] = np.clip(lips, 0, 1)
     # наружная кромка верха: последние ~1.2 мм наружной стенки под верхом — местами до стали
     fd = Field(SEED[setname] + 6, BODY.P, 0.0, 100.0, 1.5, 0.6, res=8.0)
     edge = (np.abs(sd) < 0.7) & (zt - gz < 1.4) & (zt - gz > -0.3)
-    k = smooth(0.15, 0.75, fd(s, gz))
-    Z['bare'][:] = np.maximum(Z['bare'], np.where(edge, 0.85 * k * smooth(1.4, 0.2, zt - gz), 0.0))
-    Z['streaks'][:] = np.maximum(Z['streaks'], np.where(edge, 0.7 * smooth(-0.3, 0.6, fd(s + 40.0, gz)), 0.0))
+    k = smooth(-0.35, 0.35, fd(s, gz))
+    Z['bare'][:] = np.maximum(Z['bare'], np.where(edge, 0.95 * k * (1.0 - smooth(0.9, 1.5, zt - gz)), 0.0))
+    Z['streaks'][:] = np.maximum(Z['streaks'], np.where(edge, 0.9 * smooth(-0.8, 0.2, fd(s + 40.0, gz)), 0.0))
+    # верх губок у горловины (где держится патрон) — по ходу затвора до стали, полосами вдоль X
+    lip_in = top & (np.abs(px.y) < 8.2)
+    fs = Field(SEED[setname] + 9, 400.0, -30.0, 30.0, 6.0, 0.25, res=12.0)
+    Z['bare'][:] = np.maximum(Z['bare'], np.where(lip_in, 0.85 * smooth(-0.1, 0.5, fs(gx + 200.0, px.y)) *
+                                                  (1.0 - smooth(7.0, 8.2, np.abs(px.y))), 0.0))
     # латунь — на внутренних кромках горловины (|y| 4.5…7.5), у самого верха, местами
     inner = (np.abs(px.y) > 4.3) & (np.abs(px.y) < 7.8) & (zt - gz < 2.8) & (zt - gz > -0.3) & ~on_round & \
         (px.ny * np.sign(px.y) < -0.3)
     fb = Field(SEED[setname] + 7, 400.0, -30.0, 30.0, 2.0, 0.6, res=10.0)
-    brass = np.where(inner | (top & (np.abs(px.y) < 6.2)), smooth(-0.2, 0.8, fb(gx + 200.0, gz)) * 0.8, 0.0)
+    brass = np.where(inner | (top & (np.abs(px.y) < 6.2)), smooth(-0.6, 0.5, fb(gx + 200.0, gz)) * 0.9, 0.0)
     Z['brass'][:] = np.clip(brass, 0, 1)
+    # внутренние кромки горловины — стёрты гильзами: заглажено и местами до стали
+    Z['streaks'][:] = np.maximum(Z['streaks'], np.where(inner, 0.8 * smooth(-0.6, 0.3, fb(gx + 230.0, gz)), 0.0))
+    Z['bare'][:] = np.maximum(Z['bare'], np.where(inner, 0.7 * smooth(0.0, 0.6, fb(gx + 260.0, gz)), 0.0))
 
 
 def bottom_zones(px, setname, Z):
