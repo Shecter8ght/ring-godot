@@ -19,6 +19,18 @@ func load_plan() -> void:
 	forests.clear()
 
 
+## Сырость покрытий StreetPaving — от погоды рейда (покрытия ТЦ — MallGround, в _process предка).
+var _paving_weather_t: float = 0.0
+
+
+func _process(delta: float) -> void:
+	super(delta)
+	_paving_weather_t += delta
+	if _paving_weather_t >= WEATHER_SYNC_SEC:
+		StreetPaving.sync_weather(_paving_weather_t)
+		_paving_weather_t = 0.0
+
+
 ## Земля ровная; подземные уровни — отдельными плитами, а не высотами.
 func ground(_x: float, _z: float) -> float:
 	return 0.0
@@ -65,9 +77,44 @@ func _ground_plate(g: RefCounted) -> void:
 			Vector3(piece.size.x, 0.5, piece.size.y), "ground")
 
 
-## Покрытия — тонкие коробки на земле; тротуары — с вырезами под лестницы перехода.
+## Покрытия по выбору владельца на стенде tools/paving_probe (2026-11-07, docs/design/prospekt_paving.md): тротуары —
+## серый кирпичик ложком (walk_a), дороги и парковки — асфальт А (road_a), площади у вокзала, сквер и площадки у «Вершины» —
+## плиты 500 × 500 с розовыми рядами и полосами тёмной ёлочки (plaza_ab2), детские — резиновая крошка, корт — краска по
+## покрытию; старые дворы и пустырь — разбитый асфальт (road_c). Ключ StreetPaving — по началу id куска плана, иначе по
+## материалу; трава, грунт и бетонные площадки — прежние (MallGround).
+const PAVING_BY_ID: Array = [
+	["station_", "plaza_ab2"], ["square_", "plaza_ab2"], ["fore_", "plaza_ab2"], ["plaza_", "plaza_ab2"],
+	["playground", "rubber"], ["court_bb", "court"], ["house7_yard", "road_c"], ["yard_e", "road_c"], ["evac_field", "road_c"]]
+const PAVING_BY_MAT: Dictionary = {"walk": "walk_a", "road": "road_a", "parking": "road_a", "court": "court"}
+## Что у края считается тем же покрытием (стык без наноса песка): тротуары с площадями, проезжие части между собой.
+const PAVING_KIND: Dictionary = {"walk_a": "walk", "plaza_ab2": "walk", "rubber": "pad", "court": "pad", "road_a": "road",
+	"road_c": "road"}
+const BOX_KIND: Dictionary = {"walk": "walk", "road": "road", "parking": "road"}
+## Люки и решётки: решётка ливнёвки у дорожного бордюра через столько метров, люк в тротуаре — через столько.
+const DRAIN_STEP_M: float = 32.0
+const MANHOLE_STEP_M: float = 46.0
+
+## Куски покрытий для проверки краёв: [Rect2, верх, вид]; полосы поворота: [середина xz, полуразмеры, поворот, верх, вид].
+var _pave_rects: Array = []
+var _pave_boxes: Array = []
+var _iron_rng := RandomNumberGenerator.new()
+
+
+func _paving_key(s: Dictionary) -> String:
+	var id: String = String(s.id)
+	for pair: Array in PAVING_BY_ID:
+		if id.begins_with(String(pair[0])):
+			return String(pair[1])
+	return String(PAVING_BY_MAT.get(String(s.mat), ""))
+
+
+## Покрытия — тонкие коробки на земле (коллизия и бока), сверху — прямоугольник покрытия StreetPaving с данными краёв;
+## тротуары — с вырезами под лестницы перехода.
 func _surfaces_flat(g: RefCounted) -> void:
 	var walk_holes: Array = plan.get("walk_holes", []) as Array
+	_iron_rng.seed = 7112026
+	_collect_paving_regions(walk_holes)
+	var streams: Dictionary = {}
 	for s: Dictionary in plan.surfaces:
 		var r: Array = s.rect
 		var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
@@ -75,9 +122,107 @@ func _surfaces_flat(g: RefCounted) -> void:
 		var y: float = float(s.get("y", 0.0))
 		# свои вырезы покрытия (лестницы паркинга под парковкой) или общие вырезы тротуаров (переход)
 		var holes: Array = s.get("holes", walk_holes if String(s.id).begins_with("walk") else []) as Array
+		var key: String = _paving_key(s)
 		for piece: Rect2 in _minus(rect, holes):
-			g.box(Vector3(piece.position.x + piece.size.x * 0.5, y + t * 0.5, piece.position.y + piece.size.y * 0.5),
-				Vector3(piece.size.x, t, piece.size.y), String(s.mat), true)
+			if piece.get_area() < 0.01:
+				continue
+			var at := Vector3(piece.position.x + piece.size.x * 0.5, y + t * 0.5, piece.position.y + piece.size.y * 0.5)
+			if key == "":
+				g.box(at, Vector3(piece.size.x, t, piece.size.y), String(s.mat), true)
+				continue
+			g.box(at, Vector3(piece.size.x, t, piece.size.y), "paving_side", true)
+			if not streams.has(key):
+				streams[key] = StreetPaving.begin_surfaces()
+			# узор — вдоль длинной стороны куска (ложок тротуара — вдоль тротуара на любом плече)
+			var angle: float = 0.0 if piece.size.x >= piece.size.y else PI * 0.5
+			StreetPaving.add_surface_quad(streams[key] as SurfaceTool, piece, y + t + 0.003,
+				_edge_weights(piece, y + t, String(PAVING_KIND[key])), angle)
+			if key == "walk_a" and String(s.id).begins_with("walk"):
+				_manholes(piece, y + t + 0.003)
+		if key == "court":
+			StreetPaving.court_paint(generated, rect, y + t + 0.003, 152)
+	for key: String in streams:
+		var mi := MeshInstance3D.new()
+		mi.name = "Paving_" + key
+		mi.mesh = (streams[key] as SurfaceTool).commit()
+		mi.material_override = StreetPaving.material(key)
+		generated.add_child(mi)
+
+
+func _collect_paving_regions(walk_holes: Array) -> void:
+	_pave_rects.clear()
+	_pave_boxes.clear()
+	for s: Dictionary in plan.surfaces:
+		var key: String = _paving_key(s)
+		if key == "":
+			continue
+		var r: Array = s.rect
+		var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
+		var holes: Array = s.get("holes", walk_holes if String(s.id).begins_with("walk") else []) as Array
+		for piece: Rect2 in _minus(rect, holes):
+			_pave_rects.append([piece, float(s.get("y", 0.0)) + float(s.get("t", 0.08)), String(PAVING_KIND[key])])
+	for bx: Dictionary in plan.boxes:
+		var kind: String = String(BOX_KIND.get(String(bx.get("mat", "")), ""))
+		if kind == "":
+			continue
+		var at: Array = bx.at
+		var size: Array = bx.size
+		_pave_boxes.append([Vector2(float(at[0]), float(at[2])), Vector2(float(size[0]), float(size[2])) * 0.5,
+			deg_to_rad(float(bx.get("yaw", 0.0))), float(at[1]) + float(size[1]) * 0.5, kind])
+
+
+## Вид покрытия в точке (того же уровня по высоте) — по кускам и полосам поворота; "" — другое.
+func _kind_at(p: Vector2, top: float) -> String:
+	for e: Array in _pave_rects:
+		if absf(float(e[1]) - top) < 0.06 and (e[0] as Rect2).has_point(p):
+			return String(e[2])
+	for b: Array in _pave_boxes:
+		if absf(float(b[3]) - top) > 0.06:
+			continue
+		var d: Vector2 = p - (b[0] as Vector2)
+		var yaw: float = float(b[2])
+		var lx: float = d.x * cos(yaw) - d.y * sin(yaw)
+		var lz: float = d.x * sin(yaw) + d.y * cos(yaw)
+		var half: Vector2 = b[1]
+		if absf(lx) <= half.x and absf(lz) <= half.y:
+			return String(b[4])
+	return ""
+
+
+## Сила краёв куска (x0, x1, z0, z1): 0 — за краем то же покрытие (стык), 1 — бордюр, стена, газон, другое покрытие.
+func _edge_weights(r: Rect2, top: float, kind: String) -> Color:
+	var w: Array[float] = [0.0, 0.0, 0.0, 0.0]
+	for e: int in range(4):
+		var same: int = 0
+		for k: int in range(5):
+			var t: float = (float(k) + 0.5) / 5.0
+			var p: Vector2
+			match e:
+				0:
+					p = Vector2(r.position.x - 0.3, lerpf(r.position.y, r.end.y, t))
+				1:
+					p = Vector2(r.end.x + 0.3, lerpf(r.position.y, r.end.y, t))
+				2:
+					p = Vector2(lerpf(r.position.x, r.end.x, t), r.position.y - 0.3)
+				_:
+					p = Vector2(lerpf(r.position.x, r.end.x, t), r.end.y + 0.3)
+			if _kind_at(p, top) == kind:
+				same += 1
+		w[e] = 0.0 if same >= 3 else 1.0
+	return Color(w[0], w[1], w[2], w[3])
+
+
+## Люки в тротуаре: чугунные ГОСТ через MANHOLE_STEP_M вдоль куска, у середины ширины со сдвигом.
+func _manholes(piece: Rect2, y: float) -> void:
+	var along_x: bool = piece.size.x >= piece.size.y
+	var length: float = maxf(piece.size.x, piece.size.y)
+	var s: float = _iron_rng.randf_range(8.0, MANHOLE_STEP_M)
+	while s < length - 4.0:
+		var across: float = _iron_rng.randf_range(0.3, 0.7)
+		var at := Vector3(piece.position.x + (s if along_x else piece.size.x * across), y,
+			piece.position.y + (piece.size.y * across if along_x else s))
+		StreetPaving.iron_node(generated, "manhole_gost", at, _iron_rng.randf_range(0.0, TAU))
+		s += MANHOLE_STEP_M * _iron_rng.randf_range(0.8, 1.25)
 
 
 func _slabs(g: RefCounted) -> void:
@@ -100,12 +245,108 @@ func _walls(g: RefCounted) -> void:
 			Vector3(float(r[2]) - float(r[0]), y1 - y0, float(r[3]) - float(r[1])), String(w.get("mat", "wall")))
 
 
+## Коробки плана; светлые «stripe» на земле — бордюры (0,2 × 0,15, твёрдые) и разметка (2 см) — заменяются: бордюр —
+## камнями по профилю ГОСТ 6665 лицом к дороге (StreetPaving.curb_mesh; коллизия — прежней коробкой), разметка —
+## краской road_paint, зебры бело-жёлтые (жёлтая полоса — в промежутке между белыми, как на фото владельца).
 func _boxes(g: RefCounted) -> void:
-	for bx: Dictionary in plan.boxes:
+	var curbs: SurfaceTool = null
+	var zebra: Dictionary = {}
+	for i: int in range(plan.boxes.size()):
+		var bx: Dictionary = plan.boxes[i]
 		var at: Array = bx.at
 		var size: Array = bx.size
-		g.box(Vector3(float(at[0]), float(at[1]), float(at[2])), Vector3(float(size[0]), float(size[1]), float(size[2])),
-			String(bx.get("mat", "wall")), bool(bx.get("solid", true)), deg_to_rad(float(bx.get("yaw", 0.0))))
+		var pos := Vector3(float(at[0]), float(at[1]), float(at[2]))
+		var sz := Vector3(float(size[0]), float(size[1]), float(size[2]))
+		var yaw: float = deg_to_rad(float(bx.get("yaw", 0.0)))
+		var mat: String = String(bx.get("mat", "wall"))
+		var narrow: float = minf(sz.x, sz.z)
+		if mat == "stripe" and bool(bx.get("solid", true)) and sz.y > 0.12 and sz.y < 0.18 and narrow > 0.15 and narrow < 0.25:
+			if curbs == null:
+				curbs = SurfaceTool.new()
+				curbs.begin(Mesh.PRIMITIVE_TRIANGLES)
+			_curb(g, curbs, pos, sz, yaw, i)
+			continue
+		if mat == "stripe" and sz.y <= 0.03:
+			if narrow > 0.8 and maxf(sz.x, sz.z) > 3.0:
+				var along_x: bool = sz.x > sz.z
+				var gkey: String = "%s/%d" % ["x" if along_x else "z", int(round((pos.x if along_x else pos.z) * 2.0))]
+				if not zebra.has(gkey):
+					zebra[gkey] = []
+				(zebra[gkey] as Array).append([pos, sz, yaw])
+			else:
+				StreetPaving.paint_node(generated, "line", Vector3(pos.x, pos.y - sz.y * 0.5 + 0.012, pos.z), Vector2(sz.x, sz.z), yaw)
+			continue
+		g.box(pos, sz, mat, bool(bx.get("solid", true)), yaw)
+	if curbs != null:
+		var mi := MeshInstance3D.new()
+		mi.name = "Curbs"
+		mi.mesh = curbs.commit()
+		mi.material_override = StreetPaving.curb_material("road")
+		generated.add_child(mi)
+	_zebras(zebra)
+
+
+## Бордюр по коробке: длинная ось, сторона дороги (где асфальт ниже бордюра), камни БР 100.30.15 тыльной гранью к тротуару.
+func _curb(g: RefCounted, st: SurfaceTool, pos: Vector3, sz: Vector3, yaw: float, index: int) -> void:
+	var b := Basis(Vector3.UP, yaw)
+	var along_x: bool = sz.x >= sz.z
+	var axis3: Vector3 = b * (Vector3.RIGHT if along_x else Vector3.BACK)
+	var a := Vector2(axis3.x, axis3.z).normalized()
+	var length: float = maxf(sz.x, sz.z)
+	var half_w: float = minf(sz.x, sz.z) * 0.5
+	var c := Vector2(pos.x, pos.z)
+	var n := Vector2(a.y, -a.x)
+	var top: float = pos.y + sz.y * 0.5
+	var road_plus: bool = _kind_at(c + n * (half_w + 0.35), top - 0.07) == "road"
+	var road_minus: bool = _kind_at(c - n * (half_w + 0.35), top - 0.07) == "road"
+	if road_minus and not road_plus:
+		a = -a
+		n = Vector2(a.y, -a.x)
+	var base_y: float = pos.y - sz.y * 0.5
+	var w: float = float((StreetPaving.CURB_PROFILES.road as Dictionary).w)
+	# лицевая грань (z = 0 сетки) — со стороны дороги, камень уходит к тротуару (+z сетки = −n)
+	var start: Vector2 = c - a * length * 0.5 - n * half_w + n * w
+	var xform := Transform3D(Basis(Vector3(a.x, 0.0, a.y), Vector3.UP, Vector3(-n.x, 0.0, -n.y)), Vector3(start.x, base_y, start.y))
+	st.append_from(StreetPaving.curb_mesh("road", length, 300 + index), 0, xform)
+	var shape := BoxShape3D.new()
+	shape.size = sz
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	cs.position = pos
+	cs.rotation.y = yaw
+	(g.body as StaticBody3D).add_child(cs)
+	# решётки ливнёвки у бордюра со стороны дороги, изредка люк на полосе
+	if length > 20.0 and (road_plus or road_minus):
+		var s: float = _iron_rng.randf_range(4.0, DRAIN_STEP_M)
+		while s < length - 2.0:
+			var p2: Vector2 = start + a * s + n * 0.32
+			StreetPaving.iron_node(generated, "drain_grate", Vector3(p2.x, base_y + 0.083, p2.y), atan2(-a.y, a.x))
+			s += DRAIN_STEP_M
+		if _iron_rng.randf() < 0.5:
+			var p3: Vector2 = start + a * _iron_rng.randf_range(6.0, length - 6.0) + n * 2.2
+			StreetPaving.iron_node(generated, "manhole_gost", Vector3(p3.x, base_y + 0.083, p3.y), _iron_rng.randf_range(0.0, TAU))
+
+
+## Зебры: белые полосы плана и жёлтые в промежутках между соседними белыми.
+func _zebras(groups: Dictionary) -> void:
+	for gkey: String in groups:
+		var list: Array = groups[gkey]
+		var along_x: bool = gkey.begins_with("x")
+		list.sort_custom(func(p: Array, q: Array) -> bool:
+			var pa: Vector3 = p[0]
+			var qa: Vector3 = q[0]
+			return (pa.z if along_x else pa.x) < (qa.z if along_x else qa.x))
+		for k: int in range(list.size()):
+			var pos: Vector3 = list[k][0]
+			var sz: Vector3 = list[k][1]
+			var y: float = pos.y - sz.y * 0.5 + 0.012
+			StreetPaving.paint_node(generated, "white", Vector3(pos.x, y, pos.z), Vector2(sz.x, sz.z), float(list[k][2]))
+			if k + 1 < list.size():
+				var nxt: Vector3 = list[k + 1][0]
+				var gap: float = (nxt.z - pos.z) if along_x else (nxt.x - pos.x)
+				if gap < 3.0:
+					var mid: Vector3 = (pos + nxt) * 0.5
+					StreetPaving.paint_node(generated, "yellow", Vector3(mid.x, y, mid.z), Vector2(sz.x, sz.z), float(list[k][2]))
 
 
 func _columns(g: RefCounted) -> void:
@@ -225,6 +466,13 @@ const EXTRA_COLORS: Dictionary = {"loot_common": Color("c8b48a"), "loot_med": Co
 
 func _palette() -> Dictionary:
 	var result: Dictionary = super()
+	# полосы поворота и прочие коробки покрытий — материалами стенда без данных краёв; бока кусков покрытий — бетон
+	for mat: String in PAVING_BY_MAT:
+		result[mat] = StreetPaving.material(String(PAVING_BY_MAT[mat]), false)
+	var side := StandardMaterial3D.new()
+	side.albedo_color = Color(0.42, 0.41, 0.39)
+	side.roughness = 0.95
+	result["paving_side"] = side
 	for key: String in EXTRA_COLORS:
 		var m: StandardMaterial3D = StandardMaterial3D.new()
 		m.albedo_color = EXTRA_COLORS[key]

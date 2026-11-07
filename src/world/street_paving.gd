@@ -160,12 +160,16 @@ static func _tint(set_id: String, target: Color, saturation: float) -> Vector3:
 	return Vector3(lin.r / maxf(desat.x, 0.002), lin.g / maxf(desat.y, 0.002), lin.b / maxf(desat.z, 0.002))
 
 
-static func material(key: String) -> ShaderMaterial:
-	if _cache.has(key):
-		return _cache[key]
+## edges — у сетки есть данные краёв (surface_mesh, add_surface_quad): нанос и мох у бордюров; у коробок (полосы
+## поворота на карте) данных нет — без краёв.
+static func material(key: String, edges: bool = true) -> ShaderMaterial:
+	var cache_key: String = key + ("" if edges else "/noedge")
+	if _cache.has(cache_key):
+		return _cache[cache_key]
 	var spec: Dictionary = SURFACES[key]
 	var m := ShaderMaterial.new()
 	m.shader = SHADER
+	m.set_shader_parameter("use_edges", edges)
 	var set_id: String = spec.set
 	var maps: bool = has_maps(set_id)
 	m.set_shader_parameter("use_maps", maps)
@@ -204,7 +208,7 @@ static func material(key: String) -> ShaderMaterial:
 			m.set_shader_parameter(name, spec[name] as Vector3)
 	if spec.has("dust_color"):
 		m.set_shader_parameter("dust_color", spec.dust_color as Color)
-	_cache[key] = m
+	_cache[cache_key] = m
 	return m
 
 
@@ -282,9 +286,20 @@ static func iron_material(name: String) -> StandardMaterial3D:
 ## силу краёв (COLOR: x0, x1, z0, z1 — у бордюра, стены и газона 1, у стыка с тем же покрытием 0) и поворот узора
 ## (CUSTOM0.z, рад).
 static func surface_mesh(rect: Rect2, y: float, edges: Color, angle: float = 0.0) -> ArrayMesh:
+	var st: SurfaceTool = begin_surfaces()
+	add_surface_quad(st, rect, y, edges, angle)
+	return st.commit()
+
+
+## Сборщик прямоугольников покрытия с данными краёв (несколько кусков — один меш).
+static func begin_surfaces() -> SurfaceTool:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	return st
+
+
+static func add_surface_quad(st: SurfaceTool, rect: Rect2, y: float, edges: Color, angle: float = 0.0) -> void:
 	var corners: Array[Vector2] = [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]
 	# у Godot лицевая сторона — обход по часовой, если смотреть сверху
 	for i: int in [0, 1, 2, 0, 2, 3]:
@@ -295,7 +310,6 @@ static func surface_mesh(rect: Rect2, y: float, edges: Color, angle: float = 0.0
 		st.set_uv2(Vector2(c.x - rect.position.x, c.y - rect.position.y))
 		st.set_custom(0, Color(rect.end.x - c.x, rect.end.y - c.y, angle, 0.0))
 		st.add_vertex(Vector3(c.x, y, c.y))
-	return st.commit()
 
 
 ## Бордюр вдоль +X длиной length (локально: лицевая грань — в плоскости z = 0, камень — в +Z, низ видимой части —
@@ -440,6 +454,81 @@ static func paint_arc(r0: float, r1: float, a0: float, a1: float, y: float, segm
 			st.add_vertex(q[k])
 	var mesh: ArrayMesh = st.commit()
 	return mesh
+
+
+## Полоса краски узлом: размер (м), середина, поворот вокруг вертикали.
+static func paint_node(parent: Node3D, key: String, at: Vector3, size: Vector2, yaw: float = 0.0) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = paint_quad(size, 0.0)
+	mi.material_override = paint_material(key)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	mi.position = at
+	mi.rotation.y = yaw
+	return mi
+
+
+static func paint_arc_node(parent: Node3D, key: String, at: Vector3, r0: float, r1: float, a0: float, a1: float) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = paint_arc(r0, r1, a0, a1, 0.0, 64)
+	mi.material_override = paint_material(key)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	mi.position = at
+	return mi
+
+
+## Люк или решётка: квадрат 1 × 1 м на высоте покрытия (+4 мм), карта с воротником.
+static func iron_node(parent: Node3D, name: String, at: Vector3, yaw: float) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(1.0, 1.0)
+	mi.mesh = plane
+	mi.material_override = iron_material(name)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	mi.position = at + Vector3(0.0, 0.004, 0.0)
+	mi.rotation.y = yaw
+	return mi
+
+
+## Краска баскетбольного корта по фото владельца (13–16) в прямоугольнике rect на высоте y: серое покрытие с
+## камуфляжем, оранжевое поле, синие трёхочковые зоны у колец, белые линии; длинная сторона поля — вдоль длинной
+## стороны прямоугольника. Корт брошен два года — краска стёрта местами (PAINTS: court_*).
+static func court_paint(parent: Node3D, rect: Rect2, y: float, seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var along_x: bool = rect.size.x >= rect.size.y
+	var length: float = maxf(rect.size.x, rect.size.y)
+	var width: float = minf(rect.size.x, rect.size.y)
+	var c: Vector2 = rect.get_center()
+	# точка корта (u — вдоль, v — поперёк, от середины) → мир
+	var to_world := func(u: float, v: float, h: float) -> Vector3:
+		return Vector3(c.x + u, y + h, c.y + v) if along_x else Vector3(c.x + v, y + h, c.y + u)
+	var yaw: float = 0.0 if along_x else PI * 0.5
+	var field := Vector2(minf(length - 2.0, 28.0), minf(width - 2.0, 15.0))
+	paint_node(parent, "court_grey", to_world.call(0.0, 0.0, 0.002), Vector2(length - 0.4, width - 0.4), yaw)
+	for b: int in range(int(rect.get_area() / 25.0)):
+		var at: Vector3 = to_world.call(rng.randf_range(-length * 0.45, length * 0.45), rng.randf_range(-width * 0.45, width * 0.45),
+			0.0025 + float(b) * 0.00002)
+		paint_arc_node(parent, "court_grey2", at, 0.0, rng.randf_range(0.6, 2.2), 0.0, TAU)
+	var h1: float = 0.004
+	paint_node(parent, "court_orange", to_world.call(0.0, 0.0, h1), field, yaw)
+	var lw: float = 0.05
+	for side: float in [-1.0, 1.0]:
+		var basket_u: float = side * (field.x * 0.5 - 1.575)
+		var basket: Vector3 = to_world.call(basket_u, 0.0, h1 + 0.0005)
+		var a_mid: float = (PI if side > 0.0 else 0.0) + (0.0 if along_x else PI * 0.5)
+		paint_arc_node(parent, "court_blue", basket, 0.0, 6.75, a_mid - PI * 0.5, a_mid + PI * 0.5)
+		paint_node(parent, "court_grey", to_world.call(side * (field.x * 0.5 - 2.9), 0.0, h1 + 0.001), Vector2(5.8, 4.9), yaw)
+		paint_arc_node(parent, "court_line", to_world.call(basket_u, 0.0, h1 + 0.0015), 6.75 - lw, 6.75, a_mid - PI * 0.5, a_mid + PI * 0.5)
+		paint_node(parent, "court_line", to_world.call(side * (field.x * 0.5 - 5.8), 0.0, h1 + 0.0015), Vector2(lw, 4.9), yaw)
+		for k: float in [-1.0, 1.0]:
+			paint_node(parent, "court_line", to_world.call(side * (field.x * 0.5 - 2.9), k * 2.45, h1 + 0.0015), Vector2(5.8, lw), yaw)
+		paint_node(parent, "court_line", to_world.call(0.0, side * field.y * 0.5, h1 + 0.0015), Vector2(field.x, lw), yaw)
+		paint_node(parent, "court_line", to_world.call(side * field.x * 0.5, 0.0, h1 + 0.0015), Vector2(lw, field.y), yaw)
+	paint_node(parent, "court_line", to_world.call(0.0, 0.0, h1 + 0.0015), Vector2(lw, field.y), yaw)
+	paint_arc_node(parent, "court_line", to_world.call(0.0, 0.0, h1 + 0.0015), 1.8 - lw, 1.8, 0.0, TAU)
 
 
 ## Сырость всех материалов покрытий — от погоды рейда (как MallGround.sync_weather); под крышей сухо.
