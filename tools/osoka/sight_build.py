@@ -424,7 +424,8 @@ def bracket(coll):
 
 # ---------- сборка ----------
 
-def build(src, out_asm, out_sight):
+def build(src, out_asm, out_sight, post=None):
+    """post(objs) — доработка перед сохранением (игровая сетка: нормали, sight_game.py)."""
     bpy.ops.wm.open_mainfile(filepath=src)
     sc = bpy.context.scene
     top = coll_new("THERMAL", sc.collection)
@@ -463,6 +464,8 @@ def build(src, out_asm, out_sight):
         if o.type == "MESH":
             for p in o.data.polygons:
                 p.use_smooth = True
+    if post is not None:
+        post(objs)
     # «Осока»: с прицелом целик и мушка сложены
     oc = bpy.data.objects.get("OSOKA_Controls")
     if oc is not None:
