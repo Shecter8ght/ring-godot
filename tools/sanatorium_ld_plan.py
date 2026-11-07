@@ -2,6 +2,10 @@
 """Левел-дизайн карты «Санаторий»: замер обзора по серому блокауту (data/blockouts/sanatorium.json + рельеф).
 
     python -X utf8 tools/sanatorium_ld_plan.py   → docs/design/sanatorium_sightlines.png + docs/screens/sanatorium/sightlines.json
+    python -X utf8 tools/sanatorium_ld_plan.py --breaks 70   → ещё docs/design/data/sanatorium_view_breaks.json: места групп
+        елей, которые ломают больше всего длинных лучей внутри территории (жадно: группа — туда, где таких лучей
+        больше всего, их считаем сломанными, дальше — следующая; не на дорогах, дорожках, площадках и постройках).
+        Генератор блокаута ставит туда группы (ель и молодые ели вокруг); потом замер — заново.
 
 Правило владельца для «Проспекта» и концепция «Санатория» (docs/design/sanatorium_map.md, §5): внутри территории обзор
 прерывается через 50–90 м. Замер — как на «Проспекте» (tools/prospekt_ld_plan.py), но с рельефом: из точек сетки 5 м,
@@ -36,6 +40,8 @@ DESC_JSON = ROOT / 'docs/design/data/sanatorium_descents_v03.json'
 SPA_JSON = ROOT / 'docs/design/data/sanatorium_spa_restaurant_v03.json'
 OUT_PNG = ROOT / 'docs/design/sanatorium_sightlines.png'
 OUT_JSON = ROOT / 'docs/screens/sanatorium/sightlines.json'
+OUT_BREAKS = ROOT / 'docs/design/data/sanatorium_view_breaks.json'
+DECALS = {'asphalt', 'paving', 'trail', 'trail_strip', 'stripe', 'rubber_red', 'rubber_green', 'rubber_blue', 'rubber_dark', 'court'}
 
 EYE = 1.7
 CELL = 0.5
@@ -107,6 +113,93 @@ def rect_cells(cx, cy, length, width, ang_deg, pad=0.0):
     return jj[m], ii[m]
 
 
+def raster_tris(flat):
+    """Ячейки каждого треугольника (Godot-координаты в плоском списке) и высота плоскости в них."""
+    a = np.asarray(flat, dtype=float).reshape(-1, 3, 3)
+    for tri in a:
+        xs, zs, ys = tri[:, 0], tri[:, 1], -tri[:, 2]
+        i0, j1 = cell_ij(xs.min(), ys.min())
+        i1, j0 = cell_ij(xs.max(), ys.max())
+        i0, i1 = max(0, int(i0)), min(NX - 1, int(i1))
+        j0, j1 = max(0, int(j0)), min(NY - 1, int(j1))
+        if i1 < i0 or j1 < j0:
+            continue
+        ii, jj = np.meshgrid(np.arange(i0, i1 + 1), np.arange(j0, j1 + 1))
+        px, py = X0 + (ii + 0.5) * CELL, Y1 - (jj + 0.5) * CELL
+        (x1, y1), (x2, y2), (x3, y3) = zip(xs, ys)
+        den = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+        if abs(den) < 1e-9:
+            continue
+        l1 = ((y2 - y3) * (px - x3) + (x3 - x2) * (py - y3)) / den
+        l2 = ((y3 - y1) * (px - x3) + (x1 - x3) * (py - y3)) / den
+        l3 = 1 - l1 - l2
+        m = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        yield jj[m], ii[m], (l1 * zs[0] + l2 * zs[1] + l3 * zs[2])[m]
+
+
+def plan_breaks(res, notree, n_max, target=0.10):
+    """Жадно: группа елей — в клетку 2 м, через которую идёт больше всего живых длинных лучей внутри территории;
+    лучи ближе 3,5 м к ней считаем сломанными. Группы — не ближе 14 м друг к другу."""
+    geo = [g for g in res['long_geo'] if g[5] in ('внутри плато', 'склон и спуски')]
+    plateau_rays = res['zones']['внутри плато']['rays'] + res['zones']['склон и спуски']['rays']
+    BIN = 2.0
+    nbx, nby = int((X1 - X0) / BIN), int((Y1 - Y0) / BIN)
+    ok_bin = np.zeros((nby, nbx), dtype=bool)
+    k = int(BIN / CELL)
+    free = ~notree[:nby * k, :nbx * k].reshape(nby, k, nbx, k).any(axis=(1, 3))
+    ok_bin[:, :] = free
+    samp_ray, samp_bin = [], []
+    for r_i, (px, py, dx, dy, d, z) in enumerate(geo):
+        ts = np.arange(14.0, d - 14.0, 2.0)
+        if ts.size == 0:
+            continue
+        bx = ((px + dx * ts - X0) / BIN).astype(int)
+        by = ((Y1 - (py + dy * ts)) / BIN).astype(int)
+        m = (bx >= 0) & (bx < nbx) & (by >= 0) & (by < nby)
+        bx, by = bx[m], by[m]
+        m = ok_bin[by, bx]
+        b = by[m] * nbx + bx[m]
+        samp_bin.append(b)
+        samp_ray.append(np.full(b.size, r_i))
+    if not samp_bin:
+        return []
+    samp_bin = np.concatenate(samp_bin)
+    samp_ray = np.concatenate(samp_ray)
+    alive = np.ones(len(geo), dtype=bool)
+    banned = np.zeros(nbx * nby, dtype=bool)
+    clusters = []
+    ray_xy = np.array([(g[0], g[1], g[2], g[3], g[4]) for g in geo])
+    for _ in range(n_max):
+        sel = alive[samp_ray] & ~banned[samp_bin]
+        if not sel.any():
+            break
+        counts = np.bincount(samp_bin[sel], minlength=nbx * nby)
+        b = int(np.argmax(counts))
+        if counts[b] < 25:
+            break
+        cx = X0 + (b % nbx + 0.5) * BIN
+        cy = Y1 - (b // nbx + 0.5) * BIN
+        # сломанные лучи: проходят ближе 3,5 м к центру группы (между 14 м от глаза и 14 м до цели)
+        px, py, dx, dy, d = ray_xy[:, 0], ray_xy[:, 1], ray_xy[:, 2], ray_xy[:, 3], ray_xy[:, 4]
+        t = (cx - px) * dx + (cy - py) * dy
+        dist = np.abs(-(cx - px) * dy + (cy - py) * dx)
+        hit = alive & (t > 14.0) & (t < d - 14.0) & (dist < 3.5)
+        alive &= ~hit
+        clusters.append([round(cx, 1), round(cy, 1), int(hit.sum())])
+        bx0, by0 = b % nbx, b // nbx
+        r = int(14.0 / BIN)
+        for yy in range(max(0, by0 - r), min(nby, by0 + r + 1)):
+            for xx in range(max(0, bx0 - r), min(nbx, bx0 + r + 1)):
+                if (xx - bx0) ** 2 + (yy - by0) ** 2 <= r * r:
+                    banned[yy * nbx + xx] = True
+        left = (alive.sum()) / max(1, plateau_rays)
+        if left < target:
+            break
+    print(f'группы елей: {len(clusters)}, длинных лучей внутри территории было {len(geo)} '
+          f'({len(geo) / max(1, plateau_rays) * 100:.1f} %), осталось по оценке {alive.sum()} ({alive.sum() / max(1, plateau_rays) * 100:.1f} %)')
+    return clusters
+
+
 def main():
     plan = json.loads(PLAN_JSON.read_text(encoding='utf-8'))
     scheme = load_scheme()
@@ -114,32 +207,18 @@ def main():
     T = terrain_raster()
     G = T.copy()                                   # пол: рельеф, марши, плиты (мол, пирсы)
     floor_from_tris = np.zeros_like(G, dtype=bool)
-    # сплошные треугольники — настилы (мол, пирсы, плиты): пол
+    # сплошные треугольники — настилы (мол, пирсы, плиты): пол; асфальт, дорожки, покрытия — где деревьям не место
+    decal = np.zeros_like(G, dtype=bool)
     for key, flat in plan['tris'].items():
-        if not key.endswith('|1'):
+        name, solid = key.split('|')
+        if solid != '1' and name not in DECALS:
             continue
-        a = np.asarray(flat, dtype=float).reshape(-1, 3, 3)
-        for tri in a:
-            xs, zs, ys = tri[:, 0], tri[:, 1], -tri[:, 2]
-            i0, j1 = cell_ij(xs.min(), ys.min())
-            i1, j0 = cell_ij(xs.max(), ys.max())
-            i0, i1 = max(0, int(i0)), min(NX - 1, int(i1))
-            j0, j1 = max(0, int(j0)), min(NY - 1, int(j1))
-            if i1 < i0 or j1 < j0:
-                continue
-            ii, jj = np.meshgrid(np.arange(i0, i1 + 1), np.arange(j0, j1 + 1))
-            px, py = X0 + (ii + 0.5) * CELL, Y1 - (jj + 0.5) * CELL
-            (x1, y1), (x2, y2), (x3, y3) = zip(xs, ys)
-            den = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
-            if abs(den) < 1e-9:
-                continue
-            l1 = ((y2 - y3) * (px - x3) + (x3 - x2) * (py - y3)) / den
-            l2 = ((y3 - y1) * (px - x3) + (x1 - x3) * (py - y3)) / den
-            l3 = 1 - l1 - l2
-            m = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
-            z = l1 * zs[0] + l2 * zs[1] + l3 * zs[2]
-            G[jj[m], ii[m]] = np.maximum(G[jj[m], ii[m]], z[m])
-            floor_from_tris[jj[m], ii[m]] = True
+        for jj, ii, z in raster_tris(flat):
+            if solid == '1':
+                G[jj, ii] = np.maximum(G[jj, ii], z)
+                floor_from_tris[jj, ii] = True
+            else:
+                decal[jj, ii] = True
     # марши — пол (поверхность по наклону)
     for st in plan['stairs']:
         bx, bz, bmz, tx, tz, tmz, w = st[:7]
@@ -247,6 +326,20 @@ def main():
     results = {}
     for variant, Sv in (('без деревьев', S), ('с деревьями', S_tr)):
         results[variant] = cast(pts, Sv, L_)
+    import sys
+    if '--breaks' in sys.argv:
+        from scipy.ndimage import binary_dilation
+        n_max = int(sys.argv[sys.argv.index('--breaks') + 1])
+        notree = (S - G > 0.3) | decal | ~inside | (T < 0.5)
+        for r in floors + [po]:
+            notree |= (X >= r[0]) & (X <= r[2]) & (Y >= r[1]) & (Y <= r[3])
+        notree = binary_dilation(notree, iterations=int(2.5 / CELL))
+        clusters = plan_breaks(results['с деревьями'], notree, n_max)
+        OUT_BREAKS.write_text(json.dumps({
+            'note': 'места групп елей, ломающих длинные лучи обзора внутри территории (tools/sanatorium_ld_plan.py --breaks); '
+                    'x, y — схема участка, третье число — сколько длинных лучей ломает группа по оценке',
+            'clusters': clusters}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+        print(f'→ {OUT_BREAKS.relative_to(ROOT)}')
     zones = ['внутри плато', 'с плато к воде', 'у воды', 'склон и спуски']
     out = {'eye': EYE, 'step': STEP, 'rays': RAYS, 'long_m': LONG, 'points': len(pts), 'blockers_taken': taken, 'variants': {}}
     for variant, r in results.items():
@@ -304,6 +397,7 @@ def cast(pts, S, L):
     vmax = 0.0
     per_point = []
     inside_longest = []
+    long_geo = []
     for (px, py, lv) in pts:
         E = lv + EYE
         qx = px + dx[:, None] * ts[None, :]
@@ -335,6 +429,7 @@ def cast(pts, S, L):
             if d > LONG:
                 zones[z]['long'] += 1
                 long_ += 1
+                long_geo.append((px, py, float(dx[k]), float(dy[k]), d, z))
                 if z != 'с плато к воде':
                     nlong += 1
                 if z in ('внутри плато', 'склон и спуски', 'у воды'):
@@ -346,7 +441,7 @@ def cast(pts, S, L):
             pts_long += 1
         per_point.append((px, py, best, nlong))
     inside_longest.sort(key=lambda r: -r[4])
-    return {'rays': total, 'long': long_, 'pts_long': pts_long, 'max': vmax, 'zones': zones, 'per_point': per_point,
+    return {'rays': total, 'long': long_, 'pts_long': pts_long, 'max': vmax, 'zones': zones, 'per_point': per_point, 'long_geo': long_geo,
             'inside_longest': [r[:5] for r in inside_longest], 'inside_all': inside_longest}
 
 
@@ -364,6 +459,10 @@ def draw(scheme, pts, results):
         c = (60, 160, 70, 210) if nl == 0 else ((230, 190, 40, 220) if nl <= 2 else ((235, 120, 30, 230) if nl <= 5 else (210, 30, 30, 240)))
         a = P(x, y)
         d.ellipse([a[0] - ox - 2.5, a[1] - oy - 2.5, a[0] - ox + 2.5, a[1] - oy + 2.5], fill=c)
+    if OUT_BREAKS.exists():                         # группы елей против длинного обзора — тёмные кольца
+        for cx, cy, _ in json.loads(OUT_BREAKS.read_text(encoding='utf-8'))['clusters']:
+            a = P(cx, cy)
+            d.ellipse([a[0] - ox - 6, a[1] - oy - 6, a[0] - ox + 6, a[1] - oy + 6], outline=(20, 70, 30, 255), width=3)
     for (x, y, x2, y2, dist, z) in r['inside_all'][:150]:
         a, b = P(x, y), P(x2, y2)
         d.line([(a[0] - ox, a[1] - oy), (b[0] - ox, b[1] - oy)], fill=(140, 0, 160, 110), width=1)
@@ -385,7 +484,7 @@ def draw(scheme, pts, results):
                 font=f2, fill=(40, 42, 46))
         y += 22
     dd.text((14, y + 4), 'точки (с деревьями): сколько из 24 направлений видно дальше 90 м — зелёная 0, жёлтая 1–2, оранжевая 3–5, красная 6 и больше '
-            '(без лучей с плато к воде); фиолетовые линии — 150 самых длинных лучей внутри территории', font=f2, fill=(90, 92, 96))
+            '(без лучей с плато к воде); фиолетовые линии — 150 самых длинных лучей внутри территории; тёмные кольца — группы елей против обзора', font=f2, fill=(90, 92, 96))
     OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
     out.save(OUT_PNG)
 

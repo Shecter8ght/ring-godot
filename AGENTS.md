@@ -409,6 +409,8 @@ tools/sanatorium_study.cmd                                    # карта «С�
                                                               # --windowed --resolution 1920x1080 --disable-vsync … -- perf — кадры по видам и местам → perf.txt, perf.json;
                                                               # обзор: python -X utf8 tools/sanatorium_ld_plan.py — лучи на высоте глаз, доля длиннее 90 м по зонам →
                                                               # docs/design/sanatorium_sightlines.png, docs/screens/sanatorium/sightlines.json
+                                                              # (--breaks 90 — места групп елей против длинного обзора → docs/design/data/sanatorium_view_breaks.json,
+                                                              # генератор их ставит; после — пересборка и замер заново)
 tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
                                                               # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;

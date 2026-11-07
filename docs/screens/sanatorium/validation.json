@@ -3,19 +3,19 @@
 		{
 			"check": "Собрано: объёмы, марши, помещения, обходы",
 			"details": {
-				"build_ms": 1735,
-				"landscape_ms": 374,
+				"build_ms": 1784,
+				"landscape_ms": 342,
 				"stats": {
 					"beams": 25.0,
-					"boxes": 6207.0,
+					"boxes": 6195.0,
 					"cyls": 99.0,
 					"rooms": 623.0,
 					"routes": 70.0,
 					"stairs": 106.0,
-					"trees": 4937.0,
+					"trees": 5129.0,
 					"tris": 3980.0
 				},
-				"triangles": 100156
+				"triangles": 100012
 			},
 			"pass": true
 		},
@@ -661,7 +661,7 @@
 				"checks": 14,
 				"m": 105.0,
 				"points": 55,
-				"s": 52.0
+				"s": 53.0
 			},
 			"pass": true
 		},
@@ -869,9 +869,9 @@
 			"check": "Пешком: Набережная: от каскада на север к прокату и эллингу",
 			"details": {
 				"checks": 1,
-				"m": 194.0,
+				"m": 196.0,
 				"points": 8,
-				"s": 41.0
+				"s": 44.0
 			},
 			"pass": true
 		},
@@ -960,7 +960,7 @@
 		"stage": 33.0,
 		"under_stage": 28.0
 	},
-	"real_s": 49.74,
-	"walked_m": 10383.0,
-	"walked_sim_s": 4166.0
+	"real_s": 48.83,
+	"walked_m": 10386.0,
+	"walked_sim_s": 4170.0
 }

@@ -3,20 +3,20 @@
  "step": 5.0,
  "rays": 24,
  "long_m": 90.0,
- "points": 6027,
- "blockers_taken": 3043,
+ "points": 6021,
+ "blockers_taken": 3031,
  "variants": {
   "без деревьев": {
-   "rays": 141812,
-   "long_rays": 53573,
-   "long_share": 0.3778,
-   "points_with_long_view": 5951,
+   "rays": 141571,
+   "long_rays": 52314,
+   "long_share": 0.3695,
+   "points_with_long_view": 5938,
    "max_m": 300.0,
    "zones": {
     "внутри плато": {
-     "rays": 96261,
-     "long_rays": 37271,
-     "long_share": 0.3872,
+     "rays": 96020,
+     "long_rays": 36012,
+     "long_share": 0.375,
      "max_m": 300.0
     },
     "с плато к воде": {
@@ -322,13 +322,13 @@
    ],
    "areas": {
     "север: S-корпуса, хоздвор": {
-     "points": 1497,
-     "open6_share": 0.669,
-     "closed_share": 0.016
+     "points": 1493,
+     "open6_share": 0.601,
+     "closed_share": 0.017
     },
     "центр: главный корпус, парковка, въезд": {
-     "points": 672,
-     "open6_share": 0.942,
+     "points": 670,
+     "open6_share": 0.94,
      "closed_share": 0.0
     },
     "юг: ресторан и спа, площадка, амфитеатр": {
@@ -338,8 +338,8 @@
     },
     "коттеджи": {
      "points": 630,
-     "open6_share": 0.392,
-     "closed_share": 0.01
+     "open6_share": 0.389,
+     "closed_share": 0.017
     },
     "склон и вода": {
      "points": 2240,
@@ -349,34 +349,34 @@
    }
   },
   "с деревьями": {
-   "rays": 137158,
-   "long_rays": 26034,
-   "long_share": 0.1898,
-   "points_with_long_view": 5395,
+   "rays": 134758,
+   "long_rays": 16397,
+   "long_share": 0.1217,
+   "points_with_long_view": 5101,
    "max_m": 300.0,
    "zones": {
     "внутри плато": {
-     "rays": 94610,
-     "long_rays": 17635,
-     "long_share": 0.1864,
+     "rays": 92575,
+     "long_rays": 9329,
+     "long_share": 0.1008,
      "max_m": 300.0
     },
     "с плато к воде": {
-     "rays": 639,
-     "long_rays": 506,
-     "long_share": 0.7919,
+     "rays": 602,
+     "long_rays": 456,
+     "long_share": 0.7575,
      "max_m": 300.0
     },
     "у воды": {
-     "rays": 17857,
-     "long_rays": 3745,
-     "long_share": 0.2097,
+     "rays": 18827,
+     "long_rays": 3560,
+     "long_share": 0.1891,
      "max_m": 300.0
     },
     "склон и спуски": {
-     "rays": 24052,
-     "long_rays": 4148,
-     "long_share": 0.1725,
+     "rays": 22754,
+     "long_rays": 3052,
+     "long_share": 0.1341,
      "max_m": 300.0
     }
    },
@@ -664,29 +664,29 @@
    ],
    "areas": {
     "север: S-корпуса, хоздвор": {
-     "points": 1497,
-     "open6_share": 0.357,
-     "closed_share": 0.053
+     "points": 1493,
+     "open6_share": 0.058,
+     "closed_share": 0.098
     },
     "центр: главный корпус, парковка, въезд": {
-     "points": 672,
-     "open6_share": 0.649,
-     "closed_share": 0.015
+     "points": 670,
+     "open6_share": 0.061,
+     "closed_share": 0.079
     },
     "юг: ресторан и спа, площадка, амфитеатр": {
      "points": 988,
-     "open6_share": 0.364,
-     "closed_share": 0.04
+     "open6_share": 0.028,
+     "closed_share": 0.118
     },
     "коттеджи": {
      "points": 630,
-     "open6_share": 0.03,
-     "closed_share": 0.23
+     "open6_share": 0.002,
+     "closed_share": 0.286
     },
     "склон и вода": {
      "points": 2240,
-     "open6_share": 0.291,
-     "closed_share": 0.211
+     "open6_share": 0.232,
+     "closed_share": 0.242
     }
    }
   }

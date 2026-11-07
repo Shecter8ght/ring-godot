@@ -2009,6 +2009,9 @@ CAR_COLORS = ['car_a', 'car_b', 'car_c', 'car_d']
 for i, (cx_, cy_, ang) in enumerate(CARS):
     g = min(h_at(cx_ + dx_, cy_ + dy_) for dx_ in (-2, 2) for dy_ in (-2, 2))
     m = CAR_COLORS[i % 4]
+    if i % 3 == 1:                  # фургон 2,4 м — закрывает взгляд над парковкой (замер обзора, владелец: «ломать сейчас»)
+        O.obox(cx_, cy_, 2.0, 5.2, g - 0.1, g + 2.4, ang, m)
+        continue
     O.obox(cx_, cy_, 1.8, 4.4, g - 0.1, g + 0.75, ang, m)
     O.obox(cx_, cy_, 1.6, 2.5, g + 0.75, g + 1.45, ang, m)
 # шлагбаум КПП и тротуары S-корпусов
@@ -2443,6 +2446,37 @@ for k in range(420):                         # лес по склону (v11 —
         continue
     key = ['spruce_a', 'pine', 'spruce_b', 'pine_slim', 'spruce_young'][k % 5]
     TREES[key].append([r3(x), r3(h_at(x, y) - 0.1), r3(-y), r3((k * 71) % 360), r3(0.8 + (rad - 2.0) * 0.3)])
+# группы елей, ломающие длинные лучи обзора (места — замер tools/sanatorium_ld_plan.py --breaks; владелец 2026-11-07:
+# «ломать сейчас»): большая ель в середине, вокруг молодые ели и ещё одна ель — подлесок, закрывающий взгляд от земли
+BREAKS = DATA / 'sanatorium_view_breaks.json'
+BREAK_TREES = 0
+
+
+def near_road(x, y, pad=1.5):
+    for pts_, w_ in PLAN['ROADS']:
+        for a, b in zip(pts_, pts_[1:]):
+            if seg_dist(np.array([x]), np.array([y]), a, b)[0][0] < w_ / 2 + pad:
+                return True
+    return False
+
+
+if BREAKS.exists():
+    brng = random.Random(31)
+    for k_, (cx_, cy_, _) in enumerate(json.loads(BREAKS.read_text(encoding='utf-8'))['clusters']):
+        a0_ = brng.uniform(0, 360)
+        layout = [(0.0, 0.0, ('spruce_a', 'spruce_b')[k_ % 2], brng.uniform(1.05, 1.25))]
+        for j_ in range(4):
+            r_ = brng.uniform(3.0, 4.5)
+            a_ = math.radians(a0_ + j_ * 90 + brng.uniform(-20, 20))
+            layout.append((r_ * math.cos(a_), r_ * math.sin(a_), 'spruce_young', brng.uniform(0.9, 1.15)))
+        a_ = math.radians(a0_ + 45)
+        layout.append((5.5 * math.cos(a_), 5.5 * math.sin(a_), ('spruce_b', 'spruce_a')[k_ % 2], brng.uniform(0.85, 1.0)))
+        for dx_, dy_, key_, sc_ in layout:
+            x_, y_ = cx_ + dx_, cy_ + dy_
+            if not PLAN['in_poly'](x_, y_, PLAN['boundary']) or blocked(x_, y_) or near_road(x_, y_):
+                continue
+            TREES[key_].append([r3(x_), r3(h_at(x_, y_) - 0.1), r3(-y_), r3(brng.uniform(0, 360)), r3(sc_)])
+            BREAK_TREES += 1
 # фон: лес за забором, за оврагом и на мысу (без коллизии)
 bg = random.Random(21)
 for k in range(5200):
@@ -2643,6 +2677,10 @@ PLACE_SPOTS = {
     20: ((-174.0, 200.0), (-205.0, 196.0)), 21: ((-158.0, -160.0), (-192.0, -160.0)), 22: ((-176.0, 10.0), (-245.0, 10.0)),
     23: ((-3.0, -123.0), (30.0, -123.0)),
 }
+# точки мест свободны: деревья (группы елей против обзора и прочие) — не ближе 2,5 м
+for key_ in ('pine', 'pine_slim', 'spruce_a', 'spruce_b', 'spruce_young'):
+    TREES[key_] = [t_ for t_ in TREES[key_] if all(math.hypot(t_[0] - sp_[0][0], -t_[2] - sp_[0][1]) > 2.5
+                                                    for sp_ in PLACE_SPOTS.values())]
 PLACES = []
 for n_, x_, y_, text_ in PLAN['PLACES']:
     (sx_, sy_), (lx_, ly_) = PLACE_SPOTS[n_]
@@ -2848,6 +2886,6 @@ for d_ in DEVIATIONS:
     print('ОТСТУПЛЕНИЕ:', d_)
 st_ = result['stats']
 print(f"санаторий: коробок {st_['boxes']}, маршей {st_['stairs']}, лент {st_['beams']}, цилиндров {st_['cyls']}, "
-      f"треугольников {st_['tris']}, помещений {st_['rooms']}, обходов {st_['routes']}, деревьев {st_['trees']}")
+      f"треугольников {st_['tris']}, помещений {st_['rooms']}, обходов {st_['routes']}, деревьев {st_['trees']} (из них в группах елей против длинного обзора {BREAK_TREES})")
 print(f"уровни: S {S_LEVELS}, коттеджи {COT_LEVELS}, хоздвор {HOZ_LEVEL}, площадка {PG_LEVEL}, корты {SPORT_LEVEL}")
 print(f"→ {OUT_PLAN.relative_to(ROOT)} ({OUT_PLAN.stat().st_size // 1024} КБ), {OUT_SCENE.relative_to(ROOT)}")
