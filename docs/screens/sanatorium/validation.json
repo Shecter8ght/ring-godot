@@ -3,19 +3,19 @@
 		{
 			"check": "Собрано: объёмы, марши, помещения, обходы",
 			"details": {
-				"build_ms": 1640,
-				"landscape_ms": 409,
+				"build_ms": 1735,
+				"landscape_ms": 374,
 				"stats": {
 					"beams": 25.0,
-					"boxes": 6211.0,
-					"cyls": 108.0,
+					"boxes": 6207.0,
+					"cyls": 99.0,
 					"rooms": 623.0,
 					"routes": 70.0,
 					"stairs": 106.0,
 					"trees": 4937.0,
 					"tris": 3980.0
 				},
-				"triangles": 100780
+				"triangles": 100156
 			},
 			"pass": true
 		},
@@ -960,7 +960,7 @@
 		"stage": 33.0,
 		"under_stage": 28.0
 	},
-	"real_s": 49.183,
+	"real_s": 49.74,
 	"walked_m": 10383.0,
 	"walked_sim_s": 4166.0
 }

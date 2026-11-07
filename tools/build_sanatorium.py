@@ -1304,8 +1304,7 @@ for k, g in enumerate(GALLERIES):
 
 
 CD = DESC['cascade']
-ROT_DECK = tuple(CD['rotunda_deck'])            # выступ с беседкой-ротондой у второй галереи
-ROT_C = tuple(CD['rotunda'])
+CAS_BENCH = tuple(CD['bench'])                  # лавка на южной площадке второй галереи (ротонды нет — владелец)
 BALCONY = tuple(CD['balcony'])                  # смотровой балкон у третьей
 KIOSK = tuple(CD['kiosk'])
 CAS_ELEMS = []     # (прямоугольник, уровень, уровни сторон {W, E, S, N}) — под каждым рельеф ниже, по краю — подпорные стенки
@@ -1319,9 +1318,8 @@ for g in GALLERIES:
     lv_ = [g['start']['z_top']] + [f['z_bottom'] for f in g['flights']] + [g['end']['z_top']]
     CAS_ELEMS.append((tuple(g['walk']), min(lv_), {}))
     CAS_ELEMS.append(((g['gap'][0], g['span'][0], g['gap'][1], g['span'][1]), min(lv_) + 0.45, {}))
-CAS_ELEMS.append((ROT_DECK, GALLERIES[1]['end']['z_top'], {}))
 CAS_ELEMS.append((BALCONY, GALLERIES[2]['end']['z_top'], {}))
-CAS_ZONE += [ROT_DECK, BALCONY]
+CAS_ZONE += [BALCONY]
 # склон под каскадом террасирован: рельеф под каждым элементом ниже его уровня (с запасом 1 м — треугольники сетки)
 for r_, lv_, _ in CAS_ELEMS:
     clamp_rect(r_[0] - 1.0, r_[1] - 1.0, r_[2] + 1.0, r_[3] + 1.0, lv_ - 0.3)
@@ -1722,7 +1720,7 @@ L0 = LINK[0]
 cas_route = [(TOP_X + 6.0, 0.0, CENTRAL), (TOP_X + 1.0, 0.0, CENTRAL), (L0['rect'][2] - 0.4, 0.0, CENTRAL - 0.1),
              (L0['rect'][0] + 0.4, 0.0, L0['z_bottom'] + 0.1)]
 cas_checks = [[0, 'cascade/терраса', CENTRAL]]
-EXT_DECKS = {(int(g_['gallery']), g_['end']): tuple(g_['x']) for g_ in CD['ext_gaps']}   # проходы к ротонде и смотровому балкону
+EXT_DECKS = {(int(g_['gallery']), g_['end']): tuple(g_['x']) for g_ in CD['ext_gaps']}   # проход к смотровому балкону
 for e in XFLIGHTS:
     x0, y0, x1, y1 = e['rect']
     yc = (y0 + y1) / 2
@@ -1779,7 +1777,7 @@ for k, g in enumerate(GALLERIES):
             p0_, p1_ = s0 + (s1 - s0) * kk / nb, s0 + (s1 - s0) * (kk + 1) / nb
             zl = min(gallery_level(g, p0_), gallery_level(g, p1_))
             O.box(x0 - 0.12, p0_, x0 + 0.05, p1_, zl - 0.6, gallery_level(g, (p0_ + p1_) / 2) + BAL, 'parapet')
-    # торцы галереи: перила поперёк (у второй и третьей — проход на выступ с ротондой и смотровым балконом)
+    # торцы галереи: перила поперёк (у третьей — проход на смотровой балкон)
     for which, L_ in (('start', g['start']), ('end', g['end'])):
         lx0, ly0, lx1, ly1 = L_['rect']
         edge = ly1 if (L_['rect'][1] + L_['rect'][3]) / 2 > 0 else ly0
@@ -1863,24 +1861,20 @@ tw_box(TOP_X - 1.0, CW / 2, TOP_X - 1.0 + TW, N_END + CW / 2 + TW)
 tw_box(gx0_1, N_END + CW / 2, TOP_X, N_END + CW / 2 + TW)
 tw_box(gx0_1, -CW / 2 - TW, TOP_X, -CW / 2)
 tw_box(gx0_1 - 0.6, S_END - CW / 2, gx0_1 - 0.6 + TW, -CW / 2 - TW)
-# фонтан на парадной террасе, киоск, ротонда, смотровой балкон
+# фонтан на парадной террасе, киоск, лавка, смотровой балкон
 O.cyl(-72.0, 0.0, CENTRAL, CENTRAL + 0.55, 5.0, 'stone')
 O.cyl(-72.0, 0.0, CENTRAL + 0.55, CENTRAL + 2.6, 0.5, 'stone')
 O.water.append({'name': 'FountainTerrace', 'level': r3(CENTRAL + 0.5), 'circle': [-72.0, 0.0, 4.6]})
 kz_ = float(CD['kiosk_z'])
 O.box(*KIOSK, kz_, kz_ + 2.6, 'kiosk')
 O.label((KIOSK[0] + KIOSK[2]) / 2, (KIOSK[1] + KIOSK[3]) / 2, kz_ + 3.2, 'киоск', 0.8, 'object')
-rot_deck = ROT_DECK
-lv = GALLERIES[1]['end']['z_top']
-O.box(rot_deck[0], rot_deck[1], rot_deck[2], rot_deck[3], rect_stat(*rot_deck, fn=np.min) - 0.6, lv, 'stone')
-for k in range(8):
-    a = math.radians(k * 45)
-    O.cyl(ROT_C[0] + 2.6 * math.cos(a), ROT_C[1] + 2.6 * math.sin(a), lv, lv + 3.2, 0.22, 'white')
-O.cyl(ROT_C[0], ROT_C[1], lv + 3.2, lv + 3.6, 3.1, 'white', solid=False)
-for (p, q) in (((rot_deck[0], rot_deck[1]), (rot_deck[2], rot_deck[1])), ((rot_deck[0], rot_deck[1]), (rot_deck[0], rot_deck[3])),
-               ((rot_deck[2], rot_deck[1]), (rot_deck[2], rot_deck[3]))):
-    O.seg(p, q, 0.16, lv - 0.3, lv + BAL, 'rail')
-O.label(ROT_C[0], ROT_C[1], lv + 4.2, 'беседка-ротонда', 0.8, 'object')
+lv = GALLERIES[1]['end']['z_top']             # лавка у южного парапета, спинкой к парапету
+bx0_, by0_, bx1_, by1_ = CAS_BENCH
+O.box(bx0_, by0_, bx1_, by1_, lv + 0.4, lv + 0.48, 'wood')
+O.box(bx0_, by0_ - 0.08, bx1_, by0_, lv + 0.48, lv + 0.9, 'wood', solid=False)
+for bxx in (bx0_ + 0.1, bx1_ - 0.2):
+    O.box(bxx, by0_ + 0.05, bxx + 0.1, by1_ - 0.05, lv, lv + 0.4, 'wood')
+O.label((bx0_ + bx1_) / 2, (by0_ + by1_) / 2, lv + 1.6, 'лавка', 0.7, 'object')
 bal = BALCONY
 lv3 = GALLERIES[2]['end']['z_top']
 O.box(*bal, rect_stat(*bal, fn=np.min) - 0.6, lv3, 'stone')

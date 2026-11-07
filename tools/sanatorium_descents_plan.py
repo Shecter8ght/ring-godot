@@ -124,21 +124,19 @@ for i, (x0, x1, y) in enumerate(LINKS):
 CASCADE_LEN = dist
 assert abs(z - QUAY_Z) < 0.2, f'низ каскада {z:.2f} вместо +{QUAY_Z}'
 
-# выступы и киоск — от галерей: киоск на северной площадке первой, ротонда к югу от южной площадки второй (западнее
-# террасы ресторана), смотровой балкон к северу от северной площадки третьей
+# выступы и киоск — от галерей: киоск на северной площадке первой, лавка у южного парапета южной площадки второй
+# (v03: ротонды нет — владелец, вместо неё лавка), смотровой балкон к северу от северной площадки третьей
 G = [t[0] for t in TRAV]
 KIOSK = (G[0] + WIDTH / 2 - 0.2 - 2.4, N_END + WIDTH / 2 - 0.1 - 1.6, G[0] + WIDTH / 2 - 0.2, N_END + WIDTH / 2 - 0.1)
-ROT_DECK = (G[1] - WIDTH / 2, S_END - WIDTH / 2 - 6.4, G[1] - WIDTH / 2 + 6.4, S_END - WIDTH / 2)
-ROT_C = ((ROT_DECK[0] + ROT_DECK[2]) / 2, (ROT_DECK[1] + ROT_DECK[3]) / 2)
+BENCH_S = (G[1] - 1.1, S_END - WIDTH / 2 + 0.35, G[1] + 1.1, S_END - WIDTH / 2 + 0.85)
 BALCONY = (G[2] - 3.4, N_END + WIDTH / 2, G[2] + 3.4, N_END + WIDTH / 2 + 5.2)
-EXT_GAPS = [{'gallery': 1, 'end': 'end', 'x': [round(ROT_C[0] - 1.5, 2), round(ROT_C[0] + 1.5, 2)]},
-            {'gallery': 2, 'end': 'end', 'x': [round(G[2] - 1.5, 2), round(G[2] + 1.5, 2)]}]
+EXT_GAPS = [{'gallery': 2, 'end': 'end', 'x': [round(G[2] - 1.5, 2), round(G[2] + 1.5, 2)]}]
 z_g1_end = [e for e in elements if e[0] == 'landing' and e[6] == 0][1][2]
 
 CASCADE_POINTS = [  # (название, x, y, что)
     ('Верх: парадная терраса', TOP_X, 0.0, 'балюстрада, фонтан, вид на озеро и плотину'),
     ('Площадка с киоском', G[0], N_END, 'киоск: вода, мороженое; скамьи'),
-    ('Беседка-ротонда', ROT_C[0], ROT_C[1], 'белые колонны на выступе к югу от площадки'),
+    ('Площадка с лавкой', G[1], S_END - 2.0, 'лавка у южного парапета, вид на озеро (вместо ротонды — владелец)'),
     ('Смотровой балкон', G[2], N_END + WIDTH / 2 + 2.6, 'выступ над склоном, перила, подзорная труба'),
     ('Площадка со скамьями', G[3], N_END, 'скамьи, фонарь, урны'),
     ('Низ: набережная', BOTTOM_X, 0.0, 'к «Стрелке» и пляжу'),
@@ -234,11 +232,7 @@ for xt, ya, yb, runs in TRAV:                                                   
         A.circle(xt + WIDTH / 2 - 0.5, yy_, 0.35, fill=(240, 190, 80), outline=None)
 A.rect(*KIOSK, fill=(236, 236, 232), outline=INK)                                # киоск
 A.text((KIOSK[0] + KIOSK[2]) / 2, KIOSK[1] - 1.6, 'киоск', 9, INK)
-A.rect(*ROT_DECK, fill=(236, 232, 222), outline=INK)                             # выступ ротонды
-A.circle(ROT_C[0], ROT_C[1], 3.0, fill=(245, 245, 245), outline=INK, width=2)    # ротонда
-for k in range(8):
-    a = math.radians(k * 45)
-    A.circle(ROT_C[0] + 2.6 * math.cos(a), ROT_C[1] + 2.6 * math.sin(a), 0.3, fill=INK, outline=None)
+A.rect(*BENCH_S, fill=(150, 110, 80), outline=None)                              # лавка вместо ротонды
 A.rect(*BALCONY, fill=(236, 232, 222), outline=INK, width=2)                     # смотровой балкон
 A.text(G[2], (BALCONY[1] + BALCONY[3]) / 2, 'балкон', 9, INK)
 for x, y in ((G[0] + 3.2, 20), (G[1] + 3.2, 20), (G[1] + 3.2, -10), (G[2] + 3.2, 20), (G[3] + 3.2, 20), (G[3] + 3.2, 8)):   # скамьи
@@ -351,7 +345,7 @@ DATA.write_text(json.dumps({
                 'elements': [{'kind': k, 'rect': [round(v, 2) for v in r], 'z_top': zt, 'z_bottom': zb, 'risers': n,
                               'axis': ax, 'index': idx} for k, r, zt, zb, n, ax, idx in elements],
                 'kiosk': [round(v, 2) for v in KIOSK], 'kiosk_z': z_g1_end,
-                'rotunda_deck': [round(v, 2) for v in ROT_DECK], 'rotunda': [round(v, 2) for v in ROT_C],
+                'bench': [round(v, 2) for v in BENCH_S],
                 'balcony': [round(v, 2) for v in BALCONY], 'ext_gaps': EXT_GAPS,
                 'points': [{'name': n, 'xy': [round(x, 2), round(y, 2)], 'what': w} for n, x, y, w in CASCADE_POINTS]},
     'trail': {'polyline': TRAIL, 'z': [p[2] for p in TRAIL3], 'length': round(TRAIL_LEN, 1), 'junction': JUNCTION_I,
@@ -362,4 +356,4 @@ DATA.write_text(json.dumps({
     'cottage': {'polyline': COTTAGE, 'z': [p[2] for p in COTTAGE3], 'brow_index': COT_BROW_I, 'slope_length': round(COT_SLOPE_LEN, 1)},
 }, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 print(f'спуски v03: каскад {flights} маршей, {risers_total} ступеней, {CASCADE_LEN:.0f} м по ходу, низ x {BOTTOM_X:.1f}; '
-      f'серпантин {TRAIL_LEN:.0f} м, от коттеджей {COT_SLOPE_LEN:.0f} м; галереи x {[round(g, 1) for g in G]}; ротонда {ROT_DECK}')
+      f'серпантин {TRAIL_LEN:.0f} м, от коттеджей {COT_SLOPE_LEN:.0f} м; галереи x {[round(g, 1) for g in G]}')
