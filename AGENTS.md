@@ -400,6 +400,14 @@ tools/heli_study.cmd                                          # карта «П�
 tools/dam_play.cmd                                            # «Плотина» с настоящим игроком, оружием и ботами (как dorm_play): в полёте расставить ботов (ЛКМ / ПКМ,
                                                               # 1–6 — кого, R — что делает, N / B — места, G — игрок сюда), Enter — в тело игрока; навигация ботов печётся
                                                               # кусками 128 м вокруг игрока и ботов; --headless res://tools/dam_play.tscn -- check, с окном -- shots
+tools/sanatorium_study.cmd                                    # карта «Санаторий» (docs/design/sanatorium_map.md), серый блокаут по принятым планам: прогулка
+                                                              # (M — схема участка v08, 1–9/0 и N/B — места, F — полёт); пересборка — python -X utf8 tools/build_sanatorium.py
+                                                              # (→ data/blockouts/sanatorium*.json, data/terrain/sanatorium_*, scenes/levels/sanatorium_study.tscn);
+                                                              # --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — пешком все 623 помещения, лестницы,
+                                                              # каскад, тропы, дороги, ось КПП → маяк, ~45 с (SANATORIUM_ROUTES=id,… — выборочно, SANATORIUM_TRACE=1 —
+                                                              # точки хода); с окном -- shots — docs/screens/sanatorium (SANATORIUM_SHOTS=имя,…; SANATORIUM_TIME, _WEATHER)
+tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
+                                                              # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
                                                               # --headless res://tools/prospekt_study.tscn -- verify — здания, места лута, уровни, 16 мест, 7 маршрутов пешком (пролог
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон

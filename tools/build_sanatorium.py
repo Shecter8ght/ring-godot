@@ -1,0 +1,2703 @@
+# -*- coding: utf-8 -*-
+"""Карта «Санаторий» — серый блокаут для прогулки (docs/design/sanatorium_map.md, §7 п. 6).
+
+Источники приняты владельцем 2026-11-07 (решения 1–48): схема участка v08 (tools/sanatorium_map_plan.py — берег,
+бровка, дороги, парковки, коттеджи, каскад, тропа, места, выходы), S-корпуса (tools/sanatorium_s_geom.py, номер —
+лист tools/sanatorium_s_corps_plan.py), здания по помещениям и дверям (docs/design/data/sanatorium_*.json), спуски
+(sanatorium_descents_v01.json). Генератор ничего не придумывает в планировке: он поднимает принятые планы в объём.
+
+Что считает:
+- рельеф с шагом 1 м: озеро 0, набережная +2, пляж, склон 30 м, плато +32…+37, овраг на севере, скальный мыс на юге;
+  площадки под зданиями (главный корпус и «Ресторан и спа» на +32, S-корпуса каждый на своём уровне, коттеджи,
+  хоздвор), врезки под тропы и служебную дорогу, вал за рядами амфитеатра;
+- стены по классу (docs/building_standards.md): фасад 0,5 (отдельные малые постройки 0,4), стены лестниц и коридоров
+  0,3, перегородки 0,15; проёмы — по дверям JSON (дверь 1,17 × 2,42 по правилу E); витражи — стеклом;
+- лестницы ступенями 1:1 (П-образные, прямая в коттедже, винтовая в маяке, каскад по уровням JSON на подпорных
+  стенках с террасированным склоном), тропы лентой по профилю с подпорной крепью;
+- мол «Стрелка» с павильоном-кофейней, маяком, киосками, колоннадой, ротондой и стенками; амфитеатр 10 рядов с
+  проходами, променадом, колоннадой и уровнем под сценой; детская площадка, корты, хоздвор, парковки с машинами;
+- только ели и сосны (те же точки, что на схеме); дальний силуэт плотины (стена 260 м в ~1,2 км на юго-западе), горы;
+- обходы всех помещений, лестниц, каскада и троп — точки для проверки пешком (tools/sanatorium_study.gd -- verify).
+
+    python -X utf8 tools/build_sanatorium.py
+      → data/blockouts/sanatorium.json (план: объёмы, места, обходы), data/blockouts/sanatorium_vegetation.json,
+        data/blockouts/sanatorium_terrain.json + data/terrain/sanatorium_heights.r32 и _splat.png (рельеф 1 м),
+        data/blockouts/sanatorium_far_terrain.json + data/terrain/sanatorium_far.r32 и _far_splat.png (горы 10 м),
+        scenes/levels/sanatorium_study.tscn (перезаписывается)
+
+Координаты генератора — как на схеме: x на восток, y на север, z вверх, метры над уровнем озера. В Godot: X = x,
+Y = z, Z = −y (север — −Z). Отступления от листов (двери, сдвинутые там, где лестница иначе не встаёт) — DEVIATIONS,
+печатаются в конце и пишутся в план.
+"""
+import contextlib
+import io
+import json
+import math
+import random
+import runpy
+import sys
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parent.parent
+TOOLS = ROOT / 'tools'
+sys.path.insert(0, str(TOOLS))
+import sanatorium_s_geom as sg  # noqa: E402
+
+DATA = ROOT / 'docs/design/data'
+OUT_PLAN = ROOT / 'data/blockouts/sanatorium.json'
+OUT_VEG = ROOT / 'data/blockouts/sanatorium_vegetation.json'
+OUT_TER = ROOT / 'data/blockouts/sanatorium_terrain.json'
+OUT_FAR = ROOT / 'data/blockouts/sanatorium_far_terrain.json'
+OUT_SCENE = ROOT / 'scenes/levels/sanatorium_study.tscn'
+TERRAIN_DIR = ROOT / 'data/terrain'
+
+DEVIATIONS = []
+WARN = []
+
+
+def load_plan():
+    """Схема участка v08 исполняется как есть (её числа — единственный источник), без записи картинки."""
+    import PIL.Image as PI
+    save = PI.Image.save
+    PI.Image.save = lambda self, *a, **k: None
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            ns = runpy.run_path(str(TOOLS / 'sanatorium_map_plan.py'), run_name='sanatorium_plan_data')
+    finally:
+        PI.Image.save = save
+    return ns
+
+
+PLAN = load_plan()
+shore_x = PLAN['shore_x']
+brow_x = PLAN['brow_x']
+MAIN = json.loads((DATA / 'sanatorium_main_corps_v02.json').read_text(encoding='utf-8'))
+SPA = json.loads((DATA / 'sanatorium_spa_restaurant_v02.json').read_text(encoding='utf-8'))
+SMALL = json.loads((DATA / 'sanatorium_small_v01.json').read_text(encoding='utf-8'))
+DESC = json.loads((DATA / 'sanatorium_descents_v01.json').read_text(encoding='utf-8'))
+
+# ---------------------------------------------------------------- числа блокаута
+CENTRAL = 32.0          # главный корпус, «Ресторан и спа», парадная терраса (верх каскада — +32 по листу спусков)
+DOOR_H = 2.42           # дверь 0,9 × 2,1 → 1,17 × 2,42 (правило E)
+WIDE_DOOR_H = 2.8       # двустворчатые и ворота до 3,5 м
+OPEN_W = 3.9            # проём шире — во всю высоту этажа (сцена, ворота бокса, переходы)
+EXT_T = 0.5             # фасад
+SMALL_EXT_T = 0.4       # отдельно стоящая малая постройка
+STRUCT_T = 0.3          # лестница, коридор, между номерами
+PART_T = 0.15           # перегородка
+SLAB_T = 0.3
+RAIL_H = 1.1
+STEP = 1.0              # шаг рельефа
+GRID_X = (-330.0, 190.0)
+GRID_Y = (-300.0, 300.0)
+
+# ---------------------------------------------------------------- вывод объёмов
+MATS = []
+
+
+def mat(name):
+    if name not in MATS:
+        MATS.append(name)
+    return MATS.index(name)
+
+
+def r3(v):
+    return round(float(v), 3)
+
+
+def gpt(x, y, z):
+    """Точка схемы → Godot."""
+    return [r3(x), r3(z), r3(-y)]
+
+
+class Out:
+    def __init__(self):
+        self.boxes = []
+        self.stairs = []
+        self.beams = []
+        self.cyls = []
+        self.tris = {}
+        self.labels = []
+        self.water = []
+        self.barriers = []
+        self.markers = []
+
+    def box(self, x0, y0, x1, y1, z0, z1, m, solid=True):
+        if x1 < x0:
+            x0, x1 = x1, x0
+        if y1 < y0:
+            y0, y1 = y1, y0
+        if x1 - x0 < 0.005 or y1 - y0 < 0.005 or z1 - z0 < 0.005:
+            return
+        self.boxes.append([r3((x0 + x1) / 2), r3((z0 + z1) / 2), r3(-(y0 + y1) / 2), r3(x1 - x0), r3(z1 - z0), r3(y1 - y0),
+                           0.0, mat(m), 1 if solid else 0])
+
+    def obox(self, cx, cy, length, width, z0, z1, ang_deg, m, solid=True):
+        """Повёрнутая коробка: длина — вдоль направления ang_deg (от +x против часовой), ширина — поперёк."""
+        if length < 0.005 or width < 0.005 or z1 - z0 < 0.005:
+            return
+        self.boxes.append([r3(cx), r3((z0 + z1) / 2), r3(-cy), r3(length), r3(z1 - z0), r3(width), r3(ang_deg), mat(m),
+                           1 if solid else 0])
+
+    def seg(self, p, q, t, z0, z1, m, solid=True, ext=0.0):
+        """Стенка по отрезку p → q толщиной t."""
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        length = math.hypot(dx, dy)
+        if length < 0.01:
+            return
+        self.obox((p[0] + q[0]) / 2, (p[1] + q[1]) / 2, length + ext * 2, t, z0, z1, math.degrees(math.atan2(dy, dx)), m, solid)
+
+    def stair(self, bottom, top, width, count, fill, m):
+        """Марш: bottom/top — середина нижнего и верхнего края (x, y, z); fill — до какой отметки ступени сплошные
+        (None — тонкий марш 0,3 под ступенью, винтовая лестница маяка)."""
+        self.stairs.append([*gpt(*bottom), *gpt(*top), r3(width), int(count), None if fill is None else r3(fill), mat(m)])
+
+    def beam(self, p, q, width, depth, m, solid=True):
+        """Наклонная лента по осевой верха p → q (x, y, z), толщина depth вниз. Коробка наклонена вдоль ленты, её верх
+        отстоит от оси на depth/2 по нормали — ось опускаем на depth/2 / cos(уклона), чтобы верх шёл ровно через p и q."""
+        run = math.hypot(q[0] - p[0], q[1] - p[1])
+        cos_ = run / max(math.dist(p, q), 1e-6)
+        dz = depth / 2 / max(cos_, 0.2)
+        self.beams.append([*gpt(p[0], p[1], p[2] - dz), *gpt(q[0], q[1], q[2] - dz), r3(width), r3(depth), mat(m),
+                           1 if solid else 0])
+
+    def cyl(self, cx, cy, z0, z1, r, m, solid=True, sides=16):
+        self.cyls.append([r3(cx), r3(z0), r3(-cy), r3(r), r3(z1 - z0), mat(m), 1 if solid else 0, int(sides)])
+
+    def tri(self, m, a, b, c, solid=False):
+        mat(m)
+        key = f'{m}|{1 if solid else 0}'
+        self.tris.setdefault(key, []).extend([*gpt(*a), *gpt(*b), *gpt(*c)])
+
+    def quad(self, m, a, b, c, d, solid=False):
+        self.tri(m, a, b, c, solid)
+        self.tri(m, a, c, d, solid)
+
+    def label(self, x, y, z, text, size=1.0, kind='room'):
+        self.labels.append([*gpt(x, y, z), text, r3(size), kind])
+
+    def barrier(self, p, q, z0, z1):
+        self.barriers.append([r3(p[0]), r3(-p[1]), r3(q[0]), r3(-q[1]), r3(z0), r3(z1)])
+
+
+O = Out()
+
+# ---------------------------------------------------------------- рельеф: природный
+XS = np.arange(GRID_X[0], GRID_X[1] + STEP / 2, STEP)
+YS = GRID_Y[1] - np.arange(0, GRID_Y[1] - GRID_Y[0] + STEP / 2, STEP)   # строки сверху вниз: север → юг (Godot z растёт)
+GX, GY = np.meshgrid(XS, YS)
+
+
+def shore_v(y):
+    """То же, что shore_x схемы, для массивов."""
+    y = np.asarray(y, dtype=float)
+    return (-150.0 + 7.0 * np.sin(y / 45.0) + 5.0 * np.sin(y / 17.0 + 1.0)
+            + np.where(y < -215, 14.0, 0.0) * np.minimum(1.0, (-215 - y) / 30.0))
+
+
+def brow_v(y):
+    return shore_v(y) + 20.0 + 42.0 + 6.0 * np.sin(np.asarray(y, dtype=float) / 70.0 + 0.5)
+
+
+for _y in (-260.0, -133.0, 0.0, 77.0, 240.0):
+    assert abs(float(shore_v(_y)) - shore_x(_y)) < 1e-9 and abs(float(brow_v(_y)) - brow_x(_y)) < 1e-9
+
+EAST = PLAN['east']
+NY = EAST[-1][1]
+SY = PLAN['ys'][0]
+
+
+def north_v(x):
+    return NY + 7.0 * np.sin(np.asarray(x, dtype=float) / 23.0) + 4.0 * np.sin(np.asarray(x, dtype=float) / 9.0)
+
+
+def south_v(x):
+    x = np.asarray(x, dtype=float)
+    return SY - 10.0 - 12.0 * np.exp(-((x + 90.0) / 60.0) ** 2) + 3.0 * np.sin(x / 13.0)
+
+
+def smooth(t):
+    t = np.clip(t, 0.0, 1.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+BEACH = (-235.0, -95.0)
+
+
+def natural(x, y):
+    """Природный рельеф: озеро, набережная +2 со стенкой у воды, пляж, склон, плато, овраг, мыс."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    s = shore_v(y)
+    b = brow_v(y)
+    q = s + 20.0
+    wb = np.clip((y - BEACH[0]) / 8.0, 0.0, 1.0) * np.clip((BEACH[1] - y) / 8.0, 0.0, 1.0)
+    d_out = s - x
+    lake_quay = -2.5 - 3.5 * np.clip(d_out / 20.0, 0.0, 1.0)
+    lake_beach = np.maximum(-6.0, -0.09 * d_out)
+    lake = lake_quay * (1 - wb) + lake_beach * wb
+    quay = np.full_like(x, 2.0)
+    beach = 2.0 * smooth((x - s) / 18.0)
+    shore_zone = quay * (1 - wb) + beach * wb
+    t = np.clip((x - q) / (b - q), 0.0, 1.0)
+    slope = 2.0 + 30.0 * (0.7 * t + 0.3 * smooth(t))
+    e = np.maximum(x - b, 0.0)
+    und = (0.45 * np.sin(x / 41.0 + 0.7) * np.cos(y / 57.0 - 0.3) + 0.25 * np.sin((x + y) / 23.0)) * smooth(e / 30.0)
+    plateau = 32.0 + np.minimum(5.2, 0.022 * e) + und
+    h = np.where(x < s, lake, np.where(x < q, shore_zone, np.where(x < b, slope, plateau)))
+    # овраг с ручьём на севере (за кромкой карты), скальный мыс на юге
+    ny = north_v(x)
+    h = h - np.where(x > s, 14.0 * smooth((y - ny - 2.0) / 30.0), 0.0)
+    sy = south_v(x)
+    rock = 9.0 * smooth((sy - 2.0 - y) / 22.0)
+    h = np.where(x > s, h + rock, np.maximum(h, -6.0 + 15.0 * smooth((sy - 6.0 - y) / 30.0)))
+    return h
+
+
+H0 = natural(GX, GY)
+H = H0.copy()
+
+
+def grid_window(x0, y0, x1, y1, pad=0.0):
+    """Индексы сетки, покрывающие прямоугольник схемы (с запасом)."""
+    i0 = max(0, int(math.floor((x0 - pad - GRID_X[0]) / STEP)))
+    i1 = min(len(XS) - 1, int(math.ceil((x1 + pad - GRID_X[0]) / STEP)))
+    j0 = max(0, int(math.floor((GRID_Y[1] - (y1 + pad)) / STEP)))
+    j1 = min(len(YS) - 1, int(math.ceil((GRID_Y[1] - (y0 - pad)) / STEP)))
+    return slice(j0, j1 + 1), slice(i0, i1 + 1)
+
+
+def h_at(x, y, field=None):
+    """Высота рельефа в точке (билинейно)."""
+    f = H if field is None else field
+    fx = (x - GRID_X[0]) / STEP
+    fy = (GRID_Y[1] - y) / STEP
+    i = int(np.clip(math.floor(fx), 0, len(XS) - 2))
+    j = int(np.clip(math.floor(fy), 0, len(YS) - 2))
+    tx, ty = fx - i, fy - j
+    a, b_, c, d = f[j, i], f[j, i + 1], f[j + 1, i], f[j + 1, i + 1]
+    return float(a * (1 - tx) * (1 - ty) + b_ * tx * (1 - ty) + c * (1 - tx) * ty + d * tx * ty)
+
+
+def rect_stat(x0, y0, x1, y1, field=None, fn=np.mean):
+    f = H if field is None else field
+    sj, si = grid_window(x0, y0, x1, y1)
+    m = (GX[sj, si] >= x0 - 1e-6) & (GX[sj, si] <= x1 + 1e-6) & (GY[sj, si] >= y0 - 1e-6) & (GY[sj, si] <= y1 + 1e-6)
+    vals = f[sj, si][m]
+    if vals.size == 0:
+        return h_at((x0 + x1) / 2, (y0 + y1) / 2, f)
+    return float(fn(vals))
+
+
+def pad_rect(x0, y0, x1, y1, level, blend=(10, 10, 10, 10)):
+    """Площадка: внутри — уровень (число или (xa, la, xb, lb) — уклон по x), снаружи — переход к рельефу.
+    blend — запас перехода с запада, юга, востока, севера, м."""
+    bw, bs, be, bn = blend
+    sj, si = grid_window(x0 - bw, y0 - bs, x1 + be, y1 + bn)
+    X, Y = GX[sj, si], GY[sj, si]
+    dx = np.where(X < x0, (x0 - X) / max(bw, 1e-3), np.where(X > x1, (X - x1) / max(be, 1e-3), 0.0))
+    dy = np.where(Y < y0, (y0 - Y) / max(bs, 1e-3), np.where(Y > y1, (Y - y1) / max(bn, 1e-3), 0.0))
+    w = 1.0 - np.clip(np.hypot(dx, dy), 0.0, 1.0)
+    w = smooth(w) if True else w
+    if isinstance(level, tuple):
+        xa, la, xb, lb = level
+        lv = la + (lb - la) * np.clip((X - xa) / (xb - xa), 0.0, 1.0)
+    else:
+        lv = level
+    H[sj, si] = H[sj, si] * (1 - w) + lv * w
+
+
+def pad_ring(cx, cy, r0, r1, a0, a1, level, blend):
+    """Кольцевая площадка (вал за рядами амфитеатра): радиусы r0…r1, углы a0…a1 (град)."""
+    sj, si = grid_window(cx - r1 - blend, cy - r1 - blend, cx + r1 + blend, cy + r1 + blend)
+    X, Y = GX[sj, si], GY[sj, si]
+    r = np.hypot(X - cx, Y - cy)
+    a = np.degrees(np.arctan2(Y - cy, X - cx))
+    dr = np.where(r > r1, r - r1, 0.0)
+    da = np.where(a < a0, (a0 - a) * np.pi / 180 * r, np.where(a > a1, (a - a1) * np.pi / 180 * r, 0.0))
+    # внутрь (к рядам и оркестре) — без перехода: там ряды и оркестра на своём уровне
+    w = np.where(r < r0, 0.0, smooth(1.0 - np.clip(np.hypot(dr, da) / blend, 0.0, 1.0)))
+    H[sj, si] = H[sj, si] * (1 - w) + level * w
+
+
+RING_CLAMPS = []     # (cx, cy, r0, r1, a0, a1, top) — выемки под рядами амфитеатра
+
+
+def apply_ring_clamps():
+    for cx, cy, r0, r1, a0, a1, top in RING_CLAMPS:
+        sj, si = grid_window(cx - r1 - 1, cy - r1 - 1, cx + r1 + 1, cy + r1 + 1)
+        X, Y = GX[sj, si], GY[sj, si]
+        r = np.hypot(X - cx, Y - cy)
+        a = np.degrees(np.arctan2(Y - cy, X - cx))
+        m = (r >= r0) & (r <= r1) & (a >= a0) & (a <= a1)
+        H[sj, si] = np.where(m, np.minimum(H[sj, si], top), H[sj, si])
+
+
+CLAMPS = []      # (x0, y0, x1, y1, max) — выемки под постройками, ступенями, чашами
+RIBBONS = []     # ленты троп и дороги: точки (x, y, z), ширина — врезка в рельеф
+
+
+def clamp_rect(x0, y0, x1, y1, top, inset=0.0):
+    """Рельеф в прямоугольнике не выше top; inset > 0 — только строго внутри (узлы на кромке пола остаются на уровне
+    площадки, порог двери без ступеньки)."""
+    CLAMPS.append((min(x0, x1) + inset, min(y0, y1) + inset, max(x0, x1) - inset, max(y0, y1) - inset, top))
+
+
+def apply_clamps():
+    for x0, y0, x1, y1, top in CLAMPS:
+        sj, si = grid_window(x0, y0, x1, y1)
+        X, Y = GX[sj, si], GY[sj, si]
+        m = (X >= x0 - 1e-6) & (X <= x1 + 1e-6) & (Y >= y0 - 1e-6) & (Y <= y1 + 1e-6)
+        H[sj, si] = np.where(m, np.minimum(H[sj, si], top), H[sj, si])
+
+
+def seg_dist(X, Y, a, b):
+    ax, ay = a[0], a[1]
+    dx, dy = b[0] - ax, b[1] - ay
+    L2 = dx * dx + dy * dy + 1e-12
+    t = np.clip(((X - ax) * dx + (Y - ay) * dy) / L2, 0.0, 1.0)
+    return np.hypot(X - ax - dx * t, Y - ay - dy * t), t
+
+
+def apply_ribbon_clamp(pts, half, margin, joins=(True, True)):
+    """Под лентой рельеф не выше её низа: врезка на ширину + запас (по сетке 1 м треугольники под лентой целиком ниже).
+    У первой и последней точки (там лента сходит на землю) рельеф не трогается в радиусе 2,5 м."""
+    ends = [e for e, j in zip((pts[0], pts[-1]), joins) if j]
+    for a, b in zip(pts, pts[1:]):
+        x0, x1 = min(a[0], b[0]), max(a[0], b[0])
+        y0, y1 = min(a[1], b[1]), max(a[1], b[1])
+        sj, si = grid_window(x0, y0, x1, y1, half + margin + 1)
+        X, Y = GX[sj, si], GY[sj, si]
+        d, t = seg_dist(X, Y, a, b)
+        z = a[2] + (b[2] - a[2]) * t
+        m = d <= half + margin
+        for e in ends:
+            m &= np.hypot(X - e[0], Y - e[1]) > 2.5
+        H[sj, si] = np.where(m, np.minimum(H[sj, si], z - 0.22), H[sj, si])
+
+
+# ---------------------------------------------------------------- поверхности построек (для ступеней у дверей)
+SURFACES = []    # ('rect', x0, y0, x1, y1, z) | ('poly', pts, z) — верх настилов, где рельеф ниже
+
+
+def in_poly(x, y, pts):
+    c = False
+    j = len(pts) - 1
+    for i in range(len(pts)):
+        xi, yi = pts[i]
+        xj, yj = pts[j]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi:
+            c = not c
+        j = i
+    return c
+
+
+def ground_at(x, y):
+    g = h_at(x, y)
+    for rb in RIBBONS:
+        for a, b in zip(rb['pts'], rb['pts'][1:]):
+            d, t = seg_dist(np.array([x]), np.array([y]), a, b)
+            if d[0] <= rb['w'] / 2:
+                g = max(g, a[2] + (b[2] - a[2]) * float(t[0]))
+    for s in SURFACES:
+        if s[0] == 'rect':
+            _, x0, y0, x1, y1, z = s
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                g = max(g, z)
+        elif in_poly(x, y, s[1]):
+            g = max(g, s[2])
+    return g
+
+
+# ---------------------------------------------------------------- прямоугольники
+def rect_minus(r, holes):
+    """Прямоугольник без прямоугольников → список прямоугольников (x0, y0, x1, y1)."""
+    out = [r]
+    for h in holes:
+        nxt = []
+        for a in out:
+            ix0, iy0 = max(a[0], h[0]), max(a[1], h[1])
+            ix1, iy1 = min(a[2], h[2]), min(a[3], h[3])
+            if ix0 >= ix1 - 1e-6 or iy0 >= iy1 - 1e-6:
+                nxt.append(a)
+                continue
+            if a[1] < iy0 - 1e-6:
+                nxt.append((a[0], a[1], a[2], iy0))
+            if iy1 < a[3] - 1e-6:
+                nxt.append((a[0], iy1, a[2], a[3]))
+            if a[0] < ix0 - 1e-6:
+                nxt.append((a[0], iy0, ix0, iy1))
+            if ix1 < a[2] - 1e-6:
+                nxt.append((ix1, iy0, a[2], iy1))
+        out = nxt
+    return out
+
+
+def inter_len(a0, a1, b0, b1):
+    return max(0.0, min(a1, b1) - max(a0, b0))
+
+
+def sub_intervals(a, b, cuts):
+    """Интервал [a, b] без интервалов cuts."""
+    out = [(a, b)]
+    for c0, c1 in sorted(cuts):
+        nxt = []
+        for p, q in out:
+            if c1 <= p + 1e-6 or c0 >= q - 1e-6:
+                nxt.append((p, q))
+                continue
+            if c0 > p + 1e-6:
+                nxt.append((p, c0))
+            if c1 < q - 1e-6:
+                nxt.append((c1, q))
+        out = nxt
+    return [(p, q) for p, q in out if q - p > 0.02]
+
+
+# ---------------------------------------------------------------- рамки лестниц (прямоугольная и дуга номера)
+class RectFrame:
+    """Местная система: a — вдоль марша от стены входа, b — поперёк. origin — точка (a=0, b=0), ea/eb — орты схемы."""
+
+    def __init__(self, origin, ea, eb):
+        self.o, self.ea, self.eb = origin, ea, eb
+
+    def pt(self, a, b):
+        return (self.o[0] + self.ea[0] * a + self.eb[0] * b, self.o[1] + self.ea[1] * a + self.eb[1] * b)
+
+    def rect(self, a0, a1, b0, b1):
+        p, q = self.pt(a0, b0), self.pt(a1, b1)
+        return (min(p[0], q[0]), min(p[1], q[1]), max(p[0], q[0]), max(p[1], q[1]))
+
+    def box(self, a0, a1, b0, b1, z0, z1, m, solid=True):
+        x0, y0, x1, y1 = self.rect(a0, a1, b0, b1)
+        O.box(x0, y0, x1, y1, z0, z1, m, solid)
+
+    def stair(self, a_bot, a_top, b_c, width, z_bot, z_top, count, fill, m):
+        p, q = self.pt(a_bot, b_c), self.pt(a_top, b_c)
+        O.stair((p[0], p[1], z_bot), (q[0], q[1], z_top), width, count, fill, m)
+
+
+class ArcFrame:
+    """Номер S-корпуса: b = u вдоль фасада от лестничной стены (0…10), a = v от фасада входа (0) к террасе (6);
+    дуга полудуги разбита на хорды не длиннее 1,6 м."""
+
+    def __init__(self, unit):
+        self.u = unit
+
+    def ang(self, u):
+        a0, a1 = self.u['a0'], self.u['a1']
+        return a0 + (a1 - a0) * (u + sg.PARTY_WALL / 2) / (sg.UNIT_LEN + sg.PARTY_WALL)
+
+    def rad(self, v):
+        return sg.R - sg.UNIT_DEPTH / 2 + v if self.u['entrance_inner'] else sg.R + sg.UNIT_DEPTH / 2 - v
+
+    def pt(self, a, b):
+        ang = math.radians(self.ang(b))
+        r = self.rad(a)
+        return (self.u['cx'] + r * math.cos(ang), self.u['cy'] + r * math.sin(ang))
+
+    def box(self, a0, a1, b0, b1, z0, z1, m, solid=True):
+        if b1 < b0:
+            b0, b1 = b1, b0
+        if a1 < a0:
+            a0, a1 = a1, a0
+        n = max(1, int(math.ceil((b1 - b0) / 1.6)))
+        for k in range(n):
+            u0 = b0 + (b1 - b0) * k / n
+            u1 = b0 + (b1 - b0) * (k + 1) / n
+            um, vm = (u0 + u1) / 2, (a0 + a1) / 2
+            c = self.pt(vm, um)
+            r = self.rad(vm)
+            arc = abs(math.radians(self.ang(u1) - self.ang(u0))) * r
+            tang = self.ang(um) + 90.0
+            O.obox(c[0], c[1], arc + 0.03, a1 - a0, z0, z1, tang, m, solid)
+
+    def stair(self, a_bot, a_top, b_c, width, z_bot, z_top, count, fill, m):
+        p, q = self.pt(a_bot, b_c), self.pt(a_top, b_c)
+        O.stair((p[0], p[1], z_bot), (q[0], q[1], z_top), width, count, fill, m)
+
+
+def stair_u(F, a_len, b0, b1, e, z_lo, z_hi, first_low=True, rise=0.165, run=0.3, landing_min=1.17,
+            mat_='stair', rail='rail', divider=True):
+    """П-образная лестница в рамке F: площадка входа a ∈ [0, e] на обоих уровнях (на верхнем — плита), марш 1
+    уходит от входа в половине b (first_low — нижней по b), разворотная площадка у дальней стены, марш 2
+    возвращается к входу. Возвращает путь от середины площадки входа внизу до неё же наверху и плиты верхнего
+    уровня (в рамке)."""
+    n = max(4, int(round((z_hi - z_lo) / rise)))
+    n1 = n // 2
+    n2 = n - n1
+    h = (z_hi - z_lo) / n
+    z_mid = z_lo + n1 * h
+    L1 = (n1 - 1) * run
+    L2 = (n2 - 1) * run
+    L = max(L1, L2)
+    if e + L + landing_min > a_len + 1e-6:
+        WARN.append(f'лестница: марш {L:.2f} + вход {e:.2f} не умещается в {a_len:.2f}')
+    bm = (b0 + b1) / 2
+    ha = (b0, bm) if first_low else (bm, b1)
+    hb = (bm, b1) if first_low else (b0, bm)
+    ca, cb = (ha[0] + ha[1]) / 2, (hb[0] + hb[1]) / 2
+    wa, wb = ha[1] - ha[0], hb[1] - hb[0]
+    F.stair(e, e + L1, ca, wa - 0.08, z_lo, z_mid, n1, z_lo - 0.05, mat_)
+    F.box(e + L, a_len, b0, b1, z_lo - 0.05, z_mid, mat_)                       # разворотная площадка
+    F.box(e + L1, e + L, ha[0], ha[1], z_lo - 0.05, z_mid, mat_)
+    F.stair(e + L2, e, cb, wb - 0.08, z_mid, z_hi, n2, z_lo - 0.05, mat_)
+    F.box(e + L2, e + L, hb[0], hb[1], z_lo - 0.05, z_mid, mat_)
+    F.box(0, e, b0, b1, z_hi - SLAB_T, z_hi, 'slab')                              # площадка входа наверху
+    F.box(e - 0.04, e + 0.04, ha[0], ha[1], z_hi, z_hi + RAIL_H, rail)           # перила над маршем 1
+    if divider:
+        F.box(e, e + L, bm - 0.06, bm + 0.06, z_lo, z_hi + RAIL_H, rail)         # стенка между маршами
+    path = [(e / 2, ca, z_lo), (e + 0.35, ca, z_lo + h), (e + L1 - 0.3, ca, z_mid - h * 0.5),
+            (e + L + (a_len - e - L) / 2, ca, z_mid), (e + L + (a_len - e - L) / 2, cb, z_mid),
+            (e + L2 - 0.3, cb, z_mid + h * 0.5), (e + 0.35, cb, z_hi - h), (e / 2, cb, z_hi)]
+    return {'path': [(*F.pt(a, b), z) for a, b, z in path], 'z_mid': z_mid, 'hub': (e / 2, (b0 + b1) / 2)}
+
+
+# ---------------------------------------------------------------- здания по помещениям и дверям
+ROOMS = []       # для проверки: {uid, building, name, floor, at}
+ROUTES = []
+BUILDINGS = []   # подписи и краткий счёт
+
+
+def door_geom(d):
+    """Дверь: линия ('h' — y = c, 'v' — x = c), интервал, середина, ширина."""
+    o, c, a, b = d['wall'][0], float(d['wall'][1]), float(d['wall'][2]), float(d['wall'][3])
+    mid = (a + b) / 2
+    return o, c, a, b, ((mid, c) if o == 'h' else (c, mid))
+
+
+def room_side(rect, o, c):
+    """С какой стороны линии двери лежит помещение: +1 — в сторону роста координаты."""
+    if o == 'h':
+        return 1 if abs(rect[1] - c) < 0.06 else (-1 if abs(rect[3] - c) < 0.06 else (1 if (rect[1] + rect[3]) / 2 > c else -1))
+    return 1 if abs(rect[0] - c) < 0.06 else (-1 if abs(rect[2] - c) < 0.06 else (1 if (rect[0] + rect[2]) / 2 > c else -1))
+
+
+def off_pt(pt, o, side, dist):
+    return (pt[0], pt[1] + side * dist) if o == 'h' else (pt[0] + side * dist, pt[1])
+
+
+def seg_hits_rect(p, q, r):
+    """Пересекает ли отрезок прямоугольник (Лианг — Барски)."""
+    x0, y0, x1, y1 = r
+    dx, dy = q[0] - p[0], q[1] - p[1]
+    t0, t1 = 0.0, 1.0
+    for pv, qv in ((-dx, p[0] - x0), (dx, x1 - p[0]), (-dy, p[1] - y0), (dy, y1 - p[1])):
+        if abs(pv) < 1e-12:
+            if qv < 0:
+                return False
+            continue
+        t = qv / pv
+        if pv < 0:
+            t0 = max(t0, t)
+        else:
+            t1 = min(t1, t)
+        if t0 > t1:
+            return False
+    return True
+
+
+def route_in_room(p, q, obstacles):
+    """Путь внутри помещения от p к q в обход препятствий (прямоугольники, уже с запасом) — по углам."""
+    if not any(seg_hits_rect(p, q, r) for r in obstacles):
+        return [q]
+    nodes = [p, q]
+    for x0, y0, x1, y1 in obstacles:
+        nodes += [(x0 - 0.05, y0 - 0.05), (x1 + 0.05, y0 - 0.05), (x1 + 0.05, y1 + 0.05), (x0 - 0.05, y1 + 0.05)]
+    n = len(nodes)
+    dist = [math.inf] * n
+    prev = [-1] * n
+    dist[0] = 0.0
+    done = [False] * n
+    for _ in range(n):
+        u = min((i for i in range(n) if not done[i]), key=lambda i: dist[i], default=None)
+        if u is None or dist[u] == math.inf:
+            break
+        done[u] = True
+        if u == 1:
+            break
+        for v in range(n):
+            if done[v] or any(seg_hits_rect(nodes[u], nodes[v], r) for r in obstacles):
+                continue
+            nd = dist[u] + math.dist(nodes[u], nodes[v])
+            if nd < dist[v]:
+                dist[v] = nd
+                prev[v] = u
+    if prev[1] < 0:
+        WARN.append(f'путь в помещении не найден {p} → {q}')
+        return [q]
+    path = []
+    k = 1
+    while k > 0:
+        path.append(nodes[k])
+        k = prev[k]
+    return list(reversed(path))
+
+
+class Building:
+    """Здание из помещений и дверей по этажам (координаты схемы). Стены — по рёбрам помещений: ребро с помещением
+    с одной стороны — фасад, с двух — перегородка (у лестницы и коридора — 0,3); проёмы — по дверям."""
+
+    def __init__(self, bid, title, floors, levels, heights, ext_t=EXT_T, glass=(), open_rooms=(), room_h=None,
+                 mat_ext='facade', start_door=0, roof_mat='roof', label_at=None):
+        self.bid, self.title = bid, title
+        self.floors = floors                 # {f: {'rooms': [...], 'doors': [...]}}
+        self.order = sorted(floors.keys())
+        self.levels = levels                 # {f: отметка пола}
+        self.heights = heights               # {f: высота этажа}
+        self.ext_t = ext_t
+        self.glass = set(glass)
+        self.open_rooms = set(open_rooms)
+        self.room_h = room_h or {}
+        self.mat_ext = mat_ext
+        self.roof_mat = roof_mat
+        self.start_door = start_door
+        self.stairs = {}                     # id → {'lo', 'hi', 'res'}
+        self.slab_override = {}              # (f, id) → список прямоугольников плиты пола
+        self.obstacles = {}                  # (f, id) → прямоугольники
+        self.hubs = {}                       # (f, id) → точка
+        self.basins = []                     # чаши бассейнов: (x0, y0, x1, y1)
+        self.label_at = label_at
+        self.ext_doors = []
+
+    def room(self, f, rid):
+        for r in self.floors[f]['rooms']:
+            if r['id'] == rid:
+                return r
+        return None
+
+    def rect(self, r):
+        return tuple(float(v) for v in r['rect'])
+
+    def hgt(self, f, r):
+        return float(self.room_h.get(r['id'], self.heights[f]))
+
+    def wall_t(self, ka, kb):
+        return STRUCT_T if ('stair' in (ka, kb) or 'corr' in (ka, kb)) else PART_T
+
+    def emit(self):
+        for f in self.order:
+            self._walls(f)
+            self._slabs(f)
+        self._labels()
+
+    # ---- стены
+    def _walls(self, f):
+        rooms = self.floors[f]['rooms']
+        z0 = self.levels[f]
+        lines = {}
+        for r in rooms:
+            x0, y0, x1, y1 = self.rect(r)
+            for o, c, a, b, side in (('h', y0, x0, x1, 1), ('h', y1, x0, x1, -1), ('v', x0, y0, y1, 1), ('v', x1, y0, y1, -1)):
+                lines.setdefault((o, round(c, 3)), []).append((a, b, side, r))
+        doors = {}
+        for d in self.floors[f]['doors']:
+            o, c, a, b, _ = door_geom(d)
+            doors.setdefault((o, round(c, 3)), []).append((a, b, d))
+        for (o, c), edges in lines.items():
+            pts = sorted({e for a, b, _, _ in edges for e in (a, b)})
+            pieces = []
+            for p, q in zip(pts, pts[1:]):
+                mid = (p + q) / 2
+                plus = [r for a, b, s, r in edges if s == 1 and a - 1e-6 <= mid <= b + 1e-6]
+                minus = [r for a, b, s, r in edges if s == -1 and a - 1e-6 <= mid <= b + 1e-6]
+                rp = plus[0] if plus else None
+                rm = minus[0] if minus else None
+                pieces.append((p, q, self._wall_class(f, rp, rm)))
+            # слить соседние одного класса
+            merged = []
+            for p, q, cls in pieces:
+                if cls is None:
+                    continue
+                if merged and merged[-1][2] == cls and abs(merged[-1][1] - p) < 1e-6:
+                    merged[-1] = (merged[-1][0], q, cls)
+                else:
+                    merged.append((p, q, cls))
+            cuts = [(a, b) for a, b, _ in doors.get((o, c), [])]
+            for p, q, cls in merged:
+                kind, t, top, m = cls
+                ext = t / 2 if kind != 'rail' else 0.0
+                for s0, s1 in sub_intervals(p - ext, q + ext, cuts):
+                    self._wall_box(o, c, s0, s1, t, z0, z0 + top if kind != 'rail' else z0 + RAIL_H, m)
+            # перемычки над дверями
+            for a, b, d in doors.get((o, c), []):
+                w = b - a
+                hmax = 0.0
+                for a2, b2, _, r in edges:
+                    if inter_len(a, b, a2, b2) > 0.01:
+                        hmax = max(hmax, self.hgt(f, r))
+                dh = DOOR_H if w < 2.0 else (WIDE_DOOR_H if w < OPEN_W else hmax)
+                if hmax - dh > 0.05:
+                    cls = None
+                    for p, q, c2 in merged:
+                        if inter_len(a, b, p, q) > 0.01:
+                            cls = c2
+                    if cls is None or cls[0] == 'rail':
+                        continue
+                    self._wall_box(o, c, a, b, cls[1], z0 + dh, z0 + hmax, cls[3])
+
+    def _wall_class(self, f, rp, rm):
+        """(вид, толщина, высота, материал) ребра или None."""
+        if rp is None and rm is None:
+            return None
+        if rp is not None and rm is not None:
+            if rp['id'] == rm['id']:
+                return None
+            vp, vm = rp['kind'] == 'void', rm['kind'] == 'void'
+            if vp and vm:
+                return None
+            if vp or vm:
+                return ('rail', 0.06, RAIL_H, 'glass')
+            op, om = rp['id'] in self.open_rooms, rm['id'] in self.open_rooms
+            if op and om:
+                return None
+            h = max(self.hgt(f, rp), self.hgt(f, rm))
+            if op or om:
+                closed = rm if op else rp
+                return ('wall', self.ext_t, self.hgt(f, closed), self.mat_ext)
+            t = self.wall_t(rp['kind'], rm['kind'])
+            return ('wall', t, h, 'struct' if t > 0.2 else 'partition')
+        r = rp if rp is not None else rm
+        if r['id'] in self.open_rooms:
+            return ('rail', 0.25, RAIL_H, 'parapet')
+        m = 'glass' if r['id'] in self.glass else self.mat_ext
+        return ('wall', self.ext_t, self.hgt(f, r), m)
+
+    def _wall_box(self, o, c, s0, s1, t, z0, z1, m):
+        if o == 'h':
+            O.box(s0, c - t / 2, s1, c + t / 2, z0, z1, m)
+        else:
+            O.box(c - t / 2, s0, c + t / 2, s1, z0, z1, m)
+
+    # ---- плиты, кровля, основание
+    def _slabs(self, f):
+        rooms = self.floors[f]['rooms']
+        z0 = self.levels[f]
+        idx = self.order.index(f)
+        above = self.floors[self.order[idx + 1]]['rooms'] if idx + 1 < len(self.order) else []
+        above_rects = [self.rect(r) for r in above]
+        lowest = idx == 0
+        for r in rooms:
+            rect = self.rect(r)
+            if r['kind'] != 'void':
+                parts = self.slab_override.get((f, r['id']))
+                if parts is None:
+                    holes = [b for b in self.basins if inter_len(rect[0], rect[2], b[0], b[2]) > 0 and inter_len(rect[1], rect[3], b[1], b[3]) > 0]
+                    stair_lo = r['id'] in self.stairs and self.stairs[r['id']]['lo'] != f and not lowest
+                    parts = [] if stair_lo else rect_minus(rect, holes)
+                for p in parts:
+                    O.box(p[0], p[1], p[2], p[3], z0 - SLAB_T, z0, 'slab' if not lowest else 'floor')
+                if lowest:
+                    self._plinth(rect, z0 - SLAB_T)
+            # кровля над тем, что не накрыто этажом выше
+            if r['id'] in self.open_rooms:
+                continue
+            top = z0 + self.hgt(f, r)
+            for p in rect_minus(rect, above_rects):
+                O.box(p[0] - 0.1, p[1] - 0.1, p[2] + 0.1, p[3] + 0.1, top, top + 0.35, self.roof_mat)
+
+    def _plinth(self, rect, top):
+        low = rect_stat(*rect, fn=np.min)
+        if low < top - 0.05:
+            O.box(*rect, low - 0.6, top, 'plinth')
+
+    def _labels(self):
+        f0 = self.order[0]
+        for f in self.order:
+            for r in self.floors[f]['rooms']:
+                if r['kind'] == 'void':
+                    continue
+                x0, y0, x1, y1 = self.rect(r)
+                hub = self.hubs.get((f, r['id']), ((x0 + x1) / 2, (y0 + y1) / 2))
+                z = self.levels[f]
+                O.label(hub[0], hub[1], z + 2.1, r['name'], 0.6, 'room')
+                uid = f'{self.bid}/{f}/{r["id"]}'
+                ROOMS.append({'uid': uid, 'building': self.title, 'name': r['name'], 'floor': f,
+                              'at': gpt(hub[0], hub[1], z)})
+        xs = [v for f in self.order for r in self.floors[f]['rooms'] for v in (r['rect'][0], r['rect'][2])]
+        ys = [v for f in self.order for r in self.floors[f]['rooms'] for v in (r['rect'][1], r['rect'][3])]
+        top = max(self.levels[f] + max(self.hgt(f, r) for r in self.floors[f]['rooms']) for f in self.order)
+        at = self.label_at or ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+        O.label(at[0], at[1], top + 2.5, self.title, 2.4, 'building')
+        BUILDINGS.append({'id': self.bid, 'title': self.title, 'rect': [min(xs), min(ys), max(xs), max(ys)],
+                          'rooms': sum(1 for f in self.order for r in self.floors[f]['rooms'] if r['kind'] != 'void'),
+                          'doors': sum(len(self.floors[f]['doors']) for f in self.order), 'floors': len(self.order)})
+        self.f0 = f0
+
+    # ---- двери наружу: ступени, если земля ниже пола
+    def exterior_doors(self):
+        out = []
+        for f in self.order:
+            for d in self.floors[f]['doors']:
+                if d['b'] not in ('out', 'exit'):
+                    continue
+                r = self.room(f, d['a'])
+                o, c, a, b, mid = door_geom(d)
+                side = room_side(self.rect(r), o, c)
+                out.append({'f': f, 'door': d, 'room': d['a'], 'o': o, 'c': c, 'a': a, 'b': b, 'mid': mid,
+                            'out_side': -side, 'z': self.levels[f]})
+        self.ext_doors = out
+        return out
+
+    def door_steps(self):
+        for ed in self.ext_doors:
+            z = ed['z']
+            o, s = ed['o'], ed['out_side']
+            front = off_pt(ed['mid'], o, s, 1.6)
+            g = ground_at(*front)
+            w = ed['b'] - ed['a'] + 0.6
+            ed['ground'] = g
+            ed['steps'] = None
+            if 0.16 < z - g < 3.0:
+                n = max(2, int(round((z - g) / 0.16)))
+                run = 0.3
+                land = 1.0
+                L = (n - 1) * run
+                p_land0 = off_pt(ed['mid'], o, s, self.ext_t / 2)
+                p_land1 = off_pt(ed['mid'], o, s, self.ext_t / 2 + land)
+                p_end = off_pt(ed['mid'], o, s, self.ext_t / 2 + land + L)
+                if o == 'h':
+                    O.box(ed['a'] - 0.3, min(p_land0[1], p_land1[1]), ed['b'] + 0.3, max(p_land0[1], p_land1[1]), g - 0.5, z, 'stair')
+                else:
+                    O.box(min(p_land0[0], p_land1[0]), ed['a'] - 0.3, max(p_land0[0], p_land1[0]), ed['b'] + 0.3, g - 0.5, z, 'stair')
+                gb = ground_at(*off_pt(p_end, o, s, 0.5))
+                O.stair((p_end[0], p_end[1], gb), (p_land1[0], p_land1[1], z), w, n, min(g, gb) - 0.5, 'stair')
+                ed['steps'] = off_pt(p_end, o, s, 1.0)
+
+
+def doors_out_clamps(b):
+    """Дверь ниже земли — выемка перед ней (рельеф не выше пола)."""
+    for ed in b.exterior_doors():
+        o, s = ed['o'], ed['out_side']
+        p0 = off_pt((ed['a'] - 0.6, ed['c']) if o == 'h' else (ed['c'], ed['a'] - 0.6), o, s, 0.0)
+        p1 = off_pt((ed['b'] + 0.6, ed['c']) if o == 'h' else (ed['c'], ed['b'] + 0.6), o, s, 2.6)
+        clamp_rect(p0[0], p0[1], p1[0], p1[1], ed['z'] - 0.03)
+
+
+def make_tour(b, start=None, suffix='', title=None):
+    """Обход здания: от двери наружу через все помещения (в глубину), между этажами — по лестницам.
+    Возвращает множество обойдённых помещений (uid)."""
+    exts = b.ext_doors
+    if not exts:
+        return set()
+    ed = exts[start if start is not None else b.start_door]
+    pts = []
+    checks = []
+
+    def add(p, z):
+        pts.append(gpt(p[0], p[1], z))
+
+    begin = ed.get('steps') or off_pt(ed['mid'], ed['o'], ed['out_side'], 1.8)
+    add(begin, ed.get('ground', ed['z']))
+    if ed.get('steps'):
+        add(off_pt(ed['mid'], ed['o'], ed['out_side'], b.ext_t / 2 + 0.5), ed['z'])
+    add(ed['mid'], ed['z'])
+    graph = {}
+    for f in b.order:
+        for d in b.floors[f]['doors']:
+            if d['b'] in ('out', 'exit'):
+                continue
+            graph.setdefault((f, d['a']), []).append(((f, d['b']), d))
+            graph.setdefault((f, d['b']), []).append(((f, d['a']), d))
+    for rid, st in b.stairs.items():
+        graph.setdefault((st['lo'], rid), []).append(((st['hi'], rid), ('up', rid)))
+        graph.setdefault((st['hi'], rid), []).append(((st['lo'], rid), ('down', rid)))
+    visited = set()
+
+    def hub(node):
+        f, rid = node
+        if node in b.hubs:
+            return b.hubs[node]
+        r = b.room(f, rid)
+        x0, y0, x1, y1 = b.rect(r)
+        return ((x0 + x1) / 2, (y0 + y1) / 2)
+
+    def walk_in(node, frm, to):
+        obs = b.obstacles.get(node, [])
+        for p in route_in_room(frm, to, obs):
+            add(p, b.levels[node[0]])
+
+    def visit(node, entry_pt):
+        visited.add(node)
+        f = node[0]
+        h = hub(node)
+        walk_in(node, entry_pt, h)
+        checks.append([len(pts) - 1, f'{b.bid}/{f}/{node[1]}', r3(b.levels[f])])
+        for nb, d in graph.get(node, []):
+            if nb in visited:
+                continue
+            if isinstance(d, tuple):
+                st = b.stairs[d[1]]['res']
+                path = st['path'] if d[0] == 'up' else list(reversed(st['path']))
+                for p in path:
+                    pts.append(gpt(*p))
+                visit(nb, path[-1][:2])
+                back = list(reversed(path))
+                for p in back:
+                    pts.append(gpt(*p))
+                walk_in(node, back[-1][:2], h)
+                continue
+            if b.room(nb[0], nb[1]) is None:
+                continue
+            o, c, a, bb, mid = door_geom(d)
+            r = b.room(f, node[1])
+            side = room_side(b.rect(r), o, c)
+            near = off_pt(mid, o, side, 0.75)
+            far = off_pt(mid, o, -side, 0.75)
+            walk_in(node, h, near)
+            add(mid, b.levels[f])
+            add(far, b.levels[f])
+            visit(nb, far)
+            walk_in(nb, hub(nb), far)
+            add(mid, b.levels[f])
+            add(near, b.levels[f])
+            walk_in(node, near, h)
+
+    first = (ed['f'], ed['room'])
+    inside = off_pt(ed['mid'], ed['o'], -ed['out_side'], 0.75)
+    add(inside, ed['z'])
+    visit(first, inside)
+    ROUTES.append({'id': f'tour_{b.bid}{suffix}', 'label': title or f'{b.title}: все помещения', 'kind': 'tour', 'points': pts,
+                   'checks': checks, 'building': b.bid})
+    return {c[1] for c in checks}
+
+
+def tours(b, names=None):
+    """Обходы, пока не пройдены все помещения: каждый следующий — от двери наружу ещё не обойдённой постройки."""
+    expected = {f'{b.bid}/{f}/{r["id"]}' for f in b.order for r in b.floors[f]['rooms'] if r['kind'] != 'void'}
+    seen = set()
+    k = 0
+    for i in [b.start_door] + [j for j in range(len(b.ext_doors)) if j != b.start_door]:
+        ed = b.ext_doors[i]
+        if f'{b.bid}/{ed["f"]}/{ed["room"]}' in seen:
+            continue
+        title = f'{b.title}: {names.get(ed["room"], ed["room"])}' if names else None
+        seen |= make_tour(b, i, f'_{k}' if (names or k) else '', title)
+        k += 1
+        if seen >= expected:
+            break
+    missing = sorted(expected - seen)
+    if missing:
+        WARN.append(f'{b.title}: обход не дошёл до {missing}')
+
+
+# ---------------------------------------------------------------- данные зданий
+def copy_floor(fl):
+    return {'rooms': [dict(r) for r in fl['rooms']], 'doors': [dict(d) for d in fl['doors']]}
+
+
+def shift_mirror(fl, dx, mirror_y=None):
+    """Сдвиг по x и зеркало относительно y = mirror_y (коттедж южного ряда)."""
+    out = {'rooms': [], 'doors': []}
+    for r in fl['rooms']:
+        x0, y0, x1, y1 = r['rect']
+        if mirror_y is not None:
+            y0, y1 = 2 * mirror_y - y1, 2 * mirror_y - y0
+        out['rooms'].append({**r, 'rect': [x0 + dx, y0, x1 + dx, y1]})
+    for d in fl['doors']:
+        o, c, a, b = d['wall']
+        if o == 'h':
+            c2 = 2 * mirror_y - c if mirror_y is not None else c
+            w = ['h', c2, a + dx, b + dx]
+        else:
+            if mirror_y is not None:
+                a, b = 2 * mirror_y - b, 2 * mirror_y - a
+            w = ['v', c + dx, a, b]
+        out['doors'].append({**d, 'wall': w})
+    return out
+
+
+def set_door(fl, a, b, wall, note):
+    for d in fl['doors']:
+        if {d['a'], d['b']} == {a, b} or (d['a'] == a and d['b'] == b):
+            DEVIATIONS.append(f'{note}: дверь {a}–{b} {d["wall"]} → {wall}')
+            d['wall'] = wall
+            d['width'] = abs(wall[3] - wall[2])
+            return
+    raise KeyError((a, b))
+
+
+# ================================================================ РАСКЛАДКА: уровни площадок
+S_SITES = PLAN['S_SITES']
+COTTAGES = PLAN['COTTAGES']
+BAY_W, BAY_L, AISLE = PLAN['BAY_W'], PLAN['BAY_L'], PLAN['AISLE']
+S_LOT = (PLAN['S_LOT_X0'], PLAN['S_LOT_Y0'], PLAN['S_LOT_X0'] + BAY_L * 2 + AISLE, PLAN['S_LOT_Y1'])
+
+S_LEVELS = {}
+for ox, oy, mirror, name in S_SITES:
+    ex = sg.extent(ox, oy, mirror, sg.TERRACE + 0.5)
+    S_LEVELS[name] = round(rect_stat(*[ex[0], ex[2], ex[1], ex[3]], field=H0) * 10) / 10
+COT_LEVELS = [round(rect_stat(cx - 7, cy - 6, cx + 7, cy + 6, field=H0) * 20) / 20 for cx, cy in COTTAGES]
+HOZ_RECT = (94.0, 156.0, 146.0, 216.0)
+HOZ_LEVEL = round(rect_stat(*HOZ_RECT, field=H0) * 10) / 10
+SPORT_RECT = (96.0, 52.0, 140.0, 100.0)
+PG_RECT = tuple(float(v) for v in SMALL['playground']['rect'])
+
+# площадки (порядок важен: позже — сверху)
+pad_rect(-96.0, -110.0, 14.0, 22.0, CENTRAL, blend=(3, 50, 60, 50))
+SITE1 = [s for s in S_SITES if s[3] == 'С-1'][0]
+SITE2 = [s for s in S_SITES if s[3] == 'С-2'][0]
+ex1 = sg.extent(SITE1[0], SITE1[1], SITE1[2])
+ex2 = sg.extent(SITE2[0], SITE2[1], SITE2[2])
+pad_rect(ex1[0] - 3.0, min(ex1[2], ex2[2]) - 4.0, ex2[1] + 4.0, max(ex1[3], ex2[3]) + 4.0,
+         (ex1[1], S_LEVELS['С-1'], ex2[0], S_LEVELS['С-2']), blend=(2, 16, 16, 16))
+SPORT_LEVEL = round(rect_stat(*SPORT_RECT) * 10) / 10
+pad_rect(*SPORT_RECT, SPORT_LEVEL, blend=(8, 8, 8, 8))
+pad_rect(*HOZ_RECT, HOZ_LEVEL, blend=(10, 10, 6, 6))
+PG_LEVEL = round(rect_stat(*PG_RECT) * 10) / 10
+pad_rect(*PG_RECT, PG_LEVEL, blend=(6, 10, 10, 10))
+for (cx, cy), lv in zip(COTTAGES, COT_LEVELS):
+    north = cy > -213
+    pad_rect(cx - 8.5, cy - 7.5, cx + 12.5, cy + 7.5, lv, blend=(6, 3 if north else 8, 6, 8 if north else 3))
+# амфитеатр: оркестра и сцена на +32, вал за рядами на +36
+AMPH = SMALL['amphitheatre_rows']
+AC = (float(AMPH['center'][0]), float(AMPH['center'][1]))
+ORCH = 32.0
+ROW_R0, ROW_STEP, ROWS_N = float(AMPH['r0']), float(AMPH['step']), int(AMPH['rows'])
+ROW_RISE = 0.4
+PROM = ORCH + ROW_RISE * ROWS_N
+pad_rect(AC[0] + 4.0, AC[1] - 17.0, AC[0] + 16.0, AC[1] + 17.0, ORCH, blend=(2, 6, 4, 6))
+pad_ring(AC[0], AC[1], ROW_R0 + ROW_STEP * ROWS_N, ROW_R0 + ROW_STEP * ROWS_N + 8.0, -74.0, 74.0, PROM, 24.0)
+RING_CLAMPS.append((AC[0], AC[1], ROW_R0 + 0.3, ROW_R0 + ROW_STEP * ROWS_N + 0.6, -63.5, 63.5, ORCH - 0.1))
+RING_CLAMPS.append((AC[0], AC[1], ROW_R0 + ROW_STEP * ROWS_N, ROW_R0 + ROW_STEP * ROWS_N + 4.4, -67.0, 67.0, PROM - 0.1))
+UNDER = 28.0      # под сценой −4 м от оркестры
+STAGE = ORCH + 1.0
+pad_rect(-101.5, -163.0, -96.0, -157.0, UNDER, blend=(0, 0, 0, 0))
+H_PADS = H.copy()          # рельеф после площадок — до врезок (для подпорных стенок)
+
+# ================================================================ ПОСТРОЙКИ
+BLD = {}
+
+# ---- главный корпус: 2 этажа, лобби в два света (+8,5), служебная лестница с краю
+mf = {int(k): copy_floor(v) for k, v in MAIN['floors'].items()}
+main = Building('main', 'Главный корпус', mf, {1: CENTRAL, 2: CENTRAL + float(MAIN['floor_to_floor']['1'])},
+                {1: float(MAIN['floor_to_floor']['1']), 2: float(MAIN['floor_to_floor']['2'])},
+                glass={'LOB', 'VOID', 'GLR'}, start_door=0)
+BLD['main'] = main
+
+# ---- «Ресторан и спа»: один этаж, высоты по назначению залов
+spa_f = {1: {'rooms': [dict(r) for r in SPA['rooms']], 'doors': [dict(d) for d in SPA['doors']]}}
+spa_h = {'POOL': 7.0, 'RLX': 4.5, 'REST': 5.0, 'LNG': 5.0, 'GYM': 5.0, 'STU': 4.5, 'VST': 5.0, 'GAL': 4.2, 'PEN': 4.2}
+spa = Building('spa', '«Ресторан и спа»', spa_f, {1: CENTRAL}, {1: 3.6}, room_h=spa_h,
+               glass={'VST', 'GAL', 'REST', 'LNG', 'POOL', 'RLX', 'GYM', 'LR', 'LP', 'LG'}, start_door=0)
+spa.basins = [tuple(SPA['pool_indoor'])]
+BLD['spa'] = spa
+
+# ---- коттеджи: одна планировка на все 10, южный ряд зеркально; этаж 3,4
+COT = {int(k): copy_floor(v) for k, v in SMALL['коттедж'].items()}
+cottages = []
+for i, ((cx, cy), lv) in enumerate(zip(COTTAGES, COT_LEVELS)):
+    north = cy > -213
+    # планировка листа — дом с центром (14, −199); северный ряд — сдвиг, южный — зеркало: y' = cy − (y + 199)
+    fl = {f: shift_mirror(COT[f], cx - 14.0, None) for f in COT}
+    for f in fl:
+        for r in fl[f]['rooms']:
+            x0, y0, x1, y1 = r['rect']
+            r['rect'] = [x0, y0 + cy + 199.0, x1, y1 + cy + 199.0] if north else [x0, cy - (y1 + 199.0), x1, cy - (y0 + 199.0)]
+        for d in fl[f]['doors']:
+            o, c, a, b = d['wall']
+            if north:
+                d['wall'] = ['h', c + cy + 199.0, a, b] if o == 'h' else ['v', c, a + cy + 199.0, b + cy + 199.0]
+            else:
+                d['wall'] = ['h', cy - (c + 199.0), a, b] if o == 'h' else ['v', c, cy - (b + 199.0), cy - (a + 199.0)]
+    b = Building(f'cot{i + 1:02d}', f'Коттедж {i + 1}', fl, {1: lv, 2: lv + 3.4}, {1: 3.4, 2: 3.4}, ext_t=SMALL_EXT_T,
+                 mat_ext='wood_dark', glass={'LIV'}, start_door=0)
+    b.cot = (cx, cy, north)
+    cottages.append(b)
+    BLD[b.bid] = b
+
+# ---- павильон-кофейня на «Стрелке»: 1 этаж и крыша-смотровая
+MOLE = 1.5
+pav_f = {int(k): copy_floor(v) for k, v in SMALL['павильон'].items()}
+PAV_H = 4.2
+pav = Building('pav', 'Павильон-кофейня', pav_f, {1: MOLE, 2: MOLE + PAV_H}, {1: PAV_H, 2: 3.0}, ext_t=SMALL_EXT_T,
+               glass={'PH'}, open_rooms={'DECK'}, start_door=0)
+BLD['pav'] = pav
+
+# ---- маяк: дверь на галерею перенесена на север (винтовая лестница выходит в северо-западный угол), галерея кольцом
+lh_f = {int(k): copy_floor(v) for k, v in SMALL['маяк'].items()}
+LH_GAL = MOLE + 12.0
+lh_f[2]['rooms'] = [r for r in lh_f[2]['rooms'] if r['id'] != 'LHG']
+lh_f[2]['rooms'].append({'id': 'LHG', 'name': 'Фонарный ярус и обходная галерея', 'rect': [-292.6, 13.0, -283.4, 15.0],
+                         'kind': 'pub', 'flags': [], 'area': 18.4})
+set_door(lh_f[2], 'LH0', 'LHG', ['h', 13.0, -289.4, -288.23], 'маяк: дверь на галерею с запада на север')
+DEVIATIONS.append('маяк: обходная галерея — полоса 9,2 × 2 м с севера (в листе — с запада), выход с винтовой лестницы — в её угол')
+lh = Building('lh', 'Маяк', lh_f, {1: MOLE, 2: LH_GAL}, {1: 12.0, 2: 3.0}, ext_t=SMALL_EXT_T, open_rooms={'LHG'},
+              mat_ext='white', start_door=0)
+BLD['lh'] = lh
+
+# ---- амфитеатр: уровень под сценой −4 м (+28), сцена +33, аппаратная на променаде +36
+am_f = {int(k): copy_floor(v) for k, v in SMALL['амфитеатр'].items()}
+app = [dict(r) for r in am_f[0]['rooms'] if r['id'] == 'APP']
+app[0]['rect'] = [app[0]['rect'][0] + 2.0, app[0]['rect'][1], app[0]['rect'][2] + 2.0, app[0]['rect'][3]]
+DEVIATIONS.append('амфитеатр: аппаратная сдвинута на 2 м на восток (x −55…−51) — на месте листа она стояла в верхнем ряду и '
+                  'закрывала выход среднего прохода на променад')
+am_f[0]['rooms'] = [r for r in am_f[0]['rooms'] if r['id'] != 'APP']
+app_doors = [dict(d, wall=[d['wall'][0], d['wall'][1] + 2.0, d['wall'][2], d['wall'][3]]) for d in am_f[0]['doors'] if d['a'] == 'APP']
+am_f[0]['doors'] = [d for d in am_f[0]['doors'] if d['a'] != 'APP']
+# лестницы кулис (марш вдоль y): дверь из коридора — к площадке у сцены, выход наружу — в восточную стену
+set_door(am_f[-1], 'BCR', 'KUL1', ['v', -92.0, -149.85, -148.68], 'амфитеатр, кулисы север')
+set_door(am_f[-1], 'BCR', 'KUL2', ['v', -92.0, -171.32, -170.15], 'амфитеатр, кулисы юг')
+for fl_, rid, wall in ((am_f[0], 'KUL1', ['v', -84.0, -149.85, -148.68]), (am_f[0], 'KUL2', ['v', -84.0, -171.32, -170.15])):
+    for d in fl_['doors']:
+        if d['a'] == rid and d['b'] == 'out':
+            DEVIATIONS.append(f'амфитеатр, {rid}: выход наружу {d["wall"]} → {wall} (над маршем)')
+            d['wall'] = wall
+amph = Building('amph', 'Амфитеатр: под сценой и кулисы', am_f, {-1: UNDER, 0: STAGE}, {-1: STAGE - UNDER, 0: 3.6},
+                ext_t=EXT_T, open_rooms={'STG'}, mat_ext='struct', start_door=0, label_at=(-86.0, -160.0))
+BLD['amph'] = amph
+app_f = {0: {'rooms': app, 'doors': app_doors}}
+appb = Building('app', 'Аппаратная', app_f, {0: PROM}, {0: 3.0}, ext_t=SMALL_EXT_T, start_door=0)
+BLD['app'] = appb
+
+# ---- хоздвор: одна сетка стен, обходы по постройкам
+hz_f = {1: copy_floor(SMALL['хоздвор']['1'])}
+hz_h = {'KB': 6.0, 'KP': 4.0, 'KM': 4.0, 'G1': 4.2, 'G2': 4.2, 'G3': 4.2, 'GS': 4.2, 'LR': 4.2, 'LW': 4.2, 'LC': 4.2,
+        'SK': 4.2, 'SKK': 4.2, 'TR': 4.0, 'TRU': 4.0, 'WT': 4.0}
+hoz = Building('hoz', 'Хоздвор', hz_f, {1: HOZ_LEVEL}, {1: 4.0}, ext_t=SMALL_EXT_T, room_h=hz_h, mat_ext='white')
+BLD['hoz'] = hoz
+
+# ---- малые постройки набережной, пляжа и въезда (по схеме: эллинг, прокат, склад ГСМ, спасатели, КПП)
+QUAY = 2.0
+
+
+def one_room(bid, title, rect, doors, level, h, kind='serv', glass=False):
+    rid = 'R'
+    fl = {1: {'rooms': [{'id': rid, 'name': title, 'rect': list(rect), 'kind': kind, 'flags': [], 'area': 0}],
+              'doors': [{'a': rid, 'b': 'out', 'width': abs(w[3] - w[2]), 'wall': w} for w in doors]}}
+    b = Building(bid, title, fl, {1: level}, {1: h}, ext_t=SMALL_EXT_T, glass={rid} if glass else (), start_door=0)
+    BLD[bid] = b
+    return b
+
+
+one_room('eling', 'Эллинг', (-152.0, 188.0, -134.0, 206.0), [['v', -134.0, 195.0, 198.5], ['v', -152.0, 192.0, 202.0]], QUAY, 6.0)
+one_room('gsm', 'Склад ГСМ', (-146.0, 214.0, -136.0, 222.0), [['h', 214.0, -142.6, -141.4]], QUAY, 3.6)
+one_room('rent', 'Прокат: домик выдачи', (-146.0, 134.0, -136.0, 144.0), [['v', -146.0, 138.4, 140.8], ['v', -136.0, 138.4, 139.6]],
+         QUAY, 3.4, glass=True)
+RESC_L = round(rect_stat(-142, -128, -130, -116, field=H0) * 20) / 20
+pad_rect(-145.0, -131.0, -127.0, -113.0, RESC_L, blend=(4, 6, 8, 6))
+one_room('resc', 'Спасательная станция', (-142.0, -128.0, -130.0, -116.0), [['v', -142.0, -122.6, -121.4], ['v', -130.0, -122.6, -121.4]],
+         RESC_L, 3.4, glass=True)
+KPP_RECT = (136.0, 6.5, 144.0, 12.5)
+DEVIATIONS.append('КПП: будка с северной стороны выезда (на схеме нарисована поверх дороги), шлагбаум поперёк')
+KPP_L = round(rect_stat(*KPP_RECT, field=H0) * 20) / 20
+pad_rect(KPP_RECT[0] - 2.0, KPP_RECT[1] - 1.0, KPP_RECT[2] + 2.0, KPP_RECT[3] + 2.0, KPP_L, blend=(6, 3, 6, 6))
+one_room('kpp', 'КПП', KPP_RECT, [['h', 6.5, 139.4, 140.6], ['v', 136.0, 9.0, 10.17]], KPP_L, 3.2, glass=True)
+
+for bb in BLD.values():
+    for f in bb.order:
+        for r in bb.floors[f]['rooms']:
+            if f == bb.order[0] and r['kind'] != 'void':
+                clamp_rect(*r['rect'], bb.levels[f] - SLAB_T - 0.05, inset=0.05)
+    doors_out_clamps(bb)
+for bx in spa.basins:
+    clamp_rect(bx[0] - 0.3, bx[1] - 0.3, bx[2] + 0.3, bx[3] + 0.3, CENTRAL - 1.75)
+clamp_rect(-96.0, -176.0, -80.0, -144.0, UNDER - SLAB_T - 0.05, inset=0.05)
+
+# ---- конструкции над склоном и на воде (верх настилов — для ступеней у дверей)
+PODIUM = tuple(SPA['podium'])
+RTER = tuple(SPA['terrace'])
+SURFACES.append(('rect', *PODIUM, CENTRAL))
+SURFACES.append(('rect', *RTER, CENTRAL))
+SURFACES.append(('rect', -99.0, -30.0, -96.0, -24.0, CENTRAL))
+# остриё мола по схеме — точка (−292, 10); башня маяка в блокауте квадратная 6 × 6 м и в острие не входит —
+# конец мола расширен до площадки 11 × 8 м под башней
+_mole = [tuple(p) for p in PLAN['MOLE_PTS']]
+_tip = _mole.index((-292, 10))
+MOLE_PTS = [(-138.0, -26.0)] + _mole[:_tip - 1] + [(-284.0, 3.0), (-295.0, 6.0), (-295.0, 14.0), (-284.0, 17.0)] + _mole[_tip + 2:] + [(-138.0, 46.0)]
+DEVIATIONS.append('«Стрелка»: остриё мола (−286, 4) → (−292, 10) → (−286, 16) расширено до площадки x −295…−284, y 3…17 — квадратная башня маяка 6 × 6 м в острие не входила')
+SURFACES.append(('poly', MOLE_PTS, MOLE))
+for r in (PODIUM, RTER):
+    clamp_rect(*r, CENTRAL - SLAB_T - 0.05)
+clamp_rect(PLAN['shore_x'](10) - 12, -26.5, -136.5, 46.5, MOLE - 0.3)
+
+# ================================================================ КАСКАД
+CAS = DESC['cascade']['elements']
+CW = float(DESC['width'])
+CAS_ZONE = []      # прямоугольники, где рельеф возвращается к природному (террасы каскада)
+
+
+def cascade_layout():
+    """Разбор каскада: x-марши, площадки, галереи с маршами по y и ровными кусками между ними."""
+    galleries = []
+    cur = None
+    for e in CAS:
+        if e['kind'] == 'walk':
+            cur['walk'] = e['rect']
+            galleries.append(cur)
+            cur = None
+            continue
+        if e['kind'] == 'landing' and cur is None:
+            cur = {'start': e, 'flights': [], 'end': None}
+            continue
+        if cur is not None and e['kind'] == 'flight' and e['axis'] == 'y':
+            cur['flights'].append(e)
+            continue
+        if cur is not None and e['kind'] == 'landing':
+            cur['end'] = e
+            continue
+    return galleries
+
+
+GALLERIES = cascade_layout()
+XFLIGHTS = [e for e in CAS if e['kind'] == 'flight' and e['axis'] == 'x']
+for e in CAS:
+    if e['kind'] in ('flight', 'landing', 'walk'):
+        CAS_ZONE.append(tuple(e['rect']))
+# промежутки между галереями (террасированный склон) — тоже каскад
+for k, g in enumerate(GALLERIES):
+    x0, y0, x1, y1 = g['walk']
+    up_x = GALLERIES[k - 1]['walk'][0] if k > 0 else -86.0
+    ys_ = (min(g['start']['rect'][1], g['end']['rect'][1]), max(g['start']['rect'][3], g['end']['rect'][3]))
+    CAS_ZONE.append((x1, ys_[0], up_x, ys_[1]))
+    g['gap'] = (x1, up_x)
+    g['span'] = ys_
+
+
+ROT_DECK = (-105.4, -33.0, -99.0, -24.6)       # выступ с беседкой-ротондой у второй галереи
+BALCONY = (-114.2, 24.6, -109.0, 29.4)          # смотровой балкон у третьей
+CAS_ELEMS = []     # (прямоугольник, уровень, уровни сторон {W, E, S, N}) — под каждым рельеф ниже, по краю — подпорные стенки
+for e in CAS:
+    r_ = tuple(e['rect'])
+    if e['kind'] == 'landing':
+        CAS_ELEMS.append((r_, e['z_top'], {}))
+    elif e['kind'] == 'flight' and e['axis'] == 'x':
+        CAS_ELEMS.append((r_, e['z_bottom'], {'W': e['z_bottom'], 'E': e['z_top']}))
+for g in GALLERIES:
+    lv_ = [g['start']['z_top']] + [f['z_bottom'] for f in g['flights']] + [g['end']['z_top']]
+    CAS_ELEMS.append((tuple(g['walk']), min(lv_), {}))
+    CAS_ELEMS.append(((g['gap'][0], g['span'][0], g['gap'][1], g['span'][1]), min(lv_) + 0.45, {}))
+CAS_ELEMS.append((ROT_DECK, GALLERIES[1]['end']['z_top'], {}))
+CAS_ELEMS.append((BALCONY, GALLERIES[2]['end']['z_top'], {}))
+CAS_ZONE += [ROT_DECK, BALCONY]
+# склон под каскадом террасирован: рельеф под каждым элементом ниже его уровня (с запасом 1 м — треугольники сетки)
+for r_, lv_, _ in CAS_ELEMS:
+    clamp_rect(r_[0] - 1.0, r_[1] - 1.0, r_[2] + 1.0, r_[3] + 1.0, lv_ - 0.3)
+
+
+# ================================================================ ТРОПЫ И СЛУЖЕБНАЯ ДОРОГА (ленты по профилю)
+TR = DESC['trail']
+TRAIL_W = 2.4
+trail_pts = [(float(p[0]), float(p[1]), float(z)) for p, (s_, z) in zip(TR['polyline'], TR['profile'])]
+trail_pts.insert(0, (-92.5, -107.6, CENTRAL))
+# низ тропы — на песок пляжа (по листу +2,0; песок в блокауте в этом месте чуть ниже)
+trail_pts[-1] = (trail_pts[-1][0], trail_pts[-1][1], h_at(trail_pts[-1][0], trail_pts[-1][1], H_PADS))
+STAGE_PATH = [(-101.0, -160.0, UNDER), (-101.5, -152.0, 26.6), (-101.0, -147.2, trail_pts[2][2] + 0.0)]
+GAZEBOS = [((-116.5, -107.5), 5), ((-130.0, -116.5), 9)]       # беседки на выступах у колен тропы (точка тропы)
+for (gx_, gy_), knee in GAZEBOS:
+    clamp_rect(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, trail_pts[knee][2] - 0.3)
+clamp_rect(-101.5, -163.0, -96.0, -157.0, UNDER)
+# слип эллинга и пирсы: рельеф под ними ниже настила
+clamp_rect(-171.0, 193.6, -152.0, 200.4, -1.3)
+COT_PATH_XY = [(-2.0, -216.0), (-40.0, -222.0), (-90.0, -214.0), (-104.0, -228.0), (-118.0, -218.0), (-130.0, -230.0)]
+SERVICE = [tuple(p) for p in PLAN['ROADS'][5][0]]
+SERVICE[-1] = (-132.6, 196.75)      # схема ведёт дорогу внутрь эллинга (−138, 196) — лента кончается у его ворот
+
+
+def profile_by_length(xy, z0, z1, i_from):
+    """z линейно по длине от точки i_from (z0) до конца (z1); до неё — по рельефу площадок."""
+    out = []
+    lengths = [0.0]
+    for a, b in zip(xy, xy[1:]):
+        lengths.append(lengths[-1] + math.dist(a, b))
+    total = lengths[-1] - lengths[i_from]
+    for i, p in enumerate(xy):
+        if i < i_from:
+            out.append((p[0], p[1], h_at(p[0], p[1], H_PADS)))
+        else:
+            t = (lengths[i] - lengths[i_from]) / total
+            out.append((p[0], p[1], z0 + (z1 - z0) * t))
+    return out
+
+
+def densify(pts, step):
+    out = [pts[0]]
+    for a, b in zip(pts, pts[1:]):
+        n = max(1, int(math.ceil(math.dist(a[:2], b[:2]) / step)))
+        for k in range(1, n + 1):
+            t = k / n
+            out.append(tuple(a[i] + (b[i] - a[i]) * t for i in range(3)))
+    return out
+
+
+_brow_t = (float(brow_x(-216.0)) + 2.0 + 40.0) / (-90.0 + 40.0)
+COT_BROW = (-40.0 + (-90.0 + 40.0) * _brow_t, -222.0 + (-214.0 + 222.0) * _brow_t)
+cot_xy = COT_PATH_XY[:2] + [COT_BROW] + COT_PATH_XY[2:]
+cz = h_at(COT_BROW[0], COT_BROW[1], H_PADS)
+cot_path = profile_by_length(cot_xy, cz, QUAY, 2)
+svc_i = 1
+svc_path = profile_by_length(SERVICE, h_at(SERVICE[1][0], SERVICE[1][1], H_PADS), QUAY, svc_i)
+for i in range(svc_i):
+    svc_path[i] = (svc_path[i][0], svc_path[i][1], h_at(svc_path[i][0], svc_path[i][1], H_PADS))
+cot_end = cot_path[-1]
+cot_path[-1] = (cot_end[0], cot_end[1], h_at(cot_end[0], cot_end[1], H_PADS))
+cot_path = profile_by_length([p[:2] for p in cot_path], cz, cot_path[-1][2], 2)
+# (id, подпись, точки, ширина, материал, концы сходят на землю: начало, конец)
+RIBBON_SPECS = [
+    ('trail', 'Тропа-серпантин', trail_pts, TRAIL_W, 'trail', (True, True)),
+    ('stage_path', 'Тропка из-под сцены к тропе', STAGE_PATH, 2.0, 'trail', (True, False)),
+    ('cottage_path', 'Тропа от коттеджей к пляжу', cot_path[2:], 2.4, 'trail', (True, True)),
+    ('service', 'Служебная дорога к лодочной станции', svc_path[1:], 5.0, 'asphalt', (True, True)),
+]
+for rid, title, pts, w, m, joins in RIBBON_SPECS:
+    RIBBONS.append({'id': rid, 'title': title, 'pts': pts, 'w': w, 'mat': m, 'joins': joins})
+
+# ================================================================ РЕЛЬЕФ: итог
+for rb in RIBBONS:
+    apply_ribbon_clamp(rb['pts'], rb['w'] / 2, 1.2, rb['joins'])
+apply_clamps()
+apply_ring_clamps()
+H_FINAL = H
+
+# ================================================================ ИЗЛУЧЕНИЕ: здания
+for bb in BLD.values():
+    bb.exterior_doors()
+
+# ---- лестницы зданий
+# главный корпус: П-образная в STA, вход с севера (y = −10), марш 1 в западной половине
+st = main.room(1, 'STA')
+x0, y0, x1, y1 = st['rect']
+F = RectFrame((x0, y1), (0.0, -1.0), (1.0, 0.0))
+res = stair_u(F, y1 - y0, 0.0, x1 - x0, 2.2, main.levels[1], main.levels[2], first_low=True, rise=0.161, run=0.3)
+main.stairs['STA'] = {'lo': 1, 'hi': 2, 'res': res}
+main.slab_override[(2, 'STA')] = [F.rect(0, 2.2, 0, x1 - x0)]
+main.hubs[(1, 'STA')] = F.pt(1.1, (x1 - x0) / 2)
+main.hubs[(2, 'STA')] = F.pt(1.1, (x1 - x0) / 2)
+
+# павильон: П-образная на крышу, вход с востока (x = −240), марш 1 в южной половине
+st = pav.room(1, 'PSR')
+x0, y0, x1, y1 = st['rect']
+F = RectFrame((x1, y0), (-1.0, 0.0), (0.0, 1.0))
+res = stair_u(F, x1 - x0, 0.0, y1 - y0, 1.0, pav.levels[1], pav.levels[2], first_low=True, rise=0.162, run=0.3)
+pav.stairs['PSR'] = {'lo': 1, 'hi': 2, 'res': res}
+pav.slab_override[(2, 'PSR')] = [F.rect(0, 1.0, 0, y1 - y0)]
+pav.hubs[(1, 'PSR')] = F.pt(0.5, (y1 - y0) / 2)
+pav.hubs[(2, 'PSR')] = F.pt(0.5, (y1 - y0) / 2)
+
+# кулисы амфитеатра: П вдоль y, площадка входа у сцены (1,4 м), марш 1 в западной половине
+for rid, north in (('KUL1', True), ('KUL2', False)):
+    st = amph.room(-1, rid)
+    x0, y0, x1, y1 = st['rect']
+    F = RectFrame((x0, y0), (0.0, 1.0), (1.0, 0.0)) if north else RectFrame((x0, y1), (0.0, -1.0), (1.0, 0.0))
+    res = stair_u(F, y1 - y0, 0.0, x1 - x0, 1.4, UNDER, STAGE, first_low=True, rise=0.179, run=0.26, landing_min=1.1)
+    amph.stairs[rid] = {'lo': -1, 'hi': 0, 'res': res}
+    amph.slab_override[(0, rid)] = [F.rect(0, 1.4, 0, x1 - x0)]
+    amph.hubs[(-1, rid)] = F.pt(0.7, (x1 - x0) * 0.75)
+    amph.hubs[(0, rid)] = F.pt(0.7, (x1 - x0) * 0.75)
+
+# коттедж: прямая лестница у западной стены (у южного ряда — зеркально), 20 подъёмов по 0,17
+for b in cottages:
+    cx, cy, north = b.cot
+    st = b.room(1, 'STR')
+    x0, y0, x1, y1 = st['rect']
+    z_lo, z_hi = b.levels[1], b.levels[2]
+    F = RectFrame((x0, y0), (0.0, 1.0), (1.0, 0.0)) if north else RectFrame((x0, y1), (0.0, -1.0), (1.0, 0.0))
+    A = y1 - y0
+    n, run, a0, w = 20, 0.25, 1.0, 1.17
+    L = (n - 1) * run
+    F.stair(a0, a0 + L, w / 2, w - 0.06, z_lo, z_hi, n, z_lo - 0.05, 'stair')
+    F.box(a0 + L, A, 0, w, z_lo - 0.05, z_hi - 0.06, 'stair')
+    F.box(0, a0, 0, w, z_lo - 0.05, z_lo, 'stair')
+    F.box(0, A, w + 0.05, x1 - x0, z_hi - SLAB_T, z_hi, 'slab')
+    F.box(a0 + L, A, 0, w + 0.05, z_hi - SLAB_T, z_hi, 'slab')
+    F.box(0, a0 + L - 1.3, w + 0.02, w + 0.1, z_hi, z_hi + RAIL_H, 'rail')
+    b.slab_override[(2, 'STR')] = []
+    hub = F.pt(2.0, w + 1.25)
+    b.hubs[(1, 'STR')] = hub
+    b.hubs[(2, 'STR')] = F.pt(2.0, w + 1.25)
+    h = (z_hi - z_lo) / n
+    path = [(F.pt(2.0, w + 1.25), z_lo), (F.pt(0.55, w + 0.55), z_lo), (F.pt(0.55, w / 2), z_lo), (F.pt(a0 + 0.35, w / 2), z_lo + h),
+            (F.pt(a0 + L - 0.15, w / 2), z_hi), (F.pt(a0 + L - 0.15, w + 0.85), z_hi), (F.pt(2.0, w + 1.25), z_hi)]
+    b.stairs['STR'] = {'lo': 1, 'hi': 2, 'res': {'path': [(p[0], p[1], z) for p, z in path]}}
+    b.obstacles[(1, 'STR')] = [F.rect(a0 - 0.45, A + 0.5, -0.5, w + 0.45)]
+
+# маяк: винтовая (квадратная) лестница вокруг сплошного столба, 6 маршей по 12 подъёмов до галереи +12
+st = lh.room(1, 'LH0')
+x0, y0, x1, y1 = [float(v) for v in st['rect']]
+ix0, iy0, ix1, iy1 = x0 + SMALL_EXT_T / 2, y0 + SMALL_EXT_T / 2, x1 - SMALL_EXT_T / 2, y1 - SMALL_EXT_T / 2
+fw = 1.1
+O.box(ix0 + fw, iy0 + fw, ix1 - fw, iy1 - fw, MOLE - 0.05, LH_GAL, 'struct')           # столб
+corners = [(ix1 - fw / 2, iy0 + fw / 2), (ix0 + fw / 2, iy0 + fw / 2), (ix0 + fw / 2, iy1 - fw / 2), (ix1 - fw / 2, iy1 - fw / 2)]
+seq = [0, 1, 2, 3, 0, 1, 2]       # ЮВ → ЮЗ → СЗ → СВ → ЮВ → ЮЗ → СЗ
+rise_f = (LH_GAL - MOLE) / 6
+# ступени сплошные; под маршами второго витка — проход высотой не меньше 2,5 м над маршем первого витка
+LH_FILL = [MOLE - 0.05, MOLE - 0.05, MOLE - 0.05, MOLE + 2.7, MOLE + rise_f + 2.5, MOLE + 2 * rise_f + 2.5]
+lh_path = [((ix1 - fw / 2, (iy0 + iy1) / 2), MOLE), (corners[0], MOLE)]
+for k in range(6):
+    a_, b_ = corners[seq[k]], corners[seq[k + 1]]
+    za, zb = MOLE + rise_f * k, MOLE + rise_f * (k + 1)
+    dx, dy = b_[0] - a_[0], b_[1] - a_[1]
+    Ls = math.hypot(dx, dy)
+    ux, uy = dx / Ls, dy / Ls
+    p0 = (a_[0] + ux * fw / 2, a_[1] + uy * fw / 2)
+    p1 = (b_[0] - ux * fw / 2, b_[1] - uy * fw / 2)
+    O.stair((p0[0], p0[1], za), (p1[0], p1[1], zb), fw - 0.04, 12, LH_FILL[k], 'stair')
+    cx_, cy_ = b_
+    O.box(cx_ - fw / 2, cy_ - fw / 2, cx_ + fw / 2, cy_ + fw / 2, zb - 0.3, zb, 'stair')
+    lh_path += [((p0[0] + ux * 0.3, p0[1] + uy * 0.3), za + 0.17), ((p1[0] - ux * 0.25, p1[1] - uy * 0.25), zb - 0.17), (b_, zb)]
+# пол фонарного яруса: северная и восточная полосы над маршами нижнего витка; над двумя последними маршами — проём
+O.box(ix0, iy1 - fw, ix1, iy1, LH_GAL - SLAB_T, LH_GAL, 'slab')
+O.box(ix1 - fw, iy0, ix1, iy1 - fw, LH_GAL - SLAB_T, LH_GAL, 'slab')
+lh_path.append(((ix0 + fw + 0.6, iy1 - fw / 2), LH_GAL))
+lh.stairs['LH0'] = {'lo': 1, 'hi': 2, 'res': {'path': [(p[0], p[1], z) for p, z in lh_path]}}
+lh.slab_override[(2, 'LH0')] = []
+lh.hubs[(1, 'LH0')] = (ix1 - fw / 2, (iy0 + iy1) / 2)
+lh.hubs[(2, 'LH0')] = (ix0 + fw + 0.6, iy1 - fw / 2)
+O.cyl(-288.0, 10.0, LH_GAL + 3.0, MOLE + 16.0, 2.2, 'glass', solid=False)               # фонарь
+O.cyl(-288.0, 10.0, MOLE + 16.0, MOLE + 17.2, 2.6, 'roof', solid=False)
+
+# крытый бассейн: чаша (дно −1,4), лестница в чашу, вода; препятствие для обхода
+bx = spa.basins[0]
+O.box(bx[0], bx[1], bx[2], bx[3], CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
+for (p, q) in (((bx[0], bx[1]), (bx[2], bx[1])), ((bx[2], bx[1]), (bx[2], bx[3])), ((bx[2], bx[3]), (bx[0], bx[3])), ((bx[0], bx[3]), (bx[0], bx[1]))):
+    O.seg(p, q, 0.3, CENTRAL - 1.9, CENTRAL - 0.02, 'tile', ext=0.15)
+O.stair((bx[2] - 0.6, bx[1] + 3.0, CENTRAL - 1.4), (bx[2] - 0.6, bx[1] + 0.6, CENTRAL), 1.0, 9, CENTRAL - 1.45, 'tile')
+O.water.append({'name': 'PoolIndoor', 'level': r3(CENTRAL - 0.25),
+                'poly': [[r3(bx[0]), r3(-bx[1])], [r3(bx[2]), r3(-bx[1])], [r3(bx[2]), r3(-bx[3])], [r3(bx[0]), r3(-bx[3])]]})
+spa.obstacles[(1, 'POOL')] = [(bx[0] - 0.7, bx[1] - 0.7, bx[2] + 0.7, bx[3] + 0.7)]
+spa.hubs[(1, 'POOL')] = ((bx[0] + bx[2]) / 2, (bx[3] + (-66.0)) / 2)
+
+for bb in BLD.values():
+    bb.door_steps()
+    bb.emit()
+HOZ_NAMES = {'KB': 'котельная', 'KM': 'котельная', 'LR': 'прачечная', 'LC': 'прачечная', 'G1': 'гаражи', 'G2': 'гаражи',
+             'G3': 'гаражи', 'GS': 'гаражи', 'SK': 'склад', 'SKK': 'склад', 'TR': 'трансформаторная', 'TRU': 'трансформаторная',
+             'WT': 'водонапорная башня'}
+for bb in BLD.values():
+    tours(bb, HOZ_NAMES if bb.bid == 'hoz' else None)
+
+# ================================================================ S-КОРПУСА: номера на дугах
+S_UNITS = []
+
+
+def s_unit(u, level, corps):
+    """Номер 10 × 6 м по внутренним стенам на 2 этажа: стены, плиты, П-образная лестница у стены соседа,
+    двери, витражи, терраса и балкон. Возвращает обход номера."""
+    F = ArcFrame(u)
+    L, D, FW, PW = sg.UNIT_LEN, sg.UNIT_DEPTH, sg.FACADE, sg.PARTY_WALL
+    z1 = level + 0.15
+    ff = sg.FLOOR_TO_FLOOR
+    z2 = z1 + ff
+    top = z1 + 2 * ff
+    # плиты: пол 1 этажа, 2 этажа (без лестничного проёма), кровля
+    F.box(-FW, D + FW, -PW / 2, L + PW / 2, level - 0.45, z1, 'floor')
+    F.box(0, 1.2, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
+    F.box(4.89, D, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
+    F.box(0, D, sg.STAIR_W, L, z2 - SLAB_T, z2, 'slab')
+    F.box(-FW - 0.7, D + FW + 0.7, -PW / 2, L + PW / 2, top - 0.05, top + 0.35, 'roof')
+    # фасад входа (a = −FW…0) и фасад террас (a = D…D + FW): глухая часть над лестницей в доске, остальное — витраж
+    for fa0, fa1, doors1, doors2 in ((-FW, 0.0, [(3.0, 3.0 + sg.DOOR_W)], []), (D, D + FW, [(5.2, 7.6)], [(5.2, 7.6)])):
+        for z0_, z1_, dl in ((z1, z2, doors1), (z2, top, doors2)):
+            F.box(fa0, fa1, -PW / 2, sg.STAIR_W, z0_, z1_, 'wood')
+            for s0, s1 in sub_intervals(sg.STAIR_W, L + PW / 2, dl):
+                F.box(fa0, fa1, s0, s1, z0_, z1_, 'glass')
+            for s0, s1 in dl:
+                F.box(fa0, fa1, s0, s1, z0_ + DOOR_H, z1_, 'glass')
+    # перегородки 1 этажа (лист номера: прихожая, с/у, кухня, шкаф)
+    pt = PART_T
+    F.box(1.2, 4.9, sg.STAIR_W - pt / 2, sg.STAIR_W + pt / 2, z1, z2, 'partition')
+    F.box(4.9 - pt / 2, 4.9 + pt / 2, 0, sg.STAIR_W, z1, top, 'partition')
+    F.box(0, 1.35, 5.0 - pt / 2, 5.0 + pt / 2, z1, z2, 'partition')
+    F.box(1.35 + sg.INNER_DOOR_W, 2.6, 5.0 - pt / 2, 5.0 + pt / 2, z1, z2, 'partition')
+    F.box(1.35, 1.35 + sg.INNER_DOOR_W, 5.0 - pt / 2, 5.0 + pt / 2, z1 + DOOR_H, z2, 'partition')
+    F.box(2.6 - pt / 2, 2.6 + pt / 2, 5.0, 7.4, z1, z2, 'partition')
+    F.box(0, 2.6, 7.4 - pt / 2, 7.4 + pt / 2, z1, z2, 'partition')
+    # 2 этаж: холл, кабинет, спальня, ванная, гардероб
+    hx = 3.75
+    for a0_, a1_ in ((0.0, 0.8), (0.8 + sg.INNER_DOOR_W, 3.2), (3.2 + sg.INNER_DOOR_W, 4.9)):
+        F.box(a0_, a1_, hx - pt / 2, hx + pt / 2, z2, top, 'partition')
+    for a0_, a1_ in ((0.8, 0.8 + sg.INNER_DOOR_W), (3.2, 3.2 + sg.INNER_DOOR_W)):
+        F.box(a0_, a1_, hx - pt / 2, hx + pt / 2, z2 + DOOR_H, top, 'partition')
+    F.box(2.6 - pt / 2, 2.6 + pt / 2, hx, 8.0, z2, top, 'partition')
+    F.box(2.6 - pt / 2, 2.6 + pt / 2, 8.0 + sg.INNER_DOOR_W, L, z2, top, 'partition')
+    F.box(2.6 - pt / 2, 2.6 + pt / 2, 8.0, 8.0 + sg.INNER_DOOR_W, z2 + DOOR_H, top, 'partition')
+    F.box(0, 2.6, 6.9 - pt / 2, 6.9 + pt / 2, z2, top, 'partition')
+    # лестница: марш 1 у прихожей (u 1,28…2,45) от v 1,2 вверх до площадки, марш 2 у стены обратно к фасаду
+    n = sg.RISERS // 2
+    hh = ff / (2 * n)
+    zm = z1 + n * hh
+    L1 = (n - 1) * sg.STEP_RUN
+    y0s = 1.2
+    ca, cb = sg.STAIR_W - sg.FLIGHT_W / 2, sg.FLIGHT_W / 2
+    F.stair(y0s, y0s + L1, ca, sg.FLIGHT_W - 0.06, z1, zm, n, z1 - 0.05, 'stair')
+    F.box(y0s + L1, 4.89, 0, sg.STAIR_W, z1 - 0.05, zm, 'stair')
+    F.stair(y0s + L1, y0s, cb, sg.FLIGHT_W - 0.06, zm, z2, n, z1 - 0.05, 'stair')
+    F.box(y0s, y0s + L1, sg.FLIGHT_W, sg.STAIR_W - sg.FLIGHT_W, z1, z2 + RAIL_H, 'rail')
+    F.box(y0s - 0.04, y0s + 0.04, sg.FLIGHT_W + 0.1, sg.STAIR_W, z2, z2 + RAIL_H, 'rail')
+    F.box(y0s, 4.9, sg.STAIR_W - 0.04, sg.STAIR_W + 0.04, z2, z2 + RAIL_H, 'rail')
+    # терраса 3 м с экранами между соседями, балкон 1,5 м со стеклянным ограждением
+    F.box(D + FW, D + FW + sg.TERRACE, -PW / 2, L + PW / 2, level - 0.45, z1, 'deck')
+    F.box(D + FW, D + FW + sg.BALCONY, -PW / 2, L + PW / 2, z2 - SLAB_T, z2, 'deck')
+    F.box(D + FW + sg.BALCONY - 0.04, D + FW + sg.BALCONY + 0.04, -PW / 2, L + PW / 2, z2, z2 + RAIL_H, 'glass')
+    for ue in (-PW / 2, L + PW / 2):
+        F.box(D + FW, D + FW + 2.2, ue - 0.075, ue + 0.075, z1, z1 + 1.8, 'wood')
+        F.box(D + FW, D + FW + sg.BALCONY, ue - 0.075, ue + 0.075, z2, z2 + RAIL_H, 'wood')
+    # обход номера (точки в рамке: a = v, b = u)
+    P = [(-1.6, 3.58, level), (-0.2, 3.58, z1), (1.0, 3.6, z1, 'HAL'), (1.87, 4.6, z1), (1.87, 5.0, z1), (1.3, 6.2, z1, 'WC'),
+         (1.87, 5.0, z1), (1.87, 4.4, z1), (4.2, 5.0, z1, 'LIV'), (3.3, 8.2, z1), (1.4, 8.7, z1, 'KIT'), (3.3, 8.2, z1),
+         (5.4, 6.4, z1), (6.0, 6.4, z1), (7.6, 6.4, z1, 'TER'), (6.0, 6.4, z1), (5.3, 6.0, z1), (5.45, 3.2, z1),
+         (5.45, 1.2, z1, 'CLO'), (5.4, 3.3, z1), (2.0, 3.4, z1), (0.6, 2.0, z1), (0.75, ca, z1), (y0s + 0.35, ca, z1 + hh),
+         (y0s + L1 - 0.3, ca, zm - hh * 0.5), (4.3, 1.2, zm, 'LND'), (y0s + L1 - 0.3, cb, zm + hh * 0.5), (y0s + 0.35, cb, z2 - hh),
+         (0.6, 1.2, z2, 'PL2'), (0.6, 3.1, z2), (2.2, 3.1, z2, 'HL2'), (1.32, 3.1, z2), (1.32, 3.75, z2), (1.3, 5.3, z2, 'CAB'),
+         (1.32, 3.75, z2), (1.32, 3.1, z2), (3.72, 3.1, z2), (3.72, 3.75, z2), (4.4, 5.5, z2, 'BED'), (3.4, 8.52, z2),
+         (2.6, 8.52, z2), (1.5, 8.45, z2, 'BTH'), (2.6, 8.52, z2), (3.4, 8.52, z2), (5.4, 6.4, z2), (6.0, 6.4, z2),
+         (6.9, 6.4, z2, 'BAL'), (6.0, 6.4, z2), (5.4, 6.4, z2), (4.4, 5.5, z2), (3.72, 3.75, z2), (3.72, 3.1, z2), (5.45, 3.1, z2),
+         (5.45, 1.2, z2, 'WRD')]
+    names = {'HAL': 'прихожая', 'WC': 'санузел', 'LIV': 'гостиная-столовая', 'KIT': 'кухня', 'TER': 'терраса', 'CLO': 'шкаф',
+             'LND': 'площадка лестницы', 'PL2': 'площадка 2 этажа', 'HL2': 'холл', 'CAB': 'кабинет', 'BED': 'спальня',
+             'BTH': 'ванная', 'BAL': 'балкон', 'WRD': 'гардероб'}
+    pts, checks = [], []
+    bid = f'{corps}_{u["n"]:02d}'
+    for p in P:
+        x, y = F.pt(p[0], p[1])
+        pts.append(gpt(x, y, p[2]))
+        if len(p) > 3:
+            uid = f'{bid}/{1 if p[2] < z2 - 0.5 else 2}/{p[3]}'
+            checks.append([len(pts) - 1, uid, r3(p[2])])
+            ROOMS.append({'uid': uid, 'building': f'{corps}, номер {u["n"]}', 'name': names[p[3]],
+                          'floor': 1 if p[2] < z2 - 0.5 else 2, 'at': gpt(x, y, p[2])})
+    ROUTES.append({'id': f'tour_{bid}', 'label': f'{corps}, номер {u["n"]}: все помещения, лестница', 'kind': 'tour',
+                   'points': pts, 'checks': checks, 'building': bid})
+    lx, ly = F.pt(3.0, 5.0)
+    O.label(lx, ly, top + 0.9, f'{corps} · {u["n"]}', 1.0, 'unit')
+    S_UNITS.append({'id': bid, 'z': z1})
+
+
+for ox, oy, mirror, name in S_SITES:
+    lv = S_LEVELS[name]
+    units = sg.units(ox, oy, mirror)
+    for u in units:
+        s_unit(u, lv, name)
+    # стены между номерами и торцы (0,3 / в доске 0,4)
+    z1 = lv + 0.15
+    top = z1 + 2 * sg.FLOOR_TO_FLOOR
+    for k, u in enumerate(units):
+        F = ArcFrame(u)
+        F.box(-sg.FACADE, sg.UNIT_DEPTH + sg.FACADE, -sg.PARTY_WALL / 2, sg.PARTY_WALL / 2, z1, top, 'wood' if k == 0 else 'struct')
+        if k == len(units) - 1:
+            F.box(-sg.FACADE, sg.UNIT_DEPTH + sg.FACADE, sg.UNIT_LEN, sg.UNIT_LEN + sg.PARTY_WALL, z1, top, 'wood')
+    # дорожка вдоль фасада входа (по рельефу — полосой)
+    for cx, cy, a0, a1, ent_inner in sg.halves(ox, oy, mirror):
+        r_ent = sg.face_r(ent_inner, True)
+        sgn = 1.0 if r_ent > sg.R else -1.0
+        r_a, r_b = r_ent, r_ent + sgn * sg.PATH_W
+        n = int(abs(a1 - a0) / 3)
+        for k in range(n):
+            t0, t1 = math.radians(a0 + (a1 - a0) * k / n), math.radians(a0 + (a1 - a0) * (k + 1) / n)
+            ps = [(cx + r * math.cos(t), cy + r * math.sin(t)) for r, t in ((r_a, t0), (r_b, t0), (r_b, t1), (r_a, t1))]
+            O.quad('paving', *[(x, y, h_at(x, y) + 0.04) for x, y in ps])
+    O.label(ox, oy, lv + 10.0, f'Жилой корпус {name}', 3.0, 'building')
+    BUILDINGS.append({'id': name, 'title': f'Жилой корпус {name}', 'rooms': 14 * 14, 'units': 14})
+
+# ================================================================ КАСКАД: объёмы
+BAL = 1.0      # балюстрада над площадкой
+
+
+def gallery_level(g, y):
+    """Уровень галереи в точке y (ровные куски — по нижней отметке предыдущего элемента)."""
+    sy0 = (g['start']['rect'][1] + g['start']['rect'][3]) / 2
+    sy1 = (g['end']['rect'][1] + g['end']['rect'][3]) / 2
+    direction = 1.0 if sy1 > sy0 else -1.0
+    z = g['start']['z_top']
+    for f in g['flights']:
+        fa = f['rect'][1] if direction > 0 else f['rect'][3]
+        fb = f['rect'][3] if direction > 0 else f['rect'][1]
+        if (y - fa) * direction <= 0:
+            return z
+        if (y - fb) * direction < 0:
+            t = (y - fa) / (fb - fa)
+            return f['z_top'] + (f['z_bottom'] - f['z_top']) * t
+        z = f['z_bottom']
+    return z
+
+
+cas_route = [(-80.0, 0.0, CENTRAL), (-85.0, 0.0, CENTRAL), (-86.4, 0.0, CENTRAL - 0.1), (-89.8, 0.0, 29.85)]
+cas_checks = [[0, 'cascade/терраса', CENTRAL]]
+EXT_DECKS = {(1, 'end'): (-103.7, -100.7), (2, 'end'): (-113.1, -110.1)}   # проходы к ротонде и смотровому балкону
+for e in XFLIGHTS:
+    x0, y0, x1, y1 = e['rect']
+    yc = (y0 + y1) / 2
+    O.stair((x0, yc, e['z_bottom']), (x1, yc, e['z_top']), y1 - y0 - 0.1, e['risers'], h_at(x0, yc) - 1.0, 'stone')
+    low = rect_stat(x0, y0, x1, y1, fn=np.min)
+    for yy in (y0, y1):
+        O.box(x0, yy - 0.1, x1, yy + 0.1, low - 0.5, e['z_top'] + BAL, 'parapet')
+for k, g in enumerate(GALLERIES):
+    x0, _, x1, _ = g['walk']
+    xc = (x0 + x1) / 2
+    sy0 = (g['start']['rect'][1] + g['start']['rect'][3]) / 2
+    sy1 = (g['end']['rect'][1] + g['end']['rect'][3]) / 2
+    direction = 1.0 if sy1 > sy0 else -1.0
+    # площадки
+    for L_ in (g['start'], g['end']):
+        lx0, ly0, lx1, ly1 = L_['rect']
+        low = rect_stat(lx0, ly0, lx1, ly1, fn=np.min)
+        O.box(lx0, ly0, lx1, ly1, low - 0.6, L_['z_top'], 'stone')
+    # ровные куски и марши по y
+    cursor = (g['start']['rect'][3] if direction > 0 else g['start']['rect'][1])
+    z = g['start']['z_top']
+    pieces = []
+    for f in g['flights']:
+        fa = f['rect'][1] if direction > 0 else f['rect'][3]
+        fb = f['rect'][3] if direction > 0 else f['rect'][1]
+        pieces.append(('flat', cursor, fa, z, z))
+        pieces.append(('flight', fa, fb, f['z_top'], f['z_bottom'], f['risers']))
+        cursor, z = fb, f['z_bottom']
+    end_edge = g['end']['rect'][1] if direction > 0 else g['end']['rect'][3]
+    pieces.append(('flat', cursor, end_edge, z, z))
+    cas_route.append((g['start']['rect'][0] + CW / 2, sy0, g['start']['z_top']))
+    cas_checks.append([len(cas_route) - 1, f'cascade/площадка {g["start"]["z_top"]:.2f}', r3(g['start']['z_top'])])
+    for pc in pieces:
+        a, b_ = sorted((pc[1], pc[2]))
+        low = rect_stat(x0, a, x1, b_, fn=np.min)
+        if pc[0] == 'flat':
+            O.box(x0, a, x1, b_, low - 0.6, pc[3], 'stone')
+        else:
+            O.stair((xc, pc[2], pc[4]), (xc, pc[1], pc[3]), x1 - x0 - 0.1, pc[5], low - 0.6, 'stone')
+            cas_route.append((xc, pc[1] + direction * 0.4, pc[3] - 0.1))
+            cas_route.append((xc, pc[2] - direction * 0.4, pc[4] + 0.1))
+    # низовая сторона — перила (кроме места, где уходит x-марш на следующую галерею), нагорная — бордюр цветника
+    out_y = None
+    for e in XFLIGHTS:
+        if abs(e['rect'][2] - g['end']['rect'][0]) < 0.05:
+            out_y = (e['rect'][1], e['rect'][3])
+    ya, yb = sorted((sy0 - direction * CW / 2, sy1 + direction * CW / 2))
+    for s0, s1 in sub_intervals(ya, yb, [out_y] if out_y else []):
+        nb = max(1, int(math.ceil((s1 - s0) / 1.2)))
+        for kk in range(nb):
+            p0_, p1_ = s0 + (s1 - s0) * kk / nb, s0 + (s1 - s0) * (kk + 1) / nb
+            zl = min(gallery_level(g, p0_), gallery_level(g, p1_))
+            O.box(x0 - 0.12, p0_, x0 + 0.05, p1_, zl - 0.6, gallery_level(g, (p0_ + p1_) / 2) + BAL, 'parapet')
+    # торцы галереи: перила поперёк (у второй и третьей — проход на выступ с ротондой и смотровым балконом)
+    for which, L_ in (('start', g['start']), ('end', g['end'])):
+        lx0, ly0, lx1, ly1 = L_['rect']
+        edge = ly1 if (L_['rect'][1] + L_['rect'][3]) / 2 > 0 else ly0
+        gap = EXT_DECKS.get((k, which))
+        for s0, s1 in sub_intervals(lx0, lx1, [gap] if gap else []):
+            O.box(s0, edge - 0.08, s1, edge + 0.08, L_['z_top'] - 0.6, L_['z_top'] + BAL, 'parapet')
+    # цветники в промежутке до верхнего соседа (террасы склона): верх — уровень галереи + 0,45
+    gx0, gx1 = g['gap']
+    xf = [e for e in XFLIGHTS if abs(e['rect'][0] - gx0) < 0.05 and abs(e['rect'][2] - gx1) < 0.05]
+    holes = [(e['rect'][1], e['rect'][3]) for e in xf]
+    for f in [g['start']] + g['flights'] + [g['end']]:
+        pass
+    span0, span1 = g['span']
+    step_y = 2.0
+    yy = span0
+    while yy < span1 - 1e-6:
+        y2 = min(span1, yy + step_y)
+        for s0, s1 in sub_intervals(yy, y2, holes):
+            zt = max(gallery_level(g, s0), gallery_level(g, s1)) + 0.45
+            low = rect_stat(gx0, s0, gx1, s1, fn=np.min)
+            O.box(gx0, s0, gx1, s1, low - 0.6, zt, 'planter')
+        yy = y2
+    cas_route.append((g['end']['rect'][0] + CW / 2, sy1, g['end']['z_top']))
+    cas_checks.append([len(cas_route) - 1, f'cascade/площадка {g["end"]["z_top"]:.2f}', r3(g['end']['z_top'])])
+    nxt = [e for e in XFLIGHTS if abs(e['rect'][2] - g['end']['rect'][0]) < 0.05]
+    if nxt:
+        e = nxt[0]
+        yc = (e['rect'][1] + e['rect'][3]) / 2
+        cas_route.append((e['rect'][2] - 0.4, yc, e['z_top'] - 0.1))
+        cas_route.append((e['rect'][0] + 0.4, yc, e['z_bottom'] + 0.1))
+cas_route.append((-131.5, 0.0, QUAY))
+cas_checks.append([len(cas_route) - 1, 'cascade/набережная', QUAY])
+# подпорные стенки по внешнему краю каскада: где склон или терраса выше элемента — стенка 2 м шириной до верха земли
+def in_cas(x, y, skip):
+    for i_, (r_, _, _) in enumerate(CAS_ELEMS):
+        if i_ != skip and r_[0] - 0.02 <= x <= r_[2] + 0.02 and r_[1] - 0.02 <= y <= r_[3] + 0.02:
+            return True
+    return False
+
+
+CAS_WALLS = 0
+for i_, (r_, lv_, side_lv) in enumerate(CAS_ELEMS):
+    x0, y0, x1, y1 = r_
+    for side, (ax, ay, bx, by, nx, ny) in (('W', (x0, y0, x0, y1, -1, 0)), ('E', (x1, y0, x1, y1, 1, 0)),
+                                           ('S', (x0, y0, x1, y0, 0, -1)), ('N', (x0, y1, x1, y1, 0, 1))):
+        L_ = math.hypot(bx - ax, by - ay)
+        n_ = max(2, int(math.ceil(L_ / 0.5)))
+        lvl = side_lv.get(side, lv_)
+        run = []
+        for k_ in range(n_ + 1):
+            t_ = k_ / n_
+            px, py = ax + (bx - ax) * t_, ay + (by - ay) * t_
+            outside = not in_cas(px + nx * 0.3, py + ny * 0.3, i_)
+            run.append((t_, outside, h_at(px + nx * 2.4, py + ny * 2.4, H_PADS)))
+        k_ = 0
+        while k_ < len(run):
+            if not run[k_][1]:
+                k_ += 1
+                continue
+            j_ = k_
+            while j_ + 1 < len(run) and run[j_ + 1][1]:
+                j_ += 1
+            top = max(v[2] for v in run[k_:j_ + 1]) + 0.1
+            if top > lvl + 0.3 and j_ > k_:
+                t0_, t1_ = run[k_][0], run[j_][0]
+                p0_ = (ax + (bx - ax) * t0_, ay + (by - ay) * t0_)
+                p1_ = (ax + (bx - ax) * t1_, ay + (by - ay) * t1_)
+                O.box(min(p0_[0], p1_[0] + nx * 2.0), min(p0_[1], p1_[1] + ny * 2.0), max(p0_[0], p1_[0] + nx * 2.0),
+                      max(p0_[1], p1_[1] + ny * 2.0), min(lvl, lv_) - 0.6, top, 'stone')
+                CAS_WALLS += 1
+            k_ = j_ + 1
+# подпорные стенки террасы (+32) у каскада: кромка земли уровня площадок — стенка с балюстрадой
+first = GALLERIES[0]
+gx0_1 = first['walk'][0]
+TW = 1.0
+O.box(-87.0, 2.6, -87.0 + TW, 24.0, 24.0, CENTRAL + BAL, 'stone')
+O.box(gx0_1, 24.0, -86.0, 24.0 + TW, 24.0, CENTRAL + BAL, 'stone')
+O.box(gx0_1, -2.0 - TW, -86.0, -2.0, 24.0, CENTRAL + BAL, 'stone')
+g2 = GALLERIES[1]
+O.box(g2['gap'][1] - 0.6, -24.6, g2['gap'][1] - 0.6 + TW, -2.0, 16.0, CENTRAL + BAL, 'stone')
+# фонтан на парадной террасе, киоск, ротонда, смотровой балкон
+O.cyl(-72.0, 0.0, CENTRAL, CENTRAL + 0.55, 5.0, 'stone')
+O.cyl(-72.0, 0.0, CENTRAL + 0.55, CENTRAL + 2.6, 0.5, 'stone')
+O.water.append({'name': 'FountainTerrace', 'level': r3(CENTRAL + 0.5), 'circle': [-72.0, 0.0, 4.6]})
+O.box(-92.0, 23.2, -90.4, 24.5, 26.6, 26.6 + 2.6, 'kiosk')
+O.label(-91.2, 23.8, 26.6 + 3.2, 'киоск', 0.8, 'object')
+rot_deck = ROT_DECK
+lv = GALLERIES[1]['end']['z_top']
+O.box(rot_deck[0], rot_deck[1], rot_deck[2], rot_deck[3], rect_stat(*rot_deck, fn=np.min) - 0.6, lv, 'stone')
+for k in range(8):
+    a = math.radians(k * 45)
+    O.cyl(-102.2 + 2.6 * math.cos(a), -29.5 + 2.6 * math.sin(a), lv, lv + 3.2, 0.22, 'white')
+O.cyl(-102.2, -29.5, lv + 3.2, lv + 3.6, 3.1, 'white', solid=False)
+for (p, q) in (((rot_deck[0], rot_deck[1]), (rot_deck[2], rot_deck[1])), ((rot_deck[0], rot_deck[1]), (rot_deck[0], rot_deck[3])),
+               ((rot_deck[2], rot_deck[1]), (rot_deck[2], -24.6))):
+    O.seg(p, q, 0.16, lv - 0.3, lv + BAL, 'rail')
+O.label(-102.2, -29.5, lv + 4.2, 'беседка-ротонда', 0.8, 'object')
+bal = BALCONY
+lv3 = GALLERIES[2]['end']['z_top']
+O.box(*bal, rect_stat(*bal, fn=np.min) - 0.6, lv3, 'stone')
+for (p, q) in (((bal[0], bal[3]), (bal[2], bal[3])), ((bal[0], bal[1]), (bal[0], bal[3])), ((bal[2], bal[1]), (bal[2], bal[3]))):
+    O.seg(p, q, 0.16, lv3 - 0.3, lv3 + BAL, 'rail')
+O.label(-111.6, 27.0, lv3 + 2.0, 'смотровой балкон', 0.8, 'object')
+ROUTES.append({'id': 'cascade', 'label': 'Лестница-каскад: терраса +32 → набережная +2, 17 маршей', 'kind': 'descent',
+               'points': [gpt(*p) for p in cas_route], 'checks': cas_checks})
+
+# ================================================================ ЛЕНТЫ: тропы и служебная дорога
+for rb in RIBBONS:
+    pts = rb['pts']
+    w = rb['w']
+    m = rb['mat']
+    for a, b in zip(pts, pts[1:]):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        Ls = math.hypot(dx, dy)
+        nx, ny = -dy / Ls, dx / Ls
+        lows = [h_at(a[0] + (b[0] - a[0]) * t + nx * s, a[1] + (b[1] - a[1]) * t + ny * s) for t in (0, 0.5, 1) for s in (-w / 2, 0, w / 2)]
+        depth = max(0.8, max(a[2], b[2]) - min(lows) + 0.4)
+        O.beam(a, b, w, depth, m, solid=True)
+        # подпорная крепь с нагорной стороны: верх — рельеф площадок за врезкой; у поворотов не ставится —
+        # стенка одного колена перегородила бы соседнее
+        if Ls > 7.5:
+            ux_, uy_ = dx / Ls, dy / Ls
+            for side in (1, -1):
+                off = w / 2 + 0.75
+                zs = [h_at(a[0] + dx * t + nx * side * (off + 0.6), a[1] + dy * t + ny * side * (off + 0.6), H_PADS) for t in (0.15, 0.5, 0.85)]
+                zp = min(a[2], b[2])
+                if max(zs) > zp + 0.35:
+                    L_in = Ls - 6.4
+                    npc = max(1, int(math.ceil(L_in / 2.0)))
+                    for kk in range(npc):
+                        s0_, s1_ = 3.2 + L_in * kk / npc, 3.2 + L_in * (kk + 1) / npc
+                        c_ = (a[0] + ux_ * (s0_ + s1_) / 2 + nx * side * off, a[1] + uy_ * (s0_ + s1_) / 2 + ny * side * off)
+                        near_other = False
+                        for rb2 in RIBBONS:
+                            for a2, b2 in zip(rb2['pts'], rb2['pts'][1:]):
+                                if a2 is a and b2 is b:
+                                    continue
+                                if seg_dist(np.array([c_[0]]), np.array([c_[1]]), a2, b2)[0][0] < rb2['w'] / 2 + 1.8:
+                                    near_other = True
+                        if near_other:
+                            continue
+                        q0 = (a[0] + ux_ * s0_ + nx * side * off, a[1] + uy_ * s0_ + ny * side * off)
+                        q1 = (a[0] + ux_ * s1_ + nx * side * off, a[1] + uy_ * s1_ + ny * side * off)
+                        O.seg(q0, q1, 1.5, zp - 0.4, max(zs) + 0.05, 'logs' if m == 'trail' else 'stone', ext=0.02)
+    for p in pts[1:-1]:
+        lows = [h_at(p[0] + ox_, p[1] + oy_) for ox_ in (-w / 2, w / 2) for oy_ in (-w / 2, w / 2)]
+        O.box(p[0] - w / 2, p[1] - w / 2, p[0] + w / 2, p[1] + w / 2, min(lows) - 0.4, p[2], m)
+    route = densify(pts, 6.0)
+    first_pt = pts[0]
+    ROUTES.append({'id': rb['id'], 'label': rb['title'], 'kind': 'descent', 'points': [gpt(*p) for p in route],
+                   'checks': [[0, f'{rb["id"]}/начало', r3(first_pt[2])], [len(route) - 1, f'{rb["id"]}/конец', r3(pts[-1][2])]]})
+# беседки, родник, лавка, ларёк у тропы
+for (gx_, gy_), knee in GAZEBOS:
+    zk = trail_pts[knee][2]
+    O.box(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.min) - 0.5, zk, 'deck')
+    for k in range(8):
+        a = math.radians(22.5 + k * 45)
+        if k in (4,):
+            continue
+        O.cyl(gx_ + 2.3 * math.cos(a), gy_ + 2.3 * math.sin(a), zk, zk + 2.4, 0.09, 'wood')
+    O.cyl(gx_, gy_, zk + 2.4, zk + 2.7, 2.8, 'roof', solid=False, sides=8)
+    O.label(gx_, gy_, zk + 3.3, 'беседка', 0.8, 'object')
+O.box(-105.2, -151.6, -102.8, -149.4, h_at(-104, -150.5) - 0.5, h_at(-104, -150.5) + 1.0, 'stone')
+O.label(-104.0, -150.5, h_at(-104, -150.5) + 1.8, 'родник', 0.7, 'object')
+O.box(-97.0, -105.0, -93.0, -101.0, CENTRAL - 0.2, CENTRAL + 2.6, 'kiosk')
+O.label(-95.0, -103.0, CENTRAL + 3.2, 'ларёк у начала тропы', 0.8, 'object')
+
+# ================================================================ ДОРОГИ И ПАРКОВКИ ПО РЕЛЬЕФУ
+def strip(pts, w, m, lift=0.05, step=2.0):
+    """Полоса по рельефу (асфальт, тротуар) — только вид, ходят по самому рельефу."""
+    dense = []
+    for a, b in zip(pts, pts[1:]):
+        n = max(1, int(math.ceil(math.dist(a, b) / step)))
+        for k in range(n):
+            t = k / n
+            dense.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+    dense.append(pts[-1])
+    for i in range(len(dense) - 1):
+        a, b = dense[i], dense[i + 1]
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        Ls = math.hypot(dx, dy) + 1e-9
+        nx, ny = -dy / Ls * w / 2, dx / Ls * w / 2
+        q = [(a[0] - nx, a[1] - ny), (a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), (b[0] - nx, b[1] - ny)]
+        O.quad(m, *[(x, y, ground_at(x, y) + lift) for x, y in q])
+
+
+for k, (pts, w) in enumerate(PLAN['ROADS']):
+    if k == 5:
+        strip([tuple(p) for p in pts[:2]], w, 'asphalt')
+        continue
+    strip([tuple(p) for p in pts], w, 'asphalt')
+strip(cot_xy[:3], 2.4, 'trail_strip', 0.06)
+for cx_, cy_, rr in ((10.0, 0.0, 12.0), (4.0, -213.0, 6.0), (136.0, -213.0, 6.0)):
+    n = 24
+    for k in range(n):
+        t0, t1 = 2 * math.pi * k / n, 2 * math.pi * (k + 1) / n
+        ps = [(cx_, cy_), (cx_ + rr * math.cos(t0), cy_ + rr * math.sin(t0)), (cx_ + rr * math.cos(t1), cy_ + rr * math.sin(t1))]
+        O.tri('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ps])
+O.cyl(10.0, 0.0, h_at(10, 0), h_at(10, 0) + 0.6, 5.5, 'stone')
+O.cyl(10.0, 0.0, h_at(10, 0), h_at(10, 0) + 3.0, 0.6, 'stone')
+O.water.append({'name': 'FountainCircle', 'level': r3(h_at(10, 0) + 0.55), 'circle': [10.0, 0.0, 5.1]})
+
+CAR_RNG = random.Random(11)
+CARS = []
+
+
+def lot(x0, y0, n_near, n_far, along_x):
+    """Блок парковки: два ряда мест 2,5 × 5 по сторонам проезда 7,8 м (схема), машины — укрытия."""
+    length = max(n_near, n_far) * BAY_W + 7.0
+    if along_x:
+        rect = (x0, y0, x0 + length, y0 + BAY_L * 2 + AISLE)
+    else:
+        rect = (x0, y0, x0 + BAY_L * 2 + AISLE, y0 + length)
+    nx_, ny_ = int(math.ceil((rect[2] - rect[0]) / 2.5)), int(math.ceil((rect[3] - rect[1]) / 2.5))
+    for i in range(nx_):
+        for j in range(ny_):
+            a0, a1 = rect[0] + (rect[2] - rect[0]) * i / nx_, rect[0] + (rect[2] - rect[0]) * (i + 1) / nx_
+            b0, b1 = rect[1] + (rect[3] - rect[1]) * j / ny_, rect[1] + (rect[3] - rect[1]) * (j + 1) / ny_
+            O.quad('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ((a0, b0), (a1, b0), (a1, b1), (a0, b1))])
+    for side, n in ((0, n_near), (1, n_far)):
+        for k in range(n + 1):
+            if along_x:
+                x = x0 + k * BAY_W
+                ya, yb = (y0, y0 + BAY_L) if side == 0 else (rect[3] - BAY_L, rect[3])
+                O.quad('stripe', *[(xx, yy, ground_at(xx, yy) + 0.08) for xx, yy in ((x - 0.06, ya), (x + 0.06, ya), (x + 0.06, yb), (x - 0.06, yb))])
+            else:
+                y = y0 + k * BAY_W
+                xa, xb = (x0, x0 + BAY_L) if side == 0 else (rect[2] - BAY_L, rect[2])
+                O.quad('stripe', *[(xx, yy, ground_at(xx, yy) + 0.08) for xx, yy in ((xa, y - 0.06), (xb, y - 0.06), (xb, y + 0.06), (xa, y + 0.06))])
+        for k in range(n):
+            if CAR_RNG.random() >= 0.35:
+                continue
+            if along_x:
+                cx_ = x0 + (k + 0.5) * BAY_W
+                cy_ = y0 + BAY_L / 2 if side == 0 else rect[3] - BAY_L / 2
+                CARS.append((cx_, cy_, 90.0 + CAR_RNG.uniform(-6, 6)))
+            else:
+                cy_ = y0 + (k + 0.5) * BAY_W
+                cx_ = x0 + BAY_L / 2 if side == 0 else rect[2] - BAY_L / 2
+                CARS.append((cx_, cy_, CAR_RNG.uniform(-6, 6)))
+    return rect
+
+
+LOTS = [lot(26.0, 6.0, 12, 13, True), lot(26.0, -6.0 - BAY_L * 2 - AISLE, 13, 12, True),
+        lot(PLAN['S_LOT_X0'], PLAN['S_LOT_Y0'], 20, 20, False)]
+for cx_, cy_ in COTTAGES:
+    px0 = cx_ + 8.0
+    py0, py1 = (-210.0, -204.0) if cy_ > -213 else (-222.0, -216.0)
+    O.quad('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ((px0, py0), (px0 + 3.5, py0), (px0 + 3.5, py1), (px0, py1))])
+    if CAR_RNG.random() < 0.5:
+        CARS.append((px0 + 1.75, (py0 + py1) / 2, 0.0 + CAR_RNG.uniform(-4, 4)))
+CAR_COLORS = ['car_a', 'car_b', 'car_c', 'car_d']
+for i, (cx_, cy_, ang) in enumerate(CARS):
+    g = min(h_at(cx_ + dx_, cy_ + dy_) for dx_ in (-2, 2) for dy_ in (-2, 2))
+    m = CAR_COLORS[i % 4]
+    O.obox(cx_, cy_, 1.8, 4.4, g - 0.1, g + 0.75, ang, m)
+    O.obox(cx_, cy_, 1.6, 2.5, g + 0.75, g + 1.45, ang, m)
+# шлагбаум КПП и тротуары S-корпусов
+O.box(133.8, -4.8, 134.2, 4.8, h_at(134, 0) + 0.9, h_at(134, 0) + 1.05, 'barrier_red', solid=False)
+O.box(133.6, 5.0, 134.4, 5.6, h_at(134, 5.3), h_at(134, 5.3) + 1.1, 'metal')
+SX0, SY0, SX1, SY1 = S_LOT
+for xs_ in (SX0 - 1.5, SX1 + 1.5):
+    strip([(xs_, SY0 - 6), (xs_, SY1)], sg.PATH_W, 'paving', 0.07)
+for xa, xb, y in ((SX0, SITE1[0] + sg.R - sg.HALF_T - sg.PATH_W, SITE1[1] + sg.R), (SX1, SITE2[0] - sg.R + sg.HALF_T + sg.PATH_W, SITE2[1] + sg.R),
+                  (SX0, SITE1[0] + sg.R + sg.HALF_T + sg.PATH_W, SITE1[1] - sg.R), (SX1, SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W, SITE2[1] - sg.R)):
+    strip([(xa, y), (xb, y)], sg.PATH_W, 'paving', 0.07)
+strip([(8.0, -12.0), (3.0, -42.0)], 3.0, 'paving', 0.07)
+strip([(-80.0, -16.0), (-86.0, -20.0)], 3.0, 'paving', 0.07)
+strip([(-97.5, -30.0), (-97.5, -24.0), (-92.0, -20.5)], 3.0, 'paving', 0.07)
+
+# ================================================================ «Ресторан и спа»: подиум, терраса, открытый бассейн
+O.box(*PODIUM, rect_stat(*PODIUM, fn=np.min) - 0.6, CENTRAL - 1.6, 'plinth')
+po = tuple(SPA['pool_outdoor'])
+for p in rect_minus(PODIUM, [po]):
+    O.box(*p, CENTRAL - 1.6, CENTRAL, 'floor')
+O.box(*po, CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
+for (p, q) in (((po[0], po[1]), (po[2], po[1])), ((po[2], po[1]), (po[2], po[3])), ((po[2], po[3]), (po[0], po[3])), ((po[0], po[3]), (po[0], po[1]))):
+    O.seg(p, q, 0.3, CENTRAL - 1.9, CENTRAL - 0.02, 'tile', ext=0.15)
+O.stair((po[0] + 0.6, po[1] + 3.0, CENTRAL - 1.4), (po[0] + 0.6, po[1] + 0.6, CENTRAL), 1.0, 9, CENTRAL - 1.45, 'tile')
+O.water.append({'name': 'PoolOutdoor', 'level': r3(CENTRAL - 0.25),
+                'poly': [[r3(po[0]), r3(-po[1])], [r3(po[2]), r3(-po[1])], [r3(po[2]), r3(-po[3])], [r3(po[0]), r3(-po[3])]]})
+ch = tuple(SPA['swim_channel'])
+O.box(*ch, CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
+for yy in (ch[1], ch[3]):
+    O.box(ch[0], yy - 0.15, ch[2], yy + 0.15, CENTRAL - 1.9, CENTRAL - 0.02, 'tile')
+O.box(-96.25, ch[1], -95.75, ch[3], CENTRAL - 0.4, CENTRAL + 7.0, 'glass')
+O.water.append({'name': 'SwimChannel', 'level': r3(CENTRAL - 0.25),
+                'poly': [[r3(ch[0]), r3(-ch[1])], [r3(ch[2]), r3(-ch[1])], [r3(ch[2]), r3(-ch[3])], [r3(ch[0]), r3(-ch[3])]]})
+for (p, q) in (((PODIUM[0], PODIUM[1]), (PODIUM[2], PODIUM[1])), ((PODIUM[0], PODIUM[1]), (PODIUM[0], PODIUM[3])),
+               ((PODIUM[0], PODIUM[3]), (PODIUM[2], PODIUM[3]))):
+    O.seg(p, q, 0.25, CENTRAL - 0.2, CENTRAL + RAIL_H, 'glass')
+for k in range(8):
+    lx_ = -122.0 + k * 2.6
+    if po[0] - 1 < lx_ < po[2] + 1:
+        for ly_ in (-92.5, -70.5):
+            O.box(lx_, ly_ - 1.0, lx_ + 0.8, ly_ + 1.0, CENTRAL, CENTRAL + 0.45, 'deck')
+O.label(-110.0, -95.0, CENTRAL + 2.5, 'открытый бассейн на подиуме', 1.0, 'object')
+O.box(*RTER, rect_stat(*RTER, fn=np.min) - 0.6, CENTRAL, 'deck')
+for (p, q) in (((RTER[0], RTER[1]), (RTER[2], RTER[1])), ((RTER[0], RTER[1]), (RTER[0], RTER[3])), ((RTER[0], RTER[3]), (RTER[2] - 3.0, RTER[3]))):
+    O.seg(p, q, 0.2, CENTRAL - 0.2, CENTRAL + RAIL_H, 'rail')
+O.box(-99.0, -30.0, -96.0, -24.0, rect_stat(-99, -30, -96, -24, fn=np.min) - 0.6, CENTRAL, 'deck')
+O.seg((-99.0, -30.0), (-99.0, -24.0), 0.2, CENTRAL - 0.2, CENTRAL + RAIL_H, 'rail')
+O.label(-104.0, -39.0, CENTRAL + 2.5, 'терраса ресторана', 1.0, 'object')
+
+# ================================================================ НАБЕРЕЖНАЯ, ПЛЯЖ, «СТРЕЛКА»
+ATTACH = [(-27.0, 47.0), (136.6, 143.4), (172.5, 177.5), (190.5, 203.5)]
+
+
+def poly_ear(pts):
+    """Треугольники простого многоугольника (отсечение ушей)."""
+    pts = list(pts)
+    area = sum(pts[i][0] * pts[(i + 1) % len(pts)][1] - pts[(i + 1) % len(pts)][0] * pts[i][1] for i in range(len(pts)))
+    if area < 0:
+        pts.reverse()
+    idx = list(range(len(pts)))
+    tris = []
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    guard = 0
+    while len(idx) > 3 and guard < 10000:
+        guard += 1
+        for k in range(len(idx)):
+            i0, i1, i2 = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, b, c = pts[i0], pts[i1], pts[i2]
+            if cross(a, b, c) <= 1e-9:
+                continue
+            if any(in_poly(*pts[j], [a, b, c]) for j in idx if j not in (i0, i1, i2)):
+                continue
+            tris.append((a, b, c))
+            idx.pop(k)
+            break
+    if len(idx) == 3:
+        tris.append(tuple(pts[i] for i in idx))
+    return tris
+
+
+def slab_poly(pts, z_top, z_bot, m, side_m=None):
+    for a, b, c in poly_ear(pts):
+        O.tri(m, (a[0], a[1], z_top), (b[0], b[1], z_top), (c[0], c[1], z_top), solid=True)
+    for p, q in zip(pts, pts[1:] + pts[:1]):
+        O.quad(side_m or m, (p[0], p[1], z_bot), (q[0], q[1], z_bot), (q[0], q[1], z_top), (p[0], p[1], z_top), solid=True)
+
+
+def outline_parapet(pts, z, skip_last=False, h=0.9, t=0.3, m='parapet'):
+    n = len(pts) - (1 if skip_last else 0)
+    for i in range(n):
+        p, q = pts[i], pts[(i + 1) % len(pts)]
+        O.seg(p, q, t, z - 0.2, z + h, m, solid=False, ext=t / 2)
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        O.barrier(p, q, z - 0.5, z + 2.6)
+
+
+# мол: плита, парапет по краю (кроме стыка с набережной)
+mole_poly = MOLE_PTS
+slab_poly(mole_poly, MOLE, -3.0, 'paving', 'stone')
+mp = mole_poly[1:-1]
+outline_parapet(mp + [], MOLE, skip_last=True)
+# мол на 0,5 ниже набережной — три ступени во всю ширину у берега
+O.stair((-138.0, 10.0, MOLE), (-136.0, 10.0, QUAY), 72.0, 3, MOLE - 0.3, 'stone')
+O.label(-205.0, 10.0, MOLE + 7.5, '«Стрелка»', 3.0, 'building')
+# фонтанная площадь, киоски, колоннада под навесом, ротонда, клумбы и стенки
+O.cyl(-182.0, 10.0, MOLE, MOLE + 0.6, 9.0, 'stone', sides=32)
+O.cyl(-182.0, 10.0, MOLE + 0.6, MOLE + 3.0, 0.7, 'stone')
+O.water.append({'name': 'FountainMole', 'level': r3(MOLE + 0.55), 'circle': [-182.0, -10.0, 8.6]})
+for kx, ky in ((-200.0, -8.0), (-262.0, 18.0), (-232.0, 30.0)):
+    O.box(kx - 3, ky - 2.5, kx + 3, ky + 2.5, MOLE, MOLE + 3.0, 'kiosk')
+    O.box(kx - 3.4, ky - 2.9, kx + 3.4, ky + 2.9, MOLE + 3.0, MOLE + 3.25, 'roof')
+    O.label(kx, ky, MOLE + 4.0, 'киоск', 0.8, 'object')
+col = [(-192.0 - k * 5.5, 36.0 - k * 0.9) for k in range(10)]
+for x_, y_ in col:
+    O.cyl(x_, y_, MOLE, MOLE + 3.8, 0.4, 'white', sides=12)
+ang = math.degrees(math.atan2(col[-1][1] - col[0][1], col[-1][0] - col[0][0]))
+mid = ((col[0][0] + col[-1][0]) / 2, (col[0][1] + col[-1][1]) / 2)
+O.obox(mid[0] + 1.6 * math.sin(math.radians(ang)), mid[1] - 1.6 * math.cos(math.radians(ang)), math.dist(col[0], col[-1]) + 2.0, 4.2,
+       MOLE + 3.8, MOLE + 4.2, ang, 'roof', solid=False)
+O.label(mid[0], mid[1], MOLE + 5.0, 'колоннада', 0.8, 'object')
+for k in range(8):
+    a = math.radians(k * 45 + 22.5)
+    O.cyl(-270.0 + 4.4 * math.cos(a), 10.0 + 4.4 * math.sin(a), MOLE, MOLE + 3.6, 0.3, 'white')
+O.cyl(-270.0, 10.0, MOLE + 3.6, MOLE + 4.1, 5.0, 'white', solid=False, sides=24)
+O.label(-270.0, 10.0, MOLE + 5.0, 'ротонда', 0.8, 'object')
+for px_, py_ in ((-192, 2), (-206, 18), (-226, -6), (-252, 10), (-170, -8), (-240, 36), (-166, 30), (-172, 22), (-176, -16),
+                 (-212, -12), (-196, -13)):
+    O.box(px_ - 3.5, py_ - 1.2, px_ + 3.5, py_ + 1.2, MOLE, MOLE + 0.9, 'planter')
+# моторка у маяка (выход В5)
+O.obox(-291.5, 1.0, 5.5, 2.0, -0.2, 0.6, 0.0, 'boat', solid=False)
+# наружная лестница с крыши павильона на мол
+dk = [d for d in pav.floors[2]['doors'] if d['a'] == 'DECK'][0]
+o_, c_, a_, b_, mid_ = door_geom(dk)
+n_ = int(round(PAV_H / 0.16))
+O.stair((mid_[0], c_ + 0.3 + (n_ - 1) * 0.3, MOLE), (mid_[0], c_ + 0.3, MOLE + PAV_H), b_ - a_ + 0.3, n_, MOLE - 0.05, 'stair')
+for xx in (a_ - 0.25, b_ + 0.25):
+    O.box(xx - 0.06, c_ + 0.3, xx + 0.06, c_ + 0.3 + (n_ - 1) * 0.3, MOLE, MOLE + PAV_H + RAIL_H, 'rail', solid=False)
+pav_ext = {'top': (mid_[0], c_ + 0.8, MOLE + PAV_H), 'bottom': (mid_[0], c_ + 0.3 + (n_ - 1) * 0.3 + 1.0, MOLE)}
+
+# набережная: стенка у воды с парапетом (кроме пляжа и примыканий мола, пирсов, слипа), невидимая преграда
+ys_shore = np.arange(GRID_Y[0] + 4, GRID_Y[1] - 4 + 0.1, 4.0)
+
+
+def attached(y):
+    return any(a <= y <= b for a, b in ATTACH)
+
+
+sh = [(float(shore_x(y)), float(y)) for y in ys_shore]
+for p, q in zip(sh, sh[1:]):
+    ym = (p[1] + q[1]) / 2
+    if ym < SY - 4 or ym > NY - 2:
+        continue
+    beach = BEACH[0] + 4 <= ym <= BEACH[1] - 4
+    if beach:
+        O.barrier((p[0] - 4.0, p[1]), (q[0] - 4.0, q[1]), -6.0, 4.0)
+        continue
+    if attached(ym) or in_poly((p[0] + q[0]) / 2 - 0.5, ym, MOLE_PTS):
+        continue
+    O.seg(p, q, 0.8, -3.0, QUAY - 0.02, 'stone', ext=0.4)
+    O.seg((p[0] + 0.2, p[1]), (q[0] + 0.2, q[1]), 0.3, QUAY - 0.1, QUAY + 0.9, 'parapet', solid=False, ext=0.2)
+    O.barrier((p[0] + 0.2, p[1]), (q[0] + 0.2, q[1]), -6.0, QUAY + 2.6)
+# лодочная станция: слип, стеллажи лодок, причальная стенка-пальчик, понтон проката, лодки
+O.beam((-170.0, 197.0, -1.0), (-152.3, 197.0, QUAY), 7.6, 1.2, 'stone')         # слип в воду
+for yy in (192.0, 202.0):
+    O.seg((-152.0, yy), (-170.0, 194.0 if yy < 197 else 200.0), 0.3, -1.6, QUAY + 0.9, 'parapet', ext=0.15)
+O.barrier((-168.0, 193.8), (-168.0, 200.2), -3.0, 4.0)
+for k in range(4):
+    O.box(-140.0, 160.0 + k * 6, -132.0, 163.0 + k * 6, QUAY, QUAY + 2.4, 'metal')
+finger = [(-149.0, 173.0), (-186.0, 175.0), (-186.0, 177.0), (-149.0, 175.0)]
+slab_poly(finger, QUAY + 0.02, -2.0, 'deck', 'stone')
+outline_parapet(finger, QUAY, skip_last=True, h=0.9, t=0.15, m='rail')
+pontoon = [(-149.0, 138.0), (-184.0, 140.0), (-184.0, 143.0), (-149.0, 141.0)]
+slab_poly(pontoon, 0.55, -0.4, 'deck', 'deck')
+O.stair((-149.5, 139.5, 0.55), (-146.6, 139.5, QUAY), 2.6, 9, -0.5, 'stone')
+outline_parapet(pontoon, 0.55, skip_last=True, h=0.9, t=0.12, m='rail')
+SURFACES.append(('poly', finger, QUAY))
+SURFACES.append(('poly', pontoon, 0.55))
+for k in range(4):
+    for dy in (0.0, 2.6):
+        O.box(-178.0 + k * 8, 132.4 + dy, -173.0 + k * 8, 133.6 + dy, -0.1, 0.5, 'boat', solid=False)
+    O.box(-178.0 + k * 8, 145.0, -172.0 + k * 8, 147.5, -0.1, 0.5, 'boat', solid=False)
+for k in range(5):
+    O.box(-133.0, 133.0 + k * 3.2 - 0.3, -129.0, 133.0 + k * 3.2 + 0.3, QUAY, QUAY + 1.6, 'boat')
+# пляж: кабинки, грибки, мороженое под зонтиком
+for k in range(6):
+    O.box(-140.0, -150.0 - k * 9, -136.0, -146.0 - k * 9, h_at(-138, -148 - k * 9), h_at(-138, -148 - k * 9) + 2.3, 'kiosk')
+for k in range(10):
+    x_, y_ = -152.0 + (k % 2) * 6, -100.0 - k * 12
+    g_ = h_at(x_, y_)
+    O.cyl(x_, y_, g_ - 0.3, g_ + 2.4, 0.07, 'metal')
+    O.cyl(x_, y_, g_ + 2.4, g_ + 2.55, 2.0, 'umbrella', solid=False)
+O.cyl(-134.0, -102.0, h_at(-134, -102) + 2.2, h_at(-134, -102) + 2.35, 3.2, 'umbrella_pink', solid=False)
+O.box(-135.2, -103.0, -132.8, -101.0, h_at(-134, -102), h_at(-134, -102) + 1.0, 'kiosk')
+O.label(-134.0, -102.0, h_at(-134, -102) + 3.0, 'мороженое', 0.8, 'object')
+O.label(-150.0, -160.0, 6.0, 'Пляж', 2.4, 'building')
+O.label(-150.0, 175.0, 9.0, 'Лодочная станция', 2.4, 'building')
+
+# ================================================================ АМФИТЕАТР: ряды, проходы, променад, колоннада
+AISLES = [float(a) for a in AMPH['aisles_deg']]
+SPAN = float(AMPH['span_deg'])
+AISLE_W = 1.6
+
+
+def arc_boxes(r0, r1, a0, a1, z0, z1, m, chord=2.2):
+    rm = (r0 + r1) / 2
+    n = max(1, int(math.ceil(math.radians(a1 - a0) * rm / chord)))
+    for k in range(n):
+        t0 = a0 + (a1 - a0) * k / n
+        t1 = a0 + (a1 - a0) * (k + 1) / n
+        tm = math.radians((t0 + t1) / 2)
+        length = math.radians(t1 - t0) * rm + 0.05
+        O.obox(AC[0] + rm * math.cos(tm), AC[1] + rm * math.sin(tm), length, r1 - r0, z0, z1, math.degrees(tm) + 90.0, m)
+
+
+for k in range(ROWS_N):
+    r0 = ROW_R0 + ROW_STEP * k
+    r1 = r0 + ROW_STEP
+    top = ORCH + ROW_RISE * (k + 1)
+    cuts = []
+    for a in AISLES:
+        da = math.degrees(AISLE_W / 2 / ((r0 + r1) / 2))
+        cuts.append((a - da, a + da))
+    for s0, s1 in sub_intervals(-SPAN, SPAN, cuts):
+        arc_boxes(r0, r1, s0, s1, ORCH - 0.6, top, 'stone')
+rp0 = ROW_R0 + ROW_STEP * ROWS_N
+arc_boxes(rp0, rp0 + 4.0, -SPAN - 4, SPAN + 4, ORCH - 0.6, PROM, 'paving')
+for a in AISLES:
+    ta = math.radians(a)
+    p0 = (AC[0] + ROW_R0 * math.cos(ta), AC[1] + ROW_R0 * math.sin(ta))
+    p1 = (AC[0] + rp0 * math.cos(ta), AC[1] + rp0 * math.sin(ta))
+    O.stair((p0[0], p0[1], ORCH), (p1[0], p1[1], PROM), AISLE_W - 0.05, ROWS_N * 2, ORCH - 0.6, 'stone')
+for k in range(17):
+    if -64 + k * 8 == 0:
+        continue        # по оси — аппаратная, колонна закрыла бы её дверь
+    a = math.radians(-64 + k * 8)
+    O.cyl(AC[0] + (rp0 + 3.6) * math.cos(a), AC[1] + (rp0 + 3.6) * math.sin(a), PROM, PROM + 3.6, 0.3, 'white')
+for side in (-1, 1):
+    a0_ = side * (SPAN + 0.5)
+    for k in range(ROWS_N):
+        pass
+for x_ in (-92.0, -80.0):
+    for y_ in (-170.0, -150.0):
+        O.box(x_ - 0.3, y_ - 0.3, x_ + 0.3, y_ + 0.3, STAGE, STAGE + 7.0, 'metal', solid=True)
+O.label(AC[0] + 22.0, AC[1], PROM + 4.0, 'Амфитеатр ≈ 660 мест', 2.4, 'building')
+SURFACES.append(('rect', -92.0, -170.0, -80.0, -150.0, STAGE))
+amph_rows_route = []
+for a in (40.0,):
+    ta = math.radians(a)
+    for r, z in ((ROW_R0 - 3.0, ORCH), (ROW_R0 - 0.4, ORCH), (rp0 + 0.4, PROM), (rp0 + 2.0, PROM)):
+        amph_rows_route.append((AC[0] + r * math.cos(ta), AC[1] + r * math.sin(ta), z))
+ROUTES.append({'id': 'amph_rows', 'label': 'Амфитеатр: оркестра → проход по рядам → променад', 'kind': 'descent',
+               'points': [gpt(*p) for p in amph_rows_route],
+               'checks': [[0, 'amph_rows/оркестра', ORCH], [len(amph_rows_route) - 1, 'amph_rows/променад', PROM]]})
+
+# ================================================================ ДЕТСКАЯ ПЛОЩАДКА, КОРТЫ, ХОЗДВОР
+pg = SMALL['playground']
+x0, y0, x1, y1 = PG_RECT
+for rx in ((2, -138, 26, -98, 'rubber_red'), (24, -110, 52, -97, 'rubber_green'), (46, -150, 60, -124, 'rubber_blue')):
+    O.quad(rx[4], *[(x, y, h_at(x, y) + 0.05) for x, y in ((rx[0], rx[1]), (rx[2], rx[1]), (rx[2], rx[3]), (rx[0], rx[3]))])
+gates = [(x0, -125.0), (x1, -125.0)]
+for p, q in (((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))):
+    if p[0] == q[0]:
+        for s0, s1 in sub_intervals(min(p[1], q[1]), max(p[1], q[1]), [(-126.0, -124.0)]):
+            O.box(p[0] - 0.05, s0, p[0] + 0.05, s1, PG_LEVEL, PG_LEVEL + 1.2, 'fence_green')
+    else:
+        O.box(min(p[0], q[0]), p[1] - 0.05, max(p[0], q[0]), p[1] + 0.05, PG_LEVEL, PG_LEVEL + 1.2, 'fence_green')
+for it in pg['items']:
+    k = it['kind']
+    g = it['geo']
+    hgt = float(it['height'])
+    if k == 'ship':
+        gx0, gy0, gx1, gy1 = g
+        O.box(gx0, gy0, gx1, gy1, PG_LEVEL, PG_LEVEL + hgt, 'play')
+        for yy in (gy0, gy1):
+            O.box(gx0, yy - 0.06, gx1, yy + 0.06, PG_LEVEL + hgt, PG_LEVEL + hgt + 1.2, 'play_red')
+        O.box(gx0 + 4, gy0 + 1.2, gx0 + 7, gy1 - 1.2, PG_LEVEL + hgt, PG_LEVEL + hgt + 2.2, 'play_red')
+        O.cyl(gx0 + 9.5, (gy0 + gy1) / 2, PG_LEVEL + hgt, PG_LEVEL + hgt + 5.0, 0.12, 'wood')
+    elif k == 'plane':
+        gx0, gy0, gx1, gy1 = g
+        O.box(gx0, (gy0 + gy1) / 2 - 1.0, gx1, (gy0 + gy1) / 2 + 1.0, PG_LEVEL + 1.3, PG_LEVEL + hgt, 'play')
+        O.box((gx0 + gx1) / 2 - 1.0, gy0, (gx0 + gx1) / 2 + 1.0, gy1, PG_LEVEL + 1.9, PG_LEVEL + 2.1, 'play_red')
+        for xx in (gx0 + 2, gx1 - 2):
+            O.cyl(xx, (gy0 + gy1) / 2, PG_LEVEL, PG_LEVEL + 1.3, 0.2, 'metal')
+    elif k == 'truck':
+        gx0, gy0, gx1, gy1 = g
+        O.box(gx0, gy0, gx0 + 3.0, gy1, PG_LEVEL, PG_LEVEL + hgt, 'play_red')
+        O.box(gx0 + 3.0, gy0, gx1, gy1, PG_LEVEL, PG_LEVEL + 1.1, 'play')
+    elif k == 'pyramid':
+        cx_, cy_, rr = g
+        for kk in range(6):
+            a = math.radians(kk * 60)
+            O.beam((cx_ + rr * math.cos(a), cy_ + rr * math.sin(a), PG_LEVEL), (cx_, cy_, PG_LEVEL + hgt), 0.08, 0.08, 'rope', solid=False)
+        O.cyl(cx_, cy_, PG_LEVEL, PG_LEVEL + hgt, 0.1, 'metal')
+    elif k == 'swing':
+        gx0, gy0, gx1, gy1 = g
+        for xx in (gx0, gx1):
+            O.box(xx - 0.1, gy0, xx + 0.1, gy1, PG_LEVEL, PG_LEVEL + hgt, 'metal')
+        O.box(gx0, (gy0 + gy1) / 2 - 0.06, gx1, (gy0 + gy1) / 2 + 0.06, PG_LEVEL + hgt - 0.12, PG_LEVEL + hgt, 'metal', solid=False)
+    elif k == 'tramp':
+        for cx_, cy_ in g:
+            O.cyl(cx_, cy_, PG_LEVEL - 0.02, PG_LEVEL + 0.06, 1.5, 'rubber_dark', solid=False)
+    elif k == 'spring':
+        for cx_, cy_ in g:
+            O.box(cx_ - 0.2, cy_ - 0.5, cx_ + 0.2, cy_ + 0.5, PG_LEVEL, PG_LEVEL + hgt, 'play_red')
+    elif k == 'carousel':
+        cx_, cy_, rr = g
+        O.cyl(cx_, cy_, PG_LEVEL, PG_LEVEL + hgt, rr, 'play')
+    elif k == 'sand':
+        gx0, gy0, gx1, gy1 = g
+        for p, q in (((gx0, gy0), (gx1, gy0)), ((gx1, gy0), (gx1, gy1)), ((gx1, gy1), (gx0, gy1)), ((gx0, gy1), (gx0, gy0))):
+            O.seg(p, q, 0.2, PG_LEVEL, PG_LEVEL + hgt, 'wood', ext=0.1)
+        O.box(gx0, gy0, gx1, gy1, PG_LEVEL + 2.4, PG_LEVEL + 2.55, 'roof', solid=False)
+        for xx, yy in ((gx0, gy0), (gx1, gy0), (gx1, gy1), (gx0, gy1)):
+            O.cyl(xx, yy, PG_LEVEL, PG_LEVEL + 2.4, 0.06, 'wood')
+O.label(30.0, -123.0, PG_LEVEL + 7.0, 'Детская площадка', 2.4, 'building')
+# корты и волейбол за сеткой
+sx0, sy0, sx1, sy1 = SPORT_RECT
+O.quad('court', *[(x, y, SPORT_LEVEL + 0.04) for x, y in ((sx0, sy0), (sx1, sy0), (sx1, sy1), (sx0, sy1))])
+for p, q in (((sx0, sy0), (sx1, sy0)), ((sx1, sy0), (sx1, sy1)), ((sx1, sy1), (sx0, sy1)), ((sx0, sy1), (sx0, sy0))):
+    if p[0] == q[0] and p[0] == sx0:
+        for s0, s1 in sub_intervals(sy0, sy1, [(75.0, 77.4)]):
+            O.box(sx0 - 0.04, s0, sx0 + 0.04, s1, SPORT_LEVEL, SPORT_LEVEL + 3.0, 'fence')
+    elif p[0] == q[0]:
+        O.box(p[0] - 0.04, min(p[1], q[1]), p[0] + 0.04, max(p[1], q[1]), SPORT_LEVEL, SPORT_LEVEL + 3.0, 'fence')
+    else:
+        O.box(min(p[0], q[0]), p[1] - 0.04, max(p[0], q[0]), p[1] + 0.04, SPORT_LEVEL, SPORT_LEVEL + 3.0, 'fence')
+O.box(118.0 - 0.04, 52.0, 118.0 + 0.04, 100.0, SPORT_LEVEL, SPORT_LEVEL + 3.0, 'fence')
+for yy in (64.0, 88.0):
+    O.box(96.5, yy - 0.03, 117.5, yy + 0.03, SPORT_LEVEL + 0.9, SPORT_LEVEL + 1.0, 'white', solid=False)
+O.box(118.5, 76.0 - 0.03, 139.5, 76.0 + 0.03, SPORT_LEVEL + 2.3, SPORT_LEVEL + 2.43, 'white', solid=False)
+O.label(118.0, 76.0, SPORT_LEVEL + 5.0, 'Корты и волейбол', 2.0, 'building')
+# хоздвор: труба котельной, водонапорная башня с баком, забор с воротами
+O.cyl(123.0, 186.0, HOZ_LEVEL, HOZ_LEVEL + 30.0, 1.3, 'brick', sides=16)
+O.cyl(122.0, 204.0, HOZ_LEVEL + 4.0, HOZ_LEVEL + 18.0, 2.0, 'struct', sides=16)
+O.cyl(122.0, 204.0, HOZ_LEVEL + 18.0, HOZ_LEVEL + 23.5, 4.2, 'metal', sides=20)
+hx0, hy0, hx1, hy1 = HOZ_RECT
+for p, q, gap in (((hx0, hy0), (hx1, hy0), None), ((hx1, hy0), (hx1, hy1), None), ((hx1, hy1), (hx0, hy1), None),
+                  ((hx0, hy1), (hx0, hy0), (192.5, 199.5))):
+    if p[0] == q[0]:
+        for s0, s1 in sub_intervals(min(p[1], q[1]), max(p[1], q[1]), [gap] if gap else []):
+            O.box(p[0] - 0.12, s0, p[0] + 0.12, s1, HOZ_LEVEL - 0.3, HOZ_LEVEL + 2.2, 'fence')
+    else:
+        O.box(min(p[0], q[0]), p[1] - 0.12, max(p[0], q[0]), p[1] + 0.12, HOZ_LEVEL - 0.3, HOZ_LEVEL + 2.2, 'fence')
+O.label(120.0, 186.0, HOZ_LEVEL + 33.0, 'труба котельной', 1.4, 'object')
+for k, (ex_, ey_) in enumerate(((104.0, 175.0), (118.0, 176.0), (101.0, 197.0), (130.0, 192.0), (113.0, 214.0))):
+    O.box(ex_ - 0.6, ey_ - 0.6, ex_ + 0.6, ey_ + 0.6, HOZ_LEVEL, HOZ_LEVEL + 1.2, 'eurocube')
+
+# ================================================================ ДЕРЕВЬЯ: только ели и сосны (те же точки, что на схеме v08)
+TREES = {'pine': [], 'pine_slim': [], 'spruce_a': [], 'spruce_b': [], 'spruce_young': [],
+         'pine_bg': [], 'spruce_a_bg': [], 'spruce_b_bg': []}
+BLOCK = []      # где деревьям не место: постройки, ленты, площадки (прямоугольники с запасом)
+for bb in BLD.values():
+    for f in bb.order:
+        for r in bb.floors[f]['rooms']:
+            x0, y0, x1, y1 = r['rect']
+            BLOCK.append((x0 - 2.5, y0 - 2.5, x1 + 2.5, y1 + 2.5))
+for rct in CAS_ZONE + [PODIUM, RTER, PG_RECT, SPORT_RECT, HOZ_RECT, (-100.0, -180.0, -50.0, -138.0)] + LOTS:
+    BLOCK.append((rct[0] - 2.0, rct[1] - 2.0, rct[2] + 2.0, rct[3] + 2.0))
+for ox, oy, mirror, name in S_SITES:
+    e_ = sg.extent(ox, oy, mirror, sg.TERRACE + 1.0)
+    BLOCK.append((e_[0], e_[2], e_[1], e_[3]))
+BLOCK.append((-150.0, -30.0, -126.0, 50.0))
+
+
+def blocked(x, y):
+    for x0, y0, x1, y1 in BLOCK:
+        if x0 <= x <= x1 and y0 <= y <= y1:
+            return True
+    for rb in RIBBONS:
+        for a, b in zip(rb['pts'], rb['pts'][1:]):
+            if seg_dist(np.array([x]), np.array([y]), a, b)[0][0] < rb['w'] / 2 + 2.2:
+                return True
+    return False
+
+
+def in_s_courtyard_ok(x, y):
+    return True
+
+
+rng = random.Random(7)
+kinds_plateau = ['pine', 'pine', 'pine_slim']
+kinds_dark = ['spruce_a', 'spruce_b', 'spruce_young']
+for k in range(1400):
+    x = rng.uniform(-140, 165)
+    y = rng.uniform(-258, 258)
+    if not PLAN['in_poly'](x, y, PLAN['boundary']) or not PLAN['free'](x, y) or x < PLAN['brow_x'](y) - 34:
+        continue
+    rad = rng.uniform(2.2, 3.6)
+    pine = rng.random() < 0.7
+    if blocked(x, y):
+        continue
+    key = (kinds_plateau if pine else kinds_dark)[k % 3]
+    TREES[key].append([r3(x), r3(h_at(x, y) - 0.1), r3(-y), r3((k * 47) % 360), r3(0.85 + (rad - 2.2) / 1.4 * 0.35)])
+for k in range(300):
+    y = rng.uniform(-250, 250)
+    x = rng.uniform(PLAN['shore_x'](y) + 21, PLAN['brow_x'](y) - 2)
+    if abs(y) < 28 or (-230 < y < -60 and abs(x + 105) < 30 and rng.random() < 0.4):
+        continue
+    rad = rng.uniform(2.0, 3.0)
+    if blocked(x, y):
+        continue
+    key = ['spruce_a', 'pine', 'spruce_b', 'pine_slim', 'spruce_young'][k % 5]
+    TREES[key].append([r3(x), r3(h_at(x, y) - 0.1), r3(-y), r3((k * 71) % 360), r3(0.8 + (rad - 2.0) * 0.3)])
+# фон: лес за забором, за оврагом и на мысу (без коллизии)
+bg = random.Random(21)
+for k in range(5200):
+    x = bg.uniform(-200, 600)
+    y = bg.uniform(-620, 620)
+    inside = PLAN['in_poly'](x, y, PLAN['boundary'])
+    if inside or x < PLAN['shore_x'](max(-300.0, min(300.0, y))) + 4:
+        continue
+    if abs(x - 160) < 18 and abs(y) < 8:
+        continue
+    gx_ = x if GRID_X[0] < x < GRID_X[1] and GRID_Y[0] < y < GRID_Y[1] else None
+    TREES[['pine_bg', 'spruce_a_bg', 'spruce_b_bg'][k % 3]].append([r3(x), None if gx_ is None else r3(h_at(x, y) - 0.2), r3(-y),
+                                                                     r3((k * 37) % 360), r3(0.9 + (k % 7) * 0.05)])
+
+# ================================================================ ДАЛЬНИЙ ПЛАН: плотина, горы, озеро
+TERRACE_EYE = (-72.0, 0.0)
+U = (-math.sqrt(0.5), -math.sqrt(0.5))
+V_ = (math.sqrt(0.5), -math.sqrt(0.5))
+C = (TERRACE_EYE[0] + U[0] * 1200.0, TERRACE_EYE[1] + U[1] * 1200.0)
+E1 = (C[0] + V_[0] * 500.0, C[1] + V_[1] * 500.0)
+E2 = (C[0] - V_[0] * 500.0, C[1] - V_[1] * 500.0)
+M_ = (C[0] + U[0] * 140.0, C[1] + U[1] * 140.0)
+# окружность через E1, M_, E2
+
+
+def circle3(a, b, c):
+    ax, ay = a
+    bx, by = b
+    cx, cy = c
+    d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+    ux = ((ax ** 2 + ay ** 2) * (by - cy) + (bx ** 2 + by ** 2) * (cy - ay) + (cx ** 2 + cy ** 2) * (ay - by)) / d
+    uy = ((ax ** 2 + ay ** 2) * (cx - bx) + (bx ** 2 + by ** 2) * (ax - cx) + (cx ** 2 + cy ** 2) * (bx - ax)) / d
+    return (ux, uy), math.dist((ux, uy), a)
+
+
+DC, DR = circle3(E1, M_, E2)
+aE1 = math.atan2(E1[1] - DC[1], E1[0] - DC[0])
+aE2 = math.atan2(E2[1] - DC[1], E2[0] - DC[0])
+aM = math.atan2(M_[1] - DC[1], M_[0] - DC[0])
+# дуга от E1 до E2 через M_
+da = (aE2 - aE1 + math.pi) % (2 * math.pi) - math.pi
+if abs(((aM - aE1 + math.pi) % (2 * math.pi) - math.pi)) > abs(da):
+    da = da - math.copysign(2 * math.pi, da)
+DAM_H = 260.0
+NSEG = 36
+dam_pts = []
+for k in range(NSEG + 1):
+    a = aE1 + da * k / NSEG
+    dam_pts.append(a)
+
+
+def dam_p(a, off, z):
+    """Точка грани плотины: off — смещение к центру кривизны (к зрителю: низовая грань)."""
+    r = DR - off
+    return (DC[0] + r * math.cos(a), DC[1] + r * math.sin(a), z)
+
+
+for a0, a1 in zip(dam_pts, dam_pts[1:]):
+    for z0, z1 in ((-12.0, 60.0), (60.0, 140.0), (140.0, 210.0), (210.0, DAM_H)):
+        o0 = 15.0 + 55.0 * (1 - z0 / DAM_H) if z0 > 0 else 70.0
+        o1 = 15.0 + 55.0 * (1 - z1 / DAM_H)
+        O.quad('dam', dam_p(a0, o0, z0), dam_p(a1, o0, z0), dam_p(a1, o1, z1), dam_p(a0, o1, z1))
+    O.quad('dam', dam_p(a0, 15.0, DAM_H), dam_p(a1, 15.0, DAM_H), dam_p(a1, 0.0, DAM_H), dam_p(a0, 0.0, DAM_H))
+    O.quad('dam', dam_p(a0, 0.0, DAM_H), dam_p(a1, 0.0, DAM_H), dam_p(a1, 0.0, DAM_H + 3.0), dam_p(a0, 0.0, DAM_H + 3.0))
+mid_a = aE1 + da / 2
+ges = dam_p(mid_a, 70.0 + 30.0, 0.0)
+O.obox(ges[0], ges[1], 300.0, 45.0, -2.0, 42.0, math.degrees(mid_a) + 90.0, 'dam_dark', solid=False)
+O.label(ges[0], ges[1], DAM_H + 40.0, 'плотина ГЭС · 260 м', 1.0, 'far')
+
+LAKE_FAR = [(-150.0, 360.0), (-430.0, 440.0), (-780.0, 270.0), (-1080.0, -30.0), (-1300.0, -380.0)]
+LAKE_FAR += [dam_p(a, 70.0, 0.0)[:2] for a in [aE1 + da * k / 12 for k in range(12, -1, -1)]]
+LAKE_FAR += [(-420.0, -930.0), (-250.0, -620.0), (-150.0, -380.0)]
+shore_line = [(float(shore_x(y)) + 6.0, float(y)) for y in np.arange(GRID_Y[0], GRID_Y[1] + 0.1, 8.0)]
+# контур: от северного края берега по дальнему озеру (север → запад → плотина → юг), потом по берегу с юга на север
+lake_poly = LAKE_FAR + shore_line
+O.water.append({'name': 'Lake', 'level': 0.0, 'poly': [[r3(x), r3(-y)] for x, y in lake_poly]})
+
+# горы и берега вокруг — грубая сетка 10 м (под подробной ниже на 4 м)
+FX = np.arange(-2400.0, 1200.0 + 0.1, 10.0)
+FY = 1400.0 - np.arange(0.0, 3400.0 + 0.1, 10.0)
+FGX, FGY = np.meshgrid(FX, FY)
+
+
+def lake_mask_dist(X, Y, poly):
+    """Внутри озера (чётность пересечений) и расстояние до берега (по рёбрам многоугольника)."""
+    inside = np.zeros(X.shape, bool)
+    d = np.full(X.shape, np.inf)
+    for a, b in zip(poly, poly[1:] + poly[:1]):
+        (xi, yi), (xj, yj) = a, b
+        cond = (yi > Y) != (yj > Y)
+        xcross = (xj - xi) * (Y - yi) / (yj - yi + 1e-12) + xi
+        inside ^= cond & (X < xcross)
+        dd, _ = seg_dist(X, Y, a, b)
+        d = np.minimum(d, dd)
+    return inside, d
+
+
+inside_l, dist_l = lake_mask_dist(FGX, FGY, lake_poly)
+rect_d = np.hypot(np.maximum(0, np.maximum(GRID_X[0] - FGX, FGX - GRID_X[1])), np.maximum(0, np.maximum(GRID_Y[0] - FGY, FGY - GRID_Y[1])))
+near = 1.0 - smooth(rect_d / 160.0)
+nat_far = natural(FGX, np.clip(FGY, -300, 300))
+hill = 40.0 + 0.16 * dist_l + 55.0 * (np.sin(FGX / 310.0 + 1.1) * np.cos(FGY / 270.0 - 0.4)) + 25.0 * np.sin((FGX - FGY) / 140.0)
+# горы у концов плотины (держат стену 260 м) и за ней; пологие — на крутых склонах дальний рельеф рисуется скалой
+for ex_, ey_, hh_ in ((E1[0] + V_[0] * 420, E1[1] + V_[1] * 420, 380.0), (E2[0] - V_[0] * 420, E2[1] - V_[1] * 420, 380.0),
+                      (C[0] + U[0] * 900, C[1] + U[1] * 900, 360.0)):
+    hill = np.maximum(hill, hh_ * np.exp(-((FGX - ex_) ** 2 + (FGY - ey_) ** 2) / (2 * 640.0 ** 2)))
+hill = np.maximum(hill, 38.0)
+far_h = np.where(inside_l, -10.0 + np.minimum(dist_l, 40.0) * 0.0, hill * (1 - near) + nat_far * near)
+far_h = np.where(~inside_l & (dist_l < 40.0), np.minimum(far_h, 2.0 + dist_l * 1.2) * (1 - near) + far_h * near, far_h)
+# под подробным рельефом дальний опущен глубоко: в выемках каскада, троп и чаш он не должен выглядывать
+in_detail = (FGX > GRID_X[0] + 5.0) & (FGX < GRID_X[1] - 5.0) & (FGY > GRID_Y[0] + 5.0) & (FGY < GRID_Y[1] - 5.0)
+far_h = np.where(in_detail, np.minimum(nat_far - 4.0, -14.0), far_h)
+
+
+def far_at(x, y):
+    fx = (x - FX[0]) / 10.0
+    fy = (FY[0] - y) / 10.0
+    i = int(np.clip(math.floor(fx), 0, len(FX) - 2))
+    j = int(np.clip(math.floor(fy), 0, len(FY) - 2))
+    tx, ty = fx - i, fy - j
+    return float(far_h[j, i] * (1 - tx) * (1 - ty) + far_h[j, i + 1] * tx * (1 - ty) + far_h[j + 1, i] * (1 - tx) * ty
+                 + far_h[j + 1, i + 1] * tx * ty)
+
+
+for key in ('pine_bg', 'spruce_a_bg', 'spruce_b_bg'):
+    for t_ in TREES[key]:
+        if t_[1] is None:
+            t_[1] = r3(far_at(t_[0], -t_[2]) - 0.3)
+    TREES[key] = [t_ for t_ in TREES[key] if t_[1] > 3.0]
+# за плотиной — водохранилище высоко (не видно)
+# за плотиной (только в пределах её дуги) — водохранилище высоко, рельеф до гребня: с санатория не видно
+behind = ((FGX - DC[0]) ** 2 + (FGY - DC[1]) ** 2) > (DR + 5) ** 2
+ang_p = np.arctan2(FGY - DC[1], FGX - DC[0])
+t_arc = (((ang_p - aE1) + np.pi) % (2 * np.pi) - np.pi) / da
+behind &= (t_arc > 0.0) & (t_arc < 1.0) & (np.hypot(FGX - DC[0], FGY - DC[1]) < DR + 900.0)
+far_h = np.where(behind, np.maximum(far_h, 240.0), far_h)
+
+# ================================================================ ГРАНИЦА, ВЫХОДЫ, ЗАХОДЫ
+bnd = PLAN['boundary']
+n_s = len(PLAN['south'])
+n_e = len(PLAN['east'])
+n_n = len(PLAN['north'])
+land_edge = bnd[:n_s + n_e + n_n]
+GATES = [(150.0, 0.0, 10.0), (130.0, 238.0, 6.0)]
+
+
+def near_gate(p):
+    return any(math.dist(p, (gx_, gy_)) < r_ for gx_, gy_, r_ in GATES)
+
+
+for p, q in zip(land_edge, land_edge[1:]):
+    if near_gate(((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)):
+        continue
+    z0_ = min(h_at(*p), h_at(*q)) - 3.0
+    O.barrier(p, q, z0_, z0_ + 30.0)
+# забор по восточной кромке (опушка), ворота КПП
+east_pts = PLAN['east']
+for p, q in zip(east_pts, east_pts[1:]):
+    m_ = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+    if near_gate(m_):
+        continue
+    O.seg((p[0] - 0.5, p[1]), (q[0] - 0.5, q[1]), 0.08, min(h_at(*p), h_at(*q)) - 0.2, max(h_at(*p), h_at(*q)) + 2.0, 'fence', solid=False, ext=0.05)
+O.barrier((172.0, -12.0), (172.0, 12.0), 20.0, 70.0)
+O.barrier((150.0, -10.0), (172.0, -12.0), 20.0, 70.0)
+O.barrier((150.0, 10.0), (172.0, 12.0), 20.0, 70.0)
+strip([(150.0, 0.0), (175.0, 0.0)], 9.0, 'asphalt')
+EXIT_INFO = {
+    'В1': ('КПП, выезд', 'всегда', (160.0, 0.0)),
+    'В2': ('Лесная тропа к горам', 'по стороне захода', (128.0, 232.0)),
+    'В3': ('Труба в овраг', 'без рюкзака', (-20.0, 229.0)),
+    'В4': ('Прокат: каяк или лодка', 'ключ от домика проката', (-181.0, 141.5)),
+    'В5': ('Моторка у маяка', 'не каждый рейд, канистра со склада ГСМ', (-286.0, 5.5)),
+    'В6': ('Берег за мысом', 'не каждый рейд', (-112.0, -254.0)),
+}
+EXITS = []
+for key, (title, cond, (ex_, ey_)) in EXIT_INFO.items():
+    g_ = ground_at(ex_, ey_)
+    EXITS.append({'id': key, 'label': f'{key} · {title}', 'condition': cond, 'at': gpt(ex_, ey_, g_)})
+    O.markers.append(['exit', *gpt(ex_, ey_, g_), f'{key} · {title} ({cond})'])
+O.cyl(-20.0, 231.5, h_at(-20, 229) - 1.6, h_at(-20, 229) + 0.2, 0.75, 'metal', solid=False)
+SPAWNS = []
+for i, (sx_, sy_) in enumerate(((150.0, 60.0), (150.0, -120.0), (40.0, 236.0), (100.0, -238.0))):
+    g_ = h_at(sx_, sy_)
+    SPAWNS.append({'id': f'З{i + 1}', 'at': gpt(sx_, sy_, g_)})
+    O.markers.append(['spawn', *gpt(sx_, sy_, g_), f'заход З{i + 1}'])
+
+# ================================================================ МЕСТА (1–9, 0, N/B) и маршруты по участку
+PLACE_SPOTS = {
+    1: ((-32.0, 9.0), (-32.0, -2.0)), 2: ((-60.0, -51.0), (-75.0, -39.0)), 3: ((-22.0, -66.0), (-22.0, -90.0)),
+    4: ((-78.0, -70.5), (-78.0, -82.0)), 5: ((-110.0, -70.0), (-110.0, -82.0)), 6: ((-62.0, 8.0), (-110.0, -10.0)),
+    7: ((-35.0, 163.0), (-52.0, 163.0)), 8: ((3.6, 117.0), (32.0, 117.0)), 9: ((-10.7, 100.0), (-10.7, 150.0)),
+    10: ((118.0, 3.0), (60.0, 0.0)), 11: ((-10.7, 120.0), (-10.7, 165.0)), 12: ((90.0, 196.0), (112.0, 190.0)),
+    13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((70.0, -213.0), (20.0, -213.0)),
+    16: ((-82.0, 0.0), (-128.0, 0.0)), 17: ((-93.0, -108.0), (-110.0, -130.0)), 19: ((-70.0, 226.0), (-120.0, 210.0)),
+    20: ((-131.0, 200.0), (-160.0, 196.0)), 21: ((-136.0, -160.0), (-170.0, -160.0)), 22: ((-150.0, 10.0), (-200.0, 10.0)),
+    23: ((-3.0, -123.0), (30.0, -123.0)),
+}
+PLACES = []
+for n_, x_, y_, text_ in PLAN['PLACES']:
+    (sx_, sy_), (lx_, ly_) = PLACE_SPOTS[n_]
+    z_ = ground_at(sx_, sy_)
+    if n_ == 1:
+        z_ = CENTRAL
+    if n_ == 4:
+        z_ = CENTRAL
+    if n_ == 5:
+        z_ = CENTRAL
+    PLACES.append({'n': n_, 'name': f'{n_} · {text_.split(":")[0].split(",")[0]}', 'text': text_,
+                   'at': [r3(sx_), r3(-sy_)], 'floor': r3(z_), 'look': [r3(lx_), r3(-ly_)], 'marker': [r3(x_), r3(-y_)]})
+# главная ось: КПП → аллея → парковка → круг → лобби → терраса → каскад → набережная → «Стрелка» → маяк
+axis = [(160.0, 0.0), (90.0, -2.0), (24.0, -2.0), (10.0, -13.0), (-4.0, -2.0), (-9.0, 6.0)]
+axis_pts = [(x, y, ground_at(x, y)) for x, y in axis]
+md = [d for d in main.ext_doors if d['o'] == 'v' and abs(d['c'] + 10.0) < 0.1][0]
+axis_pts += [(md['mid'][0] + 0.8, md['mid'][1], CENTRAL), (md['mid'][0], md['mid'][1], CENTRAL), (-30.0, 6.0, CENTRAL), (-54.0, 6.0, CENTRAL),
+             (-58.0, 6.0, CENTRAL), (-80.0, 3.0, CENTRAL)]
+axis_pts += [tuple((p[0], -p[2], p[1])) for p in ROUTES[[r['id'] for r in ROUTES].index('cascade')]['points'][1:]]
+axis_pts += [(-135.0, 1.0, QUAY), (-141.0, -1.0, MOLE), (-160.0, -3.0, MOLE), (-205.0, -3.0, MOLE), (-250.0, -3.0, MOLE),
+             (-262.0, -1.0, MOLE), (-279.0, 6.0, MOLE), (-283.0, 10.0, MOLE), (-284.4, 10.0, MOLE)]
+SITE_ROUTES = [
+    ('axis', 'Главная ось: КПП → лобби → терраса → каскад → «Стрелка» → маяк', axis_pts),
+    ('service_road', 'Северная ветка → служебная дорога → лодочная станция',
+     [(82.0, 0.0), (76.0, 36.0), (74.0, 70.0), (86.0, 108.0), (88.0, 140.0), (76.0, 168.0), (78.0, 196.0), (82.0, 222.0), (10.0, 224.0),
+      (-60.0, 226.0)] + [p[:2] for p in svc_path[2:]] + [(-136.0, 196.5)]),
+    ('s_parking', 'Парковка S-корпусов ↔ дворы обоих корпусов',
+     [(S_LOT[0] + BAY_L + AISLE / 2, 224.0), (S_LOT[0] + BAY_L + AISLE / 2, 168.5), (S_LOT[0] - 1.5, 168.5), (-30.0, 165.0),
+      (SITE1[0] + 4.0, SITE1[1] + sg.R), (-30.0, 165.0), (S_LOT[0] - 1.5, 168.5), (S_LOT[2] + 1.5, 168.5), (8.0, 165.0),
+      (SITE2[0] - 4.0, SITE2[1] + sg.R), (8.0, 165.0), (S_LOT[2] + 1.5, 168.5), (S_LOT[2] + 1.5, 140.0),
+      (SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R)]),
+    ('cottages_beach', 'Улица коттеджей → тропа к пляжу',
+     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0), (-2.0, -216.0)] + [p[:2] for p in cot_path[1:]] + [(-133.0, -231.0)]),
+    ('south_branch', 'Развилка → южная ветка → улица коттеджей',
+     [(82.0, 0.0), (88.0, -40.0), (90.0, -80.0), (76.0, -128.0), (72.0, -170.0), (82.0, -213.0)]),
+    ('quay_north', 'Набережная: от каскада на север к прокату и эллингу',
+     [(-131.5, 0.0), (-136.0, 30.0), (-137.0, 80.0), (-138.0, 128.0), (-134.5, 133.0), (-134.5, 146.0), (-143.0, 150.0),
+      (-143.0, 186.0)]),
+    ('quay_south', 'Набережная: от каскада на юг к пляжу и спасателям',
+     [(-131.5, 0.0), (-134.0, -40.0), (-136.0, -80.0), (-138.0, -110.0), (-145.0, -114.0), (-145.0, -131.0), (-133.0, -134.0),
+      (-134.6, -152.0)]),
+    ('stage_trail', 'Под сценой амфитеатра → тропка → тропа → пляж',
+     [(-94.0, -160.0), (-98.5, -160.0)] + [p[:2] for p in STAGE_PATH] + [p[:2] for p in trail_pts[3:]]),
+]
+for rid, title, pts in SITE_ROUTES:
+    p3 = []
+    for p in pts:
+        if len(p) == 3:
+            p3.append(p)
+        else:
+            p3.append((p[0], p[1], ground_at(p[0], p[1])))
+    ROUTES.append({'id': rid, 'label': title, 'kind': 'site', 'points': [gpt(*p) for p in p3],
+                   'checks': [[len(p3) - 1, f'{rid}/конец', r3(p3[-1][2])]]})
+# пешком нельзя: с набережной в озеро, через забор на восток
+NEG = [('quay_water', 'С набережной в озеро не сойти', (-138.0, 60.0), (-175.0, 60.0), float(shore_x(60.0)) - 0.6),
+       ('fence_east', 'Через забор на восток не пройти', (140.0, 120.0), (190.0, 120.0),
+        150.0 + 10.0 * math.sin(120.0 / 55.0) + 0.6)]
+
+# ================================================================ ЗАПИСЬ
+TERRAIN_DIR.mkdir(parents=True, exist_ok=True)
+H_FINAL.astype('<f4').tofile(TERRAIN_DIR / 'sanatorium_heights.r32')
+far_h.astype('<f4').tofile(TERRAIN_DIR / 'sanatorium_far.r32')
+
+
+def splat_for(X, Y, Hf, detail):
+    s = shore_v(np.clip(Y, -300, 300))
+    q = s + 20.0
+    wb = np.clip((Y - BEACH[0]) / 8.0, 0.0, 1.0) * np.clip((BEACH[1] - Y) / 8.0, 0.0, 1.0)
+    quay = (X >= s - 0.5) & (X < q) & (Hf < 3.0)
+    gravel = np.where(quay, 1.0 - wb * 0.3, 0.0)
+    mud = np.zeros_like(X)
+    floor_ = np.clip((Hf - 4.0) / 6.0, 0.0, 1.0) * 0.55
+    rock = np.where(Hf < -0.5, 0.6, 0.0)
+    if detail:
+        for rb in RIBBONS:
+            for a, b in zip(rb['pts'], rb['pts'][1:]):
+                x0, x1 = min(a[0], b[0]), max(a[0], b[0])
+                y0, y1 = min(a[1], b[1]), max(a[1], b[1])
+                sj, si = grid_window(x0, y0, x1, y1, 6)
+                d, _ = seg_dist(X[sj, si], Y[sj, si], a, b)
+                mud[sj, si] = np.maximum(mud[sj, si], np.clip(1 - (d - rb['w'] / 2) / 3.0, 0, 1))
+    return np.stack([mud, rock, np.clip(gravel, 0, 1), floor_], -1)
+
+
+Image.fromarray((np.clip(splat_for(GX, GY, H_FINAL, True), 0, 1) * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_splat.png')
+Image.fromarray((np.clip(splat_for(FGX, FGY, far_h, False), 0, 1) * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_far_splat.png')
+TEX = {'albedo_array': 'res://assets/terrain/zone01_albedo.jpg', 'normal_array': 'res://assets/terrain/zone01_normal.jpg',
+       'arm_array': 'res://assets/terrain/zone01_arm.jpg', 'noise': 'res://assets/terrain/zone01_noise.png'}
+OUT_TER.write_text(json.dumps({'terrain': {
+    'heights': 'res://data/terrain/sanatorium_heights.r32', 'origin': [GRID_X[0], -GRID_Y[1]], 'grid': [len(XS), len(YS)],
+    'step': STEP, 'layer_tiles': [3.0, 3.0, 2.5, 3.0, 4.0, 2.0], 'textures': TEX,
+    'splat_file': 'res://data/terrain/sanatorium_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+OUT_FAR.write_text(json.dumps({'terrain': {
+    'heights': 'res://data/terrain/sanatorium_far.r32', 'origin': [float(FX[0]), float(-FY[0])], 'grid': [len(FX), len(FY)],
+    'step': 10.0, 'layer_tiles': [3.0, 3.0, 2.5, 3.0, 4.0, 2.0], 'textures': TEX,
+    'splat_file': 'res://data/terrain/sanatorium_far_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+OUT_VEG.write_text(json.dumps(TREES, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
+
+PLAN_IMG = 'res://docs/plans/sanatorium_map_v08.png'
+pad_, top_, sc_ = PLAN['PAD'], PLAN['TOP'], PLAN['SCALE']
+crop = [0, 0, int(pad_ * 2 + (PLAN['XMAX'] - PLAN['XMIN']) * sc_), int(top_ + pad_ * 2 + (PLAN['YMAX'] - PLAN['YMIN']) * sc_)]
+x_left = PLAN['XMIN'] - pad_ / sc_
+x_right = PLAN['XMIN'] + (crop[2] - pad_) / sc_
+y_top = PLAN['YMAX'] + (top_ + pad_) / sc_
+y_bottom = PLAN['YMAX'] - (crop[3] - top_ - pad_) / sc_
+
+result = {
+    'version': 1,
+    'name': 'Санаторий',
+    'purpose': 'Карта «Санаторий» — серый блокаут: участок v08, здания по принятым планам, спуски, мол «Стрелка»',
+    'north': '-Z',
+    'y_offset': 0.0,
+    'scale': {'width_k': 1.3, 'height_k': 1.15, 'door': [1.17, 2.42], 'rule': 'E'},
+    'walkable': [GRID_X[0], GRID_X[1], -GRID_Y[1], -GRID_Y[0]],
+    'mats': MATS,
+    'boxes': O.boxes, 'stairs': O.stairs, 'beams': O.beams, 'cyls': O.cyls,
+    'tris': O.tris, 'labels': O.labels, 'water': O.water, 'barriers': O.barriers, 'markers': O.markers,
+    'rooms': ROOMS, 'routes': ROUTES, 'places': PLACES, 'exits': EXITS, 'spawns': SPAWNS,
+    'negative': [{'id': i, 'label': t, 'from': [r3(a[0]), r3(-a[1])], 'to': [r3(b[0]), r3(-b[1])], 'stop_x': s} for i, t, a, b, s in NEG],
+    'buildings': BUILDINGS,
+    'levels': {'central': CENTRAL, 's_corps': S_LEVELS, 'cottages': COT_LEVELS, 'hozdvor': HOZ_LEVEL, 'playground': PG_LEVEL,
+               'sport': SPORT_LEVEL, 'orchestra': ORCH, 'stage': STAGE, 'under_stage': UNDER, 'promenade': PROM, 'mole': MOLE,
+               'quay': QUAY},
+    'dam': {'center': [r3(DC[0]), r3(-DC[1])], 'radius': r3(DR), 'height': DAM_H, 'ends': [[r3(E1[0]), r3(-E1[1])], [r3(E2[0]), r3(-E2[1])]]},
+    'plan_image': PLAN_IMG, 'plan_image_crop': crop, 'plan_image_rect': [r3(x_left), r3(-y_top), r3(x_right), r3(-y_bottom)],
+    'deviations': DEVIATIONS,
+    'stats': {'boxes': len(O.boxes), 'stairs': len(O.stairs), 'beams': len(O.beams), 'cyls': len(O.cyls),
+              'tris': sum(len(v) // 9 for v in O.tris.values()), 'rooms': len(ROOMS), 'routes': len(ROUTES),
+              'trees': sum(len(v) for v in TREES.values())},
+}
+OUT_PLAN.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
+
+SCENE = f'''[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/blockout/sanatorium_level.gd" id="level"]
+[ext_resource type="Script" path="res://src/blockout/heli_terrain.gd" id="terrain"]
+[ext_resource type="Script" path="res://src/blockout/sanatorium_landscape.gd" id="land"]
+
+[node name="SanatoriumStudy" type="Node3D"]
+script = ExtResource("level")
+metadata/purpose = "Карта «Санаторий» — серый блокаут (tools/build_sanatorium.py; прогулка — tools/sanatorium_study.cmd)"
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("terrain")
+data_path = "res://data/blockouts/sanatorium_terrain.json"
+lod_ranges = Vector2(480, 1600)
+tile_cells = 64
+detail_rect = Rect2({GRID_X[0]}, {-GRID_Y[1]}, {GRID_X[1] - GRID_X[0]}, {GRID_Y[1] - GRID_Y[0]})
+collision_rect = Rect2({GRID_X[0]}, {-GRID_Y[1]}, {GRID_X[1] - GRID_X[0]}, {GRID_Y[1] - GRID_Y[0]})
+
+[node name="FarTerrain" type="Node3D" parent="."]
+script = ExtResource("terrain")
+data_path = "res://data/blockouts/sanatorium_far_terrain.json"
+lod_ranges = Vector2(2600, 6000)
+tile_cells = 32
+detail_rect = Rect2(-2400, -1400, 3600, 3400)
+collision_rect = Rect2(900000, 900000, 1, 1)
+
+[node name="Landscape" type="Node3D" parent="."]
+script = ExtResource("land")
+'''
+OUT_SCENE.write_text(SCENE, encoding='utf-8', newline='\n')
+
+for w in WARN:
+    print('ВНИМАНИЕ:', w)
+for d_ in DEVIATIONS:
+    print('ОТСТУПЛЕНИЕ:', d_)
+st_ = result['stats']
+print(f"санаторий: коробок {st_['boxes']}, маршей {st_['stairs']}, лент {st_['beams']}, цилиндров {st_['cyls']}, "
+      f"треугольников {st_['tris']}, помещений {st_['rooms']}, обходов {st_['routes']}, деревьев {st_['trees']}")
+print(f"уровни: S {S_LEVELS}, коттеджи {COT_LEVELS}, хоздвор {HOZ_LEVEL}, площадка {PG_LEVEL}, корты {SPORT_LEVEL}")
+print(f"→ {OUT_PLAN.relative_to(ROOT)} ({OUT_PLAN.stat().st_size // 1024} КБ), {OUT_SCENE.relative_to(ROOT)}")
