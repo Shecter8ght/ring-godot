@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Санаторий — здание «Ресторан и спа» v02: план, адресные данные помещений и дверей, проверка связей.
+"""Санаторий — здание «Ресторан и спа» v03: план, адресные данные помещений и дверей, проверка связей.
+
+v03 (владелец после прогулки по серому блокауту): крытый бассейн максимально широкий и на 30 % длиннее — чаша
+32,5 × 22 м (была 25 × 12,5), дорожки вокруг по 4 м и 5,5 м у торцов; зал бассейна и зона тишины удлинены на запад
+на 7,5 м (на востоке вплотную раздевалки и холл), подиум с открытой чашей и проплыв сдвинуты на запад следом.
 
 Решения владельца 2026-11-07 (docs/design/sanatorium_spa_restaurant.md, §1):
 - одно отдельное одноэтажное строение — ресторан, спа и центр физнагрузок и процедур;
@@ -12,10 +16,10 @@
 Остальное — предложение агента; приёмы «Бухты Коприно» — зона тишины с баром у бассейна, римская баня в наборе.
 
 Координаты — схемы участка (tools/sanatorium_map_plan.py), метры игры: помещения и проходы × 1,3 (правило E),
-мебель, лежаки и чаши 25 × 12,5 и 20 × 12,5 м — 1:1.
+мебель и лежаки — 1:1; открытая чаша 20 × 12,5 м, крытая (v03) — 32,5 × 22 м.
 
     python -X utf8 tools/sanatorium_spa_plan.py
-        → docs/plans/sanatorium_spa_restaurant_v02.png, docs/design/data/sanatorium_spa_restaurant_v02.json
+        → docs/plans/sanatorium_spa_restaurant_v03.png, docs/design/data/sanatorium_spa_restaurant_v03.json
 """
 import json
 from pathlib import Path
@@ -26,13 +30,15 @@ import sanatorium_plan_kit as kit
 from sanatorium_plan_kit import DOOR, DOOR2, INK, MUTED, font
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'docs/plans/sanatorium_spa_restaurant_v02.png'
-DATA = ROOT / 'docs/design/data/sanatorium_spa_restaurant_v02.json'
+OUT = ROOT / 'docs/plans/sanatorium_spa_restaurant_v03.png'
+DATA = ROOT / 'docs/design/data/sanatorium_spa_restaurant_v03.json'
 
-POOL_IN = (-90.0, -88.0, -65.0, -75.5)          # крытая чаша 25 × 12,5
-POOL_OUT = (-120.0, -88.0, -100.0, -75.5)       # открытая чаша 20 × 12,5, перелив на запад, к озеру
-CHANNEL = (-100.0, -83.25, -90.0, -80.25)       # проплыв из крытой чаши в открытую под завесой в стеклянной стене
-PODIUM = (-124.0, -102.0, -96.0, -66.0)         # подиум открытого бассейна над склоном
+DX = -7.5                                       # v03: зал бассейна и всё западнее него — на 7,5 м к озеру
+HALL_X0 = -96.0 + DX                            # западная стена зала бассейна
+POOL_IN = (HALL_X0 + 5.5, -92.0, -65.5, -70.0)  # крытая чаша 32,5 × 22 (v02 — 25 × 12,5): на 30 % длиннее, во всю ширину зала
+POOL_OUT = (-120.0 + DX, -88.0, -100.0 + DX, -75.5)   # открытая чаша 20 × 12,5, перелив на запад, к озеру
+CHANNEL = (-100.0 + DX, -83.25, HALL_X0 + 5.5, -80.25)  # проплыв из крытой чаши в открытую под завесой в стеклянной стене
+PODIUM = (-124.0 + DX, -102.0, HALL_X0, -66.0)  # подиум открытого бассейна над склоном
 TERRACE = (-112.0, -48.0, -96.0, -30.0)         # терраса ресторана над склоном — только выход
 YARD = (-24.0, -48.0, -8.0, -30.0)              # хозяйственный двор кухни
 
@@ -70,8 +76,8 @@ ROOMS = [
     ('SHM', 'Душевые мужские', -60, -86, -52, -78, 'wet', ''),
     ('SHF', 'Душевые женские', -52, -86, -44, -78, 'wet', ''),
     ('HAL', 'Общий холл бассейна', -60, -102, -44, -86, 'wet', ''),
-    ('POOL', 'Крытый бассейн 25 м, лежаки', -96, -96, -60, -66, 'wet', ''),
-    ('RLX', 'Зона тишины и спа-бар', -96, -102, -60, -96, 'wet', 'loot'),
+    ('POOL', 'Крытый бассейн 32,5 × 22 м, лежаки', HALL_X0, -96, -60, -66, 'wet', ''),
+    ('RLX', 'Зона тишины и спа-бар', HALL_X0, -102, -60, -96, 'wet', 'loot'),
     ('B1', 'Финская сауна, 6–7 чел.', -96, -66, -91, -60, 'bath', ''),
     ('B2', 'Русская парная, 6–7 чел.', -91, -66, -86, -60, 'bath', ''),
     ('B3', 'Римская баня, 6–7 чел.', -86, -66, -81, -60, 'bath', ''),
@@ -132,15 +138,15 @@ for i, a in enumerate(ROOMS):
 NUM = {r[0]: f'{k + 1:02d}' for k, r in enumerate(ROOMS)}
 
 # ----------------------------------------------------------------------------- рисунок
-XMIN, XMAX, YMIN, YMAX = -128.0, 16.0, -112.0, -14.0
-SC = 7.6
+XMIN, XMAX, YMIN, YMAX = -136.0, 16.0, -112.0, -14.0
+SC = 7.2
 W = int((XMAX - XMIN) * SC) + 60 + 600
 H = max(int((YMAX - YMIN) * SC) + 170, 1190)
 img = Image.new('RGB', (W, H), kit.PAPER)
 d = ImageDraw.Draw(img)
 P = kit.Plan(d, 30, 100, XMIN, YMAX, SC)
 
-d.text((30, 18), 'Санаторий · здание «Ресторан и спа» v02 — один общий вход, коридор, три отдельных крыла',
+d.text((30, 18), 'Санаторий · здание «Ресторан и спа» v03 — один общий вход, коридор, три отдельных крыла; бассейн 32,5 × 22 м',
        font=font(21, True), fill=INK)
 d.text((30, 52), 'вестибюль с ресепшеном → коридор → ресторан / бассейн / фитнес и процедуры; крылья разделены двориками — общих стен нет',
        font=font(14), fill=MUTED)
@@ -148,8 +154,8 @@ d.text((30, 72), 'одноэтажное · потолок: ресторан 4,5
        font=font(13), fill=MUTED)
 
 P.rect(XMIN, YMIN, XMAX, YMAX, fill=(226, 230, 214), outline=None)
-P.poly([(XMIN, YMIN), (-124, YMIN), (-124, YMAX), (XMIN, YMAX)], fill=(176, 190, 150), outline=None)
-P.text(-127, -28, 'склон', 12, MUTED, False, 'lm')
+P.poly([(XMIN, YMIN), (PODIUM[0], YMIN), (PODIUM[0], YMAX), (XMIN, YMAX)], fill=(176, 190, 150), outline=None)
+P.text(XMIN + 1, -28, 'склон', 12, MUTED, False, 'lm')
 for x0, y0, x1, y1 in ((-66, -60, -6, -56), (-70, -52, -24, -48), (-44, -108, -38, -60)):    # дворики между крыльями
     P.rect(x0, y0, x1, y1, fill=(200, 220, 184), outline=None)
 P.text(-40, -50, 'дворик', 10, MUTED)
@@ -157,14 +163,14 @@ P.text(-41, -84, 'сад', 10, MUTED)
 P.rect(*PODIUM, fill=(232, 226, 210), outline=MUTED)
 P.rect(*POOL_OUT, fill=(110, 192, 220), outline=INK, width=2)
 P.line([(POOL_OUT[0], POOL_OUT[1]), (POOL_OUT[0], POOL_OUT[3])], fill=(40, 90, 140), width=5)
-P.text(-122, -70, 'перелив', 10, MUTED, False, 'mm')
+P.text(POOL_OUT[0] - 2, -70, 'перелив', 10, MUTED, False, 'mm')
 P.rect(*CHANNEL, fill=(110, 192, 220), outline=None)
 for k in range(8):
-    P.rect(-121 + k * 2.8, -72, -120.3 + k * 2.8, -70, fill=(255, 255, 255), outline=MUTED)
-    P.rect(-121 + k * 2.8, -98, -120.3 + k * 2.8, -96, fill=(255, 255, 255), outline=MUTED)
+    P.rect(-121 + DX + k * 2.8, -72, -120.3 + DX + k * 2.8, -70, fill=(255, 255, 255), outline=MUTED)
+    P.rect(-121 + DX + k * 2.8, -98, -120.3 + DX + k * 2.8, -96, fill=(255, 255, 255), outline=MUTED)
 for k in range(3):
-    P.circle(-116 + k * 7, -68.5, 1.3, fill=(240, 200, 120), outline=MUTED)
-    P.circle(-116 + k * 7, -100, 1.3, fill=(240, 200, 120), outline=MUTED)
+    P.circle(-116 + DX + k * 7, -68.5, 1.3, fill=(240, 200, 120), outline=MUTED)
+    P.circle(-116 + DX + k * 7, -100, 1.3, fill=(240, 200, 120), outline=MUTED)
 P.rect(*TERRACE, fill=(222, 206, 176), outline=MUTED)
 for ix in range(2):
     for iy in range(3):
@@ -181,14 +187,16 @@ P.text(3, -28, 'от площади', 10, MUTED)
 P.rooms(ROOMS, BY_ID, DOORS, NUM, LOCKED)
 
 P.rect(*POOL_IN, fill=(110, 192, 220), outline=INK, width=2)
-for k in range(1, 5):
-    P.line([(POOL_IN[0], POOL_IN[1] + k * 2.5), (POOL_IN[2], POOL_IN[1] + k * 2.5)], fill=(70, 150, 190))
-P.line([(-96, CHANNEL[1] - 0.3), (-96, CHANNEL[3] + 0.3)], fill=(240, 240, 240), width=3)
-for k in range(9):
-    P.rect(-90 + k * 2.8, -73.5, -89.3 + k * 2.8, -71.5, fill=(255, 255, 255), outline=MUTED)
-    P.rect(-90 + k * 2.8, -94, -89.3 + k * 2.8, -92, fill=(255, 255, 255), outline=MUTED)
-for k in range(8):                                                  # лежаки зоны тишины
-    P.rect(-94 + k * 3.4, -101.5, -93.3 + k * 3.4, -99.5, fill=(255, 255, 255), outline=MUTED)
+LANES = 8
+for k in range(1, LANES):                                          # 8 дорожек по 2,75 м
+    y_ = POOL_IN[1] + k * (POOL_IN[3] - POOL_IN[1]) / LANES
+    P.line([(POOL_IN[0], y_), (POOL_IN[2], y_)], fill=(70, 150, 190))
+P.line([(HALL_X0, CHANNEL[1] - 0.3), (HALL_X0, CHANNEL[3] + 0.3)], fill=(240, 240, 240), width=3)
+for k in range(10):                                                 # лежаки у торцов и по длинным сторонам
+    P.rect(POOL_IN[0] + 1.0 + k * 3.0, -67.6, POOL_IN[0] + 1.7 + k * 3.0, -66.4, fill=(255, 255, 255), outline=MUTED)
+    P.rect(POOL_IN[0] + 1.0 + k * 3.0, -95.6, POOL_IN[0] + 1.7 + k * 3.0, -94.4, fill=(255, 255, 255), outline=MUTED)
+for k in range(10):                                                 # лежаки зоны тишины
+    P.rect(HALL_X0 + 2 + k * 3.4, -101.5, HALL_X0 + 2.7 + k * 3.4, -99.5, fill=(255, 255, 255), outline=MUTED)
 P.rect(-67, -101.5, -61.5, -100.5, fill=(210, 200, 180), outline=None)   # стойка спа-бара
 for x0 in (-96, -91, -86, -81):
     P.rect(x0 + 0.6, -61.4, x0 + 4.4, -60.6, fill=(196, 150, 110), outline=None)
@@ -214,7 +222,7 @@ P.labels(ROOMS, NUM, at={'POOL': (-62.5, -69), 'GAL': (-30, -54), 'REST': (-75, 
 P.rect(-83.5, -29, -82.8, -21, fill=(196, 170, 130), outline=None)   # стойка гардероба
 for k in range(6):
     P.line([(-81.5, -28.5 + k * 1.4), (-77, -28.5 + k * 1.4)], fill=MUTED)   # вешалки
-bx, by = P.p(-126, -110)
+bx, by = P.p(XMIN + 2, -110)
 d.line([(bx, by), (bx + 20 * SC, by)], fill=INK, width=3)
 d.text((bx + 10 * SC, by - 10), '20 м', font=font(12), fill=INK, anchor='mm')
 P.text(12, -110, 'С ↑', 14, INK, True)
@@ -232,7 +240,8 @@ img.save(OUT)
 
 DATA.parent.mkdir(parents=True, exist_ok=True)
 DATA.write_text(json.dumps({
-    'version': 'v02', 'note': 'по схеме владельца; координаты схемы участка, метры игры (правило E)',
+    'version': 'v03', 'note': 'по схеме владельца; v03 — крытый бассейн 32,5 × 22 м, зал и подиум на 7,5 м западнее; '
+            'координаты схемы участка, метры игры (правило E)',
     'zones': ZONES, 'pool_indoor': POOL_IN, 'pool_outdoor': POOL_OUT, 'swim_channel': CHANNEL, 'podium': PODIUM,
     'terrace': TERRACE, 'yard': YARD,
     'rooms': [{'id': r[0], 'no': NUM[r[0]], 'name': r[1], 'rect': [r[2], r[3], r[4], r[5]], 'kind': r[6],
@@ -242,4 +251,4 @@ DATA.write_text(json.dumps({
 
 for p in PROBLEMS:
     print('ЗАМЕЧАНИЕ:', p)
-print(f'ресторан и спа v02: помещений {len(ROOMS)}, дверей {len(DOORS)}, площадь ≈ {total:.0f} м², замечаний {len(PROBLEMS)}')
+print(f'ресторан и спа v03: помещений {len(ROOMS)}, дверей {len(DOORS)}, площадь ≈ {total:.0f} м², замечаний {len(PROBLEMS)}')

@@ -3,7 +3,7 @@
 
 Источники приняты владельцем 2026-11-07 (решения 1–48): схема участка v09 (tools/sanatorium_map_plan.py — берег,
 бровка, дороги, парковки, коттеджи, каскад, тропа, места, выходы), S-корпуса (tools/sanatorium_s_geom.py, номер —
-лист tools/sanatorium_s_corps_plan.py), здания по помещениям и дверям (docs/design/data/sanatorium_*.json), спуски
+лист tools/sanatorium_s_corps_plan.py), здания по помещениям и дверям (docs/design/data/sanatorium_*.json; «Ресторан и спа» — v03 с бассейном 32,5 × 22 м), спуски
 (sanatorium_descents_v01.json). Генератор ничего не придумывает в планировке: он поднимает принятые планы в объём.
 
 Что считает:
@@ -75,7 +75,7 @@ PLAN = load_plan()
 shore_x = PLAN['shore_x']
 brow_x = PLAN['brow_x']
 MAIN = json.loads((DATA / 'sanatorium_main_corps_v02.json').read_text(encoding='utf-8'))
-SPA = json.loads((DATA / 'sanatorium_spa_restaurant_v02.json').read_text(encoding='utf-8'))
+SPA = json.loads((DATA / 'sanatorium_spa_restaurant_v03.json').read_text(encoding='utf-8'))
 SMALL = json.loads((DATA / 'sanatorium_small_v01.json').read_text(encoding='utf-8'))
 DESC = json.loads((DATA / 'sanatorium_descents_v01.json').read_text(encoding='utf-8'))
 
@@ -726,10 +726,13 @@ class Building:
             for a, b, d in doors.get((o, c), []):
                 w = b - a
                 hmax = 0.0
+                hmin = 1e9
                 for a2, b2, _, r in edges:
                     if inter_len(a, b, a2, b2) > 0.01:
                         hmax = max(hmax, self.hgt(f, r))
-                dh = DOOR_H if w < 2.0 else (WIDE_DOOR_H if w < OPEN_W else hmax)
+                        hmin = min(hmin, self.hgt(f, r))
+                # широкий проём — во всю высоту низкого из двух помещений; выше, до потолка высокого, — перемычка
+                dh = DOOR_H if w < 2.0 else (WIDE_DOOR_H if w < OPEN_W else hmin)
                 if hmax - dh > 0.05:
                     cls = None
                     for p, q, c2 in merged:
@@ -1975,18 +1978,19 @@ ch = tuple(SPA['swim_channel'])
 O.box(*ch, CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
 for yy in (ch[1], ch[3]):
     O.box(ch[0], yy - 0.15, ch[2], yy + 0.15, CENTRAL - 1.9, CENTRAL - 0.02, 'tile')
-O.box(-96.25, ch[1], -95.75, ch[3], CENTRAL - 0.4, CENTRAL + 7.0, 'glass')
+_hx0 = float(spa.room(1, 'POOL')['rect'][0])     # западная стена зала бассейна — над проплывом стекло до воды
+O.box(_hx0 - 0.25, ch[1], _hx0 + 0.25, ch[3], CENTRAL - 0.4, CENTRAL + 7.0, 'glass')
 O.water.append({'name': 'SwimChannel', 'level': r3(CENTRAL - 0.25),
                 'poly': [[r3(ch[0]), r3(-ch[1])], [r3(ch[2]), r3(-ch[1])], [r3(ch[2]), r3(-ch[3])], [r3(ch[0]), r3(-ch[3])]]})
 for (p, q) in (((PODIUM[0], PODIUM[1]), (PODIUM[2], PODIUM[1])), ((PODIUM[0], PODIUM[1]), (PODIUM[0], PODIUM[3])),
                ((PODIUM[0], PODIUM[3]), (PODIUM[2], PODIUM[3]))):
     O.seg(p, q, 0.25, CENTRAL - 0.2, CENTRAL + RAIL_H, 'glass')
 for k in range(8):
-    lx_ = -122.0 + k * 2.6
+    lx_ = po[0] - 2.0 + k * 2.6
     if po[0] - 1 < lx_ < po[2] + 1:
         for ly_ in (-92.5, -70.5):
             O.box(lx_, ly_ - 1.0, lx_ + 0.8, ly_ + 1.0, CENTRAL, CENTRAL + 0.45, 'deck')
-O.label(-110.0, -95.0, CENTRAL + 2.5, 'открытый бассейн на подиуме', 1.0, 'object')
+O.label((PODIUM[0] + PODIUM[2]) / 2, -95.0, CENTRAL + 2.5, 'открытый бассейн на подиуме', 1.0, 'object')
 O.box(*RTER, rect_stat(*RTER, fn=np.min) - 0.6, CENTRAL, 'deck')
 for (p, q) in (((RTER[0], RTER[1]), (RTER[2], RTER[1])), ((RTER[0], RTER[1]), (RTER[0], RTER[3])), ((RTER[0], RTER[3]), (RTER[2] - 3.0, RTER[3]))):
     O.seg(p, q, 0.2, CENTRAL - 0.2, CENTRAL + RAIL_H, 'rail')
@@ -2541,7 +2545,7 @@ for i, (sx_, sy_) in enumerate(((150.0, 60.0), (150.0, -120.0), (40.0, 236.0), (
 S_AISLE = S_LOT[0] + BAY_L + AISLE / 2
 PLACE_SPOTS = {
     1: ((-32.0, 9.0), (-32.0, -2.0)), 2: ((-60.0, -51.0), (-75.0, -39.0)), 3: ((-22.0, -66.0), (-22.0, -90.0)),
-    4: ((-78.0, -70.5), (-78.0, -82.0)), 5: ((-110.0, -70.0), (-110.0, -82.0)), 6: ((-62.0, 8.0), (-110.0, -10.0)),
+    4: ((-80.0, -68.0), (-80.0, -81.0)), 5: ((-117.5, -70.0), (-117.5, -82.0)), 6: ((-62.0, 8.0), (-110.0, -10.0)),
     7: ((SITE1[0] + 17.0, SITE1[1] + sg.R), (SITE1[0], SITE1[1] + sg.R)),
     8: ((SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R), (SITE2[0], SITE2[1] - sg.R)),
     9: ((S_AISLE, S_LOT[1] - 18.0), (S_AISLE, S_LOT[1] + 30.0)),
@@ -2673,7 +2677,7 @@ OUT_FAR.write_text(json.dumps({'terrain': {
     'splat_file': 'res://data/terrain/sanatorium_far_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 OUT_VEG.write_text(json.dumps(TREES, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
 
-PLAN_IMG = 'res://docs/plans/sanatorium_map_v09.png'
+PLAN_IMG = 'res://docs/plans/sanatorium_map_v10.png'
 pad_, top_, sc_ = PLAN['PAD'], PLAN['TOP'], PLAN['SCALE']
 crop = [0, 0, int(pad_ * 2 + (PLAN['XMAX'] - PLAN['XMIN']) * sc_), int(top_ + pad_ * 2 + (PLAN['YMAX'] - PLAN['YMIN']) * sc_)]
 x_left = PLAN['XMIN'] - pad_ / sc_
@@ -2684,7 +2688,7 @@ y_bottom = PLAN['YMAX'] - (crop[3] - top_ - pad_) / sc_
 result = {
     'version': 1,
     'name': 'Санаторий',
-    'purpose': 'Карта «Санаторий» — серый блокаут: участок v09 (номер S-корпуса × 1,3), здания по принятым планам, спуски, мол «Стрелка»',
+    'purpose': 'Карта «Санаторий» — серый блокаут: участок v10 (номер S × 1,3, бассейн 32,5 × 22), здания по принятым планам, спуски, мол «Стрелка»',
     'north': '-Z',
     'y_offset': 0.0,
     'scale': {'width_k': 1.3, 'height_k': 1.15, 'door': [1.17, 2.42], 'rule': 'E'},
