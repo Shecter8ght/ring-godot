@@ -406,6 +406,9 @@ tools/sanatorium_study.cmd                                    # карта «С�
                                                               # --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — пешком все 623 помещения, лестницы,
                                                               # каскад, тропы, дороги, ось КПП → маяк, ~45 с (SANATORIUM_ROUTES=id,… — выборочно, SANATORIUM_TRACE=1 —
                                                               # точки хода); с окном -- shots — docs/screens/sanatorium (SANATORIUM_SHOTS=имя,…; SANATORIUM_TIME, _WEATHER)
+                                                              # --windowed --resolution 1920x1080 --disable-vsync … -- perf — кадры по видам и местам → perf.txt, perf.json;
+                                                              # обзор: python -X utf8 tools/sanatorium_ld_plan.py — лучи на высоте глаз, доля длиннее 90 м по зонам →
+                                                              # docs/design/sanatorium_sightlines.png, docs/screens/sanatorium/sightlines.json
 tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
                                                               # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;

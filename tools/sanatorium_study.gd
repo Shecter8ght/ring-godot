@@ -4,9 +4,11 @@ extends Node3D
 ##   tools/sanatorium_study.cmd                                                         — прогулка
 ##   tools/godot.cmd --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — проверка пешком
 ##   tools/godot.cmd --windowed --resolution 1600x900 res://tools/sanatorium_study.tscn -- shots — снимки мест
+##   tools/godot.cmd --windowed --resolution 1920x1080 --disable-vsync res://tools/sanatorium_study.tscn -- perf — замер кадров
+##     по видам и местам: средний кадр, худший 1 %, время видеокарты, треугольники → perf.txt, perf.json
 ##   tools/sanatorium_play.cmd — та же карта с настоящим игроком, оружием и ботами (мир — этот стенд без ходока)
 ## Прогулка: WASD, Shift — бег, Space — прыжок, C — присесть, F — полёт (Shift — быстрее, Space / Ctrl — вверх / вниз),
-## M — план (схема участка v08), 1–9, 0 — места 1–10, N / B — следующее / прошлое, R — к текущему месту, Esc — мышь.
+## M — план (схема участка), 1–9, 0 — места 1–10, N / B — следующее / прошлое, R — к текущему месту, Esc — мышь.
 ## SANATORIUM_TIME=day|dusk|night, SANATORIUM_WEATHER=clear|overcast|rain|fog — свет рейдов; SANATORIUM_OUTPUT —
 ## папка отчёта и снимков (docs/screens/sanatorium); SANATORIUM_ROUTES=id,id — проверить только эти обходы;
 ## SANATORIUM_SHOTS=имя,имя — только эти снимки. Код выхода проверки — число провалов.
@@ -14,6 +16,8 @@ extends Node3D
 const LEVEL: String = "res://scenes/levels/sanatorium_study.tscn"
 const Walker = preload("res://src/blockout/study_walker.gd")
 const VIEW_FAR: float = 4000.0
+const PERF_WARM: int = 90
+const PERF_MEASURE: int = 240
 
 var world: Node3D
 var landscape: Node3D
@@ -46,7 +50,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["verify", "shots"]:
+		if arg in ["verify", "shots", "perf"]:
 			mode = arg
 	if has_meta("embedded"):
 		mode = "embed"
@@ -81,6 +85,8 @@ func _ready() -> void:
 	await _frames(6)
 	if mode == "verify":
 		await _verify()
+	elif mode == "perf":
+		await _perf()
 	else:
 		await _shots()
 
@@ -418,17 +424,7 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var camera: Camera3D = walker.get("camera") as Camera3D
 	camera.fov = 62.0
-	# виды считает генератор (глаз — по полу и земле), к ним — места карты
-	var views: Array[Dictionary] = []
-	for v: Dictionary in plan.get("views", []):
-		var at: Array = v.at
-		var look: Array = v.look
-		views.append({"id": String(v.id), "at": Vector3(float(at[0]), float(at[1]), float(at[2])),
-			"look": Vector3(float(look[0]), float(look[1]), float(look[2]))})
-	for i: int in range((plan.places as Array).size()):
-		var t: Array = _place_at(i)
-		var p: Dictionary = (plan.places as Array)[i]
-		views.append({"id": "place_%02d" % int(p.n), "at": (t[0] as Vector3) + Vector3.UP * 1.62, "look": t[1]})
+	var views: Array[Dictionary] = _view_list()
 	var only: PackedStringArray = _env("SANATORIUM_SHOTS", "").split(",", false)
 	var perf: Array = []
 	for v: Dictionary in views:
@@ -451,4 +447,106 @@ func _shots() -> void:
 	var f: FileAccess = FileAccess.open(out_dir.path_join("shots.json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify({"views": perf, "time": _env("SANATORIUM_TIME", "day")}, "\t"))
 	f.close()
+	get_tree().quit(0)
+
+
+## Виды для снимков и замера: виды генератора (глаз — по полу и земле) и места карты.
+func _view_list() -> Array[Dictionary]:
+	var views: Array[Dictionary] = []
+	for v: Dictionary in plan.get("views", []):
+		var at: Array = v.at
+		var look: Array = v.look
+		views.append({"id": String(v.id), "at": Vector3(float(at[0]), float(at[1]), float(at[2])),
+			"look": Vector3(float(look[0]), float(look[1]), float(look[2]))})
+	for i: int in range((plan.places as Array).size()):
+		var t: Array = _place_at(i)
+		var p: Dictionary = (plan.places as Array)[i]
+		views.append({"id": "place_%02d" % int(p.n), "at": (t[0] as Vector3) + Vector3.UP * 1.62, "look": t[1]})
+	return views
+
+
+## Замер кадров: на каждом виде и месте прогрев, потом PERF_MEASURE кадров без вертикальной синхронизации — средний
+## кадр, худший 1 %, время видеокарты, треугольники и вызовы. Среднее — только по точкам на высоте глаз (облёты сверху
+## и с озера — для картинки). Поле зрения — как у игрока.
+func _perf() -> void:
+	walker.set_physics_process(false)
+	hud.hide()
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
+	DirAccess.make_dir_recursive_absolute(out_dir)
+	var camera: Camera3D = walker.get("camera") as Camera3D
+	camera.fov = Settings.fps_fov_v()
+	var vp: RID = get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	var size: Vector2i = DisplayServer.window_get_size()
+	var lines: PackedStringArray = [
+		"«Санаторий», серый блокаут · замер кадров",
+		"%s · %dx%d · качество %s · %s, %s · деревьев %d · сборка %d мс" % [RenderingServer.get_video_adapter_name(), size.x, size.y,
+			Settings.quality, String(RaidConditions.current.time), String(RaidConditions.current.weather), int((plan.stats as Dictionary).get("trees", 0)),
+			int(stats.build_ms)],
+		"  %-22s %7s %7s %7s %7s %10s %8s" % ["точка", "к/с", "мс", "1% мс", "GPU мс", "треуг.", "вызовов"],
+	]
+	for l: String in lines:
+		print(l)
+	var rows: Array = []
+	var total: float = 0.0
+	var count: int = 0
+	var worst_row: Dictionary = {}
+	var only: PackedStringArray = _env("SANATORIUM_SHOTS", "").split(",", false)
+	for v: Dictionary in _view_list():
+		if not only.is_empty() and not String(v.id) in only:
+			continue
+		var at: Vector3 = v.at
+		walker.global_position = at - Vector3.UP * 1.62
+		camera.global_position = at
+		camera.look_at(v.look, Vector3.UP)
+		for i: int in range(PERF_WARM):
+			await get_tree().process_frame
+		var times: Array[float] = []
+		var gpu: float = 0.0
+		var t0: int = Time.get_ticks_usec()
+		for i: int in range(PERF_MEASURE):
+			await get_tree().process_frame
+			var t1: int = Time.get_ticks_usec()
+			times.append(float(t1 - t0) / 1000.0)
+			t0 = t1
+			gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+		times.sort()
+		var mean: float = 0.0
+		for t: float in times:
+			mean += t
+		mean /= float(times.size())
+		var eye: bool = not String(v.id) in ["00_overview", "00_from_lake"]      # облёты сверху и с озера — для картинки
+		var row: Dictionary = {"id": String(v.id), "fps": snappedf(1000.0 / mean, 0.1), "ms": snappedf(mean, 0.01),
+			"low1_ms": snappedf(times[int(times.size() * 0.99)], 0.01), "gpu_ms": snappedf(gpu / float(PERF_MEASURE), 0.01),
+			"tris": int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)),
+			"draws": int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)), "eye": eye}
+		rows.append(row)
+		var line: String = "  %-22s %7.1f %7.2f %7.2f %7.2f %10d %8d%s" % [row.id, row.fps, row.ms, row.low1_ms, row.gpu_ms, row.tris,
+			row.draws, "" if eye else "  (облёт)"]
+		print(line)
+		lines.append(line)
+		if eye:
+			total += mean
+			count += 1
+			if worst_row.is_empty() or float(row.ms) > float(worst_row.ms):
+				worst_row = row
+	var summary: Dictionary = {}
+	if count > 0:
+		summary = {"points": count, "fps_mean": snappedf(1000.0 / (total / count), 0.1), "ms_mean": snappedf(total / count, 0.01),
+			"worst": worst_row}
+		var avg: String = "  на высоте глаз: %d точек, в среднем %.1f к/с (%.2f мс); хуже всего — %s: %.1f к/с, 1%% — %.2f мс" % [
+			count, float(summary.fps_mean), float(summary.ms_mean), String(worst_row.id), float(worst_row.fps), float(worst_row.low1_ms)]
+		print(avg)
+		lines.append(avg)
+	var f: FileAccess = FileAccess.open(out_dir.path_join("perf.txt"), FileAccess.WRITE)
+	f.store_string("
+".join(lines) + "
+")
+	f.close()
+	var j: FileAccess = FileAccess.open(out_dir.path_join("perf.json"), FileAccess.WRITE)
+	j.store_string(JSON.stringify({"adapter": RenderingServer.get_video_adapter_name(), "size": [size.x, size.y],
+		"quality": Settings.quality, "time": String(RaidConditions.current.time), "weather": String(RaidConditions.current.weather),
+		"summary": summary, "points": rows}, "	"))
+	j.close()
 	get_tree().quit(0)
