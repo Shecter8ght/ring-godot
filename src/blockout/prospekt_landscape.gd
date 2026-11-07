@@ -725,6 +725,22 @@ const PIT_COLORS: Dictionary = {"hazard_yellow": Color(0.85, 0.66, 0.08), "pipe_
 const PIT_LAMP_COLOR: Color = Color(0.92, 0.97, 1.0)
 const PIT_LAMP_ENERGY: float = 1.3
 const PIT_LAMP_RANGE: float = 15.0
+## Рассеянная подсветка паркинга (владелец 2026-11-07: «пару источников запечённого рассеянного света сбоку или снизу,
+## чтобы совсем темноты не было»): неподвижные, без теней и бликов.
+##   снизу — отражённый от бетонного пола свет под каждым горящим светильником (подсвечивает потолок, балки, днища машин);
+##   сбоку — дневной свет из проёмов двух рамп вдоль торцевых проездов, по времени рейда (ночью почти нет);
+##   нижняя граница — снимок отражений на весь паркинг один раз при загрузке с тусклым постоянным рассеянным светом.
+const PIT_BOUNCE_COLOR: Color = Color(0.86, 0.85, 0.82)
+const PIT_BOUNCE_ENERGY: float = 0.32
+const PIT_BOUNCE_RANGE: float = 10.0
+const PIT_BOUNCE_LIFT: float = 0.6
+const PIT_RAMP_COLOR: Color = Color(0.84, 0.9, 1.0)
+const PIT_RAMP_ENERGY: float = 2.2
+const PIT_RAMP_RANGE: float = 34.0
+const PIT_RAMP_ANGLE: float = 62.0
+const PIT_RAMP_BY_TIME: Dictionary = {"day": 1.0, "dusk": 0.5, "night": 0.06}
+const PIT_AMBIENT_COLOR: Color = Color(0.55, 0.58, 0.62)
+const PIT_AMBIENT_ENERGY: float = 0.45
 
 
 ## Свои цвета карты: маркеры лута по ценности (светятся, чтобы читались в тени), граффити, хаки, стекло.
@@ -804,6 +820,72 @@ func _lamps() -> void:
 		light.shadow_enabled = false
 		generated.add_child(light)
 		light.position = at
+		if in_pit:
+			_soft_light(Vector3(at.x, _pit_floor_y() + PIT_BOUNCE_LIFT, at.z), PIT_BOUNCE_COLOR, PIT_BOUNCE_ENERGY, PIT_BOUNCE_RANGE)
+	if pit.has_area():
+		_pit_fill(pit)
+
+
+## Неподвижный рассеянный свет без теней и бликов (подсветка, как запечённая).
+func _soft_light(at: Vector3, color: Color, energy: float, reach: float) -> OmniLight3D:
+	var l := OmniLight3D.new()
+	l.light_color = color
+	l.light_energy = energy
+	l.omni_range = reach
+	l.omni_attenuation = 0.6
+	l.light_specular = 0.0
+	l.shadow_enabled = false
+	l.light_bake_mode = Light3D.BAKE_STATIC
+	generated.add_child(l)
+	l.position = at
+	return l
+
+
+## Сбоку — дневной свет из проёмов рамп (рампы плана, что уходят под землю): широкий мягкий прожектор у низа рампы
+## вдоль неё внутрь; нижняя граница — снимок отражений на весь паркинг с тусклым постоянным рассеянным светом.
+func _pit_fill(pit: Rect2) -> void:
+	var floor_y: float = _pit_floor_y()
+	var by_time: float = float(PIT_RAMP_BY_TIME.get(String(RaidConditions.current.get("time", "day")), 1.0))
+	for r: Dictionary in plan.get("ramps", []):
+		var y0: float = float(r.y0)
+		var y1: float = float(r.y1)
+		if minf(y0, y1) > floor_y + 0.5 or String(r.get("mat", "")) != "concrete":
+			continue
+		var x: float = (float(r.x0) + float(r.x1)) * 0.5
+		var z_low: float = float(r.z1) if y1 < y0 else float(r.z0)
+		var inward: float = signf(z_low - (float(r.z0) if y1 < y0 else float(r.z1)))
+		var spot := SpotLight3D.new()
+		spot.light_color = PIT_RAMP_COLOR
+		spot.light_energy = PIT_RAMP_ENERGY * by_time
+		spot.spot_range = PIT_RAMP_RANGE
+		spot.spot_angle = PIT_RAMP_ANGLE
+		spot.spot_attenuation = 0.7
+		spot.light_specular = 0.0
+		spot.shadow_enabled = false
+		spot.light_bake_mode = Light3D.BAKE_STATIC
+		generated.add_child(spot)
+		spot.position = Vector3(x, floor_y + 4.0, z_low - inward * 2.0)
+		spot.look_at(Vector3(x, floor_y + 0.5, z_low + inward * 14.0), Vector3.UP)
+	var probe := ReflectionProbe.new()
+	probe.name = "PitAmbient"
+	var top: float = -0.4
+	probe.size = Vector3(pit.size.x, top - floor_y, pit.size.y)
+	probe.position = Vector3(pit.get_center().x, (floor_y + top) * 0.5, pit.get_center().y)
+	probe.interior = true
+	probe.box_projection = true
+	probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	probe.ambient_mode = ReflectionProbe.AMBIENT_COLOR
+	probe.ambient_color = PIT_AMBIENT_COLOR
+	probe.ambient_color_energy = PIT_AMBIENT_ENERGY
+	probe.max_distance = maxf(pit.size.x, pit.size.y)
+	generated.add_child(probe)
+
+
+func _pit_floor_y() -> float:
+	for sl: Dictionary in plan.get("slabs", []):
+		if String(sl.get("id", "")) == "pit_floor":
+			return float(sl.y_top)
+	return -7.3
 
 
 ## Паркинг −1 в плане: пол — плита pit_floor.
