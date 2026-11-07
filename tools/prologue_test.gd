@@ -82,7 +82,7 @@ func _solo() -> void:
 	# ---- заново от ворот: кофейня, ранние действия, контрольная точка, бой в зале, гибель
 	await _level_ready()
 	var me := _me()
-	_check("после гибели у ворот — снова у ворот", me != null and me.global_position.distance_to(Vector3(-200, 0, 0)) < 4.0, str(me.global_position if me else Vector3.INF))
+	_check("после гибели у ворот — снова у ворот", me != null and me.global_position.distance_to(Vector3(-200, 0, -15.65)) < 4.0, str(me.global_position if me else Vector3.INF))
 	await _wait(func() -> bool: return not _bags().is_empty(), 5.0)
 	_check("ЧВК у ворот снова мирные", _pmc().all(func(m: Marauder) -> bool: return not m.hostile_to_players), "")
 	_check("сумки снова в подсобке", not _bags().is_empty())
@@ -100,7 +100,7 @@ func _start_checks() -> void:
 	var lvl := get_tree().current_scene
 	_check("пролог на карте", Prologue.current != null and Prologue.current.get_parent() == lvl)
 	var me := _me()
-	_check("заход — у ворот кордона", me != null and me.global_position.distance_to(Vector3(-200, 0, 0)) < 4.0, str(me.global_position if me else Vector3.INF))
+	_check("заход — у ворот кордона", me != null and me.global_position.distance_to(Vector3(-200, 0, -15.65)) < 4.0, str(me.global_position if me else Vector3.INF))
 	var ext: Array = get_tree().get_nodes_in_group("extractions")
 	_check("выход один — «Тоннель на юг»", ext.size() == 1 and (ext[0] as ExtractionPoint).display_name.begins_with("Тоннель на юг"), str(ext.map(func(e: Node) -> String: return (e as ExtractionPoint).display_name)))
 	var pop := lvl.get_node_or_null("Population") as AIPopulation
@@ -125,7 +125,7 @@ func _start_checks() -> void:
 	await _wait(func() -> bool: return not _bags().is_empty(), 5.0)
 	var bags := _bags()
 	_check("сумка с биркой на имя профиля — в подсобке кофейни", bags.size() == 1 and (bags[0] as LootContainer).display_name == "Сумка · Тест"
-		and (bags[0] as Node3D).global_position.distance_to(Vector3(-178.3, 0, -22.5)) < 2.5, str(bags.map(func(b: Node) -> String: return (b as LootContainer).display_name)))
+		and (bags[0] as Node3D).global_position.distance_to(Vector3(-178.3, 0, -53.8)) < 2.5, str(bags.map(func(b: Node) -> String: return (b as LootContainer).display_name)))
 	_check("пакет Михалычу лежит рядом", _packet() != null)
 	_check("цель: «Дойти до кофейни «Зерно»»", _oid() == "coffee" and String(Quests.objective(Q).text).contains("Зерно"))
 	await _frames(4)
@@ -139,7 +139,7 @@ func _start_checks() -> void:
 func _gate_and_die() -> void:
 	var me := _me()
 	var warden := get_tree().get_first_node_in_group("gate_wardens") as GateWarden
-	await _tp(Vector3(-205.0, 0.1, 0.5))
+	await _tp(Vector3(-205.0, 0.1, -14.65))
 	await _wait(func() -> bool: return warden.stage >= 1, 3.0)
 	_check("у ворот: окрик", warden.stage >= 1, "этап %d" % warden.stage)
 	await _wait(func() -> bool: return warden.stage >= 2, 6.0)
@@ -158,7 +158,7 @@ func _gate_and_die() -> void:
 ## Кофейня: цели по порядку; оружие в руках и проверка магазина — раньше подсказки; контрольная точка.
 func _coffee() -> void:
 	var me := _me()
-	await _tp(Vector3(-184.0, 0.1, -18.6))
+	await _tp(Vector3(-184.0, 0.1, -49.9))
 	await _wait(func() -> bool: return _oid() == "search", 4.0)
 	_check("вошёл в кофейню — цель «обыскать сумку»", _oid() == "search", _oid())
 	_check("рация: «За стойкой подсобка…»", _heard("За стойкой подсобка"))
@@ -201,7 +201,7 @@ func _coffee() -> void:
 		await _frames(4)
 	_check("пакет — в рюкзаке", me.inventory.has("tutorial_packet"))
 	Raid.current.ui.close_all()
-	await _tp(Vector3(-181.9, 0.1, -22.5))
+	await _tp(Vector3(-181.9, 0.1, -53.8))
 	await _wait(func() -> bool: return _oid() == "underpass", 4.0)
 	_check("вышел в зал: проверка магазина засчитана заранее — цель «через переход»", _oid() == "underpass", _oid())
 	_check("рация: «Прежде чем идти — проверь магазин…»", _heard("Прежде чем идти"))
@@ -211,13 +211,13 @@ func _coffee() -> void:
 		and (cp.get("backpack", []) as Array).any(func(e: Dictionary) -> bool: return String(e.id) == "tutorial_packet"), str((cp.get("equipment", {}) as Dictionary).keys()))
 	_check("сделанное до кофейни переживёт гибель", "hall" in Quests.durable(Q) and "search" in (Profile.quests.get(Q, {}) as Dictionary).get("durable", []))
 	# переход
-	await _tp(Vector3(-160.0, 0.1, -13.0))
+	await _tp(Vector3(-161.0, 0.1, -38.6))
 	await _wait(func() -> bool: return _heard("Тише по стеклу"), 3.0)
 	_check("стекло под козырьком: «Тише по стеклу»", _heard("Тише по стеклу"))
-	await _tp(Vector3(-156.0, -3.2, 0.0))
+	await _tp(Vector3(-156.0, -3.2, -15.65))
 	await _frames(10)
 	_check("в переходе темно — подсказка фонаря", _coach().contains("Фонарь") or RaidAtmosphere.current == null or not RaidAtmosphere.current.is_dark(me.global_position), _coach())
-	await _tp(Vector3(-148.0, 0.1, 14.0))
+	await _tp(Vector3(-148.0, 0.1, 12.93))
 	await _wait(func() -> bool: return _oid() == "warehouse", 4.0)
 	_check("на южной стороне — цель «через «Ярус» на склад»", _oid() == "warehouse", _oid())
 	_check("рация: «Выходишь за автобусом…»", _heard("Выходишь за автобусом"))
@@ -254,7 +254,7 @@ func _hall_fight_and_die() -> void:
 ## С контрольной точки: одетые, с пакетом, сумок нет; проверка магазина заново.
 func _from_checkpoint() -> void:
 	var me := _me()
-	_check("после гибели — у выхода из кофейни", me.global_position.distance_to(Vector3(-184.0, 0, -12.5)) < 4.0, str(me.global_position))
+	_check("после гибели — у выхода из кофейни", me.global_position.distance_to(Vector3(-184.0, 0, -41.75)) < 4.0, str(me.global_position))
 	await _wait(func() -> bool: return me.inventory.equipment.has("primary"), 5.0)
 	_check("одет: автомат с фонарём, жилет, шлем", me.inventory.equipment.has("primary") and me.inventory.equipment.has("armor") and me.inventory.equipment.has("helmet")
 		and _has_light(me.inventory.equipment.primary as Dictionary), str(me.inventory.equipment.keys()))
@@ -270,7 +270,7 @@ func _from_checkpoint() -> void:
 	me.ammo_check_t = 2.0
 	await _wait(func() -> bool: return _oid() == "underpass", 3.0)
 	_check("проверил магазин — «через переход»", _oid() == "underpass", _oid())
-	await _tp(Vector3(-148.0, 0.1, 14.0))
+	await _tp(Vector3(-148.0, 0.1, 12.93))
 	await _wait(func() -> bool: return _oid() == "warehouse", 4.0)
 
 
@@ -330,7 +330,7 @@ func _to_extraction(no_packet: bool) -> void:
 	await _tp(Vector3(36.5, 0.2, 205.0))
 	await _wait(func() -> bool: return _oid() == "tunnel", 4.0)
 	_check("вагоны — «к тоннелю», «На насыпь не лезь»", _oid() == "tunnel" and _heard("На насыпь не лезь"))
-	await _tp(Vector3(58.0, 0.2, 244.0))
+	await _tp(Vector3(77.19, 0.2, 244.0))
 	await _wait(func() -> bool: return _oid() == "extract", 4.0)
 	_check("тоннель — «Вижу тебя…», цель — эвакуация", _oid() == "extract" and _heard("Вижу тебя"))
 	var ext := get_tree().get_nodes_in_group("extractions")[0] as ExtractionPoint
@@ -378,7 +378,7 @@ func _host() -> void:
 	_check("кооп: пакет один на группу", packs.size() == 1, "%d" % packs.size())
 	var me := _me()
 	var bag := _bags().filter(func(b: Node) -> bool: return (b as LootContainer).display_name == "Сумка · Хост")[0] as LootContainer
-	await _tp(Vector3(-184.0, 0.1, -18.6))
+	await _tp(Vector3(-184.0, 0.1, -49.9))
 	await _wait(func() -> bool: return _oid() == "search", 6.0)
 	await _tp(bag.global_position + Vector3(-0.9, 0.1, 0.0))
 	Raid.current.ui.start_search(bag)
@@ -392,7 +392,7 @@ func _host() -> void:
 	# гость тем временем берёт пакет
 	await _wait(func() -> bool: return _client_player() != null and _client_player().inventory.has("tutorial_packet"), 30.0)
 	_check("кооп: пакет взял гость", _client_player() != null and _client_player().inventory.has("tutorial_packet"))
-	await _tp(Vector3(-181.9, 0.1, -22.5))
+	await _tp(Vector3(-181.9, 0.1, -53.8))
 	await _wait(func() -> bool: return Quests.flag("prologue_cp") == true, 6.0)
 	_check("кооп: контрольная точка, пакет — в наборе гостя", Quests.flag("prologue_cp") == true)
 	# гость упал — подсказка хосту, тащить
@@ -418,7 +418,7 @@ func _host() -> void:
 	await _wait(func() -> bool: return not mate.is_downed(), 5.0)
 	_check("кооп: поднял напарника аптечкой", mate.is_alive() and not mate.is_downed())
 	# дальше хост ведёт группу: склад, засов, тоннель (гость идёт следом сам)
-	await _tp(Vector3(-148.0, 0.1, 14.0))
+	await _tp(Vector3(-148.0, 0.1, 12.93))
 	me.ammo_check_text = "полный"
 	me.ammo_check_t = 2.0
 	await _wait(func() -> bool: return _oid() == "warehouse", 6.0)
@@ -431,7 +431,7 @@ func _host() -> void:
 	await _wait(func() -> bool: return _oid() == "gate", 6.0)
 	var gate := get_tree().current_scene.get_node("Gameplay/Yarus_RampGate") as RollGate
 	gate._use(1)
-	for p: Vector3 in [Vector3(-102, 0.1, 92), Vector3(-58.5, 0.1, 97.5), Vector3(36.5, 0.2, 205), Vector3(58, 0.2, 244)]:
+	for p: Vector3 in [Vector3(-102, 0.1, 92), Vector3(-58.5, 0.1, 97.5), Vector3(36.5, 0.2, 205), Vector3(77.19, 0.2, 244)]:
 		await _tp(p)
 		await get_tree().create_timer(1.5).timeout
 	_check("кооп: цели до эвакуации пройдены хостом", _oid() == "extract", _oid())

@@ -29,8 +29,8 @@ const CASES: Array[Dictionary] = [
 	{"id": "night_heat", "time": "night", "weather": "heat"},
 ]
 const VIEWS: Array[Dictionary] = [
-	{"id": "avenue", "at": Vector3(-170, 1.62, -12), "look": Vector3(-60, 2, -6)},
-	{"id": "plaza", "at": Vector3(70, 1.62, 50), "look": Vector3(90, 2, 15)},
+	{"id": "avenue", "at": Vector3(-170, 1.62, -40.93), "look": Vector3(-60, 2, -29.26)},
+	{"id": "plaza", "at": Vector3(100.91, 1.62, 47.79), "look": Vector3(121.3, 2, -16.3)},
 	{"id": "hall", "at": Vector3(-108, 1.62, 50), "look": Vector3(-102, 1.5, 82)},
 ]
 ## SDFGI набирает отражённый свет и глаз привыкает не сразу

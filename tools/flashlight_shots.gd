@@ -5,10 +5,10 @@ extends Node
 ## FLASHLIGHT_COMPARE=soft — сравнить с первой мягкой версией (32°); FLASHLIGHT_OUTPUT — папка кадров.
 
 const OUT: String = "res://docs/screens/flashlight_eft_20261029"
-const AISLE: Vector3 = Vector3(-174.0, -7.22, -60.4)
-const AISLE_TARGET: Vector3 = Vector3(-158.0, -5.6, -60.4)
-const WALL: Vector3 = Vector3(-170.0, -7.22, -81.0)
-const WALL_TARGET: Vector3 = Vector3(-170.0, -5.5, -88.0)
+const AISLE: Vector3 = Vector3(-174, -7.22, -91.7)
+const AISLE_TARGET: Vector3 = Vector3(-158, -5.6, -91.7)
+const WALL: Vector3 = Vector3(-170, -7.22, -112.3)
+const WALL_TARGET: Vector3 = Vector3(-170, -5.5, -119.3)
 
 var level: Node3D
 var me: Player

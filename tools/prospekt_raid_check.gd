@@ -37,7 +37,7 @@ func _ready() -> void:
 	var pmc := 0
 	for m in get_tree().get_nodes_in_group("marauders"):
 		var mm := m as Marauder
-		if mm and mm.archetype == "pmc" and mm.global_position.distance_to(Vector3(-203, 0, 0)) < 20.0:
+		if mm and mm.archetype == "pmc" and mm.global_position.distance_to(Vector3(-203, 0, -15.65)) < 20.0:
 			pmc += 1
 	_check("кордон держат ЧВК «Периметр»", (pop.placed.posts as Array).has("Cordon_PMC") and pmc >= 2, "бойцов у кордона %d" % pmc)
 	# точки слоёв — на навигации
@@ -141,7 +141,7 @@ func _eft_checks(me: Player, pop: AIPopulation) -> void:
 			bad.append("%s: простых выходов %d" % [sp.display_name, plain.size()])
 		rows.append("%s → %s" % [sp.display_name, ", ".join(plain)])
 	var tracks_open := 0
-	var far := Vector3(150.0, 0.0, -104.0)
+	var far := Vector3(181.3, 0.0, -135.3)
 	var tracks_name := String((by_name["По путям на запад"] as Node).name) if by_name.has("По путям на запад") else ""
 	for i in range(200):
 		raid.roll_exits(far, near_m, rng)

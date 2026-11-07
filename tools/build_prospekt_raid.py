@@ -21,6 +21,7 @@ import math
 from pathlib import Path
 
 import prospekt_light as LIGHT
+import prospekt_widen as WIDEN
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "data" / "blockouts" / "prospekt.json"
@@ -29,6 +30,15 @@ SCENE = ROOT / "scenes" / "levels" / "prospekt.tscn"
 
 plan = json.loads(PLAN.read_text(encoding="utf-8"))
 EMB_TOP = 6.3                                                   # верх балласта на насыпи
+# проспект расширен (владелец 2026-11-07, tools/prospekt_widen.py): точки ниже записаны в прежних координатах карты и
+# переносятся тем же правилом, что и блокаут; вариант плана и рейда должен совпадать
+assert plan.get("widen", {}).get("variant", "now") == WIDEN.NAME, "блокаут собран с другим вариантом расширения проспекта"
+
+
+def wp(x: float, y: float, z: float) -> tuple[float, float, float]:
+    """Точка прежней карты → карта с расширенным проспектом."""
+    nx, nz = WIDEN.warp(x, z)
+    return round(nx, 2), y, round(nz, 2)
 
 # ---------------------------------------------------------------- заходы и выходы
 ENTRY_Y = {"station": 0.12}
@@ -60,6 +70,7 @@ POSTS = [
     # занят — другие посты банка в этом рейде пустуют (метка bank)
     ("Bank_Boss", -21.0, 0.12, -46.0, 14.0, (3, 4), "bank_guard", 1, 0.0, "bank"),
 ]
+POSTS = [(p[0], *wp(p[1], p[2], p[3]), *p[4:]) for p in POSTS]
 # пост «не каждый рейд» и тип ведущего: имя → (шанс, тип ведущего)
 POST_EXTRA = {"Bank_Boss": (0.3, "bank_boss")}
 ROUTES = [
@@ -74,6 +85,7 @@ ROUTES = [
     ("Route_Station", "Привокзальная площадь", False,
      [(-60.0, 0.12, 206.0), (-100.0, 0.12, 207.0), (-140.0, 0.12, 206.0)]),
 ]
+ROUTES = [(r[0], r[1], r[2], [wp(*q) for q in r[3]]) for r in ROUTES]
 # (имя, x, y, z, курс взгляда в градусах (0 — на север, −Z), сектор)
 NESTS = [
     ("Nest_BankRoof", -20.0, 12.3, -32.5, 180.0, 90.0),
@@ -81,6 +93,7 @@ NESTS = [
     ("Nest_StationRoof", -120.0, 13.0, 232.0, 0.0, 80.0),
     ("Nest_PodiumRoof", -30.0, 4.65, 22.5, 0.0, 90.0),
 ]
+NESTS = [(n[0], *wp(n[1], n[2], n[3]), n[4], n[5]) for n in NESTS]
 ARRIVALS = [
     ("Arrive_YardGap", -145.0, 0.08, -119.0),
     ("Arrive_StationWest", -146.0, 0.12, 205.0),
@@ -88,6 +101,8 @@ ARRIVALS = [
     ("Arrive_NorthEast", 150.0, 0.08, -118.0),
     ("Arrive_RailsWest", -146.0, EMB_TOP, 272.8),
 ]
+
+ARRIVALS = [(a[0], *wp(a[1], a[2], a[3])) for a in ARRIVALS]
 
 # ---------------------------------------------------------------- данные сектора
 sector = {
@@ -112,7 +127,7 @@ sector = {
     "look": LIGHT.LOOK,
     # у группы закрыты выходы ближе Balance.EXIT_RULES.near_spawn_m к её заходу (prospekt_eft_mechanics.md §3.1)
     "exits_by_side": True,
-    "events": {"off": ["power"], "at": {"drop": [-14.0, 0.1, 100.0], "pmc": [-60.0, 0.1, 205.0]},
+    "events": {"off": ["power"], "at": {"drop": list(wp(-14.0, 0.1, 100.0)), "pmc": list(wp(-60.0, 0.1, 205.0))},
                "drop_text": "Вертолёт над сквером — что-то сбросили",
                "pmc_text": "У вокзала заглушили мотор. Хлопнули двери."},
     "rooms": [],
@@ -279,18 +294,23 @@ for i, l in enumerate(plan.get("loot", [])):
         if k in l["note"]:
             lines.append('required_key = "%s"' % key)
 # ворота кордона: бойцы поста Cordon_PMC не трогают ушедших от ворот; вернулся — окрик, предупредительный, огонь
-lines += ['', '[node name="Cordon_Gate" parent="Gameplay" instance=ExtResource("15")]', 'position = ' + v3(-210.0, 0.0, 0.0),
+lines += ['', '[node name="Cordon_Gate" parent="Gameplay" instance=ExtResource("15")]', 'position = ' + v3(*wp(-210.0, 0.0, 0.0)),
           'post_name = "Cordon_PMC"']
 # роллета в проёме рампы склада «Яруса» (задняя стена, x −102): засов изнутри — с севера (−Z)
-lines += ['', '[node name="Yarus_RampGate" parent="Gameplay" instance=ExtResource("16")]', 'position = ' + v3(-102.0, 0.0, 88.0),
+lines += ['', '[node name="Yarus_RampGate" parent="Gameplay" instance=ExtResource("16")]', 'position = ' + v3(*wp(-102.0, 0.0, 88.0)),
           'width = 4.2', 'height = 3.8']
 # пролог: заход и контрольная точка — точки появления не для обычных рейдов (entry = false), сумки, трое руками
 PROLOGUE_SPOTS = [("Cordon", -200.0, 0.08, 0.0, "Кордон (пролог)"), ("Checkpoint", -184.0, 0.08, -12.5, "У кофейни (пролог)")]
 PROLOGUE_MARKS = [("Bags", -178.3, 0.1, -22.5), ("LateBags", -97.0, 0.1, 85.8)]
+PROLOGUE_SPOTS = [(n, *wp(x, y, z), label) for (n, x, y, z, label) in PROLOGUE_SPOTS]
+PROLOGUE_MARKS = [(n, *wp(x, y, z)) for (n, x, y, z) in PROLOGUE_MARKS]
 # (имя, x, y, z, роль, тип, куда смотрит [x, z] или маршрут [[x, z], …])
 PROLOGUE_AI = [("Hall_Cart", -114.0, 0.05, 66.0, "cart", "gunner", [[-114.0, 57.5], [-114.0, 76.5]]),
                ("Hall_Till", -124.0, 0.05, 53.0, "till", "scout", [-1.0, 0.0]),
                ("Dock", -105.5, 0.05, 86.2, "dock", "gunner", [0.0, 1.0])]
+# маршрут — точки (переносятся), иначе — направление взгляда (не переносится)
+PROLOGUE_AI = [(n, *wp(x, y, z), role, arch, [list(WIDEN.warp(*q)) for q in look] if isinstance(look[0], list) else look)
+               for (n, x, y, z, role, arch, look) in PROLOGUE_AI]
 lines += ['', '[node name="Prologue" type="Node3D" parent="Gameplay"]']
 for (name, x, y, z, label) in PROLOGUE_SPOTS:
     lines += ['', '[node name="%s" parent="Gameplay/Prologue" instance=ExtResource("4")]' % name, 'position = ' + v3(x, y, z),

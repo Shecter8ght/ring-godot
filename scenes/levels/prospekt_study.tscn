@@ -31,7 +31,9 @@ light_color = Color(1, 0.9, 0.76, 1)
 light_energy = 2.0
 
 shadow_enabled = true
+
 light_angular_distance = 0.53
+
 metadata/authored_shadow = true
 
 [node name="Landscape" type="Node3D" parent="."]
@@ -46,7 +48,7 @@ script = ExtResource("fill")
 
 [node name="Outside_W80" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -262, 0.0, -80)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -262.0, 0.0, -111.3)
 
 script = ExtResource("build")
 
@@ -62,7 +64,7 @@ label = ""
 
 [node name="Outside_W40" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -264, 0.0, -40)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -264.0, 0.0, -71.3)
 
 script = ExtResource("build")
 
@@ -78,7 +80,7 @@ label = ""
 
 [node name="Outside_W45" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -262, 0.0, 45)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -262.0, 0.0, 45.0)
 
 script = ExtResource("build")
 
@@ -94,7 +96,7 @@ label = ""
 
 [node name="Outside_W85" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -258, 0.0, 85)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -258.0, 0.0, 85.0)
 
 script = ExtResource("build")
 
@@ -110,7 +112,7 @@ label = ""
 
 [node name="Outside_S40" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 40, 0.0, 308.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 40.42, 0.0, 308.0)
 
 script = ExtResource("build")
 
@@ -126,7 +128,7 @@ label = ""
 
 [node name="Outside_S90" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 90, 0.0, 310.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 121.3, 0.0, 310.0)
 
 script = ExtResource("build")
 
@@ -142,7 +144,7 @@ label = ""
 
 [node name="Outside_S140" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 140, 0.0, 308.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 171.3, 0.0, 308.0)
 
 script = ExtResource("build")
 
@@ -158,7 +160,7 @@ label = ""
 
 [node name="Outside_E196_60" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 196, 0.0, -60)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 227.3, 0.0, -91.3)
 
 script = ExtResource("build")
 
@@ -174,7 +176,7 @@ label = ""
 
 [node name="Outside_E198_40" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 198, 0.0, 40)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 229.3, 0.0, 8.7)
 
 script = ExtResource("build")
 
@@ -190,7 +192,7 @@ label = ""
 
 [node name="Outside_E196_150" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 196, 0.0, 150)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 227.3, 0.0, 150.0)
 
 script = ExtResource("build")
 
@@ -206,7 +208,7 @@ label = ""
 
 [node name="Outside_E20_150" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -20, 0.0, -150)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -20.0, 0.0, -181.3)
 
 script = ExtResource("build")
 
@@ -222,7 +224,7 @@ label = ""
 
 [node name="Outside_E60_152" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 60, 0.0, -152)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 91.3, 0.0, -183.3)
 
 script = ExtResource("build")
 
@@ -238,7 +240,7 @@ label = ""
 
 [node name="Outside_City_N1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -200.0, 0.0, -138.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -200.0, 0.0, -169.3)
 
 script = ExtResource("build")
 
@@ -254,7 +256,7 @@ label = ""
 
 [node name="Outside_City_N2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -140.0, 0.0, -144.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -140.0, 0.0, -175.3)
 
 script = ExtResource("build")
 
@@ -270,7 +272,7 @@ label = ""
 
 [node name="Outside_City_S4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 80.0, 0.0, 332.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 111.3, 0.0, 332.0)
 
 script = ExtResource("build")
 
@@ -286,7 +288,7 @@ label = ""
 
 [node name="Outside_City_N3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -80.0, 0.0, -138.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -80.0, 0.0, -169.3)
 
 script = ExtResource("build")
 
@@ -302,7 +304,7 @@ label = ""
 
 [node name="Outside_City_N4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 110.0, 0.0, -140.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 141.3, 0.0, -171.3)
 
 script = ExtResource("build")
 
@@ -318,7 +320,7 @@ label = ""
 
 [node name="Outside_City_E1" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 186.0, 0.0, -100.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 217.3, 0.0, -131.3)
 
 script = ExtResource("build")
 
@@ -334,7 +336,7 @@ label = ""
 
 [node name="Outside_City_E2" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 184.0, 0.0, 100.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 215.3, 0.0, 100.0)
 
 script = ExtResource("build")
 
@@ -350,7 +352,7 @@ label = ""
 
 [node name="Outside_City_E3" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 188.0, 0.0, 240.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 219.3, 0.0, 240.0)
 
 script = ExtResource("build")
 
@@ -462,7 +464,7 @@ label = ""
 
 [node name="Outside_City_W4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -236.0, 0.0, -130.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -236.0, 0.0, -161.3)
 
 script = ExtResource("build")
 
@@ -476,11 +478,43 @@ story_height = 3.0
 
 label = ""
 
+[node name="Outside_City_N5" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 33.15, 0.0, -174.8)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(26.0, 16.0)
+
+floors = 9
+
+story_height = 3.0
+
+label = ""
+
+[node name="Outside_City_E4" type="Node3D" parent="Outside" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 243.3, 0.0, 39.35)
+
+script = ExtResource("build")
+
+kind = "mass"
+
+footprint = Vector2(16.0, 26.0)
+
+floors = 12
+
+story_height = 3.0
+
+label = ""
+
 [node name="West" type="Node3D" parent="."]
 
 [node name="Coffee" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -184.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -184.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -504,7 +538,7 @@ loot_density = 0.6
 
 [node name="Flowers" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -168.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -168.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -526,7 +560,7 @@ loot_density = 0.6
 
 [node name="Pharmacy" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -153.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -153.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -548,7 +582,7 @@ loot_density = 0.6
 
 [node name="Clothes" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -133.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -133.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -570,7 +604,7 @@ loot_density = 0.6
 
 [node name="Bakery" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -101.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -101.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -592,7 +626,7 @@ loot_density = 0.6
 
 [node name="Pavilion_Shut" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -76.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -76.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -608,7 +642,7 @@ label = "БЦ «Проспект, 11» · вестибюль и салон св�
 
 [node name="BC_Prospekt5" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -177.5, 8.03, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -177.5, 8.03, -53.8)
 
 script = ExtResource("flats")
 
@@ -632,7 +666,7 @@ metadata/lift = 8.03
 
 [node name="BC_Prospekt5_Lobby" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -194.0, 0.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -194.0, 0.0, -53.8)
 
 script = ExtResource("build")
 
@@ -648,7 +682,7 @@ label = "БЦ «Проспект, 5» · вестибюль (закрыт)"
 
 [node name="BC_Prospekt11" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -76.0, 8.0, -22.5)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -76.0, 8.0, -53.8)
 
 script = ExtResource("flats")
 
@@ -672,7 +706,7 @@ metadata/lift = 8.0
 
 [node name="Corpus1_A" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -175.0, 0.0, -69.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -175.0, 0.0, -100.3)
 
 script = ExtResource("flats")
 
@@ -694,7 +728,7 @@ glass_bands = false
 
 [node name="Corpus1_B" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -145.0, 0.0, -69.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -145.0, 0.0, -100.3)
 
 script = ExtResource("flats")
 
@@ -716,7 +750,7 @@ glass_bands = false
 
 [node name="Corpus2_A" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -89.0, 0.0, -69.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -89.0, 0.0, -100.3)
 
 script = ExtResource("flats")
 
@@ -738,7 +772,7 @@ glass_bands = false
 
 [node name="Corpus2_B" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -59.0, 0.0, -69.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, -59.0, 0.0, -100.3)
 
 script = ExtResource("flats")
 
@@ -760,7 +794,7 @@ glass_bands = false
 
 [node name="CarWash" type="Node3D" parent="West" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.0, 0.0, -56.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 12.0, 0.0, -87.3)
 
 script = ExtResource("build")
 
@@ -996,7 +1030,7 @@ loot_density = 0.5
 
 [node name="Vershina_Podium" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 57.0, 0.0, -58.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 88.3, 0.0, -89.3)
 
 script = ExtResource("build")
 
@@ -1012,7 +1046,7 @@ label = "ЖК «Вершина» · стилобат: офисы, фитнес (
 
 [node name="Vershina_T1" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 40.0, 9.3, -72.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 71.3, 9.3, -103.3)
 
 script = ExtResource("flats")
 
@@ -1036,7 +1070,7 @@ metadata/lift = 9.3
 
 [node name="Vershina_T2" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 80.0, 9.3, -62.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 111.3, 9.3, -93.3)
 
 script = ExtResource("flats")
 
@@ -1060,7 +1094,7 @@ metadata/lift = 9.3
 
 [node name="Vershina_T3" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 130.0, 0.0, -71.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 161.3, 0.0, -102.3)
 
 script = ExtResource("flats")
 
@@ -1082,7 +1116,7 @@ glass_bands = true
 
 [node name="Vershina_T4" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 128.0, 0.0, -30.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 159.3, 0.0, -61.3)
 
 script = ExtResource("flats")
 
@@ -1104,7 +1138,7 @@ glass_bands = true
 
 [node name="Corpus3_A" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 113.0, 0.0, 95.0)
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 144.3, 0.0, 95.0)
 
 script = ExtResource("flats")
 
@@ -1126,7 +1160,7 @@ glass_bands = false
 
 [node name="Corpus3_B" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 113.0, 0.0, 125.0)
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 144.3, 0.0, 125.0)
 
 script = ExtResource("flats")
 
@@ -1148,7 +1182,7 @@ glass_bands = false
 
 [node name="Meridian" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 120.0, 0.0, 195.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 151.3, 0.0, 195.0)
 
 script = ExtResource("build")
 
@@ -1164,7 +1198,7 @@ label = "бизнес-центр «Меридиан», 8 эт. (закрыт)"
 
 [node name="MetroPavilion" type="Node3D" parent="East" groups=["mall_study_snap"]]
 
-transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 100.0, 0.0, 26.0)
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 131.3, 0.0, -5.3)
 
 script = ExtResource("build")
 
@@ -1177,3 +1211,25 @@ floors = 1
 story_height = 4.5
 
 label = "вход в метро «Проспект» (закрыт)"
+
+[node name="BC_Prospekt13" type="Node3D" parent="East" groups=["mall_study_snap"]]
+
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1, 0, 0.00000, 0, 1.00000, 41.65, 0.0, -85.5)
+
+script = ExtResource("flats")
+
+kind = "mass"
+
+footprint = Vector2(15.300000000000004, 49.0)
+
+floors = 9
+
+story_height = 3.6
+
+label = "БЦ «Проспект, 13» — 9 этажей (закрыт)"
+
+open_floors = 0
+
+balconies = false
+
+glass_bands = true
