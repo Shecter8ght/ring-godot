@@ -2,7 +2,8 @@
 (tools/vss_m_v8/game_imports.py).
 
 python -X utf8 tools/osoka/game_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
-Папка: assets/models/weapons/osoka (комплекс и ракета в полёте) — как у ИЗЛОМ-45 (tools/smg03/game_imports.py).
+Папки: assets/models/weapons/osoka (комплекс и ракета в полёте) — как у ИЗЛОМ-45 (tools/smg03/game_imports.py),
+assets/models/attachments/polyn (тепловизор «ПОЛЫНЬ», tools/osoka/sight_export.py — карты как у комплекса).
 Как у Мосина, ПМ и ВСС-М: сжатие VRAM, mip-уровни; у нормалей — флаг карты нормалей и сглаживание шероховатости по ним
 (ORM винтовки — по своей карте нормалей; у прицелов шероховатость — отдельная карта _roughness).
 """
@@ -10,7 +11,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DIRS = ['assets/models/weapons/osoka']
+DIRS = ['assets/models/weapons/osoka', 'assets/models/attachments/polyn']
 
 
 def setp(text: str, key: str, val: str) -> str:

@@ -610,6 +610,7 @@ const TRADER_BUY_PRICES := {
 	"nvg_tube": 114000,
 	"oil_tin": 1800,
 	"optic_12x_01": 650000,
+	"optic_polyn_01": 950000,
 	"optic_2x_01": 80000,
 	"optic_4x_01": 150000,
 	"optic_8x_01": 450000,
@@ -1645,6 +1646,22 @@ const OSOKA := {"power_sec": 0.9, "cone_deg": 3.0, "lock_sec": 1.6, "track_deg":
 	"push": 9.0, "roll_hz": 2.5, "noise_m": 220.0, "shake": 0.55,
 	"trail_step_m": 1.6, "trail_life_sec": 9.0, "trail_size": [0.35, 2.6],
 	"tone_hz": [760.0, 1180.0], "tone_db": -9.0, "beep_hz": 3.0, "beep_fast_hz": 9.0}
+## Тепловизор ПН-36Т «ПОЛЫНЬ» на «Осоке» (обвес optic_polyn_01; CameraRig — экран окуляра, ThermalView — тепловой
+## канал, OsokaHud — знаки на экране). Экран 4:3 вписан в круг окуляра на display_w его диаметра; дневной канал —
+## day_res точек, цвет с насыщенностью day_sat; тепловой — матрица прицела (attach.thermal.res), шум noise.
+## Тепловой канал: небо холодное (sky — яркость на экране), рассеянный свет ambient + sun_ambient × солнце вместо неба;
+## «автоусиление» держит самую светлую поверхность мира на world_max (до белого не доходит — белым только тёплое);
+## тёплое ярче потолка мира в gain раз (≈ белое); дымка haze по расстоянию к серому haze_color.
+## «Температура» целей 0…1: вертолёт — корпус heli.base, у сопел горячее пятно радиуса hot_r (горит — шире в fire_k),
+## человек — person, осветительная ракета и ракета в полёте — шарик радиуса *_r. Переключение канала (X) — экран гаснет
+## на switch_sec, рычажок переходит за lever_sec. Цели ищутся раз в rescan_sec. Знаки на экране светлые в тепловом канале
+## и в дневном, когда солнце (луна) слабее day_dark_sun, иначе тёмные.
+const THERMAL_SIGHT := {"display_w": 0.92, "day_res": [800, 600], "day_sat": 0.82, "noise": 0.03,
+	"sky": 0.2, "ambient": 1.0, "sun_ambient": 0.8, "world_max": 0.5, "gain": 1.45, "haze": 0.00035,
+	"haze_color": 0.3,
+	"heli": {"base": 0.62, "hot_r": 1.6, "fire_k": 2.2}, "person": 0.82, "flare": 1.0, "flare_r": 0.6,
+	"missile": 1.0, "missile_r": 0.45,
+	"switch_sec": 0.25, "lever_sec": 0.15, "rescan_sec": 0.5, "day_dark_sun": 1.0}
 ## Учебная цель для ПЗРК (HeliTarget, стенд tools/osoka_range.tscn): процедурный вертолёт кружит над точкой стенда —
 ## радиус radius_m, высота alt_m над землёй (± alt_wave_m), скорость speed_mps, крен в вираже bank_deg; несущий винт —
 ## rotor_hz оборотов в секунду (лопастей blades), рулевой — tail_hz. Звук винтов — процедурный: слышен издалека

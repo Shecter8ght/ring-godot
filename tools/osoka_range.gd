@@ -11,9 +11,14 @@ extends Node3D
 ##   пуск без захвата не проходит, захват и сбитие осветительной ракеты; код выхода 0 — всё прошло.
 ## --windowed --resolution 1600x900 res://tools/osoka_range.tscn -- shots — снимки docs/screens/osoka_*.png (у бедра,
 ##   поиск, сопровождение, захват, пуск, ракета вблизи, полёт, попадание, падение).
-## HELI_PLAN, HELI_TIME, HELI_WEATHER — как у стенда «Плотины»; OSOKA_OUT — папка снимков.
+## HELI_PLAN, HELI_TIME, HELI_WEATHER — как у стенда «Плотины»; OSOKA_OUT — папка снимков, OSOKA_TAG — приставка имён.
+## На «Осоке» — тепловизор ПН-36Т «ПОЛЫНЬ» (optic_polyn_01): ПКМ — взгляд в окуляр, X — канал «ДЕНЬ / ТЕПЛО»; в
+## окуляре — кольцо поля головки, рамка захвата и дальность. -- bare — без прицела (открытые прицельные, метка на
+## экране). check с прицелом ещё проверяет: прицел на модели, прицельные сложены, экран тепловизора, тёплый
+## вертолёт только в тепловом канале, X — дневной и обратно; shots — ещё снимки th_* и day_* в окуляре.
 
 const ID := "wpn_mp_01"
+const SIGHT := "optic_polyn_01"
 const OUT := "res://docs/screens/"
 const WORLD_SCENE: String = "res://tools/heli_study.tscn"
 const PLAYER_SCENE: String = "res://scenes/player/player.tscn"
@@ -32,6 +37,10 @@ var _mode: String = "play"
 var _hint: Label
 var _status: Label
 var _fails: int = 0
+## С тепловизором на «Осоке» (-- bare — без него).
+var _with_sight: bool = true
+## ПКМ держит стенд: окно потеряло фокус — Godot отпускает нажатые клавиши, _track нажимает снова.
+var _aim_hold: bool = false
 
 
 func _enter_tree() -> void:
@@ -47,6 +56,7 @@ func _ready() -> void:
 		_mode = "check"
 	elif "shots" in args:
 		_mode = "shots"
+	_with_sight = not "bare" in args
 	_world = (load(WORLD_SCENE) as PackedScene).instantiate() as Node3D
 	_world.set_meta("embedded", true)
 	add_child(_world)
@@ -127,7 +137,7 @@ func _wait_visible(max_m: float, timeout: float) -> bool:
 func _equip() -> void:
 	_player.loadout_mode = false
 	var slot: String = String(WeaponDb.sandbox()[0])
-	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": {},
+	_player.sandbox_weapons[slot] = {"id": ID, "n": 1, "dur": 100.0, "mods": {"optic_primary": SIGHT} if _with_sight else {},
 		"mag": {"ammo": "msl_zr36", "rounds": 1}, "sight": "primary", "rev": randi()}
 	_player.weapon_slot = ""
 	_player._switch(slot, false)
@@ -143,6 +153,8 @@ func _build_hint() -> void:
 	_hint = Label.new()
 	_hint.text = "«Осока»: ПКМ — вскинуть к прицелу (головка готовится ~1 с) · держи вертолёт в кольце мушки — писк учащается\n" \
 		+ "захват — писк ровный, лампа на целике и метка зелёные · ЛКМ — пуск · R — новая труба · вертолёт кружит над тобой"
+	if _with_sight:
+		_hint.text += "\nТепловизор «ПОЛЫНЬ»: в окуляре кольцо головки, рамка захвата и дальность · X — канал «ДЕНЬ / ТЕПЛО»"
 	_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	box.add_child(_hint)
 	_status = Label.new()
@@ -161,9 +173,19 @@ func _look_at(p: Vector3, off_deg: float = 0.0) -> void:
 	_camera._look_pitch = pitch
 
 
+func _aim(on: bool) -> void:
+	_aim_hold = on
+	if on:
+		Input.action_press("aim")
+	else:
+		Input.action_release("aim")
+
+
 ## Держать взгляд на цели frames кадров (вертолёт движется).
 func _track(target: Node3D, frames: int, off_deg: float = 0.0) -> void:
 	for _f in range(frames):
+		if _aim_hold and not Input.is_action_pressed("aim"):
+			Input.action_press("aim")
 		if target and is_instance_valid(target):
 			_look_at(target.call("heat_point"), off_deg)
 		await get_tree().physics_frame
@@ -174,6 +196,8 @@ func _wait_lock(target: Node3D, timeout: float) -> float:
 	var n: int = 0
 	while (Time.get_ticks_msec() - t0) / 1000.0 < timeout:
 		_look_at(target.call("heat_point"))
+		if _aim_hold and not Input.is_action_pressed("aim"):
+			Input.action_press("aim")
 		await get_tree().physics_frame
 		if _player.osoka.locked() and _player.osoka.target == target:
 			return (Time.get_ticks_msec() - t0) / 1000.0
@@ -213,7 +237,7 @@ func _check() -> void:
 	var vm: Node3D = _camera._vm_frame()
 	_ok(vm != null and vm.has_meta("missile_mount") and vm.has_meta("breech"), "у модели в руках есть метки пуска")
 	# без захвата: смотрит в небо мимо вертолёта — пуска нет
-	Input.action_press("aim")
+	_aim(true)
 	await get_tree().create_timer(float(_player.spec().aim_time) + 1.5).timeout
 	await _track(_heli, 30, 40.0)
 	await _fire_once()
@@ -226,11 +250,13 @@ func _check() -> void:
 		int(_player.global_position.distance_to(_heli.global_position))])
 	var lock_t: float = await _wait_lock(_heli, 8.0)
 	_ok(lock_t > 0.0, "захват вертолёта за %.2f с (дальность %d м)" % [lock_t, int(_player.global_position.distance_to(_heli.global_position))])
+	if _with_sight:
+		await _check_sight()
 	await _fire_once()
 	await get_tree().physics_frame
 	var launched: bool = not get_tree().get_nodes_in_group("missiles").is_empty()
 	_ok(launched and _player.ammo == 0, "пуск: ракета в воздухе, труба пуста")
-	Input.action_release("aim")
+	_aim(false)
 	var t0: int = Time.get_ticks_msec()
 	while _heli.state == HeliTarget.State.FLY and (Time.get_ticks_msec() - t0) < 16000:
 		await get_tree().physics_frame
@@ -253,12 +279,12 @@ func _check() -> void:
 	# осветительная ракета над головой — тоже тепловая цель
 	var flare: SkyFlare = SkyFlare.launch(get_tree().current_scene, _player.eye_position() + Vector3(8, 0, 25), Vector3.UP, false, false)
 	await get_tree().create_timer(3.0).timeout
-	Input.action_press("aim")
+	_aim(true)
 	await get_tree().create_timer(float(_player.spec().aim_time) + 1.2).timeout
 	var flare_lock: float = await _wait_lock(flare, 6.0)
 	_ok(flare_lock > 0.0, "захват осветительной ракеты за %.2f с" % flare_lock)
 	await _fire_once()
-	Input.action_release("aim")
+	_aim(false)
 	t0 = Time.get_ticks_msec()
 	while is_instance_valid(flare) and flare.heat_alive() and (Time.get_ticks_msec() - t0) < 8000:
 		await get_tree().physics_frame
@@ -270,6 +296,38 @@ func _check() -> void:
 	_ok(_heli.state == HeliTarget.State.FLY, "новый заход вертолёта")
 
 
+## Тепловизор на «Осоке»: прицел на модели в руках, прицельные сложены, взгляд — в экран окуляра, вертолёт тёплый
+## только в тепловом канале, знаки — на экране прицела; X — дневной канал (мир — свой), снова X — тепловой.
+func _check_sight() -> void:
+	var vm: Node3D = _camera._vm_frame()
+	_ok(vm != null and vm.has_meta("thermal") and vm.find_child("BodyLever", true, false) != null, "тепловизор на модели в руках (узлы, канал)")
+	var rear: Node3D = vm.find_child("RearSight_Launcher", true, false) as Node3D if vm else null
+	var front: Node3D = vm.find_child("FrontSight_Launcher", true, false) as Node3D if vm else null
+	var folded: bool = rear != null and front != null and rear.has_meta("fold_rest") and front.has_meta("fold_rest") \
+		and not rear.transform.basis.is_equal_approx((rear.get_meta("fold_rest") as Transform3D).basis) \
+		and not front.transform.basis.is_equal_approx((front.get_meta("fold_rest") as Transform3D).basis)
+	_ok(folded, "целик и мушка сложены")
+	await _track(_heli, 6)
+	_ok(_camera.scope_active and _camera._display_on and _player.sight_thermal, "взгляд в окуляр: экран тепловизора, канал ТЕПЛО")
+	var cam: Camera3D = _camera._scope_cam
+	_ok(cam.environment != null and (cam.cull_mask & ThermalView.THERMAL_BIT) != 0, "камера окуляра — тепловой канал (своё окружение, бит маски)")
+	var warm: int = 0
+	for raw: Node in _heli.find_children("*", "MeshInstance3D", true, false):
+		if (raw as MeshInstance3D).material_overlay == ThermalView.material():
+			warm += 1
+	_ok(warm > 4, "вертолёт тёплый: тёплый проход на %d сетках" % warm)
+	var hud: OsokaHud = _camera._osoka_hud
+	_ok(hud.in_display() and hud._disp_on and hud._range_m > 0.0, "рамка захвата и дальность — на экране прицела (%d м)" % int(hud._range_m))
+	_player.toggle_sight_channel()
+	await _track(_heli, 30)
+	_ok(not _player.sight_thermal and cam.environment == null and (cam.cull_mask & ThermalView.THERMAL_BIT) == 0 \
+		and not _camera._thermal_view.active, "X — дневной канал: мир свой, тёплого прохода нет")
+	_ok(_player.osoka.locked(), "в дневном канале захват держится")
+	_player.toggle_sight_channel()
+	await _track(_heli, 30)
+	_ok(_player.sight_thermal and cam.environment != null, "X ещё раз — снова тепловой")
+
+
 # ---------------------------------------------------------------- снимки
 
 func _shots() -> void:
@@ -277,11 +335,18 @@ func _shots() -> void:
 		var keep: bool = canvas.find_children("*", "OsokaHud", true, false).size() > 0 or canvas == _camera._scope_view.get_parent()
 		if not keep:
 			(canvas as CanvasLayer).visible = false
+	# OSOKA_ONLY=hip — только вид «на плече» и комплекс со стороны, без ожидания вертолёта
+	var only_hip: bool = OS.get_environment("OSOKA_ONLY") == "hip"
 	# ждём, пока вертолёт выйдет из-за гор и подлетит ближе 1,6 км
-	await _wait_visible(1600.0, 180.0)
+	if not only_hip:
+		await _wait_visible(1600.0, 180.0)
 	await _track(_heli, 30)
 	await _shot("hip")
-	Input.action_press("aim")
+	if _with_sight:
+		await _model_shots()
+	if only_hip:
+		return
+	_aim(true)
 	await _track(_heli, int((float(_player.spec().aim_time) + 1.4) * 60.0), 7.0)
 	await _shot("search")
 	var frames_half: int = int(float(Balance.OSOKA.lock_sec) * 0.5 * 60.0)
@@ -290,6 +355,19 @@ func _shots() -> void:
 	await _wait_lock(_heli, 6.0)
 	await _track(_heli, 20)
 	await _shot("lock")
+	if _with_sight:
+		_player.toggle_sight_channel()
+		await _track(_heli, 30)
+		await _shot("day_lock")
+		_player.toggle_sight_channel()
+		await _track(_heli, 30)
+		if await _wait_broadside(900.0, 120.0):
+			await _shot("side")
+			_player.toggle_sight_channel()
+			await _track(_heli, 20)
+			await _shot("day_side")
+			_player.toggle_sight_channel()
+			await _track(_heli, 20)
 	await _fire_once()
 	await _track(_heli, 8)
 	await _shot("launch")
@@ -316,7 +394,7 @@ func _shots() -> void:
 		cam.current = false
 		player_cam.current = true
 		cam.queue_free()
-	Input.action_release("aim")
+	_aim(false)
 	await _track(_heli, 40)
 	await _shot("flight")
 	var t0: int = Time.get_ticks_msec()
@@ -329,12 +407,53 @@ func _shots() -> void:
 	await _shot("fall")
 
 
+## Ждать, пока вертолёт ближе max_m и идёт бортом к стрелку (скорость поперёк взгляда), держа его в прицеле.
+func _wait_broadside(max_m: float, timeout: float) -> bool:
+	var t0: int = Time.get_ticks_msec()
+	while (Time.get_ticks_msec() - t0) / 1000.0 < timeout:
+		await _track(_heli, 1)
+		var to: Vector3 = _heli.heat_point() - _player.eye_position()
+		var v: Vector3 = _heli.heat_velocity()
+		if to.length() < max_m and v.length() > 5.0 and absf(to.normalized().dot(v.normalized())) < 0.45 \
+				and _player.osoka._angle(_player, _heli, _player.eye_position(), _player.look_dir()) < 5.0:
+			return true
+	print("osoka_range: вертолёт бортом ближе %d м не дождались" % int(max_m))
+	return false
+
+
+## Комплекс с тепловизором со стороны: своя камера у стрелка, модель как в мире (WeaponModels.build), день.
+func _model_shots() -> void:
+	var player_cam: Camera3D = get_viewport().get_camera_3d()
+	var model: Node3D = WeaponModels.build(ID, {"optic_primary": SIGHT})
+	add_child(model)
+	var at: Vector3 = _player.global_position + Vector3(0.0, 1.4, 0.0) + _player.global_basis.x * 3.0
+	model.global_position = at
+	model.rotation = Vector3(0.0, _camera._look_yaw + PI * 0.5, 0.0)
+	var cam := Camera3D.new()
+	cam.fov = 32.0
+	add_child(cam)
+	for view: Array in [["model_left", Vector3(0.0, 0.25, 0.0), 1.9, 0.0], ["model_rear", Vector3(0.0, 0.3, -0.25), 1.15, -2.1],
+			["model_front", Vector3(0.0, 0.3, 0.3), 1.2, 2.4]]:
+		var aim: Vector3 = model.to_global(view[1] as Vector3)
+		var side: Vector3 = model.global_basis.x.rotated(Vector3.UP, float(view[3]))
+		cam.global_position = aim + side * float(view[2]) + Vector3.UP * 0.25
+		cam.look_at(aim)
+		cam.current = true
+		await get_tree().process_frame
+		await _shot(String(view[0]))
+	cam.current = false
+	player_cam.current = true
+	cam.queue_free()
+	model.queue_free()
+
+
 func _shot(label: String) -> void:
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 	else:
 		await get_tree().process_frame
-	var name: String = "osoka_%s.png" % label
+	var tag: String = OS.get_environment("OSOKA_TAG")
+	var name: String = "osoka_%s%s%s.png" % [tag, "_" if tag != "" else "", label]
 	var dir: String = OS.get_environment("OSOKA_OUT")
 	var path: String = dir.path_join(name) if dir != "" else ProjectSettings.globalize_path(OUT + name)
 	var img: Image = get_viewport().get_texture().get_image() if DisplayServer.get_name() != "headless" else null

@@ -675,12 +675,22 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/smg03_shots.tscn # 
 #   с рулями и стабилизаторами на шарнирах; отчёт osoka.json; линия прицела — по +Z модели, труба выше неё на 6,6°) → --import →
 #   python -X utf8 tools/osoka/game_imports.py → --import; данные — python -X utf8 tools/osoka/game_data.py (calibers.zr36, ammo.msl_zr36,
 #   models.osoka, weapons.wpn_mp_01, хват osoka); у Михалыча — каталог 5 (tools/gen_trader_catalogs.py)
+# Тепловизор ПН-36Т «ПОЛЫНЬ» (optic_polyn_01, по мотивам 1ПН97) в игру: "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup
+#   --python-exit-code 1 --python tools/osoka/sight_export.py [-- <папка карт>] (игровая сетка Тепловизор/work/thermal_game_uv_v01.blend +
+#   карты «Тепловизор_износ_этап2_v1_карты» → assets/models/attachments/polyn: polyn.gltf — Body, наглазник BodyEyecup, рычажок
+#   BodyLever и крышка объектива BodyCap своими узлами с осями, Body_LOD1; отчёт polyn.json — в осях «Осоки», начало — точка
+#   крепления) → --import → python -X utf8 tools/osoka/game_imports.py → --import; данные — тот же tools/osoka/game_data.py
+#   (attachments.optic_polyn_01, сокет optic_primary «Осоки» — интерфейс OSOKA_PN, fold_sights); экран окуляра — CameraRig
+#   (_update_display), тепловой канал — src/combat/ThermalView, знаки — OsokaHud, числа — Balance.THERMAL_SIGHT
 tools/osoka_range.cmd                                         # стенд «Осоки» на карте «Плотина» (мир tools/heli_study.tscn, как у dam_play):
                                                               # по маршруту задания летает учебный вертолёт (HeliTarget, процедурный звук винтов),
                                                               # игрок во дворе лесопилки; ПКМ — головка ищет, держать цель в кольце мушки — захват
                                                               # (ровный писк, зелёная метка), ЛКМ — пуск, R — новая труба;
                                                               # --headless res://tools/osoka_range.tscn -- check — захват, пуск, попадание, падение,
                                                               # без захвата пуска нет, сбить осветительную ракету; -- shots (с окном) — снимки osoka_*
+                                                              # на «Осоке» — тепловизор «ПОЛЫНЬ» (-- bare — без него): в окуляре кольцо головки,
+                                                              # рамка захвата и дальность, X — канал «ДЕНЬ / ТЕПЛО»; check ещё — прицел на модели,
+                                                              # прицельные сложены, тёплый вертолёт только в тепловом канале; OSOKA_TAG — приставка снимков
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b --factory-startup --python-exit-code 1 --python tools/smg03/render_street.py -- <папка> [кадр,…] [ширина высота выборки] [сцена.blend]
                                                               # ИЗЛОМ-45, рендеры на улице: в статике, затвор на задержке, приклад сложен,
                                                               # очередь (вспышка, гильзы), на асфальте; позы — tools/smg03/render_poses.py

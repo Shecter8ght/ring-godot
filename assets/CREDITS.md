@@ -221,6 +221,13 @@
   Сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
 - Учебный вертолёт стенда (`src/world/heli_target.gd`) — примитивы Godot; звуки винтов, пуска, двигателя ракеты и писк
   головки — процедурные (`src/combat/proc_sound.gd`), записей нет.
+- Тепловизор ПН-36Т «ПОЛЫНЬ» `assets/models/attachments/polyn/` (`polyn.gltf`, карты `polyn_100_*`) — собственная модель
+  по мотивам 1ПН97 «Маугли-2М» (Blender, форма v03, игровая сетка v01), отделка в Substance Painter (этап 1 v1, износ
+  этап 2 v1; ресурсы полки Painter — только запечённым результатом); игровые файлы — `tools/osoka/sight_export.py`,
+  исходники — `E:/Models Blender/WEAPONS/Верба — модель/Тепловизор/`, `_asset_src/osoka_polyn/`. Название и маркировка
+  вымышленные; надписи — шрифт DejaVu Sans Bold (лицензия — в разделе ливрей «Проспекта»). Рисунок отпечатков и
+  разводов — фото-маски CC0 1.0 ambientCG (https://ambientcg.com, лицензия https://docs.ambientcg.com/license/) —
+  Fingerprints003, Fingerprints005, Fingerprints007, Smear004, Smear006; сырьё — та же папка `Маски_АЛЬФА`.
 
 <!-- VSS_OPTICS_START -->
 ## Отдельная оптика ВСС

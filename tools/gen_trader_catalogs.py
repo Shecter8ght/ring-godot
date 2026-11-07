@@ -47,8 +47,8 @@ CATALOGS = [
                "optic_lpvo_01", "mount_adjustable_01", "muzzle_supp_762_01",
                "plate_military"]},
     {"n": 5, "step": 40, "name": "Тяжёлое и снайперское",
-     "what": "MR762, MCX Spear, AWM, ПКМ, ПЗРК «Осока» и ракеты к нему. Оптика 8× и 12×, тормоза и глушители крупных калибров.",
-     "items": ["wpn_dmr_01", "wpn_ar_05", "wpn_sr_01", "wpn_lmg_01", "wpn_mp_01", "optic_8x_01", "optic_12x_01", "muzzle_brake_68_01", "muzzle_supp_68_01", "muzzle_brake_338_01",
+     "what": "MR762, MCX Spear, AWM, ПКМ, ПЗРК «Осока», ракеты и тепловизор к нему. Оптика 8× и 12×, тормоза и глушители крупных калибров.",
+     "items": ["wpn_dmr_01", "wpn_ar_05", "wpn_sr_01", "wpn_lmg_01", "wpn_mp_01", "optic_polyn_01", "optic_8x_01", "optic_12x_01", "muzzle_brake_68_01", "muzzle_supp_68_01", "muzzle_brake_338_01",
                "muzzle_supp_338_01"]},
 ]
 # Только с тел ЧВК «Периметр» — у Михалыча этого нет; сигнал снабжения (supply_signal) — не продаётся.

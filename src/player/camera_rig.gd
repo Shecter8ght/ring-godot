@@ -43,6 +43,21 @@ var _osoka_nodes: Dictionary = {}
 var _osoka_lamp_mat: StandardMaterial3D
 var _osoka_lever_k: float = 0.0
 var _osoka_hud: OsokaHud
+## Тепловизор ПН-36Т «ПОЛЫНЬ» на «Осоке» (attach.thermal): рычажок переключателя и крышка объектива на модели в руках,
+## экран окуляра (_update_display: свой шейдер, канал, «экран гаснет» при переключении), тепловой канал (ThermalView).
+var _sight_parts_vm: Node3D
+var _sight_lever: Node3D
+var _sight_cap: Node3D
+var _sight_lever_deg: float = 0.0
+var _sight_cap_k: float = 0.0
+var _thermal_view: ThermalView = ThermalView.new()
+var _optic_mat: ShaderMaterial
+var _display_mat: ShaderMaterial
+var _display_on: bool = false
+var _display_mode: int = -1
+var _display_blank: float = 0.0
+## Маска камеры окуляра: без модели в руках (слой 2) и карты дождя.
+var _scope_mask: int = 0
 var _bolt_ammo: int = -1
 # продольно-скользящий затвор (models.<ключ>.action.kind = "bolt", Мосин): после выстрела — рукоять вверх, отвод,
 # подача, вниз; на перезарядке затвор стоит открытым. Правая кисть на это время — на шаре рукояти (метка BoltHand)
@@ -930,6 +945,9 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	var vm_spec: Dictionary = WeaponDb.weapon(wid).get("viewmodel", {}) as Dictionary
 	if vm_spec.has("hip_pose"):
 		hip_pos = WeaponGrips.vector(vm_spec.hip_pose as Array)
+	# крупный прицел на комплексе (тепловизор «ПОЛЫНЬ» на «Осоке», attach.model.hip_shift): не вскинутый — ниже и дальше,
+	# короб у самого лица закрывал пол-экрана
+	hip_pos += _vm_frame().get_meta("hip_shift", Vector3.ZERO) as Vector3
 	if pl.stance == Player.Stance.PRONE: hip_pos.y += float(Balance.WEAPON_CLEARANCE.prone_hip_lift)
 	# На ходу у бедра оружие покачивается в темп шагов (та же фаза, что у камеры, руки чуть позже
 	# головы); размах следует реальной скорости — при разгоне и остановке не включается рывком.
@@ -1281,7 +1299,8 @@ func _build_scope() -> void:
 	_scope_cam.far = 900.0
 	_scope_cam.keep_aspect = Camera3D.KEEP_HEIGHT
 	# без слоя 2: модель в руках (и сам прицел) в окуляр не попадает
-	_scope_cam.cull_mask = 0xFFFFF & ~2 & ~RainOcclusion.LAYER
+	_scope_mask = 0xFFFFF & ~2 & ~RainOcclusion.LAYER
+	_scope_cam.cull_mask = _scope_mask
 	_scope_cam.current = true
 	_scope_vp.add_child(_scope_cam)
 	var layer := CanvasLayer.new()
@@ -1293,7 +1312,9 @@ func _build_scope() -> void:
 	_scope_view.stretch_mode = TextureRect.STRETCH_SCALE
 	_scope_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_scope_view.visible = false
-	_scope_view.material = _ocular_material()
+	_optic_mat = _ocular_material()
+	_display_mat = _display_material()
+	_scope_view.material = _optic_mat
 	layer.add_child(_scope_view)
 
 
@@ -1318,6 +1339,8 @@ func _set_scope(on: bool) -> void:
 	scope_active = on
 	_scope_view.visible = on
 	_scope_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+	if not on:
+		_display_off()
 
 
 ## Механика затвора статичной модели (models.<ключ>.action, как драйверы исходника): выстрел — патронов стало меньше;
@@ -1375,6 +1398,8 @@ func _tick_osoka_view(pl: Player, delta: float) -> void:
 		layer.add_child(_osoka_hud)
 	_osoka_hud.player = pl
 	_osoka_hud.cam = _ads_cam
+	if not scope_active:
+		_osoka_hud.display_rect = Rect2()
 	var on: bool = pl.is_manpads() and _viewmodel != null and not _viewmodel is ViewmodelClips
 	if not on:
 		return
@@ -1426,6 +1451,42 @@ func _tick_osoka_view(pl: Player, delta: float) -> void:
 		elif seeker.state == OsokaSeeker.State.TRACK:
 			glow = 1.6 if fmod(Time.get_ticks_msec() / 1000.0 * lerpf(3.0, 9.0, seeker.progress), 1.0) < 0.5 else 0.0
 		_osoka_lamp_mat.emission_energy_multiplier = glow
+	_tick_sight_parts(pl, delta)
+
+
+## Тепловизор в руках: крышка объектива откинута, рычажок переключателя — на канале («ДЕНЬ» / «ТЕПЛО»); оба — вокруг
+## своих осей от покоя модели (на земле и у других игроков — «ВЫКЛ», крышка закрыта; WeaponMods._model_part).
+func _tick_sight_parts(pl: Player, delta: float) -> void:
+	if _sight_parts_vm != _viewmodel:
+		_sight_parts_vm = _viewmodel
+		_sight_lever = null
+		_sight_cap = null
+		for raw: Node in _viewmodel.find_children("Body*", "Node3D", true, false):
+			if raw.has_meta("sight_lever"):
+				_sight_lever = raw as Node3D
+			elif raw.has_meta("sight_cap"):
+				_sight_cap = raw as Node3D
+		for n: Node3D in [_sight_lever, _sight_cap]:
+			if n and not n.has_meta("rest"):
+				n.set_meta("rest", n.transform)
+		_sight_lever_deg = 0.0
+		_sight_cap_k = 0.0
+	if _sight_lever and is_instance_valid(_sight_lever):
+		var turn: Dictionary = _sight_lever.get_meta("sight_lever")
+		var degs: Dictionary = turn.get("deg", {})
+		var want: float = float(degs.get("thermal" if pl.sight_thermal else "day", 0.0))
+		var speed: float = absf(float(degs.get("day", 50.0))) / maxf(0.01, float(Balance.THERMAL_SIGHT.lever_sec))
+		_sight_lever_deg = move_toward(_sight_lever_deg, want, speed * delta)
+		_turn_part(_sight_lever, turn.get("axis", [1, 0, 0]), _sight_lever_deg)
+	if _sight_cap and is_instance_valid(_sight_cap):
+		var cturn: Dictionary = _sight_cap.get_meta("sight_cap")
+		_sight_cap_k = move_toward(_sight_cap_k, 1.0, delta * 4.0)
+		_turn_part(_sight_cap, cturn.get("axis", [1, 0, 0]), float(cturn.get("deg", 0.0)) * _sight_cap_k)
+
+
+func _turn_part(n: Node3D, axis: Array, deg: float) -> void:
+	var rest: Transform3D = n.get_meta("rest")
+	n.transform = Transform3D(Basis(WeaponGrips.vector(axis).normalized(), deg_to_rad(deg)) * rest.basis, rest.origin)
 
 
 ## Флажки переводчика (action.levers: {узел: {axis, deg: {режим: градусы}}}) и спуск (action.trigger: {node, axis,
@@ -1597,6 +1658,11 @@ func _hide_near_parts() -> void:
 ## Камера оптики — там же, где глаз, по той же оси; её поле зрения — чтобы в окуляре было
 ## увеличение zoom относительно основного вида. Окно — ровно на проекции окуляра.
 func _update_scope(zoom: float, illum: bool = false) -> void:
+	var th: Dictionary = _vm_frame().get_meta("thermal", {})
+	if not th.is_empty():
+		_update_display(th)
+		return
+	_display_off()
 	_scope_zoom = zoom
 	var scope_mat := _scope_view.material as ShaderMaterial
 	scope_mat.set_shader_parameter("illum", 1.0 if illum else 0.0)
@@ -1632,6 +1698,134 @@ func _update_scope(zoom: float, illum: bool = false) -> void:
 	_scope_view.position = c - Vector2(rad_px, rad_px)
 	_scope_view.size = Vector2(rad_px, rad_px) * 2.0
 	_update_scope_sun()
+
+
+## Тепловизор (attach.thermal, ПН-36Т на «Осоке»): окуляр — экран 4:3 на display_w диаметра круга окуляра, картинка на
+## нём — камера окуляра с полем зрения экрана (fov_deg по горизонтали) по оси взгляда, без линзы (нет аберраций и
+## бликов). Тепловой канал — матрица прицела (res) и ThermalView, дневной — day_res. Переключение канала (X) — экран
+## гаснет на switch_sec. Знаки на экране (кольцо головки, рамка захвата, дальность) рисует OsokaHud.
+func _update_display(th: Dictionary) -> void:
+	var cfg: Dictionary = Balance.THERMAL_SIGHT
+	var pl := _target as Player
+	var thermal_on: bool = pl == null or pl.sight_thermal
+	_display_on = true
+	if _scope_view.material != _display_mat:
+		_scope_view.material = _display_mat
+	var res: Array = th.get("res", [320, 240])
+	var day: Array = cfg.day_res
+	var px := Vector2i(int(res[0]), int(res[1])) if thermal_on else Vector2i(int(day[0]), int(day[1]))
+	if _scope_vp.size != px:
+		_scope_vp.size = px
+	var dt: float = get_process_delta_time()
+	var mode: int = 1 if thermal_on else 0
+	if _display_mode != mode:
+		if _display_mode >= 0:
+			_display_blank = float(cfg.switch_sec)
+		_display_mode = mode
+	_display_blank = maxf(0.0, _display_blank - dt)
+	var aspect: float = float(res[1]) / float(res[0])
+	var box := Vector2(float(cfg.display_w), float(cfg.display_w) * aspect)
+	var tan_h: float = tan(deg_to_rad(float(th.get("fov_deg", 24.0)) * 0.5))
+	var ocular: Vector3 = _vm_frame().to_global(_vm_frame().get_meta("ocular"))
+	var r := float(_vm_frame().get_meta("ocular_r")) * _vm_space.scale.x
+	_scope_cam.global_transform = _ads_cam.global_transform
+	var dist := maxf(0.02, _ads_cam.global_position.distance_to(ocular))
+	var half_main := atan(r / dist)
+	var main_px_per_rad := get_viewport().get_visible_rect().size.y * 0.5 / tan(deg_to_rad(_ads_cam.fov) * 0.5)
+	_scope_cam.set_frustum(2.0 * _scope_cam.near * tan_h * aspect, Vector2.ZERO, _scope_cam.near, _scope_cam.far)
+	# мышь — как у оптики: во сколько раз экран в окуляре крупнее того же угла в мире
+	_scope_zoom = maxf(1.0, tan(half_main) * box.x / tan_h)
+	var c := _ads_cam.unproject_position(ocular)
+	var rad_px := tan(half_main) * main_px_per_rad
+	_scope_view.position = c - Vector2(rad_px, rad_px)
+	_scope_view.size = Vector2(rad_px, rad_px) * 2.0
+	# люфт: глаз сошёл с оси — тень с края; картинка на экране не плывёт
+	var lag_cfg: Dictionary = Balance.AIM_LAG
+	var lag_euler: Vector3 = Basis(_lag_q).get_euler()
+	var lag_k: float = 1.0 / deg_to_rad(float(lag_cfg.max_deg))
+	_display_mat.set_shader_parameter("lag", Vector2(clampf(-lag_euler.y * lag_k, -1.0, 1.0), clampf(lag_euler.x * lag_k, -1.0, 1.0)))
+	_display_mat.set_shader_parameter("lag_shadow", float(lag_cfg.scope_shadow))
+	_display_mat.set_shader_parameter("thermal", float(mode))
+	_display_mat.set_shader_parameter("box", box)
+	_display_mat.set_shader_parameter("res", Vector2(px))
+	_display_mat.set_shader_parameter("noise", float(cfg.noise))
+	_display_mat.set_shader_parameter("day_sat", float(cfg.day_sat))
+	_display_mat.set_shader_parameter("blank", clampf(_display_blank / maxf(0.01, float(cfg.switch_sec)) * 1.6, 0.0, 1.0))
+	if thermal_on:
+		_thermal_view.update(_scope_cam, _scope_mask, dt, pl)
+	else:
+		_thermal_view.off(_scope_cam, _scope_mask)
+	if _osoka_hud:
+		_osoka_hud.display_rect = Rect2(_scope_view.position + _scope_view.size * (Vector2.ONE - box) * 0.5, _scope_view.size * box)
+		_osoka_hud.display_tan_h = tan_h
+		_osoka_hud.display_thermal = thermal_on
+		# знаки — по контрасту картинки: тепловой канал и дневной в темноте — светлые, дневной при свете — тёмные
+		_osoka_hud.display_light_ink = thermal_on or _thermal_view.sun_energy(_scope_cam) < float(cfg.day_dark_sun)
+		_osoka_hud.scope_cam = _scope_cam
+		_osoka_hud.scope_px = Vector2(px)
+		_osoka_hud.display_blank = _display_blank > 0.0
+
+
+## Окуляр снова обычный (не тепловизор или взгляд из окуляра ушёл): шейдер линзы, квадратная картинка, мир — свой.
+func _display_off() -> void:
+	if _osoka_hud:
+		_osoka_hud.display_rect = Rect2()
+	if not _display_on:
+		return
+	_display_on = false
+	_display_mode = -1
+	_scope_view.material = _optic_mat
+	_scope_vp.size = Vector2i(Balance.SCOPE_RT_SIZE, Balance.SCOPE_RT_SIZE)
+	_thermal_view.off(_scope_cam, _scope_mask)
+
+
+## Шейдер экрана тепловизора: экран 4:3 (box — его доля диаметра) в круге окуляра, вокруг — чёрная рамка; тепловой
+## канал — серое по яркости, мягкие точки матрицы и её зерно; дневной — цвет с насыщенностью day_sat; при
+## переключении канала экран гаснет (blank); тень с края, когда глаз сошёл с оси.
+func _display_material() -> ShaderMaterial:
+	var sh := Shader.new()
+	sh.code = """
+shader_type canvas_item;
+uniform float thermal = 1.0;
+uniform vec2 box = vec2(0.92, 0.69);
+uniform vec2 res = vec2(320.0, 240.0);
+uniform float noise = 0.03;
+uniform float day_sat = 0.82;
+uniform float blank = 0.0;
+uniform vec2 lag = vec2(0.0);
+uniform float lag_shadow = 0.42;
+
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void fragment() {
+	vec2 c = UV - 0.5;
+	float r = length(c) * 2.0;
+	vec2 d = c / box + 0.5;
+	vec3 col = texture(TEXTURE, d).rgb;
+	float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
+	vec3 th = vec3(pow(clamp(l, 0.0, 1.0), 0.85));
+	vec3 dy = mix(vec3(l), col, day_sat);
+	col = mix(dy, th, thermal);
+	// зерно матрицы: по её точкам, от кадра к кадру
+	vec2 px = floor(d * res);
+	float n = hash(px + floor(fract(TIME * 7.3) * 97.0)) - 0.5;
+	col += n * noise * mix(0.5, 1.2, thermal);
+	col *= 1.0 - blank;
+	// край экрана — на полточки мягче, вокруг экрана — чёрная рамка
+	vec2 e = min(d, 1.0 - d) * res;
+	col *= clamp(min(e.x, e.y) + 0.5, 0.0, 1.0);
+	col *= smoothstep(1.0, 0.94, r);
+	float off_axis = length(lag);
+	float shade_r = length(c + lag * lag_shadow) * 2.0;
+	col *= mix(1.0, smoothstep(1.0, 0.62, shade_r), clamp(off_axis * 1.6, 0.0, 1.0));
+	COLOR = vec4(max(col, vec3(0.0)), 1.0 - smoothstep(0.97, 1.0, r));
+}
+"""
+	var m := ShaderMaterial.new()
+	m.shader = sh
+	return m
 
 
 ## Солнце для бликов в оптике: где оно в окуляре и насколько близко к оси. Закрыто стеной или

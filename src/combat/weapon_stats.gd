@@ -60,6 +60,8 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 	s.zoom_min = 0.0
 	s.zoom_max = 0.0
 	s.scoped = false
+	# тепловизор (attach.thermal): окуляр — экран на два канала, X — переключатель (Player.toggle_sight_channel)
+	s.thermal = false
 	# патрон
 	var a := WeaponDb.ammo(aid) if aid != "" else {}
 	if a.is_empty():
@@ -151,6 +153,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 				s.zoom_min = zoom_limits(att).x
 				s.zoom_max = zoom_limits(att).y
 				s.scoped = true
+				s.thermal = att.has("thermal")
 			elif active != "primary":
 				# угловой коллиматор: основной (оптика) не работает, пока смотришь в угловой
 				s.zoom = 0.0
@@ -171,6 +174,7 @@ static func compute(entry: Dictionary, ammo_id: String = "") -> Dictionary:
 		s.zoom_min = 0.0
 		s.zoom_max = 0.0
 		s.scoped = false
+		s.thermal = false
 	# износ: разброс растёт, задержки чаще (на хорошем стволе — редкость)
 	var worn := pow(clampf((100.0 - dur) / 100.0, 0.0, 1.0), 2.0)
 	s.spread_deg = float(s.spread_deg) * (1.0 + worn * float(Balance.WEAPON_WEAR.spread))

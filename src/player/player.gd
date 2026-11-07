@@ -22,6 +22,9 @@ var stance: Stance = Stance.STAND
 var aiming: bool = false
 ## Головка самонаведения ПЗРК «Осока» (только у своего игрока; OsokaSeeker): захват цели, писк, метка.
 var osoka: OsokaSeeker = OsokaSeeker.new()
+## Канал тепловизора на «Осоке» (ПН-36Т «ПОЛЫНЬ», attach.thermal): true — тепловой, false — дневной; X — переключатель
+## (toggle_sight_channel). Свой у игрока, не в записи ствола: новый рейд — снова тепловой.
+var sight_thermal: bool = true
 ## Прицел от первого лица включён — ставит CameraRig.
 var ads: bool = false
 ## Наклон (Q/E) от первого лица: -1 — влево, 1 — вправо; синхронизируется (AI видит высунувшегося).
@@ -1619,6 +1622,8 @@ func _combat(delta: float) -> void:
 		_toggle_tac("laser")
 	if Input.is_action_just_pressed("toggle_sight"):
 		_toggle_sight()
+	if InputMap.has_action("fire_mode") and Input.is_action_just_pressed("fire_mode") and not ui_blocked() and bool(spec().get("thermal", false)):
+		toggle_sight_channel()
 	# пристрелка: в прицеле стрелки — щелчки барабанчиков
 	if aiming and ads and not ui_blocked():
 		for z: Array in [["zero_up", 0, 1], ["zero_down", 0, -1], ["zero_left", -1, 0], ["zero_right", 1, 0]]:
@@ -2263,6 +2268,14 @@ func toggle_sight() -> void:
 		Audio.play("sight_switch", global_position, -16.0)
 	else:
 		_toggle_sight()
+
+
+## X с тепловизором на оружии: рычажок переключателя «ДЕНЬ / ТЕПЛО» — экран окуляра гаснет на миг и показывает
+## другой канал (CameraRig._update_display); звук — действие sight_channel модели, без записи — тишина.
+func toggle_sight_channel() -> void:
+	sight_thermal = not sight_thermal
+	_play_weapon_sound(spec(), "sight_channel", -6.0)
+	_say("Тепловизор: %s" % ("ТЕПЛО — тепловой канал" if sight_thermal else "ДЕНЬ — дневной канал"))
 
 
 func _toggle_sight() -> void:
