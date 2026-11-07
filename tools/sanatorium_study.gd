@@ -418,20 +418,13 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var camera: Camera3D = walker.get("camera") as Camera3D
 	camera.fov = 62.0
-	var views: Array[Dictionary] = [
-		{"id": "00_overview", "at": Vector3(-40, 330, 260), "look": Vector3(-40, 20, 0)},
-		{"id": "00_from_lake", "at": Vector3(-330, 40, 40), "look": Vector3(-60, 30, 0)},
-		{"id": "00_terrace_dam", "at": Vector3(-74, 33.62, -6), "look": Vector3(-700, 120, 700)},
-		{"id": "00_cascade_below", "at": Vector3(-134, 3.6, 0), "look": Vector3(-95, 22, 2)},
-		{"id": "00_cascade_gallery", "at": Vector3(-102.2, 25.97, -19), "look": Vector3(-102.2, 22, 22)},
-		{"id": "00_mole_lighthouse", "at": Vector3(-289, 15.1, -14), "look": Vector3(-170, 3, -10)},
-		{"id": "00_s_courtyard", "at": Vector3(-36, 34.3, -150), "look": Vector3(-60, 35, -163)},
-		{"id": "00_s_parking", "at": Vector3(-10.7, 35.6, -110), "look": Vector3(-10.7, 34.8, -170)},
-		{"id": "00_amph_promenade", "at": Vector3(-56, 37.62, 160), "look": Vector3(-100, 32, 160)},
-		{"id": "00_lobby", "at": Vector3(-14, 33.62, -12), "look": Vector3(-54, 34, -2)},
-		{"id": "00_pool", "at": Vector3(-62, 33.62, 92), "look": Vector3(-96, 33, 80)},
-		{"id": "00_trail", "at": Vector3(-111, 19.8, 128), "look": Vector3(-115, 14, 150)},
-	]
+	# виды считает генератор (глаз — по полу и земле), к ним — места карты
+	var views: Array[Dictionary] = []
+	for v: Dictionary in plan.get("views", []):
+		var at: Array = v.at
+		var look: Array = v.look
+		views.append({"id": String(v.id), "at": Vector3(float(at[0]), float(at[1]), float(at[2])),
+			"look": Vector3(float(look[0]), float(look[1]), float(look[2]))})
 	for i: int in range((plan.places as Array).size()):
 		var t: Array = _place_at(i)
 		var p: Dictionary = (plan.places as Array)[i]

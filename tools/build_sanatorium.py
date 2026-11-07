@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Карта «Санаторий» — серый блокаут для прогулки (docs/design/sanatorium_map.md, §7 п. 6).
 
-Источники приняты владельцем 2026-11-07 (решения 1–48): схема участка v08 (tools/sanatorium_map_plan.py — берег,
+Источники приняты владельцем 2026-11-07 (решения 1–48): схема участка v09 (tools/sanatorium_map_plan.py — берег,
 бровка, дороги, парковки, коттеджи, каскад, тропа, места, выходы), S-корпуса (tools/sanatorium_s_geom.py, номер —
 лист tools/sanatorium_s_corps_plan.py), здания по помещениям и дверям (docs/design/data/sanatorium_*.json), спуски
 (sanatorium_descents_v01.json). Генератор ничего не придумывает в планировке: он поднимает принятые планы в объём.
@@ -59,7 +59,7 @@ WARN = []
 
 
 def load_plan():
-    """Схема участка v08 исполняется как есть (её числа — единственный источник), без записи картинки."""
+    """Схема участка исполняется как есть (её числа — единственный источник), без записи картинки."""
     import PIL.Image as PI
     save = PI.Image.save
     PI.Image.save = lambda self, *a, **k: None
@@ -1474,8 +1474,8 @@ S_UNITS = []
 
 
 def s_unit(u, level, corps):
-    """Номер 10 × 6 м по внутренним стенам на 2 этажа: стены, плиты, П-образная лестница у стены соседа,
-    двери, витражи, терраса и балкон. Возвращает обход номера."""
+    """Номер на 2 этажа по разбивке tools/sanatorium_s_geom.py (v02: 13 × 7,8 м — лист номера × 1,3): стены, плиты,
+    П-образная лестница у стены соседа, двери, витражи, терраса и балкон. Возвращает обход номера."""
     F = ArcFrame(u)
     L, D, FW, PW = sg.UNIT_LEN, sg.UNIT_DEPTH, sg.FACADE, sg.PARTY_WALL
     z1 = level + 0.15
@@ -1484,86 +1484,105 @@ def s_unit(u, level, corps):
     top = z1 + 2 * ff
     # плиты: пол 1 этажа, 2 этажа (без лестничного проёма), кровля
     F.box(-FW, D + FW, -PW / 2, L + PW / 2, level - 0.45, z1, 'floor')
-    F.box(0, 1.2, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
-    F.box(4.89, D, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
+    F.box(0, sg.STAIR_V0, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
+    F.box(sg.LANDING_V1, D, 0, sg.STAIR_W, z2 - SLAB_T, z2, 'slab')
     F.box(0, D, sg.STAIR_W, L, z2 - SLAB_T, z2, 'slab')
     F.box(-FW - 0.7, D + FW + 0.7, -PW / 2, L + PW / 2, top - 0.05, top + 0.35, 'roof')
     # фасад входа (a = −FW…0) и фасад террас (a = D…D + FW): глухая часть над лестницей в доске, остальное — витраж
-    for fa0, fa1, doors1, doors2 in ((-FW, 0.0, [(3.0, 3.0 + sg.DOOR_W)], []), (D, D + FW, [(5.2, 7.6)], [(5.2, 7.6)])):
+    for fa0, fa1, doors1, doors2 in ((-FW, 0.0, [sg.ENTRY_DOOR_U], []), (D, D + FW, [sg.SLIDE_DOOR_U], [sg.SLIDE_DOOR_U])):
         for z0_, z1_, dl in ((z1, z2, doors1), (z2, top, doors2)):
             F.box(fa0, fa1, -PW / 2, sg.STAIR_W, z0_, z1_, 'wood')
             for s0, s1 in sub_intervals(sg.STAIR_W, L + PW / 2, dl):
                 F.box(fa0, fa1, s0, s1, z0_, z1_, 'glass')
             for s0, s1 in dl:
                 F.box(fa0, fa1, s0, s1, z0_ + DOOR_H, z1_, 'glass')
-    # перегородки 1 этажа (лист номера: прихожая, с/у, кухня, шкаф)
+    # перегородки и перемычки над межкомнатными дверями по этажам (рамка: a = v, b = u)
     pt = PART_T
-    F.box(1.2, 4.9, sg.STAIR_W - pt / 2, sg.STAIR_W + pt / 2, z1, z2, 'partition')
-    F.box(4.9 - pt / 2, 4.9 + pt / 2, 0, sg.STAIR_W, z1, top, 'partition')
-    F.box(0, 1.35, 5.0 - pt / 2, 5.0 + pt / 2, z1, z2, 'partition')
-    F.box(1.35 + sg.INNER_DOOR_W, 2.6, 5.0 - pt / 2, 5.0 + pt / 2, z1, z2, 'partition')
-    F.box(1.35, 1.35 + sg.INNER_DOOR_W, 5.0 - pt / 2, 5.0 + pt / 2, z1 + DOOR_H, z2, 'partition')
-    F.box(2.6 - pt / 2, 2.6 + pt / 2, 5.0, 7.4, z1, z2, 'partition')
-    F.box(0, 2.6, 7.4 - pt / 2, 7.4 + pt / 2, z1, z2, 'partition')
-    # 2 этаж: холл, кабинет, спальня, ванная, гардероб
-    hx = 3.75
-    for a0_, a1_ in ((0.0, 0.8), (0.8 + sg.INNER_DOOR_W, 3.2), (3.2 + sg.INNER_DOOR_W, 4.9)):
-        F.box(a0_, a1_, hx - pt / 2, hx + pt / 2, z2, top, 'partition')
-    for a0_, a1_ in ((0.8, 0.8 + sg.INNER_DOOR_W), (3.2, 3.2 + sg.INNER_DOOR_W)):
-        F.box(a0_, a1_, hx - pt / 2, hx + pt / 2, z2 + DOOR_H, top, 'partition')
-    F.box(2.6 - pt / 2, 2.6 + pt / 2, hx, 8.0, z2, top, 'partition')
-    F.box(2.6 - pt / 2, 2.6 + pt / 2, 8.0 + sg.INNER_DOOR_W, L, z2, top, 'partition')
-    F.box(2.6 - pt / 2, 2.6 + pt / 2, 8.0, 8.0 + sg.INNER_DOOR_W, z2 + DOOR_H, top, 'partition')
-    F.box(0, 2.6, 6.9 - pt / 2, 6.9 + pt / 2, z2, top, 'partition')
-    # лестница: марш 1 у прихожей (u 1,28…2,45) от v 1,2 вверх до площадки, марш 2 у стены обратно к фасаду
+    for floor, (zb, zt) in ((1, (z1, z2)), (2, (z2, top))):
+        for u0, v0, u1, v1 in sg.UNIT_WALLS[floor]:
+            if abs(u0 - u1) < 1e-6:
+                F.box(min(v0, v1), max(v0, v1), u0 - pt / 2, u0 + pt / 2, zb, zt, 'partition')
+            else:
+                F.box(v0 - pt / 2, v0 + pt / 2, min(u0, u1), max(u0, u1), zb, zt, 'partition')
+        for u0, v0, u1, v1 in sg.UNIT_DOORS[floor]:
+            if abs(u0 - u1) < 1e-6:
+                F.box(min(v0, v1), max(v0, v1), u0 - pt / 2, u0 + pt / 2, zb + DOOR_H, zt, 'partition')
+            else:
+                F.box(v0 - pt / 2, v0 + pt / 2, min(u0, u1), max(u0, u1), zb + DOOR_H, zt, 'partition')
+    # лестница: марш 1 у прихожей от площадки входа вверх до разворотной, марш 2 у стены обратно к фасаду
     n = sg.RISERS // 2
     hh = ff / (2 * n)
     zm = z1 + n * hh
-    L1 = (n - 1) * sg.STEP_RUN
-    y0s = 1.2
+    L1 = sg.FLIGHT_RUN
+    y0s = sg.STAIR_V0
     ca, cb = sg.STAIR_W - sg.FLIGHT_W / 2, sg.FLIGHT_W / 2
     F.stair(y0s, y0s + L1, ca, sg.FLIGHT_W - 0.06, z1, zm, n, z1 - 0.05, 'stair')
-    F.box(y0s + L1, 4.89, 0, sg.STAIR_W, z1 - 0.05, zm, 'stair')
+    F.box(y0s + L1, sg.LANDING_V1, 0, sg.STAIR_W, z1 - 0.05, zm, 'stair')
     F.stair(y0s + L1, y0s, cb, sg.FLIGHT_W - 0.06, zm, z2, n, z1 - 0.05, 'stair')
     F.box(y0s, y0s + L1, sg.FLIGHT_W, sg.STAIR_W - sg.FLIGHT_W, z1, z2 + RAIL_H, 'rail')
     F.box(y0s - 0.04, y0s + 0.04, sg.FLIGHT_W + 0.1, sg.STAIR_W, z2, z2 + RAIL_H, 'rail')
-    F.box(y0s, 4.9, sg.STAIR_W - 0.04, sg.STAIR_W + 0.04, z2, z2 + RAIL_H, 'rail')
-    # терраса 3 м с экранами между соседями, балкон 1,5 м со стеклянным ограждением
+    F.box(y0s, sg.CLOSET_V, sg.STAIR_W - 0.04, sg.STAIR_W + 0.04, z2, z2 + RAIL_H, 'rail')
+    # терраса с экранами между соседями, балкон со стеклянным ограждением
     F.box(D + FW, D + FW + sg.TERRACE, -PW / 2, L + PW / 2, level - 0.45, z1, 'deck')
     F.box(D + FW, D + FW + sg.BALCONY, -PW / 2, L + PW / 2, z2 - SLAB_T, z2, 'deck')
     F.box(D + FW + sg.BALCONY - 0.04, D + FW + sg.BALCONY + 0.04, -PW / 2, L + PW / 2, z2, z2 + RAIL_H, 'glass')
     for ue in (-PW / 2, L + PW / 2):
         F.box(D + FW, D + FW + 2.2, ue - 0.075, ue + 0.075, z1, z1 + 1.8, 'wood')
         F.box(D + FW, D + FW + sg.BALCONY, ue - 0.075, ue + 0.075, z2, z2 + RAIL_H, 'wood')
-    # обход номера (точки в рамке: a = v, b = u)
-    P = [(-1.6, 3.58, level), (-0.2, 3.58, z1), (1.0, 3.6, z1, 'HAL'), (1.87, 4.6, z1), (1.87, 5.0, z1), (1.3, 6.2, z1, 'WC'),
-         (1.87, 5.0, z1), (1.87, 4.4, z1), (4.2, 5.0, z1, 'LIV'), (3.3, 8.2, z1), (1.4, 8.7, z1, 'KIT'), (3.3, 8.2, z1),
-         (5.4, 6.4, z1), (6.0, 6.4, z1), (7.6, 6.4, z1, 'TER'), (6.0, 6.4, z1), (5.3, 6.0, z1), (5.45, 3.2, z1),
-         (5.45, 1.2, z1, 'CLO'), (5.4, 3.3, z1), (2.0, 3.4, z1), (0.6, 2.0, z1), (0.75, ca, z1), (y0s + 0.35, ca, z1 + hh),
-         (y0s + L1 - 0.3, ca, zm - hh * 0.5), (4.3, 1.2, zm, 'LND'), (y0s + L1 - 0.3, cb, zm + hh * 0.5), (y0s + 0.35, cb, z2 - hh),
-         (0.6, 1.2, z2, 'PL2'), (0.6, 3.1, z2), (2.2, 3.1, z2, 'HL2'), (1.32, 3.1, z2), (1.32, 3.75, z2), (1.3, 5.3, z2, 'CAB'),
-         (1.32, 3.75, z2), (1.32, 3.1, z2), (3.72, 3.1, z2), (3.72, 3.75, z2), (4.4, 5.5, z2, 'BED'), (3.4, 8.52, z2),
-         (2.6, 8.52, z2), (1.5, 8.45, z2, 'BTH'), (2.6, 8.52, z2), (3.4, 8.52, z2), (5.4, 6.4, z2), (6.0, 6.4, z2),
-         (6.9, 6.4, z2, 'BAL'), (6.0, 6.4, z2), (5.4, 6.4, z2), (4.4, 5.5, z2), (3.72, 3.75, z2), (3.72, 3.1, z2), (5.45, 3.1, z2),
-         (5.45, 1.2, z2, 'WRD')]
-    names = {'HAL': 'прихожая', 'WC': 'санузел', 'LIV': 'гостиная-столовая', 'KIT': 'кухня', 'TER': 'терраса', 'CLO': 'шкаф',
-             'LND': 'площадка лестницы', 'PL2': 'площадка 2 этажа', 'HL2': 'холл', 'CAB': 'кабинет', 'BED': 'спальня',
-             'BTH': 'ванная', 'BAL': 'балкон', 'WRD': 'гардероб'}
+    # обход номера (точки в рамке: a = v, b = u) — середины помещений из разбивки, двери, лестница
+    R1, R2 = sg.UNIT_ROOMS[1], sg.UNIT_ROOMS[2]
+
+    def hub(rooms, code, z):
+        return (rooms[code][2], rooms[code][1], z, code)
+
+    ent_u = sum(sg.ENTRY_DOOR_U) / 2
+    wc_v = sum(sg.WC_DOOR_V) / 2
+    slide_u = sum(sg.SLIDE_DOOR_U) / 2
+    cab_v, bed_v = sum(sg.CAB_DOOR_V) / 2, sum(sg.BED_DOOR_V) / 2
+    bath_u = sum(sg.BATH_DOOR_U) / 2
+    hall_u = (sg.STAIR_W + sg.HALL_U) / 2
+    clo_v = (sg.CLOSET_V + D) / 2
+    kit_u = R1['KIT'][1]
+    inside, out_t, out_b = D - 0.6, D + 0.2, None
+    P = [(-1.6, ent_u, level), (-0.2, ent_u, z1), hub(R1, 'HAL', z1),
+         (wc_v, sg.WC_U[0] - 0.6, z1), (wc_v, sg.WC_U[0], z1), hub(R1, 'WC', z1), (wc_v, sg.WC_U[0], z1), (wc_v, sg.WC_U[0] - 0.6, z1),
+         (3.0, sg.WC_U[0] - 1.2, z1), hub(R1, 'LIV', z1), (sg.UTIL_V + 1.0, kit_u, z1), hub(R1, 'KIT', z1), (sg.UTIL_V + 1.0, kit_u, z1),
+         (inside, slide_u, z1), (out_t, slide_u, z1), (D + FW + sg.TERRACE / 2, slide_u, z1, 'TER'), (out_t, slide_u, z1),
+         (inside, slide_u, z1), (clo_v, sg.STAIR_W + 0.85, z1), (clo_v, R1['CLO'][1], z1, 'CLO'), (clo_v, sg.STAIR_W + 0.85, z1),
+         (2.6, sg.STAIR_W + 0.65, z1), (1.0, sg.STAIR_W + 0.65, z1), (0.85, ca, z1),
+         (y0s + 0.35, ca, z1 + hh), (y0s + L1 - 0.3, ca, zm - hh * 0.5), ((y0s + L1 + sg.LANDING_V1) / 2, sg.STAIR_W / 2, zm, 'LND'),
+         (y0s + L1 - 0.3, cb, zm + hh * 0.5), (y0s + 0.35, cb, z2 - hh), (y0s / 2, sg.STAIR_W / 2, z2, 'PL2'),
+         (y0s / 2, hall_u, z2), hub(R2, 'HL2', z2), (cab_v, hall_u, z2), (cab_v, sg.HALL_U, z2), hub(R2, 'CAB', z2),
+         (cab_v, sg.HALL_U, z2), (cab_v, hall_u, z2), (bed_v, hall_u, z2), (bed_v, sg.HALL_U, z2), hub(R2, 'BED', z2),
+         (sg.UTIL_V + 0.8, bath_u, z2), (sg.UTIL_V, bath_u, z2), hub(R2, 'BTH', z2), (sg.UTIL_V, bath_u, z2),
+         (sg.UTIL_V + 0.8, bath_u, z2), (inside, slide_u, z2), (out_t, slide_u, z2), (D + FW + sg.BALCONY / 2, slide_u, z2, 'BAL'),
+         (out_t, slide_u, z2), (inside, slide_u, z2), hub(R2, 'BED', z2)[:3], (bed_v, sg.HALL_U, z2), (bed_v, hall_u, z2),
+         (clo_v, hall_u, z2), (clo_v, R2['WRD'][1], z2, 'WRD')]
+    names = {k: v[0] for k, v in list(R1.items()) + list(R2.items())}
+    names.update({'TER': 'терраса', 'LND': 'площадка лестницы', 'PL2': 'площадка 2 этажа', 'BAL': 'балкон'})
     pts, checks = [], []
     bid = f'{corps}_{u["n"]:02d}'
-    for p in P:
-        x, y = F.pt(p[0], p[1])
-        pts.append(gpt(x, y, p[2]))
-        if len(p) > 3:
-            uid = f'{bid}/{1 if p[2] < z2 - 0.5 else 2}/{p[3]}'
-            checks.append([len(pts) - 1, uid, r3(p[2])])
-            ROOMS.append({'uid': uid, 'building': f'{corps}, номер {u["n"]}', 'name': names[p[3]],
-                          'floor': 1 if p[2] < z2 - 0.5 else 2, 'at': gpt(x, y, p[2])})
+    for p_ in P:
+        x, y = F.pt(p_[0], p_[1])
+        pts.append(gpt(x, y, p_[2]))
+        if len(p_) > 3:
+            fl = 1 if p_[2] < z2 - 0.5 else 2
+            uid = f'{bid}/{fl}/{p_[3]}'
+            checks.append([len(pts) - 1, uid, r3(p_[2])])
+            ROOMS.append({'uid': uid, 'building': f'{corps}, номер {u["n"]}', 'name': names[p_[3]], 'floor': fl,
+                          'at': gpt(x, y, p_[2])})
     ROUTES.append({'id': f'tour_{bid}', 'label': f'{corps}, номер {u["n"]}: все помещения, лестница', 'kind': 'tour',
                    'points': pts, 'checks': checks, 'building': bid})
-    lx, ly = F.pt(3.0, 5.0)
+    lx, ly = F.pt(D / 2, L / 2)
     O.label(lx, ly, top + 0.9, f'{corps} · {u["n"]}', 1.0, 'unit')
     S_UNITS.append({'id': bid, 'z': z1})
+
+
+def sg_unit_point(corps, n, v, u):
+    """Точка схемы внутри номера n корпуса по его рамке (v — от фасада входа, u — от лестничной стены)."""
+    site = SITE1 if corps == 'С-1' else SITE2
+    unit = [x for x in sg.units(site[0], site[1], site[2]) if x['n'] == n][0]
+    return ArcFrame(unit).pt(v, u)
 
 
 for ox, oy, mirror, name in S_SITES:
@@ -1933,7 +1952,7 @@ O.box(133.8, -4.8, 134.2, 4.8, h_at(134, 0) + 0.9, h_at(134, 0) + 1.05, 'barrier
 O.box(133.6, 5.0, 134.4, 5.6, h_at(134, 5.3), h_at(134, 5.3) + 1.1, 'metal')
 SX0, SY0, SX1, SY1 = S_LOT
 for xs_ in (SX0 - 1.5, SX1 + 1.5):
-    strip([(xs_, SY0 - 6), (xs_, SY1)], sg.PATH_W, 'paving', 0.07)
+    strip([(xs_, SY0 - 6), (xs_, SY1 + 3)], sg.PATH_W, 'paving', 0.07)
 for xa, xb, y in ((SX0, SITE1[0] + sg.R - sg.HALF_T - sg.PATH_W, SITE1[1] + sg.R), (SX1, SITE2[0] - sg.R + sg.HALF_T + sg.PATH_W, SITE2[1] + sg.R),
                   (SX0, SITE1[0] + sg.R + sg.HALF_T + sg.PATH_W, SITE1[1] - sg.R), (SX1, SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W, SITE2[1] - sg.R)):
     strip([(xa, y), (xb, y)], sg.PATH_W, 'paving', 0.07)
@@ -2276,7 +2295,7 @@ O.label(120.0, 186.0, HOZ_LEVEL + 33.0, 'труба котельной', 1.4, 'o
 for k, (ex_, ey_) in enumerate(((104.0, 175.0), (118.0, 176.0), (101.0, 197.0), (130.0, 192.0), (113.0, 214.0))):
     O.box(ex_ - 0.6, ey_ - 0.6, ex_ + 0.6, ey_ + 0.6, HOZ_LEVEL, HOZ_LEVEL + 1.2, 'eurocube')
 
-# ================================================================ ДЕРЕВЬЯ: только ели и сосны (те же точки, что на схеме v08)
+# ================================================================ ДЕРЕВЬЯ: только ели и сосны (те же точки, что на схеме участка)
 TREES = {'pine': [], 'pine_slim': [], 'spruce_a': [], 'spruce_b': [], 'spruce_young': [],
          'pine_bg': [], 'spruce_a_bg': [], 'spruce_b_bg': []}
 BLOCK = []      # где деревьям не место: постройки, ленты, площадки (прямоугольники с запасом)
@@ -2519,11 +2538,14 @@ for i, (sx_, sy_) in enumerate(((150.0, 60.0), (150.0, -120.0), (40.0, 236.0), (
     O.markers.append(['spawn', *gpt(sx_, sy_, g_), f'заход З{i + 1}'])
 
 # ================================================================ МЕСТА (1–9, 0, N/B) и маршруты по участку
+S_AISLE = S_LOT[0] + BAY_L + AISLE / 2
 PLACE_SPOTS = {
     1: ((-32.0, 9.0), (-32.0, -2.0)), 2: ((-60.0, -51.0), (-75.0, -39.0)), 3: ((-22.0, -66.0), (-22.0, -90.0)),
     4: ((-78.0, -70.5), (-78.0, -82.0)), 5: ((-110.0, -70.0), (-110.0, -82.0)), 6: ((-62.0, 8.0), (-110.0, -10.0)),
-    7: ((-35.0, 163.0), (-52.0, 163.0)), 8: ((3.6, 117.0), (32.0, 117.0)), 9: ((-10.7, 100.0), (-10.7, 150.0)),
-    10: ((118.0, 3.0), (60.0, 0.0)), 11: ((-10.7, 120.0), (-10.7, 165.0)), 12: ((90.0, 196.0), (112.0, 190.0)),
+    7: ((SITE1[0] + 17.0, SITE1[1] + sg.R), (SITE1[0], SITE1[1] + sg.R)),
+    8: ((SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R), (SITE2[0], SITE2[1] - sg.R)),
+    9: ((S_AISLE, S_LOT[1] - 18.0), (S_AISLE, S_LOT[1] + 30.0)),
+    10: ((118.0, 3.0), (60.0, 0.0)), 11: ((S_AISLE, S_LOT[1] + 4.0), (S_AISLE, S_LOT[3])), 12: ((90.0, 196.0), (112.0, 190.0)),
     13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((70.0, -213.0), (20.0, -213.0)),
     16: ((-82.0, 0.0), (-128.0, 0.0)), 17: ((-93.0, -108.0), (-110.0, -130.0)), 19: ((-70.0, 226.0), (-120.0, 210.0)),
     20: ((-131.0, 200.0), (-160.0, 196.0)), 21: ((-136.0, -160.0), (-170.0, -160.0)), 22: ((-150.0, 10.0), (-200.0, 10.0)),
@@ -2553,12 +2575,12 @@ axis_pts += [(-135.0, 1.0, QUAY), (-141.0, -1.0, MOLE), (-160.0, -3.0, MOLE), (-
 SITE_ROUTES = [
     ('axis', 'Главная ось: КПП → лобби → терраса → каскад → «Стрелка» → маяк', axis_pts),
     ('service_road', 'Северная ветка → служебная дорога → лодочная станция',
-     [(82.0, 0.0), (76.0, 36.0), (74.0, 70.0), (86.0, 108.0), (88.0, 140.0), (76.0, 168.0), (78.0, 196.0), (82.0, 222.0), (10.0, 224.0),
-      (-60.0, 226.0)] + [p[:2] for p in svc_path[2:]] + [(-136.0, 196.5)]),
+     [tuple(p) for p in PLAN['ROADS'][2][0]] + [(10.0, 224.0), (-60.0, 226.0)] + [p[:2] for p in svc_path[2:]] + [(-136.0, 196.5)]),
     ('s_parking', 'Парковка S-корпусов ↔ дворы обоих корпусов',
-     [(S_LOT[0] + BAY_L + AISLE / 2, 224.0), (S_LOT[0] + BAY_L + AISLE / 2, 168.5), (S_LOT[0] - 1.5, 168.5), (-30.0, 165.0),
-      (SITE1[0] + 4.0, SITE1[1] + sg.R), (-30.0, 165.0), (S_LOT[0] - 1.5, 168.5), (S_LOT[2] + 1.5, 168.5), (8.0, 165.0),
-      (SITE2[0] - 4.0, SITE2[1] + sg.R), (8.0, 165.0), (S_LOT[2] + 1.5, 168.5), (S_LOT[2] + 1.5, 140.0),
+     [(S_AISLE, 224.0), (S_AISLE, S_LOT[3] - 3.5), (S_LOT[0] - 1.5, S_LOT[3] - 3.5), (S_LOT[0] - 1.5, SITE1[1] + sg.R),
+      (SITE1[0] + 4.0, SITE1[1] + sg.R), (S_LOT[0] - 1.5, SITE1[1] + sg.R), (S_LOT[0] - 1.5, S_LOT[3] - 3.5),
+      (S_LOT[2] + 1.5, S_LOT[3] - 3.5), (S_LOT[2] + 1.5, SITE2[1] + sg.R), (SITE2[0] - 4.0, SITE2[1] + sg.R),
+      (S_LOT[2] + 1.5, SITE2[1] + sg.R), (S_LOT[2] + 1.5, SITE2[1]),
       (SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R)]),
     ('cottages_beach', 'Улица коттеджей → тропа к пляжу',
      [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0), (-2.0, -216.0)] + [p[:2] for p in cot_path[1:]] + [(-133.0, -231.0)]),
@@ -2586,6 +2608,30 @@ for rid, title, pts in SITE_ROUTES:
 NEG = [('quay_water', 'С набережной в озеро не сойти', (-138.0, 60.0), (-175.0, 60.0), float(shore_x(60.0)) - 0.6),
        ('fence_east', 'Через забор на восток не пройти', (140.0, 120.0), (190.0, 120.0),
         150.0 + 10.0 * math.sin(120.0 / 55.0) + 0.6)]
+
+
+# ================================================================ ВИДЫ ДЛЯ СНИМКОВ (глаз на 1,62 над полом/землёй)
+def eye(x, y, z=None):
+    return gpt(x, y, (ground_at(x, y) if z is None else z) + 1.62)
+
+
+SHOT_VIEWS = [
+    {'id': '00_overview', 'at': gpt(-40, -260, 330), 'look': gpt(-40, 0, 20)},
+    {'id': '00_from_lake', 'at': gpt(-330, -40, 40), 'look': gpt(-60, 0, 30)},
+    {'id': '00_terrace_dam', 'at': eye(-74, 6), 'look': gpt(-700, -700, 120)},
+    {'id': '00_cascade_below', 'at': eye(-134, 0), 'look': gpt(-95, -2, 22)},
+    {'id': '00_cascade_gallery', 'at': eye(-102.2, 19.0, GALLERIES[1]['start']['z_top']), 'look': gpt(-102.2, -22, 22)},
+    {'id': '00_mole_lighthouse', 'at': eye(-289.0, 14.0, LH_GAL), 'look': gpt(-170, 10, 3)},
+    {'id': '00_s_courtyard', 'at': eye(SITE1[0] + 16.0, SITE1[1] + sg.R + 3.0), 'look': gpt(SITE1[0] - 10.0, SITE1[1] + sg.R, S_LEVELS['С-1'] + 3.0)},
+    {'id': '00_s_unit_living', 'at': eye(*sg_unit_point('С-1', 3, 6.6, 3.2)), 'look': gpt(*sg_unit_point('С-1', 3, 4.2, 12.0), S_LEVELS['С-1'] + 1.6)},
+    {'id': '00_s_unit_bedroom', 'at': eye(*sg_unit_point('С-1', 3, 6.9, 4.2), S_LEVELS['С-1'] + 0.15 + sg.FLOOR_TO_FLOOR),
+     'look': gpt(*sg_unit_point('С-1', 3, 4.0, 12.5), S_LEVELS['С-1'] + 0.15 + sg.FLOOR_TO_FLOOR + 1.4)},
+    {'id': '00_s_parking', 'at': eye(S_AISLE, S_LOT[1] - 4.0), 'look': gpt(S_AISLE, S_LOT[3] - 2.0, S_LEVELS['С-1'] + 2.0)},
+    {'id': '00_amph_promenade', 'at': eye(AC[0] + 28.0, AC[1] + 18.0, PROM), 'look': gpt(AC[0] - 16, AC[1], ORCH)},
+    {'id': '00_lobby', 'at': eye(-14, 12, CENTRAL), 'look': gpt(-54, 2, CENTRAL + 2.0)},
+    {'id': '00_pool', 'at': eye(-62, -92, CENTRAL), 'look': gpt(-96, -80, CENTRAL + 1.0)},
+    {'id': '00_trail', 'at': eye(*trail_pts[5][:2], trail_pts[5][2]), 'look': gpt(*trail_pts[7][:2], trail_pts[7][2])},
+]
 
 # ================================================================ ЗАПИСЬ
 TERRAIN_DIR.mkdir(parents=True, exist_ok=True)
@@ -2627,7 +2673,7 @@ OUT_FAR.write_text(json.dumps({'terrain': {
     'splat_file': 'res://data/terrain/sanatorium_far_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 OUT_VEG.write_text(json.dumps(TREES, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
 
-PLAN_IMG = 'res://docs/plans/sanatorium_map_v08.png'
+PLAN_IMG = 'res://docs/plans/sanatorium_map_v09.png'
 pad_, top_, sc_ = PLAN['PAD'], PLAN['TOP'], PLAN['SCALE']
 crop = [0, 0, int(pad_ * 2 + (PLAN['XMAX'] - PLAN['XMIN']) * sc_), int(top_ + pad_ * 2 + (PLAN['YMAX'] - PLAN['YMIN']) * sc_)]
 x_left = PLAN['XMIN'] - pad_ / sc_
@@ -2638,7 +2684,7 @@ y_bottom = PLAN['YMAX'] - (crop[3] - top_ - pad_) / sc_
 result = {
     'version': 1,
     'name': 'Санаторий',
-    'purpose': 'Карта «Санаторий» — серый блокаут: участок v08, здания по принятым планам, спуски, мол «Стрелка»',
+    'purpose': 'Карта «Санаторий» — серый блокаут: участок v09 (номер S-корпуса × 1,3), здания по принятым планам, спуски, мол «Стрелка»',
     'north': '-Z',
     'y_offset': 0.0,
     'scale': {'width_k': 1.3, 'height_k': 1.15, 'door': [1.17, 2.42], 'rule': 'E'},
@@ -2653,6 +2699,7 @@ result = {
                'sport': SPORT_LEVEL, 'orchestra': ORCH, 'stage': STAGE, 'under_stage': UNDER, 'promenade': PROM, 'mole': MOLE,
                'quay': QUAY},
     'dam': {'center': [r3(DC[0]), r3(-DC[1])], 'radius': r3(DR), 'height': DAM_H, 'ends': [[r3(E1[0]), r3(-E1[1])], [r3(E2[0]), r3(-E2[1])]]},
+    'views': SHOT_VIEWS,
     'plan_image': PLAN_IMG, 'plan_image_crop': crop, 'plan_image_rect': [r3(x_left), r3(-y_top), r3(x_right), r3(-y_bottom)],
     'deviations': DEVIATIONS,
     'stats': {'boxes': len(O.boxes), 'stairs': len(O.stairs), 'beams': len(O.beams), 'cyls': len(O.cyls),

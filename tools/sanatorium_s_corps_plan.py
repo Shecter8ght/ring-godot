@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Санаторий — лист жилого S-корпуса v01 по картинке владельца 2026-11-07 (docs/design/sanatorium_s_corps.md).
+"""Санаторий — лист жилого S-корпуса v02 по картинке владельца 2026-11-07 (docs/design/sanatorium_s_corps.md).
+
+v02: номер × 1,3 по правилу E (владелец после прогулки по серому блокауту) — 13 × 7,8 м; разбивка номера — данными
+из tools/sanatorium_s_geom.py (те же, что строит блокаут), корпус на месте схемы участка v09.
 
 Корпус — две полудуги, соединённые краями, сплошной двухэтажной лентой из 14 номеров; номер 10 × 6 м по внутренним
 стенам, 2 этажа, свой вход с улицы. На листе: план корпуса С-1 с парковкой, номер — 1 и 2 этаж, разрез поперёк ленты.
 Геометрия — tools/sanatorium_s_geom.py (та же, что на схеме участка).
 
-    python -X utf8 tools/sanatorium_s_corps_plan.py   → docs/plans/sanatorium_s_corps_v01.png
+    python -X utf8 tools/sanatorium_s_corps_plan.py   → docs/plans/sanatorium_s_corps_v02.png
 """
 import math
 import random
@@ -16,7 +19,7 @@ from PIL import Image, ImageDraw, ImageFont
 import sanatorium_s_geom as sg
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'docs/plans/sanatorium_s_corps_v01.png'
+OUT = ROOT / 'docs/plans/sanatorium_s_corps_v02.png'
 
 W, H = 2060, 1400
 PAPER = (247, 245, 239)
@@ -85,19 +88,19 @@ def title(x, y, s, size=18):
     d.text((x, y), s, font=font(size, True), fill=INK)
 
 
-title(30, 18, 'Санаторий · жилой S-корпус v01 — по картинке владельца 2026-11-07 · две полудуги, соединённые краями,'
-      ' 14 номеров по 2 этажа', 22)
+title(30, 18, 'Санаторий · жилой S-корпус v02 — по картинке владельца 2026-11-07 · две полудуги, соединённые краями,'
+      ' 14 номеров 13 × 7,8 м по 2 этажа (× 1,3)', 22)
 
 # ================================================================ A. План корпуса С-1 и парковки
-OX, OY = -52.0, 140.0
-A = View(30, 120, -96.0, 196.0, 6.4)
+OX, OY = -52.3, 147.0          # как на схеме участка v09
+A = View(30, 120, -96.0, OY + 70.0, 5.4)
 title(30, 70, 'А. Корпус С-1 («S») и парковка между корпусами', 17)
 d.text((30, 96), '1 этаж; пунктир — край балконов 2 этажа; С-2 — зеркально справа от парковки', font=font(13), fill=MUTED)
-A.rect(-96, 80, 2, 196, fill=GRASS_C, outline=None)
+A.rect(-96, OY - 70, 12, OY + 70, fill=GRASS_C, outline=None)
 rng = random.Random(5)
 
 # парковка (половина ширины к С-2 — до проезда и второго ряда) и тротуары
-LX0, LY0 = -19.6, 114.0
+LX0, LY0 = OX + sg.R + sg.HALF_T + sg.PATH_W + 3.05, OY - 28.5
 A.rect(LX0, LY0, LX0 + sg.TERRACE * 0 + 17.8, LY0 + 57.0, fill=PARK_C, outline=MUTED)
 for k in range(20):
     for xa, xb in ((LX0, LX0 + 5.0), (LX0 + 12.8, LX0 + 17.8)):
@@ -140,7 +143,7 @@ for cx, cy, r_in, a_c in ((OX, OY + sg.R, sg.R - sg.HALF_T - sg.PATH_W - 1.0, 0.
     A.line([(cx + 3 * math.cos(math.radians(a_c)), cy), (cx + (r_in - 1) * math.cos(math.radians(a_c)), cy)],
            color=PAVE_C, width=6, dash=(6, 4))
 for _ in range(26):     # ели и сосны вокруг корпуса
-    x, y = rng.uniform(-94, -2), rng.uniform(82, 194)
+    x, y = rng.uniform(-94, LX0 - 2), rng.uniform(OY - 64, OY + 64)
     near = min(abs(math.hypot(x - cx, y - cy) - sg.R) if (math.degrees(math.atan2(y - cy, x - cx)) - min(a0, a1)) % 360
                <= abs(a1 - a0) else 99 for cx, cy, a0, a1, _ in halves)
     inside_lot = LX0 - 4 <= x <= LX0 + 18 and LY0 - 7 <= y <= LY0 + 58
@@ -179,18 +182,18 @@ A.line([(OX, OY + sg.R), (OX - sg.R * math.cos(math.radians(35)), OY + sg.R + sg
 A.text(OX + 1.5, OY + sg.R + 3.5, f'R {sg.R:.1f} м по оси'.replace('.', ','), 12, MUTED, False, 'lm')
 A.text(OX, OY + sg.R, 'двор', 13, MUTED)
 A.text(OX - 2, OY - sg.R, 'двор к озеру', 13, MUTED)
-A.text(-92, 192, 'С', 15, INK, True)
-A.line([(-92, 186), (-92, 189.5)], width=3)
+A.text(-92, OY + 58, 'С', 15, INK, True)
+A.line([(-92, OY + 52), (-92, OY + 55.5)], width=3)
 for k in range(0, 21, 5):
-    A.line([(-90 + k, 84), (-90 + k, 85.2)], width=2)
-A.line([(-90, 84), (-70, 84)], width=2)
-A.text(-80, 86.8, '20 м', 12)
-A.text(-46, 84, 'к озеру ←   склон', 12, MUTED)
+    A.line([(-90 + k, OY - 64), (-90 + k, OY - 62.8)], width=2)
+A.line([(-90, OY - 64), (-70, OY - 64)], width=2)
+A.text(-80, OY - 61.2, '20 м', 12)
+A.text(OX + 8, OY - 64, 'к озеру ←   склон', 12, MUTED)
 
 LEG = [(UNIT_C, 'номер (1 и 2 этаж), цифра — его номер в корпусе'),
        (WOOD_C, 'глухая часть фасада над лестницей, в доске; экраны террас'),
-       (DOOR_C, 'входная дверь с улицы'), (PAVE_C, 'мощёная дорожка вдоль входов, 3 м'), (DECK_C, 'терраса 1 этажа, 3 м'),
-       (None, 'пунктир — край балкона 2 этажа (1,5 м)'), ((240, 190, 80), 'фонари-столбики'), (TREE_C, 'ели и сосны'),
+       (DOOR_C, 'входная дверь с улицы'), (PAVE_C, 'мощёная дорожка вдоль входов, 3 м'), (DECK_C, 'терраса 1 этажа, 3,9 м'),
+       (None, 'пунктир — край балкона 2 этажа (1,95 м)'), ((240, 190, 80), 'фонари-столбики'), (TREE_C, 'ели и сосны'),
        (ROCK_C, 'валуны'), (CAR_C, 'брошенные машины на парковке')]
 ly = 890
 for c, s_ in LEG:
@@ -202,7 +205,7 @@ for c, s_ in LEG:
     ly += 25
 
 # ================================================================ Б, В. Номер: 1 и 2 этаж (план развёрнут в прямоугольник)
-S_U = 44.0
+S_U = 38.0
 
 
 def unit_frame(V, floor):
@@ -214,7 +217,7 @@ def unit_frame(V, floor):
     for y0, y1 in ((-F, 0), (D, D + F)):
         V.rect(0, y0, SW, y1, fill=WOOD_C, outline=INK)                          # глухая часть в доске (над лестницей)
         V.rect(SW, y0, L, y1, fill=(214, 232, 246), outline=INK)                 # витраж
-        for x in range(3, 10, 2):
+        for x in range(3, int(L), 2):
             V.line([(x + 0.0, y0), (x + 0.0, y1)], color=GLASS_C)
 
 
@@ -233,7 +236,7 @@ def door_arc(V, x, y, w, ang0, hinge_left=True):
 def stair(V, upper):
     """П-образная лестница у стены: марш 1 у прихожей вверх к террасе, площадка, марш 2 обратно ко входу."""
     n = sg.RISERS // 2 - 1                       # проступей в марше
-    y0, y1 = 1.2, 1.2 + n * sg.STEP_RUN
+    y0, y1 = sg.STAIR_V0, sg.STAIR_V0 + n * sg.STEP_RUN
     xa0, xa1 = sg.STAIR_W - sg.FLIGHT_W, sg.STAIR_W   # марш 1 — у прихожей
     xb0, xb1 = 0.0, sg.FLIGHT_W                       # марш 2 — у стены
     for k in range(n + 1):
@@ -254,92 +257,98 @@ def furniture_rect(V, x0, y0, x1, y1, label=None, size=11):
         V.text((x0 + x1) / 2, (y0 + y1) / 2, label, size, MUTED)
 
 
-B = View(700, 150, -1.0, 10.6, S_U)
-title(700, 70, 'Б. Номер, 1 этаж — 10 × 6 м по внутренним стенам (≈ 60 м²)', 17)
-d.text((700, 96), 'внизу — фасад входа (улица), вверху — фасад террасы; на дуге номер — клин', font=font(13), fill=MUTED)
-# улица, терраса
-B.rect(-0.3, -3.4, 10.3, -0.4, fill=PAVE_C, outline=None)
-B.text(5.0, -2.0, 'мощёная дорожка вдоль фасада входа — 3 м, фонари-столбики', 12, MUTED)
-B.rect(-0.3, 6.4, 10.3, 9.4, fill=DECK_C, outline=None)
-for x in (-0.3, 10.15):
-    B.rect(x, 6.4, x + 0.15, 8.6, fill=WOOD_C, outline=None)       # экраны террасы — укрытие
+L_, D_, F_ = sg.UNIT_LEN, sg.UNIT_DEPTH, sg.FACADE
+SIZES = {'HAL': (sg.WC_U[0] - sg.STAIR_W, sg.UTIL_V), 'WC': (sg.WC_U[1] - sg.WC_U[0], sg.UTIL_V),
+         'KIT': (L_ - sg.WC_U[1], sg.UTIL_V), 'LIV': (L_ - sg.STAIR_W, D_ - sg.UTIL_V), 'CLO': (sg.STAIR_W, D_ - sg.CLOSET_V),
+         'HL2': (sg.HALL_U - sg.STAIR_W, D_), 'CAB': (sg.BATH_U - sg.HALL_U, sg.UTIL_V), 'BTH': (L_ - sg.BATH_U, sg.UTIL_V),
+         'BED': (L_ - sg.HALL_U, D_ - sg.UTIL_V), 'WRD': (sg.STAIR_W, D_ - sg.CLOSET_V)}
+
+
+def room_labels(V, floor):
+    """Название и размер помещения по разбивке номера (у больших — и площадь)."""
+    for code, (name, u, v) in sg.UNIT_ROOMS[floor].items():
+        w, h = SIZES[code]
+        big = code in ('LIV', 'BED')
+        small = code in ('CLO', 'WRD', 'HL2')
+        V.text(u, v + 0.3, name, 11 if small else 13, INK, big)
+        size = f'{w:.2f} × {h:.2f}' + (f' ≈ {w * h:.0f} м²' if big else '')
+        V.text(u, v - 0.3, size.replace('.', ','), 11, MUTED)
+
+
+def dims(V, items):
+    for x0, x1, y, lab in items:
+        V.line([(x0, y), (x1, y)], color=MUTED)
+        V.line([(x0, y - 0.15), (x0, y + 0.15)], color=MUTED)
+        V.line([(x1, y - 0.15), (x1, y + 0.15)], color=MUTED)
+        V.text((x0 + x1) / 2, y + 0.25, lab.replace('.', ','), 12, MUTED, False, 'mb')
+
+
+TOP_V = D_ + F_ + sg.TERRACE + 0.6
+B = View(700, 150, -1.0, TOP_V, S_U)
+title(700, 70, f'Б. Номер, 1 этаж — {L_:.0f} × {D_:.1f} м по внутренним стенам (≈ {L_ * D_:.0f} м²)'.replace('.', ','), 17)
+d.text((700, 96), 'внизу — фасад входа (улица), вверху — фасад террасы; на дуге номер — клин; лист v01 × 1,3',
+       font=font(13), fill=MUTED)
+B.rect(-0.3, -sg.PATH_W - 0.4, L_ + 0.3, -0.4, fill=PAVE_C, outline=None)
+B.text(L_ / 2, -2.0, 'мощёная дорожка вдоль фасада входа — 3 м, фонари-столбики', 12, MUTED)
+B.rect(-0.3, D_ + F_, L_ + 0.3, D_ + F_ + sg.TERRACE, fill=DECK_C, outline=None)
+for x in (-0.3, L_ + 0.15):
+    B.rect(x, D_ + F_, x + 0.15, D_ + F_ + 2.2, fill=WOOD_C, outline=None)       # экраны террасы — укрытие
 unit_frame(B, 1)
 stair(B, False)
-partition(B, [(sg.STAIR_W, 1.2), (sg.STAIR_W, 4.9)])
-partition(B, [(0, 4.9), (sg.STAIR_W, 4.9)])
-partition(B, [(5.0, 0), (5.0, 2.6), (7.4, 2.6), (7.4, 0)])
-# входная дверь, двери, раздвижная к террасе
-B.rect(3.0, -0.4, 3.0 + sg.DOOR_W, 0, fill=(30, 30, 34), outline=None)
-door_arc(B, 3.0, 0.0, sg.DOOR_W, 0.0)
-door_arc(B, 5.0, 1.35, sg.INNER_DOOR_W, 90.0, False)
-B.rect(5.2, 6.0, 7.6, 6.4, fill=(170, 210, 236), outline=DOOR_C, width=2)
-B.text(6.4, 6.9, 'раздвижная', 11, DOOR_C)
-# мебель и подписи
-furniture_rect(B, 7.4, 0.0, 10.0, 0.65)
-furniture_rect(B, 9.35, 0.65, 10.0, 2.2)
-B.text(8.7, 1.6, 'кухня', 13, INK, True)
-furniture_rect(B, 6.4, 0.1, 7.3, 1.0, 'душ', 10)
-furniture_rect(B, 5.15, 0.15, 5.75, 0.85)
-B.text(6.2, 1.9, 'с/у', 13, INK, True)
-B.text(3.75, 1.5, 'прихожая', 13, INK, True)
+for u0, v0, u1, v1 in sg.UNIT_WALLS[1]:
+    partition(B, [(u0, v0), (u1, v1)])
+B.rect(sg.ENTRY_DOOR_U[0], -F_, sg.ENTRY_DOOR_U[1], 0, fill=(30, 30, 34), outline=None)
+door_arc(B, sg.ENTRY_DOOR_U[0], 0.0, sg.DOOR_W, 0.0)
+door_arc(B, sg.WC_U[0], sg.WC_DOOR_V[0], sg.INNER_DOOR_W, 90.0, False)
+B.rect(sg.SLIDE_DOOR_U[0], D_, sg.SLIDE_DOOR_U[1], D_ + F_, fill=(170, 210, 236), outline=DOOR_C, width=2)
+B.text(sum(sg.SLIDE_DOOR_U) / 2, D_ + F_ + 0.45, 'раздвижная', 11, DOOR_C)
+furniture_rect(B, sg.WC_U[1], 0.0, L_, 0.65)
+furniture_rect(B, L_ - 0.65, 0.65, L_, 2.6)
+furniture_rect(B, sg.WC_U[1] - 1.2, 0.1, sg.WC_U[1] - 0.15, 1.05, 'душ', 10)
+furniture_rect(B, sg.WC_U[0] + 0.15, 0.15, sg.WC_U[0] + 0.75, 0.85)
+furniture_rect(B, 3.4, D_ - 1.1, 6.4, D_ - 0.2, 'диван', 11)
+furniture_rect(B, 9.6, 4.4, 11.8, 5.4, 'стол', 11)
+furniture_rect(B, 1.5, D_ + F_ + 1.0, 4.6, D_ + F_ + 2.0, 'диван', 11)
+furniture_rect(B, 5.4, D_ + F_ + 1.1, 6.6, D_ + F_ + 1.9)
 B.text(1.2, 0.6, 'площадка', 11, MUTED)
-furniture_rect(B, 3.0, 5.0, 5.4, 5.9, 'диван', 11)
-furniture_rect(B, 7.6, 3.6, 9.4, 4.6, 'стол', 11)
-B.text(5.0, 4.2, 'гостиная-столовая ≈ 26 м²', 13, INK, True)
-B.text(1.2, 5.45, 'шкаф', 11, MUTED)
-furniture_rect(B, 1.5, 7.2, 4.2, 8.1, 'диван', 11)
-furniture_rect(B, 5.0, 7.3, 6.0, 8.0)
-B.text(7.8, 7.9, 'терраса 3 м', 13, INK, True)
-# размеры
-for x0, x1, y, lab in ((0, 10, -4.0, '10,0'), (0, 2.45, 10.0, '2,45 лестница'), (2.45, 10, 10.0, '7,55')):
-    B.line([(x0, y), (x1, y)], color=MUTED)
-    B.line([(x0, y - 0.15), (x0, y + 0.15)], color=MUTED)
-    B.line([(x1, y - 0.15), (x1, y + 0.15)], color=MUTED)
-    B.text((x0 + x1) / 2, y + 0.25, lab, 12, MUTED, False, 'mb')
-B.line([(10.8, 0), (10.8, 6)], color=MUTED)
-B.text(10.95, 3.0, '6,0', 12, MUTED, False, 'lm')
+room_labels(B, 1)
+B.text(L_ - 2.4, D_ + F_ + sg.TERRACE / 2 + 0.6, f'терраса {sg.TERRACE:.1f} м'.replace('.', ','), 13, INK, True)
+dims(B, ((0, L_, -4.0, f'{L_:.1f}'), (0, sg.STAIR_W, TOP_V - 0.45, f'{sg.STAIR_W:.2f} лестница'),
+         (sg.STAIR_W, L_, TOP_V - 0.45, f'{L_ - sg.STAIR_W:.2f}')))
+B.line([(L_ + 0.8, 0), (L_ + 0.8, D_)], color=MUTED)
+B.text(L_ + 0.95, D_ / 2, f'{D_:.1f}'.replace('.', ','), 12, MUTED, False, 'lm')
 
-C = View(1330, 150, -1.0, 10.6, S_U)
-title(1330, 70, 'В. Номер, 2 этаж (≈ 60 м²)', 17)
-d.text((1330, 96), 'над фасадом входа окна, над террасой — балкон 1,5 м со стеклянным ограждением', font=font(13), fill=MUTED)
-C.rect(-0.3, 6.4, 10.3, 7.9, fill=DECK_C, outline=None)
-C.line([(-0.3, 7.9), (10.3, 7.9)], color=GLASS_C, width=4)
-for x in (-0.3, 10.15):
-    C.rect(x, 6.4, x + 0.15, 7.9, fill=WOOD_C, outline=None)
+C = View(1330, 150, -1.0, TOP_V, S_U)
+title(1330, 70, f'В. Номер, 2 этаж (≈ {L_ * D_:.0f} м²)', 17)
+d.text((1330, 96), f'над фасадом входа окна, над террасой — балкон {sg.BALCONY:.2f} м со стеклянным ограждением'.replace('.', ','),
+       font=font(13), fill=MUTED)
+C.rect(-0.3, D_ + F_, L_ + 0.3, D_ + F_ + sg.BALCONY, fill=DECK_C, outline=None)
+C.line([(-0.3, D_ + F_ + sg.BALCONY), (L_ + 0.3, D_ + F_ + sg.BALCONY)], color=GLASS_C, width=4)
+for x in (-0.3, L_ + 0.15):
+    C.rect(x, D_ + F_, x + 0.15, D_ + F_ + sg.BALCONY, fill=WOOD_C, outline=None)
 unit_frame(C, 2)
 stair(C, True)
-HX = 3.75                                    # холл — полоса 1,3 м вдоль лестницы (1,0 × 1,3)
-partition(C, [(0, 4.9), (sg.STAIR_W, 4.9)])
-partition(C, [(HX, 0), (HX, 0.8)])
-partition(C, [(HX, 0.8 + sg.INNER_DOOR_W), (HX, 3.2)])
-partition(C, [(HX, 3.2 + sg.INNER_DOOR_W), (HX, 4.9)])
-partition(C, [(HX, 2.6), (8.0, 2.6)])
-partition(C, [(8.0 + sg.INNER_DOOR_W, 2.6), (10.0, 2.6)])
-partition(C, [(6.9, 0), (6.9, 2.6)])
-door_arc(C, HX, 0.8, sg.INNER_DOOR_W, 90.0, False)
-door_arc(C, HX, 3.2, sg.INNER_DOOR_W, 90.0, False)
-door_arc(C, 8.0, 2.6, sg.INNER_DOOR_W, 0.0)
-C.rect(5.2, 6.0, 7.6, 6.4, fill=(170, 210, 236), outline=DOOR_C, width=2)
-furniture_rect(C, 7.0, 0.1, 8.7, 0.85, 'ванна', 10)
-furniture_rect(C, 9.2, 0.15, 9.85, 0.85)
-C.text(8.45, 1.75, 'ванная', 13, INK, True)
-C.text(3.1, 2.2, 'холл', 12, INK, True)
-furniture_rect(C, 5.6, 0.1, 6.8, 0.75, 'стол', 10)
-C.text(5.3, 1.6, 'кабинет ≈ 8 м²', 12, INK, True)
-furniture_rect(C, 6.4, 3.4, 8.0, 5.4, 'кровать', 11)
-C.text(5.1, 4.4, 'спальня', 13, INK, True)
-C.text(5.1, 3.95, '≈ 21 м²', 12, INK)
-C.text(1.85, 5.45, 'гардероб', 11, MUTED)
+for u0, v0, u1, v1 in sg.UNIT_WALLS[2]:
+    partition(C, [(u0, v0), (u1, v1)])
+door_arc(C, sg.HALL_U, sg.CAB_DOOR_V[0], sg.INNER_DOOR_W, 90.0, False)
+door_arc(C, sg.HALL_U, sg.BED_DOOR_V[0], sg.INNER_DOOR_W, 90.0, False)
+door_arc(C, sg.BATH_DOOR_U[0], sg.UTIL_V, sg.INNER_DOOR_W, 0.0)
+C.rect(sg.SLIDE_DOOR_U[0], D_, sg.SLIDE_DOOR_U[1], D_ + F_, fill=(170, 210, 236), outline=DOOR_C, width=2)
+furniture_rect(C, sg.BATH_U + 0.4, 0.1, sg.BATH_U + 2.1, 0.85, 'ванна', 10)
+furniture_rect(C, L_ - 0.8, 0.15, L_ - 0.15, 0.85)
+furniture_rect(C, sg.HALL_U + 1.2, 0.1, sg.HALL_U + 2.6, 0.75, 'стол', 10)
+furniture_rect(C, 9.6, 4.4, 11.6, 6.6, 'кровать', 11)
 C.text(1.2, 0.6, 'площадка', 11, MUTED)
-C.text(7.8, 7.15, 'балкон 1,5 м', 13, INK, True)
+room_labels(C, 2)
+C.text(L_ - 2.4, D_ + F_ + sg.BALCONY / 2, f'балкон {sg.BALCONY:.2f} м'.replace('.', ','), 13, INK, True)
 
 # ================================================================ Г. Разрез поперёк ленты
-G = View(700, 900, -4.5, 9.2, 40.0)
+G = View(700, 900, -4.5, 9.2, 30.0)
 title(700, 830, 'Г. Разрез поперёк корпуса — по гостиной и спальне', 17)
 ff = sg.FLOOR_TO_FLOOR
 F, D = sg.FACADE, sg.UNIT_DEPTH
-G.rect(-4.5, -0.6, 11.2, 0, fill=(214, 206, 186), outline=None)       # земля
-G.line([(-4.5, 0), (11.2, 0)], width=2)
+G.rect(-4.5, -0.6, D + 9.0, 0, fill=(214, 206, 186), outline=None)       # земля
+G.line([(-4.5, 0), (D + 9.0, 0)], width=2)
 G.rect(-3.4, -0.05, -0.4, 0.0, fill=PAVE_C, outline=None)
 G.text(-1.9, -0.35, 'дорожка', 12, MUTED)
 z0 = 0.15
@@ -360,18 +369,18 @@ G.line([(-F - 0.15, z0 + 2.6), (-F - 0.15, z0 + 2.9)], color=(240, 190, 80), wid
 for z, lab in ((z0, f'+{z0:.2f}'), (z0 + ff, f'+{z0 + ff:.2f}'), (zr + 0.4, f'+{zr + 0.4:.2f} кровля')):
     G.line([(D + F + 3.2, z), (D + F + 3.6, z)], color=MUTED)
     G.text(D + F + 3.7, z, lab.replace('.', ','), 12, MUTED, False, 'lm')
-G.text(D + F + 1.5, z0 + 0.5, 'терраса 3 м', 12)
+G.text(D + F + 1.9, z0 + 0.5, f'терраса {sg.TERRACE:.1f} м'.replace('.', ','), 12)
 G.text(D + F + 0.75, z0 + ff + 1.45, 'балкон', 12)
 G.text(-2.2, z0 + 1.6, 'улица →', 12, MUTED)
 G.text(-2.2, z0 + 1.15, 'вход', 12, MUTED)
-G.text(D / 2, -0.35, f'6,0 + стены {F:.1f} × 2'.replace('.', ','), 12, MUTED)
+G.text(D / 2, -0.35, f'{D:.1f} + стены {F:.1f} × 2'.replace('.', ','), 12, MUTED)
 
 # ================================================================ Д. Числа и замечания
 notes = [
     ('Решения владельца', True),
     ('· две полудуги, соединённые краями; лента номеров, как на картинке', False),
-    ('· 2 этажа на номер; номер по внутренним стенам 10 м вдоль фасада', False),
-    ('  × 6 м в глубину; на дуге — клин 8,7…11,3 м', False),
+    ('· 2 этажа на номер; номер по внутренним стенам 10 × 6 м, в v02 —', False),
+    ('  весь номер × 1,3 (правило E): 13 м вдоль фасада × 7,8 м в глубину', False),
     ('· у каждого номера свой вход с улицы', False),
     ('· парковка между корпусами — от машины к любому номеру', False),
     ('· деревья только ели и сосны (берёз с картинки нет)', False),
@@ -379,7 +388,9 @@ notes = [
     ('· крыша недоступна; корпус на одном уровне', False),
     ('· вход — со стороны парковки, терраса и балкон — с другой', False),
     ('Предложение агента', True),
-    (f'· радиус оси ленты {sg.R:.1f} м, корпус с террасами ≈ 60 × 100 м'.replace('.', ','), False),
+    (f'· радиус оси ленты {sg.R:.1f} м, корпус с террасами ≈ 75 × 133 м;'.replace('.', ','), False),
+    (f'  на дуге номер — клин {math.radians(180 / 7) * (sg.R - sg.UNIT_DEPTH / 2) - sg.PARTY_WALL:.1f}…'
+     f'{math.radians(180 / 7) * (sg.R + sg.UNIT_DEPTH / 2) - sg.PARTY_WALL:.1f} м'.replace('.', ','), False),
     ('· у С-1 террасы смотрят на озеро и закат, у С-2 — в парк', False),
     (f'· потолок {sg.FLOOR_CLEAR} м, этаж {sg.FLOOR_TO_FLOOR:.1f} м, {sg.RISERS} подъёмов по {sg.STEP_RISE} м;'.replace('.', ','), False),
     (f'  дверь {sg.DOOR_W} × {sg.DOOR_H} м, марш {sg.FLIGHT_W} м (правило масштаба E)'.replace('.', ','), False),
