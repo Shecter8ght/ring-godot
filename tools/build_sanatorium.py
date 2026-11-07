@@ -1071,7 +1071,12 @@ S_LEVELS = {}
 for ox, oy, mirror, name in S_SITES:
     ex = sg.extent(ox, oy, mirror, sg.TERRACE + 0.5)
     S_LEVELS[name] = round(rect_stat(*[ex[0], ex[2], ex[1], ex[3]], field=H0) * 10) / 10
-COT_LEVELS = [round(rect_stat(cx - 7, cy - 6, cx + 7, cy + 6, field=H0) * 20) / 20 for cx, cy in COTTAGES]
+COT_ROT = PLAN['COT_ROT']
+UNFINISHED = PLAN['UNFINISHED']
+cot_pt, cot_rect = PLAN['cot_pt'], PLAN['cot_rect']
+COT_LEVELS = [round(rect_stat(*cot_rect(cx, cy, k, 7.0, -205.0, 21.0, -193.0), field=H0) * 20) / 20
+              for (cx, cy), k in zip(COTTAGES, COT_ROT)]
+UNF_LEVELS = [round(rect_stat(*cot_rect(u[0], u[1], u[2], 7.0, -205.0, 21.0, -193.0), field=H0) * 20) / 20 for u in UNFINISHED]
 HOZ_RECT = (94.0, 156.0, 146.0, 216.0)
 HOZ_LEVEL = round(rect_stat(*HOZ_RECT, field=H0) * 10) / 10
 SPORT_RECT = (96.0, 52.0, 140.0, 100.0)
@@ -1090,9 +1095,9 @@ pad_rect(*SPORT_RECT, SPORT_LEVEL, blend=(8, 8, 8, 8))
 pad_rect(*HOZ_RECT, HOZ_LEVEL, blend=(10, 10, 6, 6))
 PG_LEVEL = round(rect_stat(*PG_RECT) * 10) / 10
 pad_rect(*PG_RECT, PG_LEVEL, blend=(6, 10, 10, 10))
-for (cx, cy), lv in zip(COTTAGES, COT_LEVELS):
-    north = cy > -213
-    pad_rect(cx - 8.5, cy - 7.5, cx + 12.5, cy + 7.5, lv, blend=(6, 3 if north else 8, 6, 8 if north else 3))
+# v13: площадка под домом и у входа (подъезд, место для машины) — у жилых и у стройплощадок
+for pad_, lv in zip(PLAN['COT_PADS'], COT_LEVELS + UNF_LEVELS):
+    pad_rect(*pad_, lv, blend=(6, 6, 6, 6))
 # амфитеатр: оркестра и сцена на +32, вал за рядами на +36
 AMPH = SMALL['amphitheatre_rows']
 AC = (float(AMPH['center'][0]), float(AMPH['center'][1]))
@@ -1129,24 +1134,37 @@ BLD['spa'] = spa
 
 # ---- коттеджи: одна планировка на все 10, южный ряд зеркально; этаж 3,4
 COT = {int(k): copy_floor(v) for k, v in SMALL['коттедж'].items()}
+def rot_floor(fl, cx, cy, k):
+    """Этаж коттеджа с листа (центр дома (14, −199)) — поворот на k × 90° и перенос на участок (схема v13)."""
+    out = {'rooms': [], 'doors': []}
+    for r in fl['rooms']:
+        out['rooms'].append({**r, 'rect': list(cot_rect(cx, cy, k, *r['rect']))})
+    for d in fl['doors']:
+        o, c, a, b = d['wall']
+        p0, q0 = ((a, c), (b, c)) if o == 'h' else ((c, a), (c, b))
+        P0, Q0 = cot_pt(cx, cy, k, *p0), cot_pt(cx, cy, k, *q0)
+        if abs(P0[1] - Q0[1]) < 1e-6:
+            w = ['h', P0[1], min(P0[0], Q0[0]), max(P0[0], Q0[0])]
+        else:
+            w = ['v', P0[0], min(P0[1], Q0[1]), max(P0[1], Q0[1])]
+        out['doors'].append({**d, 'wall': w})
+    return out
+
+
+def rot_vec(v, k):
+    x, y = v
+    for _ in range(k % 4):
+        x, y = -y, x
+    return (x, y)
+
+
 cottages = []
-for i, ((cx, cy), lv) in enumerate(zip(COTTAGES, COT_LEVELS)):
-    north = cy > -213
-    # планировка листа — дом с центром (14, −199); северный ряд — сдвиг, южный — зеркало: y' = cy − (y + 199)
-    fl = {f: shift_mirror(COT[f], cx - 14.0, None) for f in COT}
-    for f in fl:
-        for r in fl[f]['rooms']:
-            x0, y0, x1, y1 = r['rect']
-            r['rect'] = [x0, y0 + cy + 199.0, x1, y1 + cy + 199.0] if north else [x0, cy - (y1 + 199.0), x1, cy - (y0 + 199.0)]
-        for d in fl[f]['doors']:
-            o, c, a, b = d['wall']
-            if north:
-                d['wall'] = ['h', c + cy + 199.0, a, b] if o == 'h' else ['v', c, a + cy + 199.0, b + cy + 199.0]
-            else:
-                d['wall'] = ['h', cy - (c + 199.0), a, b] if o == 'h' else ['v', c, cy - (b + 199.0), cy - (a + 199.0)]
+for i, ((cx, cy), lv, k) in enumerate(zip(COTTAGES, COT_LEVELS, COT_ROT)):
+    # планировка листа — дом с центром (14, −199); v13: дом развёрнут входом к своему подъезду
+    fl = {f: rot_floor(COT[f], cx, cy, k) for f in COT}
     b = Building(f'cot{i + 1:02d}', f'Коттедж {i + 1}', fl, {1: lv, 2: lv + 3.4}, {1: 3.4, 2: 3.4}, ext_t=SMALL_EXT_T,
                  mat_ext='wood_dark', glass={'LIV'}, start_door=0)
-    b.cot = (cx, cy, north)
+    b.cot = (cx, cy, k)
     cottages.append(b)
     BLD[b.bid] = b
 
@@ -1471,13 +1489,13 @@ for rid, north in (('KUL1', True), ('KUL2', False)):
     amph.hubs[(-1, rid)] = F.pt(0.7, (x1 - x0) * 0.75)
     amph.hubs[(0, rid)] = F.pt(0.7, (x1 - x0) * 0.75)
 
-# коттедж: прямая лестница у западной стены (у южного ряда — зеркально), 20 подъёмов по 0,17
+# коттедж: прямая лестница у западной стены листа (v13 — повёрнута вместе с домом), 20 подъёмов по 0,17
+STR_LOCAL = [r['rect'] for r in COT[1]['rooms'] if r['id'] == 'STR'][0]
 for b in cottages:
-    cx, cy, north = b.cot
-    st = b.room(1, 'STR')
-    x0, y0, x1, y1 = st['rect']
+    cx, cy, k = b.cot
+    x0, y0, x1, y1 = STR_LOCAL
     z_lo, z_hi = b.levels[1], b.levels[2]
-    F = RectFrame((x0, y0), (0.0, 1.0), (1.0, 0.0)) if north else RectFrame((x0, y1), (0.0, -1.0), (1.0, 0.0))
+    F = RectFrame(cot_pt(cx, cy, k, x0, y0), rot_vec((0.0, 1.0), k), rot_vec((1.0, 0.0), k))
     A = y1 - y0
     n, run, a0, w = 20, 0.25, 1.0, 1.17
     L = (n - 1) * run
@@ -1945,7 +1963,7 @@ for pts, w in PLAN['ROADS']:
 strip(cot_xy[:COT_BROW_I + 1], 2.4, 'trail_strip', 0.06)       # тропа от коттеджей по плато
 CIRCLE = tuple(PLAN['CIRCLE'])          # v11: круг с фонтаном у главного корпуса
 TURN = tuple(PLAN['TURN'])              # разворот у «Ресторана и спа»
-for cx_, cy_, rr in (CIRCLE, TURN, (4.0, -213.0, 6.0), (136.0, -213.0, 6.0)):
+for cx_, cy_, rr in [CIRCLE, TURN] + [tuple(t_) for t_ in PLAN['TURNAROUNDS']]:
     n = 24
     for k in range(n):
         t0, t1 = 2 * math.pi * k / n, 2 * math.pi * (k + 1) / n
@@ -1999,12 +2017,10 @@ def lot(x0, y0, n_near, n_far, along_x):
 
 LOTS = [lot(x0_, y0_, n0_, n1_, True) for x0_, y0_, n0_, n1_ in PLAN['MAIN_LOTS']] + \
        [lot(PLAN['S_LOT_X0'], PLAN['S_LOT_Y0'], 20, 20, False)]
-for cx_, cy_ in COTTAGES:
-    px0 = cx_ + 8.0
-    py0, py1 = (-210.0, -204.0) if cy_ > -213 else (-222.0, -216.0)
-    O.quad('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ((px0, py0), (px0 + 3.5, py0), (px0 + 3.5, py1), (px0, py1))])
+for (bx0_, by0_, bx1_, by1_), odd_ in PLAN['COT_BAYS']:          # место для машины у входа (v13)
+    O.quad('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ((bx0_, by0_), (bx1_, by0_), (bx1_, by1_), (bx0_, by1_))])
     if CAR_RNG.random() < 0.5:
-        CARS.append((px0 + 1.75, (py0 + py1) / 2, 0.0 + CAR_RNG.uniform(-4, 4)))
+        CARS.append(((bx0_ + bx1_) / 2, (by0_ + by1_) / 2, (90.0 if odd_ else 0.0) + CAR_RNG.uniform(-4, 4)))
 CAR_COLORS = ['car_a', 'car_b', 'car_c', 'car_d']
 for i, (cx_, cy_, ang) in enumerate(CARS):
     g = min(h_at(cx_ + dx_, cy_ + dy_) for dx_ in (-2, 2) for dy_ in (-2, 2))
@@ -2025,6 +2041,9 @@ for xa, xb, y in ((SX0, SITE1[0] + sg.R - sg.HALF_T - sg.PATH_W, SITE1[1] + sg.R
     strip([(xa, y), (xb, y)], sg.PATH_W, 'paving', 0.07)
 strip([(8.0, -9.0), (3.0, -42.0)], 3.0, 'paving', 0.07)
 PAVED = [([tuple(q) for q in pts_], w_) for pts_, w_ in PLAN['PATHS']]   # v11: дорожки у главного корпуса
+for pts_, w_ in PLAN['TRACKS']:                                          # v13: грунтовки к стройплощадкам
+    strip([tuple(q) for q in pts_], w_, 'trail_strip', 0.06)
+    PAVED.append(([tuple(q) for q in pts_], w_))
 for pts_, w_ in PAVED:
     strip(pts_, w_, 'paving', 0.07)
 strip([(-80.0, -16.0), (-86.0, -20.0)], 3.0, 'paving', 0.07)
@@ -2397,6 +2416,12 @@ for bb in BLD.values():
             BLOCK.append((x0 - 2.5, y0 - 2.5, x1 + 2.5, y1 + 2.5))
 for rct in CAS_ZONE + [PODIUM, RTER, PG_RECT, SPORT_RECT, HOZ_RECT, (-100.0, -180.0, -50.0, -138.0)] + LOTS:
     BLOCK.append((rct[0] - 2.0, rct[1] - 2.0, rct[2] + 2.0, rct[3] + 2.0))
+for pad_ in PLAN['COT_PADS']:                                   # v13: дома, стройплощадки и места у входа
+    BLOCK.append((pad_[0] - 3.0, pad_[1] - 3.0, pad_[2] + 3.0, pad_[3] + 3.0))
+for u_ in UNFINISHED:                                           # стройматериалы и бытовка вокруг стройплощадки
+    BLOCK.append((u_[0] - 15.0, u_[1] - 15.0, u_[0] + 15.0, u_[1] + 15.0))
+for gx_, gy_ in PLAN['GAZEBOS_PARK']:
+    BLOCK.append((gx_ - 5.0, gy_ - 5.0, gx_ + 5.0, gy_ + 5.0))
 for ox, oy, mirror, name in S_SITES:
     e_ = sg.extent(ox, oy, mirror, sg.TERRACE + 1.0)
     BLOCK.append((e_[0], e_[2], e_[1], e_[3]))
@@ -2672,7 +2697,7 @@ PLACE_SPOTS = {
     8: ((SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R), (SITE2[0], SITE2[1] - sg.R)),
     9: ((S_AISLE, S_LOT[1] - 18.0), (S_AISLE, S_LOT[1] + 30.0)),
     10: ((118.0, 3.0), (60.0, 16.0)), 11: ((S_AISLE, S_LOT[1] + 4.0), (S_AISLE, S_LOT[3])), 12: ((90.0, 196.0), (112.0, 190.0)),
-    13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((70.0, -213.0), (20.0, -213.0)),
+    13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((54.0, -197.5), (10.0, -215.0)),
     16: ((-82.0, 0.0), (-160.0, 0.0)), 17: ((-90.0, -106.5), (-110.0, -130.0)),
     20: ((-174.0, 200.0), (-205.0, 196.0)), 21: ((-158.0, -160.0), (-192.0, -160.0)), 22: ((-176.0, 10.0), (-245.0, 10.0)),
     23: ((-3.0, -123.0), (30.0, -123.0)),
@@ -2681,6 +2706,138 @@ PLACE_SPOTS = {
 for key_ in ('pine', 'pine_slim', 'spruce_a', 'spruce_b', 'spruce_young'):
     TREES[key_] = [t_ for t_ in TREES[key_] if all(math.hypot(t_[0] - sp_[0][0], -t_[2] - sp_[0][1]) > 2.5
                                                     for sp_ in PLACE_SPOTS.values())]
+# ================================================================ v13: СТРОЙПЛОЩАДКИ, ВАЛУНЫ, БЕСЕДКИ
+# недостроенные коттеджи (владелец): фундамент; стены по пояс; коробка первого этажа с лесами и частью второго.
+# Стены — кирпич 0,4 м кусками разной высоты, проёмы окон и дверей; вокруг — поддоны кирпича, штабели досок и
+# блоков, бетонные кольца, куча песка, арматура, контейнер, бытовка (координаты — по листу коттеджа, с поворотом).
+UNF_WALLS = [  # (x0, y0, x1, y1) кусков стен по листу коттеджа: юг с дверью, север с выходом на террасу, запад, восток
+    (7.0, -205.0, 8.3, -205.0), (9.7, -205.0, 12.0, -205.0), (13.2, -205.0, 15.8, -205.0), (17.0, -205.0, 21.0, -205.0),
+    (7.0, -193.0, 11.0, -193.0), (12.2, -193.0, 15.6, -193.0), (18.4, -193.0, 21.0, -193.0),
+    (7.0, -205.0, 7.0, -201.0), (7.0, -199.8, 7.0, -193.0),
+    (21.0, -205.0, 21.0, -204.2), (21.0, -202.8, 21.0, -197.0), (21.0, -195.8, 21.0, -193.0),
+    (11.0, -205.0, 11.0, -202.6), (11.0, -201.4, 11.0, -199.0), (12.0, -199.0, 16.0, -199.0)]
+urng = random.Random(53)
+
+
+def ubox(cx, cy, k, lx0, ly0, lx1, ly1, z0, z1, m, solid=True):
+    O.box(*cot_rect(cx, cy, k, lx0, ly0, lx1, ly1), z0, z1, m, solid)
+
+
+def useg(cx, cy, k, a, b, t, z0, z1, m, solid=True):
+    O.seg(cot_pt(cx, cy, k, *a), cot_pt(cx, cy, k, *b), t, z0, z1, m, solid, ext=t / 2)
+
+
+UNF_SITES = []
+for (ux, uy, uk, kind), lv in zip(UNFINISHED, UNF_LEVELS):
+    hr = cot_rect(ux, uy, uk, 7.0, -205.0, 21.0, -193.0)
+    base = rect_stat(*hr, fn=np.min) - 0.4
+    top = lv + 0.35                                             # верх фундаментной плиты
+    O.box(hr[0] - 0.3, hr[1] - 0.3, hr[2] + 0.3, hr[3] + 0.3, base, top, 'struct')
+    if kind == 'foundation':                                    # плита и выпуски арматуры по углам и стенам
+        for q in ((7.2, -204.8), (20.8, -204.8), (7.2, -193.2), (20.8, -193.2), (14.0, -204.8), (14.0, -193.2), (11.0, -199.0)):
+            ux_, uy_ = cot_pt(ux, uy, uk, *q)
+            O.box(ux_ - 0.2, uy_ - 0.2, ux_ + 0.2, uy_ + 0.2, top, top + 0.9, 'metal', solid=False)
+        ubox(ux, uy, uk, 9.0, -203.0, 11.4, -201.4, top, top + 1.2, 'brick')         # блоки на плите
+        ubox(ux, uy, uk, 15.0, -197.0, 17.5, -195.6, top, top + 0.9, 'brick')
+    else:
+        for a_x, a_y, b_x, b_y in UNF_WALLS:
+            h_ = 3.4 if kind == 'frame' else urng.choice((0.9, 1.3, 1.8, 2.2, 2.6))
+            useg(ux, uy, uk, (a_x, a_y), (b_x, b_y), 0.4, top, top + h_, 'brick')
+        if kind == 'frame':                                     # перекрытие над половиной дома, стены второго этажа кусками
+            ubox(ux, uy, uk, 7.0, -205.0, 14.0, -193.0, top + 3.4, top + 3.7, 'slab')
+            for a_x, a_y, b_x, b_y in UNF_WALLS[:2] + UNF_WALLS[4:5] + UNF_WALLS[7:9]:
+                useg(ux, uy, uk, (a_x, a_y), (min(b_x, 14.0), b_y), 0.4, top + 3.7, top + 3.7 + urng.choice((1.0, 1.8, 2.6)), 'brick')
+            for j_ in range(7):                                 # леса вдоль северной стены: стойки и два настила
+                lx_ = 7.0 + j_ * 14.0 / 6.0
+                for ly_ in (-192.6, -191.3):
+                    x_, y_ = cot_pt(ux, uy, uk, lx_, ly_)
+                    O.box(x_ - 0.04, y_ - 0.04, x_ + 0.04, y_ + 0.04, top - 0.3, top + 6.6, 'metal', solid=False)
+            for zz_ in (2.0, 4.1):
+                ubox(ux, uy, uk, 7.0, -192.7, 21.0, -191.2, top + zz_, top + zz_ + 0.06, 'wood')
+    # стройматериалы и бытовка вокруг
+    for (lx_, ly_, w_, d_, h_, m_) in ((3.0, -208.0, 1.0, 1.2, 0.95, 'brick'), (4.6, -208.0, 1.0, 1.2, 0.95, 'brick'),
+                                        (3.0, -204.0, 1.0, 1.2, 1.9, 'brick'), (25.0, -201.0, 1.1, 4.2, 0.6, 'wood'),
+                                        (25.0, -196.0, 1.6, 2.4, 1.2, 'struct'), (14.0, -210.0, 6.0, 0.45, 0.35, 'metal'),
+                                        (26.5, -190.0, 2.2, 4.2, 1.5, 'metal'), (-1.5, -198.0, 2.5, 6.0, 2.7, 'kiosk')):
+        x_, y_ = cot_pt(ux, uy, uk, lx_, ly_)
+        wx_, wy_ = (w_, d_) if uk % 2 == 0 else (d_, w_)
+        g_ = min(h_at(x_ + sx_ * wx_ / 2, y_ + sy_ * wy_ / 2) for sx_ in (-1, 1) for sy_ in (-1, 1))
+        O.box(x_ - wx_ / 2, y_ - wy_ / 2, x_ + wx_ / 2, y_ + wy_ / 2, g_ - 0.1, g_ + h_, m_)
+    for lx_, ly_ in ((23.5, -208.5), (25.3, -208.5)):          # бетонные кольца
+        x_, y_ = cot_pt(ux, uy, uk, lx_, ly_)
+        O.cyl(x_, y_, h_at(x_, y_) - 0.1, h_at(x_, y_) + 0.9, 0.75, 'struct', sides=12)
+    x_, y_ = cot_pt(ux, uy, uk, 0.0, -211.0)                    # куча песка
+    for r_, z0_, z1_ in ((2.4, -0.2, 0.45), (1.6, 0.45, 0.95), (0.8, 0.95, 1.35)):
+        O.cyl(x_, y_, h_at(x_, y_) + z0_, h_at(x_, y_) + z1_, r_, 'trail', sides=10)
+    lab_ = {'foundation': 'стройка: фундамент', 'walls': 'стройка: стены по пояс', 'frame': 'стройка: коробка в лесах'}[kind]
+    O.label(ux, uy, top + 5.0, lab_, 1.2, 'building')
+    UNF_SITES.append({'at': [r3(ux), r3(-uy)], 'kind': kind, 'level': r3(top)})
+
+# большие камни и валуны (владелец): на склоне крупные, у мыса гуще, в парке плато — поменьше; не на дорогах,
+# дорожках, тропах, площадках, постройках и не ближе 2,5 м к деревьям и точкам мест; на набережной и молу нет
+rock_rng = random.Random(61)
+tree_pts = [(t_[0], -t_[2]) for key_ in ('pine', 'pine_slim', 'spruce_a', 'spruce_b', 'spruce_young') for t_ in TREES[key_]]
+ROCKS = []
+
+
+def rock_ok(x, y, clear):
+    if not PLAN['in_poly'](x, y, PLAN['boundary']) or blocked(x, y) or near_road(x, y, 2.5):
+        return False
+    if x < float(PLAN['foot_x'](y)) + 2.0 and y > -205.0:          # набережная и пляж у маршрутов — свободны
+        return False
+    if any(math.hypot(x - sp_[0][0], y - sp_[0][1]) < 3.0 for sp_ in PLACE_SPOTS.values()):
+        return False
+    if any(math.hypot(x - tx_, y - ty_) < clear for tx_, ty_ in tree_pts):
+        return False
+    return all(math.hypot(x - rx_, y - ry_) > clear + 2.0 for rx_, ry_, _ in ROCKS)
+
+
+for zone_, n_, size_ in (('slope', 34, (2.0, 4.2)), ('cape', 14, (1.8, 3.8)), ('park', 30, (1.3, 2.6))):
+    placed_ = 0
+    for _ in range(4000):
+        if placed_ >= n_:
+            break
+        if zone_ == 'cape':
+            x_, y_ = rock_rng.uniform(-150.0, -40.0), rock_rng.uniform(-258.0, -200.0)
+        else:
+            y_ = rock_rng.uniform(-250.0, 240.0)
+            if zone_ == 'slope':
+                x_ = rock_rng.uniform(float(PLAN['foot_x'](y_)) + 3.0, float(PLAN['brow_x'](y_)) - 3.0)
+            else:
+                x_ = rock_rng.uniform(float(PLAN['brow_x'](y_)) + 5.0, 140.0)
+        if not rock_ok(x_, y_, 2.5):
+            continue
+        L_ = rock_rng.uniform(*size_)
+        ROCKS.append((x_, y_, L_))
+        placed_ += 1
+for x_, y_, L_ in ROCKS:
+    ang_ = rock_rng.uniform(0, 180)
+    W_ = L_ * rock_rng.uniform(0.6, 0.85)
+    H_ = L_ * rock_rng.uniform(0.45, 0.7)
+    base_ = min(h_at(x_ + dx_, y_ + dy_) for dx_ in (-L_ / 2, L_ / 2) for dy_ in (-L_ / 2, L_ / 2)) - 0.4
+    O.obox(x_, y_, L_, W_, base_, base_ + H_, ang_, 'rock')
+    a2_ = math.radians(ang_ + 60)
+    O.obox(x_ + math.cos(a2_) * L_ * 0.25, y_ + math.sin(a2_) * L_ * 0.25, L_ * 0.6, W_ * 0.7, base_, base_ + H_ * 0.8, ang_ + 35, 'rock')
+    if rock_rng.random() < 0.5:
+        a3_ = math.radians(ang_ - 120)
+        O.obox(x_ + math.cos(a3_) * L_ * 0.2, y_ + math.sin(a3_) * L_ * 0.2, L_ * 0.45, W_ * 0.5, base_, base_ + H_ * 1.15, ang_ - 25, 'rock')
+
+# беседки в парке, у бровки, у посёлка (владелец): настил, столбы, кровля — как у тропы
+for gx_, gy_ in PLAN['GAZEBOS_PARK']:
+    if near_road(gx_, gy_, 4.0):
+        WARN.append(f'беседка ({gx_}, {gy_}) — на дороге')
+    lo_ = rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.min)
+    zk_ = rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.max) + 0.25
+    O.box(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, lo_ - 0.5, zk_, 'deck')
+    for j_ in range(8):
+        if j_ == 6:
+            continue                                            # проход
+        a_ = math.radians(22.5 + j_ * 45)
+        O.cyl(gx_ + 2.3 * math.cos(a_), gy_ + 2.3 * math.sin(a_), zk_, zk_ + 2.4, 0.09, 'wood')
+    O.cyl(gx_, gy_, zk_ + 2.4, zk_ + 2.7, 2.8, 'roof', solid=False, sides=8)
+    O.label(gx_, gy_, zk_ + 3.3, 'беседка', 0.8, 'object')
+    SURFACES.append(('rect', gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, zk_))
+
 PLACES = []
 for n_, x_, y_, text_ in PLAN['PLACES']:
     (sx_, sy_), (lx_, ly_) = PLACE_SPOTS[n_]
@@ -2717,11 +2874,11 @@ SITE_ROUTES = [
       (S_LOT[2] + 1.5, S_LOT[3] - 3.5), (S_LOT[2] + 1.5, SITE2[1] + sg.R), (SITE2[0] - 4.0, SITE2[1] + sg.R),
       (S_LOT[2] + 1.5, SITE2[1] + sg.R), (S_LOT[2] + 1.5, SITE2[1]),
       (SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R)]),
-    ('cottages_beach', 'Улица коттеджей → тропа → развилка у родника → серпантин → пляж',
-     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0)] + cot_xy[:COT_BROW_I] + [p for p in cot_path]
+    ('cottages_beach', 'Лесная улица посёлка → тропа → развилка у родника → серпантин → пляж',
+     [(72.0, -170.0), (64.0, -188.0), (44.0, -206.0), (18.0, -214.0), (-8.0, -212.0)] + cot_xy[:COT_BROW_I] + [p for p in cot_path]
      + [p for p in trail_pts[J_I + 1:]]),
-    ('south_branch', 'Развилка → южная ветка → улица коттеджей',
-     [(82.0, 0.0), (88.0, -40.0), (90.0, -80.0), (76.0, -128.0), (72.0, -170.0), (82.0, -213.0)]),
+    ('south_branch', 'Развилка → южная ветка → лесная улица посёлка на восток',
+     [(82.0, 0.0), (88.0, -40.0), (90.0, -80.0), (76.0, -128.0), (72.0, -170.0), (96.0, -178.0), (116.0, -190.0), (124.0, -212.0)]),
     ('quay_north', 'Набережная: от каскада на север к прокату и эллингу',
      [(BOTTOM_X - 3.3, 0.0), (-170.0, 30.0), (-172.0, 80.0), (-175.0, 128.0), (-179.5, 133.0), (-179.5, 146.0), (-188.0, 150.0),
       (-188.0, 186.0)]),
@@ -2768,6 +2925,8 @@ SHOT_VIEWS = [
     {'id': '00_lobby', 'at': eye(MR[2] - 4.0, MR[1] + 32.0, CENTRAL), 'look': gpt(MR[0], MR[1] + 22.0, CENTRAL + 2.0)},
     {'id': '00_pool', 'at': eye(-62, -92, CENTRAL), 'look': gpt(-96, -80, CENTRAL + 1.0)},
     {'id': '00_pool_rock', 'at': eye(-166.0, -84.0), 'look': gpt(-114.0, -84.0, 22.0)},
+    {'id': '00_cottages', 'at': eye(56.0, -199.0), 'look': gpt(4.0, -214.0, h_at(4.0, -214.0) + 3.0)},
+    {'id': '00_construction', 'at': eye(77.0, -137.0), 'look': gpt(94.0, -150.0, h_at(94.0, -150.0) + 2.5)},
     {'id': '00_main_circle', 'at': eye(CIRCLE[0] + 26.0, CIRCLE[1] - 3.0), 'look': gpt(MR[0] + 10.0, MR[1] + 20.0, CENTRAL + 4.0)},
     {'id': '00_trail', 'at': eye(*trail_pts[J_I + 3][:2]), 'look': gpt(*trail_pts[min(len(trail_pts) - 1, J_I + 16)][:2], trail_pts[min(len(trail_pts) - 1, J_I + 16)][2] - 1.0)},
     {'id': '00_trail_spring', 'at': eye(*trail_pts[max(0, J_I - 6)][:2]), 'look': gpt(SPRING[0], SPRING[1], J_LAND[2] + 0.6)},

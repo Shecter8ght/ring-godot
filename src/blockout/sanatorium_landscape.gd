@@ -21,7 +21,7 @@ const SPECIES: Dictionary = {
 const COLORS: Dictionary = {
 	"facade": Color("b9b6ad"), "partition": Color("d3d0c6"), "struct": Color("9d9a92"), "glass": Color(0.62, 0.74, 0.8, 0.32),
 	"slab": Color("8f8d87"), "floor": Color("a7a39a"), "roof": Color("4f5154"), "plinth": Color("85827a"),
-	"stair": Color("a19c90"), "stone": Color("b0a993"), "planter": Color("6f7d5a"), "rail": Color("4a4c4f"),
+	"stair": Color("a19c90"), "stone": Color("b0a993"), "rock": Color("6e6b65"), "planter": Color("6f7d5a"), "rail": Color("4a4c4f"),
 	"parapet": Color("a59f8c"), "wood": Color("7a5e43"), "wood_dark": Color("5b4a3c"), "white": Color("e2dfd6"),
 	"deck": Color("8d7356"), "logs": Color("6e5a42"), "trail": Color("7b6a4f"), "trail_strip": Color("7b6a4f"),
 	"asphalt": Color("4c4f52"), "paving": Color("a39d8e"), "stripe": Color("d8d6cc"), "kiosk": Color("c3b89a"),

@@ -5,7 +5,8 @@
     python -X utf8 tools/sanatorium_ld_plan.py --breaks 70   → ещё docs/design/data/sanatorium_view_breaks.json: места групп
         елей, которые ломают больше всего длинных лучей внутри территории (жадно: группа — туда, где таких лучей
         больше всего, их считаем сломанными, дальше — следующая; не на дорогах, дорожках, площадках и постройках).
-        Генератор блокаута ставит туда группы (ель и молодые ели вокруг); потом замер — заново.
+        Прежние группы из файла остаются, новые добавляются к ним. Генератор блокаута ставит туда группы (ель и
+        молодые ели вокруг); потом пересборка и замер — заново.
 
 Правило владельца для «Проспекта» и концепция «Санатория» (docs/design/sanatorium_map.md, §5): внутри территории обзор
 прерывается через 50–90 м. Замер — как на «Проспекте» (tools/prospekt_ld_plan.py), но с рельефом: из точек сетки 5 м,
@@ -334,7 +335,8 @@ def main():
         for r in floors + [po]:
             notree |= (X >= r[0]) & (X <= r[2]) & (Y >= r[1]) & (Y <= r[3])
         notree = binary_dilation(notree, iterations=int(2.5 / CELL))
-        clusters = plan_breaks(results['с деревьями'], notree, n_max)
+        old = json.loads(OUT_BREAKS.read_text(encoding='utf-8'))['clusters'] if OUT_BREAKS.exists() else []
+        clusters = old + plan_breaks(results['с деревьями'], notree, n_max)     # прежние группы уже в замере — новые к ним
         OUT_BREAKS.write_text(json.dumps({
             'note': 'места групп елей, ломающих длинные лучи обзора внутри территории (tools/sanatorium_ld_plan.py --breaks); '
                     'x, y — схема участка, третье число — сколько длинных лучей ломает группа по оценке',
