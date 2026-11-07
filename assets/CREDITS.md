@@ -51,6 +51,7 @@
 - `assets/textures/clean_asphalt/` — Clean Asphalt, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/clean_asphalt — «Проспект»: зерно асфальта вблизи (мелкий слой) и основа покрытия корта
 - `assets/textures/road_damaged/` — Road Damaged, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/road_damaged — «Проспект»: разбитый асфальт с выбоинами (дворы, проезды)
 - `assets/textures/rubberized_track/` — Rubberized Track, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/rubberized_track — «Проспект»: резиновая крошка детской площадки
+- `assets/textures/asphalt_track/` — Asphalt Track, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/asphalt_track — «Проспект»: зерно асфальта дороги вблизи — чёткие камешки без трещин (мелкий слой)
 
 ## Общежитие · материалы v03 (assets/textures/dorm_v3)
 

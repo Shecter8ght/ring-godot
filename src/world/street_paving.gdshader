@@ -33,8 +33,18 @@ uniform bool has_height = false;
 uniform bool use_detail = false;
 uniform sampler2D detail_albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D detail_normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D detail_arm_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform float detail_m = 2.1;
+// сила мелкого слоя вблизи: цвет и шероховатость (доля от его контраста), рельеф (множитель)
 uniform float detail_k : hint_range(0.0, 1.0) = 0.6;
+uniform float detail_normal_k : hint_range(0.0, 3.0) = 1.0;
+// рельеф крупного слоя вблизи (у 30-метровой текстуры он размыт — вблизи рельеф даёт мелкий слой), до 12 м — к 1
+uniform float macro_normal_near : hint_range(0.0, 1.0) = 1.0;
+// сдвиг мипов цвета крупного слоя (минус — чётче на средней дальности)
+uniform float mip_bias : hint_range(-2.0, 0.0) = 0.0;
+// вблизи крупный слой — только тон: его собственное зерно (камешки на 7 мм пикселя) растянуто в мутные пятна, «мыло»;
+// мипы цвета вблизи — грубее на столько (зерно даёт мелкий слой), к 15 м — mip_bias
+uniform float macro_near_bias : hint_range(0.0, 4.0) = 0.0;
 
 group_uniforms look;
 uniform float tile_m = 3.0;
@@ -67,11 +77,23 @@ uniform float surface_contrast : hint_range(0.0, 1.0) = 1.0;
 uniform float sink : hint_range(0.0, 0.5) = 0.04;
 // у фотоскана: шов — где карта высот ниже порога
 uniform float joint_h : hint_range(0.0, 1.0) = 0.25;
-// полосы плиток другого тона (рамки площади): период и ширина по мировой оси (axis 0 — X, 1 — Z), м
+// ряды плиток другого тона (только цвет): период и ширина по мировой оси (axis 0 — X, 1 — Z), м
+uniform float stripe_period = 0.0;
+uniform float stripe_w = 0.4;
+uniform int stripe_axis = 0;
+uniform vec3 stripe_tint = vec3(0.6);
+// полосы другой раскладки (рамки площади: ёлочка полями, между ними плиты, или наоборот): период, ширина, мировая
+// ось, раскладка в полосе (−1 — нет), её плитка и поворот; тон полосы и цветной ряд в ней (от и до поперёк, м)
 uniform float band_period = 0.0;
-uniform float band_w = 0.4;
+uniform float band_w = 1.5;
 uniform int band_axis = 0;
-uniform vec3 band_tint = vec3(0.6);
+uniform int band_layout = -1;
+uniform vec2 band_unit_m = vec2(0.5, 0.5);
+uniform float band_deg = 0.0;
+uniform float band_bond = 0.0;
+uniform vec3 band_tint = vec3(1.0);
+uniform vec2 band_accent = vec2(-1.0, -1.0);
+uniform vec3 accent_tint = vec3(1.06, 0.8, 0.76);
 group_uniforms;
 
 group_uniforms age;
@@ -233,6 +255,51 @@ float voronoi_edge(vec2 sp) {
 	return edge;
 }
 
+// плитка раскладки mode (1 — ложок / плиты со сдвигом ряда bnd, 2 — ёлочка 2 : 1, 3 — плиты) в точке p узора, м:
+// номер, точка в плитке (x — вдоль длинной стороны), размер, «стоя» ли (ёлочка), середина плитки в осях узора
+void unit_at(int mode, vec2 p, vec2 unit, float bnd, out vec3 id, out vec2 lm, out vec2 usize, out bool turned, out vec2 ucenter) {
+	id = vec3(0.0);
+	lm = vec2(0.0);
+	usize = unit;
+	turned = false;
+	ucenter = vec2(0.0);
+	if (mode == 1 || mode == 3) {
+		float row = floor(p.y / unit.y);
+		float off = mod(row, 2.0) * bnd * unit.x;
+		float col = floor((p.x + off) / unit.x);
+		lm = vec2(p.x + off - col * unit.x, p.y - row * unit.y);
+		id = vec3(col, row, 0.0);
+		ucenter = vec2((col + 0.5) * unit.x - off, (row + 0.5) * unit.y);
+	} else if (mode == 2) {
+		float w = unit.y;
+		usize = vec2(2.0 * w, w);
+		vec2 q0 = p / w;
+		float mf = floor((q0.x + q0.y) * 0.5);
+		float nf = floor((q0.x - q0.y) * 0.25);
+		for (int dm = -1; dm <= 1; dm++) {
+			for (int dn = -1; dn <= 1; dn++) {
+				float m = mf + float(dm);
+				float n = nf + float(dn);
+				vec2 o = vec2(m + 2.0 * n, m - 2.0 * n);
+				vec2 q = q0 - o;
+				if (q.x >= 0.0 && q.x < 2.0 && q.y >= 0.0 && q.y < 1.0) {
+					id = vec3(m, n, 0.0);
+					lm = q * w;
+					turned = false;
+					ucenter = (o + vec2(1.0, 0.5)) * w;
+				}
+				vec2 r = q - vec2(2.0, -1.0);
+				if (r.x >= 0.0 && r.x < 1.0 && r.y >= 0.0 && r.y < 2.0) {
+					id = vec3(m, n, 1.0);
+					lm = vec2(r.y, r.x) * w;
+					turned = true;
+					ucenter = (o + vec2(2.5, 0.0)) * w;
+				}
+			}
+		}
+	}
+}
+
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	edge_d = vec4(UV2.x, CUSTOM0.x, UV2.y, CUSTOM0.y);
@@ -248,56 +315,33 @@ void fragment() {
 	float n_low = vnoise(xz * 0.045 + 5.3) * 0.65 + vnoise(xz * 0.11 + 1.7) * 0.35;
 
 	// ---------------------------------------------------------------- раскладка
-	float ang = radians(layout_deg) + lay_rot;
+	// полоса другой раскладки (рамка площади): по мировой оси band_axis; плиты в полосе — от её края
+	float bc = band_axis == 0 ? xz.x : xz.y;
+	float bpos = band_period > 0.0 ? mod(bc, band_period) : 1e5;
+	bool in_band = band_layout >= 0 && band_period > 0.0 && bpos < band_w;
+	int mode = in_band ? band_layout : layout;
+	vec2 unit = in_band ? band_unit_m : unit_m;
+	float ang = (in_band ? radians(band_deg) : radians(layout_deg)) + lay_rot;
+	vec2 origin = vec2(0.0);
+	if (in_band) {
+		origin = band_axis == 0 ? vec2(bc - bpos, 0.0) : vec2(0.0, bc - bpos);
+	}
 	mat2 to_pat = rot2(-ang);
 	mat2 to_world = rot2(ang);
-	vec2 p = to_pat * xz;
+	vec2 p = to_pat * (xz - origin);
 	vec2 dpx = to_pat * dFdx(xz);
 	vec2 dpy = to_pat * dFdy(xz);
-	vec3 unit_id = vec3(0.0);
-	vec2 lm = vec2(0.0);          // точка в плитке, м (x — вдоль длинной стороны)
-	vec2 usize = unit_m;
-	bool turned = false;          // плитка ёлочки «стоя»: её длинная сторона — по оси y узора
-	vec2 ucenter = vec2(0.0);     // середина плитки в осях узора, м
-	if (layout == 1 || layout == 3) {
-		float row = floor(p.y / unit_m.y);
-		float off = mod(row, 2.0) * bond * unit_m.x;
-		float col = floor((p.x + off) / unit_m.x);
-		lm = vec2(p.x + off - col * unit_m.x, p.y - row * unit_m.y);
-		unit_id = vec3(col, row, 0.0);
-		ucenter = vec2((col + 0.5) * unit_m.x - off, (row + 0.5) * unit_m.y);
-	} else if (layout == 2) {
-		float w = unit_m.y;
-		usize = vec2(2.0 * w, w);
-		vec2 q0 = p / w;
-		float mf = floor((q0.x + q0.y) * 0.5);
-		float nf = floor((q0.x - q0.y) * 0.25);
-		for (int dm = -1; dm <= 1; dm++) {
-			for (int dn = -1; dn <= 1; dn++) {
-				float m = mf + float(dm);
-				float n = nf + float(dn);
-				vec2 o = vec2(m + 2.0 * n, m - 2.0 * n);
-				vec2 q = q0 - o;
-				if (q.x >= 0.0 && q.x < 2.0 && q.y >= 0.0 && q.y < 1.0) {
-					unit_id = vec3(m, n, 0.0);
-					lm = q * w;
-					turned = false;
-					ucenter = (o + vec2(1.0, 0.5)) * w;
-				}
-				vec2 r = q - vec2(2.0, -1.0);
-				if (r.x >= 0.0 && r.x < 1.0 && r.y >= 0.0 && r.y < 2.0) {
-					unit_id = vec3(m, n, 1.0);
-					lm = vec2(r.y, r.x) * w;
-					turned = true;
-					ucenter = (o + vec2(2.5, 0.0)) * w;
-				}
-			}
-		}
-	}
-	bool tiled = layout != 0;
+	vec3 unit_id;
+	vec2 lm;                      // точка в плитке, м (x — вдоль длинной стороны)
+	vec2 usize;
+	bool turned;                  // плитка ёлочки «стоя»: её длинная сторона — по оси y узора
+	vec2 ucenter;                 // середина плитки в осях узора, м
+	unit_at(mode, p, unit, in_band ? band_bond : bond, unit_id, lm, usize, turned, ucenter);
+	unit_id.z += in_band ? 5.0 : 0.0;
+	bool tiled = mode != 0;
 	float uh = hash12(unit_id.xy * vec2(1.0, 1.7) + unit_id.z * 13.1 + 0.37);
 	float uh2 = hash12(unit_id.xy + unit_id.z * 7.7 + 5.1);
-	// до края плитки и куда край (в осях узора)
+	// до края плитки и куда край (в осях узора); край полосы — тоже шов
 	float ed = 1.0;
 	vec2 edir = vec2(0.0);
 	if (tiled) {
@@ -306,6 +350,15 @@ void fragment() {
 		ed = min(dx, dy);
 		vec2 dl = dx < dy ? vec2(sign(lm.x - usize.x * 0.5), 0.0) : vec2(0.0, sign(lm.y - usize.y * 0.5));
 		edir = turned ? dl.yx : dl;
+	}
+	if (band_layout >= 0 && band_period > 0.0) {
+		float db = in_band ? min(bpos, band_w - bpos) : min(bpos - band_w, band_period - bpos);
+		if (db < ed) {
+			ed = db;
+			float s_out = in_band ? (bpos < band_w * 0.5 ? -1.0 : 1.0) : (bpos - band_w < band_period - bpos ? -1.0 : 1.0);
+			vec2 wdir = band_axis == 0 ? vec2(s_out, 0.0) : vec2(0.0, s_out);
+			edir = to_pat * wdir;
+		}
 	}
 
 	// ---------------------------------------------------------------- поверхность
@@ -343,7 +396,8 @@ void fragment() {
 				uv2 = rot * uv * 0.61 + vec2(0.37, 0.71);
 			}
 			mixk = smoothstep(0.35, 0.65, n_low);
-			alb = mix(texture(albedo_tex, uv).rgb, texture(albedo_tex, uv2).rgb, mixk);
+			float bias = mix(macro_near_bias, mip_bias, smoothstep(3.0, 15.0, dist));
+			alb = mix(texture(albedo_tex, uv, bias).rgb, texture(albedo_tex, uv2, bias).rgb, mixk);
 			arm = mix(texture(arm_tex, uv).rgb, texture(arm_tex, uv2).rgb, mixk);
 			vec2 n1 = texture(normal_tex, uv).rg * 2.0 - 1.0;
 			vec2 n2 = texture(normal_tex, uv2).rg * 2.0 - 1.0;
@@ -360,16 +414,27 @@ void fragment() {
 		}
 		float l = dot(alb, vec3(0.3, 0.59, 0.11));
 		alb = mix(vec3(l), alb, saturation) * tint;
-		// нормали в осях узора → в мир
-		nxy = to_world * nxy;
+		// нормали в осях узора → в мир; рельеф крупного слоя вблизи слабее (его даёт мелкий слой)
+		nxy = to_world * nxy * mix(macro_normal_near, 1.0, smoothstep(2.0, 12.0, dist));
 		if (use_detail) {
+			// мелкий слой — двумя выборками (вторая повёрнута и крупнее): повтор 2 м не виден и на средней дальности
 			vec2 duv = xz / detail_m;
-			vec3 dalb = texture(detail_albedo_tex, duv).rgb;
+			mat2 drot = mat2(vec2(0.47, 0.88), vec2(-0.88, 0.47));
+			vec2 duv2 = drot * duv * 0.73 + vec2(0.31, 0.57);
+			float dmix = smoothstep(0.3, 0.7, vnoise(xz * 0.21 + 9.0));
+			vec3 dalb = mix(texture(detail_albedo_tex, duv).rgb, texture(detail_albedo_tex, duv2).rgb, dmix);
 			vec3 dmean = textureLod(detail_albedo_tex, duv, 10.0).rgb;
+			float drough = mix(texture(detail_arm_tex, duv).g, texture(detail_arm_tex, duv2).g, dmix);
+			float drough_mean = textureLod(detail_arm_tex, duv, 10.0).g;
 			float dk = detail_k * (1.0 - far);
 			alb *= mix(vec3(1.0), dalb / max(dmean, vec3(0.02)), dk);
-			vec2 dn = texture(detail_normal_tex, duv).rg * 2.0 - 1.0;
-			nxy += vec2(dn.x, -dn.y) * dk;
+			arm.g = clamp(arm.g * mix(1.0, drough / max(drough_mean, 0.05), dk), 0.05, 1.0);
+			vec2 dn1 = texture(detail_normal_tex, duv).rg * 2.0 - 1.0;
+			vec2 dn2 = texture(detail_normal_tex, duv2).rg * 2.0 - 1.0;
+			dn1.y = -dn1.y;
+			dn2.y = -dn2.y;
+			vec2 dn = mix(dn1, transpose(drot) * dn2, dmix);
+			nxy += dn * detail_normal_k * (1.0 - far);
 		}
 	} else {
 		vec2 g = xz / grain_m;
@@ -393,11 +458,18 @@ void fragment() {
 	float sunk = 0.0;
 	if (tiled) {
 		alb *= 1.0 + (uh - 0.5) * 2.0 * unit_var;
-		if (band_period > 0.0) {
-			vec2 cw = to_world * ucenter;
-			float c = band_axis == 0 ? cw.x : cw.y;
-			if (mod(c, band_period) < band_w) {
-				alb *= band_tint;
+		// середина плитки в мире: ряды другого тона и цветной ряд в полосе
+		vec2 cw = to_world * ucenter + origin;
+		if (in_band) {
+			alb *= band_tint;
+			float across = (band_axis == 0 ? cw.x : cw.y) - (bc - bpos);
+			if (across > band_accent.x && across < band_accent.y) {
+				alb *= accent_tint;
+			}
+		} else if (stripe_period > 0.0) {
+			float c = stripe_axis == 0 ? cw.x : cw.y;
+			if (mod(c, stripe_period) < stripe_w) {
+				alb *= stripe_tint;
 			}
 		}
 		sunk = step(1.0 - sink, uh2);

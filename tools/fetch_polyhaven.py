@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "_asset_src" / "textures"
 UA = {"User-Agent": "RING-asset-tool/1.0 (github.com/Shecter8ght/ring-godot)"}
 RES = "2k"
+# своё разрешение у отдельных наборов: асфальт проспекта — 30 м на текстуру, в 2K вблизи «мыльный» (владелец 2026-11-07)
+RES_BY_ID: dict[str, str] = {"aerial_asphalt_01": "4k"}
 
 # id на Poly Haven → роль в игре (для чего материал)
 TEXTURES: dict[str, str] = {
@@ -66,6 +68,7 @@ TEXTURES: dict[str, str] = {
     "aerial_asphalt_01": "«Проспект»: асфальт проспекта — трещины на 30 м без повтора (крупный слой)",
     "clean_asphalt": "«Проспект»: зерно асфальта вблизи (мелкий слой) и основа покрытия корта",
     "road_damaged": "«Проспект»: разбитый асфальт с выбоинами (дворы, проезды)",
+    "asphalt_track": "«Проспект»: зерно асфальта дороги вблизи — чёткие камешки без трещин (мелкий слой)",
     "rubberized_track": "«Проспект»: резиновая крошка детской площадки",
 }
 
@@ -74,7 +77,7 @@ MAPS = {"Diffuse": "albedo", "nor_gl": "normal", "arm": "arm", "Rough": "rough",
 # доп. карты для отдельных наборов: асфальту — высоты (вода собирается во впадинах, шейдер мокрой земли)
 EXTRA_MAPS: dict[str, dict[str, str]] = {key: {"Displacement": "height"} for key in (
     "asphalt_02", "asphalt_04", "pavement_04", "herringbone_pavement_03",
-    "aerial_asphalt_01", "clean_asphalt", "road_damaged", "rubberized_track")}
+    "aerial_asphalt_01", "clean_asphalt", "road_damaged", "rubberized_track", "asphalt_track")}
 
 
 def get_json(url: str) -> dict:
@@ -102,7 +105,8 @@ def fetch(asset_id: str, info: dict) -> None:
         entry = files.get(key)
         if not entry:
             continue
-        variant = entry.get(RES, {}).get("jpg") or next(iter(entry.get(RES, {}).values()), None)
+        res = RES_BY_ID.get(asset_id, RES)
+        variant = entry.get(res, {}).get("jpg") or next(iter(entry.get(res, {}).values()), None)
         if not variant:
             continue
         dest = out / f"{name}.jpg"

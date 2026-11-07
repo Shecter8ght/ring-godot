@@ -28,6 +28,7 @@ const TEX_MEAN: Dictionary = {
 	"rough_concrete": Color(0.4854, 0.4668, 0.3378),
 	"asphalt_02": Color(0.1073, 0.1055, 0.0935),
 	"asphalt_04": Color(0.2384, 0.2227, 0.2108),
+	"asphalt_track": Color(0.0166, 0.0130, 0.0121),
 	"sparse_grass": Color(0.0810, 0.0485, 0.0082),
 }
 
@@ -50,21 +51,42 @@ const SURFACES: Dictionary = {
 	"plaza_a": {"name": "Площадь А — ёлочка, светлая, тёмные полосы-рамки (Стрелка)", "set": "concrete_floor_02",
 		"tile": 3.0, "color": Color8(150, 147, 140), "saturation": 0.3, "layout": 2, "layout_deg": 45.0,
 		"unit_m": Vector2(0.2, 0.1), "joint_m": 0.004, "bevel_m": 0.006, "unit_var": 0.06, "surface_contrast": 0.45, "unit_tilt": 0.012, "sink": 0.04,
-		"band_period": 6.0, "band_w": 0.6, "band_axis": 0, "band_tint": Vector3(0.45, 0.45, 0.47),
+		"stripe_period": 6.0, "stripe_w": 0.6, "stripe_axis": 0, "stripe_tint": Vector3(0.45, 0.45, 0.47),
 		"joint_weeds": 0.3, "dust": 0.3, "macro_var": 0.08, "drift": 0.6, "edge_moss": 0.25},
 	"plaza_b": {"name": "Площадь Б — плиты 500 × 500, розовые ряды (как у фонтана)", "set": "concrete_floor_02",
 		"tile": 3.0, "color": Color8(142, 140, 134), "saturation": 0.35, "layout": 3, "unit_m": Vector2(0.5, 0.5),
 		"bond": 0.0, "joint_m": 0.006, "bevel_m": 0.004, "unit_var": 0.06, "surface_contrast": 0.5, "unit_tilt": 0.01, "sink": 0.06,
-		"band_period": 5.0, "band_w": 1.0, "band_axis": 0, "band_tint": Vector3(1.06, 0.8, 0.76), "cracks": 0.25,
+		"stripe_period": 5.0, "stripe_w": 1.0, "stripe_axis": 0, "stripe_tint": Vector3(1.06, 0.8, 0.76), "cracks": 0.25,
 		"crack_cell": 2.5, "crack_w": 0.008, "crack_weeds": 0.3, "joint_weeds": 0.4, "dust": 0.3, "macro_var": 0.08,
 		"drift": 0.6, "edge_moss": 0.25},
 	"plaza_c": {"name": "Площадь В — тёмная ёлочка, фотоскан", "set": "herringbone_pavement_03", "tile": 2.4, "height": true,
 		"color": Color8(108, 106, 101), "saturation": 0.35, "repeat_break": 1, "pattern_shift": Vector2(0.5, 0.5),
 		"joint_h": 0.3, "joint_weeds": 0.35, "dust": 0.25, "macro_var": 0.1, "drift": 0.6, "edge_moss": 0.3},
+	# ------------------------------------------------ площадь: сочетания Б и А (выбор владельца 2026-11-07)
+	"plaza_ab1": {"name": "Площадь А — светлая ёлочка полями, рамки из плит 500 × 500 с розовым рядом", "set": "concrete_floor_02",
+		"tile": 3.0, "color": Color8(150, 147, 140), "saturation": 0.3, "layout": 2, "layout_deg": 45.0,
+		"unit_m": Vector2(0.2, 0.1), "joint_m": 0.004, "bevel_m": 0.006, "unit_var": 0.06, "surface_contrast": 0.45,
+		"unit_tilt": 0.012, "sink": 0.04, "band_period": 6.0, "band_w": 1.5, "band_axis": 0, "band_layout": 3,
+		"band_unit_m": Vector2(0.5, 0.5), "band_tint": Vector3(0.94, 0.94, 0.95), "band_accent": Vector2(0.5, 1.0),
+		"accent_tint": Vector3(1.06, 0.8, 0.76), "joint_weeds": 0.35, "dust": 0.3, "macro_var": 0.08, "drift": 0.6, "edge_moss": 0.25},
+	"plaza_ab2": {"name": "Площадь Б — плиты 500 × 500 полем с розовыми рядами, полосы тёмной ёлочки", "set": "concrete_floor_02",
+		"tile": 3.0, "color": Color8(142, 140, 134), "saturation": 0.35, "layout": 3, "unit_m": Vector2(0.5, 0.5),
+		"bond": 0.0, "joint_m": 0.006, "bevel_m": 0.004, "unit_var": 0.06, "surface_contrast": 0.5, "unit_tilt": 0.01,
+		"sink": 0.06, "stripe_period": 4.5, "stripe_w": 1.0, "stripe_axis": 1, "stripe_tint": Vector3(1.06, 0.8, 0.76),
+		"band_period": 9.0, "band_w": 1.2, "band_axis": 0, "band_layout": 2, "band_unit_m": Vector2(0.2, 0.1), "band_deg": 45.0,
+		"band_tint": Vector3(0.55, 0.55, 0.57), "cracks": 0.2, "crack_cell": 2.5, "crack_w": 0.008, "crack_weeds": 0.3,
+		"joint_weeds": 0.4, "dust": 0.3, "macro_var": 0.08, "drift": 0.6, "edge_moss": 0.25},
+	"plaza_ab3": {"name": "Площадь В — светлая ёлочка полями, рамки из серых плит 500 × 500", "set": "concrete_floor_02",
+		"tile": 3.0, "color": Color8(150, 147, 140), "saturation": 0.3, "layout": 2, "layout_deg": 45.0,
+		"unit_m": Vector2(0.2, 0.1), "joint_m": 0.004, "bevel_m": 0.006, "unit_var": 0.06, "surface_contrast": 0.45,
+		"unit_tilt": 0.012, "sink": 0.04, "band_period": 6.0, "band_w": 1.0, "band_axis": 0, "band_layout": 3,
+		"band_unit_m": Vector2(0.5, 0.5), "band_tint": Vector3(0.8, 0.8, 0.82), "joint_weeds": 0.35, "dust": 0.3,
+		"macro_var": 0.08, "drift": 0.6, "edge_moss": 0.25},
 	# ------------------------------------------------ проезжая часть (фото 03, 04, 07)
-	"road_a": {"name": "Дорога А — асфальт с трещинами без повтора (30 м)", "set": "aerial_asphalt_01", "tile": 30.0,
-		"height": true, "color": Color8(90, 90, 89), "saturation": 0.35, "detail": "clean_asphalt", "detail_k": 0.35,
-		"macro_var": 0.08, "grime": 0.15, "grime_m": 2.5, "cracks": 0.3, "crack_cell": 2.2, "crack_w": 0.01, "crack_weeds": 0.35,
+	"road_a": {"name": "Дорога А — асфальт с трещинами без повтора (30 м), чёткий вблизи", "set": "aerial_asphalt_01", "tile": 30.0,
+		"height": true, "color": Color8(90, 90, 89), "saturation": 0.35, "detail": "asphalt_track", "detail_m": 2.0,
+		"detail_k": 0.9, "detail_normal_k": 1.2, "macro_normal_near": 0.25, "mip_bias": -0.5, "macro_near_bias": 6.0,
+		"macro_var": 0.05, "grime": 0.15, "grime_m": 2.5, "cracks": 0.3, "crack_cell": 2.2, "crack_w": 0.01, "crack_weeds": 0.35,
 		"dust": 0.2, "drift": 0.7, "edge_moss": 0.25},
 	"road_b": {"name": "Дорога Б — тёмный асфальт, залитые трещины и заплаты", "set": "asphalt_02", "tile": 4.5,
 		"height": true, "color": Color8(72, 72, 70), "saturation": 0.4, "detail": "clean_asphalt", "detail_k": 0.3,
@@ -159,6 +181,7 @@ static func material(key: String) -> ShaderMaterial:
 			m.set_shader_parameter("use_detail", true)
 			m.set_shader_parameter("detail_albedo_tex", load(TEX % [detail, "albedo"]))
 			m.set_shader_parameter("detail_normal_tex", load(TEX % [detail, "normal"]))
+			m.set_shader_parameter("detail_arm_tex", load(TEX % [detail, "arm"]))
 	var sat: float = float(spec.get("saturation", 1.0))
 	m.set_shader_parameter("tint", _tint(set_id, spec.get("color", Color(0.5, 0.5, 0.5)) as Color, sat))
 	m.set_shader_parameter("base_color", spec.get("color", Color(0.5, 0.5, 0.5)) as Color)
@@ -166,17 +189,19 @@ static func material(key: String) -> ShaderMaterial:
 	for name: String in ["saturation", "normal_strength", "rough_add", "macro_var", "macro_m", "layout_deg", "bond", "joint_m",
 			"bevel_m", "unit_var", "unit_tilt", "sink", "joint_h", "band_period", "band_w", "joint_weeds", "dust", "grime", "grime_m",
 			"patch_amount", "patch_cell", "patch_tone", "cracks", "crack_w", "crack_cell", "crack_weeds", "seal", "potholes",
-			"pothole_r", "drift_w", "drift", "edge_moss", "detail_k", "surface_contrast", "puddle_k"]:
+			"pothole_r", "drift_w", "drift", "edge_moss", "detail_k", "surface_contrast", "puddle_k", "stripe_period", "stripe_w",
+			"band_deg", "band_bond", "detail_normal_k", "macro_normal_near", "mip_bias", "macro_near_bias", "detail_m"]:
 		if spec.has(name):
 			m.set_shader_parameter(name, float(spec[name]))
-	for name: String in ["layout", "repeat_break", "band_axis"]:
+	for name: String in ["layout", "repeat_break", "band_axis", "band_layout", "stripe_axis"]:
 		if spec.has(name):
 			m.set_shader_parameter(name, int(spec[name]))
-	for name: String in ["unit_m", "pattern_shift"]:
+	for name: String in ["unit_m", "pattern_shift", "band_unit_m", "band_accent"]:
 		if spec.has(name):
 			m.set_shader_parameter(name, spec[name] as Vector2)
-	if spec.has("band_tint"):
-		m.set_shader_parameter("band_tint", spec.band_tint as Vector3)
+	for name: String in ["band_tint", "stripe_tint", "accent_tint"]:
+		if spec.has(name):
+			m.set_shader_parameter(name, spec[name] as Vector3)
 	if spec.has("dust_color"):
 		m.set_shader_parameter("dust_color", spec.dust_color as Color)
 	_cache[key] = m

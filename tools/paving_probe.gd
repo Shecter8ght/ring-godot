@@ -28,9 +28,11 @@ const WEATHER_NAMES: Dictionary = {"clear": "ясно", "overcast": "пасму�
 
 ## Куски улицы: какие варианты тротуара, дороги, площади.
 const SLICES: Array = [
-	{"tag": "А", "walk": "walk_a", "road": "road_a", "plaza": "plaza_a", "iron": ["manhole_gost", "walk"]},
-	{"tag": "Б", "walk": "walk_b", "road": "road_b", "plaza": "plaza_b", "iron": ["manhole_gost", "road"]},
-	{"tag": "В", "walk": "walk_c", "road": "road_c", "plaza": "plaza_c", "iron": ["manhole_polymer", "plaza"]},
+	# выбор владельца 2026-11-07: тротуар А и дорога А (чётче) на всех кусках, площадь — сочетания Б и А
+	# (первая версия стенда: walk_a…c, road_a…c, plaza_a…c — StreetPaving.SURFACES)
+	{"tag": "А", "walk": "walk_a", "road": "road_a", "plaza": "plaza_ab1", "iron": ["manhole_gost", "walk"]},
+	{"tag": "Б", "walk": "walk_a", "road": "road_a", "plaza": "plaza_ab2", "iron": ["manhole_gost", "road"]},
+	{"tag": "В", "walk": "walk_a", "road": "road_a", "plaza": "plaza_ab3", "iron": ["manhole_polymer", "plaza"]},
 ]
 const SLICE_W: float = 26.0
 const SLICE_GAP: float = 8.0
@@ -60,6 +62,7 @@ const VIEWS: Array = [
 	["plaza", Vector2(10.0, 4.5), Vector3(12.5, -0.9, 7.0)],
 	["gutter", Vector2(17.0, -5.4), Vector3(19.5, -1.2, -4.6)],
 	["across", Vector2(13.0, 9.5), Vector3(13.0, -0.3, -9.0)],
+	["asphalt", Vector2(9.0, -2.6), Vector3(11.5, -1.6, -1.2)],
 ]
 const PAD_VIEWS: Array = [
 	["rubber", Vector2(-27.0, 21.0), Vector3(-36.0, -0.6, 24.0)],
@@ -193,7 +196,7 @@ func _slice(xs: float, spec: Dictionary, index: int) -> void:
 	_label(Vector3(xs + 0.6, 1.0, mid), String(StreetPaving.SURFACES[spec.road].name), 36)
 	_label(Vector3(xs + 0.6, 1.2, (Z_PLAZA + Z_PLAZA_END) * 0.5), String(StreetPaving.SURFACES[spec.plaza].name), 36)
 	# трава и бурьян: газон не косили два года; у бордюров и в швах — пучки
-	var broken: float = [1.0, 1.2, 1.8][index]
+	var broken: float = 1.0
 	_scatter_strip(GRASS_LAWN, Rect2(xs + 0.1, Z_LAWN + 0.1, SLICE_W - 0.2, Z_WALK_CURB - Z_LAWN - 0.2), H_LAWN, 9.0, Vector2(0.35, 0.75))
 	_scatter_strip(WEEDS, Rect2(xs + 0.1, Z_LAWN + 0.1, SLICE_W - 0.2, Z_WALK_CURB - Z_LAWN - 0.2), H_LAWN, 0.8, Vector2(0.25, 0.5))
 	_scatter_strip(NETTLE, Rect2(xs + 0.1, Z_LAWN + 0.1, SLICE_W - 0.2, 0.6), H_LAWN, 0.25, Vector2(0.6, 0.95))
@@ -208,7 +211,7 @@ func _slice(xs: float, spec: Dictionary, index: int) -> void:
 	_scatter_strip(GRASS_SMALL, Rect2(xs, Z_PLAZA, SLICE_W, Z_PLAZA_END - Z_PLAZA), H_WALK, 0.1 * broken, Vector2(0.06, 0.16))
 	_scatter_strip(GRASS_SMALL, Rect2(xs, Z_PLAZA, SLICE_W, 0.18), H_WALK, 2.0 * broken, Vector2(0.1, 0.25))
 	# на разбитой дороге — трава из трещин посреди полос
-	if index == 2:
+	if String(spec.road) == "road_c":
 		_scatter_strip(GRASS_SMALL, Rect2(xs, Z_ROAD + 0.3, SLICE_W, Z_ROAD_END - Z_ROAD - 0.6), 0.0, 0.25, Vector2(0.08, 0.22))
 	# коллизии насыпных покрытий и бордюров
 	_collider(Vector3(xs + SLICE_W * 0.5, H_LAWN - 0.25, (Z_LAWN + Z_WALK_CURB) * 0.5), Vector3(SLICE_W, 0.5, Z_WALK_CURB - Z_LAWN))
@@ -517,6 +520,10 @@ func _shots() -> void:
 		out = ProjectSettings.globalize_path(OUT_DEFAULT)
 	DirAccess.make_dir_recursive_absolute(out)
 	_help = false
+	# мышь и клавиши человека за компьютером не должны крутить камеру и двигать игрока, пока идут снимки
+	for n: Node in [rig, player]:
+		n.set_process_input(false)
+		n.set_process_unhandled_input(false)
 	var only: PackedStringArray = OS.get_environment("PAVING_ONLY").split(",", false)
 	var fps: Dictionary = {}
 	var gpu: Dictionary = {}
