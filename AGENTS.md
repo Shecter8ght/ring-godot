@@ -414,6 +414,11 @@ tools/prospekt_study.cmd                                      # прогулка
                                                               # не пройти; -- shots — снимки docs/screens/prospekt/ (PROSPEKT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр,
                                                               # несколько — через «;», или имена готовых кадров); PROSPEKT_LIGHT=all_variants -- shots — стенд света
                                                               # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png
+tools/paving_probe.cmd                                        # стенд покрытий «Проспекта» по фото владельца (docs/design/prospekt_paving.md): три куска
+                                                              # улицы А / Б / В — газон, бордюры ГОСТ 6665, тротуар, дорога с зеброй, площадь у вокзала; детская
+                                                              # и корт; F2 — время, F3 — погода, F5–F8 — куски; -- shots — снимки docs/screens/paving_probe
+                                                              # (PAVING_ONLY, PAVING_PLAIN=1 — без шейдеров покрытий, замер их стоимости); шейдер — StreetPaving;
+                                                              # люки и решётка ливнёвки — python -X utf8 tools/gen_street_iron_textures.py
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn

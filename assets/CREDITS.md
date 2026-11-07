@@ -45,6 +45,12 @@
 - `assets/textures/worn_asphalt/` — Worn Asphalt, Amal Kumar, CC0 1.0, https://polyhaven.com/a/worn_asphalt — асфальт двора
 - `assets/textures/worn_corrugated_iron/` — Worn Corrugated Iron, Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_corrugated_iron — обшивка балконов, навесы
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
+- `assets/textures/pavement_04/` — Pavement 04, Jan Burghardt, CC0 1.0, https://polyhaven.com/a/pavement_04 — «Проспект»: серый тротуарный кирпичик ложком (тротуары, фотоскан)
+- `assets/textures/herringbone_pavement_03/` — Herringbone Pavement 03, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/herringbone_pavement_03 — «Проспект»: тёмная обветренная ёлочка (площадь у вокзала, фотоскан)
+- `assets/textures/aerial_asphalt_01/` — Aerial Asphalt 01, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/aerial_asphalt_01 — «Проспект»: асфальт проспекта — трещины на 30 м без повтора (крупный слой)
+- `assets/textures/clean_asphalt/` — Clean Asphalt, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/clean_asphalt — «Проспект»: зерно асфальта вблизи (мелкий слой) и основа покрытия корта
+- `assets/textures/road_damaged/` — Road Damaged, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/road_damaged — «Проспект»: разбитый асфальт с выбоинами (дворы, проезды)
+- `assets/textures/rubberized_track/` — Rubberized Track, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/rubberized_track — «Проспект»: резиновая крошка детской площадки
 
 ## Общежитие · материалы v03 (assets/textures/dorm_v3)
 
@@ -105,6 +111,12 @@
   «23_Следы_заблокированных_шин» — Шины_03, 05, 06; пути и SHA-256 — `masks_used.json`); номера, накладная, бирка — процедурные, текст отрисован
   шрифтами Windows (Bahnschrift, Arial, Segoe Print). Ящик для номеров — `assets/shelter/models/PH_PlasticCrate.glb`
   (Poly Haven, CC0 — см. раздел убежища).
+
+## Люки и решётка ливнёвки «Проспекта» (assets/textures/street_iron)
+
+- Собственные текстуры `tools/gen_street_iron_textures.py` (без внешних картинок): чугунный люк ГОСТ 3634-61 1968 года
+  по фото владельца, полимерный люк без марки, решётка дождеприёмника. Надписи — шрифт DejaVu Sans Bold (лицензия
+  Bitstream Vera, свободная; `_asset_src/fonts`).
 
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 

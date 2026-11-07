@@ -60,13 +60,21 @@ TEXTURES: dict[str, str] = {
     "brick_pavement_03": "территория ТЦ: тротуарная плитка «волна» у дорог и вокруг здания",
     "patterned_paving": "территория ТЦ: узорная плитка площади перед входом",
     "patterned_brick_floor": "территория ТЦ: плитка дорожек сквера",
+    # «Проспект», стенд покрытий (tools/paving_probe, шейдер street_paving): по фото владельца 2026-11-07
+    "pavement_04": "«Проспект»: серый тротуарный кирпичик ложком (тротуары, фотоскан)",
+    "herringbone_pavement_03": "«Проспект»: тёмная обветренная ёлочка (площадь у вокзала, фотоскан)",
+    "aerial_asphalt_01": "«Проспект»: асфальт проспекта — трещины на 30 м без повтора (крупный слой)",
+    "clean_asphalt": "«Проспект»: зерно асфальта вблизи (мелкий слой) и основа покрытия корта",
+    "road_damaged": "«Проспект»: разбитый асфальт с выбоинами (дворы, проезды)",
+    "rubberized_track": "«Проспект»: резиновая крошка детской площадки",
 }
 
 # карта Poly Haven → имя файла у нас
 MAPS = {"Diffuse": "albedo", "nor_gl": "normal", "arm": "arm", "Rough": "rough", "AO": "ao"}
 # доп. карты для отдельных наборов: асфальту — высоты (вода собирается во впадинах, шейдер мокрой земли)
-EXTRA_MAPS: dict[str, dict[str, str]] = {"asphalt_02": {"Displacement": "height"},
-                                         "asphalt_04": {"Displacement": "height"}}
+EXTRA_MAPS: dict[str, dict[str, str]] = {key: {"Displacement": "height"} for key in (
+    "asphalt_02", "asphalt_04", "pavement_04", "herringbone_pavement_03",
+    "aerial_asphalt_01", "clean_asphalt", "road_damaged", "rubberized_track")}
 
 
 def get_json(url: str) -> dict:
