@@ -1,6 +1,6 @@
 {
 	"files": {
-		"res://data/blockouts/prospekt.json": "da74e43fff4523817d6c7ad010b5ce99c7e5d4b317cbc11beab0d8caea0c7dbc",
+		"res://data/blockouts/prospekt.json": "7887ea4c0c3b5a57c3bfb3c09c52ea57c749c95418fa91953003fd8d5ca88a27",
 		"res://data/sectors/prospekt.json": "a5d971a6f8449d6e972939d8eba0f32778450eaa89d86288aadc00243891411e",
 		"res://data/urban95_models.json": "53dce20c311cb364f81ee00a322ce6fc5806770ec66b7975e2c0557a1c8a9d3b",
 		"res://scenes/levels/prospekt.tscn": "590cbcb33a10a16ad66684223251ed0214fafeb4639c4508c2dfb1cbacdf96bc",
@@ -12,9 +12,9 @@
 		"res://src/blockout/flat_section.gd": "f8c52ebeed5e3b1e82053962d645cb013b43d35ad40896cb2f79f979be09d2b4",
 		"res://src/blockout/mall_filler.gd": "530b052ded96cb81c125341623662f7bad66bd6b650a28f287867231f14036b7",
 		"res://src/blockout/mall_landscape.gd": "a88a7438c463c44589438ea76d3eef2c7158cec913d3134e03406ea4a9c480d4",
-		"res://src/blockout/prospekt_landscape.gd": "ca1c2e127ffb4e7cda8b86e038755028791244bf9819ad7e200ed46ce4fdc01b",
+		"res://src/blockout/prospekt_landscape.gd": "dff3620e18ee7a04e5cedf7dc7ba2d647d3d00bc3fed53e7ba046d6b6f469df8",
 		"res://src/blockout/study_building.gd": "ff4fee7613e4b0b11ce3778cca8fb7530277894d08a13f6732b874898e6d6275",
-		"res://src/blockout/study_geometry.gd": "159931c99cff4b85f89ff61b0ad8c82a119d7d98de8afed6ee049f6d83a985de",
+		"res://src/blockout/study_geometry.gd": "e2e4e903c43793f81aee7f008f8b74dd4350535295a8975c40bde6560a5f168a",
 		"res://src/world/blockout_building.gd": "7ad9d854dc416f779d7ca25fa8e1f23d151b24a5b1be65b87a12b6289dd43892",
 		"res://src/world/blockout_mesh.gd": "a7e5dfcc5fb8ce1c27c229ab5629e3525495a10c88e73d554fa7a3ae0124bc40",
 		"res://src/world/blockout_opening.gd": "063660bf3bf804e031428db167352fee000c98f2795b32136787ab6395cd27f9",

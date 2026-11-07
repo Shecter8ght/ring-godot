@@ -111,6 +111,12 @@ const SURFACES: Dictionary = {
 		"joint_m": 0.007, "bevel_m": 0.002, "unit_var": 0.05, "surface_contrast": 0.8, "unit_tilt": 0.0, "sink": 0.0,
 		"joint_weeds": 0.0, "joint_color": Color8(52, 50, 47), "grime": 0.4, "grime_m": 2.2, "dust": 0.25, "drift": 0.0,
 		"edge_moss": 0.0, "puddle_k": 0.3, "macro_var": 0.1},
+	# пол подземного перехода: серые гранитные плиты 400 × 400 (тон разный — гранит), швы тёмные, пыль и грязь
+	"tunnel_floor": {"name": "Переход — гранитные плиты", "set": "concrete_floor_02", "tile": 3.0,
+		"color": Color8(112, 110, 106), "saturation": 0.25, "layout": 3, "unit_m": Vector2(0.4, 0.4), "bond": 0.0,
+		"joint_m": 0.003, "bevel_m": 0.002, "unit_var": 0.13, "surface_contrast": 0.55, "unit_tilt": 0.004, "sink": 0.03,
+		"joint_weeds": 0.0, "joint_color": Color8(48, 46, 42), "grime": 0.3, "grime_m": 1.6, "dust": 0.55, "drift": 0.0,
+		"edge_moss": 0.0, "puddle_k": 0.6, "macro_var": 0.14, "macro_m": 6.0},
 	# газон (основа под травой)
 	"lawn": {"name": "Газон", "set": "sparse_grass", "tile": 3.0, "color": Color8(78, 74, 52), "saturation": 0.6,
 		"macro_var": 0.2, "macro_m": 8.0, "dust": 0.0, "joint_weeds": 0.0, "puddle_k": 0.0},

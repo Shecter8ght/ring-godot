@@ -15,6 +15,14 @@ uniform float base_y = 0.0;
 uniform float dirt_h = 0.18;
 uniform vec3 dirt_color : source_color = vec3(0.32, 0.28, 0.21);
 uniform float chips : hint_range(0.0, 1.0) = 0.25;
+// цоколь другой плитки (высота над base_y, 0 — нет) и полоса-фриз (низ, высота над base_y; высота 0 — нет)
+uniform float plinth_h = 0.0;
+uniform vec3 plinth_color : source_color = vec3(0.22, 0.22, 0.24);
+uniform float frieze_y = 0.0;
+uniform float frieze_h = 0.0;
+uniform vec3 frieze_color : source_color = vec3(0.16, 0.36, 0.5);
+// потёки от протечек сверху вниз (переход): сила
+uniform float leaks : hint_range(0.0, 1.0) = 0.0;
 uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 uniform float puddles : hint_range(0.0, 1.0) = 0.0;
 uniform float rain : hint_range(0.0, 1.0) = 0.0;
@@ -59,7 +67,14 @@ void fragment() {
 		float px = max(length(fwidth(uv)), 0.0005);
 		float joint = 1.0 - smoothstep(joint_m * 0.5, joint_m * 0.5 + px, ed);
 		float h = hash12(cell + floor(wpos.xz * 0.1));
-		alb = tile_color * (1.0 + (h - 0.5) * 2.0 * tile_var);
+		float hy0 = wpos.y - base_y;
+		vec3 base_tile = tile_color;
+		if (plinth_h > 0.0 && hy0 < plinth_h) {
+			base_tile = plinth_color;
+		} else if (frieze_h > 0.0 && hy0 >= frieze_y && hy0 < frieze_y + frieze_h) {
+			base_tile = frieze_color;
+		}
+		alb = base_tile * (1.0 + (h - 0.5) * 2.0 * tile_var);
 		rough = 0.35 + (1.0 - vnoise(uv * 3.0)) * 0.25;
 		// отбитая глазурь: светлый бетон под ней, шершаво
 		float chip = chips * smoothstep(0.72, 0.76, vnoise(uv * 9.0 + h * 7.0)) * smoothstep(0.0, 0.03, ed);
@@ -76,6 +91,15 @@ void fragment() {
 	float streak = smoothstep(0.6, 0.9, vnoise(vec2((wpos.x + wpos.z) * 9.0, hy * 1.5))) * (1.0 - smoothstep(0.0, 0.5, hy)) * (1.0 - n_up);
 	alb = mix(alb, dirt_color, max(dk * 0.85, streak * 0.4));
 	rough = mix(rough, 1.0, dk);
+	// протечки: тёмные потёки от потолка вниз, с ржавым краем, пятнами вдоль стены
+	if (leaks > 0.0 && n_up < 0.6) {
+		float along = abs(wnorm.x) > abs(wnorm.z) ? wpos.z : wpos.x;
+		float where = smoothstep(0.62, 0.78, vnoise(vec2(along * 0.35, 3.0)));
+		float drip = smoothstep(0.45, 0.8, vnoise(vec2(along * 6.0, wpos.y * 0.6)));
+		float k = where * drip * leaks;
+		alb = mix(alb, alb * vec3(0.55, 0.5, 0.42), k);
+		rough = mix(rough, 0.25, k * 0.6);
+	}
 	// сырость
 	alb = mix(alb, alb * 0.6, wetness * 0.8);
 	rough = mix(rough, 0.12 + rough * 0.15, wetness);

@@ -146,7 +146,8 @@ func rebuild() -> void:
 	generated.name = "_Landscape"
 	add_child(generated)
 	cover_spots = PackedVector2Array()
-	var g: RefCounted = Geometry.new(generated, _palette())
+	_palette_saved = _palette()
+	var g: RefCounted = Geometry.new(generated, _palette_saved)
 	# из чего поверхности (шаги, попадания): коробки и лестницы — по материалу, покрытия — по месту (surface_at)
 	g.surface_of = SURFACE_BY_MAT
 	(g.body as StaticBody3D).set_meta("surface_map", self)
@@ -163,6 +164,7 @@ func rebuild() -> void:
 	_markers(g)
 	_loot(g)
 	_boundary(g)
+	_tunnel(g)
 	g.finish()
 	_lamps()
 	_signs()
@@ -201,7 +203,8 @@ const BOX_SURFACE: Dictionary = {"walk": "concrete", "road": "asphalt"}
 const SURFACE_BY_MAT: Dictionary = {"concrete": "concrete", "wall": "concrete", "slab": "concrete", "dark": "concrete",
 	"accent": "concrete", "pit_floor": "concrete", "ground": "dirt", "steel": "metal", "rust": "metal",
 	"tray": "metal", "wood": "wood", "timber": "wood", "glass": "glass", "grass": "grass", "mud": "mud", "rock": "gravel",
-	"fountain_tile": "tile", "stripe": "concrete"}
+	"fountain_tile": "tile", "stripe": "concrete", "tunnel_floor": "tile", "tunnel_tile": "tile",
+	"tunnel_ceiling": "concrete", "rail_steel": "metal"}
 ## Люки и решётки (металл поверх покрытия): [середина xz, полуразмеры, поворот].
 var _iron_spots: Array = []
 ## Люки и решётки: решётка ливнёвки у дорожного бордюра через столько метров, люк в тротуаре — через столько.
@@ -804,6 +807,36 @@ const PIT_AMBIENT_COLOR: Color = Color(0.55, 0.58, 0.62)
 const PIT_AMBIENT_ENERGY: float = 0.45
 
 
+## Подземный переход (владелец 2026-11-08: «красиво и реалистично оформим подземный переход»): городской переход,
+## брошенный два года: светильники рядами в подвесном потолке — почти все мёртвые, несколько тусклых аварийных, один
+## мигает; днём свет с лестниц; витрины магазинчиков с роллетами вдоль восточной стены (одна разбита — у неё стекло на
+## полу), вывески; указатели выходов под потолком; у лестниц — поручни с обеих сторон, рельсы-пандус для колясок,
+## решётка ливнёвки внизу. Пол, стены, потолок — материалы tunnel_floor / tunnel_tile / tunnel_ceiling (плиты и стены
+## плана, генератор tools/build_prospekt.py).
+const PANEL_CEILING: Shader = preload("res://src/world/panel_ceiling.gdshader")
+const FLICKER_SCRIPT: Script = preload("res://src/blockout/dorm_flicker_light.gd")
+const ROLLER_SHUTTER: Shader = preload("res://src/world/roller_shutter.gdshader")
+## Короба вывесок без света (пожелтели), темнота за поднятой роллетой, указатели, оцинкованная сталь поручней и пандуса.
+const TUNNEL_COLORS: Dictionary = {"lightbox": Color(0.62, 0.6, 0.55), "shop_dark": Color(0.05, 0.05, 0.05),
+	"sign_blue": Color(0.1, 0.22, 0.42), "rail_steel": Color(0.62, 0.63, 0.62), "ceiling_panel": Color(0.6, 0.58, 0.54)}
+const TUNNEL_PLINTH_H: float = 0.9
+const TUNNEL_FRIEZE_Y: float = 1.25
+const TUNNEL_SHOPS: Array = ["ЦВЕТЫ", "РЕМОНТ ОБУВИ · КЛЮЧИ", "ШАВЕРМА", "САЛОН СВЯЗИ", "ОПТИКА", "ФОТО НА ДОКУМЕНТЫ",
+	"ЧАСЫ · БАТАРЕЙКИ", "ПРЕССА"]
+const TUNNEL_SHOP_W: float = 2.8
+const TUNNEL_SHOP_GAP: float = 1.4
+const TUNNEL_LAMP_STEP: float = 3.6
+## Доля выпавших плит подвесного потолка (как missing в panel_ceiling.gdshader).
+const TUNNEL_CEILING_MISSING: float = 0.12
+## Аварийный свет перехода (тусклый тёплый) и днём свет с лестниц (по времени рейда — как у рамп паркинга).
+const TUNNEL_EMERGENCY_COLOR: Color = Color(1.0, 0.82, 0.6)
+const TUNNEL_EMERGENCY_ENERGY: float = 0.35
+const TUNNEL_EMERGENCY_RANGE: float = 7.0
+const TUNNEL_DAY_ENERGY: float = 1.6
+const TUNNEL_DAY_RANGE: float = 22.0
+const TUNNEL_AMBIENT_ENERGY: float = 0.45
+
+
 ## Свои цвета карты: маркеры лута по ценности (светятся, чтобы читались в тени), граффити, хаки, стекло.
 const EXTRA_COLORS: Dictionary = {"loot_common": Color("c8b48a"), "loot_med": Color("4fae63"), "loot_good": Color("e3b23c"),
 	"loot_weapon": Color("c4493b"), "graffiti": Color("7a6f8f"), "olive": Color("5b6243"), "glass": Color("5d6f74"),
@@ -824,6 +857,38 @@ func _palette() -> Dictionary:
 	# газон — основа под травой DistrictGrass; паркинг −1 — как в зале D стенда паркинга
 	result["grass"] = StreetPaving.material("lawn", false)
 	result["pit_floor"] = StreetPaving.material("pit_floor", false)
+	# подземный переход: гранитный пол, кафель стен с цоколем и полосой, подвесной потолок
+	result["tunnel_floor"] = StreetPaving.material("tunnel_floor", false)
+	var tile := ShaderMaterial.new()
+	tile.shader = StreetPaving.TILE_SHADER
+	tile.set_shader_parameter("tile_m", Vector2(0.2, 0.2))
+	tile.set_shader_parameter("tile_color", Color(0.82, 0.81, 0.77))
+	tile.set_shader_parameter("tile_var", 0.06)
+	tile.set_shader_parameter("plinth_h", TUNNEL_PLINTH_H)
+	tile.set_shader_parameter("plinth_color", Color(0.26, 0.24, 0.23))
+	tile.set_shader_parameter("frieze_y", TUNNEL_FRIEZE_Y)
+	tile.set_shader_parameter("frieze_h", 0.2)
+	tile.set_shader_parameter("frieze_color", Color(0.14, 0.32, 0.46))
+	tile.set_shader_parameter("base_y", _tunnel_floor_y())
+	tile.set_shader_parameter("dirt_h", 0.35)
+	tile.set_shader_parameter("chips", 0.2)
+	tile.set_shader_parameter("leaks", 0.7)
+	tile.set_shader_parameter("top_color", Color(0.4, 0.39, 0.37))
+	result["tunnel_tile"] = tile
+	var ceiling := ShaderMaterial.new()
+	ceiling.shader = PANEL_CEILING
+	result["tunnel_ceiling"] = ceiling
+	var shutter := ShaderMaterial.new()
+	shutter.shader = ROLLER_SHUTTER
+	shutter.set_shader_parameter("shop_m", TUNNEL_SHOP_W + TUNNEL_SHOP_GAP)
+	shutter.set_shader_parameter("base_y", _tunnel_floor_y())
+	result["shutter"] = shutter
+	for key: String in TUNNEL_COLORS:
+		var tm := StandardMaterial3D.new()
+		tm.albedo_color = TUNNEL_COLORS[key]
+		tm.roughness = 0.4 if key == "rail_steel" else 0.8
+		tm.metallic = 0.7 if key == "rail_steel" else 0.0
+		result[key] = tm
 	for key: String in PIT_COLORS:
 		var pm := StandardMaterial3D.new()
 		pm.albedo_color = PIT_COLORS[key]
@@ -845,7 +910,7 @@ func _palette() -> Dictionary:
 	return result
 
 
-## Свет перехода — аварийный (тёплый); в паркинге −1 — люминесцентные светильники как в зале D стенда: холодный свет,
+## Лампы плана; в паркинге −1 — люминесцентные светильники как в зале D стенда: холодный свет,
 ## каждый третий погас (видна только полоса).
 func _lamps() -> void:
 	var pit: Rect2 = _pit_rect()
@@ -947,6 +1012,275 @@ func _pit_floor_y() -> float:
 		if String(sl.get("id", "")) == "pit_floor":
 			return float(sl.y_top)
 	return -7.3
+
+
+## Пол перехода в плане (плита tunnel_floor) — для материала стен и сборки.
+func _tunnel_floor_y() -> float:
+	for sl: Dictionary in plan.get("slabs", []):
+		if String(sl.get("id", "")) == "tunnel_floor":
+			return float(sl.y_top)
+	return -3.3
+
+
+func _tunnel(g: RefCounted) -> void:
+	var floor_r := Rect2()
+	var roof_r := Rect2()
+	var ceil_y: float = 0.0
+	for sl: Dictionary in plan.get("slabs", []):
+		var r: Array = sl.rect
+		var rect := Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
+		if String(sl.get("id", "")) == "tunnel_floor":
+			floor_r = rect
+	for sl: Dictionary in plan.get("slabs", []):
+		var r: Array = sl.rect
+		var rect := Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
+		if String(sl.get("id", "")) == "tunnel_roof" and float(sl.y_top) < 1.0 and rect.intersects(floor_r):
+			roof_r = rect
+			ceil_y = float(sl.y_top) - float(sl.t)
+	if not floor_r.has_area() or not roof_r.has_area():
+		return
+	var y0: float = _tunnel_floor_y()
+	var x0: float = floor_r.position.x
+	var x1: float = floor_r.end.x
+	var z0: float = maxf(roof_r.position.y, floor_r.position.y)
+	var z1: float = minf(roof_r.end.y, floor_r.end.y)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2011
+	_tunnel_lamps(x0, x1, z0, z1, ceil_y, rng)
+	_tunnel_hanging_panels(x0, x1, z0, z1, ceil_y, rng)
+	_tunnel_shops(x1, z0, z1, y0, ceil_y)
+	_tunnel_stairs(g, floor_r, y0, ceil_y, z0, z1)
+	_ambient_probe(Rect2(x0, z0, x1 - x0, z1 - z0), y0, ceil_y, TUNNEL_AMBIENT_ENERGY)
+
+
+## Светильники рядами вдоль перехода у потолка: почти все мёртвые (света нет два года), каждый пятый западного ряда —
+## тусклый аварийный, один в середине восточного ряда мигает.
+func _tunnel_lamps(x0: float, x1: float, z0: float, z1: float, ceil_y: float, rng: RandomNumberGenerator) -> void:
+	var dead := StandardMaterial3D.new()
+	dead.albedo_color = Color(0.7, 0.71, 0.7)
+	dead.roughness = 0.5
+	var lit := StandardMaterial3D.new()
+	lit.albedo_color = Color(0.95, 0.9, 0.82)
+	lit.emission_enabled = true
+	lit.emission = TUNNEL_EMERGENCY_COLOR
+	lit.emission_energy_multiplier = 1.4
+	var count: int = int((z1 - z0 - 2.0) / TUNNEL_LAMP_STEP)
+	var flicker_k: int = count / 2
+	for row: int in [0, 1]:
+		var x: float = x0 + 2.2 if row == 0 else x1 - 2.2
+		for k: int in range(count + 1):
+			var z: float = z0 + 1.0 + float(k) * TUNNEL_LAMP_STEP
+			var flicker: bool = row == 1 and k == flicker_k
+			var emergency: bool = not flicker and ((row == 0 and k % 5 == 2) or (row == 1 and k % 5 == 0))
+			var fixture := MeshInstance3D.new()
+			var box := BoxMesh.new()
+			box.size = Vector3(0.3, 0.05, 1.2)
+			fixture.mesh = box
+			fixture.material_override = lit if emergency else (lit.duplicate() as StandardMaterial3D if flicker else dead)
+			fixture.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			generated.add_child(fixture)
+			fixture.position = Vector3(x, ceil_y - 0.03, z)
+			if emergency:
+				var l := OmniLight3D.new()
+				l.light_color = TUNNEL_EMERGENCY_COLOR
+				l.light_energy = TUNNEL_EMERGENCY_ENERGY
+				l.omni_range = TUNNEL_EMERGENCY_RANGE
+				l.shadow_enabled = false
+				generated.add_child(l)
+				l.position = fixture.position + Vector3(0.0, -0.15, 0.0)
+			elif flicker:
+				var f: Node3D = FLICKER_SCRIPT.new() as Node3D
+				f.set("seed_value", 77)
+				var mats: Array[StandardMaterial3D] = [fixture.material_override as StandardMaterial3D]
+				f.set("tube_materials", mats)
+				generated.add_child(f)
+				f.position = fixture.position + Vector3(0.0, -0.15, 0.0)
+
+
+## Выпавшие плиты подвесного потолка: несколько висят на одном краю, одна лежит на полу.
+func _tunnel_hanging_panels(x0: float, x1: float, z0: float, z1: float, ceil_y: float, rng: RandomNumberGenerator) -> void:
+	var panel: Material = _palette_cache().ceiling_panel
+	var placed: int = 0
+	for i: int in range(400):
+		if placed >= 4:
+			break
+		var cell := Vector2(floor(rng.randf_range(x0 + 1.0, x1 - 1.0) / 0.6), floor(rng.randf_range(z0 + 2.0, z1 - 2.0) / 0.6))
+		if _ceiling_hash(cell + Vector2(0.37, 0.37)) > TUNNEL_CEILING_MISSING * 0.6:
+			continue
+		placed += 1
+		var cx: float = (cell.x + 0.5) * 0.6
+		var cz: float = (cell.y + 0.5) * 0.6
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.58, 0.015, 0.58)
+		mi.mesh = box
+		mi.material_override = panel
+		generated.add_child(mi)
+		var tilt: float = deg_to_rad(rng.randf_range(35.0, 70.0))
+		# висит на ближнем к потолку крае: поворот вокруг края по X
+		mi.position = Vector3(cx, ceil_y - sin(tilt) * 0.29 - 0.01, cz - 0.29 + cos(tilt) * 0.29)
+		mi.rotation.x = tilt
+
+
+## hash12 шейдера panel_ceiling (какие плиты потолка выпали).
+func _ceiling_hash(p: Vector2) -> float:
+	var p3 := Vector3(fposmod(p.x * 0.1031, 1.0), fposmod(p.y * 0.1031, 1.0), fposmod(p.x * 0.1031, 1.0))
+	var d: float = p3.dot(Vector3(p3.y, p3.z, p3.x) + Vector3(33.33, 33.33, 33.33))
+	p3 += Vector3(d, d, d)
+	return fposmod((p3.x + p3.y) * p3.z, 1.0)
+
+
+## Витрины магазинчиков вдоль восточной стены: роллета, вывеска-короб (света нет), у разбитой (рядом стекло на полу)
+## роллета поднята до половины, за ней темно.
+func _tunnel_shops(x1: float, z0: float, z1: float, y0: float, ceil_y: float) -> void:
+	var glass_sum: float = 0.0
+	var glass_n: int = 0
+	var filler: Dictionary = plan.get("filler", {})
+	for item: Array in filler.get("items", []):
+		if String(item[0]) == "glass_shards" and absf(float(item[1]) - x1) < 2.5 and float(item[2]) > z0 and float(item[2]) < z1:
+			glass_sum += float(item[2])
+			glass_n += 1
+	var centers: Array[float] = []
+	var z: float = z0 + 1.2
+	while z + TUNNEL_SHOP_W < z1 - 1.0:
+		centers.append(z + TUNNEL_SHOP_W * 0.5)
+		z += TUNNEL_SHOP_W + TUNNEL_SHOP_GAP
+	var broken_i: int = -1
+	if glass_n > 0:
+		var glass_z: float = glass_sum / float(glass_n)
+		for i: int in range(centers.size()):
+			if broken_i < 0 or absf(centers[i] - glass_z) < absf(centers[broken_i] - glass_z):
+				broken_i = i
+	var palette: Dictionary = _palette_cache()
+	# тон роллеты — по магазинчику: границы тонов шейдера — посередине промежутков
+	(palette.shutter as ShaderMaterial).set_shader_parameter("shop_offset", z0 + 1.2 - TUNNEL_SHOP_GAP * 0.5)
+	for n: int in range(centers.size()):
+		var zc: float = centers[n]
+		var broken: bool = n == broken_i
+		var shutter_low: float = y0 + (1.15 if broken else 0.0)
+		_tunnel_box(palette.shutter, Vector3(x1 - 0.03, (shutter_low + y0 + 2.25) * 0.5, zc), Vector3(0.05, y0 + 2.25 - shutter_low, TUNNEL_SHOP_W))
+		if broken:
+			_tunnel_box(palette.shop_dark, Vector3(x1 - 0.005, y0 + 0.575, zc), Vector3(0.01, 1.15, TUNNEL_SHOP_W - 0.1))
+		_tunnel_box(palette.lightbox, Vector3(x1 - 0.1, y0 + 2.48, zc), Vector3(0.18, 0.42, TUNNEL_SHOP_W))
+		var t := Label3D.new()
+		t.text = String(TUNNEL_SHOPS[n % TUNNEL_SHOPS.size()])
+		t.font_size = 64
+		t.pixel_size = 0.004
+		t.modulate = Color(0.15, 0.12, 0.1)
+		t.outline_size = 0
+		t.shaded = true
+		t.double_sided = false
+		generated.add_child(t)
+		t.position = Vector3(x1 - 0.2, y0 + 2.48, zc)
+		t.rotation.y = -PI * 0.5
+
+
+func _tunnel_box(m: Material, at: Vector3, size: Vector3) -> void:
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = size
+	mi.mesh = box
+	mi.material_override = m
+	generated.add_child(mi)
+	mi.position = at
+
+
+var _palette_saved: Dictionary = {}
+
+
+func _palette_cache() -> Dictionary:
+	return _palette_saved
+
+
+## Лестницы перехода: поручни с обеих сторон, рельсы-пандус для колясок, решётка ливнёвки внизу, указатель выхода
+## под потолком у низа лестницы и дневной свет с лестницы внутрь.
+func _tunnel_stairs(g: RefCounted, floor_r: Rect2, y0: float, ceil_y: float, z0: float, z1: float) -> void:
+	var palette: Dictionary = _palette_cache()
+	var by_time: float = float(PIT_RAMP_BY_TIME.get(String(RaidConditions.current.get("time", "day")), 1.0))
+	for st: Dictionary in plan.stairs:
+		var a: Array = st.from
+		var b: Array = st.to
+		var top := Vector3(float(a[0]), float(a[1]), float(a[2]))
+		var bottom := Vector3(float(b[0]), float(b[1]), float(b[2]))
+		if top.y < bottom.y:
+			var sw: Vector3 = top
+			top = bottom
+			bottom = sw
+		if absf(bottom.y - y0) > 0.2 or not floor_r.grow(0.5).has_point(Vector2(bottom.x, bottom.z)):
+			continue
+		var width: float = float(st.width)
+		var flat := Vector3(bottom.x - top.x, 0.0, bottom.z - top.z)
+		var side: Vector3 = flat.normalized().cross(Vector3.UP)
+		var inward: float = signf((z0 + z1) * 0.5 - bottom.z)
+		# поручень на 0,9 м над ступенями у торцевой стены, стойки через 1,5 м (у стальной стенки со стороны перехода
+		# поручень — модель U03_04 плана)
+		for sgn: float in [-inward * signf(side.z)]:
+			var off: Vector3 = side * sgn * (width * 0.5 - 0.12)
+			g.beam(top + off + Vector3.UP * 0.9, bottom + off + Vector3.UP * 0.9, 0.05, 0.05, "rail_steel")
+			var posts: int = int(flat.length() / 1.5)
+			for k: int in range(posts + 1):
+				var p: Vector3 = top.lerp(bottom, float(k) / float(maxi(posts, 1))) + off
+				g.box(p + Vector3.UP * 0.45, Vector3(0.04, 0.9, 0.04), "rail_steel", false)
+		# рельсы-пандус для колясок посередине: два швеллера по уклону над кромками ступеней
+		for sgn2: float in [-1.0, 1.0]:
+			var off2: Vector3 = side * sgn2 * 0.35
+			g.beam(top + off2 + Vector3.UP * 0.03, bottom + off2 + Vector3.UP * 0.03, 0.1, 0.04, "rail_steel")
+		# решётка ливнёвки на площадке под лестницей
+		var landing: Vector3 = bottom + flat.normalized() * 0.6
+		_iron(Vector3(landing.x, y0 + 0.003, landing.z), "drain_grate", atan2(-side.z, side.x))
+		# указатель выхода под краем потолка у лестницы и свет с лестницы — внутрь перехода (к его середине по Z)
+		var north: bool = bottom.z < (z0 + z1) * 0.5
+		var sign_at := Vector3((floor_r.position.x + floor_r.end.x) * 0.5, ceil_y - 0.45, (z0 + 0.8) if north else (z1 - 0.8))
+		_tunnel_box(palette.sign_blue, sign_at, Vector3(2.5, 0.34, 0.05))
+		for face: float in [-1.0, 1.0]:
+			var t := Label3D.new()
+			# к середине перехода — этот выход, к лестнице — дальний; север — −Z (ЖК «Панорама»), юг — супермаркет «Ярус»
+			var this_exit: bool = (face > 0.0) == north
+			var to_north: bool = this_exit == north
+			# проход с лестницы — у западной стены: смотрящему на север он слева, на юг — справа
+			var name_exit: String = "ЖК «ПАНОРАМА»" if to_north else "СУПЕРМАРКЕТ «ЯРУС»"
+			if this_exit:
+				t.text = ("←  ВЫХОД · " + name_exit) if north else ("ВЫХОД · " + name_exit + "  →")
+			else:
+				t.text = "↑  ВЫХОД · " + name_exit
+			t.font_size = 48
+			t.pixel_size = 0.0026
+			t.double_sided = false
+			t.modulate = Color(0.95, 0.95, 0.92)
+			t.outline_size = 0
+			t.shaded = true
+			generated.add_child(t)
+			t.position = sign_at + Vector3(0.0, 0.0, face * 0.03)
+			t.rotation.y = 0.0 if face > 0.0 else PI
+		for hz: float in [-1.0, 1.0]:
+			_tunnel_box(palette.rail_steel, sign_at + Vector3(hz, 0.3, 0.0), Vector3(0.01, 0.25, 0.01))
+		var spot := SpotLight3D.new()
+		spot.light_color = PIT_RAMP_COLOR
+		spot.light_energy = TUNNEL_DAY_ENERGY * by_time
+		spot.spot_range = TUNNEL_DAY_RANGE
+		spot.spot_angle = 55.0
+		spot.spot_attenuation = 0.8
+		spot.light_specular = 0.0
+		spot.shadow_enabled = false
+		generated.add_child(spot)
+		spot.position = Vector3(bottom.x, ceil_y - 0.2, bottom.z - inward * 1.0)
+		spot.look_at(Vector3(bottom.x, y0 + 0.3, bottom.z + inward * 9.0), Vector3.UP)
+		_soft_light(Vector3(bottom.x, y0 + 0.5, bottom.z + inward * 2.5), PIT_BOUNCE_COLOR, 0.25 * by_time + 0.05, 8.0)
+
+
+## Нижняя граница освещённости помещения: снимок отражений один раз при загрузке с тусклым постоянным рассеянным светом.
+func _ambient_probe(rect: Rect2, y0: float, y1: float, energy: float) -> void:
+	var probe := ReflectionProbe.new()
+	probe.size = Vector3(rect.size.x, y1 - y0, rect.size.y)
+	probe.position = Vector3(rect.get_center().x, (y0 + y1) * 0.5, rect.get_center().y)
+	probe.interior = true
+	probe.box_projection = true
+	probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	probe.ambient_mode = ReflectionProbe.AMBIENT_COLOR
+	probe.ambient_color = PIT_AMBIENT_COLOR
+	probe.ambient_color_energy = energy
+	probe.max_distance = maxf(rect.size.x, rect.size.y)
+	generated.add_child(probe)
 
 
 ## Паркинг −1 в плане: пол — плита pit_floor.

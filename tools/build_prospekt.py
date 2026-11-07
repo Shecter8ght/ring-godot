@@ -627,16 +627,20 @@ TZN, TZS = -15.0, 15.0
 TUN = 9.5
 STAIR_Z = 11.0
 plan["ground_holes"].append([TX0, TZN, TX1, TZS])
-plan["slabs"].append({"id": "tunnel_floor", "rect": [TX0, TZN, TX1, TZS], "y_top": TUNNEL_Y, "t": 0.3, "mat": "concrete", "holes": []})
-plan["slabs"].append({"id": "tunnel_roof", "rect": [TX0 - 0.4, -TUN, TX1 + 0.4, TUN], "y_top": -0.1, "t": 0.4, "mat": "concrete", "holes": []})
-wall(TX0 - 0.4, TZN, TX0, TZS, TUNNEL_Y, 0.0, "concrete")
-wall(TX1, TZN, TX1 + 0.4, TZS, TUNNEL_Y, 0.0, "concrete")
-wall(TX0, TZN - 0.4, TX1, TZN, TUNNEL_Y, 0.0, "concrete")
-wall(TX0, TZS, TX1, TZS + 0.4, TUNNEL_Y, 0.0, "concrete")
+# отделка как в городском переходе (владелец 2026-11-08: «красиво и реалистично оформим подземный переход»): пол —
+# гранитные плиты, стены — кафель с тёмным цоколем и полосой, потолок — подвесной; свет, витрины, указатели, поручни
+# и пандус лестниц — ProspektLandscape._tunnel (по плитам tunnel_floor / tunnel_roof)
+plan["slabs"].append({"id": "tunnel_floor", "rect": [TX0, TZN, TX1, TZS], "y_top": TUNNEL_Y, "t": 0.3, "mat": "tunnel_floor", "holes": []})
+plan["slabs"].append({"id": "tunnel_roof", "rect": [TX0 - 0.4, -TUN, TX1 + 0.4, TUN], "y_top": -0.1, "t": 0.4, "mat": "tunnel_ceiling", "holes": []})
+wall(TX0 - 0.4, TZN, TX0, TZS, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX1, TZN, TX1 + 0.4, TZS, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX0, TZN - 0.4, TX1, TZN, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX0, TZS, TX1, TZS + 0.4, TUNNEL_Y, 0.0, "tunnel_tile")
 for sgn in (-1.0, 1.0):
     zc = sgn * (STAIR_Z + 2.0)
     plan["stairs"].append({"from": [TX1, 0.15, zc], "to": [TX0 + 1.5, TUNNEL_Y, zc], "width": 3.8, "count": 20, "mat": "concrete"})
-    box((TX0 + 1.5 + TX1) * 0.5, -1.3, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 4.6, 0.2, "steel")
+    box((TX0 + 1.5 + TX1) * 0.5, -1.8, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 3.6, 0.2, "tunnel_tile")
+    box((TX0 + 1.5 + TX1) * 0.5, 0.5, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 1.0, 0.2, "concrete")
     box((TX0 + TX1) * 0.5, 0.5, sgn * (TZS + 0.2), TX1 - TX0 + 0.8, 1.0, 0.4, "concrete")
     box((TX0 - 0.4 + TX0 + 1.5) * 0.5, 0.5, sgn * STAIR_Z, 1.9, 1.0, 0.2, "concrete")
     # парапет и по западному краю проёма лестницы: на широком тротуаре к нему подходят и с запада (от кофейни)
@@ -646,11 +650,23 @@ for sgn in (-1.0, 1.0):
     u("U10_03_wayfinding", TX1 + 2.0, sgn * 10.6, 90.0)
 for z in (-5.0, 0.0, 5.0):
     put("kiosk", TX0 + 1.6, z, 90.0, 0.9, TUNNEL_Y, -1, 0.0, True)
-u("U18_03_industrial_light", (TX0 + TX1) * 0.5, -4.0, 0.0, 1.0, -0.6)
-u("U18_03_industrial_light", (TX0 + TX1) * 0.5, 4.0, 0.0, 1.0, -0.6)
-plan["lamps"].append([(TX0 + TX1) * 0.5, -0.9, 0.0, 0.5, 8.0])
+# свет перехода — ряды светильников в подвесном потолке (почти все мёртвые) и дневной свет с лестниц:
+# ProspektLandscape._tunnel; ламп плана и промышленных светильников здесь нет
 plan["walk_holes"] = [[TX0, TZN, TX1, -STAIR_Z], [TX0, STAIR_Z, TX1, TZS]]
 FI["stories"].append({"label": "тело под брезентом у ларька в переходе", "at": [TX1 - 1.5, 3.0], "height": 1.5})
+# два года без людей: бумаги, бутылки и банки по полу, стекло у разбитой витрины, угол с коробками и мешками (тут
+# ночевали), лужа под протечкой, пыль
+rng_t = random.Random(808)
+for _ in range(26):
+    put(rng_t.choice(["paper", "paper", "paper_ball", "bottle", "can"]), rng_t.uniform(TX0 + 0.5, TX1 - 0.5),
+        rng_t.uniform(TZN + 1.0, TZS - 1.0), rng_t.uniform(0, 360), 1.0, TUNNEL_Y)
+for k in range(4):
+    put("glass_shards", TX1 - 0.9 - rng_t.uniform(0.0, 0.8), -6.2 + k * 0.5, rng_t.uniform(0, 360), rng_t.uniform(0.9, 1.3), TUNNEL_Y)
+put("boxes", TX1 - 0.6, -8.6, 10.0, 1.0, TUNNEL_Y)
+put("bags", TX1 - 0.7, -7.9, 70.0, 1.0, TUNNEL_Y)
+put("trash_pile", TX1 - 0.9, 8.8, 30.0, 0.8, TUNNEL_Y)
+put("puddle", (TX0 + TX1) * 0.5 + 0.8, 2.5, 0.0, 2.4, TUNNEL_Y)
+put("dust", (TX0 + TX1) * 0.5, -3.0, 0.0, 1.0, TUNNEL_Y)
 
 # ------------------------------------------------------------------ уличная мебель вдоль всей оси
 BUSY = [[TX0 - 2.0, -16.0, TX1 + 2.0, 16.0],                 # переход
