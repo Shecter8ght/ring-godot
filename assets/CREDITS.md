@@ -292,6 +292,23 @@
   (tools/build_zone01_foliage_textures.py, tools/build_zone01.py).
 - Фототекстуры поверхностей и фасадов — Poly Haven, CC0 (список выше, раздел текстур).
 
+## Санаторий · земля (assets/terrain/sanatorium_*)
+
+Массивы слоёв земли «Санатория» (tools/fetch_sanatorium_ground.py → tools/build_sanatorium_ground.py): фотосканы 4K,
+CC0 1.0. Изменения: цвет и нормаль сложены в массив слоёв 4K, AO, шероховатость и высота (растянута по уровням) —
+в один файл 2K. Сырьё и лицензии — `_asset_src/textures/<id>/`.
+
+- Grass004 — ambientCG (Lennart Demes), CC0 1.0, https://ambientcg.com/view?id=Grass004 — газон
+- Ground037 — ambientCG (Lennart Demes), CC0 1.0, https://ambientcg.com/view?id=Ground037 — вытоптанный газон
+- Forest Ground 03 — Rob Tuytel, CC0 1.0, https://polyhaven.com/a/forrest_ground_03 — хвойная подстилка
+- Forest Leaves 02 — Rob Tuytel, CC0 1.0, https://polyhaven.com/a/forest_leaves_02 — мох с сором
+- Forest Ground 04 — Rob Tuytel, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/forest_ground_04 — грунт тропы
+- Lichen Rock — Rico Cilliers, CC0 1.0, https://polyhaven.com/a/lichen_rock — гранит с лишайником
+- Gravel Floor 02 — Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/gravel_floor_02 — щебень
+- Sand 03 — Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/sand_03 — песок пляжа
+
+Покрытия дорог и дорожек — наборы «Проспекта» (StreetPaving, список выше); трава — растительность Poly Haven зоны 1.
+
 ## Зона 1 · модели Sketchfab (CC-BY 4.0, assets/zone01/models/sf_*.glb)
 
 Скачаны владельцем, перевод в игру — tools/import_sketchfab.py (масштаб, упрощение, срез земли). Полный список библиотеки — docs/assets_sketchfab.md.

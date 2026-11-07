@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/blockout/sanatorium_level.gd" id="level"]
 [ext_resource type="Script" path="res://src/blockout/heli_terrain.gd" id="terrain"]
+[ext_resource type="Script" path="res://src/blockout/sanatorium_ground.gd" id="ground"]
+[ext_resource type="Script" path="res://src/world/district_grass.gd" id="grass"]
 [ext_resource type="Script" path="res://src/blockout/sanatorium_landscape.gd" id="land"]
 
 [node name="SanatoriumStudy" type="Node3D"]
@@ -9,12 +11,21 @@ script = ExtResource("level")
 metadata/purpose = "Карта «Санаторий» — серый блокаут (tools/build_sanatorium.py; прогулка — tools/sanatorium_study.cmd)"
 
 [node name="Terrain" type="Node3D" parent="."]
-script = ExtResource("terrain")
+script = ExtResource("ground")
 data_path = "res://data/blockouts/sanatorium_terrain.json"
 lod_ranges = Vector2(480, 1600)
 tile_cells = 64
 detail_rect = Rect2(-390.0, -300.0, 580.0, 600.0)
 collision_rect = Rect2(-390.0, -300.0, 580.0, 600.0)
+
+[node name="Grass" type="Node3D" parent="."]
+script = ExtResource("grass")
+density_map = "res://data/terrain/sanatorium_grass.png"
+origin = Vector2(-390.5, -300.5)
+models = PackedStringArray("res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_tall_b.glb", "res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass_mid_b.glb", "res://assets/zone01/models/ug_grass2_c.glb")
+weed_models = PackedStringArray("res://assets/zone01/models/ug_weed_a.glb", "res://assets/zone01/models/ug_weed_b.glb", "res://assets/zone01/models/ug_dandelion_c.glb", "res://assets/zone01/models/ug_dandelion_e.glb")
+tint = Color(0.7, 0.82, 0.52, 1)
+lawn_dryness = 0.22
 
 [node name="FarTerrain" type="Node3D" parent="."]
 script = ExtResource("terrain")

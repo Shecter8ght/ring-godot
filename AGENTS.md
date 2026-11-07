@@ -411,6 +411,9 @@ tools/sanatorium_study.cmd                                    # карта «С�
                                                               # docs/design/sanatorium_sightlines.png, docs/screens/sanatorium/sightlines.json
                                                               # (--breaks 90 — места групп елей против длинного обзора → docs/design/data/sanatorium_view_breaks.json,
                                                               # генератор их ставит; после — пересборка и замер заново)
+python -X utf8 tools/fetch_sanatorium_ground.py                 # земля «Санатория»: восемь грунтов 4K (CC0 ambientCG, Poly Haven) → _asset_src/textures/<id>
+python -X utf8 tools/build_sanatorium_ground.py                 # массивы слоёв земли → assets/terrain/sanatorium_{albedo,normal,arm}.jpg; затем --import
+                                                              # (маски, трава и узел земли — tools/build_sanatorium.py; шейдеры src/world/sanatorium_ground, sanatorium_lake)
 tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
                                                               # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;

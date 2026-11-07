@@ -2930,6 +2930,12 @@ SHOT_VIEWS = [
     {'id': '00_main_circle', 'at': eye(CIRCLE[0] + 26.0, CIRCLE[1] - 3.0), 'look': gpt(MR[0] + 10.0, MR[1] + 20.0, CENTRAL + 4.0)},
     {'id': '00_trail', 'at': eye(*trail_pts[J_I + 3][:2]), 'look': gpt(*trail_pts[min(len(trail_pts) - 1, J_I + 16)][:2], trail_pts[min(len(trail_pts) - 1, J_I + 16)][2] - 1.0)},
     {'id': '00_trail_spring', 'at': eye(*trail_pts[max(0, J_I - 6)][:2]), 'look': gpt(SPRING[0], SPRING[1], J_LAND[2] + 0.6)},
+    # земля под ногами (владелец 2026-11-08: однообразно, виден повтор): газон плато, пляж, вид вниз, лесной склон
+    {'id': '00_ground_lawn', 'at': eye(30.0, -150.0), 'look': gpt(4.0, -166.0, h_at(4.0, -166.0))},
+    {'id': '00_ground_down', 'at': eye(30.0, -150.0), 'look': gpt(28.0, -153.0, h_at(28.0, -153.0))},
+    {'id': '00_ground_beach', 'at': eye(float(shore_v((BEACH[0] + BEACH[1]) / 2)) + 7.0, (BEACH[0] + BEACH[1]) / 2 + 18.0), 'look': gpt(float(shore_v((BEACH[0] + BEACH[1]) / 2)) + 4.0, (BEACH[0] + BEACH[1]) / 2 - 30.0, 0.0)},
+    {'id': '00_ground_shore', 'at': eye(float(shore_v((BEACH[0] + BEACH[1]) / 2 - 20.0)) + 2.5, (BEACH[0] + BEACH[1]) / 2 - 20.0), 'look': gpt(float(shore_v((BEACH[0] + BEACH[1]) / 2 - 26.0)) - 6.0, (BEACH[0] + BEACH[1]) / 2 - 26.0, -0.5)},
+    {'id': '00_ground_slope', 'at': eye(float(brow_v(60.0)) - 6.0, 60.0), 'look': gpt(float(brow_v(60.0)) - 34.0, 52.0, h_at(float(brow_v(60.0)) - 34.0, 52.0))},
 ]
 
 # ================================================================ ЗАПИСЬ
@@ -2959,21 +2965,231 @@ def splat_for(X, Y, Hf, detail):
     return np.stack([mud, rock, np.clip(gravel, 0, 1), floor_], -1)
 
 
-Image.fromarray((np.clip(splat_for(GX, GY, H_FINAL, True), 0, 1) * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_splat.png')
+def ground_masks():
+    """Маски восьми грунтов земли «Санатория» (шейдер sanatorium_ground, владелец 2026-11-08: земля не однообразная):
+    A — R вытоптанный газон, G хвоя, B мох, A тропа; B — R гранит, G щебень, B песок, A сырость у воды. Газон — всё
+    остальное на плато. Хвоя — под кронами (по деревьям) и на лесном склоне; мох пятнами в лесу, у валунов и на северных
+    склонах; вытоптано — у асфальта, дорожек, построек и пятнами; тропы — ленты троп и грунтовки; щебень — хоздвор,
+    стройки, набережная до мощения, обочины; песок — пляж и дно у пляжа; гранит — скала под подиумом, у валунов, мыс."""
+    from PIL import ImageDraw
+    from scipy.ndimage import distance_transform_edt, gaussian_filter
+    X, Y, Hf = GX, GY, H_FINAL
+    shape = X.shape
+    rng_ = np.random.default_rng(5)
+
+    def smooth_noise(sigma):
+        f = gaussian_filter(rng_.random(shape), sigma)
+        return (f - f.min()) / (f.max() - f.min() + 1e-9)
+    n_big, n_mid, n_fine = smooth_noise(16.0), smooth_noise(5.0), smooth_noise(2.0)
+    sh = shore_v(np.clip(Y, -300, 300))
+    wb = np.clip((Y - BEACH[0]) / 8.0, 0.0, 1.0) * np.clip((BEACH[1] - Y) / 8.0, 0.0, 1.0)
+    foot = sh + QUAY_W + (BEACH_W - QUAY_W) * wb
+    brow = brow_v(np.clip(Y, -300, 300))
+    land = X > sh
+    slope = (X > foot + 1.0) & (X < brow - 1.0)
+    plateau = X >= brow - 1.0
+
+    def to_px(x, y):
+        return (x - GRID_X[0]) / STEP, (GRID_Y[1] - y) / STEP
+
+    def raster(draw_fn):
+        im = Image.new('L', (shape[1], shape[0]), 0)
+        draw_fn(ImageDraw.Draw(im))
+        return np.asarray(im, dtype=np.float32) / 255.0
+    # твёрдое: асфальт, площадки, дорожки, постройки — от него «вытоптано» и обочины
+    def draw_hard(d):
+        for pts_, w_ in PLAN['ROADS']:
+            d.line([to_px(*q_) for q_ in pts_], fill=255, width=max(1, int(round(w_ / STEP))), joint='curve')
+        for pts_, w_ in PAVED:
+            d.line([to_px(*q_) for q_ in pts_], fill=255, width=max(1, int(round(w_ / STEP))), joint='curve')
+        for r_ in LOTS:
+            d.rectangle([to_px(r_[0], r_[3]), to_px(r_[2], r_[1])], fill=255)
+        for bb in BLD.values():
+            for r_ in bb.floors[bb.order[0]]['rooms']:
+                x0_, y0_, x1_, y1_ = r_['rect']
+                d.rectangle([to_px(x0_, y1_), to_px(x1_, y0_)], fill=255)
+    hard = raster(draw_hard) > 0.5
+    d_hard = distance_transform_edt(~hard) * STEP
+    def draw_roads(d):
+        for pts_, w_ in PLAN['ROADS']:
+            d.line([to_px(*q_) for q_ in pts_], fill=255, width=max(1, int(round(w_ / STEP))), joint='curve')
+    d_road = distance_transform_edt(~(raster(draw_roads) > 0.5)) * STEP
+    # кроны: точки деревьев, размытые до пятна подстилки
+    canopy = np.zeros(shape, np.float32)
+    for key_, k_ in (('pine', 1.0), ('pine_slim', 0.8), ('spruce_a', 1.3), ('spruce_b', 1.3), ('spruce_young', 0.7)):
+        for t_ in TREES[key_]:
+            c_, r_ = to_px(t_[0], -t_[2])
+            ci, ri = int(round(c_)), int(round(r_))
+            if 0 <= ri < shape[0] and 0 <= ci < shape[1]:
+                canopy[ri, ci] += k_ * float(t_[4])
+    canopy = np.clip(gaussian_filter(canopy, 3.0) * 30.0, 0.0, 1.0)
+    # склон: подстилка с прогалинами травы (крупный шум), на плато — пятна под кронами
+    glade = np.clip((n_big - 0.58) * 4.0, 0.0, 1.0)
+    forest = np.maximum(canopy, np.where(slope, 0.85 * (1.0 - 0.8 * glade), 0.0)) * land
+    forest = np.clip(forest * (0.75 + 0.5 * n_mid), 0.0, 1.0)
+    # мох: пятна в лесу, у валунов, на северных склонах (высота растёт к югу — склон смотрит на север)
+    grad_n = np.gradient(Hf, axis=0) / STEP
+    moss = forest * np.clip((n_mid - 0.46) * 4.0, 0.0, 1.0) * np.clip((n_fine - 0.3) * 3.0, 0.0, 1.0)
+    moss = np.maximum(moss, forest * np.clip(grad_n * 0.9, 0.0, 0.55))
+    # дно озера: камень вперемешку со щебнем (горное озеро), у пляжа — песок (ниже)
+    rock_m = np.where(Hf < -0.5, 0.35 + 0.5 * n_mid, 0.0) + np.clip(CARVE / 3.0, 0.0, 0.95)
+    for rx_, ry_, rl_ in ROCKS:
+        c_, r_ = to_px(rx_, ry_)
+        sj, si = grid_window(rx_ - rl_ * 1.4, ry_ - rl_ * 1.4, rx_ + rl_ * 1.4, ry_ + rl_ * 1.4)
+        dd = np.hypot(X[sj, si] - rx_, Y[sj, si] - ry_)
+        moss[sj, si] = np.maximum(moss[sj, si], np.clip(1.0 - (dd - rl_ * 0.5) / (rl_ * 0.9), 0.0, 1.0) * 0.8)
+        rock_m[sj, si] = np.maximum(rock_m[sj, si], np.clip(1.0 - dd / (rl_ * 0.7), 0.0, 1.0) * 0.55)
+    # мыс: каменистые выходы у южной кромки
+    cape = np.clip((south_v(X) + 22.0 - Y) / 14.0, 0.0, 1.0) * land
+    rock_m = np.maximum(rock_m, cape * np.clip((n_mid - 0.45) * 3.0, 0.0, 0.8))
+    # вытоптано: у твёрдого и пятнами на плато
+    worn = np.clip(1.0 - d_hard / 3.0, 0.0, 1.0) * 0.75 * (0.7 + 0.6 * n_fine)
+    worn = np.maximum(worn, np.clip((n_big - 0.56) * 3.0, 0.0, 0.75) * np.clip((n_fine - 0.25) * 2.5, 0.0, 1.0) * plateau)
+    # тропы: ленты троп, грунтовки и тропа от коттеджей по плато, стройплощадки, обочины
+    trail = np.zeros(shape, np.float32)
+    lines_ = [(rb_['pts'], rb_['w']) for rb_ in RIBBONS] + [(pts_, w_) for pts_, w_ in PLAN['TRACKS']] + \
+             [([tuple(q_) for q_ in cot_xy[:COT_BROW_I + 1]], 2.4)]
+    for pts_, w_ in lines_:
+        for a_, b_ in zip(pts_, pts_[1:]):
+            sj, si = grid_window(min(a_[0], b_[0]), min(a_[1], b_[1]), max(a_[0], b_[0]), max(a_[1], b_[1]), 6)
+            dd, _ = seg_dist(X[sj, si], Y[sj, si], a_, b_)
+            trail[sj, si] = np.maximum(trail[sj, si], np.clip(1.0 - (dd - w_ / 2) / 1.6, 0.0, 1.0))
+    trail = np.maximum(trail, np.clip(1.0 - np.abs(d_road - 1.2) / 1.2, 0.0, 1.0) * 0.35 * (0.6 + 0.8 * n_fine) * plateau)
+    gravel = np.zeros(shape, np.float32)
+    def rect_w(x0_, y0_, x1_, y1_, v_, soft=3.0):
+        dx_ = np.maximum(np.maximum(x0_ - X, X - x1_), 0.0)
+        dy_ = np.maximum(np.maximum(y0_ - Y, Y - y1_), 0.0)
+        return np.clip(1.0 - np.hypot(dx_, dy_) / soft, 0.0, 1.0) * v_
+    gravel = np.maximum(gravel, rect_w(*HOZ_RECT, 0.9))
+    for u_ in UNFINISHED:
+        gravel = np.maximum(gravel, rect_w(u_[0] - 12.0, u_[1] - 12.0, u_[0] + 12.0, u_[1] + 12.0, 0.75, 5.0) * (0.6 + 0.6 * n_fine))
+        trail = np.maximum(trail, rect_w(u_[0] - 15.0, u_[1] - 15.0, u_[0] + 15.0, u_[1] + 15.0, 0.5, 4.0) * n_mid)
+    quay = land & (X < foot) & (Hf < 3.0)
+    gravel = np.maximum(gravel, np.where(quay, 0.85 * (1.0 - wb), 0.0))
+    gravel = np.maximum(gravel, np.clip(1.0 - np.abs(d_road - 0.8) / 0.9, 0.0, 1.0) * 0.4 * plateau)
+    sand = np.where((X < foot) & (X > sh - 30.0), wb, 0.0)
+    sand = np.maximum(sand, np.where((Hf < 0.4) & (X > sh - 30.0) & (wb > 0.0), wb, 0.0))
+    wet = np.clip(1.0 - (X - sh) / 5.0, 0.0, 1.0) * (Hf < 1.4) * (X > sh - 3.0)
+    # лес не лежит на песке, щебне, тропах; мох — только в лесу
+    gravel = np.maximum(gravel, np.where(Hf < -0.5, 0.75 * (1.0 - n_mid), 0.0))
+    forest *= (1.0 - sand) * (1.0 - gravel * 0.8) * (1.0 - moss * 0.7)
+    moss *= (1.0 - sand)
+    A = np.stack([worn, forest, moss, trail], -1)
+    B = np.stack([rock_m, gravel, sand, wet], -1)
+    return np.clip(A, 0, 1), np.clip(B, 0, 1)
+
+
+def grass_density(GA, GB):
+    """Густота травяного покрова (DistrictGrass: травинки и пучки высокой травы, бурьян, одуванчики) — 1 пиксель = 1 м,
+    та же сетка, что у масок. R — трава (до 0,22 — травинки гуще, дальше — больше пучков некошеной травы), G — сорняки.
+    Растёт там, где газон и вытоптанный газон; нет — под постройками, лестницами, дорожками, площадками, на песке,
+    щебне, гранитe, тропах, в лесной подстилке и у воды: всё, что стоит на земле или чуть выше (коробки, марши, ленты,
+    цилиндры, треугольники генератора), вырезает траву своим следом (иначе травинки торчат из пола)."""
+    from PIL import ImageDraw
+    from scipy.ndimage import binary_dilation, gaussian_filter
+    X, Y, Hf = GX, GY, H_FINAL
+    rows, cols = X.shape
+    im = Image.new('L', (cols, rows), 0)
+    d = ImageDraw.Draw(im)
+
+    def px(x, y):
+        return (x - GRID_X[0]) / STEP, (GRID_Y[1] - y) / STEP
+
+    def g_at(x, y):
+        c = int(round((x - GRID_X[0]) / STEP))
+        r = int(round((GRID_Y[1] - y) / STEP))
+        return float(Hf[min(max(r, 0), rows - 1), min(max(c, 0), cols - 1)])
+
+    def near_ground(z0, z1, x, y):
+        g = g_at(x, y)
+        return z0 <= g + 0.7 and z1 >= g - 0.15
+
+    def strip(a, b, w):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        ln = math.hypot(dx, dy)
+        if ln < 1e-6:
+            return
+        nx, ny = -dy / ln * w / 2, dx / ln * w / 2
+        d.polygon([px(a[0] + nx, a[1] + ny), px(b[0] + nx, b[1] + ny), px(b[0] - nx, b[1] - ny), px(a[0] - nx, a[1] - ny)], fill=255)
+    for bx in O.boxes:
+        cx, cz_, cy = bx[0], bx[1], -bx[2]
+        lx, h, ly, ang = bx[3], bx[4], bx[5], math.radians(bx[6])
+        if not near_ground(cz_ - h / 2, cz_ + h / 2, cx, cy):
+            continue
+        ux, uy = math.cos(ang) * lx / 2, math.sin(ang) * lx / 2
+        vx, vy = -math.sin(ang) * ly / 2, math.cos(ang) * ly / 2
+        d.polygon([px(cx + ux + vx, cy + uy + vy), px(cx - ux + vx, cy - uy + vy), px(cx - ux - vx, cy - uy - vy),
+                   px(cx + ux - vx, cy + uy - vy)], fill=255)
+    for st in O.stairs:
+        a, b = (st[0], -st[2]), (st[3], -st[5])
+        if min(st[1], st[4]) <= g_at(*a) + 0.7 or min(st[1], st[4]) <= g_at(*b) + 0.7:
+            strip(a, b, st[6] + 0.6)
+    for bm in O.beams:
+        a, b = (bm[0], -bm[2]), (bm[3], -bm[5])
+        if bm[1] <= g_at(*a) + 0.9 or bm[4] <= g_at(*b) + 0.9:
+            strip(a, b, bm[6] + 0.4)
+    for cyl in O.cyls:
+        cx, cy, r_ = cyl[0], -cyl[2], cyl[3]
+        if near_ground(cyl[1], cyl[1] + cyl[4], cx, cy):
+            d.ellipse([px(cx - r_ - 0.3, cy + r_ + 0.3), px(cx + r_ + 0.3, cy - r_ - 0.3)], fill=255)
+    for key, flat in O.tris.items():
+        for k in range(0, len(flat), 9):
+            pts = [(flat[k + j * 3], flat[k + j * 3 + 1], -flat[k + j * 3 + 2]) for j in range(3)]
+            if min(p_[1] - g_at(p_[0], p_[2]) for p_ in pts) <= 0.7:
+                d.polygon([px(p_[0], p_[2]) for p_ in pts], fill=255)
+    covered = np.asarray(im) > 0
+    covered = binary_dilation(covered, iterations=1)            # травинки у края пола не торчат сквозь плинтус
+    worn, forest, moss, trail = (GA[..., i] for i in range(4))
+    rock_m, gravel, sand, wet = (GB[..., i] for i in range(4))
+    other = np.max(np.stack([worn, forest, moss, trail, rock_m, gravel, sand]), 0)
+    lawn = 1.0 - other
+    rng_ = np.random.default_rng(17)
+    clumps = gaussian_filter(rng_.random(X.shape), 3.0)
+    clumps = (clumps - clumps.min()) / (clumps.max() - clumps.min() + 1e-9)
+    tall = gaussian_filter(rng_.random(X.shape), 9.0)
+    tall = (tall - tall.min()) / (tall.max() - tall.min() + 1e-9)
+    land = (X > shore_v(np.clip(Y, -300, 300)) + 1.5) & (Hf > 0.7)
+    # газон: травинки сплошь, пучков некошеной травы — пятнами (крупный шум); вытоптанный — реже; лесная подстилка —
+    # редкие пучки на прогалинах
+    R = np.clip((lawn - 0.4) / 0.4, 0.0, 1.0) * (0.25 + 0.5 * tall)
+    R = np.maximum(R, np.clip(worn - trail, 0.0, 1.0) * 0.16 * (0.5 + clumps))
+    R = np.maximum(R, forest * (1.0 - moss) * np.clip((clumps - 0.62) * 3.0, 0.0, 1.0) * 0.12)
+    G = np.clip((lawn - 0.3) / 0.5, 0.0, 1.0) * (0.15 + 0.45 * clumps) + worn * 0.25 * clumps
+    # круче ~35° — камень и осыпь (шейдер кладёт гранит), травы нет
+    gy_, gx_ = np.gradient(Hf, STEP)
+    flat_k = np.clip((0.72 - np.hypot(gx_, gy_)) / 0.3, 0.0, 1.0)
+    keep = (land & ~covered) * flat_k
+    keep_k = keep * (1.0 - np.clip(sand + gravel + rock_m + trail * 1.5 + wet, 0.0, 1.0))
+    R *= keep_k
+    G *= keep_k
+    return np.stack([R, G, np.zeros_like(R)], -1), float(covered.mean())
+
+
+GA, GB = ground_masks()
+GRASS, GRASS_COVER = grass_density(GA, GB)
+Image.fromarray((np.clip(GRASS, 0, 1) * 255).astype(np.uint8), 'RGB').save(TERRAIN_DIR / 'sanatorium_grass.png')
+Image.fromarray((GA * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_splat.png')
+Image.fromarray((GB * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_splat2.png')
 Image.fromarray((np.clip(splat_for(FGX, FGY, far_h, False), 0, 1) * 255).astype(np.uint8), 'RGBA').save(TERRAIN_DIR / 'sanatorium_far_splat.png')
 TEX = {'albedo_array': 'res://assets/terrain/zone01_albedo.jpg', 'normal_array': 'res://assets/terrain/zone01_normal.jpg',
        'arm_array': 'res://assets/terrain/zone01_arm.jpg', 'noise': 'res://assets/terrain/zone01_noise.png'}
+# земля «Санатория»: восемь грунтов 4K (tools/build_sanatorium_ground.py) — газон, вытоптанный газон, хвоя, мох, тропа,
+# гранит, щебень, песок; плитка — по размеру скана, яркость фотографий выровнена (линейный множитель)
+GROUND_TEX = {'albedo_array': 'res://assets/terrain/sanatorium_albedo.jpg', 'normal_array': 'res://assets/terrain/sanatorium_normal.jpg',
+              'arm_array': 'res://assets/terrain/sanatorium_arm.jpg', 'noise': 'res://assets/terrain/zone01_noise.png'}
 OUT_TER.write_text(json.dumps({'terrain': {
     'heights': 'res://data/terrain/sanatorium_heights.r32', 'origin': [GRID_X[0], -GRID_Y[1]], 'grid': [len(XS), len(YS)],
-    'step': STEP, 'layer_tiles': [3.0, 3.0, 2.5, 3.0, 4.0, 2.0], 'textures': TEX,
-    'splat_file': 'res://data/terrain/sanatorium_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
+    'step': STEP, 'layer_tiles': [2.0, 2.4, 2.4, 3.0, 3.2, 4.0, 2.2, 2.6],
+    'layer_gain': [0.86, 0.56, 0.6, 0.72, 1.0, 1.9, 0.58, 1.9], 'textures': GROUND_TEX,
+    'splat_file': 'res://data/terrain/sanatorium_splat.png', 'splat2_file': 'res://data/terrain/sanatorium_splat2.png'}},
+    ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 OUT_FAR.write_text(json.dumps({'terrain': {
     'heights': 'res://data/terrain/sanatorium_far.r32', 'origin': [float(FX[0]), float(-FY[0])], 'grid': [len(FX), len(FY)],
     'step': 10.0, 'layer_tiles': [3.0, 3.0, 2.5, 3.0, 4.0, 2.0], 'textures': TEX,
     'splat_file': 'res://data/terrain/sanatorium_far_splat.png'}}, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 OUT_VEG.write_text(json.dumps(TREES, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
 
-PLAN_IMG = 'res://docs/plans/sanatorium_map_v10.png'
+PLAN_IMG = 'res://' + Path(PLAN['OUT']).resolve().relative_to(ROOT).as_posix()      # схема участка — текущей версии
 pad_, top_, sc_ = PLAN['PAD'], PLAN['TOP'], PLAN['SCALE']
 crop = [0, 0, int(pad_ * 2 + (PLAN['XMAX'] - PLAN['XMIN']) * sc_), int(top_ + pad_ * 2 + (PLAN['YMAX'] - PLAN['YMIN']) * sc_)]
 x_left = PLAN['XMIN'] - pad_ / sc_
@@ -3008,10 +3224,12 @@ result = {
 }
 OUT_PLAN.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
 
-SCENE = f'''[gd_scene load_steps=4 format=3]
+SCENE = f'''[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/blockout/sanatorium_level.gd" id="level"]
 [ext_resource type="Script" path="res://src/blockout/heli_terrain.gd" id="terrain"]
+[ext_resource type="Script" path="res://src/blockout/sanatorium_ground.gd" id="ground"]
+[ext_resource type="Script" path="res://src/world/district_grass.gd" id="grass"]
 [ext_resource type="Script" path="res://src/blockout/sanatorium_landscape.gd" id="land"]
 
 [node name="SanatoriumStudy" type="Node3D"]
@@ -3019,12 +3237,21 @@ script = ExtResource("level")
 metadata/purpose = "Карта «Санаторий» — серый блокаут (tools/build_sanatorium.py; прогулка — tools/sanatorium_study.cmd)"
 
 [node name="Terrain" type="Node3D" parent="."]
-script = ExtResource("terrain")
+script = ExtResource("ground")
 data_path = "res://data/blockouts/sanatorium_terrain.json"
 lod_ranges = Vector2(480, 1600)
 tile_cells = 64
 detail_rect = Rect2({GRID_X[0]}, {-GRID_Y[1]}, {GRID_X[1] - GRID_X[0]}, {GRID_Y[1] - GRID_Y[0]})
 collision_rect = Rect2({GRID_X[0]}, {-GRID_Y[1]}, {GRID_X[1] - GRID_X[0]}, {GRID_Y[1] - GRID_Y[0]})
+
+[node name="Grass" type="Node3D" parent="."]
+script = ExtResource("grass")
+density_map = "res://data/terrain/sanatorium_grass.png"
+origin = Vector2({GRID_X[0] - STEP / 2}, {-GRID_Y[1] - STEP / 2})
+models = PackedStringArray("res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_tall_b.glb", "res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass_mid_b.glb", "res://assets/zone01/models/ug_grass2_c.glb")
+weed_models = PackedStringArray("res://assets/zone01/models/ug_weed_a.glb", "res://assets/zone01/models/ug_weed_b.glb", "res://assets/zone01/models/ug_dandelion_c.glb", "res://assets/zone01/models/ug_dandelion_e.glb")
+tint = Color(0.7, 0.82, 0.52, 1)
+lawn_dryness = 0.22
 
 [node name="FarTerrain" type="Node3D" parent="."]
 script = ExtResource("terrain")

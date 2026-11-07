@@ -3,8 +3,8 @@
 		{
 			"check": "Собрано: объёмы, марши, помещения, обходы",
 			"details": {
-				"build_ms": 1526,
-				"landscape_ms": 353,
+				"build_ms": 3437,
+				"landscape_ms": 446,
 				"stats": {
 					"beams": 25.0,
 					"boxes": 6486.0,
@@ -960,7 +960,7 @@
 		"stage": 33.0,
 		"under_stage": 28.0
 	},
-	"real_s": 47.141,
+	"real_s": 71.963,
 	"walked_m": 10370.0,
 	"walked_sim_s": 4168.0
 }

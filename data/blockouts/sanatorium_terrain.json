@@ -11,19 +11,32 @@
   ],
   "step": 1.0,
   "layer_tiles": [
+   2.0,
+   2.4,
+   2.4,
    3.0,
-   3.0,
-   2.5,
-   3.0,
+   3.2,
    4.0,
-   2.0
+   2.2,
+   2.6
+  ],
+  "layer_gain": [
+   0.86,
+   0.56,
+   0.6,
+   0.72,
+   1.0,
+   1.9,
+   0.58,
+   1.9
   ],
   "textures": {
-   "albedo_array": "res://assets/terrain/zone01_albedo.jpg",
-   "normal_array": "res://assets/terrain/zone01_normal.jpg",
-   "arm_array": "res://assets/terrain/zone01_arm.jpg",
+   "albedo_array": "res://assets/terrain/sanatorium_albedo.jpg",
+   "normal_array": "res://assets/terrain/sanatorium_normal.jpg",
+   "arm_array": "res://assets/terrain/sanatorium_arm.jpg",
    "noise": "res://assets/terrain/zone01_noise.png"
   },
-  "splat_file": "res://data/terrain/sanatorium_splat.png"
+  "splat_file": "res://data/terrain/sanatorium_splat.png",
+  "splat2_file": "res://data/terrain/sanatorium_splat2.png"
  }
 }

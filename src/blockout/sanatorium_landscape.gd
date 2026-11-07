@@ -9,6 +9,8 @@ extends Node3D
 
 const Geometry = preload("res://src/blockout/study_geometry.gd")
 const WATER_SHADER: Shader = preload("res://src/world/district_water.gdshader")
+## Горное озеро: прозрачная холодная вода, дно видно у берега, пена у кромки (src/world/sanatorium_lake.gdshader).
+const LAKE_SHADER: Shader = preload("res://src/world/sanatorium_lake.gdshader")
 const NOISE: String = "res://assets/terrain/zone01_noise.png"
 const PLAN_PATH: String = "res://data/blockouts/sanatorium.json"
 const VEG_PATH: String = "res://data/blockouts/sanatorium_vegetation.json"
@@ -32,6 +34,15 @@ const COLORS: Dictionary = {
 	"rubber_red": Color("8e4a40"), "rubber_green": Color("5c7a52"), "rubber_blue": Color("4e6787"), "rubber_dark": Color("2f3133"),
 	"umbrella": Color("d08a4e"), "umbrella_pink": Color("d6768f"), "dam": Color("9c9a94"), "dam_dark": Color("6d6c68"),
 }
+## Покрытия, по которым ходят (владелец 2026-11-08: «сначала то, по чему будем ходить»), — покрытия «Проспекта»,
+## выбранные владельцем на стенде tools/paving_probe (StreetPaving): дорога А — чёткий асфальт с трещинами, тротуар А —
+## серый кирпичик ложком; корт и детская площадка — их же. Грунтовые тропы — материалом земли (тот же грунт тропы,
+## что в масках рельефа: лента и земля под ней — одно). Без текстур — серые цвета блокаута.
+const PAVING: Dictionary = {"asphalt": "road_a", "paving": "walk_a", "court": "court", "rubber_red": "rubber"}
+const GROUND_KEYS: Array[String] = ["trail", "trail_strip"]
+## Сырость покрытий — от погоды рейда, раз в столько секунд (как у «Проспекта»).
+const WEATHER_SYNC_SEC: float = 0.25
+
 ## Подписи: на какой дальности ещё видны (м).
 const LABEL_RANGE: Dictionary = {"room": 22.0, "unit": 70.0, "object": 90.0, "building": 650.0, "far": 6000.0}
 const LABEL_PIXEL: Dictionary = {"room": 0.006, "unit": 0.012, "object": 0.01, "building": 0.03, "far": 0.4}
@@ -42,10 +53,20 @@ const LABEL_BEGIN: Dictionary = {"room": 1.2, "unit": 6.0, "object": 3.0, "build
 var plan: Dictionary = {}
 var generated: Node3D
 var built_ms: int = 0
+var _paving_weather_t: float = 0.0
 
 
 func _ready() -> void:
 	rebuild()
+
+
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	_paving_weather_t += delta
+	if _paving_weather_t >= WEATHER_SYNC_SEC:
+		StreetPaving.sync_weather(_paving_weather_t)
+		_paving_weather_t = 0.0
 
 
 func load_plan() -> void:
@@ -98,7 +119,14 @@ func rebuild() -> void:
 
 func _palette() -> Dictionary:
 	var result: Dictionary = {}
+	var ground: Material = _ground_material()
 	for key: Variant in plan.mats:
+		if PAVING.has(String(key)) and StreetPaving.has_maps(String(StreetPaving.SURFACES[PAVING[String(key)]].set)):
+			result[String(key)] = StreetPaving.material(String(PAVING[String(key)]), false)
+			continue
+		if ground != null and String(key) in GROUND_KEYS:
+			result[String(key)] = ground
+			continue
 		var m: StandardMaterial3D = StandardMaterial3D.new()
 		var c: Color = COLORS.get(String(key), Color("a0a093"))
 		m.albedo_color = c
@@ -115,6 +143,15 @@ func _palette() -> Dictionary:
 			m.roughness = 0.35
 		result[String(key)] = m
 	return result
+
+
+## Материал земли соседнего узла Terrain (SanatoriumGround): строится раньше ландшафта (порядок узлов сцены).
+func _ground_material() -> Material:
+	var terrain: Node = get_parent().get_node_or_null("Terrain") if get_parent() else null
+	if terrain == null:
+		return null
+	var m: Variant = terrain.get("_material")
+	return m as Material if m is Material else null
 
 
 ## Марш: ступени видом (сплошные до fill — с коллизией, у винтовой лестницы — тонкие), шаг — по наклонной.
@@ -203,18 +240,17 @@ func _water() -> void:
 	root.name = "Water"
 	generated.add_child(root)
 	var lake: ShaderMaterial = ShaderMaterial.new()
-	lake.shader = WATER_SHADER
+	lake.shader = LAKE_SHADER
+	# бассейны и фонтаны: два года без ухода — стоячая зелёная вода, ряска пятнами (мутная, дна не видно)
+	var pool: ShaderMaterial = ShaderMaterial.new()
+	pool.shader = WATER_SHADER
+	pool.set_shader_parameter("deep_color", Color(0.06, 0.09, 0.05))
+	pool.set_shader_parameter("murk_color", Color(0.14, 0.2, 0.09))
+	pool.set_shader_parameter("duckweed", 0.18)
+	pool.set_shader_parameter("flow", 0.03)
 	if ResourceLoader.exists(NOISE):
 		lake.set_shader_parameter("noise_tex", load(NOISE))
-	# нижнее озеро под плотиной: глубокая холодная вода
-	lake.set_shader_parameter("deep_color", Color(0.05, 0.09, 0.1))
-	lake.set_shader_parameter("murk_color", Color(0.12, 0.18, 0.17))
-	lake.set_shader_parameter("depth_max", 3.0)
-	var pool: StandardMaterial3D = StandardMaterial3D.new()
-	pool.albedo_color = Color(0.32, 0.62, 0.7, 0.72)
-	pool.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	pool.roughness = 0.06
-	pool.cull_mode = BaseMaterial3D.CULL_DISABLED
+		pool.set_shader_parameter("noise_tex", load(NOISE))
 	for body: Dictionary in plan.water:
 		var level: float = float(body.level)
 		var outline: PackedVector2Array = PackedVector2Array()

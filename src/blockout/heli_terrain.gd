@@ -32,7 +32,7 @@ func _build() -> void:
 	root.name = "_Generated"
 	add_child(root)
 	var material: ShaderMaterial = ShaderMaterial.new()
-	material.shader = HELI_SHADER
+	material.shader = _surface_shader()
 	var textures: Dictionary = terrain.get("textures", {}) as Dictionary
 	for key: String in ["albedo_array", "normal_array", "arm_array", "noise"]:
 		var path: String = String(textures.get(key, ""))
@@ -46,6 +46,7 @@ func _build() -> void:
 		if image:
 			_splat = image
 			material.set_shader_parameter("splat", ImageTexture.create_from_image(image))
+	_extra_textures(material, terrain)
 	material.set_shader_parameter("splat_origin", _origin)
 	material.set_shader_parameter("splat_size", Vector2(float(_cols - 1), float(_rows - 1)) * _step)
 	material.set_shader_parameter("layer_tile", PackedFloat32Array(terrain.get("layer_tiles", [3.0, 3.0, 2.5, 3.0, 4.0, 2.0])))
@@ -73,6 +74,16 @@ func _build() -> void:
 				built.ground += 1
 			tx += tile_cells
 		tz += tile_cells
+
+
+## Шейдер поверхности; наследник ставит свой (земля «Санатория» — восемь грунтов 4K).
+func _surface_shader() -> Shader:
+	return HELI_SHADER
+
+
+## Добавочные карты наследника (вторая маска, яркость слоёв) — после основной маски.
+func _extra_textures(_material: ShaderMaterial, _terrain: Dictionary) -> void:
+	pass
 
 
 func _lod_tile(root: Node3D, material: ShaderMaterial, x0: int, z0: int, w: int, d: int, step: int,
