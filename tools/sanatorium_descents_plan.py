@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Санаторий — спуски к воде v02: лестница-каскад (16) и тропа-серпантин (17): план, марши, профили, точки.
+"""Санаторий — спуски к воде v03: лестница-каскад (16) и общая сеть троп (17, 3): план, марши, профили, точки.
 
 Решения владельца (docs/design/sanatorium_map.md, §1): вода ниже санатория, к ней спускаются не по прямой, а по
 лестницам — вниз, потом в сторону, потом ещё в сторону; параллельно — грунтовая тропа другим маршрутом; по пути
@@ -12,11 +12,16 @@ v02 — владелец после прогулки по серому блок�
 бровка на месте) — каскад 74 м по горизонтали вместо 42: марш 7,8 м вместо 5,2, марш «вниз» с площадками по 2,25 м
 сверху и снизу, галереи вдвое дальше друг от друга, на север до +34 м; тропа — колена через 10 м вместо 4–5 м.
 
+v03 — владелец: тропы «сделать общими — пересекаться, меньше сегментов, естественнее». Трассы проложены по рельефу
+блокаута с ровным уклоном ≈ 13 % (разовая трассировка по склону, координаты ниже): серпантин — три колена
+с плавными поворотами вместо десяти отрезков; тропа от коттеджей спускается от бровки у мыса и сходится с ним
+на развилке у родника, ниже — общая; тропка из-под сцены — к первому колену. Высоты — по рельефу блокаута.
+
 Каскад — постройка на подпорных стенках: уровни площадок задаёт лестница, склон под ней террасирован. Ступени 1:1 —
 подъём 0,15, проступь 0,30 (уличные); ширина марша 6 × 1,3 = 7,8 м (правило E). Координаты — схемы участка.
 
     python -X utf8 tools/sanatorium_descents_plan.py
-        → docs/plans/sanatorium_descents_v02.png, docs/design/data/sanatorium_descents_v02.json
+        → docs/plans/sanatorium_descents_v03.png, docs/design/data/sanatorium_descents_v03.json
 """
 import json
 import math
@@ -28,8 +33,8 @@ import sanatorium_plan_kit as kit
 from sanatorium_plan_kit import INK, MUTED, font
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'docs/plans/sanatorium_descents_v02.png'
-DATA = ROOT / 'docs/design/data/sanatorium_descents_v02.json'
+OUT = ROOT / 'docs/plans/sanatorium_descents_v03.png'
+DATA = ROOT / 'docs/design/data/sanatorium_descents_v03.json'
 
 RISE, RUN, WIDTH = 0.15, 0.30, 7.8
 TERRACE_Z, QUAY_Z = 32.0, 2.0
@@ -139,52 +144,58 @@ CASCADE_POINTS = [  # (название, x, y, что)
     ('Низ: набережная', BOTTOM_X, 0.0, 'к «Стрелке» и пляжу'),
 ]
 
-# ----------------------------------------------------------------------------- тропа-серпантин
-# пять колен вдоль склона по 40–47 м и короткие повороты; колена — через 10 м по склону (в v01 — через 4–5 м)
-TRAIL = [(-97, -108), (-103, -152), (-108, -154), (-112, -114), (-117, -112), (-123, -154), (-128, -156), (-132, -116),
-         (-137, -114), (-145, -160), (-158, -168)]
-TRAIL_Z0, TRAIL_Z1 = 31.0, QUAY_Z
+# ----------------------------------------------------------------------------- тропы: общая сеть (v03)
+# Серпантин (17): от ларька у бровки три колена — на юг, на север, на юг — до пляжа; повороты плавные. Тропа от
+# коттеджей (3): с улицы коттеджей по плато к бровке у мыса, по склону на север — к развилке у родника на конце
+# первого колена; дальше — по серпантину. Точки — (x, y, z), z — рельеф блокаута (до врезки троп).
+N1 = [(-94.0, -108.0, 32.0), (-101.0, -113.0, 29.4), (-108.8, -129.2, 27.0), (-113.3, -142.5, 25.2), (-114.7, -158.4, 23.1),
+      (-110.8, -184.0, 19.7)]
+N2 = [(-129.7, -153.5, 15.2), (-133.9, -140.1, 13.4), (-135.7, -124.3, 11.5)]
+N3 = [(-141.1, -139.3, 9.4), (-143.3, -151.1, 7.8), (-141.8, -194.9, 2.1), (-149.0, -199.0, 2.0)]
+TRAIL3 = N1 + N2 + N3
+TRAIL = [p[:2] for p in TRAIL3]
+JUNCTION_I = len(N1) - 1                       # развилка у родника — конец первого колена
+JUNCTION = TRAIL[JUNCTION_I]
+COTTAGE3 = [(-2.0, -216.0, 33.6), (-40.0, -232.0, 33.0), (-70.0, -244.0, 32.1), (-76.7, -242.2, 31.2), (-83.4, -234.7, 29.5),
+            (-94.6, -215.9, 25.8), (-101.0, -199.1, 22.7), TRAIL3[JUNCTION_I]]
+COTTAGE = [p[:2] for p in COTTAGE3]
+COT_BROW_I = 3                                 # от этой точки — по склону (до неё — по плато)
 seg = [math.dist(a, b) for a, b in zip(TRAIL, TRAIL[1:])]
 TRAIL_LEN = sum(seg)
-trail_profile = [(0.0, TRAIL_Z0)]
+trail_profile = [(0.0, TRAIL3[0][2])]
 acc = 0.0
-for s_ in seg:
+for s_, p_ in zip(seg, TRAIL3[1:]):
     acc += s_
-    trail_profile.append((acc, TRAIL_Z0 + (TRAIL_Z1 - TRAIL_Z0) * acc / TRAIL_LEN))
-
-
-def trail_at_y(i, y):
-    """Точка колена i (отрезок TRAIL[i] → TRAIL[i + 1]) на широте y и высота тропы в ней."""
-    (ax, ay), (bx, by) = TRAIL[i], TRAIL[i + 1]
-    t = (y - ay) / (by - ay)
-    s = trail_profile[i][0] + seg[i] * t
-    return ax + (bx - ax) * t, y, TRAIL_Z0 + (TRAIL_Z1 - TRAIL_Z0) * s / TRAIL_LEN
-
-
-UNDER_Z = 28.0                                     # уровень под сценой амфитеатра
-_join = trail_at_y(0, -148.5)
-STAGE_PATH = [(-101.0, -160.0, UNDER_Z), (-99.5, -153.5, round(UNDER_Z - 0.9, 2)), tuple(round(v, 2) for v in _join)]
-GAZEBOS = [((-120.5, -109.5), 4), ((-140.5, -111.5), 8)]      # беседки у северных поворотов (номер точки тропы)
-SPRING = (-111.0, -157.5)
-BENCH = (-127.0, -159.5)
+    trail_profile.append((acc, p_[2]))
+cot_seg = [math.dist(a, b) for a, b in zip(COTTAGE, COTTAGE[1:])]
+COT_SLOPE_LEN = sum(cot_seg[COT_BROW_I:])
+cot_profile = [(0.0, COTTAGE3[COT_BROW_I][2])]
+acc = 0.0
+for s_, p_ in zip(cot_seg[COT_BROW_I:], COTTAGE3[COT_BROW_I + 1:]):
+    acc += s_
+    cot_profile.append((acc, p_[2]))
+STAGE_PATH = [(-101.0, -160.0), (-103.0, -158.2), (-106.7, -151.1), (-111.0, -137.8)]    # к первому колену
+GAZEBOS = [(-120.0, -150.0), (-137.5, -119.0)]   # над склоном у первого колена; над пляжем на втором повороте
+SPRING = (-105.5, -183.0)                         # развилка: родник в каменной кладке и лавка (как на картинке владельца)
+BENCH = (-107.0, -178.5)
 TRAIL_POINTS = [
-    ('Начало: киоск у бровки', -95.0, -103.0, 'ларёк, лавка; к южной стороне спа и детской площадке'),
+    ('Начало: ларёк у бровки', -95.0, -103.0, 'ларёк, лавка; к южной стороне спа и детской площадке'),
     ('Выход из-под сцены амфитеатра', -96.0, -160.0, 'короткая тропка к первому колену'),
-    ('Родник в каменной кладке', SPRING[0], SPRING[1], 'трубка, чаша; под кладкой — укрытие'),
-    ('Беседка восьмигранная', GAZEBOS[0][0][0], GAZEBOS[0][0][1], 'деревянная, на выступе с видом на озеро'),
-    ('Лавка у поворота', BENCH[0], BENCH[1], 'старая деревянная лавка'),
-    ('Беседка над пляжем', GAZEBOS[1][0][0], GAZEBOS[1][0][1], 'деревянная, на последнем северном повороте'),
+    ('Развилка у родника', JUNCTION[0], JUNCTION[1], 'родник в каменной кладке, лавка; сюда сходится тропа от коттеджей'),
+    ('Беседка над склоном', GAZEBOS[0][0], GAZEBOS[0][1], 'деревянная, у первого колена, вид на озеро'),
+    ('Беседка над пляжем', GAZEBOS[1][0], GAZEBOS[1][1], 'деревянная, на повороте второго колена'),
     ('Низ: пляж', TRAIL[-1][0], TRAIL[-1][1], 'к пляжу и спасательной станции'),
+    ('Тропа от коттеджей у бровки', COTTAGE[COT_BROW_I][0], COTTAGE[COT_BROW_I][1], 'с улицы коттеджей по плато, дальше по склону'),
 ]
 
 # ----------------------------------------------------------------------------- лист
 W, H = 1960, 1290
 img = Image.new('RGB', (W, H), kit.PAPER)
 d = ImageDraw.Draw(img)
-d.text((30, 18), f'Санаторий · спуски к воде v02 — лестница-каскад ({flights} маршей, {risers_total} ступеней) и тропа-серпантин '
-       f'({TRAIL_LEN:.0f} м)', font=font(21, True), fill=INK)
-d.text((30, 50), 'вниз — в сторону — ещё в сторону (решение владельца) · v02 просторнее: марш 7,8 м, марши «вниз» с площадками, '
-       'склон 74 м · ступень 15 × 30 см · координаты схемы участка, метры игры', font=font(14), fill=MUTED)
+d.text((30, 18), f'Санаторий · спуски к воде v03 — лестница-каскад ({flights} маршей, {risers_total} ступеней) и общая сеть '
+       f'троп (серпантин {TRAIL_LEN:.0f} м, от коттеджей {COT_SLOPE_LEN:.0f} м по склону)', font=font(21, True), fill=INK)
+d.text((30, 50), 'вниз — в сторону — ещё в сторону (решение владельца) · каскад: марш 7,8 м, марши «вниз» с площадками, '
+       'склон 74 м · v03: тропы общие, по рельефу, ≈ 13 % · координаты схемы участка, метры игры', font=font(14), fill=MUTED)
 
 # --- план каскада
 CX0, CX1, CY0, CY1 = -168.0, -78.0, -36.0, 48.0
@@ -249,37 +260,39 @@ d.line([(bx, by), (bx + 10 * CS, by)], fill=INK, width=3)
 d.text((bx + 5 * CS, by - 10), '10 м', font=font(12), fill=INK, anchor='mm')
 d.text((30, 100 + int((CY1 - CY0) * CS) + 6), 'Лестница-каскад (16) — план', font=font(16, True), fill=INK)
 
-# --- план тропы
-TX0, TX1, TY0, TY1 = -166.0, -86.0, -174.0, -100.0
-TS = 6.6
+# --- план троп
+TX0, TX1, TY0, TY1 = -158.0, -66.0, -250.0, -100.0
+TS = 4.0
 B = kit.Plan(d, 650, 100, TX0, TY1, TS)
 B.rect(TX0, TY0, TX1, TY1, fill=(176, 190, 150), outline=None)
-B.poly([(TX1, TY0), (-95.4, TY0), (-95.4, TY1), (TX1, TY1)], fill=(226, 230, 214), outline=None)   # плато
-B.rect(TX0, TY0, -154.0, TY1, fill=(232, 216, 170), outline=None)            # пляж
-B.text(TX0 + 4, TY1 - 2, 'пляж', 10, MUTED, False, 'lm')
-B.text(-90.5, TY1 - 2, 'плато', 10, MUTED)
+B.poly([(TX1, TY0), (-80.0, TY0), (-96.0, -150.0), (-95.4, TY1), (TX1, TY1)], fill=(226, 230, 214), outline=None)   # плато
+B.rect(TX0, TY0, -146.0, TY1, fill=(232, 216, 170), outline=None)            # пляж
+B.text(TX0 + 2, TY1 - 3, 'пляж', 10, MUTED, False, 'lm')
+B.text(-76.0, TY1 - 3, 'плато', 10, MUTED)
 B.rect(-95, -172, -80, -144, fill=(236, 236, 232), outline=MUTED)             # сцена амфитеатра
 B.text(-88, -150, 'сцена', 9, MUTED)
 B.rect(-131.5, -102, -103.5, TY1, fill=(232, 228, 214), outline=MUTED)         # край подиума бассейна
-B.text(-117.5, -101, 'подиум бассейна (над скалой)', 9, MUTED)
+B.text(-117.5, -101, 'подиум', 9, MUTED)
 B.line(TRAIL, fill=(150, 106, 60), width=6)
-B.line([p[:2] for p in STAGE_PATH], fill=(150, 106, 60), width=3)
-for i, (x, y) in enumerate(TRAIL):
-    if 0 < i < len(TRAIL) - 1:
-        B.circle(x, y, 1.0, fill=(150, 106, 60), outline=None)
-for (gx, gy), _ in GAZEBOS:
+B.line(COTTAGE[2:], fill=(150, 106, 60), width=5)              # по плато дальше — к улице коттеджей
+B.line(STAGE_PATH, fill=(150, 106, 60), width=3)
+for (gx, gy) in GAZEBOS:
     B.circle(gx, gy, 2.4, fill=(236, 236, 232), outline=INK)
 B.circle(SPRING[0], SPRING[1], 1.2, fill=(120, 196, 220), outline=INK)
+B.rect(BENCH[0] - 0.9, BENCH[1] - 0.3, BENCH[0] + 0.9, BENCH[1] + 0.3, fill=(150, 110, 80), outline=None)
 for k, (name, x, y, what) in enumerate(TRAIL_POINTS, 1):
     px, py = B.p(x, y)
     d.ellipse([px - 9, py - 9, px + 9, py + 9], fill=(255, 255, 255), outline=INK, width=2)
     d.text((px, py), str(k), font=font(11, True), fill=INK, anchor='mm')
-for (x, y), zz in zip(TRAIL, [p_[1] for p_ in trail_profile]):
-    B.text(x - 2.6, y + 2.2, f'+{zz:.0f}', 9, MUTED)
-d.text((650, 100 + int((TY1 - TY0) * TS) + 6), 'Тропа-серпантин (17) — план', font=font(16, True), fill=INK)
+for x, y, zz in TRAIL3[::2] + COTTAGE3[COT_BROW_I:-1:2]:
+    B.text(x - 3.0, y + 2.6, f'+{zz:.0f}', 9, MUTED)
+bx, by = B.p(TX0 + 2, TY0 + 3)
+d.line([(bx, by), (bx + 20 * TS, by)], fill=INK, width=3)
+d.text((bx + 10 * TS, by - 10), '20 м', font=font(12), fill=INK, anchor='mm')
+d.text((650, 100 + int((TY1 - TY0) * TS) + 6), 'Тропы (17 и 3) — план: общая нижняя часть', font=font(16, True), fill=INK)
 
 # --- профили
-PY = 800
+PY = 820
 d.text((30, PY), 'Профили, развёрнуто по ходу (по вертикали × 2)', font=font(16, True), fill=INK)
 
 
@@ -297,7 +310,8 @@ def profile_draw(x0, y0, pts, length, scale_x, color, label):
 profile_draw(70, PY + 300, profile, CASCADE_LEN, 2.6, (196, 84, 60),
              f'каскад: {CASCADE_LEN:.0f} м по ходу, {flights} маршей, {risers_total} ступеней, площадки ровные')
 profile_draw(700, PY + 300, trail_profile, TRAIL_LEN, 2.1, (150, 106, 60),
-             f'тропа: {TRAIL_LEN:.0f} м, средний уклон {30 / TRAIL_LEN * 100:.0f} %, на крутых местах — ступени из брёвен')
+             f'серпантин: {TRAIL_LEN:.0f} м, средний уклон {30 / TRAIL_LEN * 100:.0f} %; от коттеджей по склону — {COT_SLOPE_LEN:.0f} м')
+d.line([(700 + a * 2.1, PY + 300 - b * 2 * 4) for a, b in cot_profile], fill=(196, 150, 90), width=2)
 
 # --- списки и замечания
 sx = 1260
@@ -310,7 +324,7 @@ for k, (name, x, y, what) in enumerate(CASCADE_POINTS, 1):
     d.text((sx + 24, yy + 17), what, font=font(12), fill=(60, 62, 66))
     yy += 38
 yy += 6
-d.text((sx, yy), 'Тропа — точки', font=font(16, True), fill=INK)
+d.text((sx, yy), 'Тропы — точки', font=font(16, True), fill=INK)
 yy += 26
 for k, (name, x, y, what) in enumerate(TRAIL_POINTS, 1):
     d.text((sx, yy), f'{k}', font=font(13, True), fill=INK)
@@ -322,8 +336,9 @@ for s_ in ['Каскад: марш «вниз» — 15 ступеней попе
            'галерея «в сторону» вдоль склона с короткими маршами по 10–11 ступеней. С нагорной',
            'стороны — подпорная стенка с подсветкой ступеней (укрытие), с низовой — перила.',
            'Между галереями — цветники террасами. Марш 7,8 м (в v01 — 5,2).',
-           'Тропа: грунт, корни, камни; пять колен вдоль склона через 10 м, ступени из брёвен,',
-           'верёвочные перила на поворотах; под соснами и елями, видно на 20–40 м.']:
+           'Тропы: грунт, корни, камни; серпантин — три колена с плавными поворотами, уклон',
+           '≈ 13 %; тропа от коттеджей сходится с ним у родника, ниже — общая. Под соснами',
+           'и елями, видно на 20–40 м; где круче — ступени из брёвен.']:
     d.text((sx, yy), s_, font=font(12), fill=(60, 62, 66))
     yy += 17
 img.save(OUT)
@@ -339,11 +354,12 @@ DATA.write_text(json.dumps({
                 'rotunda_deck': [round(v, 2) for v in ROT_DECK], 'rotunda': [round(v, 2) for v in ROT_C],
                 'balcony': [round(v, 2) for v in BALCONY], 'ext_gaps': EXT_GAPS,
                 'points': [{'name': n, 'xy': [round(x, 2), round(y, 2)], 'what': w} for n, x, y, w in CASCADE_POINTS]},
-    'trail': {'polyline': TRAIL, 'length': round(TRAIL_LEN, 1),
+    'trail': {'polyline': TRAIL, 'z': [p[2] for p in TRAIL3], 'length': round(TRAIL_LEN, 1), 'junction': JUNCTION_I,
               'profile': [[round(a, 1), round(b, 2)] for a, b in trail_profile],
               'stage_path': [list(p) for p in STAGE_PATH],
-              'gazebos': [{'xy': list(p), 'knee': k} for p, k in GAZEBOS], 'spring': list(SPRING), 'bench': list(BENCH),
+              'gazebos': [{'xy': list(p)} for p in GAZEBOS], 'spring': list(SPRING), 'bench': list(BENCH),
               'points': [{'name': n, 'xy': [x, y], 'what': w} for n, x, y, w in TRAIL_POINTS]},
+    'cottage': {'polyline': COTTAGE, 'z': [p[2] for p in COTTAGE3], 'brow_index': COT_BROW_I, 'slope_length': round(COT_SLOPE_LEN, 1)},
 }, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
-print(f'спуски v02: каскад {flights} маршей, {risers_total} ступеней, {CASCADE_LEN:.0f} м по ходу, низ x {BOTTOM_X:.1f}; '
-      f'тропа {TRAIL_LEN:.0f} м; галереи x {[round(g, 1) for g in G]}; ротонда {ROT_DECK}')
+print(f'спуски v03: каскад {flights} маршей, {risers_total} ступеней, {CASCADE_LEN:.0f} м по ходу, низ x {BOTTOM_X:.1f}; '
+      f'серпантин {TRAIL_LEN:.0f} м, от коттеджей {COT_SLOPE_LEN:.0f} м; галереи x {[round(g, 1) for g in G]}; ротонда {ROT_DECK}')

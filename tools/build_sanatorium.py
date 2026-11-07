@@ -77,7 +77,7 @@ brow_x = PLAN['brow_x']
 MAIN = json.loads((DATA / 'sanatorium_main_corps_v03.json').read_text(encoding='utf-8'))   # v03 — корпус к S-корпусам
 SPA = json.loads((DATA / 'sanatorium_spa_restaurant_v03.json').read_text(encoding='utf-8'))
 SMALL = json.loads((DATA / 'sanatorium_small_v01.json').read_text(encoding='utf-8'))
-DESC = json.loads((DATA / 'sanatorium_descents_v02.json').read_text(encoding='utf-8'))   # v02 — просторнее, склон длиннее
+DESC = json.loads((DATA / 'sanatorium_descents_v03.json').read_text(encoding='utf-8'))   # v03 — общая сеть троп по рельефу
 DS = float(PLAN['DS'])                 # урез воды на DS западнее, чем в v10 (схема v11)
 QUAY_W, BEACH_W = float(PLAN['QUAY_W']), float(PLAN['BEACH_W'])
 
@@ -400,6 +400,21 @@ def apply_ribbon_clamp(pts, half, margin, joins=(True, True)):
         for e in ends:
             m &= np.hypot(X - e[0], Y - e[1]) > 2.5
         H[sj, si] = np.where(m, np.minimum(H[sj, si], z - 0.22), H[sj, si])
+
+
+def apply_ribbon_bench(pts, half, blend):
+    """Тропа врезана в склон (v03): по ширине тропы рельеф на её уровне — срезка сверху, подсыпка снизу, дальше
+    плавно к склону. Ходят по самому рельефу, отдельного тела у тропы нет."""
+    for a, b in zip(pts, pts[1:]):
+        x0, x1 = min(a[0], b[0]), max(a[0], b[0])
+        y0, y1 = min(a[1], b[1]), max(a[1], b[1])
+        sj, si = grid_window(x0, y0, x1, y1, half + blend + 1)
+        X, Y = GX[sj, si], GY[sj, si]
+        d, t = seg_dist(X, Y, a, b)
+        z = a[2] + (b[2] - a[2]) * t
+        w = np.clip(1.0 - (d - half) / blend, 0.0, 1.0)
+        w = w * w * (3.0 - 2.0 * w)
+        H[sj, si] = H[sj, si] * (1.0 - w) + z * w
 
 
 # ---------------------------------------------------------------- поверхности построек (для ступеней у дверей)
@@ -1314,36 +1329,83 @@ for r_, lv_, _ in CAS_ELEMS:
 
 # ================================================================ ТРОПЫ И СЛУЖЕБНАЯ ДОРОГА (ленты по профилю)
 TR = DESC['trail']
+CT = DESC['cottage']
 TRAIL_W = 2.4
-trail_pts = [(float(p[0]), float(p[1]), float(z)) for p, (s_, z) in zip(TR['polyline'], TR['profile'])]
-trail_pts.insert(0, (-92.5, -107.6, CENTRAL))
-# низ тропы — на песок пляжа (по листу +2,0; песок в блокауте в этом месте чуть ниже)
-trail_pts[-1] = (trail_pts[-1][0], trail_pts[-1][1], h_at(trail_pts[-1][0], trail_pts[-1][1], H_PADS))
-STAGE_PATH = [tuple(float(v) for v in p) for p in TR['stage_path']]
-GAZEBOS = [(tuple(g['xy']), int(g['knee']) + 1) for g in TR['gazebos']]   # номер точки — с учётом вставленного начала
+
+
+def rounded(xy, r=4.0):
+    """Ломаная со скруглёнными поворотами: у каждой внутренней вершины — квадратичная кривая радиусом ~r."""
+    out = [tuple(xy[0])]
+    for i in range(1, len(xy) - 1):
+        a, b, c = xy[i - 1], xy[i], xy[i + 1]
+        la, lc = math.dist(a, b), math.dist(b, c)
+        d_ = min(r, 0.45 * la, 0.45 * lc)
+        p0 = (b[0] + (a[0] - b[0]) * d_ / la, b[1] + (a[1] - b[1]) * d_ / la)
+        p2 = (b[0] + (c[0] - b[0]) * d_ / lc, b[1] + (c[1] - b[1]) * d_ / lc)
+        for k in range(5):
+            t = k / 4
+            out.append(((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * b[0] + t * t * p2[0],
+                        (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * b[1] + t * t * p2[1]))
+    out.append(tuple(xy[-1]))
+    return out
+
+
+def terrain_path(xy, step=2.0, win=3, z_end=None):
+    """Тропа по рельефу: точки через ~2 м, высота — рельеф площадок, сглаженный по ходу; z_end — стык с другой тропой."""
+    dense = [xy[0]]
+    for a, b in zip(xy, xy[1:]):
+        n = max(1, int(math.ceil(math.dist(a, b) / step)))
+        for k in range(1, n + 1):
+            dense.append((a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n))
+    z = [h_at(x, y, H_PADS) for x, y in dense]
+    zs = []
+    for i in range(len(z)):
+        w_ = z[max(0, i - win):i + win + 1]
+        zs.append(sum(w_) / len(w_))
+    zs[0] = z[0]
+    zs[-1] = z[-1] if z_end is None else z_end
+    if z_end is not None:                       # к стыку — плавно на уровень другой тропы
+        for k in range(1, min(6, len(zs) - 1)):
+            t = k / 6.0
+            zs[-1 - k] = zs[-1 - k] * t + z_end * (1 - t)
+    return [(x, y, zz) for (x, y), zz in zip(dense, zs)]
+
+
+def nearest_i(pts, xy):
+    return min(range(len(pts)), key=lambda i: math.dist(pts[i][:2], xy))
+
+
+# серпантин (17): от ларька у бровки три колена до пляжа; тропа от коттеджей (3) и тропка из-под сцены сходятся с ним
+trail_pts = terrain_path(rounded([tuple(p) for p in TR['polyline']]))
+JUNCTION = tuple(TR['polyline'][int(TR['junction'])])
+J_I = nearest_i(trail_pts, JUNCTION)
+cot_xy = [tuple(p) for p in CT['polyline']]
+COT_BROW_I = int(CT['brow_index'])
+cot_path = terrain_path(rounded(cot_xy[COT_BROW_I:]), z_end=trail_pts[J_I][2])
+cot_path[-1] = trail_pts[J_I]
+st_xy = [tuple(p) for p in TR['stage_path']]
+ST_I = nearest_i(trail_pts, st_xy[-1])
+STAGE_PATH = terrain_path(rounded(st_xy[:-1] + [trail_pts[ST_I][:2]]), z_end=trail_pts[ST_I][2])
 SPRING = tuple(TR['spring'])
-for (gx_, gy_), knee in GAZEBOS:
-    clamp_rect(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, trail_pts[knee][2] - 0.3)
+BENCH = tuple(TR['bench'])
+GAZEBOS = [tuple(g['xy']) for g in TR['gazebos']]
+
+
+def path_z_near(xy):
+    best = None
+    for pts_ in (trail_pts, cot_path, STAGE_PATH):
+        i = nearest_i(pts_, xy)
+        d_ = math.dist(pts_[i][:2], xy)
+        if best is None or d_ < best[0]:
+            best = (d_, pts_[i][2])
+    return best[1]
+
+
+for gx_, gy_ in GAZEBOS:
+    clamp_rect(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, path_z_near((gx_, gy_)) - 0.3)
 clamp_rect(-101.5, -163.0, -96.0, -157.0, UNDER)
 # слип эллинга и пирсы: рельеф под ними ниже настила
 clamp_rect(-171.0 - DS, 193.6, -152.0 - DS, 200.4, -1.3)
-COT_XY = [tuple(float(v) for v in p) for p in PLAN['COT_PATH']]      # третья точка — на бровке
-
-
-def profile_by_length(xy, z0, z1, i_from):
-    """z линейно по длине от точки i_from (z0) до конца (z1); до неё — по рельефу площадок."""
-    out = []
-    lengths = [0.0]
-    for a, b in zip(xy, xy[1:]):
-        lengths.append(lengths[-1] + math.dist(a, b))
-    total = lengths[-1] - lengths[i_from]
-    for i, p in enumerate(xy):
-        if i < i_from:
-            out.append((p[0], p[1], h_at(p[0], p[1], H_PADS)))
-        else:
-            t = (lengths[i] - lengths[i_from]) / total
-            out.append((p[0], p[1], z0 + (z1 - z0) * t))
-    return out
 
 
 def densify(pts, step):
@@ -1356,21 +1418,21 @@ def densify(pts, step):
     return out
 
 
-cot_xy = COT_XY
-cz = h_at(cot_xy[2][0], cot_xy[2][1], H_PADS)
-cot_path = profile_by_length(cot_xy, cz, h_at(cot_xy[-1][0], cot_xy[-1][1], H_PADS), 2)
 # (id, подпись, точки, ширина, материал, концы сходят на землю: начало, конец); служебной дороги нет (владелец, v11)
 RIBBON_SPECS = [
-    ('trail', 'Тропа-серпантин', trail_pts, TRAIL_W, 'trail', (True, True)),
-    ('stage_path', 'Тропка из-под сцены к тропе', STAGE_PATH, 2.0, 'trail', (True, False)),
-    ('cottage_path', 'Тропа от коттеджей к пляжу', cot_path[2:], 2.4, 'trail', (True, True)),
+    ('trail', 'Тропа-серпантин: три колена по рельефу', trail_pts, TRAIL_W, 'trail', (True, True)),
+    ('stage_path', 'Тропка из-под сцены к серпантину', STAGE_PATH, 2.0, 'trail', (True, False)),
+    ('cottage_path', 'Тропа от коттеджей: от бровки к развилке у родника', cot_path, TRAIL_W, 'trail', (True, False)),
 ]
 for rid, title, pts, w, m, joins in RIBBON_SPECS:
     RIBBONS.append({'id': rid, 'title': title, 'pts': pts, 'w': w, 'mat': m, 'joins': joins})
 
 # ================================================================ РЕЛЬЕФ: итог
 for rb in RIBBONS:
-    apply_ribbon_clamp(rb['pts'], rb['w'] / 2, 1.2, rb['joins'])
+    apply_ribbon_bench(rb['pts'], rb['w'] / 2 + 0.3, 2.5)
+# развилка у родника — ровная площадка на уровне тропы: лавка, родник в кладке у срезки склона
+J_LAND = ((SPRING[0] + BENCH[0] + JUNCTION[0]) / 3 + 0.8, (SPRING[1] + BENCH[1] + JUNCTION[1]) / 3, trail_pts[J_I][2])
+apply_ribbon_bench([J_LAND, (J_LAND[0] + 0.01, J_LAND[1], J_LAND[2])], 4.6, 2.5)
 apply_clamps()
 apply_ring_clamps()
 H_FINAL = H
@@ -1828,54 +1890,22 @@ O.label((bal[0] + bal[2]) / 2, (bal[1] + bal[3]) / 2, lv3 + 2.0, 'смотров
 ROUTES.append({'id': 'cascade', 'label': f'Лестница-каскад: терраса +32 → набережная +2, {CD["flights"]} маршей, марш {CW:g} м', 'kind': 'descent',
                'points': [gpt(*p) for p in cas_route], 'checks': cas_checks})
 
-# ================================================================ ЛЕНТЫ: тропы и служебная дорога
+# ================================================================ ТРОПЫ: полоса грунта по врезанному склону
 for rb in RIBBONS:
     pts = rb['pts']
     w = rb['w']
-    m = rb['mat']
     for a, b in zip(pts, pts[1:]):
         dx, dy = b[0] - a[0], b[1] - a[1]
-        Ls = math.hypot(dx, dy)
-        nx, ny = -dy / Ls, dx / Ls
-        lows = [h_at(a[0] + (b[0] - a[0]) * t + nx * s, a[1] + (b[1] - a[1]) * t + ny * s) for t in (0, 0.5, 1) for s in (-w / 2, 0, w / 2)]
-        depth = max(0.8, max(a[2], b[2]) - min(lows) + 0.4)
-        O.beam(a, b, w, depth, m, solid=True)
-        # подпорная крепь с нагорной стороны: верх — рельеф площадок за врезкой; у поворотов не ставится —
-        # стенка одного колена перегородила бы соседнее
-        if Ls > 7.5:
-            ux_, uy_ = dx / Ls, dy / Ls
-            for side in (1, -1):
-                off = w / 2 + 0.75
-                zs = [h_at(a[0] + dx * t + nx * side * (off + 0.6), a[1] + dy * t + ny * side * (off + 0.6), H_PADS) for t in (0.15, 0.5, 0.85)]
-                zp = min(a[2], b[2])
-                if max(zs) > zp + 0.35:
-                    L_in = Ls - 6.4
-                    npc = max(1, int(math.ceil(L_in / 2.0)))
-                    for kk in range(npc):
-                        s0_, s1_ = 3.2 + L_in * kk / npc, 3.2 + L_in * (kk + 1) / npc
-                        c_ = (a[0] + ux_ * (s0_ + s1_) / 2 + nx * side * off, a[1] + uy_ * (s0_ + s1_) / 2 + ny * side * off)
-                        near_other = False
-                        for rb2 in RIBBONS:
-                            for a2, b2 in zip(rb2['pts'], rb2['pts'][1:]):
-                                if a2 is a and b2 is b:
-                                    continue
-                                if seg_dist(np.array([c_[0]]), np.array([c_[1]]), a2, b2)[0][0] < rb2['w'] / 2 + 1.8:
-                                    near_other = True
-                        if near_other:
-                            continue
-                        q0 = (a[0] + ux_ * s0_ + nx * side * off, a[1] + uy_ * s0_ + ny * side * off)
-                        q1 = (a[0] + ux_ * s1_ + nx * side * off, a[1] + uy_ * s1_ + ny * side * off)
-                        O.seg(q0, q1, 1.5, zp - 0.4, max(zs) + 0.05, 'logs' if m == 'trail' else 'stone', ext=0.02)
-    for p in pts[1:-1]:
-        lows = [h_at(p[0] + ox_, p[1] + oy_) for ox_ in (-w / 2, w / 2) for oy_ in (-w / 2, w / 2)]
-        O.box(p[0] - w / 2, p[1] - w / 2, p[0] + w / 2, p[1] + w / 2, min(lows) - 0.4, p[2], m)
+        Ls = math.hypot(dx, dy) + 1e-9
+        nx, ny = -dy / Ls * w / 2, dx / Ls * w / 2
+        q = [(a[0] - nx, a[1] - ny), (a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), (b[0] - nx, b[1] - ny)]
+        O.quad(rb['mat'], *[(x, y, ground_at(x, y) + 0.06) for x, y in q])
     route = densify(pts, 6.0)
-    first_pt = pts[0]
     ROUTES.append({'id': rb['id'], 'label': rb['title'], 'kind': 'descent', 'points': [gpt(*p) for p in route],
-                   'checks': [[0, f'{rb["id"]}/начало', r3(first_pt[2])], [len(route) - 1, f'{rb["id"]}/конец', r3(pts[-1][2])]]})
-# беседки, родник, лавка, ларёк у тропы
-for (gx_, gy_), knee in GAZEBOS:
-    zk = trail_pts[knee][2]
+                   'checks': [[0, f'{rb["id"]}/начало', r3(pts[0][2])], [len(route) - 1, f'{rb["id"]}/конец', r3(pts[-1][2])]]})
+# беседки, развилка у родника (кладка с трубкой, лавка), ларёк у начала
+for gx_, gy_ in GAZEBOS:
+    zk = path_z_near((gx_, gy_))
     O.box(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.min) - 0.5, zk, 'deck')
     for k in range(8):
         a = math.radians(22.5 + k * 45)
@@ -1884,8 +1914,16 @@ for (gx_, gy_), knee in GAZEBOS:
         O.cyl(gx_ + 2.3 * math.cos(a), gy_ + 2.3 * math.sin(a), zk, zk + 2.4, 0.09, 'wood')
     O.cyl(gx_, gy_, zk + 2.4, zk + 2.7, 2.8, 'roof', solid=False, sides=8)
     O.label(gx_, gy_, zk + 3.3, 'беседка', 0.8, 'object')
-O.box(SPRING[0] - 1.2, SPRING[1] - 1.1, SPRING[0] + 1.2, SPRING[1] + 1.1, h_at(*SPRING) - 0.5, h_at(*SPRING) + 1.0, 'stone')
-O.label(SPRING[0], SPRING[1], h_at(*SPRING) + 1.8, 'родник', 0.7, 'object')
+zs_ = J_LAND[2]
+O.box(SPRING[0] - 1.2, SPRING[1] - 2.2, SPRING[0] + 1.2, SPRING[1] + 2.2, zs_ - 0.5, zs_ + 1.4, 'stone')       # кладка
+O.box(SPRING[0] - 2.0, SPRING[1] - 0.8, SPRING[0] - 1.2, SPRING[1] + 0.8, zs_ - 0.3, zs_ + 0.45, 'stone')     # чаша
+O.label(SPRING[0], SPRING[1], zs_ + 2.2, 'родник', 0.7, 'object')
+zb_ = J_LAND[2]
+O.box(BENCH[0] - 0.9, BENCH[1] - 0.25, BENCH[0] + 0.9, BENCH[1] + 0.25, zb_ + 0.4, zb_ + 0.48, 'wood', solid=False)
+O.box(BENCH[0] - 0.9, BENCH[1] + 0.2, BENCH[0] + 0.9, BENCH[1] + 0.28, zb_ + 0.48, zb_ + 0.9, 'wood', solid=False)
+for bx_ in (BENCH[0] - 0.8, BENCH[0] + 0.8):
+    O.box(bx_ - 0.05, BENCH[1] - 0.2, bx_ + 0.05, BENCH[1] + 0.2, zb_, zb_ + 0.4, 'wood')
+O.label(BENCH[0], BENCH[1], zb_ + 1.6, 'развилка: к коттеджам', 0.7, 'object')
 O.box(-97.0, -105.0, -93.0, -101.0, CENTRAL - 0.2, CENTRAL + 2.6, 'kiosk')
 O.label(-95.0, -103.0, CENTRAL + 3.2, 'ларёк у начала тропы', 0.8, 'object')
 
@@ -1910,7 +1948,7 @@ def strip(pts, w, m, lift=0.05, step=2.0):
 
 for pts, w in PLAN['ROADS']:
     strip([tuple(p) for p in pts], w, 'asphalt')
-strip(cot_xy[:3], 2.4, 'trail_strip', 0.06)
+strip(cot_xy[:COT_BROW_I + 1], 2.4, 'trail_strip', 0.06)       # тропа от коттеджей по плато
 CIRCLE = tuple(PLAN['CIRCLE'])          # v11: круг с фонтаном у главного корпуса
 TURN = tuple(PLAN['TURN'])              # разворот у «Ресторана и спа»
 for cx_, cy_, rr in (CIRCLE, TURN, (4.0, -213.0, 6.0), (136.0, -213.0, 6.0)):
@@ -2607,7 +2645,7 @@ PLACE_SPOTS = {
     9: ((S_AISLE, S_LOT[1] - 18.0), (S_AISLE, S_LOT[1] + 30.0)),
     10: ((118.0, 3.0), (60.0, 16.0)), 11: ((S_AISLE, S_LOT[1] + 4.0), (S_AISLE, S_LOT[3])), 12: ((90.0, 196.0), (112.0, 190.0)),
     13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((70.0, -213.0), (20.0, -213.0)),
-    16: ((-82.0, 0.0), (-160.0, 0.0)), 17: ((-93.0, -108.0), (-110.0, -130.0)),
+    16: ((-82.0, 0.0), (-160.0, 0.0)), 17: ((-90.0, -106.5), (-110.0, -130.0)),
     20: ((-174.0, 200.0), (-205.0, 196.0)), 21: ((-158.0, -160.0), (-192.0, -160.0)), 22: ((-176.0, 10.0), (-245.0, 10.0)),
     23: ((-3.0, -123.0), (30.0, -123.0)),
 }
@@ -2647,9 +2685,9 @@ SITE_ROUTES = [
       (S_LOT[2] + 1.5, S_LOT[3] - 3.5), (S_LOT[2] + 1.5, SITE2[1] + sg.R), (SITE2[0] - 4.0, SITE2[1] + sg.R),
       (S_LOT[2] + 1.5, SITE2[1] + sg.R), (S_LOT[2] + 1.5, SITE2[1]),
       (SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R)]),
-    ('cottages_beach', 'Улица коттеджей → тропа к пляжу',
-     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0), (-2.0, -216.0)] + [p[:2] for p in cot_path[1:]]
-     + [(cot_path[-1][0] - 5.0, cot_path[-1][1])]),
+    ('cottages_beach', 'Улица коттеджей → тропа → развилка у родника → серпантин → пляж',
+     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0)] + cot_xy[:COT_BROW_I] + [p for p in cot_path]
+     + [p for p in trail_pts[J_I + 1:]]),
     ('south_branch', 'Развилка → южная ветка → улица коттеджей',
      [(82.0, 0.0), (88.0, -40.0), (90.0, -80.0), (76.0, -128.0), (72.0, -170.0), (82.0, -213.0)]),
     ('quay_north', 'Набережная: от каскада на север к прокату и эллингу',
@@ -2658,8 +2696,8 @@ SITE_ROUTES = [
     ('quay_south', 'Набережная: от каскада на юг под скалой подиума к пляжу и спасателям',
      [(BOTTOM_X - 3.3, 0.0), (-172.0, -40.0), (-176.0, -80.0), (-176.0, -110.0), (-171.0, -114.0), (-171.0, -131.0), (-157.5, -134.0),
       (-157.3, -152.0)]),
-    ('stage_trail', 'Под сценой амфитеатра → тропка → тропа → пляж',
-     [(-94.0, -160.0), (-98.5, -160.0)] + [p[:2] for p in STAGE_PATH] + [p[:2] for p in trail_pts[2:]]),
+    ('stage_trail', 'Под сценой амфитеатра → тропка → серпантин → пляж',
+     [(-94.0, -160.0), (-98.5, -160.0)] + [p for p in STAGE_PATH] + [p for p in trail_pts[ST_I + 1:]]),
 ]
 for rid, title, pts in SITE_ROUTES:
     p3 = []
@@ -2699,7 +2737,8 @@ SHOT_VIEWS = [
     {'id': '00_pool', 'at': eye(-62, -92, CENTRAL), 'look': gpt(-96, -80, CENTRAL + 1.0)},
     {'id': '00_pool_rock', 'at': eye(-166.0, -84.0), 'look': gpt(-114.0, -84.0, 22.0)},
     {'id': '00_main_circle', 'at': eye(CIRCLE[0] + 26.0, CIRCLE[1] - 3.0), 'look': gpt(MR[0] + 10.0, MR[1] + 20.0, CENTRAL + 4.0)},
-    {'id': '00_trail', 'at': eye(*trail_pts[5][:2], trail_pts[5][2]), 'look': gpt(*trail_pts[7][:2], trail_pts[7][2])},
+    {'id': '00_trail', 'at': eye(*trail_pts[J_I + 3][:2]), 'look': gpt(*trail_pts[min(len(trail_pts) - 1, J_I + 16)][:2], trail_pts[min(len(trail_pts) - 1, J_I + 16)][2] - 1.0)},
+    {'id': '00_trail_spring', 'at': eye(*trail_pts[max(0, J_I - 6)][:2]), 'look': gpt(SPRING[0], SPRING[1], J_LAND[2] + 0.6)},
 ]
 
 # ================================================================ ЗАПИСЬ
