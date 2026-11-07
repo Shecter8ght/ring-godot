@@ -966,7 +966,7 @@ for srf in plan["surfaces"]:
         srf["holes"] = [[RW[0] - 0.3, RAMP_TOP, RW[1] + 0.3, PIT[1] - 0.4], [RE[0] - 0.3, RAMP_TOP, RE[1] + 0.3, PIT[1] - 0.4]]
 slab("lot_slab", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], 0.0, 0.4, "walk")
 plan["ground_holes"].append([PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4])
-slab("pit_floor", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], PIT_Y, 0.4, "concrete")
+slab("pit_floor", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], PIT_Y, 0.4, "pit_floor")       # бетон с пропилами (StreetPaving)
 wall(PIT[0] - 0.4, PIT[1] - 0.4, PIT[0], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
 wall(PIT[2], PIT[1] - 0.4, PIT[2] + 0.4, TUNNEL_Z[0], PIT_Y, -0.4, "concrete")
 wall(PIT[2], TUNNEL_Z[1], PIT[2] + 0.4, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
@@ -984,17 +984,20 @@ BEAM_Y = -0.4 - PIT_BEAM * 0.5
 COL_X = [X_ROW0 + k * BAY for k in range(int((X_ROW1 - X_ROW0) / BAY) + 1)]
 slab("pit_ceiling", [PIT[0], PIT[1], PIT[2], PIT[3]], -0.4, 0.04, "concrete")
 for cx in COL_X:
-    box(cx, BEAM_Y, (PIT[1] + PIT[3]) * 0.5, 0.6, PIT_BEAM, PIT[3] - PIT[1], "slab", 0.0, False)
+    box(cx, BEAM_Y, (PIT[1] + PIT[3]) * 0.5, 0.6, PIT_BEAM, PIT[3] - PIT[1], "concrete", 0.0, False)
     for cz in COL_Z:
-        box(cx, -0.4 - PIT_BEAM - 0.2, cz, 2.2, 0.4, 2.2, "slab", 0.0, False)
+        box(cx, -0.4 - PIT_BEAM - 0.2, cz, 2.2, 0.4, 2.2, "concrete", 0.0, False)
         for k in range(6):
-            box(cx, PIT_Y + 0.1 + k * 0.2, cz, 0.94, 0.2, 0.94, "accent" if k % 2 == 0 else "dark", 0.0, False)
+            box(cx, PIT_Y + 0.1 + k * 0.2, cz, 0.94, 0.2, 0.94, "hazard_yellow" if k % 2 == 0 else "dark", 0.0, False)
 for cz in COL_Z:
-    box((X_ROW0 + X_ROW1) * 0.5, BEAM_Y, cz, X_ROW1 - X_ROW0, PIT_BEAM, 0.6, "slab", 0.0, False)
+    box((X_ROW0 + X_ROW1) * 0.5, BEAM_Y, cz, X_ROW1 - X_ROW0, PIT_BEAM, 0.6, "concrete", 0.0, False)
 for (a0, a1) in AISLES:
     box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.3, a1 - 0.9, X_ROW1 - X_ROW0, 0.5, 1.2, "wall", 0.0, False)
 for (row, z0, z1, _yaw) in ROWS:
-    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.12, (z0 + z1) * 0.5, X_ROW1 - X_ROW0, 0.14, 0.14, "rust", 0.0, False)
+    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.12, (z0 + z1) * 0.5, X_ROW1 - X_ROW0, 0.14, 0.14, "pipe_red", 0.0, False)
+# кабельные лотки вдоль продольных стен под балками (как в зале D стенда)
+for tz in (PIT[1] + 0.65, PIT[3] - 0.65):
+    box((PIT[0] + PIT[2]) * 0.5, -0.4 - PIT_BEAM - 0.25, tz, PIT[2] - PIT[0] - 1.0, 0.08, 0.45, "tray", 0.0, False)
 
 
 def stall_free(x: float, row: str) -> bool:
@@ -1053,6 +1056,7 @@ for (row, z0, z1, _yaw) in ROWS:
     sign("ряд " + row, PIT[2] - 4.0, PIT_Y + 4.0, (z0 + z1) * 0.5, 30)
 for x in ((RW[0] + RW[1]) * 0.5, (RE[0] + RE[1]) * 0.5):
     sign("выезд ↑", x, PIT_Y + 4.0, RAMP_BOT + 2.0, 34)
+    box(x, PIT_Y + 4.0, RAMP_BOT + 2.15, 1.6, 0.4, 0.12, "exit_sign", 0.0, False)          # зелёный указатель выезда
 # техпомещения в торцах ряда A: насосная и электрощитовая (закрыты)
 for (x0, x1, title) in [(X_ROW0, X_ROW0 + 12.0, "насосная"), (X_ROW1 - 12.0, X_ROW1, "электрощитовая")]:
     wall(x0, ROWS[0][2] - 0.2, x1, ROWS[0][2], PIT_Y, -0.4, "wall")
