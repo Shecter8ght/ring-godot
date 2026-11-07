@@ -290,6 +290,13 @@
    "t": 0.1
   },
   {
+   "id": "fountain_floor",
+   "mat": "fountain_floor",
+   "rect": [-16.2, 101.3, -7.8, 106.7],
+   "y": 0.0,
+   "t": 0.12
+  },
+  {
    "id": "playground_sq",
    "mat": "walk",
    "rect": [-49.0, 150.0, -24.0, 178.0],
@@ -7450,25 +7457,25 @@
    "rect": [-16.5, 101.0, -7.5, 101.3],
    "y0": 0.0,
    "y1": 0.6,
-   "mat": "concrete"
+   "mat": "fountain_tile"
   },
   {
    "rect": [-16.5, 106.7, -7.5, 107.0],
    "y0": 0.0,
    "y1": 0.6,
-   "mat": "concrete"
+   "mat": "fountain_tile"
   },
   {
    "rect": [-16.5, 101.0, -16.2, 107.0],
    "y0": 0.0,
    "y1": 0.6,
-   "mat": "concrete"
+   "mat": "fountain_tile"
   },
   {
    "rect": [-7.8, 101.0, -7.5, 107.0],
    "y0": 0.0,
    "y1": 0.6,
-   "mat": "concrete"
+   "mat": "fountain_tile"
   },
   {
    "rect": [-22.0, 112.0, -4.0, 112.3],

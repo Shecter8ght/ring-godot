@@ -13,6 +13,7 @@ extends RefCounted
 const SHADER: Shader = preload("res://src/world/street_paving.gdshader")
 const CURB_SHADER: Shader = preload("res://src/world/curb_stone.gdshader")
 const PAINT_SHADER: Shader = preload("res://src/world/road_paint.gdshader")
+const TILE_SHADER: Shader = preload("res://src/world/tile_wall.gdshader")
 const TEX: String = "res://assets/textures/%s/%s.jpg"
 const IRON: String = "res://assets/textures/street_iron/%s_%s.png"
 
@@ -135,6 +136,8 @@ const PAINTS: Dictionary = {
 	"court_grey": {"color": Color8(120, 126, 132), "wear": 0.1, "dirt": 0.25, "rough": 0.7},
 	"court_grey2": {"color": Color8(84, 90, 98), "wear": 0.1, "dirt": 0.25, "rough": 0.7},
 	"court_line": {"color": Color8(232, 232, 228), "wear": 0.2, "dirt": 0.25, "rough": 0.6},
+	# дно сухого фонтана (фото владельца 05): голубая краска облезла, грязь и листья
+	"fountain_blue": {"color": Color8(78, 142, 182), "wear": 0.3, "dirt": 0.55, "rough": 0.6},
 }
 
 const RAIN_FADE_SEC: float = 12.0
@@ -279,6 +282,16 @@ static func iron_material(name: String) -> StandardMaterial3D:
 		m.albedo_color = Color(0.2, 0.17, 0.14)
 		m.roughness = 0.8
 	_cache[cache_key] = m
+	return m
+
+
+## Облицовка плиткой по граням (бортик сухого фонтана): шейдер tile_wall, своё, без текстур.
+static func tile_material() -> ShaderMaterial:
+	if _cache.has("tile_wall"):
+		return _cache["tile_wall"]
+	var m := ShaderMaterial.new()
+	m.shader = TILE_SHADER
+	_cache["tile_wall"] = m
 	return m
 
 
@@ -529,6 +542,65 @@ static func court_paint(parent: Node3D, rect: Rect2, y: float, seed_value: int) 
 		paint_node(parent, "court_line", to_world.call(side * field.x * 0.5, 0.0, h1 + 0.0015), Vector2(lw, field.y), yaw)
 	paint_node(parent, "court_line", to_world.call(0.0, 0.0, h1 + 0.0015), Vector2(lw, field.y), yaw)
 	paint_arc_node(parent, "court_line", to_world.call(0.0, 0.0, h1 + 0.0015), 1.8 - lw, 1.8, 0.0, TAU)
+
+
+## Бурьян и трава пучками (модели зоны 1 — растительность Poly Haven, CC0, AGENTS.md п. 6): мелкая трава в швах и у
+## бордюров, бурьян и одуванчики.
+const WEED_GRASS: PackedStringArray = ["res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass2_c.glb"]
+const WEED_TALL: PackedStringArray = ["res://assets/zone01/models/ug_weed_a.glb", "res://assets/zone01/models/ug_weed_b.glb",
+	"res://assets/zone01/models/ug_dandelion_c.glb", "res://assets/zone01/models/ug_dandelion_e.glb"]
+## Куски пучков на карте (м) и с какого расстояния кусок не рисуется: мелкая трава, бурьян.
+const WEED_CHUNK_M: float = 32.0
+const WEED_FAR_M: Vector2 = Vector2(55.0, 75.0)
+
+static var _model_cache: Dictionary = {}
+
+
+## Сетка первой MeshInstance3D модели (материалы — из модели); нет файла — null.
+static func model_mesh(path: String) -> Mesh:
+	if _model_cache.has(path):
+		return _model_cache[path]
+	var mesh: Mesh = null
+	if ResourceLoader.exists(path):
+		var inst: Node = (load(path) as PackedScene).instantiate()
+		var found: Array[Node] = inst.find_children("*", "MeshInstance3D", true, false)
+		if inst is MeshInstance3D:
+			found.push_front(inst)
+		if not found.is_empty():
+			var mi := found[0] as MeshInstance3D
+			mesh = mi.mesh.duplicate() as Mesh
+			for k: int in range(mesh.get_surface_count()):
+				var over: Material = mi.get_surface_override_material(k)
+				if over:
+					mesh.surface_set_material(k, over)
+		inst.free()
+	_model_cache[path] = mesh
+	return mesh
+
+
+## Пучки одной модели одним MultiMesh: в преобразованиях масштаб — нужная высота, м (делится на высоту модели).
+static func scatter_node(parent: Node3D, path: String, transforms: Array, far_m: float = 0.0, shadows: bool = false) -> MultiMeshInstance3D:
+	var mesh: Mesh = model_mesh(path)
+	if mesh == null or transforms.is_empty():
+		return null
+	var model_h: float = maxf(mesh.get_aabb().size.y, 0.05)
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = transforms.size()
+	for i: int in range(transforms.size()):
+		var t: Transform3D = transforms[i]
+		var k: float = t.basis.get_scale().x / model_h
+		mm.set_instance_transform(i, Transform3D(t.basis.orthonormalized().scaled(Vector3.ONE * k), t.origin))
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if far_m > 0.0:
+		mmi.visibility_range_end = far_m
+		mmi.visibility_range_end_margin = 6.0
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	parent.add_child(mmi)
+	return mmi
 
 
 ## Сырость всех материалов покрытий — от погоды рейда (как MallGround.sync_weather); под крышей сухо.
