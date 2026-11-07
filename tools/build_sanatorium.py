@@ -74,10 +74,12 @@ def load_plan():
 PLAN = load_plan()
 shore_x = PLAN['shore_x']
 brow_x = PLAN['brow_x']
-MAIN = json.loads((DATA / 'sanatorium_main_corps_v02.json').read_text(encoding='utf-8'))
+MAIN = json.loads((DATA / 'sanatorium_main_corps_v03.json').read_text(encoding='utf-8'))   # v03 — корпус к S-корпусам
 SPA = json.loads((DATA / 'sanatorium_spa_restaurant_v03.json').read_text(encoding='utf-8'))
 SMALL = json.loads((DATA / 'sanatorium_small_v01.json').read_text(encoding='utf-8'))
-DESC = json.loads((DATA / 'sanatorium_descents_v01.json').read_text(encoding='utf-8'))
+DESC = json.loads((DATA / 'sanatorium_descents_v02.json').read_text(encoding='utf-8'))   # v02 — просторнее, склон длиннее
+DS = float(PLAN['DS'])                 # урез воды на DS западнее, чем в v10 (схема v11)
+QUAY_W, BEACH_W = float(PLAN['QUAY_W']), float(PLAN['BEACH_W'])
 
 # ---------------------------------------------------------------- числа блокаута
 CENTRAL = 32.0          # главный корпус, «Ресторан и спа», парадная терраса (верх каскада — +32 по листу спусков)
@@ -91,7 +93,7 @@ PART_T = 0.15           # перегородка
 SLAB_T = 0.3
 RAIL_H = 1.1
 STEP = 1.0              # шаг рельефа
-GRID_X = (-330.0, 190.0)
+GRID_X = (-390.0, 190.0)
 GRID_Y = (-300.0, 300.0)
 
 # ---------------------------------------------------------------- вывод объёмов
@@ -194,12 +196,12 @@ GX, GY = np.meshgrid(XS, YS)
 def shore_v(y):
     """То же, что shore_x схемы, для массивов."""
     y = np.asarray(y, dtype=float)
-    return (-150.0 + 7.0 * np.sin(y / 45.0) + 5.0 * np.sin(y / 17.0 + 1.0)
+    return (-150.0 - DS + 7.0 * np.sin(y / 45.0) + 5.0 * np.sin(y / 17.0 + 1.0)
             + np.where(y < -215, 14.0, 0.0) * np.minimum(1.0, (-215 - y) / 30.0))
 
 
 def brow_v(y):
-    return shore_v(y) + 20.0 + 42.0 + 6.0 * np.sin(np.asarray(y, dtype=float) / 70.0 + 0.5)
+    return shore_v(y) + DS + 20.0 + 42.0 + 6.0 * np.sin(np.asarray(y, dtype=float) / 70.0 + 0.5)
 
 
 for _y in (-260.0, -133.0, 0.0, 77.0, 240.0):
@@ -224,7 +226,7 @@ def smooth(t):
     return t * t * (3.0 - 2.0 * t)
 
 
-BEACH = (-235.0, -95.0)
+BEACH = tuple(PLAN['BEACH_Y'])
 
 
 def natural(x, y):
@@ -233,14 +235,14 @@ def natural(x, y):
     y = np.asarray(y, dtype=float)
     s = shore_v(y)
     b = brow_v(y)
-    q = s + 20.0
     wb = np.clip((y - BEACH[0]) / 8.0, 0.0, 1.0) * np.clip((BEACH[1] - y) / 8.0, 0.0, 1.0)
+    q = s + QUAY_W + (BEACH_W - QUAY_W) * wb          # подошва склона: набережная 30 м, пляж 42 м (v11)
     d_out = s - x
     lake_quay = -2.5 - 3.5 * np.clip(d_out / 20.0, 0.0, 1.0)
     lake_beach = np.maximum(-6.0, -0.09 * d_out)
     lake = lake_quay * (1 - wb) + lake_beach * wb
     quay = np.full_like(x, 2.0)
-    beach = 2.0 * smooth((x - s) / 18.0)
+    beach = 2.0 * smooth((x - s) / 24.0)
     shore_zone = quay * (1 - wb) + beach * wb
     t = np.clip((x - q) / (b - q), 0.0, 1.0)
     slope = 2.0 + 30.0 * (0.7 * t + 0.3 * smooth(t))
@@ -257,7 +259,28 @@ def natural(x, y):
     return h
 
 
-H0 = natural(GX, GY)
+# скала под подвесным подиумом открытого бассейна (владелец, v11): у бровки обрыв ≈ 13 м, ниже скальный откос, к
+# набережной выемка сходит на нет; по краям по y — переход 10 м (не котлован, а скальный выступ склона)
+ROCK_Y = (-102.0, -66.0)         # ядро по y
+FACE_X = (-103.0, -110.0)        # верх и низ обрыва
+ROCK_D = 10.0                    # глубина выемки под подиумом
+ROCK_FADE = (-122.0, -152.0)     # от — до: выемка сходит на нет к набережной
+
+
+def rock_carve(x, y, h):
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    face = smooth((FACE_X[0] - x) / (FACE_X[0] - FACE_X[1]))
+    fade = 1.0 - smooth((ROCK_FADE[0] - x) / (ROCK_FADE[0] - ROCK_FADE[1]))
+    depth = ROCK_D * np.where(x > FACE_X[1], face, np.where(x > ROCK_FADE[0], 1.0, fade))
+    w = smooth((y - (ROCK_Y[0] - 10.0)) / 10.0) * smooth(((ROCK_Y[1] + 10.0) - y) / 10.0) * (x > shore_v(y) + 2.0)
+    out = h - depth * w
+    return np.where((out < 2.2) & (h >= 2.2), 2.2, out)
+
+
+H_NAT = natural(GX, GY)
+H0 = rock_carve(GX, GY, H_NAT)
+CARVE = H_NAT - H0               # глубина выемки скалы — для текстуры камня
 H = H0.copy()
 
 
@@ -1040,7 +1063,7 @@ SPORT_RECT = (96.0, 52.0, 140.0, 100.0)
 PG_RECT = tuple(float(v) for v in SMALL['playground']['rect'])
 
 # площадки (порядок важен: позже — сверху)
-pad_rect(-96.0, -110.0, 14.0, 22.0, CENTRAL, blend=(3, 50, 60, 50))
+pad_rect(-96.0, -110.0, 18.0, 52.0, CENTRAL, blend=(3, 50, 60, 50))      # v11: и главный корпус на новом месте
 SITE1 = [s for s in S_SITES if s[3] == 'С-1'][0]
 SITE2 = [s for s in S_SITES if s[3] == 'С-2'][0]
 ex1 = sg.extent(SITE1[0], SITE1[1], SITE1[2])
@@ -1114,19 +1137,19 @@ for i, ((cx, cy), lv) in enumerate(zip(COTTAGES, COT_LEVELS)):
 
 # ---- павильон-кофейня на «Стрелке»: 1 этаж и крыша-смотровая
 MOLE = 1.5
-pav_f = {int(k): copy_floor(v) for k, v in SMALL['павильон'].items()}
+pav_f = {int(k): shift_mirror(copy_floor(v), -DS) for k, v in SMALL['павильон'].items()}   # v11: мол к новому урезу
 PAV_H = 4.2
 pav = Building('pav', 'Павильон-кофейня', pav_f, {1: MOLE, 2: MOLE + PAV_H}, {1: PAV_H, 2: 3.0}, ext_t=SMALL_EXT_T,
                glass={'PH'}, open_rooms={'DECK'}, start_door=0)
 BLD['pav'] = pav
 
 # ---- маяк: дверь на галерею перенесена на север (винтовая лестница выходит в северо-западный угол), галерея кольцом
-lh_f = {int(k): copy_floor(v) for k, v in SMALL['маяк'].items()}
+lh_f = {int(k): shift_mirror(copy_floor(v), -DS) for k, v in SMALL['маяк'].items()}
 LH_GAL = MOLE + 12.0
 lh_f[2]['rooms'] = [r for r in lh_f[2]['rooms'] if r['id'] != 'LHG']
-lh_f[2]['rooms'].append({'id': 'LHG', 'name': 'Фонарный ярус и обходная галерея', 'rect': [-292.6, 13.0, -283.4, 15.0],
+lh_f[2]['rooms'].append({'id': 'LHG', 'name': 'Фонарный ярус и обходная галерея', 'rect': [-292.6 - DS, 13.0, -283.4 - DS, 15.0],
                          'kind': 'pub', 'flags': [], 'area': 18.4})
-set_door(lh_f[2], 'LH0', 'LHG', ['h', 13.0, -289.4, -288.23], 'маяк: дверь на галерею с запада на север')
+set_door(lh_f[2], 'LH0', 'LHG', ['h', 13.0, -289.4 - DS, -288.23 - DS], 'маяк: дверь на галерею с запада на север')
 DEVIATIONS.append('маяк: обходная галерея — полоса 9,2 × 2 м с севера (в листе — с запада), выход с винтовой лестницы — в её угол')
 lh = Building('lh', 'Маяк', lh_f, {1: MOLE, 2: LH_GAL}, {1: 12.0, 2: 3.0}, ext_t=SMALL_EXT_T, open_rooms={'LHG'},
               mat_ext='white', start_door=0)
@@ -1176,13 +1199,15 @@ def one_room(bid, title, rect, doors, level, h, kind='serv', glass=False):
     return b
 
 
-one_room('eling', 'Эллинг', (-152.0, 188.0, -134.0, 206.0), [['v', -134.0, 195.0, 198.5], ['v', -152.0, 192.0, 202.0]], QUAY, 6.0)
-one_room('gsm', 'Склад ГСМ', (-146.0, 214.0, -136.0, 222.0), [['h', 214.0, -142.6, -141.4]], QUAY, 3.6)
-one_room('rent', 'Прокат: домик выдачи', (-146.0, 134.0, -136.0, 144.0), [['v', -146.0, 138.4, 140.8], ['v', -136.0, 138.4, 139.6]],
-         QUAY, 3.4, glass=True)
-RESC_L = round(rect_stat(-142, -128, -130, -116, field=H0) * 20) / 20
-pad_rect(-145.0, -131.0, -127.0, -113.0, RESC_L, blend=(4, 6, 8, 6))
-one_room('resc', 'Спасательная станция', (-142.0, -128.0, -130.0, -116.0), [['v', -142.0, -122.6, -121.4], ['v', -130.0, -122.6, -121.4]],
+Q = -DS     # v11: лодочная станция и прокат — к новому урезу
+one_room('eling', 'Эллинг', (-152.0 + Q, 188.0, -134.0 + Q, 206.0), [['v', -134.0 + Q, 195.0, 198.5], ['v', -152.0 + Q, 192.0, 202.0]], QUAY, 6.0)
+one_room('gsm', 'Склад ГСМ', (-146.0 + Q, 214.0, -136.0 + Q, 222.0), [['h', 214.0, -142.6 + Q, -141.4 + Q]], QUAY, 3.6)
+one_room('rent', 'Прокат: домик выдачи', (-146.0 + Q, 134.0, -136.0 + Q, 144.0),
+         [['v', -146.0 + Q, 138.4, 140.8], ['v', -136.0 + Q, 138.4, 139.6]], QUAY, 3.4, glass=True)
+RS = tuple(PLAN['RESCUE'])
+RESC_L = round(rect_stat(*RS, field=H0) * 20) / 20
+pad_rect(RS[0] - 3.0, RS[1] - 3.0, RS[2] + 3.0, RS[3] + 3.0, RESC_L, blend=(4, 6, 8, 6))
+one_room('resc', 'Спасательная станция', RS, [['v', RS[0], -122.6, -121.4], ['v', RS[2], -122.6, -121.4]],
          RESC_L, 3.4, glass=True)
 KPP_RECT = (136.0, 6.5, 144.0, 12.5)
 DEVIATIONS.append('КПП: будка с северной стороны выезда (на схеме нарисована поверх дороги), шлагбаум поперёк')
@@ -1208,64 +1233,70 @@ SURFACES.append(('rect', *RTER, CENTRAL))
 SURFACES.append(('rect', -99.0, -30.0, -96.0, -24.0, CENTRAL))
 # остриё мола по схеме — точка (−292, 10); башня маяка в блокауте квадратная 6 × 6 м и в острие не входит —
 # конец мола расширен до площадки 11 × 8 м под башней
-_mole = [tuple(p) for p in PLAN['MOLE_PTS']]
-_tip = _mole.index((-292, 10))
-MOLE_PTS = [(-138.0, -26.0)] + _mole[:_tip - 1] + [(-284.0, 3.0), (-295.0, 6.0), (-295.0, 14.0), (-284.0, 17.0)] + _mole[_tip + 2:] + [(-138.0, 46.0)]
-DEVIATIONS.append('«Стрелка»: остриё мола (−286, 4) → (−292, 10) → (−286, 16) расширено до площадки x −295…−284, y 3…17 — квадратная башня маяка 6 × 6 м в острие не входила')
+_mole = [(float(p[0]), float(p[1])) for p in PLAN['MOLE_PTS']]
+_tip = max(range(len(_mole)), key=lambda i: -_mole[i][0])      # остриё — самая западная точка
+MOLE_PTS = ([(-138.0 - DS, -26.0)] + _mole[:_tip - 1] + [(-284.0 - DS, 3.0), (-295.0 - DS, 6.0), (-295.0 - DS, 14.0), (-284.0 - DS, 17.0)]
+            + _mole[_tip + 2:] + [(-138.0 - DS, 46.0)])
+DEVIATIONS.append(f'«Стрелка»: остриё мола ({-286 - DS:.0f}, 4) → ({-292 - DS:.0f}, 10) → ({-286 - DS:.0f}, 16) расширено до площадки '
+                  f'x {-295 - DS:.0f}…{-284 - DS:.0f}, y 3…17 — квадратная башня маяка 6 × 6 м в острие не входила')
 SURFACES.append(('poly', MOLE_PTS, MOLE))
 for r in (PODIUM, RTER):
     clamp_rect(*r, CENTRAL - SLAB_T - 0.05)
-clamp_rect(PLAN['shore_x'](10) - 12, -26.5, -136.5, 46.5, MOLE - 0.3)
+clamp_rect(PLAN['shore_x'](10) - 12, -26.5, -136.5 - DS, 46.5, MOLE - 0.3)
 
 # ================================================================ КАСКАД
 CAS = DESC['cascade']['elements']
 CW = float(DESC['width'])
+TOP_X, BOTTOM_X = float(DESC['top_x']), float(DESC['bottom_x'])
+N_END, S_END = float(DESC['n_end']), float(DESC['s_end'])
 CAS_ZONE = []      # прямоугольники, где рельеф возвращается к природному (террасы каскада)
 
 
 def cascade_layout():
-    """Разбор каскада: x-марши, площадки, галереи с маршами по y и ровными кусками между ними."""
-    galleries = []
-    cur = None
+    """Галереи по номеру: площадки начала и конца, марши по y, ровная полоса."""
+    gal = {}
     for e in CAS:
+        if e['axis'] == 'x':
+            continue
+        g = gal.setdefault(e['index'], {'start': None, 'flights': [], 'end': None, 'walk': None})
         if e['kind'] == 'walk':
-            cur['walk'] = e['rect']
-            galleries.append(cur)
-            cur = None
-            continue
-        if e['kind'] == 'landing' and cur is None:
-            cur = {'start': e, 'flights': [], 'end': None}
-            continue
-        if cur is not None and e['kind'] == 'flight' and e['axis'] == 'y':
-            cur['flights'].append(e)
-            continue
-        if cur is not None and e['kind'] == 'landing':
-            cur['end'] = e
-            continue
-    return galleries
+            g['walk'] = e['rect']
+        elif e['kind'] == 'landing':
+            if g['start'] is None:
+                g['start'] = e
+            else:
+                g['end'] = e
+        elif e['kind'] == 'flight':
+            g['flights'].append(e)
+    return [gal[k] for k in sorted(gal)]
 
 
 GALLERIES = cascade_layout()
-XFLIGHTS = [e for e in CAS if e['kind'] == 'flight' and e['axis'] == 'x']
+XFLIGHTS = [e for e in CAS if e['kind'] == 'flight' and e['axis'] == 'x']    # марши «вниз»: index — номер (0 — с террасы)
+PADS = [e for e in CAS if e['kind'] == 'pad']                                # площадки над и под маршами «вниз»
+LINK = {e['index']: e for e in XFLIGHTS}
 for e in CAS:
-    if e['kind'] in ('flight', 'landing', 'walk'):
+    if e['kind'] in ('flight', 'landing', 'walk', 'pad'):
         CAS_ZONE.append(tuple(e['rect']))
 # промежутки между галереями (террасированный склон) — тоже каскад
 for k, g in enumerate(GALLERIES):
     x0, y0, x1, y1 = g['walk']
-    up_x = GALLERIES[k - 1]['walk'][0] if k > 0 else -86.0
+    up_x = GALLERIES[k - 1]['walk'][0] if k > 0 else TOP_X
     ys_ = (min(g['start']['rect'][1], g['end']['rect'][1]), max(g['start']['rect'][3], g['end']['rect'][3]))
     CAS_ZONE.append((x1, ys_[0], up_x, ys_[1]))
     g['gap'] = (x1, up_x)
     g['span'] = ys_
 
 
-ROT_DECK = (-105.4, -33.0, -99.0, -24.6)       # выступ с беседкой-ротондой у второй галереи
-BALCONY = (-114.2, 24.6, -109.0, 29.4)          # смотровой балкон у третьей
+CD = DESC['cascade']
+ROT_DECK = tuple(CD['rotunda_deck'])            # выступ с беседкой-ротондой у второй галереи
+ROT_C = tuple(CD['rotunda'])
+BALCONY = tuple(CD['balcony'])                  # смотровой балкон у третьей
+KIOSK = tuple(CD['kiosk'])
 CAS_ELEMS = []     # (прямоугольник, уровень, уровни сторон {W, E, S, N}) — под каждым рельеф ниже, по краю — подпорные стенки
 for e in CAS:
     r_ = tuple(e['rect'])
-    if e['kind'] == 'landing':
+    if e['kind'] in ('landing', 'pad'):
         CAS_ELEMS.append((r_, e['z_top'], {}))
     elif e['kind'] == 'flight' and e['axis'] == 'x':
         CAS_ELEMS.append((r_, e['z_bottom'], {'W': e['z_bottom'], 'E': e['z_top']}))
@@ -1288,16 +1319,15 @@ trail_pts = [(float(p[0]), float(p[1]), float(z)) for p, (s_, z) in zip(TR['poly
 trail_pts.insert(0, (-92.5, -107.6, CENTRAL))
 # низ тропы — на песок пляжа (по листу +2,0; песок в блокауте в этом месте чуть ниже)
 trail_pts[-1] = (trail_pts[-1][0], trail_pts[-1][1], h_at(trail_pts[-1][0], trail_pts[-1][1], H_PADS))
-STAGE_PATH = [(-101.0, -160.0, UNDER), (-101.5, -152.0, 26.6), (-101.0, -147.2, trail_pts[2][2] + 0.0)]
-GAZEBOS = [((-116.5, -107.5), 5), ((-130.0, -116.5), 9)]       # беседки на выступах у колен тропы (точка тропы)
+STAGE_PATH = [tuple(float(v) for v in p) for p in TR['stage_path']]
+GAZEBOS = [(tuple(g['xy']), int(g['knee']) + 1) for g in TR['gazebos']]   # номер точки — с учётом вставленного начала
+SPRING = tuple(TR['spring'])
 for (gx_, gy_), knee in GAZEBOS:
     clamp_rect(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, trail_pts[knee][2] - 0.3)
 clamp_rect(-101.5, -163.0, -96.0, -157.0, UNDER)
 # слип эллинга и пирсы: рельеф под ними ниже настила
-clamp_rect(-171.0, 193.6, -152.0, 200.4, -1.3)
-COT_PATH_XY = [(-2.0, -216.0), (-40.0, -222.0), (-90.0, -214.0), (-104.0, -228.0), (-118.0, -218.0), (-130.0, -230.0)]
-SERVICE = [tuple(p) for p in PLAN['ROADS'][5][0]]
-SERVICE[-1] = (-132.6, 196.75)      # схема ведёт дорогу внутрь эллинга (−138, 196) — лента кончается у его ворот
+clamp_rect(-171.0 - DS, 193.6, -152.0 - DS, 200.4, -1.3)
+COT_XY = [tuple(float(v) for v in p) for p in PLAN['COT_PATH']]      # третья точка — на бровке
 
 
 def profile_by_length(xy, z0, z1, i_from):
@@ -1326,24 +1356,14 @@ def densify(pts, step):
     return out
 
 
-_brow_t = (float(brow_x(-216.0)) + 2.0 + 40.0) / (-90.0 + 40.0)
-COT_BROW = (-40.0 + (-90.0 + 40.0) * _brow_t, -222.0 + (-214.0 + 222.0) * _brow_t)
-cot_xy = COT_PATH_XY[:2] + [COT_BROW] + COT_PATH_XY[2:]
-cz = h_at(COT_BROW[0], COT_BROW[1], H_PADS)
-cot_path = profile_by_length(cot_xy, cz, QUAY, 2)
-svc_i = 1
-svc_path = profile_by_length(SERVICE, h_at(SERVICE[1][0], SERVICE[1][1], H_PADS), QUAY, svc_i)
-for i in range(svc_i):
-    svc_path[i] = (svc_path[i][0], svc_path[i][1], h_at(svc_path[i][0], svc_path[i][1], H_PADS))
-cot_end = cot_path[-1]
-cot_path[-1] = (cot_end[0], cot_end[1], h_at(cot_end[0], cot_end[1], H_PADS))
-cot_path = profile_by_length([p[:2] for p in cot_path], cz, cot_path[-1][2], 2)
-# (id, подпись, точки, ширина, материал, концы сходят на землю: начало, конец)
+cot_xy = COT_XY
+cz = h_at(cot_xy[2][0], cot_xy[2][1], H_PADS)
+cot_path = profile_by_length(cot_xy, cz, h_at(cot_xy[-1][0], cot_xy[-1][1], H_PADS), 2)
+# (id, подпись, точки, ширина, материал, концы сходят на землю: начало, конец); служебной дороги нет (владелец, v11)
 RIBBON_SPECS = [
     ('trail', 'Тропа-серпантин', trail_pts, TRAIL_W, 'trail', (True, True)),
     ('stage_path', 'Тропка из-под сцены к тропе', STAGE_PATH, 2.0, 'trail', (True, False)),
     ('cottage_path', 'Тропа от коттеджей к пляжу', cot_path[2:], 2.4, 'trail', (True, True)),
-    ('service', 'Служебная дорога к лодочной станции', svc_path[1:], 5.0, 'asphalt', (True, True)),
 ]
 for rid, title, pts, w, m, joins in RIBBON_SPECS:
     RIBBONS.append({'id': rid, 'title': title, 'pts': pts, 'w': w, 'mat': m, 'joins': joins})
@@ -1449,8 +1469,8 @@ lh.stairs['LH0'] = {'lo': 1, 'hi': 2, 'res': {'path': [(p[0], p[1], z) for p, z 
 lh.slab_override[(2, 'LH0')] = []
 lh.hubs[(1, 'LH0')] = (ix1 - fw / 2, (iy0 + iy1) / 2)
 lh.hubs[(2, 'LH0')] = (ix0 + fw + 0.6, iy1 - fw / 2)
-O.cyl(-288.0, 10.0, LH_GAL + 3.0, MOLE + 16.0, 2.2, 'glass', solid=False)               # фонарь
-O.cyl(-288.0, 10.0, MOLE + 16.0, MOLE + 17.2, 2.6, 'roof', solid=False)
+O.cyl(-288.0 - DS, 10.0, LH_GAL + 3.0, MOLE + 16.0, 2.2, 'glass', solid=False)          # фонарь
+O.cyl(-288.0 - DS, 10.0, MOLE + 16.0, MOLE + 17.2, 2.6, 'roof', solid=False)
 
 # крытый бассейн: чаша (дно −1,4), лестница в чашу, вода; препятствие для обхода
 bx = spa.basins[0]
@@ -1636,9 +1656,11 @@ def gallery_level(g, y):
     return z
 
 
-cas_route = [(-80.0, 0.0, CENTRAL), (-85.0, 0.0, CENTRAL), (-86.4, 0.0, CENTRAL - 0.1), (-89.8, 0.0, 29.85)]
+L0 = LINK[0]
+cas_route = [(TOP_X + 6.0, 0.0, CENTRAL), (TOP_X + 1.0, 0.0, CENTRAL), (L0['rect'][2] - 0.4, 0.0, CENTRAL - 0.1),
+             (L0['rect'][0] + 0.4, 0.0, L0['z_bottom'] + 0.1)]
 cas_checks = [[0, 'cascade/терраса', CENTRAL]]
-EXT_DECKS = {(1, 'end'): (-103.7, -100.7), (2, 'end'): (-113.1, -110.1)}   # проходы к ротонде и смотровому балкону
+EXT_DECKS = {(int(g_['gallery']), g_['end']): tuple(g_['x']) for g_ in CD['ext_gaps']}   # проходы к ротонде и смотровому балкону
 for e in XFLIGHTS:
     x0, y0, x1, y1 = e['rect']
     yc = (y0 + y1) / 2
@@ -1646,6 +1668,12 @@ for e in XFLIGHTS:
     low = rect_stat(x0, y0, x1, y1, fn=np.min)
     for yy in (y0, y1):
         O.box(x0, yy - 0.1, x1, yy + 0.1, low - 0.5, e['z_top'] + BAL, 'parapet')
+for e in PADS:                      # площадки марша «вниз»: плита и перила по обеим сторонам
+    x0, y0, x1, y1 = e['rect']
+    low = rect_stat(x0, y0, x1, y1, fn=np.min)
+    O.box(x0, y0, x1, y1, low - 0.6, e['z_top'], 'stone')
+    for yy in (y0, y1):
+        O.box(x0, yy - 0.1, x1, yy + 0.1, e['z_top'] - 0.3, e['z_top'] + BAL, 'parapet')
 for k, g in enumerate(GALLERIES):
     x0, _, x1, _ = g['walk']
     xc = (x0 + x1) / 2
@@ -1681,10 +1709,7 @@ for k, g in enumerate(GALLERIES):
             cas_route.append((xc, pc[1] + direction * 0.4, pc[3] - 0.1))
             cas_route.append((xc, pc[2] - direction * 0.4, pc[4] + 0.1))
     # низовая сторона — перила (кроме места, где уходит x-марш на следующую галерею), нагорная — бордюр цветника
-    out_y = None
-    for e in XFLIGHTS:
-        if abs(e['rect'][2] - g['end']['rect'][0]) < 0.05:
-            out_y = (e['rect'][1], e['rect'][3])
+    out_y = (LINK[k + 1]['rect'][1], LINK[k + 1]['rect'][3]) if (k + 1) in LINK else None
     ya, yb = sorted((sy0 - direction * CW / 2, sy1 + direction * CW / 2))
     for s0, s1 in sub_intervals(ya, yb, [out_y] if out_y else []):
         nb = max(1, int(math.ceil((s1 - s0) / 1.2)))
@@ -1701,8 +1726,7 @@ for k, g in enumerate(GALLERIES):
             O.box(s0, edge - 0.08, s1, edge + 0.08, L_['z_top'] - 0.6, L_['z_top'] + BAL, 'parapet')
     # цветники в промежутке до верхнего соседа (террасы склона): верх — уровень галереи + 0,45
     gx0, gx1 = g['gap']
-    xf = [e for e in XFLIGHTS if abs(e['rect'][0] - gx0) < 0.05 and abs(e['rect'][2] - gx1) < 0.05]
-    holes = [(e['rect'][1], e['rect'][3]) for e in xf]
+    holes = [(LINK[k]['rect'][1], LINK[k]['rect'][3])]      # в промежутке — марш «вниз» с площадками
     for f in [g['start']] + g['flights'] + [g['end']]:
         pass
     span0, span1 = g['span']
@@ -1717,13 +1741,12 @@ for k, g in enumerate(GALLERIES):
         yy = y2
     cas_route.append((g['end']['rect'][0] + CW / 2, sy1, g['end']['z_top']))
     cas_checks.append([len(cas_route) - 1, f'cascade/площадка {g["end"]["z_top"]:.2f}', r3(g['end']['z_top'])])
-    nxt = [e for e in XFLIGHTS if abs(e['rect'][2] - g['end']['rect'][0]) < 0.05]
-    if nxt:
-        e = nxt[0]
+    if (k + 1) in LINK:
+        e = LINK[k + 1]
         yc = (e['rect'][1] + e['rect'][3]) / 2
         cas_route.append((e['rect'][2] - 0.4, yc, e['z_top'] - 0.1))
         cas_route.append((e['rect'][0] + 0.4, yc, e['z_bottom'] + 0.1))
-cas_route.append((-131.5, 0.0, QUAY))
+cas_route.append((BOTTOM_X - 3.3, 0.0, QUAY))
 cas_checks.append([len(cas_route) - 1, 'cascade/набережная', QUAY])
 # подпорные стенки по внешнему краю каскада: где склон или терраса выше элемента — стенка 2 м шириной до верха земли
 def in_cas(x, y, skip):
@@ -1768,35 +1791,41 @@ for i_, (r_, lv_, side_lv) in enumerate(CAS_ELEMS):
 first = GALLERIES[0]
 gx0_1 = first['walk'][0]
 TW = 1.0
-O.box(-87.0, 2.6, -87.0 + TW, 24.0, 24.0, CENTRAL + BAL, 'stone')
-O.box(gx0_1, 24.0, -86.0, 24.0 + TW, 24.0, CENTRAL + BAL, 'stone')
-O.box(gx0_1, -2.0 - TW, -86.0, -2.0, 24.0, CENTRAL + BAL, 'stone')
-g2 = GALLERIES[1]
-O.box(g2['gap'][1] - 0.6, -24.6, g2['gap'][1] - 0.6 + TW, -2.0, 16.0, CENTRAL + BAL, 'stone')
+
+
+def tw_box(x0, y0, x1, y1):
+    O.box(x0, y0, x1, y1, rect_stat(x0, y0, x1, y1, fn=np.min) - 0.6, CENTRAL + BAL, 'stone')
+
+
+tw_box(TOP_X - 1.0, CW / 2, TOP_X - 1.0 + TW, N_END + CW / 2 + TW)
+tw_box(gx0_1, N_END + CW / 2, TOP_X, N_END + CW / 2 + TW)
+tw_box(gx0_1, -CW / 2 - TW, TOP_X, -CW / 2)
+tw_box(gx0_1 - 0.6, S_END - CW / 2, gx0_1 - 0.6 + TW, -CW / 2 - TW)
 # фонтан на парадной террасе, киоск, ротонда, смотровой балкон
 O.cyl(-72.0, 0.0, CENTRAL, CENTRAL + 0.55, 5.0, 'stone')
 O.cyl(-72.0, 0.0, CENTRAL + 0.55, CENTRAL + 2.6, 0.5, 'stone')
 O.water.append({'name': 'FountainTerrace', 'level': r3(CENTRAL + 0.5), 'circle': [-72.0, 0.0, 4.6]})
-O.box(-92.0, 23.2, -90.4, 24.5, 26.6, 26.6 + 2.6, 'kiosk')
-O.label(-91.2, 23.8, 26.6 + 3.2, 'киоск', 0.8, 'object')
+kz_ = float(CD['kiosk_z'])
+O.box(*KIOSK, kz_, kz_ + 2.6, 'kiosk')
+O.label((KIOSK[0] + KIOSK[2]) / 2, (KIOSK[1] + KIOSK[3]) / 2, kz_ + 3.2, 'киоск', 0.8, 'object')
 rot_deck = ROT_DECK
 lv = GALLERIES[1]['end']['z_top']
 O.box(rot_deck[0], rot_deck[1], rot_deck[2], rot_deck[3], rect_stat(*rot_deck, fn=np.min) - 0.6, lv, 'stone')
 for k in range(8):
     a = math.radians(k * 45)
-    O.cyl(-102.2 + 2.6 * math.cos(a), -29.5 + 2.6 * math.sin(a), lv, lv + 3.2, 0.22, 'white')
-O.cyl(-102.2, -29.5, lv + 3.2, lv + 3.6, 3.1, 'white', solid=False)
+    O.cyl(ROT_C[0] + 2.6 * math.cos(a), ROT_C[1] + 2.6 * math.sin(a), lv, lv + 3.2, 0.22, 'white')
+O.cyl(ROT_C[0], ROT_C[1], lv + 3.2, lv + 3.6, 3.1, 'white', solid=False)
 for (p, q) in (((rot_deck[0], rot_deck[1]), (rot_deck[2], rot_deck[1])), ((rot_deck[0], rot_deck[1]), (rot_deck[0], rot_deck[3])),
-               ((rot_deck[2], rot_deck[1]), (rot_deck[2], -24.6))):
+               ((rot_deck[2], rot_deck[1]), (rot_deck[2], rot_deck[3]))):
     O.seg(p, q, 0.16, lv - 0.3, lv + BAL, 'rail')
-O.label(-102.2, -29.5, lv + 4.2, 'беседка-ротонда', 0.8, 'object')
+O.label(ROT_C[0], ROT_C[1], lv + 4.2, 'беседка-ротонда', 0.8, 'object')
 bal = BALCONY
 lv3 = GALLERIES[2]['end']['z_top']
 O.box(*bal, rect_stat(*bal, fn=np.min) - 0.6, lv3, 'stone')
 for (p, q) in (((bal[0], bal[3]), (bal[2], bal[3])), ((bal[0], bal[1]), (bal[0], bal[3])), ((bal[2], bal[1]), (bal[2], bal[3]))):
     O.seg(p, q, 0.16, lv3 - 0.3, lv3 + BAL, 'rail')
-O.label(-111.6, 27.0, lv3 + 2.0, 'смотровой балкон', 0.8, 'object')
-ROUTES.append({'id': 'cascade', 'label': 'Лестница-каскад: терраса +32 → набережная +2, 17 маршей', 'kind': 'descent',
+O.label((bal[0] + bal[2]) / 2, (bal[1] + bal[3]) / 2, lv3 + 2.0, 'смотровой балкон', 0.8, 'object')
+ROUTES.append({'id': 'cascade', 'label': f'Лестница-каскад: терраса +32 → набережная +2, {CD["flights"]} маршей, марш {CW:g} м', 'kind': 'descent',
                'points': [gpt(*p) for p in cas_route], 'checks': cas_checks})
 
 # ================================================================ ЛЕНТЫ: тропы и служебная дорога
@@ -1855,8 +1884,8 @@ for (gx_, gy_), knee in GAZEBOS:
         O.cyl(gx_ + 2.3 * math.cos(a), gy_ + 2.3 * math.sin(a), zk, zk + 2.4, 0.09, 'wood')
     O.cyl(gx_, gy_, zk + 2.4, zk + 2.7, 2.8, 'roof', solid=False, sides=8)
     O.label(gx_, gy_, zk + 3.3, 'беседка', 0.8, 'object')
-O.box(-105.2, -151.6, -102.8, -149.4, h_at(-104, -150.5) - 0.5, h_at(-104, -150.5) + 1.0, 'stone')
-O.label(-104.0, -150.5, h_at(-104, -150.5) + 1.8, 'родник', 0.7, 'object')
+O.box(SPRING[0] - 1.2, SPRING[1] - 1.1, SPRING[0] + 1.2, SPRING[1] + 1.1, h_at(*SPRING) - 0.5, h_at(*SPRING) + 1.0, 'stone')
+O.label(SPRING[0], SPRING[1], h_at(*SPRING) + 1.8, 'родник', 0.7, 'object')
 O.box(-97.0, -105.0, -93.0, -101.0, CENTRAL - 0.2, CENTRAL + 2.6, 'kiosk')
 O.label(-95.0, -103.0, CENTRAL + 3.2, 'ларёк у начала тропы', 0.8, 'object')
 
@@ -1879,21 +1908,21 @@ def strip(pts, w, m, lift=0.05, step=2.0):
         O.quad(m, *[(x, y, ground_at(x, y) + lift) for x, y in q])
 
 
-for k, (pts, w) in enumerate(PLAN['ROADS']):
-    if k == 5:
-        strip([tuple(p) for p in pts[:2]], w, 'asphalt')
-        continue
+for pts, w in PLAN['ROADS']:
     strip([tuple(p) for p in pts], w, 'asphalt')
 strip(cot_xy[:3], 2.4, 'trail_strip', 0.06)
-for cx_, cy_, rr in ((10.0, 0.0, 12.0), (4.0, -213.0, 6.0), (136.0, -213.0, 6.0)):
+CIRCLE = tuple(PLAN['CIRCLE'])          # v11: круг с фонтаном у главного корпуса
+TURN = tuple(PLAN['TURN'])              # разворот у «Ресторана и спа»
+for cx_, cy_, rr in (CIRCLE, TURN, (4.0, -213.0, 6.0), (136.0, -213.0, 6.0)):
     n = 24
     for k in range(n):
         t0, t1 = 2 * math.pi * k / n, 2 * math.pi * (k + 1) / n
         ps = [(cx_, cy_), (cx_ + rr * math.cos(t0), cy_ + rr * math.sin(t0)), (cx_ + rr * math.cos(t1), cy_ + rr * math.sin(t1))]
         O.tri('asphalt', *[(x, y, ground_at(x, y) + 0.06) for x, y in ps])
-O.cyl(10.0, 0.0, h_at(10, 0), h_at(10, 0) + 0.6, 5.5, 'stone')
-O.cyl(10.0, 0.0, h_at(10, 0), h_at(10, 0) + 3.0, 0.6, 'stone')
-O.water.append({'name': 'FountainCircle', 'level': r3(h_at(10, 0) + 0.55), 'circle': [10.0, 0.0, 5.1]})
+_fz = h_at(CIRCLE[0], CIRCLE[1])
+O.cyl(CIRCLE[0], CIRCLE[1], _fz, _fz + 0.6, 5.5, 'stone')
+O.cyl(CIRCLE[0], CIRCLE[1], _fz, _fz + 3.0, 0.6, 'stone')
+O.water.append({'name': 'FountainCircle', 'level': r3(_fz + 0.55), 'circle': [CIRCLE[0], -CIRCLE[1], 5.1]})
 
 CAR_RNG = random.Random(11)
 CARS = []
@@ -1936,8 +1965,8 @@ def lot(x0, y0, n_near, n_far, along_x):
     return rect
 
 
-LOTS = [lot(26.0, 6.0, 12, 13, True), lot(26.0, -6.0 - BAY_L * 2 - AISLE, 13, 12, True),
-        lot(PLAN['S_LOT_X0'], PLAN['S_LOT_Y0'], 20, 20, False)]
+LOTS = [lot(x0_, y0_, n0_, n1_, True) for x0_, y0_, n0_, n1_ in PLAN['MAIN_LOTS']] + \
+       [lot(PLAN['S_LOT_X0'], PLAN['S_LOT_Y0'], 20, 20, False)]
 for cx_, cy_ in COTTAGES:
     px0 = cx_ + 8.0
     py0, py1 = (-210.0, -204.0) if cy_ > -213 else (-222.0, -216.0)
@@ -1959,15 +1988,36 @@ for xs_ in (SX0 - 1.5, SX1 + 1.5):
 for xa, xb, y in ((SX0, SITE1[0] + sg.R - sg.HALF_T - sg.PATH_W, SITE1[1] + sg.R), (SX1, SITE2[0] - sg.R + sg.HALF_T + sg.PATH_W, SITE2[1] + sg.R),
                   (SX0, SITE1[0] + sg.R + sg.HALF_T + sg.PATH_W, SITE1[1] - sg.R), (SX1, SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W, SITE2[1] - sg.R)):
     strip([(xa, y), (xb, y)], sg.PATH_W, 'paving', 0.07)
-strip([(8.0, -12.0), (3.0, -42.0)], 3.0, 'paving', 0.07)
+strip([(8.0, -9.0), (3.0, -42.0)], 3.0, 'paving', 0.07)
+PAVED = [([tuple(q) for q in pts_], w_) for pts_, w_ in PLAN['PATHS']]   # v11: дорожки у главного корпуса
+for pts_, w_ in PAVED:
+    strip(pts_, w_, 'paving', 0.07)
 strip([(-80.0, -16.0), (-86.0, -20.0)], 3.0, 'paving', 0.07)
 strip([(-97.5, -30.0), (-97.5, -24.0), (-92.0, -20.5)], 3.0, 'paving', 0.07)
 
 # ================================================================ «Ресторан и спа»: подиум, терраса, открытый бассейн
-O.box(*PODIUM, rect_stat(*PODIUM, fn=np.min) - 0.6, CENTRAL - 1.6, 'plinth')
+# v11 (владелец): не фундаментный блок, а подвесной подиум над скалой — плита 1,2 м с краевой балкой, чаша висит
+# под плитой, от уступа под обрывом к плите — диагональные подкосы (два на раму, рамы через 6 м)
 po = tuple(SPA['pool_outdoor'])
+DECK_BOT = CENTRAL - 1.2
 for p in rect_minus(PODIUM, [po]):
-    O.box(*p, CENTRAL - 1.6, CENTRAL, 'floor')
+    O.box(*p, DECK_BOT, CENTRAL, 'floor')
+for (bx0, by0, bx1, by1) in ((PODIUM[0], PODIUM[1], PODIUM[0] + 0.7, PODIUM[3]), (PODIUM[0], PODIUM[1], PODIUM[2], PODIUM[1] + 0.7),
+                             (PODIUM[0], PODIUM[3] - 0.7, PODIUM[2], PODIUM[3])):
+    O.box(bx0, by0, bx1, by1, DECK_BOT - 1.0, DECK_BOT, 'struct')          # краевая балка
+O.box(po[0] - 0.4, po[1] - 0.4, po[2] + 0.4, po[3] + 0.4, CENTRAL - 2.4, CENTRAL - 1.9, 'struct')   # дно чаши снизу
+for (p, q) in (((po[0], po[1]), (po[2], po[1])), ((po[2], po[1]), (po[2], po[3])), ((po[2], po[3]), (po[0], po[3])), ((po[0], po[3]), (po[0], po[1]))):
+    O.seg(p, q, 0.4, CENTRAL - 2.4, DECK_BOT, 'struct', ext=0.2)                 # стенки чаши под плитой
+STRUTS = []
+for yk in np.arange(PODIUM[1] + 3.0, PODIUM[3] - 2.0, 6.0):
+    yk = float(yk)
+    zf = h_at(FACE_X[1] - 1.0, yk) + 0.3
+    foot = (FACE_X[1] - 1.0, yk, zf + 0.5)
+    O.box(FACE_X[1] - 2.2, yk - 0.8, FACE_X[1] + 0.2, yk + 0.8, zf - 1.0, zf + 1.0, 'stone')            # пята в скале
+    for xt_, zt_ in ((PODIUM[0] + 0.5, DECK_BOT - 0.5), ((PODIUM[0] + PODIUM[2]) / 2, DECK_BOT - 0.3)):
+        O.beam(foot, (xt_, yk, zt_), 0.6, 0.6, 'struct')
+        STRUTS.append((foot, (xt_, yk, zt_)))
+    O.beam((FACE_X[0] + 0.5, yk, DECK_BOT - 0.2), (PODIUM[0] + 0.5, yk, DECK_BOT - 0.2), 0.5, 0.6, 'struct')   # ригель рамы под плитой
 O.box(*po, CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
 for (p, q) in (((po[0], po[1]), (po[2], po[1])), ((po[2], po[1]), (po[2], po[3])), ((po[2], po[3]), (po[0], po[3])), ((po[0], po[3]), (po[0], po[1]))):
     O.seg(p, q, 0.3, CENTRAL - 1.9, CENTRAL - 0.02, 'tile', ext=0.15)
@@ -1990,7 +2040,8 @@ for k in range(8):
     if po[0] - 1 < lx_ < po[2] + 1:
         for ly_ in (-92.5, -70.5):
             O.box(lx_, ly_ - 1.0, lx_ + 0.8, ly_ + 1.0, CENTRAL, CENTRAL + 0.45, 'deck')
-O.label((PODIUM[0] + PODIUM[2]) / 2, -95.0, CENTRAL + 2.5, 'открытый бассейн на подиуме', 1.0, 'object')
+O.label((PODIUM[0] + PODIUM[2]) / 2, -95.0, CENTRAL + 2.5, 'открытый бассейн на подвесном подиуме', 1.0, 'object')
+O.label(FACE_X[1] - 6.0, -84.0, h_at(FACE_X[1] - 6.0, -84.0) + 4.0, 'скала и подкосы подиума', 1.0, 'object')
 O.box(*RTER, rect_stat(*RTER, fn=np.min) - 0.6, CENTRAL, 'deck')
 for (p, q) in (((RTER[0], RTER[1]), (RTER[2], RTER[1])), ((RTER[0], RTER[1]), (RTER[0], RTER[3])), ((RTER[0], RTER[3]), (RTER[2] - 3.0, RTER[3]))):
     O.seg(p, q, 0.2, CENTRAL - 0.2, CENTRAL + RAIL_H, 'rail')
@@ -2054,17 +2105,17 @@ slab_poly(mole_poly, MOLE, -3.0, 'paving', 'stone')
 mp = mole_poly[1:-1]
 outline_parapet(mp + [], MOLE, skip_last=True)
 # мол на 0,5 ниже набережной — три ступени во всю ширину у берега
-O.stair((-138.0, 10.0, MOLE), (-136.0, 10.0, QUAY), 72.0, 3, MOLE - 0.3, 'stone')
-O.label(-205.0, 10.0, MOLE + 7.5, '«Стрелка»', 3.0, 'building')
+O.stair((-138.0 - DS, 10.0, MOLE), (-136.0 - DS, 10.0, QUAY), 72.0, 3, MOLE - 0.3, 'stone')
+O.label(-205.0 - DS, 10.0, MOLE + 7.5, '«Стрелка»', 3.0, 'building')
 # фонтанная площадь, киоски, колоннада под навесом, ротонда, клумбы и стенки
-O.cyl(-182.0, 10.0, MOLE, MOLE + 0.6, 9.0, 'stone', sides=32)
-O.cyl(-182.0, 10.0, MOLE + 0.6, MOLE + 3.0, 0.7, 'stone')
-O.water.append({'name': 'FountainMole', 'level': r3(MOLE + 0.55), 'circle': [-182.0, -10.0, 8.6]})
-for kx, ky in ((-200.0, -8.0), (-262.0, 18.0), (-232.0, 30.0)):
+O.cyl(-182.0 - DS, 10.0, MOLE, MOLE + 0.6, 9.0, 'stone', sides=32)
+O.cyl(-182.0 - DS, 10.0, MOLE + 0.6, MOLE + 3.0, 0.7, 'stone')
+O.water.append({'name': 'FountainMole', 'level': r3(MOLE + 0.55), 'circle': [-182.0 - DS, -10.0, 8.6]})
+for kx, ky in ((-200.0 - DS, -8.0), (-262.0 - DS, 18.0), (-232.0 - DS, 30.0)):
     O.box(kx - 3, ky - 2.5, kx + 3, ky + 2.5, MOLE, MOLE + 3.0, 'kiosk')
     O.box(kx - 3.4, ky - 2.9, kx + 3.4, ky + 2.9, MOLE + 3.0, MOLE + 3.25, 'roof')
     O.label(kx, ky, MOLE + 4.0, 'киоск', 0.8, 'object')
-col = [(-192.0 - k * 5.5, 36.0 - k * 0.9) for k in range(10)]
+col = [(-192.0 - DS - k * 5.5, 36.0 - k * 0.9) for k in range(10)]
 for x_, y_ in col:
     O.cyl(x_, y_, MOLE, MOLE + 3.8, 0.4, 'white', sides=12)
 ang = math.degrees(math.atan2(col[-1][1] - col[0][1], col[-1][0] - col[0][0]))
@@ -2074,14 +2125,14 @@ O.obox(mid[0] + 1.6 * math.sin(math.radians(ang)), mid[1] - 1.6 * math.cos(math.
 O.label(mid[0], mid[1], MOLE + 5.0, 'колоннада', 0.8, 'object')
 for k in range(8):
     a = math.radians(k * 45 + 22.5)
-    O.cyl(-270.0 + 4.4 * math.cos(a), 10.0 + 4.4 * math.sin(a), MOLE, MOLE + 3.6, 0.3, 'white')
-O.cyl(-270.0, 10.0, MOLE + 3.6, MOLE + 4.1, 5.0, 'white', solid=False, sides=24)
-O.label(-270.0, 10.0, MOLE + 5.0, 'ротонда', 0.8, 'object')
+    O.cyl(-270.0 - DS + 4.4 * math.cos(a), 10.0 + 4.4 * math.sin(a), MOLE, MOLE + 3.6, 0.3, 'white')
+O.cyl(-270.0 - DS, 10.0, MOLE + 3.6, MOLE + 4.1, 5.0, 'white', solid=False, sides=24)
+O.label(-270.0 - DS, 10.0, MOLE + 5.0, 'ротонда', 0.8, 'object')
 for px_, py_ in ((-192, 2), (-206, 18), (-226, -6), (-252, 10), (-170, -8), (-240, 36), (-166, 30), (-172, 22), (-176, -16),
                  (-212, -12), (-196, -13)):
-    O.box(px_ - 3.5, py_ - 1.2, px_ + 3.5, py_ + 1.2, MOLE, MOLE + 0.9, 'planter')
+    O.box(px_ - DS - 3.5, py_ - 1.2, px_ - DS + 3.5, py_ + 1.2, MOLE, MOLE + 0.9, 'planter')
 # моторка у маяка (выход В5)
-O.obox(-291.5, 1.0, 5.5, 2.0, -0.2, 0.6, 0.0, 'boat', solid=False)
+O.obox(-291.5 - DS, 1.0, 5.5, 2.0, -0.2, 0.6, 0.0, 'boat', solid=False)
 # наружная лестница с крыши павильона на мол
 dk = [d for d in pav.floors[2]['doors'] if d['a'] == 'DECK'][0]
 o_, c_, a_, b_, mid_ = door_geom(dk)
@@ -2113,41 +2164,42 @@ for p, q in zip(sh, sh[1:]):
     O.seg(p, q, 0.8, -3.0, QUAY - 0.02, 'stone', ext=0.4)
     O.seg((p[0] + 0.2, p[1]), (q[0] + 0.2, q[1]), 0.3, QUAY - 0.1, QUAY + 0.9, 'parapet', solid=False, ext=0.2)
     O.barrier((p[0] + 0.2, p[1]), (q[0] + 0.2, q[1]), -6.0, QUAY + 2.6)
-# лодочная станция: слип, стеллажи лодок, причальная стенка-пальчик, понтон проката, лодки
-O.beam((-170.0, 197.0, -1.0), (-152.3, 197.0, QUAY), 7.6, 1.2, 'stone')         # слип в воду
+# лодочная станция: слип, стеллажи лодок, причальная стенка-пальчик, понтон проката, лодки (v11 — на DS западнее)
+O.beam((-170.0 + Q, 197.0, -1.0), (-152.3 + Q, 197.0, QUAY), 7.6, 1.2, 'stone')         # слип в воду
 for yy in (192.0, 202.0):
-    O.seg((-152.0, yy), (-170.0, 194.0 if yy < 197 else 200.0), 0.3, -1.6, QUAY + 0.9, 'parapet', ext=0.15)
-O.barrier((-168.0, 193.8), (-168.0, 200.2), -3.0, 4.0)
+    O.seg((-152.0 + Q, yy), (-170.0 + Q, 194.0 if yy < 197 else 200.0), 0.3, -1.6, QUAY + 0.9, 'parapet', ext=0.15)
+O.barrier((-168.0 + Q, 193.8), (-168.0 + Q, 200.2), -3.0, 4.0)
 for k in range(4):
-    O.box(-140.0, 160.0 + k * 6, -132.0, 163.0 + k * 6, QUAY, QUAY + 2.4, 'metal')
-finger = [(-149.0, 173.0), (-186.0, 175.0), (-186.0, 177.0), (-149.0, 175.0)]
+    O.box(-140.0 + Q, 160.0 + k * 6, -132.0 + Q, 163.0 + k * 6, QUAY, QUAY + 2.4, 'metal')
+finger = [(-149.0 + Q, 173.0), (-186.0 + Q, 175.0), (-186.0 + Q, 177.0), (-149.0 + Q, 175.0)]
 slab_poly(finger, QUAY + 0.02, -2.0, 'deck', 'stone')
 outline_parapet(finger, QUAY, skip_last=True, h=0.9, t=0.15, m='rail')
-pontoon = [(-149.0, 138.0), (-184.0, 140.0), (-184.0, 143.0), (-149.0, 141.0)]
+pontoon = [(-149.0 + Q, 138.0), (-184.0 + Q, 140.0), (-184.0 + Q, 143.0), (-149.0 + Q, 141.0)]
 slab_poly(pontoon, 0.55, -0.4, 'deck', 'deck')
-O.stair((-149.5, 139.5, 0.55), (-146.6, 139.5, QUAY), 2.6, 9, -0.5, 'stone')
+O.stair((-149.5 + Q, 139.5, 0.55), (-146.6 + Q, 139.5, QUAY), 2.6, 9, -0.5, 'stone')
 outline_parapet(pontoon, 0.55, skip_last=True, h=0.9, t=0.12, m='rail')
 SURFACES.append(('poly', finger, QUAY))
 SURFACES.append(('poly', pontoon, 0.55))
 for k in range(4):
     for dy in (0.0, 2.6):
-        O.box(-178.0 + k * 8, 132.4 + dy, -173.0 + k * 8, 133.6 + dy, -0.1, 0.5, 'boat', solid=False)
-    O.box(-178.0 + k * 8, 145.0, -172.0 + k * 8, 147.5, -0.1, 0.5, 'boat', solid=False)
+        O.box(-178.0 + Q + k * 8, 132.4 + dy, -173.0 + Q + k * 8, 133.6 + dy, -0.1, 0.5, 'boat', solid=False)
+    O.box(-178.0 + Q + k * 8, 145.0, -172.0 + Q + k * 8, 147.5, -0.1, 0.5, 'boat', solid=False)
 for k in range(5):
-    O.box(-133.0, 133.0 + k * 3.2 - 0.3, -129.0, 133.0 + k * 3.2 + 0.3, QUAY, QUAY + 1.6, 'boat')
-# пляж: кабинки, грибки, мороженое под зонтиком
-for k in range(6):
-    O.box(-140.0, -150.0 - k * 9, -136.0, -146.0 - k * 9, h_at(-138, -148 - k * 9), h_at(-138, -148 - k * 9) + 2.3, 'kiosk')
-for k in range(10):
-    x_, y_ = -152.0 + (k % 2) * 6, -100.0 - k * 12
+    O.box(-133.0 + Q, 133.0 + k * 3.2 - 0.3, -129.0 + Q, 133.0 + k * 3.2 + 0.3, QUAY, QUAY + 1.6, 'boat')
+# пляж 42 м (v11): кабинки у подошвы склона, грибки двумя рядами ближе к воде, мороженое под зонтиком
+for c_ in PLAN['CABINS']:
+    cx_, cy_ = (c_[0] + c_[2]) / 2, (c_[1] + c_[3]) / 2
+    O.box(*c_, h_at(cx_, cy_), h_at(cx_, cy_) + 2.3, 'kiosk')
+for x_, y_ in PLAN['UMBRELLAS']:
     g_ = h_at(x_, y_)
     O.cyl(x_, y_, g_ - 0.3, g_ + 2.4, 0.07, 'metal')
     O.cyl(x_, y_, g_ + 2.4, g_ + 2.55, 2.0, 'umbrella', solid=False)
-O.cyl(-134.0, -102.0, h_at(-134, -102) + 2.2, h_at(-134, -102) + 2.35, 3.2, 'umbrella_pink', solid=False)
-O.box(-135.2, -103.0, -132.8, -101.0, h_at(-134, -102), h_at(-134, -102) + 1.0, 'kiosk')
-O.label(-134.0, -102.0, h_at(-134, -102) + 3.0, 'мороженое', 0.8, 'object')
-O.label(-150.0, -160.0, 6.0, 'Пляж', 2.4, 'building')
-O.label(-150.0, 175.0, 9.0, 'Лодочная станция', 2.4, 'building')
+ix_, iy_ = PLAN['ICE']
+O.cyl(ix_, iy_, h_at(ix_, iy_) + 2.2, h_at(ix_, iy_) + 2.35, 3.2, 'umbrella_pink', solid=False)
+O.box(ix_ - 1.2, iy_ - 1.0, ix_ + 1.2, iy_ + 1.0, h_at(ix_, iy_), h_at(ix_, iy_) + 1.0, 'kiosk')
+O.label(ix_, iy_, h_at(ix_, iy_) + 3.0, 'мороженое', 0.8, 'object')
+O.label(-178.0, -165.0, 6.0, 'Пляж', 2.4, 'building')
+O.label(-195.0, 175.0, 9.0, 'Лодочная станция', 2.4, 'building')
 
 # ================================================================ АМФИТЕАТР: ряды, проходы, променад, колоннада
 AISLES = [float(a) for a in AMPH['aisles_deg']]
@@ -2313,7 +2365,7 @@ for rct in CAS_ZONE + [PODIUM, RTER, PG_RECT, SPORT_RECT, HOZ_RECT, (-100.0, -18
 for ox, oy, mirror, name in S_SITES:
     e_ = sg.extent(ox, oy, mirror, sg.TERRACE + 1.0)
     BLOCK.append((e_[0], e_[2], e_[1], e_[3]))
-BLOCK.append((-150.0, -30.0, -126.0, 50.0))
+BLOCK.append((float(shore_x(10.0)) - 6.0, -30.0, BOTTOM_X + 4.0, 50.0))      # набережная у низа каскада и мола
 
 
 def blocked(x, y):
@@ -2323,6 +2375,10 @@ def blocked(x, y):
     for rb in RIBBONS:
         for a, b in zip(rb['pts'], rb['pts'][1:]):
             if seg_dist(np.array([x]), np.array([y]), a, b)[0][0] < rb['w'] / 2 + 2.2:
+                return True
+    for pts_, w_ in PAVED:
+        for a, b in zip(pts_, pts_[1:]):
+            if seg_dist(np.array([x]), np.array([y]), a, b)[0][0] < w_ / 2 + 1.5:
                 return True
     return False
 
@@ -2345,10 +2401,10 @@ for k in range(1400):
         continue
     key = (kinds_plateau if pine else kinds_dark)[k % 3]
     TREES[key].append([r3(x), r3(h_at(x, y) - 0.1), r3(-y), r3((k * 47) % 360), r3(0.85 + (rad - 2.2) / 1.4 * 0.35)])
-for k in range(300):
+for k in range(420):                         # лес по склону (v11 — склон длиннее, деревьев больше)
     y = rng.uniform(-250, 250)
-    x = rng.uniform(PLAN['shore_x'](y) + 21, PLAN['brow_x'](y) - 2)
-    if abs(y) < 28 or (-230 < y < -60 and abs(x + 105) < 30 and rng.random() < 0.4):
+    x = rng.uniform(PLAN['foot_x'](y) + 1, PLAN['brow_x'](y) - 2)
+    if -38 < y < 50 or (-230 < y < -60 and abs(x + 127) < 34 and rng.random() < 0.4) or (-110 < y < -56 and x > -142):
         continue
     rad = rng.uniform(2.0, 3.0)
     if blocked(x, y):
@@ -2424,9 +2480,9 @@ ges = dam_p(mid_a, 70.0 + 30.0, 0.0)
 O.obox(ges[0], ges[1], 300.0, 45.0, -2.0, 42.0, math.degrees(mid_a) + 90.0, 'dam_dark', solid=False)
 O.label(ges[0], ges[1], DAM_H + 40.0, 'плотина ГЭС · 260 м', 1.0, 'far')
 
-LAKE_FAR = [(-150.0, 360.0), (-430.0, 440.0), (-780.0, 270.0), (-1080.0, -30.0), (-1300.0, -380.0)]
+LAKE_FAR = [(-150.0 - DS, 360.0), (-430.0, 440.0), (-780.0, 270.0), (-1080.0, -30.0), (-1300.0, -380.0)]
 LAKE_FAR += [dam_p(a, 70.0, 0.0)[:2] for a in [aE1 + da * k / 12 for k in range(12, -1, -1)]]
-LAKE_FAR += [(-420.0, -930.0), (-250.0, -620.0), (-150.0, -380.0)]
+LAKE_FAR += [(-420.0, -930.0), (-250.0, -620.0), (-150.0 - DS, -380.0)]
 shore_line = [(float(shore_x(y)) + 6.0, float(y)) for y in np.arange(GRID_Y[0], GRID_Y[1] + 0.1, 8.0)]
 # контур: от северного края берега по дальнему озеру (север → запад → плотина → юг), потом по берегу с юга на север
 lake_poly = LAKE_FAR + shore_line
@@ -2524,17 +2580,17 @@ strip([(150.0, 0.0), (175.0, 0.0)], 9.0, 'asphalt')
 EXIT_INFO = {
     'В1': ('КПП, выезд', 'всегда', (160.0, 0.0)),
     'В2': ('Лесная тропа к горам', 'по стороне захода', (128.0, 232.0)),
-    'В3': ('Труба в овраг', 'без рюкзака', (-20.0, 229.0)),
-    'В4': ('Прокат: каяк или лодка', 'ключ от домика проката', (-181.0, 141.5)),
-    'В5': ('Моторка у маяка', 'не каждый рейд, канистра со склада ГСМ', (-286.0, 5.5)),
-    'В6': ('Берег за мысом', 'не каждый рейд', (-112.0, -254.0)),
+    'В3': ('Труба в овраг', 'без рюкзака', (30.0, 229.0)),
+    'В4': ('Прокат: каяк или лодка', 'ключ от домика проката', (-181.0 - DS, 141.5)),
+    'В5': ('Моторка у маяка', 'не каждый рейд, канистра со склада ГСМ', (-286.0 - DS, 5.5)),
+    'В6': ('Берег за мысом', 'не каждый рейд', (-112.0 - DS, -254.0)),
 }
 EXITS = []
 for key, (title, cond, (ex_, ey_)) in EXIT_INFO.items():
     g_ = ground_at(ex_, ey_)
     EXITS.append({'id': key, 'label': f'{key} · {title}', 'condition': cond, 'at': gpt(ex_, ey_, g_)})
     O.markers.append(['exit', *gpt(ex_, ey_, g_), f'{key} · {title} ({cond})'])
-O.cyl(-20.0, 231.5, h_at(-20, 229) - 1.6, h_at(-20, 229) + 0.2, 0.75, 'metal', solid=False)
+O.cyl(30.0, 231.5, h_at(30, 229) - 1.6, h_at(30, 229) + 0.2, 0.75, 'metal', solid=False)
 SPAWNS = []
 for i, (sx_, sy_) in enumerate(((150.0, 60.0), (150.0, -120.0), (40.0, 236.0), (100.0, -238.0))):
     g_ = h_at(sx_, sy_)
@@ -2544,15 +2600,15 @@ for i, (sx_, sy_) in enumerate(((150.0, 60.0), (150.0, -120.0), (40.0, 236.0), (
 # ================================================================ МЕСТА (1–9, 0, N/B) и маршруты по участку
 S_AISLE = S_LOT[0] + BAY_L + AISLE / 2
 PLACE_SPOTS = {
-    1: ((-32.0, 9.0), (-32.0, -2.0)), 2: ((-60.0, -51.0), (-75.0, -39.0)), 3: ((-22.0, -66.0), (-22.0, -90.0)),
+    1: ((-28.0, 39.0), (-28.0, 28.0)), 2: ((-60.0, -51.0), (-75.0, -39.0)), 3: ((-22.0, -66.0), (-22.0, -90.0)),
     4: ((-80.0, -68.0), (-80.0, -81.0)), 5: ((-117.5, -70.0), (-117.5, -82.0)), 6: ((-62.0, 8.0), (-110.0, -10.0)),
     7: ((SITE1[0] + 17.0, SITE1[1] + sg.R), (SITE1[0], SITE1[1] + sg.R)),
     8: ((SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R), (SITE2[0], SITE2[1] - sg.R)),
     9: ((S_AISLE, S_LOT[1] - 18.0), (S_AISLE, S_LOT[1] + 30.0)),
-    10: ((118.0, 3.0), (60.0, 0.0)), 11: ((S_AISLE, S_LOT[1] + 4.0), (S_AISLE, S_LOT[3])), 12: ((90.0, 196.0), (112.0, 190.0)),
+    10: ((118.0, 3.0), (60.0, 16.0)), 11: ((S_AISLE, S_LOT[1] + 4.0), (S_AISLE, S_LOT[3])), 12: ((90.0, 196.0), (112.0, 190.0)),
     13: ((92.0, 76.0), (118.0, 76.0)), 14: ((-74.0, -160.0), (-86.0, -160.0)), 15: ((70.0, -213.0), (20.0, -213.0)),
-    16: ((-82.0, 0.0), (-128.0, 0.0)), 17: ((-93.0, -108.0), (-110.0, -130.0)), 19: ((-70.0, 226.0), (-120.0, 210.0)),
-    20: ((-131.0, 200.0), (-160.0, 196.0)), 21: ((-136.0, -160.0), (-170.0, -160.0)), 22: ((-150.0, 10.0), (-200.0, 10.0)),
+    16: ((-82.0, 0.0), (-160.0, 0.0)), 17: ((-93.0, -108.0), (-110.0, -130.0)),
+    20: ((-174.0, 200.0), (-205.0, 196.0)), 21: ((-158.0, -160.0), (-192.0, -160.0)), 22: ((-176.0, 10.0), (-245.0, 10.0)),
     23: ((-3.0, -123.0), (30.0, -123.0)),
 }
 PLACES = []
@@ -2568,18 +2624,23 @@ for n_, x_, y_, text_ in PLAN['PLACES']:
     PLACES.append({'n': n_, 'name': f'{n_} · {text_.split(":")[0].split(",")[0]}', 'text': text_,
                    'at': [r3(sx_), r3(-sy_)], 'floor': r3(z_), 'look': [r3(lx_), r3(-ly_)], 'marker': [r3(x_), r3(-y_)]})
 # главная ось: КПП → аллея → парковка → круг → лобби → терраса → каскад → набережная → «Стрелка» → маяк
-axis = [(160.0, 0.0), (90.0, -2.0), (24.0, -2.0), (10.0, -13.0), (-4.0, -2.0), (-9.0, 6.0)]
+# v11: корпус севернее оси — ствол от развилки, проезд к корпусу, вокруг фонтана, лобби, дорожка к террасе
+MR = PLAN['MAIN_RECT']
+axis = [(160.0, 0.0), (90.0, -2.0), (81.5, 6.0), (80.5, 24.0), (74.0, CIRCLE[1]), (CIRCLE[0] + CIRCLE[2] + 2.0, CIRCLE[1] + 1.0),
+        (CIRCLE[0], CIRCLE[1] + 8.5), (CIRCLE[0] - 9.0, CIRCLE[1] + 6.0)]
 axis_pts = [(x, y, ground_at(x, y)) for x, y in axis]
-md = [d for d in main.ext_doors if d['o'] == 'v' and abs(d['c'] + 10.0) < 0.1][0]
-axis_pts += [(md['mid'][0] + 0.8, md['mid'][1], CENTRAL), (md['mid'][0], md['mid'][1], CENTRAL), (-30.0, 6.0, CENTRAL), (-54.0, 6.0, CENTRAL),
-             (-58.0, 6.0, CENTRAL), (-80.0, 3.0, CENTRAL)]
+md = [d for d in main.ext_doors if d['o'] == 'v' and abs(d['c'] - MR[2]) < 0.1][0]
+yd = md['mid'][1]
+axis_pts += [(md['mid'][0] + 0.8, yd, CENTRAL), (md['mid'][0], yd, CENTRAL), (-28.0, yd, CENTRAL), (MR[0], yd, CENTRAL),
+             (MR[0] - 4.0, yd, CENTRAL), (-60.0, CIRCLE[1], CENTRAL), (-66.0, 16.0, CENTRAL), (-80.0, 3.0, CENTRAL)]
 axis_pts += [tuple((p[0], -p[2], p[1])) for p in ROUTES[[r['id'] for r in ROUTES].index('cascade')]['points'][1:]]
-axis_pts += [(-135.0, 1.0, QUAY), (-141.0, -1.0, MOLE), (-160.0, -3.0, MOLE), (-205.0, -3.0, MOLE), (-250.0, -3.0, MOLE),
-             (-262.0, -1.0, MOLE), (-279.0, 6.0, MOLE), (-283.0, 10.0, MOLE), (-284.4, 10.0, MOLE)]
+axis_pts += [(-135.0 - DS, 1.0, QUAY), (-141.0 - DS, -1.0, MOLE), (-160.0 - DS, -3.0, MOLE), (-205.0 - DS, -3.0, MOLE),
+             (-250.0 - DS, -3.0, MOLE), (-262.0 - DS, -1.0, MOLE), (-279.0 - DS, 6.0, MOLE), (-283.0 - DS, 10.0, MOLE),
+             (-284.4 - DS, 10.0, MOLE)]
 SITE_ROUTES = [
-    ('axis', 'Главная ось: КПП → лобби → терраса → каскад → «Стрелка» → маяк', axis_pts),
-    ('service_road', 'Северная ветка → служебная дорога → лодочная станция',
-     [tuple(p) for p in PLAN['ROADS'][2][0]] + [(10.0, 224.0), (-60.0, 226.0)] + [p[:2] for p in svc_path[2:]] + [(-136.0, 196.5)]),
+    ('axis', 'Главная ось: КПП → круг с фонтаном → лобби → терраса → каскад → «Стрелка» → маяк', axis_pts),
+    ('north_road', 'Ствол → северная ветка → дорога к парковке S-корпусов',
+     [tuple(p) for p in PLAN['ROADS'][2][0]] + [(40.0, 223.6), (S_AISLE, 224.0), (S_AISLE, S_LOT[3] + 2.0)]),
     ('s_parking', 'Парковка S-корпусов ↔ дворы обоих корпусов',
      [(S_AISLE, 224.0), (S_AISLE, S_LOT[3] - 3.5), (S_LOT[0] - 1.5, S_LOT[3] - 3.5), (S_LOT[0] - 1.5, SITE1[1] + sg.R),
       (SITE1[0] + 4.0, SITE1[1] + sg.R), (S_LOT[0] - 1.5, SITE1[1] + sg.R), (S_LOT[0] - 1.5, S_LOT[3] - 3.5),
@@ -2587,17 +2648,18 @@ SITE_ROUTES = [
       (S_LOT[2] + 1.5, SITE2[1] + sg.R), (S_LOT[2] + 1.5, SITE2[1]),
       (SITE2[0] - sg.R - sg.HALF_T - sg.PATH_W / 2, SITE2[1] - sg.R)]),
     ('cottages_beach', 'Улица коттеджей → тропа к пляжу',
-     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0), (-2.0, -216.0)] + [p[:2] for p in cot_path[1:]] + [(-133.0, -231.0)]),
+     [(136.0, -213.0), (82.0, -213.0), (40.0, -213.0), (4.0, -213.0), (-2.0, -216.0)] + [p[:2] for p in cot_path[1:]]
+     + [(cot_path[-1][0] - 5.0, cot_path[-1][1])]),
     ('south_branch', 'Развилка → южная ветка → улица коттеджей',
      [(82.0, 0.0), (88.0, -40.0), (90.0, -80.0), (76.0, -128.0), (72.0, -170.0), (82.0, -213.0)]),
     ('quay_north', 'Набережная: от каскада на север к прокату и эллингу',
-     [(-131.5, 0.0), (-136.0, 30.0), (-137.0, 80.0), (-138.0, 128.0), (-134.5, 133.0), (-134.5, 146.0), (-143.0, 150.0),
-      (-143.0, 186.0)]),
-    ('quay_south', 'Набережная: от каскада на юг к пляжу и спасателям',
-     [(-131.5, 0.0), (-134.0, -40.0), (-136.0, -80.0), (-138.0, -110.0), (-145.0, -114.0), (-145.0, -131.0), (-133.0, -134.0),
-      (-134.6, -152.0)]),
+     [(BOTTOM_X - 3.3, 0.0), (-170.0, 30.0), (-172.0, 80.0), (-175.0, 128.0), (-179.5, 133.0), (-179.5, 146.0), (-188.0, 150.0),
+      (-188.0, 186.0)]),
+    ('quay_south', 'Набережная: от каскада на юг под скалой подиума к пляжу и спасателям',
+     [(BOTTOM_X - 3.3, 0.0), (-172.0, -40.0), (-176.0, -80.0), (-176.0, -110.0), (-171.0, -114.0), (-171.0, -131.0), (-157.5, -134.0),
+      (-157.3, -152.0)]),
     ('stage_trail', 'Под сценой амфитеатра → тропка → тропа → пляж',
-     [(-94.0, -160.0), (-98.5, -160.0)] + [p[:2] for p in STAGE_PATH] + [p[:2] for p in trail_pts[3:]]),
+     [(-94.0, -160.0), (-98.5, -160.0)] + [p[:2] for p in STAGE_PATH] + [p[:2] for p in trail_pts[2:]]),
 ]
 for rid, title, pts in SITE_ROUTES:
     p3 = []
@@ -2609,7 +2671,7 @@ for rid, title, pts in SITE_ROUTES:
     ROUTES.append({'id': rid, 'label': title, 'kind': 'site', 'points': [gpt(*p) for p in p3],
                    'checks': [[len(p3) - 1, f'{rid}/конец', r3(p3[-1][2])]]})
 # пешком нельзя: с набережной в озеро, через забор на восток
-NEG = [('quay_water', 'С набережной в озеро не сойти', (-138.0, 60.0), (-175.0, 60.0), float(shore_x(60.0)) - 0.6),
+NEG = [('quay_water', 'С набережной в озеро не сойти', (-180.0, 60.0), (-220.0, 60.0), float(shore_x(60.0)) - 0.6),
        ('fence_east', 'Через забор на восток не пройти', (140.0, 120.0), (190.0, 120.0),
         150.0 + 10.0 * math.sin(120.0 / 55.0) + 0.6)]
 
@@ -2621,19 +2683,22 @@ def eye(x, y, z=None):
 
 SHOT_VIEWS = [
     {'id': '00_overview', 'at': gpt(-40, -260, 330), 'look': gpt(-40, 0, 20)},
-    {'id': '00_from_lake', 'at': gpt(-330, -40, 40), 'look': gpt(-60, 0, 30)},
+    {'id': '00_from_lake', 'at': gpt(-375, -40, 40), 'look': gpt(-100, -10, 26)},
     {'id': '00_terrace_dam', 'at': eye(-74, 6), 'look': gpt(-700, -700, 120)},
-    {'id': '00_cascade_below', 'at': eye(-134, 0), 'look': gpt(-95, -2, 22)},
-    {'id': '00_cascade_gallery', 'at': eye(-102.2, 19.0, GALLERIES[1]['start']['z_top']), 'look': gpt(-102.2, -22, 22)},
-    {'id': '00_mole_lighthouse', 'at': eye(-289.0, 14.0, LH_GAL), 'look': gpt(-170, 10, 3)},
+    {'id': '00_cascade_below', 'at': eye(BOTTOM_X - 8.0, 0), 'look': gpt(-112, 4, 20)},
+    {'id': '00_cascade_gallery', 'at': eye((GALLERIES[1]['walk'][0] + GALLERIES[1]['walk'][2]) / 2, N_END - 4.0, GALLERIES[1]['start']['z_top']),
+     'look': gpt((GALLERIES[1]['walk'][0] + GALLERIES[1]['walk'][2]) / 2, S_END, GALLERIES[1]['end']['z_top'])},
+    {'id': '00_mole_lighthouse', 'at': eye(-289.0 - DS, 14.0, LH_GAL), 'look': gpt(-170 - DS, 10, 3)},
     {'id': '00_s_courtyard', 'at': eye(SITE1[0] + 16.0, SITE1[1] + sg.R + 3.0), 'look': gpt(SITE1[0] - 10.0, SITE1[1] + sg.R, S_LEVELS['С-1'] + 3.0)},
     {'id': '00_s_unit_living', 'at': eye(*sg_unit_point('С-1', 3, 6.6, 3.2)), 'look': gpt(*sg_unit_point('С-1', 3, 4.2, 12.0), S_LEVELS['С-1'] + 1.6)},
     {'id': '00_s_unit_bedroom', 'at': eye(*sg_unit_point('С-1', 3, 6.9, 4.2), S_LEVELS['С-1'] + 0.15 + sg.FLOOR_TO_FLOOR),
      'look': gpt(*sg_unit_point('С-1', 3, 4.0, 12.5), S_LEVELS['С-1'] + 0.15 + sg.FLOOR_TO_FLOOR + 1.4)},
     {'id': '00_s_parking', 'at': eye(S_AISLE, S_LOT[1] - 4.0), 'look': gpt(S_AISLE, S_LOT[3] - 2.0, S_LEVELS['С-1'] + 2.0)},
     {'id': '00_amph_promenade', 'at': eye(AC[0] + 28.0, AC[1] + 18.0, PROM), 'look': gpt(AC[0] - 16, AC[1], ORCH)},
-    {'id': '00_lobby', 'at': eye(-14, 12, CENTRAL), 'look': gpt(-54, 2, CENTRAL + 2.0)},
+    {'id': '00_lobby', 'at': eye(MR[2] - 4.0, MR[1] + 32.0, CENTRAL), 'look': gpt(MR[0], MR[1] + 22.0, CENTRAL + 2.0)},
     {'id': '00_pool', 'at': eye(-62, -92, CENTRAL), 'look': gpt(-96, -80, CENTRAL + 1.0)},
+    {'id': '00_pool_rock', 'at': eye(-166.0, -84.0), 'look': gpt(-114.0, -84.0, 22.0)},
+    {'id': '00_main_circle', 'at': eye(CIRCLE[0] + 26.0, CIRCLE[1] - 3.0), 'look': gpt(MR[0] + 10.0, MR[1] + 20.0, CENTRAL + 4.0)},
     {'id': '00_trail', 'at': eye(*trail_pts[5][:2], trail_pts[5][2]), 'look': gpt(*trail_pts[7][:2], trail_pts[7][2])},
 ]
 
@@ -2645,14 +2710,15 @@ far_h.astype('<f4').tofile(TERRAIN_DIR / 'sanatorium_far.r32')
 
 def splat_for(X, Y, Hf, detail):
     s = shore_v(np.clip(Y, -300, 300))
-    q = s + 20.0
     wb = np.clip((Y - BEACH[0]) / 8.0, 0.0, 1.0) * np.clip((BEACH[1] - Y) / 8.0, 0.0, 1.0)
+    q = s + QUAY_W + (BEACH_W - QUAY_W) * wb
     quay = (X >= s - 0.5) & (X < q) & (Hf < 3.0)
     gravel = np.where(quay, 1.0 - wb * 0.3, 0.0)
     mud = np.zeros_like(X)
     floor_ = np.clip((Hf - 4.0) / 6.0, 0.0, 1.0) * 0.55
     rock = np.where(Hf < -0.5, 0.6, 0.0)
     if detail:
+        rock = np.maximum(rock, np.clip(CARVE / 3.0, 0.0, 0.95))       # скала под подиумом
         for rb in RIBBONS:
             for a, b in zip(rb['pts'], rb['pts'][1:]):
                 x0, x1 = min(a[0], b[0]), max(a[0], b[0])

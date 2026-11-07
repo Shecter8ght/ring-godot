@@ -401,7 +401,7 @@ tools/dam_play.cmd                                            # «Плотина
                                                               # 1–6 — кого, R — что делает, N / B — места, G — игрок сюда), Enter — в тело игрока; навигация ботов печётся
                                                               # кусками 128 м вокруг игрока и ботов; --headless res://tools/dam_play.tscn -- check, с окном -- shots
 tools/sanatorium_study.cmd                                    # карта «Санаторий» (docs/design/sanatorium_map.md), серый блокаут по принятым планам: прогулка
-                                                              # (M — схема участка v10, 1–9/0 и N/B — места, F — полёт); пересборка — python -X utf8 tools/build_sanatorium.py
+                                                              # (M — схема участка v11, 1–9/0 и N/B — места, F — полёт); пересборка — python -X utf8 tools/build_sanatorium.py
                                                               # (→ data/blockouts/sanatorium*.json, data/terrain/sanatorium_*, scenes/levels/sanatorium_study.tscn);
                                                               # --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — пешком все 623 помещения, лестницы,
                                                               # каскад, тропы, дороги, ось КПП → маяк, ~45 с (SANATORIUM_ROUTES=id,… — выборочно, SANATORIUM_TRACE=1 —

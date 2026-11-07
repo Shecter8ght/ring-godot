@@ -2,11 +2,11 @@
  "terrain": {
   "heights": "res://data/terrain/sanatorium_heights.r32",
   "origin": [
-   -330.0,
+   -390.0,
    -300.0
   ],
   "grid": [
-   521,
+   581,
    601
   ],
   "step": 1.0,

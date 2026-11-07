@@ -13,8 +13,8 @@ script = ExtResource("terrain")
 data_path = "res://data/blockouts/sanatorium_terrain.json"
 lod_ranges = Vector2(480, 1600)
 tile_cells = 64
-detail_rect = Rect2(-330.0, -300.0, 520.0, 600.0)
-collision_rect = Rect2(-330.0, -300.0, 520.0, 600.0)
+detail_rect = Rect2(-390.0, -300.0, 580.0, 600.0)
+collision_rect = Rect2(-390.0, -300.0, 580.0, 600.0)
 
 [node name="FarTerrain" type="Node3D" parent="."]
 script = ExtResource("terrain")

@@ -2,220 +2,226 @@
 	"time": "day",
 	"views": [
 		{
-			"draws": 254,
+			"draws": 261,
 			"fps": 1.0,
 			"id": "00_overview",
-			"primitives": 583759
+			"primitives": 605887
 		},
 		{
-			"draws": 535,
-			"fps": 309.0,
+			"draws": 520,
+			"fps": 307.0,
 			"id": "00_from_lake",
-			"primitives": 1469703
+			"primitives": 1405305
 		},
 		{
-			"draws": 502,
-			"fps": 388.0,
+			"draws": 563,
+			"fps": 390.0,
 			"id": "00_terrace_dam",
-			"primitives": 1597071
+			"primitives": 1706205
 		},
 		{
-			"draws": 855,
-			"fps": 348.0,
+			"draws": 871,
+			"fps": 331.0,
 			"id": "00_cascade_below",
-			"primitives": 2088295
+			"primitives": 2186781
 		},
 		{
-			"draws": 665,
-			"fps": 277.0,
+			"draws": 682,
+			"fps": 273.0,
 			"id": "00_cascade_gallery",
-			"primitives": 1840885
+			"primitives": 1832573
 		},
 		{
-			"draws": 644,
-			"fps": 343.0,
+			"draws": 670,
+			"fps": 340.0,
 			"id": "00_mole_lighthouse",
-			"primitives": 1655115
+			"primitives": 1688529
 		},
 		{
-			"draws": 431,
-			"fps": 329.0,
+			"draws": 601,
+			"fps": 328.0,
 			"id": "00_s_courtyard",
-			"primitives": 1508497
+			"primitives": 1838793
 		},
 		{
-			"draws": 788,
-			"fps": 255.0,
+			"draws": 893,
+			"fps": 237.0,
 			"id": "00_s_unit_living",
-			"primitives": 2246629
+			"primitives": 2462557
 		},
 		{
-			"draws": 799,
-			"fps": 216.0,
+			"draws": 892,
+			"fps": 214.0,
 			"id": "00_s_unit_bedroom",
-			"primitives": 2278669
+			"primitives": 2454001
 		},
 		{
-			"draws": 608,
-			"fps": 233.0,
+			"draws": 630,
+			"fps": 226.0,
 			"id": "00_s_parking",
-			"primitives": 1621233
+			"primitives": 1624245
 		},
 		{
-			"draws": 565,
-			"fps": 244.0,
+			"draws": 633,
+			"fps": 230.0,
 			"id": "00_amph_promenade",
-			"primitives": 1721767
+			"primitives": 1889475
 		},
 		{
-			"draws": 602,
-			"fps": 260.0,
+			"draws": 786,
+			"fps": 238.0,
 			"id": "00_lobby",
-			"primitives": 1937639
+			"primitives": 2384375
 		},
 		{
-			"draws": 481,
-			"fps": 285.0,
+			"draws": 572,
+			"fps": 282.0,
 			"id": "00_pool",
-			"primitives": 1749073
+			"primitives": 1953675
 		},
 		{
-			"draws": 606,
-			"fps": 285.0,
+			"draws": 975,
+			"fps": 282.0,
+			"id": "00_pool_rock",
+			"primitives": 2209096
+		},
+		{
+			"draws": 802,
+			"fps": 251.0,
+			"id": "00_main_circle",
+			"primitives": 2245523
+		},
+		{
+			"draws": 730,
+			"fps": 220.0,
 			"id": "00_trail",
-			"primitives": 1634549
+			"primitives": 1967057
 		},
 		{
-			"draws": 696,
-			"fps": 252.0,
+			"draws": 932,
+			"fps": 194.0,
 			"id": "place_01",
-			"primitives": 1710457
+			"primitives": 2311443
 		},
 		{
-			"draws": 492,
-			"fps": 318.0,
+			"draws": 603,
+			"fps": 278.0,
 			"id": "place_02",
-			"primitives": 1675309
+			"primitives": 1947413
 		},
 		{
-			"draws": 748,
-			"fps": 284.0,
+			"draws": 798,
+			"fps": 281.0,
 			"id": "place_03",
-			"primitives": 1711759
+			"primitives": 1777949
 		},
 		{
-			"draws": 719,
+			"draws": 778,
 			"fps": 297.0,
 			"id": "place_04",
-			"primitives": 1825499
+			"primitives": 1890747
 		},
 		{
-			"draws": 642,
-			"fps": 247.0,
+			"draws": 724,
+			"fps": 235.0,
 			"id": "place_05",
-			"primitives": 1636595
+			"primitives": 1840461
 		},
 		{
-			"draws": 462,
-			"fps": 279.0,
+			"draws": 518,
+			"fps": 267.0,
 			"id": "place_06",
-			"primitives": 1598145
+			"primitives": 1727913
 		},
 		{
-			"draws": 412,
-			"fps": 333.0,
+			"draws": 581,
+			"fps": 308.0,
 			"id": "place_07",
-			"primitives": 1440661
+			"primitives": 1816283
 		},
 		{
-			"draws": 720,
-			"fps": 266.0,
+			"draws": 749,
+			"fps": 243.0,
 			"id": "place_08",
-			"primitives": 1595396
+			"primitives": 1656348
 		},
 		{
-			"draws": 658,
-			"fps": 220.0,
+			"draws": 715,
+			"fps": 215.0,
 			"id": "place_09",
-			"primitives": 1754221
+			"primitives": 1888491
 		},
 		{
-			"draws": 812,
-			"fps": 210.0,
+			"draws": 791,
+			"fps": 212.0,
 			"id": "place_10",
-			"primitives": 2388853
+			"primitives": 2369617
 		},
 		{
-			"draws": 577,
+			"draws": 609,
 			"fps": 236.0,
 			"id": "place_11",
-			"primitives": 1536681
+			"primitives": 1572155
 		},
 		{
 			"draws": 738,
-			"fps": 249.0,
+			"fps": 259.0,
 			"id": "place_12",
-			"primitives": 1592346
+			"primitives": 1523930
 		},
 		{
-			"draws": 806,
-			"fps": 217.0,
+			"draws": 827,
+			"fps": 228.0,
 			"id": "place_13",
-			"primitives": 1815534
+			"primitives": 1942108
 		},
 		{
-			"draws": 546,
-			"fps": 253.0,
+			"draws": 723,
+			"fps": 225.0,
 			"id": "place_14",
-			"primitives": 1797721
+			"primitives": 2157867
 		},
 		{
-			"draws": 756,
+			"draws": 816,
 			"fps": 244.0,
 			"id": "place_15",
-			"primitives": 1981359
+			"primitives": 2081307
 		},
 		{
-			"draws": 424,
-			"fps": 337.0,
+			"draws": 463,
+			"fps": 244.0,
 			"id": "place_16",
-			"primitives": 1659533
+			"primitives": 1766841
 		},
 		{
-			"draws": 547,
-			"fps": 337.0,
+			"draws": 668,
+			"fps": 361.0,
 			"id": "place_17",
-			"primitives": 1630815
+			"primitives": 1909263
 		},
 		{
-			"draws": 521,
-			"fps": 259.0,
-			"id": "place_19",
-			"primitives": 1888133
-		},
-		{
-			"draws": 356,
-			"fps": 254.0,
+			"draws": 252,
+			"fps": 196.0,
 			"id": "place_20",
-			"primitives": 1536211
+			"primitives": 1222227
 		},
 		{
-			"draws": 244,
-			"fps": 269.0,
+			"draws": 284,
+			"fps": 424.0,
 			"id": "place_21",
-			"primitives": 1105087
+			"primitives": 1250827
 		},
 		{
-			"draws": 223,
-			"fps": 435.0,
+			"draws": 251,
+			"fps": 406.0,
 			"id": "place_22",
-			"primitives": 1049173
+			"primitives": 1179441
 		},
 		{
-			"draws": 826,
-			"fps": 394.0,
+			"draws": 851,
+			"fps": 372.0,
 			"id": "place_23",
-			"primitives": 1719220
+			"primitives": 1785540
 		}
 	]
 }

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Санаторий — главный корпус v02: два этажа, лобби в два света; план, адресные данные, проверка связей.
+"""Санаторий — главный корпус v03: два этажа, лобби в два света; план, адресные данные, проверка связей.
+
+v03 (владелец после прогулки по серому блокауту): корпус тот же, на участке сдвинут к S-корпусам — в середину между
+ними и «Рестораном и спа» (схема участка v11): на +4 м по x и +30 м по y. Лист рисуется в координатах v02 (подписи
+окружения — по новому месту), в данных — координаты участка со сдвигом SITE_SHIFT.
 
 Решения владельца 2026-11-07 (docs/design/sanatorium_main_corps.md, §1): главный корпус — отдельное строение в два
 этажа. Входящего встречает общее пространство в два света — большие панорамные окна, очень высокий потолок; там
@@ -10,7 +14,7 @@
 Координаты — схемы участка (tools/sanatorium_map_plan.py), метры игры (правило E: помещения и проходы × 1,3).
 
     python -X utf8 tools/sanatorium_main_corps_plan.py
-        → docs/plans/sanatorium_main_corps_v02.png, docs/design/data/sanatorium_main_corps_v02.json
+        → docs/plans/sanatorium_main_corps_v03.png, docs/design/data/sanatorium_main_corps_v03.json
 """
 import json
 from pathlib import Path
@@ -21,8 +25,9 @@ import sanatorium_plan_kit as kit
 from sanatorium_plan_kit import DOOR, DOOR2, INK, MUTED, font
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'docs/plans/sanatorium_main_corps_v02.png'
-DATA = ROOT / 'docs/design/data/sanatorium_main_corps_v02.json'
+OUT = ROOT / 'docs/plans/sanatorium_main_corps_v03.png'
+DATA = ROOT / 'docs/design/data/sanatorium_main_corps_v03.json'
+SITE_SHIFT = (4.0, 30.0)       # v03: место корпуса на участке — сдвиг от координат листа
 
 FLOOR_TO_FLOOR = {1: 4.5, 2: 4.0}      # лобби в два света — 8,5 м до потолка
 STA = ('STA', 'Служебная лестница (только персонал)', -54, -20, -46, -10, 'stair', '')
@@ -103,21 +108,22 @@ W = PW * 2 + 90 + 40
 H = 100 + PH + 30 + 600
 img = Image.new('RGB', (W, H), kit.PAPER)
 d = ImageDraw.Draw(img)
-d.text((30, 18), 'Санаторий · главный корпус v02 — два этажа, лобби в два света с панорамными окнами', font=font(21, True), fill=INK)
+d.text((30, 18), 'Санаторий · главный корпус v03 — два этажа, лобби в два света; на участке — в середине между S-корпусами и рестораном', font=font(21, True), fill=INK)
 d.text((30, 50), 'входящего встречают длинный ресепшен, бар и диваны; дальше — служебные помещения; 2 этаж — администрация и сейф,'
        ' лестница с краю — только персонал', font=font(14), fill=MUTED)
-d.text((30, 70), 'этаж 4,5 / 4,0 м, лобби ≈ 8,5 м до потолка · координаты схемы участка, метры игры', font=font(13), fill=MUTED)
+d.text((30, 70), 'этаж 4,5 / 4,0 м, лобби ≈ 8,5 м до потолка · координаты листа = участок v10; на участке v11 корпус '
+       'сдвинут на (+4, +30) м · метры игры', font=font(13), fill=MUTED)
 
 for i, f in enumerate((1, 2)):
     P = kit.Plan(d, 30 + i * (PW + 60), 100, XMIN, YMAX, SC)
     P.rect(XMIN, YMIN, XMAX, YMAX, fill=(226, 230, 214), outline=None)
-    P.rect(-64, -16, -56, 16, fill=(232, 228, 214), outline=MUTED)                 # парадная терраса
-    P.text(-60, 19, 'терраса', 10, MUTED)
-    P.rect(-10, 3, 0, 9, fill=(218, 210, 196), outline=None)                      # дорожка к площади
-    P.text(-5, 11, 'к площади', 10, MUTED)
+    P.rect(-64, 3, -54, 9, fill=(218, 210, 196), outline=None)                    # v03: дорожка к парадной террасе (юго-запад)
+    P.text(-59, 11, 'к террасе', 10, MUTED)
+    P.rect(-10, 3, 0, 9, fill=(218, 210, 196), outline=None)                      # дорожка к кругу с фонтаном
+    P.text(-5, 11, 'к фонтану', 10, MUTED)
     P.rect(-34, 16, -30, 24, fill=(218, 210, 196), outline=None)                  # дорожка к S-корпусам
-    P.rect(-30, -26, 0, -22, fill=(190, 190, 186), outline=None)                  # хозпроезд между корпусами
-    P.text(-16, -24, 'хозпроезд', 10, MUTED)
+    P.rect(-16, -26, -12, -20, fill=(218, 210, 196), outline=None)                # служебный выход в парк
+    P.text(-14, -24, 'к ресторану', 10, MUTED)
     P.rooms(ROOMS[f], BY[f], DOORS[f], NUM[f], LOCKED)
     if f == 2:
         for k in range(0, 64, 3):
@@ -168,7 +174,7 @@ d.text(S(-12, 6.4), 'администрация', font=font(12), fill=INK, ancho
 d.text(S(-2, 6.0), 'галерея', font=font(11), fill=INK, anchor='mm')
 d.text(S(7, 4.2), 'лобби в два света, 8,5 м', font=font(13, True), fill=INK, anchor='mm')
 d.text(S(18.5, 6.8), 'панорама', font=font(11), fill=MUTED, anchor='lm')
-d.text(S(-24, 1.2), 'хозпроезд', font=font(11), fill=MUTED, anchor='mm')
+d.text(S(-24, 1.2), 'парк', font=font(11), fill=MUTED, anchor='mm')
 for z, lab in ((0, '±0'), (4.5, '+4,5'), (8.9, '+8,9 кровля')):
     d.line([S(17, z), S(18, z)], fill=MUTED)
     d.text(S(18.3, z + 0.6), lab, font=font(11), fill=MUTED, anchor='lm')
@@ -192,17 +198,28 @@ if yy + 20 > H:
 img.save(OUT)
 
 DATA.parent.mkdir(parents=True, exist_ok=True)
+
+
+def shift_wall(w):
+    o, c, a, b = w
+    if o == 'v':
+        return [o, round(c + SITE_SHIFT[0], 3), round(a + SITE_SHIFT[1], 3), round(b + SITE_SHIFT[1], 3)]
+    return [o, round(c + SITE_SHIFT[1], 3), round(a + SITE_SHIFT[0], 3), round(b + SITE_SHIFT[0], 3)]
+
+
 DATA.write_text(json.dumps({
-    'version': 'v02', 'note': 'по решениям владельца; координаты схемы участка, метры игры (правило E)',
+    'version': 'v03', 'note': 'по решениям владельца; координаты схемы участка v11 (корпус сдвинут на (+4, +30) от листа v02), '
+            'метры игры (правило E)', 'site_shift': list(SITE_SHIFT),
     'floor_to_floor': FLOOR_TO_FLOOR, 'vertical': ['STA'], 'staff_door': STAFF_DOOR,
     'floors': {str(f): {
-        'rooms': [{'id': r[0], 'no': NUM[f].get(r[0]), 'name': r[1], 'rect': [r[2], r[3], r[4], r[5]], 'kind': r[6],
+        'rooms': [{'id': r[0], 'no': NUM[f].get(r[0]), 'name': r[1],
+                   'rect': [r[2] + SITE_SHIFT[0], r[3] + SITE_SHIFT[1], r[4] + SITE_SHIFT[0], r[5] + SITE_SHIFT[1]], 'kind': r[6],
                    'flags': r[7].split(), 'area': round((r[4] - r[2]) * (r[5] - r[3]), 1)} for r in ROOMS[f]],
         'doors': [{'a': x[0], 'b': x[1], 'width': x[3], 'locked': (x[0], x[1]) in LOCKED,
-                   'wall': list(kit.door_geom(BY[f], x))} for x in DOORS[f]]} for f in ROOMS},
+                   'wall': shift_wall(kit.door_geom(BY[f], x))} for x in DOORS[f]]} for f in ROOMS},
 }, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
 
 for p in PROBLEMS:
     print('ЗАМЕЧАНИЕ:', p)
-print(f'главный корпус v02: помещений {sum(1 for f in ROOMS for r in ROOMS[f] if r[6] != "void")}, '
+print(f'главный корпус v03: помещений {sum(1 for f in ROOMS for r in ROOMS[f] if r[6] != "void")}, '
       f'дверей {sum(len(DOORS[f]) for f in ROOMS)}, замечаний {len(PROBLEMS)}')

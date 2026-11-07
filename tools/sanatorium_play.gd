@@ -78,8 +78,8 @@ func _check_run() -> void:
 		"%d кусков за %.1f с (выпечка %.1f с)" % [nav_tiles.size(), waited, nav_baked_ms / 1000.0])
 	for i: int in range(30):
 		await get_tree().physics_frame
-	# путь ботов: с террасы через главный корпус к кругу с фонтаном (~85 м по прямой)
-	var circle: Vector3 = NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, _ground_at(14.0, 2.0))
+	# путь ботов: с террасы мимо главного корпуса к кругу с фонтаном у его входа (схема v11, ~90 м по прямой)
+	var circle: Vector3 = NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, _ground_at(24.0, -30.0))
 	var path: PackedVector3Array = _path(player_start, circle)
 	var ok: bool = path.size() > 1 and path[path.size() - 1].distance_to(circle) < 2.0 and circle.distance_to(player_start) > 60.0
 	_check("Путь ботов с террасы к кругу у входа", ok, "%d точек, цель %s, конец %s" % [path.size(), str(circle),
