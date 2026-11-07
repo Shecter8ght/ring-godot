@@ -257,7 +257,12 @@ def main():
             v['zones'][z] = {'rays': zr['rays'], 'long_rays': zr['long'], 'long_share': round(zr['long'] / max(1, zr['rays']), 4),
                              'max_m': round(zr['max'], 1)}
         v['longest_inside'] = [[round(a, 1) for a in ray] for ray in r['inside_longest'][:40]]
-        v['by_point'] = [[round(x, 1), round(y, 1), round(bst, 1), nl] for x, y, bst, nl in r['per_point']]   # x, y, макс, лучей > 90 м
+        v['areas'] = {}                            # доля точек, откуда дальше 90 м видно в 6+ направлениях, и без длинных
+        for name, f in AREAS:
+            sel = [pp for pp in r['per_point'] if f(pp[0], pp[1])]
+            if sel:
+                v['areas'][name] = {'points': len(sel), 'open6_share': round(sum(1 for pp in sel if pp[3] >= 6) / len(sel), 3),
+                                    'closed_share': round(sum(1 for pp in sel if pp[3] == 0) / len(sel), 3)}
         out['variants'][variant] = v
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
@@ -267,7 +272,16 @@ def main():
               f'точек с таким обзором {v["points_with_long_view"]}, самый длинный {v["max_m"]} м')
         for z, zr in v['zones'].items():
             print(f'   {z}: лучей {zr["rays"]}, длиннее {LONG:.0f} м — {zr["long_share"] * 100:.1f} %, макс {zr["max_m"]} м')
+        for name, ar in v['areas'].items():
+            print(f'   район «{name}»: 6+ длинных направлений — {ar["open6_share"] * 100:.0f} % точек, без длинных — {ar["closed_share"] * 100:.0f} %')
     print(f'→ {OUT_PNG.relative_to(ROOT)}, {OUT_JSON.relative_to(ROOT)}')
+
+
+AREAS = [('север: S-корпуса, хоздвор', lambda x, y: y > 60 and x > -80),
+         ('центр: главный корпус, парковка, въезд', lambda x, y: -20 < y <= 60 and x > -80),
+         ('юг: ресторан и спа, площадка, амфитеатр', lambda x, y: -170 < y <= -20 and x > -80),
+         ('коттеджи', lambda x, y: y <= -170 and x > -80),
+         ('склон и вода', lambda x, y: x <= -80)]
 
 
 def zone_of(lo, lt):
