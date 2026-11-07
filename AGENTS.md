@@ -424,6 +424,8 @@ tools/paving_probe.cmd                                        # стенд по�
                                                               # и корт; F2 — время, F3 — погода, F5–F8 — куски; -- shots — снимки docs/screens/paving_probe
                                                               # (PAVING_ONLY, PAVING_PLAIN=1 — без шейдеров покрытий, замер их стоимости); шейдер — StreetPaving;
                                                               # люки и решётка ливнёвки — python -X utf8 tools/gen_street_iron_textures.py
+tools/godot.cmd --headless res://tools/prospekt_surfaces_test.tscn # «Проспект»: из чего поверхности для шагов, гильз и попаданий (Surfaces) —
+                                                              # 14 точек: асфальт, плитка, газоны, крошка, корт, грунт стройки, паркинг, фонтан, бордюр, люк, решётка
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn

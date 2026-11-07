@@ -11,6 +11,9 @@ var parent: Node3D
 var body: StaticBody3D
 var streams: Dictionary = {}
 var palette: Dictionary = {}
+## Из чего поверхность по ключу материала (Surfaces: шаги, попадания): у коллизии коробки и лестницы — meta "surface".
+## Пусто — без меток, как раньше.
+var surface_of: Dictionary = {}
 var unit_vertices: PackedVector3Array
 var unit_normals: PackedVector3Array
 var unit_indices: PackedInt32Array
@@ -54,6 +57,8 @@ func box(at: Vector3, size: Vector3, key: String, solid: bool = true, yaw: float
 		cs.shape = shape
 		cs.position = at
 		cs.rotation.y = yaw
+		if surface_of.has(key):
+			cs.set_meta("surface", surface_of[key])
 		body.add_child(cs)
 
 func tri(a: Vector3, b: Vector3, c: Vector3, key: String) -> void:
@@ -134,6 +139,8 @@ func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: Stri
 	shape.points = points
 	var cs: CollisionShape3D = CollisionShape3D.new()
 	cs.shape = shape
+	if surface_of.has(key):
+		cs.set_meta("surface", surface_of[key])
 	body.add_child(cs)
 
 func collision_box(at: Vector3, size: Vector3) -> void:

@@ -147,6 +147,10 @@ func rebuild() -> void:
 	add_child(generated)
 	cover_spots = PackedVector2Array()
 	var g: RefCounted = Geometry.new(generated, _palette())
+	# из чего поверхности (шаги, попадания): коробки и лестницы — по материалу, покрытия — по месту (surface_at)
+	g.surface_of = SURFACE_BY_MAT
+	(g.body as StaticBody3D).set_meta("surface_map", self)
+	_iron_spots.clear()
 	_ground_plate(g)
 	_surfaces_flat(g)
 	_slabs(g)
@@ -188,6 +192,18 @@ const PAVING_BY_MAT: Dictionary = {"walk": "walk_a", "road": "road_a", "parking"
 const PAVING_KIND: Dictionary = {"walk_a": "walk", "plaza_ab2": "walk", "rubber": "pad", "court": "pad", "road_a": "road",
 	"road_c": "road"}
 const BOX_KIND: Dictionary = {"walk": "walk", "road": "road", "parking": "road"}
+## Из чего поверхность (Surfaces: звук шагов, гильз, попаданий): покрытия — по ключу StreetPaving, полосы поворота — по
+## виду, коробки и лестницы плана — по материалу (у коллизии meta "surface"); люки и решётки поверх асфальта — металл.
+## Резиновая крошка — мягкая, как ковёр («fabric»).
+const PAVING_SURFACE: Dictionary = {"walk_a": "concrete", "plaza_ab2": "concrete", "road_a": "asphalt", "road_c": "asphalt",
+	"rubber": "fabric", "court": "asphalt"}
+const BOX_SURFACE: Dictionary = {"walk": "concrete", "road": "asphalt"}
+const SURFACE_BY_MAT: Dictionary = {"concrete": "concrete", "wall": "concrete", "slab": "concrete", "dark": "concrete",
+	"accent": "concrete", "pit_floor": "concrete", "ground": "dirt", "steel": "metal", "rust": "metal",
+	"tray": "metal", "wood": "wood", "timber": "wood", "glass": "glass", "grass": "grass", "mud": "mud", "rock": "gravel",
+	"fountain_tile": "tile", "stripe": "concrete"}
+## Люки и решётки (металл поверх покрытия): [середина xz, полуразмеры, поворот].
+var _iron_spots: Array = []
 ## Люки и решётки: решётка ливнёвки у дорожного бордюра через столько метров, люк в тротуаре — через столько.
 const DRAIN_STEP_M: float = 32.0
 const MANHOLE_STEP_M: float = 46.0
@@ -281,7 +297,7 @@ func _collect_paving_regions(walk_holes: Array) -> void:
 		var rect: Rect2 = Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
 		var holes: Array = s.get("holes", walk_holes if String(s.id).begins_with("walk") else []) as Array
 		for piece: Rect2 in _minus(rect, holes):
-			_pave_rects.append([piece, float(s.get("y", 0.0)) + float(s.get("t", 0.08)), String(PAVING_KIND[key])])
+			_pave_rects.append([piece, float(s.get("y", 0.0)) + float(s.get("t", 0.08)), String(PAVING_KIND[key]), key])
 	for bx: Dictionary in plan.boxes:
 		var kind: String = String(BOX_KIND.get(String(bx.get("mat", "")), ""))
 		if kind == "":
@@ -331,6 +347,49 @@ func _edge_weights(r: Rect2, top: float, kind: String) -> Color:
 				same += 1
 		w[e] = 0.0 if same >= 3 else 1.0
 	return Color(w[0], w[1], w[2], w[3])
+
+
+## Люк или решётка: картинка поверх покрытия и место для звука шагов и попаданий (металл).
+func _iron(at: Vector3, name: String, yaw: float) -> void:
+	StreetPaving.iron_node(generated, name, at, yaw)
+	var half: Vector2 = Vector2(0.38, 0.38) if name.begins_with("manhole") else Vector2(0.45, 0.28)
+	_iron_spots.append([Vector2(at.x, at.z), half, yaw])
+
+
+## Из чего поверхность в точке коллизии без своей метки (Surfaces.kind_at: meta "surface_map" у тела ландшафта) —
+## верх кусков покрытий и полос поворота; люки и решётки — металл; бока и прочее — бетон.
+func surface_at(point: Vector3, normal: Vector3) -> String:
+	if normal.y < 0.5:
+		return "concrete"
+	var p := Vector2(point.x, point.z)
+	for spot: Array in _iron_spots:
+		var d: Vector2 = p - (spot[0] as Vector2)
+		var yaw: float = float(spot[2])
+		var half: Vector2 = spot[1]
+		if absf(d.x * cos(yaw) - d.y * sin(yaw)) <= half.x and absf(d.x * sin(yaw) + d.y * cos(yaw)) <= half.y:
+			return "metal"
+	# куски лежат и друг на друге (детская и корт — на площади сквера): верх ближе всего к точке, при равенстве — меньший
+	var best: String = ""
+	var best_dy: float = 0.08
+	var best_area: float = INF
+	for e: Array in _pave_rects:
+		var r: Rect2 = e[0]
+		var dy: float = absf(float(e[1]) - point.y)
+		if dy < 0.08 and r.has_point(p) and (dy < best_dy - 0.005 or (dy < best_dy + 0.005 and r.get_area() < best_area)):
+			best = String(PAVING_SURFACE.get(String(e[3]), "concrete"))
+			best_dy = dy
+			best_area = r.get_area()
+	if best != "":
+		return best
+	for b: Array in _pave_boxes:
+		if absf(float(b[3]) - point.y) > 0.08:
+			continue
+		var d2: Vector2 = p - (b[0] as Vector2)
+		var yaw2: float = float(b[2])
+		var half2: Vector2 = b[1]
+		if absf(d2.x * cos(yaw2) - d2.y * sin(yaw2)) <= half2.x and absf(d2.x * sin(yaw2) + d2.y * cos(yaw2)) <= half2.y:
+			return String(BOX_SURFACE.get(String(b[4]), "concrete"))
+	return "concrete"
 
 
 ## Следы зданий плана (пучки внутри не сажаются).
@@ -419,7 +478,7 @@ func _manholes(piece: Rect2, y: float) -> void:
 		var across: float = _iron_rng.randf_range(0.3, 0.7)
 		var at := Vector3(piece.position.x + (s if along_x else piece.size.x * across), y,
 			piece.position.y + (piece.size.y * across if along_x else s))
-		StreetPaving.iron_node(generated, "manhole_gost", at, _iron_rng.randf_range(0.0, TAU))
+		_iron(at, "manhole_gost", _iron_rng.randf_range(0.0, TAU))
 		s += MANHOLE_STEP_M * _iron_rng.randf_range(0.8, 1.25)
 
 
@@ -513,6 +572,7 @@ func _curb(g: RefCounted, st: SurfaceTool, pos: Vector3, sz: Vector3, yaw: float
 	cs.shape = shape
 	cs.position = pos
 	cs.rotation.y = yaw
+	cs.set_meta("surface", "concrete")
 	(g.body as StaticBody3D).add_child(cs)
 	# бурьян: в канаве у лицевой грани (на асфальте) и за тыльной гранью (на тротуаре)
 	if road_plus or road_minus:
@@ -524,11 +584,11 @@ func _curb(g: RefCounted, st: SurfaceTool, pos: Vector3, sz: Vector3, yaw: float
 		var s: float = _iron_rng.randf_range(4.0, DRAIN_STEP_M)
 		while s < length - 2.0:
 			var p2: Vector2 = start + a * s + n * 0.32
-			StreetPaving.iron_node(generated, "drain_grate", Vector3(p2.x, base_y + 0.083, p2.y), atan2(-a.y, a.x))
+			_iron(Vector3(p2.x, base_y + 0.083, p2.y), "drain_grate", atan2(-a.y, a.x))
 			s += DRAIN_STEP_M
 		if _iron_rng.randf() < 0.5:
 			var p3: Vector2 = start + a * _iron_rng.randf_range(6.0, length - 6.0) + n * 2.2
-			StreetPaving.iron_node(generated, "manhole_gost", Vector3(p3.x, base_y + 0.083, p3.y), _iron_rng.randf_range(0.0, TAU))
+			_iron(Vector3(p3.x, base_y + 0.083, p3.y), "manhole_gost", _iron_rng.randf_range(0.0, TAU))
 
 
 ## Зебры: белые полосы плана и жёлтые в промежутках между соседними белыми.
@@ -653,6 +713,7 @@ func _ramps(g: RefCounted) -> void:
 			Vector3(x0, y0 - t, z0), Vector3(x1, y0 - t, z0), Vector3(x0, y1 - t, z1), Vector3(x1, y1 - t, z1)])
 		var cs: CollisionShape3D = CollisionShape3D.new()
 		cs.shape = shape
+		cs.set_meta("surface", String(SURFACE_BY_MAT.get(key, BOX_SURFACE.get(key, "concrete"))))
 		(g.body as StaticBody3D).add_child(cs)
 		# откос насыпи — сплошной клин, а не плита над пустотой: под ним не ходят ни люди, ни навигация
 		if bool(r.get("fill", false)):
