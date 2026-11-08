@@ -401,19 +401,22 @@ tools/dam_play.cmd                                            # «Плотина
                                                               # 1–6 — кого, R — что делает, N / B — места, G — игрок сюда), Enter — в тело игрока; навигация ботов печётся
                                                               # кусками 128 м вокруг игрока и ботов; --headless res://tools/dam_play.tscn -- check, с окном -- shots
 tools/sanatorium_study.cmd                                    # карта «Санаторий» (docs/design/sanatorium_map.md), серый блокаут по принятым планам: прогулка
-                                                              # (M — схема участка v13, 1–9/0 и N/B — места, F — полёт); пересборка — python -X utf8 tools/build_sanatorium.py
-                                                              # (→ data/blockouts/sanatorium*.json, data/terrain/sanatorium_*, scenes/levels/sanatorium_study.tscn);
+                                                              # (M — схема участка v13, 1–9/0 и N/B — места, F — полёт); с 2026-11-08 правится руками в редакторе
+                                                              # (scenes/levels/sanatorium_study.tscn + scenes/levels/sanatorium/*, кисть земли — docs/level_editing.md);
+                                                              # генератор — только в папку: SANATORIUM_OUT=<папка> python -X utf8 tools/build_sanatorium.py (план с метками
+                                                              # групп; разовый перенос в сцены сделал tools/sanatorium_to_scenes.tscn — повторно не запускать: сотрёт правки);
                                                               # --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — пешком все 623 помещения, лестницы,
                                                               # каскад, тропы, дороги, ось КПП → маяк, ~45 с (SANATORIUM_ROUTES=id,… — выборочно, SANATORIUM_TRACE=1 —
                                                               # точки хода); с окном -- shots — docs/screens/sanatorium (SANATORIUM_SHOTS=имя,…; SANATORIUM_TIME, _WEATHER)
                                                               # --windowed --resolution 1920x1080 --disable-vsync … -- perf — кадры по видам и местам → perf.txt, perf.json;
+                                                              # --headless … -- snapshot — снимок сцены в прежнем формате → data/blockouts/sanatorium_snapshot*.json (для обзора);
                                                               # обзор: python -X utf8 tools/sanatorium_ld_plan.py — лучи на высоте глаз, доля длиннее 90 м по зонам →
                                                               # docs/design/sanatorium_sightlines.png, docs/screens/sanatorium/sightlines.json
                                                               # (--breaks 90 — места групп елей против длинного обзора → docs/design/data/sanatorium_view_breaks.json,
-                                                              # генератор их ставит; после — пересборка и замер заново)
+                                                              # ставить их теперь руками — деревьями TreeSpot; после — снимок и замер заново)
 python -X utf8 tools/fetch_sanatorium_ground.py                 # земля «Санатория»: восемь грунтов 4K (CC0 ambientCG, Poly Haven) → _asset_src/textures/<id>
 python -X utf8 tools/build_sanatorium_ground.py                 # массивы слоёв земли → assets/terrain/sanatorium_{albedo,normal,arm}.jpg; затем --import
-                                                              # (маски, трава и узел земли — tools/build_sanatorium.py; шейдеры src/world/sanatorium_ground, sanatorium_lake)
+                                                              # (маски и трава — «Кисть земли» в редакторе; шейдеры src/world/sanatorium_ground, sanatorium_lake)
 tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
                                                               # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
@@ -901,6 +904,16 @@ docs/          STATUS.md (что сделано / что дальше), реше
 1. **Баланс — только в `src/core/balance.gd`.** Никаких магических чисел в других скриптах.
 2. **Карта — данные + сцена.** Кольцо (помещения, проёмы) — `data/sectors/*.json`, собирается
    `SectorBuilder`; в редакторе видно превью (скрипты @tool), в .tscn оно не сохраняется.
+   **Карты, переведённые в правку руками** (решение владельца 2026-11-08: «перевести в формат, чтобы я мог
+   редактировать их вручную из editor»; план — `docs/design/editable_levels.md`, памятка — `docs/level_editing.md`):
+   **сцена — источник правды, генератор её не перезаписывает.** Сейчас это «Санаторий»: постройки — сцены
+   `scenes/levels/sanatorium/buildings`, куски участка — `…/site`, беседки, машины, валуны, стройплощадки и деревья
+   участка (`TreeSpot`) — узлы сцены уровня; коробки — `CSGBox3D` (материал — файл `…/materials/<ключ>.tres`, имя
+   файла = ключ палитры), марши — `BlockoutStair`, покрытия — `MeshInstance3D` с meta `blockout_mat`, проверки пешком —
+   `BlockoutChecks` внутри построек (едут вместе с ними). В игре всё склеивает `BlockoutMerge` — один меш на материал
+   и простые коллизии, как было у генератора. Земля — «Кисть земли» (`addons/ring_level_tools`): маски грунта, трава,
+   высоты — прямо в `data/terrain/*`. Генератор такой карты пишет только в отдельную папку (`SANATORIUM_OUT`):
+   заготовки новых построек. Остальные карты переводятся по одной; до перевода у них — как ниже.
    Всё, что вне кольца, — узлы сцены уровня, их двигают руками: постройки
    (`scenes/world/blockout_building.tscn`, вид/размеры/этажи в инспекторе; двери и ворота —
    дочерние `blockout_opening.tscn`, режут ближайшую стену), точки появления (`spawn_point.tscn`)

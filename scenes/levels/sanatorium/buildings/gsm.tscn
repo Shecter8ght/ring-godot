@@ -1,0 +1,105 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/facade.tres" id="1_j203o"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_nuti8"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="3_rtcdl"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="4_2sdt8"]
+
+[node name="Склад ГСМ" type="Node3D" unique_id=958055425]
+metadata/group = "gsm"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1387453195]
+
+[node name="facade_0000" type="CSGBox3D" parent="Коробки" unique_id=1785753370]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.399994, 2.1, 4)
+use_collision = true
+size = Vector3(3.6, 3.6, 0.4)
+material = ExtResource("1_j203o")
+
+[node name="facade_0001" type="CSGBox3D" parent="Коробки" unique_id=966106631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.399994, 2.1, 4)
+use_collision = true
+size = Vector3(5.6, 3.6, 0.4)
+material = ExtResource("1_j203o")
+
+[node name="facade_0002" type="CSGBox3D" parent="Коробки" unique_id=696588731]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 3.3100002, 4)
+use_collision = true
+size = Vector3(1.2, 1.18, 0.4)
+material = ExtResource("1_j203o")
+
+[node name="facade_0003" type="CSGBox3D" parent="Коробки" unique_id=1020867630]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, -4)
+use_collision = true
+size = Vector3(10.4, 3.6, 0.4)
+material = ExtResource("1_j203o")
+
+[node name="facade_0004" type="CSGBox3D" parent="Коробки" unique_id=420038364]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.1, 0)
+use_collision = true
+size = Vector3(0.4, 3.6, 8.4)
+material = ExtResource("1_j203o")
+
+[node name="facade_0005" type="CSGBox3D" parent="Коробки" unique_id=2138763537]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.1, 0)
+use_collision = true
+size = Vector3(0.4, 3.6, 8.4)
+material = ExtResource("1_j203o")
+
+[node name="floor_0006" type="CSGBox3D" parent="Коробки" unique_id=261710898]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14999998, 0)
+use_collision = true
+size = Vector3(10, 0.3, 8)
+material = ExtResource("2_nuti8")
+
+[node name="roof_0007" type="CSGBox3D" parent="Коробки" unique_id=681251276]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.075, 0)
+use_collision = true
+size = Vector3(10.2, 0.35, 8.2)
+material = ExtResource("3_rtcdl")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=663101533]
+
+[node name="Склад ГСМ" type="Label3D" parent="Подписи" unique_id=1473602294]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3999999, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Склад ГСМ"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Склад ГСМ2" type="Label3D" parent="Подписи" unique_id=1708353999]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4000006, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Склад ГСМ"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1191887098]
+script = ExtResource("4_2sdt8")
+rooms = [{
+"at": [0.0, 0.3, 0.0],
+"building": "Склад ГСМ",
+"floor": 1.0,
+"name": "Склад ГСМ",
+"uid": "gsm/1/R"
+}]
+routes = [{
+"building": "gsm",
+"checks": [[3, "gsm/1/R", 0.3]],
+"id": "tour_gsm",
+"kind": "tour",
+"label": "Склад ГСМ: все помещения",
+"points": [[-1.0, 0.27, 5.8], [-1.0, 0.3, 4.0], [-1.0, 0.3, 3.25], [0.0, 0.3, 0.0]]
+}]

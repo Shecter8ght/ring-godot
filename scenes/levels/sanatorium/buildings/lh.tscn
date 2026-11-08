@@ -1,0 +1,347 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/struct.tres" id="1_8fkba"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/stair.tres" id="2_qt86q"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/slab.tres" id="3_du1o2"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/white.tres" id="4_b58sc"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="5_780kh"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/plinth.tres" id="6_f3uva"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/parapet.tres" id="7_dfj3h"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="8_jsmlh"]
+[ext_resource type="Script" path="res://src/blockout/blockout_stair.gd" id="9_080bd"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/glass.tres" id="10_ex4ci"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="11_pvd1t"]
+
+[node name="Маяк" type="Node3D" unique_id=616946849]
+metadata/group = "lh"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=2142526863]
+
+[node name="struct_0000" type="CSGBox3D" parent="Коробки" unique_id=1595733848]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.075, 1)
+use_collision = true
+size = Vector3(3.4, 12.05, 3.4)
+material = ExtResource("1_8fkba")
+
+[node name="stair_0001" type="CSGBox3D" parent="Коробки" unique_id=1120360930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 9.95, 3.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="stair_0002" type="CSGBox3D" parent="Коробки" unique_id=1837286760]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 11.95, -1.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="stair_0003" type="CSGBox3D" parent="Коробки" unique_id=1219619225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 13.95, -1.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="stair_0004" type="CSGBox3D" parent="Коробки" unique_id=2099039722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 15.950001, 3.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="stair_0005" type="CSGBox3D" parent="Коробки" unique_id=3955063]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 17.95, 3.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="stair_0006" type="CSGBox3D" parent="Коробки" unique_id=873405642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 19.95, -1.25)
+use_collision = true
+size = Vector3(1.1, 0.3, 1.1)
+material = ExtResource("2_qt86q")
+
+[node name="slab_0007" type="CSGBox3D" parent="Коробки" unique_id=549714650]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.95, -1.25)
+use_collision = true
+size = Vector3(5.6, 0.3, 1.1)
+material = ExtResource("3_du1o2")
+
+[node name="slab_0008" type="CSGBox3D" parent="Коробки" unique_id=787762971]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 19.95, 1.5500002)
+use_collision = true
+size = Vector3(1.1, 0.3, 4.5)
+material = ExtResource("3_du1o2")
+
+[node name="white_0009" type="CSGBox3D" parent="Коробки" unique_id=1149136569]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.1, 4)
+use_collision = true
+size = Vector3(6.4, 12, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0010" type="CSGBox3D" parent="Коробки" unique_id=1263586015]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.1, -2)
+use_collision = true
+size = Vector3(6.4, 12, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0011" type="CSGBox3D" parent="Коробки" unique_id=764393308]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 14.1, 1)
+use_collision = true
+size = Vector3(0.4, 12, 6.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0012" type="CSGBox3D" parent="Коробки" unique_id=110821540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 14.1, 2.8929996)
+use_collision = true
+size = Vector3(0.4, 12, 2.615)
+material = ExtResource("4_b58sc")
+
+[node name="white_0013" type="CSGBox3D" parent="Коробки" unique_id=373104771]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 14.1, -0.89299965)
+use_collision = true
+size = Vector3(0.4, 12, 2.615)
+material = ExtResource("4_b58sc")
+
+[node name="white_0014" type="CSGBox3D" parent="Коробки" unique_id=234976033]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 15.309999, 1)
+use_collision = true
+size = Vector3(0.4, 9.58, 1.17)
+material = ExtResource("4_b58sc")
+
+[node name="floor_0015" type="CSGBox3D" parent="Коробки" unique_id=1782436665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.95, 1)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+material = ExtResource("5_780kh")
+
+[node name="plinth_0016" type="CSGBox3D" parent="Коробки" unique_id=984194874]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8999999, 1)
+use_collision = true
+size = Vector3(6, 7.8, 6)
+material = ExtResource("6_f3uva")
+
+[node name="white_0017" type="CSGBox3D" parent="Коробки" unique_id=1967327111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 21.6, 4)
+use_collision = true
+size = Vector3(6.4, 3, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="parapet_0018" type="CSGBox3D" parent="Коробки" unique_id=1142498503]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7999878, 20.65, -2)
+use_collision = true
+size = Vector3(1.6, 1.1, 0.25)
+material = ExtResource("7_dfj3h")
+
+[node name="white_0019" type="CSGBox3D" parent="Коробки" unique_id=408783039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2999878, 21.6, -2)
+use_collision = true
+size = Vector3(1.8, 3, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0020" type="CSGBox3D" parent="Коробки" unique_id=1688911869]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4849854, 21.6, -2)
+use_collision = true
+size = Vector3(3.43, 3, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="parapet_0021" type="CSGBox3D" parent="Коробки" unique_id=110121761]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7999878, 20.65, -2)
+use_collision = true
+size = Vector3(1.6, 1.1, 0.25)
+material = ExtResource("7_dfj3h")
+
+[node name="white_0022" type="CSGBox3D" parent="Коробки" unique_id=481868951]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.81500244, 22.81, -2)
+use_collision = true
+size = Vector3(1.17, 0.58, 0.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0023" type="CSGBox3D" parent="Коробки" unique_id=390926908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 21.6, 1)
+use_collision = true
+size = Vector3(0.4, 3, 6.4)
+material = ExtResource("4_b58sc")
+
+[node name="white_0024" type="CSGBox3D" parent="Коробки" unique_id=253989980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 21.6, 1)
+use_collision = true
+size = Vector3(0.4, 3, 6.4)
+material = ExtResource("4_b58sc")
+
+[node name="parapet_0025" type="CSGBox3D" parent="Коробки" unique_id=271782921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20.65, -4)
+use_collision = true
+size = Vector3(9.2, 1.1, 0.25)
+material = ExtResource("7_dfj3h")
+
+[node name="parapet_0026" type="CSGBox3D" parent="Коробки" unique_id=621259759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.600006, 20.65, -3)
+use_collision = true
+size = Vector3(0.25, 1.1, 2)
+material = ExtResource("7_dfj3h")
+
+[node name="parapet_0027" type="CSGBox3D" parent="Коробки" unique_id=898808700]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.600006, 20.65, -3)
+use_collision = true
+size = Vector3(0.25, 1.1, 2)
+material = ExtResource("7_dfj3h")
+
+[node name="roof_0028" type="CSGBox3D" parent="Коробки" unique_id=1876221121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.275, 1)
+use_collision = true
+size = Vector3(6.2, 0.35, 6.2)
+material = ExtResource("8_jsmlh")
+
+[node name="slab_0029" type="CSGBox3D" parent="Коробки" unique_id=792839532]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.95, -3)
+use_collision = true
+size = Vector3(9.2, 0.3, 2)
+material = ExtResource("3_du1o2")
+
+[node name="Лестницы" type="Node3D" parent="." unique_id=1152571414]
+
+[node name="Марш_030" type="Node3D" parent="Лестницы" unique_id=1912273235]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.7000122, 8.1, 3.25)
+script = ExtResource("9_080bd")
+run = 3.4000244
+width = 1.06
+material = ExtResource("2_qt86q")
+
+[node name="Марш_031" type="Node3D" parent="Лестницы" unique_id=2002347168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 10.1, 2.6999998)
+script = ExtResource("9_080bd")
+run = 3.3999996
+width = 1.06
+solid_bottom = -2.05
+material = ExtResource("2_qt86q")
+
+[node name="Марш_032" type="Node3D" parent="Лестницы" unique_id=1812068820]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.7000122, 12.1, -1.25)
+script = ExtResource("9_080bd")
+run = 3.4000244
+width = 1.06
+solid_bottom = -4.05
+material = ExtResource("2_qt86q")
+
+[node name="Марш_033" type="Node3D" parent="Лестницы" unique_id=1736160460]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.25, 14.1, -0.6999998)
+script = ExtResource("9_080bd")
+run = 3.3999996
+width = 1.06
+solid_bottom = -3.3
+material = ExtResource("2_qt86q")
+
+[node name="Марш_034" type="Node3D" parent="Лестницы" unique_id=1994432958]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.7000122, 16.1, 3.25)
+script = ExtResource("9_080bd")
+run = 3.4000244
+width = 1.06
+solid_bottom = -3.5
+material = ExtResource("2_qt86q")
+
+[node name="Марш_035" type="Node3D" parent="Лестницы" unique_id=731254268]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.25, 18.1, 2.6999998)
+script = ExtResource("9_080bd")
+run = 3.3999996
+width = 1.06
+solid_bottom = -3.5
+material = ExtResource("2_qt86q")
+
+[node name="Цилиндры" type="Node3D" parent="." unique_id=2116913286]
+
+[node name="glass_0036" type="CSGCylinder3D" parent="Цилиндры" unique_id=1898531292]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.6, 1)
+radius = 2.2
+height = 1.0
+sides = 16
+material = ExtResource("10_ex4ci")
+
+[node name="roof_0037" type="CSGCylinder3D" parent="Цилиндры" unique_id=1308048400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.7, 1)
+radius = 2.6
+height = 1.2
+sides = 16
+material = ExtResource("8_jsmlh")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=1058566401]
+
+[node name="Маяк, нижний ярус, винтовая лестница" type="Label3D" parent="Подписи" unique_id=1160455299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.25, 10.2, 1)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Маяк, нижний ярус, винтовая лестница"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Маяк, нижний ярус, винтовая лестница2" type="Label3D" parent="Подписи" unique_id=635862632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1000061, 22.2, -1.25)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Маяк, нижний ярус, винтовая лестница"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Фонарный ярус и обходная галерея" type="Label3D" parent="Подписи" unique_id=571195541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.2, -3)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Фонарный ярус и обходная галерея"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Маяк" type="Label3D" parent="Подписи" unique_id=403283108]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 25.6, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Маяк"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1459691974]
+script = ExtResource("11_pvd1t")
+rooms = [{
+"at": [2.25, 8.1, 1.0],
+"building": "Маяк",
+"floor": 1.0,
+"name": "Маяк, нижний ярус, винтовая лестница",
+"uid": "lh/1/LH0"
+}, {
+"at": [-1.1, 20.1, -1.25],
+"building": "Маяк",
+"floor": 2.0,
+"name": "Маяк, нижний ярус, винтовая лестница",
+"uid": "lh/2/LH0"
+}, {
+"at": [0.0, 20.1, -3.0],
+"building": "Маяк",
+"floor": 2.0,
+"name": "Фонарный ярус и обходная галерея",
+"uid": "lh/2/LHG"
+}]
+routes = [{
+"building": "lh",
+"checks": [[3, "lh/1/LH0", 8.1], [25, "lh/2/LH0", 20.1], [29, "lh/2/LHG", 20.1]],
+"id": "tour_lh",
+"kind": "tour",
+"label": "Маяк: все помещения",
+"points": [[4.8, 8.1, 1.0], [3.0, 8.1, 1.0], [2.25, 8.1, 1.0], [2.25, 8.1, 1.0], [2.25, 8.1, 1.0], [2.25, 8.1, 3.25], [1.4000000000000001, 8.27, 3.25], [-1.45, 9.93, 3.25], [-2.25, 10.1, 3.25], [-2.25, 10.27, 2.4], [-2.25, 11.93, -0.45], [-2.25, 12.1, -1.25], [-1.4000000000000001, 12.27, -1.25], [1.45, 13.93, -1.25], [2.25, 14.1, -1.25], [2.25, 14.27, -0.4], [2.25, 15.93, 2.45], [2.25, 16.1, 3.25], [1.4000000000000001, 16.27, 3.25], [-1.45, 17.93, 3.25], [-2.25, 18.1, 3.25], [-2.25, 18.27, 2.4], [-2.25, 19.93, -0.45], [-2.25, 20.1, -1.25], [-1.1, 20.1, -1.25], [-1.1, 20.1, -1.25], [-0.8150000000000001, 20.1, -1.25], [-0.8150000000000001, 20.1, -2.0], [-0.8150000000000001, 20.1, -2.75], [0.0, 20.1, -3.0], [-0.8150000000000001, 20.1, -2.75], [-0.8150000000000001, 20.1, -2.0], [-0.8150000000000001, 20.1, -1.25], [-1.1, 20.1, -1.25], [-1.1, 20.1, -1.25], [-2.25, 20.1, -1.25], [-2.25, 19.93, -0.45], [-2.25, 18.27, 2.4], [-2.25, 18.1, 3.25], [-1.45, 17.93, 3.25], [1.4000000000000001, 16.27, 3.25], [2.25, 16.1, 3.25], [2.25, 15.93, 2.45], [2.25, 14.27, -0.4], [2.25, 14.1, -1.25], [1.45, 13.93, -1.25], [-1.4000000000000001, 12.27, -1.25], [-2.25, 12.1, -1.25], [-2.25, 11.93, -0.45], [-2.25, 10.27, 2.4], [-2.25, 10.1, 3.25], [-1.45, 9.93, 3.25], [1.4000000000000001, 8.27, 3.25], [2.25, 8.1, 3.25], [2.25, 8.1, 1.0], [2.25, 8.1, 1.0]]
+}]

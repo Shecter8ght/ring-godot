@@ -1,0 +1,14 @@
+[gd_resource type="ArrayMesh" format=4]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/water_pool.tres" id="1_5kl5v"]
+
+[resource]
+_surfaces = [{
+"aabb": AABB(-26.6, 0.55, -43.9, 10.200001, 1e-05, 10.200001),
+"format": 34359738375,
+"material": ExtResource("1_5kl5v"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 78,
+"vertex_data": PackedByteArray("EzmEwc3MDD9LvR/CMzODwc3MDD8zMxvCEzmEwc3MDD8bqRbCEzmEwc3MDD8bqRbCjz2Hwc3MDD9JWRLC7RmMwc3MDD8Wew7C7RmMwc3MDD8Wew7Cxo+Swc3MDD8qQAvCLEyawc3MDD/70QjCLEyawc3MDD/70QjC0Ouiwc3MDD+9TwfCAACswc3MDD/NzAbCAACswc3MDD/NzAbCMBS1wc3MDD+9TwfC1LO9wc3MDD/70QjC1LO9wc3MDD/70QjCOnDFwc3MDD8qQAvCE+bLwc3MDD8Wew7CE+bLwc3MDD8Wew7CccLQwc3MDD9JWRLC7cbTwc3MDD8bqRbC7cbTwc3MDD8bqRbCzczUwc3MDD8zMxvC7cbTwc3MDD9LvR/C7cbTwc3MDD9LvR/CccLQwc3MDD8dDSTCE+bLwc3MDD9Q6yfCE+bLwc3MDD9Q6yfCOnDFwc3MDD89JivC1LO9wc3MDD9slC3C1LO9wc3MDD9slC3CMBS1wc3MDD+qFi/CAACswc3MDD+amS/CAACswc3MDD+amS/C0Ouiwc3MDD+qFi/CLEyawc3MDD9slC3CLEyawc3MDD9slC3Cxo+Swc3MDD89JivC7RmMwc3MDD9Q6yfC7RmMwc3MDD9Q6yfCjz2Hwc3MDD8dDSTCEzmEwc3MDD9LvR/CEzmEwc3MDD9LvR/CEzmEwc3MDD8bqRbC7RmMwc3MDD8Wew7C7RmMwc3MDD8Wew7CLEyawc3MDD/70QjCAACswc3MDD/NzAbCAACswc3MDD/NzAbC1LO9wc3MDD/70QjCE+bLwc3MDD8Wew7CE+bLwc3MDD8Wew7C7cbTwc3MDD8bqRbC7cbTwc3MDD9LvR/C7cbTwc3MDD9LvR/CE+bLwc3MDD9Q6yfC1LO9wc3MDD9slC3C1LO9wc3MDD9slC3CAACswc3MDD+amS/CLEyawc3MDD9slC3CLEyawc3MDD9slC3C7RmMwc3MDD9Q6yfCEzmEwc3MDD9LvR/CEzmEwc3MDD9LvR/C7RmMwc3MDD8Wew7CAACswc3MDD/NzAbCAACswc3MDD/NzAbCE+bLwc3MDD8Wew7C7cbTwc3MDD9LvR/C7cbTwc3MDD9LvR/C1LO9wc3MDD9slC3CLEyawc3MDD9slC3CLEyawc3MDD9slC3CEzmEwc3MDD9LvR/CAACswc3MDD/NzAbCAACswc3MDD/NzAbC7cbTwc3MDD9LvR/CLEyawc3MDD9slC3C/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]

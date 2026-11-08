@@ -1,0 +1,1688 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/stone.tres" id="1_cko0q"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/paving.tres" id="2_qghu3"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/metal.tres" id="3_s45ue"]
+[ext_resource type="Script" path="res://src/blockout/blockout_stair.gd" id="4_8tao7"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/white.tres" id="5_mswvm"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="6_dtokk"]
+
+[node name="Амфитеатр — ряды, проходы, променад, колоннада" type="Node3D" unique_id=1290607189]
+metadata/group = "sec31"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=2139072964]
+
+[node name="stone_0000" type="CSGBox3D" parent="Коробки" unique_id=105920031]
+transform = Transform3D(0.85531, 0, 0.5181166, 0, 1, 0, -0.5181166, 0, 0.85531, -2.9990005, 0.5, 14.197998)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0001" type="CSGBox3D" parent="Коробки" unique_id=1614818130]
+transform = Transform3D(0.79208726, 0, 0.6104078, 0, 1, 0, -0.6104078, 0, 0.79208726, -1.4669952, 0.5, 13.149002)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0002" type="CSGBox3D" parent="Коробки" unique_id=835756020]
+transform = Transform3D(0.7189517, 0, 0.69506, 0, 1, 0, -0.69506, 0, 0.7189517, -0.06199646, 0.5, 11.934998)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0003" type="CSGBox3D" parent="Коробки" unique_id=199931420]
+transform = Transform3D(0.55616504, 0, 0.83107185, 0, 1, 0, -0.83107185, 0, 0.55616504, 2.1959991, 0.5, 9.231995)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0004" type="CSGBox3D" parent="Коробки" unique_id=1518839128]
+transform = Transform3D(0.45237243, 0, 0.89182913, 0, 1, 0, -0.89182913, 0, 0.45237243, 3.2040024, 0.5, 7.5090027)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0005" type="CSGBox3D" parent="Коробки" unique_id=1680344301]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 3.9990005, 0.5, 5.677994)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0006" type="CSGBox3D" parent="Коробки" unique_id=905848503]
+transform = Transform3D(0.22671933, 0, 0.97396016, 0, 1, 0, -0.97396016, 0, 0.22671933, 4.568001, 0.5, 3.7640076)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0007" type="CSGBox3D" parent="Коробки" unique_id=2127948179]
+transform = Transform3D(0.10815554, 0, 0.994134, 0, 1, 0, -0.994134, 0, 0.10815554, 4.903, 0.5, 1.7949982)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0008" type="CSGBox3D" parent="Коробки" unique_id=1662372206]
+transform = Transform3D(-0.10815551, 0, 0.994134, 0, 1, 0, -0.994134, 0, -0.10815551, 4.903, 0.5, -1.7949982)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0009" type="CSGBox3D" parent="Коробки" unique_id=574205352]
+transform = Transform3D(-0.2267193, 0, 0.97396016, 0, 1, 0, -0.97396016, 0, -0.2267193, 4.568001, 0.5, -3.7640076)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0010" type="CSGBox3D" parent="Коробки" unique_id=124668814]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 3.9990005, 0.5, -5.677994)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0011" type="CSGBox3D" parent="Коробки" unique_id=55928542]
+transform = Transform3D(-0.4523724, 0, 0.89182913, 0, 1, 0, -0.89182913, 0, -0.4523724, 3.2040024, 0.5, -7.5090027)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0012" type="CSGBox3D" parent="Коробки" unique_id=1330503767]
+transform = Transform3D(-0.55616516, 0, 0.8310718, 0, 1, 0, -0.8310718, 0, -0.55616516, 2.1959991, 0.5, -9.231995)
+use_collision = true
+size = Vector3(2.048, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0013" type="CSGBox3D" parent="Коробки" unique_id=377761076]
+transform = Transform3D(-0.71895176, 0, 0.69506, 0, 1, 0, -0.69506, 0, -0.71895176, -0.06199646, 0.5, -11.934998)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0014" type="CSGBox3D" parent="Коробки" unique_id=1007097325]
+transform = Transform3D(-0.7920873, 0, 0.6104078, 0, 1, 0, -0.6104078, 0, -0.7920873, -1.4669952, 0.5, -13.149002)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0015" type="CSGBox3D" parent="Коробки" unique_id=2119700385]
+transform = Transform3D(-0.85531, 0, 0.51811653, 0, 1, 0, -0.51811653, 0, -0.85531, -2.9990005, 0.5, -14.197998)
+use_collision = true
+size = Vector3(1.908, 1, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0016" type="CSGBox3D" parent="Коробки" unique_id=1129417651]
+transform = Transform3D(0.8550296, 0, 0.51857924, 0, 1, 0, -0.51857924, 0, 0.8550296, -2.3689957, 0.69999886, 15.218994)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0017" type="CSGBox3D" parent="Коробки" unique_id=985196641]
+transform = Transform3D(0.79109544, 0, 0.6116928, 0, 1, 0, -0.6116928, 0, 0.79109544, -0.711998, 0.69999886, 14.080994)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0018" type="CSGBox3D" parent="Коробки" unique_id=2003098253]
+transform = Transform3D(0.7170688, 0, 0.6970024, 0, 1, 0, -0.6970024, 0, 0.7170688, 0.8069992, 0.69999886, 12.764008)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0019" type="CSGBox3D" parent="Коробки" unique_id=106897795]
+transform = Transform3D(0.55832446, 0, 0.8296227, 0, 1, 0, -0.8296227, 0, 0.55832446, 3.1669998, 0.69999886, 9.938004)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0020" type="CSGBox3D" parent="Коробки" unique_id=458034102]
+transform = Transform3D(0.45352384, 0, 0.8912441, 0, 1, 0, -0.8912441, 0, 0.45352384, 4.264, 0.69999886, 8.072998)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0021" type="CSGBox3D" parent="Коробки" unique_id=1653364451]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 5.126999, 0.69999886, 6.0879974)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0022" type="CSGBox3D" parent="Коробки" unique_id=36257737]
+transform = Transform3D(0.22546116, 0, 0.97425216, 0, 1, 0, -0.97425216, 0, 0.22546116, 5.7420044, 0.69999886, 4.0130005)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0023" type="CSGBox3D" parent="Коробки" unique_id=1556538257]
+transform = Transform3D(0.105569884, 0, 0.9944119, 0, 1, 0, -0.9944119, 0, 0.105569884, 6.100998, 0.69999886, 1.8789978)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0024" type="CSGBox3D" parent="Коробки" unique_id=1711553900]
+transform = Transform3D(-0.10556985, 0, 0.9944119, 0, 1, 0, -0.9944119, 0, -0.10556985, 6.100998, 0.69999886, -1.8789978)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0025" type="CSGBox3D" parent="Коробки" unique_id=976334649]
+transform = Transform3D(-0.22546124, 0, 0.97425216, 0, 1, 0, -0.97425216, 0, -0.22546124, 5.7420044, 0.69999886, -4.0130005)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0026" type="CSGBox3D" parent="Коробки" unique_id=1410332079]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 5.126999, 0.69999886, -6.0879974)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0027" type="CSGBox3D" parent="Коробки" unique_id=1462414621]
+transform = Transform3D(-0.4535238, 0, 0.8912442, 0, 1, 0, -0.8912442, 0, -0.4535238, 4.264, 0.69999886, -8.072998)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0028" type="CSGBox3D" parent="Коробки" unique_id=1893309217]
+transform = Transform3D(-0.5583244, 0, 0.82962275, 0, 1, 0, -0.82962275, 0, -0.5583244, 3.1669998, 0.69999886, -9.938004)
+use_collision = true
+size = Vector3(2.215, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0029" type="CSGBox3D" parent="Коробки" unique_id=1216567584]
+transform = Transform3D(-0.71706873, 0, 0.6970025, 0, 1, 0, -0.6970025, 0, -0.71706873, 0.8069992, 0.69999886, -12.764008)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0030" type="CSGBox3D" parent="Коробки" unique_id=1160265807]
+transform = Transform3D(-0.7910955, 0, 0.61169267, 0, 1, 0, -0.61169267, 0, -0.7910955, -0.711998, 0.69999886, -14.080994)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0031" type="CSGBox3D" parent="Коробки" unique_id=1966168407]
+transform = Transform3D(-0.8550295, 0, 0.51857936, 0, 1, 0, -0.51857936, 0, -0.8550295, -2.3689957, 0.69999886, -15.218994)
+use_collision = true
+size = Vector3(2.062, 1.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0032" type="CSGBox3D" parent="Коробки" unique_id=696801745]
+transform = Transform3D(0.854776, 0, 0.5189971, 0, 1, 0, -0.5189971, 0, 0.854776, -1.7389984, 0.8999996, 16.240997)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0033" type="CSGBox3D" parent="Коробки" unique_id=314596555]
+transform = Transform3D(0.7902192, 0, 0.6128243, 0, 1, 0, -0.6128243, 0, 0.7902192, 0.04399872, 0.8999996, 15.014008)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0034" type="CSGBox3D" parent="Коробки" unique_id=1752170749]
+transform = Transform3D(0.7154123, 0, 0.6987025, 0, 1, 0, -0.6987025, 0, 0.7154123, 1.675003, 0.8999996, 13.593002)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0035" type="CSGBox3D" parent="Коробки" unique_id=767403753]
+transform = Transform3D(0.56864804, 0, 0.82258093, 0, 1, 0, -0.82258093, 0, 0.56864804, 4.0289993, 0.8999996, 10.804001)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0036" type="CSGBox3D" parent="Коробки" unique_id=1576956452]
+transform = Transform3D(0.4816619, 0, 0.87635714, 0, 1, 0, -0.87635714, 0, 0.4816619, 5.0510025, 0.8999996, 9.151993)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0037" type="CSGBox3D" parent="Коробки" unique_id=537643601]
+transform = Transform3D(0.38962227, 0, 0.92097473, 0, 1, 0, -0.92097473, 0, 0.38962227, 5.8980026, 0.8999996, 7.403)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0038" type="CSGBox3D" parent="Коробки" unique_id=227097239]
+transform = Transform3D(0.2935232, 0, 0.9559519, 0, 1, 0, -0.9559519, 0, 0.2935232, 6.5630035, 0.8999996, 5.576996)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0039" type="CSGBox3D" parent="Коробки" unique_id=1089353694]
+transform = Transform3D(0.19433711, 0, 0.9809348, 0, 1, 0, -0.9809348, 0, 0.19433711, 7.038002, 0.8999996, 3.6920013)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0040" type="CSGBox3D" parent="Коробки" unique_id=1250004680]
+transform = Transform3D(0.0931352, 0, 0.99565345, 0, 1, 0, -0.99565345, 0, 0.0931352, 7.3170013, 0.8999996, 1.7689972)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0041" type="CSGBox3D" parent="Коробки" unique_id=209235695]
+transform = Transform3D(-0.09313517, 0, 0.99565345, 0, 1, 0, -0.99565345, 0, -0.09313517, 7.3170013, 0.8999996, -1.7689972)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0042" type="CSGBox3D" parent="Коробки" unique_id=267466870]
+transform = Transform3D(-0.19433708, 0, 0.9809348, 0, 1, 0, -0.9809348, 0, -0.19433708, 7.038002, 0.8999996, -3.6920013)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0043" type="CSGBox3D" parent="Коробки" unique_id=967741564]
+transform = Transform3D(-0.29352316, 0, 0.955952, 0, 1, 0, -0.955952, 0, -0.29352316, 6.5630035, 0.8999996, -5.576996)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0044" type="CSGBox3D" parent="Коробки" unique_id=2050227980]
+transform = Transform3D(-0.38962224, 0, 0.92097473, 0, 1, 0, -0.92097473, 0, -0.38962224, 5.8980026, 0.8999996, -7.403)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0045" type="CSGBox3D" parent="Коробки" unique_id=623724574]
+transform = Transform3D(-0.48166186, 0, 0.87635714, 0, 1, 0, -0.87635714, 0, -0.48166186, 5.0510025, 0.8999996, -9.151993)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0046" type="CSGBox3D" parent="Коробки" unique_id=299838128]
+transform = Transform3D(-0.5686481, 0, 0.82258093, 0, 1, 0, -0.82258093, 0, -0.5686481, 4.0289993, 0.8999996, -10.804001)
+use_collision = true
+size = Vector3(1.994, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0047" type="CSGBox3D" parent="Коробки" unique_id=1390224721]
+transform = Transform3D(-0.71541226, 0, 0.6987026, 0, 1, 0, -0.6987026, 0, -0.71541226, 1.675003, 0.8999996, -13.593002)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0048" type="CSGBox3D" parent="Коробки" unique_id=1640341298]
+transform = Transform3D(-0.7902192, 0, 0.6128243, 0, 1, 0, -0.6128243, 0, -0.7902192, 0.04399872, 0.8999996, -15.014008)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0049" type="CSGBox3D" parent="Коробки" unique_id=1061617831]
+transform = Transform3D(-0.8547761, 0, 0.51899695, 0, 1, 0, -0.51899695, 0, -0.8547761, -1.7389984, 0.8999996, -16.240997)
+use_collision = true
+size = Vector3(2.215, 1.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0050" type="CSGBox3D" parent="Коробки" unique_id=88330866]
+transform = Transform3D(0.8619302, 0, 0.507027, 0, 1, 0, -0.507027, 0, 0.8619302, -1.3580017, 1.1000004, 17.410995)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0051" type="CSGBox3D" parent="Коробки" unique_id=236858108]
+transform = Transform3D(0.8151379, 0, 0.5792669, 0, 1, 0, -0.5792669, 0, 0.8151379, 0.100997925, 1.1000004, 16.466003)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0052" type="CSGBox3D" parent="Коробки" unique_id=2070040160]
+transform = Transform3D(0.762307, 0, 0.64721566, 0, 1, 0, -0.64721566, 0, 0.762307, 1.473999, 1.1000004, 15.399002)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0053" type="CSGBox3D" parent="Коробки" unique_id=698275615]
+transform = Transform3D(0.7038288, 0, 0.71036965, 0, 1, 0, -0.71036965, 0, 0.7038288, 2.7490005, 1.1000004, 14.216995)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0054" type="CSGBox3D" parent="Коробки" unique_id=1813376162]
+transform = Transform3D(0.5703696, 0, 0.8213882, 0, 1, 0, -0.8213882, 0, 0.5703696, 4.9920044, 1.1000004, 11.520996)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0055" type="CSGBox3D" parent="Коробки" unique_id=1502814478]
+transform = Transform3D(0.48274747, 0, 0.8757596, 0, 1, 0, -0.8757596, 0, 0.48274747, 6.090004, 1.1000004, 9.751999)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0056" type="CSGBox3D" parent="Коробки" unique_id=131335648]
+transform = Transform3D(0.39000803, 0, 0.9208115, 0, 1, 0, -0.9208115, 0, 0.39000803, 7, 1.1000004, 7.878006)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0057" type="CSGBox3D" parent="Коробки" unique_id=2107181370]
+transform = Transform3D(0.2931227, 0, 0.95607483, 0, 1, 0, -0.95607483, 0, 0.2931227, 7.713005, 1.1000004, 5.9210052)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0058" type="CSGBox3D" parent="Коробки" unique_id=1569998968]
+transform = Transform3D(0.1931214, 0, 0.9811749, 0, 1, 0, -0.9811749, 0, 0.1931214, 8.220001, 1.1000004, 3.901001)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0059" type="CSGBox3D" parent="Коробки" unique_id=921915324]
+transform = Transform3D(0.091049716, 0, 0.99584633, 0, 1, 0, -0.99584633, 0, 0.091049716, 8.516003, 1.1000004, 1.8390045)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0060" type="CSGBox3D" parent="Коробки" unique_id=1950967382]
+transform = Transform3D(-0.091049686, 0, 0.99584633, 0, 1, 0, -0.99584633, 0, -0.091049686, 8.516003, 1.1000004, -1.8390045)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0061" type="CSGBox3D" parent="Коробки" unique_id=230280357]
+transform = Transform3D(-0.19312137, 0, 0.9811749, 0, 1, 0, -0.9811749, 0, -0.19312137, 8.220001, 1.1000004, -3.901001)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0062" type="CSGBox3D" parent="Коробки" unique_id=1330942435]
+transform = Transform3D(-0.29312268, 0, 0.95607483, 0, 1, 0, -0.95607483, 0, -0.29312268, 7.713005, 1.1000004, -5.9210052)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0063" type="CSGBox3D" parent="Коробки" unique_id=1493648932]
+transform = Transform3D(-0.390008, 0, 0.9208115, 0, 1, 0, -0.9208115, 0, -0.390008, 7, 1.1000004, -7.878006)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0064" type="CSGBox3D" parent="Коробки" unique_id=375994686]
+transform = Transform3D(-0.48274755, 0, 0.87575954, 0, 1, 0, -0.87575954, 0, -0.48274755, 6.090004, 1.1000004, -9.751999)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0065" type="CSGBox3D" parent="Коробки" unique_id=1375292855]
+transform = Transform3D(-0.57036954, 0, 0.8213882, 0, 1, 0, -0.8213882, 0, -0.57036954, 4.9920044, 1.1000004, -11.520996)
+use_collision = true
+size = Vector3(2.134, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0066" type="CSGBox3D" parent="Коробки" unique_id=2128732670]
+transform = Transform3D(-0.7038288, 0, 0.71036965, 0, 1, 0, -0.71036965, 0, -0.7038288, 2.7490005, 1.1000004, -14.216995)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0067" type="CSGBox3D" parent="Коробки" unique_id=2029444199]
+transform = Transform3D(-0.7623069, 0, 0.64721566, 0, 1, 0, -0.64721566, 0, -0.7623069, 1.473999, 1.1000004, -15.399002)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0068" type="CSGBox3D" parent="Коробки" unique_id=33604007]
+transform = Transform3D(-0.815138, 0, 0.57926685, 0, 1, 0, -0.57926685, 0, -0.815138, 0.100997925, 1.1000004, -16.466003)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0069" type="CSGBox3D" parent="Коробки" unique_id=1424176400]
+transform = Transform3D(-0.8619302, 0, 0.507027, 0, 1, 0, -0.507027, 0, -0.8619302, -1.3580017, 1.1000004, -17.410995)
+use_collision = true
+size = Vector3(1.789, 2.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0070" type="CSGBox3D" parent="Коробки" unique_id=2074237247]
+transform = Transform3D(0.8617886, 0, 0.50726765, 0, 1, 0, -0.50726765, 0, 0.8617886, -0.74399567, 1.3000011, 18.442001)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0071" type="CSGBox3D" parent="Коробки" unique_id=719944619]
+transform = Transform3D(0.8146523, 0, 0.5799497, 0, 1, 0, -0.5799497, 0, 0.8146523, 0.81100464, 1.3000011, 17.434006)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0072" type="CSGBox3D" parent="Коробки" unique_id=850271062]
+transform = Transform3D(0.7614139, 0, 0.6482661, 0, 1, 0, -0.6482661, 0, 0.7614139, 2.2730026, 1.3000011, 16.294006)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0073" type="CSGBox3D" parent="Коробки" unique_id=1458064791]
+transform = Transform3D(0.7024512, 0, 0.71173185, 0, 1, 0, -0.71173185, 0, 0.7024512, 3.6310043, 1.3000011, 15.031998)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0074" type="CSGBox3D" parent="Коробки" unique_id=1841000260]
+transform = Transform3D(0.57795733, 0, 0.816067, 0, 1, 0, -0.816067, 0, 0.57795733, 5.8639984, 1.3000011, 12.367996)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0075" type="CSGBox3D" parent="Коробки" unique_id=1943251589]
+transform = Transform3D(0.5030954, 0, 0.86423093, 0, 1, 0, -0.86423093, 0, 0.5030954, 6.8950043, 1.3000011, 10.766006)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0076" type="CSGBox3D" parent="Коробки" unique_id=84942326]
+transform = Transform3D(0.42423105, 0, 0.905554, 0, 1, 0, -0.905554, 0, 0.42423105, 7.7789993, 1.3000011, 9.078995)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0077" type="CSGBox3D" parent="Коробки" unique_id=627589318]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 8.509003, 1.3000011, 7.3190002)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0078" type="CSGBox3D" parent="Коробки" unique_id=1907159616]
+transform = Transform3D(0.25709906, 0, 0.96638507, 0, 1, 0, -0.96638507, 0, 0.25709906, 9.081001, 1.3000011, 5.501999)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0079" type="CSGBox3D" parent="Коробки" unique_id=1891193614]
+transform = Transform3D(0.17012352, 0, 0.98542273, 0, 1, 0, -0.98542273, 0, 0.17012352, 9.488003, 1.3000011, 3.6410065)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0080" type="CSGBox3D" parent="Коробки" unique_id=1358789156]
+transform = Transform3D(0.08181675, 0, 0.9966474, 0, 1, 0, -0.9966474, 0, 0.08181675, 9.728001, 1.3000011, 1.7510071)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0081" type="CSGBox3D" parent="Коробки" unique_id=933289827]
+transform = Transform3D(-0.08181671, 0, 0.9966474, 0, 1, 0, -0.9966474, 0, -0.08181671, 9.728001, 1.3000011, -1.7510071)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0082" type="CSGBox3D" parent="Коробки" unique_id=1375659056]
+transform = Transform3D(-0.17012349, 0, 0.98542273, 0, 1, 0, -0.98542273, 0, -0.17012349, 9.488003, 1.3000011, -3.6410065)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0083" type="CSGBox3D" parent="Коробки" unique_id=1907334597]
+transform = Transform3D(-0.257099, 0, 0.96638507, 0, 1, 0, -0.96638507, 0, -0.257099, 9.081001, 1.3000011, -5.501999)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0084" type="CSGBox3D" parent="Коробки" unique_id=964052134]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 8.509003, 1.3000011, -7.3190002)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0085" type="CSGBox3D" parent="Коробки" unique_id=635198210]
+transform = Transform3D(-0.42423114, 0, 0.90555394, 0, 1, 0, -0.90555394, 0, -0.42423114, 7.7789993, 1.3000011, -9.078995)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0086" type="CSGBox3D" parent="Коробки" unique_id=871569653]
+transform = Transform3D(-0.50309545, 0, 0.8642309, 0, 1, 0, -0.8642309, 0, -0.50309545, 6.8950043, 1.3000011, -10.766006)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0087" type="CSGBox3D" parent="Коробки" unique_id=332861421]
+transform = Transform3D(-0.5779574, 0, 0.8160669, 0, 1, 0, -0.8160669, 0, -0.5779574, 5.8639984, 1.3000011, -12.367996)
+use_collision = true
+size = Vector3(1.956, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0088" type="CSGBox3D" parent="Коробки" unique_id=1211826329]
+transform = Transform3D(-0.7024512, 0, 0.7117319, 0, 1, 0, -0.7117319, 0, -0.7024512, 3.6310043, 1.3000011, -15.031998)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0089" type="CSGBox3D" parent="Коробки" unique_id=1587199806]
+transform = Transform3D(-0.7614139, 0, 0.6482661, 0, 1, 0, -0.6482661, 0, -0.7614139, 2.2730026, 1.3000011, -16.294006)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0090" type="CSGBox3D" parent="Коробки" unique_id=1562650258]
+transform = Transform3D(-0.8146524, 0, 0.57994956, 0, 1, 0, -0.57994956, 0, -0.8146524, 0.81100464, 1.3000011, -17.434006)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0091" type="CSGBox3D" parent="Коробки" unique_id=251807322]
+transform = Transform3D(-0.86178863, 0, 0.5072676, 0, 1, 0, -0.5072676, 0, -0.86178863, -0.74399567, 1.3000011, -18.442001)
+use_collision = true
+size = Vector3(1.904, 2.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0092" type="CSGBox3D" parent="Коробки" unique_id=1370436244]
+transform = Transform3D(0.8616646, 0, 0.5074782, 0, 1, 0, -0.5074782, 0, 0.8616646, -0.1309967, 1.5000019, 19.473999)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0093" type="CSGBox3D" parent="Коробки" unique_id=837037674]
+transform = Transform3D(0.814227, 0, 0.5805467, 0, 1, 0, -0.5805467, 0, 0.814227, 1.5200043, 1.5000019, 18.401001)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0094" type="CSGBox3D" parent="Коробки" unique_id=1067857746]
+transform = Transform3D(0.76061, 0, 0.6492091, 0, 1, 0, -0.6492091, 0, 0.76061, 3.0719986, 1.5000019, 17.190002)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0095" type="CSGBox3D" parent="Коробки" unique_id=273702776]
+transform = Transform3D(0.7012204, 0, 0.71294457, 0, 1, 0, -0.71294457, 0, 0.7012204, 4.5130005, 1.5000019, 15.847)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0096" type="CSGBox3D" parent="Коробки" unique_id=268154191]
+transform = Transform3D(0.5793381, 0, 0.8150874, 0, 1, 0, -0.8150874, 0, 0.5793381, 6.820999, 1.5000019, 13.093002)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0097" type="CSGBox3D" parent="Коробки" unique_id=679411474]
+transform = Transform3D(0.5040755, 0, 0.86365956, 0, 1, 0, -0.86365956, 0, 0.5040755, 7.9189987, 1.5000019, 11.391998)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0098" type="CSGBox3D" parent="Коробки" unique_id=59891178]
+transform = Transform3D(0.4247525, 0, 0.9053095, 0, 1, 0, -0.9053095, 0, 0.4247525, 8.860001, 1.5000019, 9.598999)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0099" type="CSGBox3D" parent="Коробки" unique_id=1431363188]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 9.637001, 1.5000019, 7.7299957)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0100" type="CSGBox3D" parent="Коробки" unique_id=2075982409]
+transform = Transform3D(0.25654247, 0, 0.96653295, 0, 1, 0, -0.96653295, 0, 0.25654247, 10.244003, 1.5000019, 5.798004)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0101" type="CSGBox3D" parent="Коробки" unique_id=1817557176]
+transform = Transform3D(0.16900544, 0, 0.98561513, 0, 1, 0, -0.98561513, 0, 0.16900544, 10.675003, 1.5000019, 3.8200073)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0102" type="CSGBox3D" parent="Коробки" unique_id=1823452050]
+transform = Transform3D(0.080129296, 0, 0.99678445, 0, 1, 0, -0.99678445, 0, 0.080129296, 10.927002, 1.5000019, 1.8110046)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0103" type="CSGBox3D" parent="Коробки" unique_id=1909485376]
+transform = Transform3D(-0.080129385, 0, 0.99678445, 0, 1, 0, -0.99678445, 0, -0.080129385, 10.927002, 1.5000019, -1.8110046)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0104" type="CSGBox3D" parent="Коробки" unique_id=1151716665]
+transform = Transform3D(-0.16900553, 0, 0.9856151, 0, 1, 0, -0.9856151, 0, -0.16900553, 10.675003, 1.5000019, -3.8200073)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0105" type="CSGBox3D" parent="Коробки" unique_id=598312458]
+transform = Transform3D(-0.25654244, 0, 0.96653295, 0, 1, 0, -0.96653295, 0, -0.25654244, 10.244003, 1.5000019, -5.798004)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0106" type="CSGBox3D" parent="Коробки" unique_id=1159589998]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 9.637001, 1.5000019, -7.7299957)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0107" type="CSGBox3D" parent="Коробки" unique_id=1516715372]
+transform = Transform3D(-0.42475247, 0, 0.90530956, 0, 1, 0, -0.90530956, 0, -0.42475247, 8.860001, 1.5000019, -9.598999)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0108" type="CSGBox3D" parent="Коробки" unique_id=1294453375]
+transform = Transform3D(-0.50407547, 0, 0.8636596, 0, 1, 0, -0.8636596, 0, -0.50407547, 7.9189987, 1.5000019, -11.391998)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0109" type="CSGBox3D" parent="Коробки" unique_id=1775619731]
+transform = Transform3D(-0.579338, 0, 0.81508744, 0, 1, 0, -0.81508744, 0, -0.579338, 6.820999, 1.5000019, -13.093002)
+use_collision = true
+size = Vector3(2.075, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0110" type="CSGBox3D" parent="Коробки" unique_id=1364372941]
+transform = Transform3D(-0.70122045, 0, 0.7129445, 0, 1, 0, -0.7129445, 0, -0.70122045, 4.5130005, 1.5000019, -15.847)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0111" type="CSGBox3D" parent="Коробки" unique_id=1655612212]
+transform = Transform3D(-0.76061004, 0, 0.649209, 0, 1, 0, -0.649209, 0, -0.76061004, 3.0719986, 1.5000019, -17.190002)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0112" type="CSGBox3D" parent="Коробки" unique_id=2036196384]
+transform = Transform3D(-0.814227, 0, 0.5805467, 0, 1, 0, -0.5805467, 0, -0.814227, 1.5200043, 1.5000019, -18.401001)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0113" type="CSGBox3D" parent="Коробки" unique_id=337901928]
+transform = Transform3D(-0.8616646, 0, 0.5074782, 0, 1, 0, -0.5074782, 0, -0.8616646, -0.1309967, 1.5000019, -19.473999)
+use_collision = true
+size = Vector3(2.019, 3, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0114" type="CSGBox3D" parent="Коробки" unique_id=2023093283]
+transform = Transform3D(0.86154944, 0, 0.5076737, 0, 1, 0, -0.5076737, 0, 0.86154944, 0.4830017, 1.6999989, 20.505005)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0115" type="CSGBox3D" parent="Коробки" unique_id=1193238979]
+transform = Transform3D(0.8138316, 0, 0.58110076, 0, 1, 0, -0.58110076, 0, 0.8138316, 2.2300034, 1.6999989, 19.369003)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0116" type="CSGBox3D" parent="Коробки" unique_id=374309027]
+transform = Transform3D(0.7598843, 0, 0.6500583, 0, 1, 0, -0.6500583, 0, 0.7598843, 3.8710022, 1.6999989, 18.085007)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0117" type="CSGBox3D" parent="Коробки" unique_id=1429089343]
+transform = Transform3D(0.70009965, 0, 0.71404517, 0, 1, 0, -0.71404517, 0, 0.70009965, 5.394005, 1.6999989, 16.662003)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0118" type="CSGBox3D" parent="Коробки" unique_id=1223565694]
+transform = Transform3D(0.5805893, 0, 0.8141966, 0, 1, 0, -0.8141966, 0, 0.5805893, 7.778, 1.6999989, 13.817993)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0119" type="CSGBox3D" parent="Коробки" unique_id=1555889622]
+transform = Transform3D(0.50494945, 0, 0.8631489, 0, 1, 0, -0.8631489, 0, 0.50494945, 8.943001, 1.6999989, 12.018005)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0120" type="CSGBox3D" parent="Коробки" unique_id=539091663]
+transform = Transform3D(0.42521068, 0, 0.9050944, 0, 1, 0, -0.9050944, 0, 0.42521068, 9.941002, 1.6999989, 10.119995)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0121" type="CSGBox3D" parent="Коробки" unique_id=1718603710]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 10.765003, 1.6999989, 8.139999)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0122" type="CSGBox3D" parent="Коробки" unique_id=1743598160]
+transform = Transform3D(0.2560532, 0, 0.9666627, 0, 1, 0, -0.9666627, 0, 0.2560532, 11.4070015, 1.6999989, 6.093994)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0123" type="CSGBox3D" parent="Коробки" unique_id=1417414392]
+transform = Transform3D(0.1680077, 0, 0.98578566, 0, 1, 0, -0.98578566, 0, 0.1680077, 11.862003, 1.6999989, 3.998993)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0124" type="CSGBox3D" parent="Коробки" unique_id=1999446906]
+transform = Transform3D(0.078598246, 0, 0.9969064, 0, 1, 0, -0.9969064, 0, 0.078598246, 12.126003, 1.6999989, 1.8710022)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0125" type="CSGBox3D" parent="Коробки" unique_id=1136691371]
+transform = Transform3D(-0.078598335, 0, 0.99690634, 0, 1, 0, -0.99690634, 0, -0.078598335, 12.126003, 1.6999989, -1.8710022)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0126" type="CSGBox3D" parent="Коробки" unique_id=2070781690]
+transform = Transform3D(-0.16800767, 0, 0.98578566, 0, 1, 0, -0.98578566, 0, -0.16800767, 11.862003, 1.6999989, -3.998993)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0127" type="CSGBox3D" parent="Коробки" unique_id=1180323643]
+transform = Transform3D(-0.25605318, 0, 0.9666627, 0, 1, 0, -0.9666627, 0, -0.25605318, 11.4070015, 1.6999989, -6.093994)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0128" type="CSGBox3D" parent="Коробки" unique_id=747660867]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 10.765003, 1.6999989, -8.139999)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0129" type="CSGBox3D" parent="Коробки" unique_id=1824204707]
+transform = Transform3D(-0.42521065, 0, 0.90509444, 0, 1, 0, -0.90509444, 0, -0.42521065, 9.941002, 1.6999989, -10.119995)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0130" type="CSGBox3D" parent="Коробки" unique_id=363242408]
+transform = Transform3D(-0.5049495, 0, 0.86314887, 0, 1, 0, -0.86314887, 0, -0.5049495, 8.943001, 1.6999989, -12.018005)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0131" type="CSGBox3D" parent="Коробки" unique_id=1895381808]
+transform = Transform3D(-0.5805892, 0, 0.81419665, 0, 1, 0, -0.81419665, 0, -0.5805892, 7.778, 1.6999989, -13.817993)
+use_collision = true
+size = Vector3(2.195, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0132" type="CSGBox3D" parent="Коробки" unique_id=57569050]
+transform = Transform3D(-0.7000996, 0, 0.7140452, 0, 1, 0, -0.7140452, 0, -0.7000996, 5.394005, 1.6999989, -16.662003)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0133" type="CSGBox3D" parent="Коробки" unique_id=1929292080]
+transform = Transform3D(-0.75988424, 0, 0.6500584, 0, 1, 0, -0.6500584, 0, -0.75988424, 3.8710022, 1.6999989, -18.085007)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0134" type="CSGBox3D" parent="Коробки" unique_id=1178509734]
+transform = Transform3D(-0.8138316, 0, 0.58110076, 0, 1, 0, -0.58110076, 0, -0.8138316, 2.2300034, 1.6999989, -19.369003)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0135" type="CSGBox3D" parent="Коробки" unique_id=2076578430]
+transform = Transform3D(-0.86154944, 0, 0.50767374, 0, 1, 0, -0.50767374, 0, -0.86154944, 0.4830017, 1.6999989, -20.505005)
+use_collision = true
+size = Vector3(2.135, 3.4, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0136" type="CSGBox3D" parent="Коробки" unique_id=180692006]
+transform = Transform3D(0.8614431, 0, 0.50785416, 0, 1, 0, -0.50785416, 0, 0.8614431, 1.0960007, 1.8999996, 21.535995)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0137" type="CSGBox3D" parent="Коробки" unique_id=657782598]
+transform = Transform3D(0.81348664, 0, 0.5815836, 0, 1, 0, -0.5815836, 0, 0.81348664, 2.9400024, 1.8999996, 20.337006)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0138" type="CSGBox3D" parent="Коробки" unique_id=2031699104]
+transform = Transform3D(0.7592259, 0, 0.6508272, 0, 1, 0, -0.6508272, 0, 0.7592259, 4.6710052, 1.8999996, 18.981003)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0139" type="CSGBox3D" parent="Коробки" unique_id=983724893]
+transform = Transform3D(0.69908947, 0, 0.7150342, 0, 1, 0, -0.7150342, 0, 0.69908947, 6.276001, 1.8999996, 17.477005)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0140" type="CSGBox3D" parent="Коробки" unique_id=1785722904]
+transform = Transform3D(0.5863158, 0, 0.8100826, 0, 1, 0, -0.8100826, 0, 0.5863158, 8.652, 1.8999996, 14.658005)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0141" type="CSGBox3D" parent="Коробки" unique_id=1927901469]
+transform = Transform3D(0.52032423, 0, 0.8539688, 0, 1, 0, -0.8539688, 0, 0.52032423, 9.749001, 1.8999996, 13.007996)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0142" type="CSGBox3D" parent="Коробки" unique_id=1805310656]
+transform = Transform3D(0.4510645, 0, 0.89249134, 0, 1, 0, -0.89249134, 0, 0.4510645, 10.712002, 1.8999996, 11.276993)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0143" type="CSGBox3D" parent="Коробки" unique_id=2041860451]
+transform = Transform3D(0.3789878, 0, 0.9254017, 0, 1, 0, -0.9254017, 0, 0.3789878, 11.535, 1.8999996, 9.475006)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0144" type="CSGBox3D" parent="Коробки" unique_id=1265251179]
+transform = Transform3D(0.30451527, 0, 0.95250744, 0, 1, 0, -0.95250744, 0, 0.30451527, 12.213001, 1.8999996, 7.6130066)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0145" type="CSGBox3D" parent="Коробки" unique_id=1241602767]
+transform = Transform3D(0.22814696, 0, 0.97362673, 0, 1, 0, -0.97362673, 0, 0.22814696, 12.741001, 1.8999996, 5.703003)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0146" type="CSGBox3D" parent="Коробки" unique_id=276990662]
+transform = Transform3D(0.15032911, 0, 0.988636, 0, 1, 0, -0.988636, 0, 0.15032911, 13.116001, 1.8999996, 3.7579956)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0147" type="CSGBox3D" parent="Коробки" unique_id=1238739859]
+transform = Transform3D(0.07156705, 0, 0.9974358, 0, 1, 0, -0.9974358, 0, 0.07156705, 13.336002, 1.8999996, 1.7890015)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0148" type="CSGBox3D" parent="Коробки" unique_id=405350378]
+transform = Transform3D(-0.07156702, 0, 0.9974358, 0, 1, 0, -0.9974358, 0, -0.07156702, 13.336002, 1.8999996, -1.7890015)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0149" type="CSGBox3D" parent="Коробки" unique_id=2146016230]
+transform = Transform3D(-0.15032908, 0, 0.988636, 0, 1, 0, -0.988636, 0, -0.15032908, 13.116001, 1.8999996, -3.7579956)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0150" type="CSGBox3D" parent="Коробки" unique_id=290738242]
+transform = Transform3D(-0.22814693, 0, 0.97362673, 0, 1, 0, -0.97362673, 0, -0.22814693, 12.741001, 1.8999996, -5.703003)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0151" type="CSGBox3D" parent="Коробки" unique_id=1093125570]
+transform = Transform3D(-0.30451524, 0, 0.95250744, 0, 1, 0, -0.95250744, 0, -0.30451524, 12.213001, 1.8999996, -7.6130066)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0152" type="CSGBox3D" parent="Коробки" unique_id=1386430241]
+transform = Transform3D(-0.37898785, 0, 0.9254016, 0, 1, 0, -0.9254016, 0, -0.37898785, 11.535, 1.8999996, -9.475006)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0153" type="CSGBox3D" parent="Коробки" unique_id=2139183199]
+transform = Transform3D(-0.45106447, 0, 0.8924914, 0, 1, 0, -0.8924914, 0, -0.45106447, 10.712002, 1.8999996, -11.276993)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0154" type="CSGBox3D" parent="Коробки" unique_id=74013600]
+transform = Transform3D(-0.5203243, 0, 0.85396874, 0, 1, 0, -0.85396874, 0, -0.5203243, 9.749001, 1.8999996, -13.007996)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0155" type="CSGBox3D" parent="Коробки" unique_id=256530376]
+transform = Transform3D(-0.5863158, 0, 0.81008255, 0, 1, 0, -0.81008255, 0, -0.5863158, 8.652, 1.8999996, -14.658005)
+use_collision = true
+size = Vector3(2.032, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0156" type="CSGBox3D" parent="Коробки" unique_id=808101852]
+transform = Transform3D(-0.6990895, 0, 0.7150342, 0, 1, 0, -0.7150342, 0, -0.6990895, 6.276001, 1.8999996, -17.477005)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0157" type="CSGBox3D" parent="Коробки" unique_id=1148928675]
+transform = Transform3D(-0.75922596, 0, 0.65082717, 0, 1, 0, -0.65082717, 0, -0.75922596, 4.6710052, 1.8999996, -18.981003)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0158" type="CSGBox3D" parent="Коробки" unique_id=1691322010]
+transform = Transform3D(-0.81348664, 0, 0.5815836, 0, 1, 0, -0.5815836, 0, -0.81348664, 2.9400024, 1.8999996, -20.337006)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0159" type="CSGBox3D" parent="Коробки" unique_id=1102146661]
+transform = Transform3D(-0.8614431, 0, 0.50785404, 0, 1, 0, -0.50785404, 0, -0.8614431, 1.0960007, 1.8999996, -21.535995)
+use_collision = true
+size = Vector3(2.25, 3.8, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0160" type="CSGBox3D" parent="Коробки" unique_id=1117909354]
+transform = Transform3D(0.8658072, 0, 0.50037783, 0, 1, 0, -0.50037783, 0, 0.8658072, 1.5100021, 2.1000004, 22.684006)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0161" type="CSGBox3D" parent="Коробки" unique_id=1179529749]
+transform = Transform3D(0.8283049, 0, 0.56027764, 0, 1, 0, -0.56027764, 0, 0.8283049, 3.0790024, 2.1000004, 21.701996)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0162" type="CSGBox3D" parent="Коробки" unique_id=441049304]
+transform = Transform3D(0.78666574, 0, 0.6173792, 0, 1, 0, -0.6173792, 0, 0.78666574, 4.5750046, 2.1000004, 20.610992)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0163" type="CSGBox3D" parent="Коробки" unique_id=433567673]
+transform = Transform3D(0.7410976, 0, 0.6713973, 0, 1, 0, -0.6713973, 0, 0.7410976, 5.991005, 2.1000004, 19.417007)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0164" type="CSGBox3D" parent="Коробки" unique_id=2097226899]
+transform = Transform3D(0.6918282, 0, 0.7220622, 0, 1, 0, -0.7220622, 0, 0.6918282, 7.318001, 2.1000004, 18.126007)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0165" type="CSGBox3D" parent="Коробки" unique_id=1261152345]
+transform = Transform3D(0.58734745, 0, 0.8093349, 0, 1, 0, -0.8093349, 0, 0.58734745, 9.605003, 2.1000004, 15.389008)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0166" type="CSGBox3D" parent="Коробки" unique_id=481767373]
+transform = Transform3D(0.5211139, 0, 0.8534872, 0, 1, 0, -0.8534872, 0, 0.5211139, 10.761002, 2.1000004, 13.653)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0167" type="CSGBox3D" parent="Коробки" unique_id=1727649661]
+transform = Transform3D(0.45156288, 0, 0.89223933, 0, 1, 0, -0.89223933, 0, 0.45156288, 11.777, 2.1000004, 11.830994)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0168" type="CSGBox3D" parent="Коробки" unique_id=1261299074]
+transform = Transform3D(0.3791493, 0, 0.9253355, 0, 1, 0, -0.9253355, 0, 0.3791493, 12.644001, 2.1000004, 9.934006)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0169" type="CSGBox3D" parent="Коробки" unique_id=1131061689]
+transform = Transform3D(0.30434892, 0, 0.9525606, 0, 1, 0, -0.9525606, 0, 0.30434892, 13.357002, 2.1000004, 7.973999)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0170" type="CSGBox3D" parent="Коробки" unique_id=414284582]
+transform = Transform3D(0.22760315, 0, 0.973754, 0, 1, 0, -0.973754, 0, 0.22760315, 13.912003, 2.1000004, 5.9629974)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0171" type="CSGBox3D" parent="Коробки" unique_id=593883522]
+transform = Transform3D(0.1494145, 0, 0.98877466, 0, 1, 0, -0.98877466, 0, 0.1494145, 14.306, 2.1000004, 3.9149933)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0172" type="CSGBox3D" parent="Коробки" unique_id=1387976713]
+transform = Transform3D(0.07029615, 0, 0.99752617, 0, 1, 0, -0.99752617, 0, 0.07029615, 14.535, 2.1000004, 1.8419952)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0173" type="CSGBox3D" parent="Коробки" unique_id=527823157]
+transform = Transform3D(-0.07029624, 0, 0.99752617, 0, 1, 0, -0.99752617, 0, -0.07029624, 14.535, 2.1000004, -1.8419952)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0174" type="CSGBox3D" parent="Коробки" unique_id=373137025]
+transform = Transform3D(-0.14941458, 0, 0.98877466, 0, 1, 0, -0.98877466, 0, -0.14941458, 14.306, 2.1000004, -3.9149933)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0175" type="CSGBox3D" parent="Коробки" unique_id=2088713379]
+transform = Transform3D(-0.22760312, 0, 0.973754, 0, 1, 0, -0.973754, 0, -0.22760312, 13.912003, 2.1000004, -5.9629974)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0176" type="CSGBox3D" parent="Коробки" unique_id=1883281344]
+transform = Transform3D(-0.304349, 0, 0.9525606, 0, 1, 0, -0.9525606, 0, -0.304349, 13.357002, 2.1000004, -7.973999)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0177" type="CSGBox3D" parent="Коробки" unique_id=460183232]
+transform = Transform3D(-0.37914935, 0, 0.92533547, 0, 1, 0, -0.92533547, 0, -0.37914935, 12.644001, 2.1000004, -9.934006)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0178" type="CSGBox3D" parent="Коробки" unique_id=709572825]
+transform = Transform3D(-0.45156294, 0, 0.8922393, 0, 1, 0, -0.8922393, 0, -0.45156294, 11.777, 2.1000004, -11.830994)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0179" type="CSGBox3D" parent="Коробки" unique_id=1836261877]
+transform = Transform3D(-0.5211138, 0, 0.8534872, 0, 1, 0, -0.8534872, 0, -0.5211138, 10.761002, 2.1000004, -13.653)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0180" type="CSGBox3D" parent="Коробки" unique_id=1061636103]
+transform = Transform3D(-0.58734745, 0, 0.8093349, 0, 1, 0, -0.8093349, 0, -0.58734745, 9.605003, 2.1000004, -15.389008)
+use_collision = true
+size = Vector3(2.136, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0181" type="CSGBox3D" parent="Коробки" unique_id=1426999253]
+transform = Transform3D(-0.69182825, 0, 0.7220621, 0, 1, 0, -0.7220621, 0, -0.69182825, 7.318001, 2.1000004, -18.126007)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0182" type="CSGBox3D" parent="Коробки" unique_id=174372900]
+transform = Transform3D(-0.74109757, 0, 0.6713974, 0, 1, 0, -0.6713974, 0, -0.74109757, 5.991005, 2.1000004, -19.417007)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0183" type="CSGBox3D" parent="Коробки" unique_id=2067968335]
+transform = Transform3D(-0.7866657, 0, 0.61737925, 0, 1, 0, -0.61737925, 0, -0.7866657, 4.5750046, 2.1000004, -20.610992)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0184" type="CSGBox3D" parent="Коробки" unique_id=938782106]
+transform = Transform3D(-0.8283048, 0, 0.5602777, 0, 1, 0, -0.5602777, 0, -0.8283048, 3.0790024, 2.1000004, -21.701996)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0185" type="CSGBox3D" parent="Коробки" unique_id=313361958]
+transform = Transform3D(-0.8658071, 0, 0.50037783, 0, 1, 0, -0.50037783, 0, -0.8658071, 1.5100021, 2.1000004, -22.684006)
+use_collision = true
+size = Vector3(1.902, 4.2, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0186" type="CSGBox3D" parent="Коробки" unique_id=2109312695]
+transform = Transform3D(0.86573726, 0, 0.5004987, 0, 1, 0, -0.5004987, 0, 0.86573726, 2.1139984, 2.3000011, 23.720993)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0187" type="CSGBox3D" parent="Коробки" unique_id=1372578887]
+transform = Transform3D(0.8280799, 0, 0.5606101, 0, 1, 0, -0.5606101, 0, 0.8280799, 3.7610016, 2.3000011, 22.688995)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0188" type="CSGBox3D" parent="Коробки" unique_id=492116040]
+transform = Transform3D(0.7862453, 0, 0.6179145, 0, 1, 0, -0.6179145, 0, 0.7862453, 5.3310013, 2.3000011, 21.543)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0189" type="CSGBox3D" parent="Коробки" unique_id=105678542]
+transform = Transform3D(0.7404645, 0, 0.6720955, 0, 1, 0, -0.6720955, 0, 0.7404645, 6.8150024, 2.3000011, 20.289001)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0190" type="CSGBox3D" parent="Коробки" unique_id=1885638962]
+transform = Transform3D(0.6909581, 0, 0.7228948, 0, 1, 0, -0.7228948, 0, 0.6909581, 8.207001, 2.3000011, 18.932007)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0191" type="CSGBox3D" parent="Коробки" unique_id=238858916]
+transform = Transform3D(0.58829343, 0, 0.8086475, 0, 1, 0, -0.8086475, 0, 0.58829343, 10.557003, 2.3000011, 16.119003)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0192" type="CSGBox3D" parent="Коробки" unique_id=634658579]
+transform = Transform3D(0.52181387, 0, 0.85305935, 0, 1, 0, -0.85305935, 0, 0.52181387, 11.774002, 2.3000011, 14.298004)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0193" type="CSGBox3D" parent="Коробки" unique_id=446964382]
+transform = Transform3D(0.45201442, 0, 0.8920106, 0, 1, 0, -0.8920106, 0, 0.45201442, 12.841003, 2.3000011, 12.3849945)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0194" type="CSGBox3D" parent="Коробки" unique_id=804270953]
+transform = Transform3D(0.37931088, 0, 0.9252693, 0, 1, 0, -0.9252693, 0, 0.37931088, 13.752003, 2.3000011, 10.393005)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0195" type="CSGBox3D" parent="Коробки" unique_id=2137007600]
+transform = Transform3D(0.30418268, 0, 0.9526137, 0, 1, 0, -0.9526137, 0, 0.30418268, 14.502003, 2.3000011, 8.335007)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0196" type="CSGBox3D" parent="Коробки" unique_id=1722038297]
+transform = Transform3D(0.22711025, 0, 0.973869, 0, 1, 0, -0.973869, 0, 0.22711025, 15.084, 2.3000011, 6.223007)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0197" type="CSGBox3D" parent="Коробки" unique_id=744336839]
+transform = Transform3D(0.14860336, 0, 0.9888969, 0, 1, 0, -0.9888969, 0, 0.14860336, 15.496002, 2.3000011, 4.072006)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0198" type="CSGBox3D" parent="Коробки" unique_id=1045743643]
+transform = Transform3D(0.069129676, 0, 0.9976077, 0, 1, 0, -0.9976077, 0, 0.069129676, 15.734001, 2.3000011, 1.8939972)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0199" type="CSGBox3D" parent="Коробки" unique_id=1341564972]
+transform = Transform3D(-0.069129646, 0, 0.9976077, 0, 1, 0, -0.9976077, 0, -0.069129646, 15.734001, 2.3000011, -1.8939972)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0200" type="CSGBox3D" parent="Коробки" unique_id=830051251]
+transform = Transform3D(-0.14860334, 0, 0.9888969, 0, 1, 0, -0.9888969, 0, -0.14860334, 15.496002, 2.3000011, -4.072006)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0201" type="CSGBox3D" parent="Коробки" unique_id=1994158506]
+transform = Transform3D(-0.22711022, 0, 0.9738691, 0, 1, 0, -0.9738691, 0, -0.22711022, 15.084, 2.3000011, -6.223007)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0202" type="CSGBox3D" parent="Коробки" unique_id=212789528]
+transform = Transform3D(-0.30418274, 0, 0.9526137, 0, 1, 0, -0.9526137, 0, -0.30418274, 14.502003, 2.3000011, -8.335007)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0203" type="CSGBox3D" parent="Коробки" unique_id=160538754]
+transform = Transform3D(-0.37931085, 0, 0.9252693, 0, 1, 0, -0.9252693, 0, -0.37931085, 13.752003, 2.3000011, -10.393005)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0204" type="CSGBox3D" parent="Коробки" unique_id=1500856247]
+transform = Transform3D(-0.4520145, 0, 0.89201057, 0, 1, 0, -0.89201057, 0, -0.4520145, 12.841003, 2.3000011, -12.3849945)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0205" type="CSGBox3D" parent="Коробки" unique_id=1779183531]
+transform = Transform3D(-0.52181387, 0, 0.85305935, 0, 1, 0, -0.85305935, 0, -0.52181387, 11.774002, 2.3000011, -14.298004)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0206" type="CSGBox3D" parent="Коробки" unique_id=463251738]
+transform = Transform3D(-0.58829355, 0, 0.80864745, 0, 1, 0, -0.80864745, 0, -0.58829355, 10.557003, 2.3000011, -16.119003)
+use_collision = true
+size = Vector3(2.241, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0207" type="CSGBox3D" parent="Коробки" unique_id=355061379]
+transform = Transform3D(-0.690958, 0, 0.72289485, 0, 1, 0, -0.72289485, 0, -0.690958, 8.207001, 2.3000011, -18.932007)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0208" type="CSGBox3D" parent="Коробки" unique_id=1415009110]
+transform = Transform3D(-0.74046445, 0, 0.67209554, 0, 1, 0, -0.67209554, 0, -0.74046445, 6.8150024, 2.3000011, -20.289001)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0209" type="CSGBox3D" parent="Коробки" unique_id=167480532]
+transform = Transform3D(-0.7862452, 0, 0.61791456, 0, 1, 0, -0.61791456, 0, -0.7862452, 5.3310013, 2.3000011, -21.543)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0210" type="CSGBox3D" parent="Коробки" unique_id=1816704384]
+transform = Transform3D(-0.82808, 0, 0.56061, 0, 1, 0, -0.56061, 0, -0.82808, 3.7610016, 2.3000011, -22.688995)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="stone_0211" type="CSGBox3D" parent="Коробки" unique_id=1416925195]
+transform = Transform3D(-0.8657372, 0, 0.50049883, 0, 1, 0, -0.50049883, 0, -0.8657372, 2.1139984, 2.3000011, -23.720993)
+use_collision = true
+size = Vector3(1.994, 4.6, 1.2)
+material = ExtResource("1_cko0q")
+
+[node name="paving_0212" type="CSGBox3D" parent="Коробки" unique_id=428687918]
+transform = Transform3D(0.8983191, 0, 0.43934348, 0, 1, 0, -0.43934348, 0, 0.8983191, 1.5810013, 2.3000011, 26.949005)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0213" type="CSGBox3D" parent="Коробки" unique_id=1422518950]
+transform = Transform3D(0.8643889, 0, 0.5028238, 0, 1, 0, -0.5028238, 0, 0.8643889, 3.4850006, 2.3000011, 25.932007)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0214" type="CSGBox3D" parent="Коробки" unique_id=558236498]
+transform = Transform3D(0.82598025, 0, 0.563699, 0, 1, 0, -0.563699, 0, 0.82598025, 5.3110046, 2.3000011, 24.779007)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0215" type="CSGBox3D" parent="Коробки" unique_id=662067217]
+transform = Transform3D(0.7832813, 0, 0.6216674, 0, 1, 0, -0.6216674, 0, 0.7832813, 7.050003, 2.3000011, 23.498993)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0216" type="CSGBox3D" parent="Коробки" unique_id=1821795439]
+transform = Transform3D(0.73654586, 0, 0.6763876, 0, 1, 0, -0.6763876, 0, 0.73654586, 8.692001, 2.3000011, 22.095993)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0217" type="CSGBox3D" parent="Коробки" unique_id=531829923]
+transform = Transform3D(0.6859708, 0, 0.7276291, 0, 1, 0, -0.7276291, 0, 0.6859708, 10.229, 2.3000011, 20.578995)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0218" type="CSGBox3D" parent="Коробки" unique_id=2062408619]
+transform = Transform3D(0.631867, 0, 0.77507687, 0, 1, 0, -0.77507687, 0, 0.631867, 11.652, 2.3000011, 18.955994)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0219" type="CSGBox3D" parent="Коробки" unique_id=492871149]
+transform = Transform3D(0.5744625, 0, 0.8185309, 0, 1, 0, -0.8185309, 0, 0.5744625, 12.956001, 2.3000011, 17.233994)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0220" type="CSGBox3D" parent="Коробки" unique_id=169576710]
+transform = Transform3D(0.51411027, 0, 0.85772413, 0, 1, 0, -0.85772413, 0, 0.51411027, 14.132, 2.3000011, 15.423004)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0221" type="CSGBox3D" parent="Коробки" unique_id=1248635809]
+transform = Transform3D(0.4510645, 0, 0.89249134, 0, 1, 0, -0.89249134, 0, 0.4510645, 15.175003, 2.3000011, 13.531998)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0222" type="CSGBox3D" parent="Коробки" unique_id=112766835]
+transform = Transform3D(0.38571283, 0, 0.92261887, 0, 1, 0, -0.92261887, 0, 0.38571283, 16.079002, 2.3000011, 11.570999)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0223" type="CSGBox3D" parent="Коробки" unique_id=1309536263]
+transform = Transform3D(0.31833065, 0, 0.94797975, 0, 1, 0, -0.94797975, 0, 0.31833065, 16.839, 2.3000011, 9.550003)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0224" type="CSGBox3D" parent="Коробки" unique_id=684085845]
+transform = Transform3D(0.24933222, 0, 0.968418, 0, 1, 0, -0.968418, 0, 0.24933222, 17.453003, 2.3000011, 7.4799957)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0225" type="CSGBox3D" parent="Коробки" unique_id=1606647691]
+transform = Transform3D(0.17900825, 0, 0.98384756, 0, 1, 0, -0.98384756, 0, 0.17900825, 17.915, 2.3000011, 5.371002)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0226" type="CSGBox3D" parent="Коробки" unique_id=252222512]
+transform = Transform3D(0.10779112, 0, 0.9941736, 0, 1, 0, -0.9941736, 0, 0.10779112, 18.225002, 2.3000011, 3.2330017)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0227" type="CSGBox3D" parent="Коробки" unique_id=241880449]
+transform = Transform3D(0.035980877, 0, 0.99935246, 0, 1, 0, -0.99935246, 0, 0.035980877, 18.381, 2.3000011, 1.0800018)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0228" type="CSGBox3D" parent="Коробки" unique_id=1683866327]
+transform = Transform3D(-0.035980962, 0, 0.99935246, 0, 1, 0, -0.99935246, 0, -0.035980962, 18.381, 2.3000011, -1.0800018)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0229" type="CSGBox3D" parent="Коробки" unique_id=2031438131]
+transform = Transform3D(-0.10779108, 0, 0.9941736, 0, 1, 0, -0.9941736, 0, -0.10779108, 18.225002, 2.3000011, -3.2330017)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0230" type="CSGBox3D" parent="Коробки" unique_id=2114070016]
+transform = Transform3D(-0.17900822, 0, 0.98384756, 0, 1, 0, -0.98384756, 0, -0.17900822, 17.915, 2.3000011, -5.371002)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0231" type="CSGBox3D" parent="Коробки" unique_id=337547446]
+transform = Transform3D(-0.24933219, 0, 0.968418, 0, 1, 0, -0.968418, 0, -0.24933219, 17.453003, 2.3000011, -7.4799957)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0232" type="CSGBox3D" parent="Коробки" unique_id=60443137]
+transform = Transform3D(-0.31833062, 0, 0.94797975, 0, 1, 0, -0.94797975, 0, -0.31833062, 16.839, 2.3000011, -9.550003)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0233" type="CSGBox3D" parent="Коробки" unique_id=1613940747]
+transform = Transform3D(-0.3857128, 0, 0.9226189, 0, 1, 0, -0.9226189, 0, -0.3857128, 16.079002, 2.3000011, -11.570999)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0234" type="CSGBox3D" parent="Коробки" unique_id=818998711]
+transform = Transform3D(-0.45106447, 0, 0.8924914, 0, 1, 0, -0.8924914, 0, -0.45106447, 15.175003, 2.3000011, -13.531998)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0235" type="CSGBox3D" parent="Коробки" unique_id=1404300783]
+transform = Transform3D(-0.51411015, 0, 0.8577242, 0, 1, 0, -0.8577242, 0, -0.51411015, 14.132, 2.3000011, -15.423004)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0236" type="CSGBox3D" parent="Коробки" unique_id=1449328395]
+transform = Transform3D(-0.5744626, 0, 0.8185308, 0, 1, 0, -0.8185308, 0, -0.5744626, 12.956001, 2.3000011, -17.233994)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0237" type="CSGBox3D" parent="Коробки" unique_id=258869450]
+transform = Transform3D(-0.631867, 0, 0.7750768, 0, 1, 0, -0.7750768, 0, -0.631867, 11.652, 2.3000011, -18.955994)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0238" type="CSGBox3D" parent="Коробки" unique_id=69319742]
+transform = Transform3D(-0.6859708, 0, 0.72762907, 0, 1, 0, -0.72762907, 0, -0.6859708, 10.229, 2.3000011, -20.578995)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0239" type="CSGBox3D" parent="Коробки" unique_id=796452566]
+transform = Transform3D(-0.7365458, 0, 0.67638767, 0, 1, 0, -0.67638767, 0, -0.7365458, 8.692001, 2.3000011, -22.095993)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0240" type="CSGBox3D" parent="Коробки" unique_id=2120940405]
+transform = Transform3D(-0.78328127, 0, 0.62166744, 0, 1, 0, -0.62166744, 0, -0.78328127, 7.050003, 2.3000011, -23.498993)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0241" type="CSGBox3D" parent="Коробки" unique_id=838965613]
+transform = Transform3D(-0.8259803, 0, 0.563699, 0, 1, 0, -0.563699, 0, -0.8259803, 5.3110046, 2.3000011, -24.779007)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0242" type="CSGBox3D" parent="Коробки" unique_id=1597063577]
+transform = Transform3D(-0.8643802, 0, 0.50283885, 0, 1, 0, -0.50283885, 0, -0.8643802, 3.4850006, 2.3000011, -25.932007)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="paving_0243" type="CSGBox3D" parent="Коробки" unique_id=862098589]
+transform = Transform3D(-0.8983191, 0, 0.4393435, 0, 1, 0, -0.4393435, 0, -0.8983191, 1.5810013, 2.3000011, -26.949005)
+use_collision = true
+size = Vector3(2.21, 4.6, 4)
+material = ExtResource("2_qghu3")
+
+[node name="metal_0244" type="CSGBox3D" parent="Коробки" unique_id=632192565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.599998, 5.1000004, 10)
+use_collision = true
+size = Vector3(0.6, 7, 0.6)
+material = ExtResource("3_s45ue")
+
+[node name="metal_0245" type="CSGBox3D" parent="Коробки" unique_id=1078325296]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.599998, 5.1000004, -10)
+use_collision = true
+size = Vector3(0.6, 7, 0.6)
+material = ExtResource("3_s45ue")
+
+[node name="metal_0246" type="CSGBox3D" parent="Коробки" unique_id=1925216695]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5999985, 5.1000004, 10)
+use_collision = true
+size = Vector3(0.6, 7, 0.6)
+material = ExtResource("3_s45ue")
+
+[node name="metal_0247" type="CSGBox3D" parent="Коробки" unique_id=1897458684]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5999985, 5.1000004, -10)
+use_collision = true
+size = Vector3(0.6, 7, 0.6)
+material = ExtResource("3_s45ue")
+
+[node name="Лестницы" type="Node3D" parent="." unique_id=1326814872]
+
+[node name="Марш_248" type="Node3D" parent="Лестницы" unique_id=1842288083]
+transform = Transform3D(-0.64278746, 0, -0.76604456, 0, 1, 0, 0.76604456, 0, -0.64278746, 0.6570053, 0.6000004, 10.285004)
+script = ExtResource("4_8tao7")
+run = 11.999298
+rise = 4.0
+width = 1.55
+steps = 20
+solid_bottom = -0.6000000000000014
+material = ExtResource("1_cko0q")
+
+[node name="Марш_249" type="Node3D" parent="Лестницы" unique_id=494903136]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.4000015, 0.6000004, 0)
+script = ExtResource("4_8tao7")
+run = 12.0
+rise = 4.0
+width = 1.55
+steps = 20
+solid_bottom = -0.6000000000000014
+material = ExtResource("1_cko0q")
+
+[node name="Марш_250" type="Node3D" parent="Лестницы" unique_id=704045812]
+transform = Transform3D(0.6427874, 0, -0.7660446, 0, 1, 0, 0.7660446, 0, 0.6427874, 0.6570053, 0.6000004, -10.285004)
+script = ExtResource("4_8tao7")
+run = 11.999298
+rise = 4.0
+width = 1.55
+steps = 20
+solid_bottom = -0.6000000000000014
+material = ExtResource("1_cko0q")
+
+[node name="Цилиндры" type="Node3D" parent="." unique_id=1842911018]
+
+[node name="white_0251" type="CSGCylinder3D" parent="Цилиндры" unique_id=1975916114]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2529984, 6.3999996, 28.401993)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0252" type="CSGCylinder3D" parent="Цилиндры" unique_id=836863379]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0699997, 6.3999996, 26.197998)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0253" type="CSGCylinder3D" parent="Цилиндры" unique_id=1703485092]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.545002, 6.3999996, 23.483002)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0254" type="CSGCylinder3D" parent="Цилиндры" unique_id=1843327792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.607002, 6.3999996, 20.311996)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0255" type="CSGCylinder3D" parent="Цилиндры" unique_id=318172649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.198002, 6.3999996, 16.744995)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0256" type="CSGCylinder3D" parent="Цилиндры" unique_id=1704530626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.268002, 6.3999996, 12.852997)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0257" type="CSGCylinder3D" parent="Цилиндры" unique_id=1135497403]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.776001, 6.3999996, 8.710007)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0258" type="CSGCylinder3D" parent="Цилиндры" unique_id=1969647465]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.692001, 6.3999996, 4.397995)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0259" type="CSGCylinder3D" parent="Цилиндры" unique_id=1111821057]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.692001, 6.3999996, -4.397995)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0260" type="CSGCylinder3D" parent="Цилиндры" unique_id=864860655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.776001, 6.3999996, -8.710007)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0261" type="CSGCylinder3D" parent="Цилиндры" unique_id=153277679]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.268002, 6.3999996, -12.852997)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0262" type="CSGCylinder3D" parent="Цилиндры" unique_id=1034029333]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.198002, 6.3999996, -16.744995)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0263" type="CSGCylinder3D" parent="Цилиндры" unique_id=797165455]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.607002, 6.3999996, -20.311996)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0264" type="CSGCylinder3D" parent="Цилиндры" unique_id=317451782]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.545002, 6.3999996, -23.483002)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0265" type="CSGCylinder3D" parent="Цилиндры" unique_id=1768218000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0699997, 6.3999996, -26.197998)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="white_0266" type="CSGCylinder3D" parent="Цилиндры" unique_id=781924684]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2529984, 6.3999996, -28.401993)
+use_collision = true
+radius = 0.3
+height = 3.6
+sides = 16
+material = ExtResource("5_mswvm")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=557610710]
+
+[node name="Амфитеатр ≈ 660 мест" type="Label3D" parent="Подписи" unique_id=193695090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.400002, 8.6, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Амфитеатр ≈ 660 мест"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1443709139]
+script = ExtResource("6_dtokk")
+routes = [{
+"checks": [[0, "amph_rows/оркестра", 0.6], [3, "amph_rows/променад", 4.6000000000000005]],
+"id": "amph_rows",
+"kind": "descent",
+"label": "Амфитеатр: оркестра → проход по рядам → променад",
+"points": [[-1.641, 0.6, -8.356], [0.35000000000000003, 0.6, -10.027000000000001], [10.156, 4.6000000000000005, -18.255], [11.381, 4.6000000000000005, -19.284]]
+}]

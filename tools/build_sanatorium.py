@@ -19,20 +19,26 @@
 - только ели и сосны (те же точки, что на схеме); дальний силуэт плотины (стена 260 м в ~1,2 км на юго-западе), горы;
 - обходы всех помещений, лестниц, каскада и троп — точки для проверки пешком (tools/sanatorium_study.gd -- verify).
 
-    python -X utf8 tools/build_sanatorium.py
-      → data/blockouts/sanatorium.json (план: объёмы, места, обходы), data/blockouts/sanatorium_vegetation.json,
+    SANATORIUM_OUT=<папка> python -X utf8 tools/build_sanatorium.py
+      → в <папка>, по тем же относительным путям: data/blockouts/sanatorium.json (план: объёмы, места, обходы и метки
+        групп — к какой постройке или куску участка относится каждая запись), data/blockouts/sanatorium_vegetation.json,
         data/blockouts/sanatorium_terrain.json + data/terrain/sanatorium_heights.r32 и _splat.png (рельеф 1 м),
         data/blockouts/sanatorium_far_terrain.json + data/terrain/sanatorium_far.r32 и _far_splat.png (горы 10 м),
-        scenes/levels/sanatorium_study.tscn (перезаписывается)
+        scenes/levels/sanatorium_study.tscn.
+    С 2026-11-08 карта правится руками в редакторе (docs/level_editing.md): в проект генератор не пишет. Разовый перенос
+    в сцены сделал tools/sanatorium_to_scenes.tscn; новая постройка — собрать здесь в отдельную папку и перенести
+    её сцену руками или тем же переносчиком в отдельный файл.
 
 Координаты генератора — как на схеме: x на восток, y на север, z вверх, метры над уровнем озера. В Godot: X = x,
 Y = z, Z = −y (север — −Z). Отступления от листов (двери, сдвинутые там, где лестница иначе не встаёт) — DEVIATIONS,
 печатаются в конце и пишутся в план.
 """
+import bisect
 import contextlib
 import io
 import json
 import math
+import os
 import random
 import runpy
 import sys
@@ -47,12 +53,24 @@ sys.path.insert(0, str(TOOLS))
 import sanatorium_s_geom as sg  # noqa: E402
 
 DATA = ROOT / 'docs/design/data'
-OUT_PLAN = ROOT / 'data/blockouts/sanatorium.json'
-OUT_VEG = ROOT / 'data/blockouts/sanatorium_vegetation.json'
-OUT_TER = ROOT / 'data/blockouts/sanatorium_terrain.json'
-OUT_FAR = ROOT / 'data/blockouts/sanatorium_far_terrain.json'
-OUT_SCENE = ROOT / 'scenes/levels/sanatorium_study.tscn'
-TERRAIN_DIR = ROOT / 'data/terrain'
+# С 2026-11-08 карта правится руками в редакторе (решение владельца, docs/design/editable_levels.md): постройки,
+# коробки, лестницы, деревья — сохранённые узлы сцен scenes/levels/sanatorium/, земля — кистью. Генератор в проект
+# больше не пишет: SANATORIUM_OUT=<папка> — всё (план с метками групп, деревья, рельеф, сцена) в эту папку, по тем же
+# относительным путям; оттуда берут заготовки (новая постройка) и переносчик tools/sanatorium_to_scenes.gd.
+_OUT_ENV = os.environ.get('SANATORIUM_OUT', '')
+if not _OUT_ENV:
+    print('«Санаторий» правится руками в редакторе (docs/design/editable_levels.md): генератор не перезаписывает сцену\n'
+          'и землю. Заготовки — в отдельную папку: SANATORIUM_OUT=<папка> python -X utf8 tools/build_sanatorium.py')
+    sys.exit(1)
+OUT_ROOT = Path(_OUT_ENV).resolve()
+OUT_PLAN = OUT_ROOT / 'data/blockouts/sanatorium.json'
+OUT_VEG = OUT_ROOT / 'data/blockouts/sanatorium_vegetation.json'
+OUT_TER = OUT_ROOT / 'data/blockouts/sanatorium_terrain.json'
+OUT_FAR = OUT_ROOT / 'data/blockouts/sanatorium_far_terrain.json'
+OUT_SCENE = OUT_ROOT / 'scenes/levels/sanatorium_study.tscn'
+TERRAIN_DIR = OUT_ROOT / 'data/terrain'
+for _p in (OUT_PLAN, OUT_SCENE, TERRAIN_DIR / 'x'):
+    _p.parent.mkdir(parents=True, exist_ok=True)
 
 DEVIATIONS = []
 WARN = []
@@ -115,17 +133,68 @@ def gpt(x, y, z):
     return [r3(x), r3(z), r3(-y)]
 
 
+# ---- метки групп: к чему относится каждая запись вывода (перенос карты в сцены, docs/design/editable_levels.md)
+# Явная метка — item() (постройка, беседка, валун, машина); без неё — раздел генератора, в котором запись выпущена:
+# ближайший заголовок «# ====» / «# ----» над исполняемой строкой верхнего уровня этого файла.
+_G = globals()
+SECTIONS = []          # (номер строки, заголовок)
+for _n, _l in enumerate(Path(__file__).read_text(encoding='utf-8').splitlines(), 1):
+    if _l.startswith('# ====') or _l.startswith('# ----'):
+        _t = _l.lstrip('#=- ').strip()
+        if _t:
+            SECTIONS.append((_n, _t))
+SECTION_LINES = [s[0] for s in SECTIONS]
+ITEM = [None]          # явная метка (id, заголовок)
+ITEM_COUNT = {}
+GROUP_TITLES = {}
+
+
+def item(gid=None, title=None):
+    ITEM[0] = None if gid is None else (gid, title or gid)
+
+
+def item_next(prefix, title):
+    ITEM_COUNT[prefix] = ITEM_COUNT.get(prefix, 0) + 1
+    item(f'{prefix}{ITEM_COUNT[prefix]:02d}', f'{title} {ITEM_COUNT[prefix]}')
+
+
+def cur_group():
+    if ITEM[0] is not None:
+        gid, title = ITEM[0]
+    else:
+        f = sys._getframe(1)
+        while f is not None and not (f.f_code.co_name == '<module>' and f.f_globals is _G):
+            f = f.f_back
+        k = bisect.bisect_right(SECTION_LINES, f.f_lineno if f else 0) - 1
+        gid, title = (f'sec{k:02d}', SECTIONS[k][1]) if k >= 0 else ('sec00', 'прочее')
+    GROUP_TITLES.setdefault(gid, title)
+    return gid
+
+
+class TaggedList(list):
+    """Список вывода, который помнит группу каждой добавленной записи (tags — параллельно)."""
+
+    def __init__(self):
+        super().__init__()
+        self.tags = []
+
+    def append(self, x):
+        super().append(x)
+        self.tags.append(cur_group())
+
+
 class Out:
     def __init__(self):
-        self.boxes = []
-        self.stairs = []
-        self.beams = []
-        self.cyls = []
+        self.boxes = TaggedList()
+        self.stairs = TaggedList()
+        self.beams = TaggedList()
+        self.cyls = TaggedList()
         self.tris = {}
-        self.labels = []
-        self.water = []
-        self.barriers = []
-        self.markers = []
+        self.tri_tags = {}
+        self.labels = TaggedList()
+        self.water = TaggedList()
+        self.barriers = TaggedList()
+        self.markers = TaggedList()
 
     def box(self, x0, y0, x1, y1, z0, z1, m, solid=True):
         if x1 < x0:
@@ -173,6 +242,7 @@ class Out:
         mat(m)
         key = f'{m}|{1 if solid else 0}'
         self.tris.setdefault(key, []).extend([*gpt(*a), *gpt(*b), *gpt(*c)])
+        self.tri_tags.setdefault(key, []).append(cur_group())
 
     def quad(self, m, a, b, c, d, solid=False):
         self.tri(m, a, b, c, solid)
@@ -595,8 +665,8 @@ def stair_u(F, a_len, b0, b1, e, z_lo, z_hi, first_low=True, rise=0.165, run=0.3
 
 
 # ---------------------------------------------------------------- здания по помещениям и дверям
-ROOMS = []       # для проверки: {uid, building, name, floor, at}
-ROUTES = []
+ROOMS = TaggedList()       # для проверки: {uid, building, name, floor, at}
+ROUTES = TaggedList()
 BUILDINGS = []   # подписи и краткий счёт
 
 
@@ -1455,10 +1525,13 @@ H_FINAL = H
 
 # ================================================================ ИЗЛУЧЕНИЕ: здания
 for bb in BLD.values():
+    item(bb.bid, bb.title)
     bb.exterior_doors()
+item()
 
 # ---- лестницы зданий
 # главный корпус: П-образная в STA, вход с севера (y = −10), марш 1 в западной половине
+item('main', main.title)
 st = main.room(1, 'STA')
 x0, y0, x1, y1 = st['rect']
 F = RectFrame((x0, y1), (0.0, -1.0), (1.0, 0.0))
@@ -1469,6 +1542,7 @@ main.hubs[(1, 'STA')] = F.pt(1.1, (x1 - x0) / 2)
 main.hubs[(2, 'STA')] = F.pt(1.1, (x1 - x0) / 2)
 
 # павильон: П-образная на крышу, вход с востока (x = −240), марш 1 в южной половине
+item('pav', pav.title)
 st = pav.room(1, 'PSR')
 x0, y0, x1, y1 = st['rect']
 F = RectFrame((x1, y0), (-1.0, 0.0), (0.0, 1.0))
@@ -1479,6 +1553,7 @@ pav.hubs[(1, 'PSR')] = F.pt(0.5, (y1 - y0) / 2)
 pav.hubs[(2, 'PSR')] = F.pt(0.5, (y1 - y0) / 2)
 
 # кулисы амфитеатра: П вдоль y, площадка входа у сцены (1,4 м), марш 1 в западной половине
+item('amph', amph.title)
 for rid, north in (('KUL1', True), ('KUL2', False)):
     st = amph.room(-1, rid)
     x0, y0, x1, y1 = st['rect']
@@ -1492,6 +1567,7 @@ for rid, north in (('KUL1', True), ('KUL2', False)):
 # коттедж: прямая лестница у западной стены листа (v13 — повёрнута вместе с домом), 20 подъёмов по 0,17
 STR_LOCAL = [r['rect'] for r in COT[1]['rooms'] if r['id'] == 'STR'][0]
 for b in cottages:
+    item(b.bid, b.title)
     cx, cy, k = b.cot
     x0, y0, x1, y1 = STR_LOCAL
     z_lo, z_hi = b.levels[1], b.levels[2]
@@ -1516,6 +1592,7 @@ for b in cottages:
     b.obstacles[(1, 'STR')] = [F.rect(a0 - 0.45, A + 0.5, -0.5, w + 0.45)]
 
 # маяк: винтовая (квадратная) лестница вокруг сплошного столба, 6 маршей по 12 подъёмов до галереи +12
+item('lh', lh.title)
 st = lh.room(1, 'LH0')
 x0, y0, x1, y1 = [float(v) for v in st['rect']]
 ix0, iy0, ix1, iy1 = x0 + SMALL_EXT_T / 2, y0 + SMALL_EXT_T / 2, x1 - SMALL_EXT_T / 2, y1 - SMALL_EXT_T / 2
@@ -1551,6 +1628,7 @@ O.cyl(-288.0 - DS, 10.0, LH_GAL + 3.0, MOLE + 16.0, 2.2, 'glass', solid=False)  
 O.cyl(-288.0 - DS, 10.0, MOLE + 16.0, MOLE + 17.2, 2.6, 'roof', solid=False)
 
 # крытый бассейн: чаша (дно −1,4), лестница в чашу, вода; препятствие для обхода
+item('spa', spa.title)
 bx = spa.basins[0]
 O.box(bx[0], bx[1], bx[2], bx[3], CENTRAL - 1.9, CENTRAL - 1.4, 'tile')
 for (p, q) in (((bx[0], bx[1]), (bx[2], bx[1])), ((bx[2], bx[1]), (bx[2], bx[3])), ((bx[2], bx[3]), (bx[0], bx[3])), ((bx[0], bx[3]), (bx[0], bx[1]))):
@@ -1562,13 +1640,16 @@ spa.obstacles[(1, 'POOL')] = [(bx[0] - 0.7, bx[1] - 0.7, bx[2] + 0.7, bx[3] + 0.
 spa.hubs[(1, 'POOL')] = ((bx[0] + bx[2]) / 2, (bx[3] + (-66.0)) / 2)
 
 for bb in BLD.values():
+    item(bb.bid, bb.title)
     bb.door_steps()
     bb.emit()
 HOZ_NAMES = {'KB': 'котельная', 'KM': 'котельная', 'LR': 'прачечная', 'LC': 'прачечная', 'G1': 'гаражи', 'G2': 'гаражи',
              'G3': 'гаражи', 'GS': 'гаражи', 'SK': 'склад', 'SKK': 'склад', 'TR': 'трансформаторная', 'TRU': 'трансформаторная',
              'WT': 'водонапорная башня'}
 for bb in BLD.values():
+    item(bb.bid, bb.title)
     tours(bb, HOZ_NAMES if bb.bid == 'hoz' else None)
+item()
 
 # ================================================================ S-КОРПУСА: номера на дугах
 S_UNITS = []
@@ -1687,6 +1768,7 @@ def sg_unit_point(corps, n, v, u):
 
 
 for ox, oy, mirror, name in S_SITES:
+    item('s_corps_' + name[-1], f'Жилой корпус {name}')
     lv = S_LEVELS[name]
     units = sg.units(ox, oy, mirror)
     for u in units:
@@ -1711,6 +1793,7 @@ for ox, oy, mirror, name in S_SITES:
             O.quad('paving', *[(x, y, h_at(x, y) + 0.04) for x, y in ps])
     O.label(ox, oy, lv + 10.0, f'Жилой корпус {name}', 3.0, 'building')
     BUILDINGS.append({'id': name, 'title': f'Жилой корпус {name}', 'rooms': 14 * 14, 'units': 14})
+item()
 
 # ================================================================ КАСКАД: объёмы
 BAL = 1.0      # балюстрада над площадкой
@@ -1917,6 +2000,7 @@ for rb in RIBBONS:
                    'checks': [[0, f'{rb["id"]}/начало', r3(pts[0][2])], [len(route) - 1, f'{rb["id"]}/конец', r3(pts[-1][2])]]})
 # беседки, развилка у родника (кладка с трубкой, лавка), ларёк у начала
 for gx_, gy_ in GAZEBOS:
+    item_next('gazebo', 'Беседка')
     zk = path_z_near((gx_, gy_))
     O.box(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.min) - 0.5, zk, 'deck')
     for k in range(8):
@@ -1926,6 +2010,7 @@ for gx_, gy_ in GAZEBOS:
         O.cyl(gx_ + 2.3 * math.cos(a), gy_ + 2.3 * math.sin(a), zk, zk + 2.4, 0.09, 'wood')
     O.cyl(gx_, gy_, zk + 2.4, zk + 2.7, 2.8, 'roof', solid=False, sides=8)
     O.label(gx_, gy_, zk + 3.3, 'беседка', 0.8, 'object')
+item()
 zs_ = J_LAND[2]
 O.box(SPRING[0] - 1.2, SPRING[1] - 2.2, SPRING[0] + 1.2, SPRING[1] + 2.2, zs_ - 0.5, zs_ + 1.4, 'stone')       # кладка
 O.box(SPRING[0] - 2.0, SPRING[1] - 0.8, SPRING[0] - 1.2, SPRING[1] + 0.8, zs_ - 0.3, zs_ + 0.45, 'stone')     # чаша
@@ -2023,6 +2108,7 @@ for (bx0_, by0_, bx1_, by1_), odd_ in PLAN['COT_BAYS']:          # место д
         CARS.append(((bx0_ + bx1_) / 2, (by0_ + by1_) / 2, (90.0 if odd_ else 0.0) + CAR_RNG.uniform(-4, 4)))
 CAR_COLORS = ['car_a', 'car_b', 'car_c', 'car_d']
 for i, (cx_, cy_, ang) in enumerate(CARS):
+    item_next('car', 'Машина')
     g = min(h_at(cx_ + dx_, cy_ + dy_) for dx_ in (-2, 2) for dy_ in (-2, 2))
     m = CAR_COLORS[i % 4]
     if i % 3 == 1:                  # фургон 2,4 м — закрывает взгляд над парковкой (замер обзора, владелец: «ломать сейчас»)
@@ -2030,6 +2116,7 @@ for i, (cx_, cy_, ang) in enumerate(CARS):
         continue
     O.obox(cx_, cy_, 1.8, 4.4, g - 0.1, g + 0.75, ang, m)
     O.obox(cx_, cy_, 1.6, 2.5, g + 0.75, g + 1.45, ang, m)
+item()
 # шлагбаум КПП и тротуары S-корпусов
 O.box(133.8, -4.8, 134.2, 4.8, h_at(134, 0) + 0.9, h_at(134, 0) + 1.05, 'barrier_red', solid=False)
 O.box(133.6, 5.0, 134.4, 5.6, h_at(134, 5.3), h_at(134, 5.3) + 1.1, 'metal')
@@ -2729,6 +2816,7 @@ def useg(cx, cy, k, a, b, t, z0, z1, m, solid=True):
 
 UNF_SITES = []
 for (ux, uy, uk, kind), lv in zip(UNFINISHED, UNF_LEVELS):
+    item_next('site', 'Стройплощадка')
     hr = cot_rect(ux, uy, uk, 7.0, -205.0, 21.0, -193.0)
     base = rect_stat(*hr, fn=np.min) - 0.4
     top = lv + 0.35                                             # верх фундаментной плиты
@@ -2775,6 +2863,7 @@ for (ux, uy, uk, kind), lv in zip(UNFINISHED, UNF_LEVELS):
 
 # большие камни и валуны (владелец): на склоне крупные, у мыса гуще, в парке плато — поменьше; не на дорогах,
 # дорожках, тропах, площадках, постройках и не ближе 2,5 м к деревьям и точкам мест; на набережной и молу нет
+item()
 rock_rng = random.Random(61)
 tree_pts = [(t_[0], -t_[2]) for key_ in ('pine', 'pine_slim', 'spruce_a', 'spruce_b', 'spruce_young') for t_ in TREES[key_]]
 ROCKS = []
@@ -2811,6 +2900,7 @@ for zone_, n_, size_ in (('slope', 34, (2.0, 4.2)), ('cape', 14, (1.8, 3.8)), ('
         ROCKS.append((x_, y_, L_))
         placed_ += 1
 for x_, y_, L_ in ROCKS:
+    item_next('rock', 'Валун')
     ang_ = rock_rng.uniform(0, 180)
     W_ = L_ * rock_rng.uniform(0.6, 0.85)
     H_ = L_ * rock_rng.uniform(0.45, 0.7)
@@ -2821,11 +2911,13 @@ for x_, y_, L_ in ROCKS:
     if rock_rng.random() < 0.5:
         a3_ = math.radians(ang_ - 120)
         O.obox(x_ + math.cos(a3_) * L_ * 0.2, y_ + math.sin(a3_) * L_ * 0.2, L_ * 0.45, W_ * 0.5, base_, base_ + H_ * 1.15, ang_ - 25, 'rock')
+item()
 
 # беседки в парке, у бровки, у посёлка (владелец): настил, столбы, кровля — как у тропы
 for gx_, gy_ in PLAN['GAZEBOS_PARK']:
     if near_road(gx_, gy_, 4.0):
         WARN.append(f'беседка ({gx_}, {gy_}) — на дороге')
+    item_next('gazebo', 'Беседка')
     lo_ = rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.min)
     zk_ = rect_stat(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, fn=np.max) + 0.25
     O.box(gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, lo_ - 0.5, zk_, 'deck')
@@ -2837,6 +2929,7 @@ for gx_, gy_ in PLAN['GAZEBOS_PARK']:
     O.cyl(gx_, gy_, zk_ + 2.4, zk_ + 2.7, 2.8, 'roof', solid=False, sides=8)
     O.label(gx_, gy_, zk_ + 3.3, 'беседка', 0.8, 'object')
     SURFACES.append(('rect', gx_ - 3.3, gy_ - 3.3, gx_ + 3.3, gy_ + 3.3, zk_))
+item()
 
 PLACES = []
 for n_, x_, y_, text_ in PLAN['PLACES']:
@@ -3221,6 +3314,11 @@ result = {
     'stats': {'boxes': len(O.boxes), 'stairs': len(O.stairs), 'beams': len(O.beams), 'cyls': len(O.cyls),
               'tris': sum(len(v) // 9 for v in O.tris.values()), 'rooms': len(ROOMS), 'routes': len(ROUTES),
               'trees': sum(len(v) for v in TREES.values())},
+    # метки групп (параллельно спискам выше) и их заголовки — для переноса в сцены построек
+    'tags': {'boxes': O.boxes.tags, 'stairs': O.stairs.tags, 'beams': O.beams.tags, 'cyls': O.cyls.tags, 'tris': O.tri_tags,
+             'labels': O.labels.tags, 'water': O.water.tags, 'barriers': O.barriers.tags, 'markers': O.markers.tags,
+             'rooms': ROOMS.tags, 'routes': ROUTES.tags},
+    'group_titles': GROUP_TITLES,
 }
 OUT_PLAN.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')), encoding='utf-8', newline='\n')
 
@@ -3274,4 +3372,4 @@ st_ = result['stats']
 print(f"санаторий: коробок {st_['boxes']}, маршей {st_['stairs']}, лент {st_['beams']}, цилиндров {st_['cyls']}, "
       f"треугольников {st_['tris']}, помещений {st_['rooms']}, обходов {st_['routes']}, деревьев {st_['trees']} (из них в группах елей против длинного обзора {BREAK_TREES})")
 print(f"уровни: S {S_LEVELS}, коттеджи {COT_LEVELS}, хоздвор {HOZ_LEVEL}, площадка {PG_LEVEL}, корты {SPORT_LEVEL}")
-print(f"→ {OUT_PLAN.relative_to(ROOT)} ({OUT_PLAN.stat().st_size // 1024} КБ), {OUT_SCENE.relative_to(ROOT)}")
+print(f"→ {OUT_PLAN} ({OUT_PLAN.stat().st_size // 1024} КБ), {OUT_SCENE}; групп {len(GROUP_TITLES)}")

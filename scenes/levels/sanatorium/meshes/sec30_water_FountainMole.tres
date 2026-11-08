@@ -1,0 +1,14 @@
+[gd_resource type="ArrayMesh" format=4]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/water_pool.tres" id="1_o0w6s"]
+
+[resource]
+_surfaces = [{
+"aabb": AABB(14.4, 5.05, -20.6, 17.2, 1e-05, 17.2),
+"format": 34359738375,
+"material": ExtResource("1_o0w6s"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 78,
+"vertex_data": PackedByteArray("NhP7QZqZoUBvnl7Bzcz8QZqZoUAAAEDBNhP7QZqZoUCRYSHBNhP7QZqZoUCRYSHBlvz1QZqZoUAvTATBPsrtQZqZoUBlatTAPsrtQZqZoUBlatTAZ+XiQZqZoUAJ16jA6NnVQZqZoUCpDYjA6NnVQZqZoUCpDYjAN0/HQZqZoUBRZmfAAAC4QZqZoUCamVnAAAC4QZqZoUCamVnAybCoQZqZoUBRZmfAGCaaQZqZoUCpDYjAGCaaQZqZoUCpDYjAmRqNQZqZoUAJ16jAwjWCQZqZoUBlatTAwjWCQZqZoUBlatTA1QZ0QZqZoUAvTATBlNlpQZqZoUCRYSHBlNlpQZqZoUCRYSHBZmZmQZqZoUAAAEDBlNlpQZqZoUBvnl7BlNlpQZqZoUBvnl7B1QZ0QZqZoUDRs3vBwjWCQZqZoUBn5YrBwjWCQZqZoUBn5YrBmRqNQZqZoUA+ypXBGCaaQZqZoUCW/J3BGCaaQZqZoUCW/J3BybCoQZqZoUA2E6PBAAC4QZqZoUDNzKTBAAC4QZqZoUDNzKTBN0/HQZqZoUA2E6PB6NnVQZqZoUCW/J3B6NnVQZqZoUCW/J3BZ+XiQZqZoUA+ypXBPsrtQZqZoUBn5YrBPsrtQZqZoUBn5YrBlvz1QZqZoUDRs3vBNhP7QZqZoUBvnl7BNhP7QZqZoUBvnl7BNhP7QZqZoUCRYSHBPsrtQZqZoUBlatTAPsrtQZqZoUBlatTA6NnVQZqZoUCpDYjAAAC4QZqZoUCamVnAAAC4QZqZoUCamVnAGCaaQZqZoUCpDYjAwjWCQZqZoUBlatTAwjWCQZqZoUBlatTAlNlpQZqZoUCRYSHBlNlpQZqZoUBvnl7BlNlpQZqZoUBvnl7BwjWCQZqZoUBn5YrBGCaaQZqZoUCW/J3BGCaaQZqZoUCW/J3BAAC4QZqZoUDNzKTB6NnVQZqZoUCW/J3B6NnVQZqZoUCW/J3BPsrtQZqZoUBn5YrBNhP7QZqZoUBvnl7BNhP7QZqZoUBvnl7BPsrtQZqZoUBlatTAAAC4QZqZoUCamVnAAAC4QZqZoUCamVnAwjWCQZqZoUBlatTAlNlpQZqZoUBvnl7BlNlpQZqZoUBvnl7BGCaaQZqZoUCW/J3B6NnVQZqZoUCW/J3B6NnVQZqZoUCW/J3BNhP7QZqZoUBvnl7BAAC4QZqZoUCamVnAAAC4QZqZoUCamVnAlNlpQZqZoUBvnl7B6NnVQZqZoUCW/J3B/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]

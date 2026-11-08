@@ -4,7 +4,10 @@
 утверждённый проект. Схема участка с разрезом по главной оси:
 [docs/plans/sanatorium_map_v13.png](../plans/sanatorium_map_v13.png), генератор — `python -X utf8 tools/sanatorium_map_plan.py`.
 Серый блокаут и прогулка — `tools/build_sanatorium.py`, `tools/sanatorium_study.cmd`, с игроком и ботами —
-`tools/sanatorium_play.cmd`.
+`tools/sanatorium_play.cmd`. **С 2026-11-08 карта правится руками в редакторе** (решение владельца,
+[editable_levels.md](editable_levels.md), памятка — [docs/level_editing.md](../level_editing.md)): постройки, куски
+участка, деревья — сохранённые узлы `scenes/levels/sanatorium_study.tscn` и `scenes/levels/sanatorium/*`, земля —
+«Кисть земли»; генератор в проект больше не пишет (только в папку `SANATORIUM_OUT` — заготовки).
 Вид на плотину с террасы — [sanatorium_dam_view_v01.png](../plans/sanatorium_dam_view_v01.png)
 (`python -X utf8 tools/sanatorium_dam_view.py`).
 Жилой S-корпус подробно — [sanatorium_s_corps.md](sanatorium_s_corps.md); здание «Ресторан и спа» —

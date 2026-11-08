@@ -50,7 +50,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["verify", "shots", "perf"]:
+		if arg in ["verify", "shots", "perf", "snapshot"]:
 			mode = arg
 	if has_meta("embedded"):
 		mode = "embed"
@@ -68,6 +68,12 @@ func _ready() -> void:
 	stats.landscape_ms = int(landscape.get("built_ms"))
 	if mode == "embed":
 		return
+	if mode == "snapshot":
+		# снимок сцены для замера обзора (tools/sanatorium_ld_plan.py): объёмы и деревья в прежнем формате плана
+		landscape.call("write_snapshot")
+		print("sanatorium_study: снимок сцены → data/blockouts/sanatorium_snapshot*.json, коробок %d" % int((plan.stats as Dictionary).get("boxes", 0)))
+		get_tree().quit(0)
+		return
 	walker = Walker.new()
 	walker.name = "StudyWalker"
 	add_child(walker)
@@ -76,7 +82,7 @@ func _ready() -> void:
 	await _frames(4)
 	_jump(5)
 	print("sanatorium_study: сборка %d мс (объёмы %d мс), коробок %d, помещений %d, обходов %d" % [int(stats.build_ms),
-		int(stats.landscape_ms), (plan.boxes as Array).size(), (plan.rooms as Array).size(), (plan.routes as Array).size()])
+		int(stats.landscape_ms), int((plan.stats as Dictionary).get("boxes", 0)), (plan.rooms as Array).size(), (plan.routes as Array).size()])
 	if mode == "walk":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		return
@@ -395,6 +401,11 @@ func _walk_route(route: Dictionary, frame_limit: int = 20000) -> Dictionary:
 			if stuck_total > 700 or walker.global_position.y < -15.0:
 				break
 			if stalled > 40:
+				# упёрся (угол тесной площадки лестницы): сначала шаг назад от цели, потом вбок — как человек; без шага
+				# назад исход зависел от долей миллиметра (порядок касаний у физики) — 2026-11-08, перенос в сцены
+				for k: int in range(10):
+					walker.set("probe_direction", -delta.normalized() * 0.6)
+					await get_tree().physics_frame
 				for k: int in range(22):
 					walker.set("probe_direction", delta.normalized().cross(Vector3.UP) * side * 0.6)
 					await get_tree().physics_frame

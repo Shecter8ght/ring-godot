@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://src/world/sanatorium_lake.gdshader" id="1_t4k0h"]
+[ext_resource type="Texture2D" path="res://assets/terrain/zone01_noise.png" id="2_k0h3r"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_t4k0h")
+shader_parameter/noise_tex = ExtResource("2_k0h3r")
+shader_parameter/shallow_color = null
+shader_parameter/deep_color = null
+shader_parameter/absorb = null
+shader_parameter/turbidity = null
+shader_parameter/refraction = null
+shader_parameter/wave_strength = null
+shader_parameter/flow = null
+shader_parameter/foam_depth = null
+shader_parameter/foam_amount = null
+shader_parameter/rain = null
+shader_parameter/reflect_ridge = null
+shader_parameter/slope_reflection = null

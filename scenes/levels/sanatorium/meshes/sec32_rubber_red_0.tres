@@ -1,0 +1,15 @@
+[gd_resource type="ArrayMesh" format=4]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/rubber_red.tres" id="1_nf5g8"]
+
+[resource]
+_surfaces = [{
+"aabb": AABB(-71, 0.15000153, 131, 24, 1e-05, 40),
+"attribute_data": PackedByteArray("AAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBB"),
+"format": 34359738423,
+"material": ExtResource("1_nf5g8"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AACOwgCaGT4AACtDAAA8wgCaGT4AAANDAAA8wgCaGT4AACtDAACOwgCaGT4AACtDAACOwgCaGT4AAANDAAA8wgCaGT4AAAND/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]

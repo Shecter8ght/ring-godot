@@ -34,8 +34,10 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-PLAN_JSON = ROOT / 'data/blockouts/sanatorium.json'
-VEG_JSON = ROOT / 'data/blockouts/sanatorium_vegetation.json'
+# С 2026-11-08 карта правится руками в редакторе (docs/level_editing.md): объёмы и деревья — снимок сцены в прежнем
+# формате плана, его пишет tools/godot.cmd --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- snapshot.
+PLAN_JSON = ROOT / 'data/blockouts/sanatorium_snapshot.json'
+VEG_JSON = ROOT / 'data/blockouts/sanatorium_snapshot_vegetation.json'
 TER_JSON = ROOT / 'data/blockouts/sanatorium_terrain.json'
 DESC_JSON = ROOT / 'docs/design/data/sanatorium_descents_v03.json'
 SPA_JSON = ROOT / 'docs/design/data/sanatorium_spa_restaurant_v03.json'
@@ -202,6 +204,8 @@ def plan_breaks(res, notree, n_max, target=0.10):
 
 
 def main():
+    if not PLAN_JSON.exists():
+        raise SystemExit('нет снимка сцены: сначала tools/godot.cmd --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- snapshot')
     plan = json.loads(PLAN_JSON.read_text(encoding='utf-8'))
     scheme = load_scheme()
     mats = plan['mats']

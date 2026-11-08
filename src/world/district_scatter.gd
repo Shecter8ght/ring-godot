@@ -54,6 +54,9 @@ extends Node3D
 		local_points = value
 		_queue()
 
+## Точки готовым списком ([x, y, z, поворот, масштаб]) вместо JSON — их собирает уровень из узлов сцены
+## (деревья TreeSpot, расставленные руками); задать до добавления в дерево.
+var points_override: Array = []
 var _pending: bool = false
 
 
@@ -73,12 +76,14 @@ func _build() -> void:
 	for child in get_children():
 		if String(child.name).begins_with("_"):
 			child.free()
-	if data_path == "" or not FileAccess.file_exists(data_path):
-		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_path))
-	if not parsed is Dictionary:
-		return
-	var points: Array = (parsed as Dictionary).get(key, [])
+	var points: Array = points_override
+	if points.is_empty():
+		if data_path == "" or not FileAccess.file_exists(data_path):
+			return
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_path))
+		if not parsed is Dictionary:
+			return
+		points = (parsed as Dictionary).get(key, [])
 	if points.is_empty():
 		return
 	var mesh: Mesh = _mesh()

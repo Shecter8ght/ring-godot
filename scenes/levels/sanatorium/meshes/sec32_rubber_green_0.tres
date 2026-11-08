@@ -1,0 +1,15 @@
+[gd_resource type="ArrayMesh" format=4]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/rubber_green.tres" id="1_2hfv1"]
+
+[resource]
+_surfaces = [{
+"aabb": AABB(-49, 0.15000153, 130, 28, 1e-05, 13),
+"attribute_data": PackedByteArray("AAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBB"),
+"format": 34359738423,
+"material": ExtResource("1_2hfv1"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AABEwgCaGT4AAA9DAACowQCaGT4AAAJDAACowQCaGT4AAA9DAABEwgCaGT4AAA9DAABEwgCaGT4AAAJDAACowQCaGT4AAAJD/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]

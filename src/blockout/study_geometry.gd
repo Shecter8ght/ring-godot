@@ -61,6 +61,25 @@ func box(at: Vector3, size: Vector3, key: String, solid: bool = true, yaw: float
 			cs.set_meta("surface", surface_of[key])
 		body.add_child(cs)
 
+## Коробка с любым поворотом (узел сцены, правленный руками: повёрнут, наклонён, отражён): rot — поворот без масштаба,
+## size — размер с учётом масштаба узла. across — ось «поперёк» для расстояний до рёбер (у box — 2, у beam — 0).
+func box_basis(at: Vector3, rot: Basis, size: Vector3, key: String, solid: bool = true, across: int = 2) -> void:
+	var st: SurfaceTool = stream(key)
+	for index: int in unit_indices:
+		_edges(st, unit_vertices[index], unit_normals[index], size, across)
+		st.set_normal(rot * unit_normals[index])
+		st.add_vertex(at + rot * (unit_vertices[index] * size))
+	triangles += 12
+	if solid:
+		var shape: BoxShape3D = BoxShape3D.new()
+		shape.size = size
+		var cs: CollisionShape3D = CollisionShape3D.new()
+		cs.shape = shape
+		cs.transform = Transform3D(rot, at)
+		if surface_of.has(key):
+			cs.set_meta("surface", surface_of[key])
+		body.add_child(cs)
+
 func tri(a: Vector3, b: Vector3, c: Vector3, key: String) -> void:
 	var st: SurfaceTool = stream(key)
 	var normal: Vector3 = (c - a).cross(b - a).normalized()

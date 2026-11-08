@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://src/world/district_water.gdshader" id="1_l2vf3"]
+[ext_resource type="Texture2D" path="res://assets/terrain/zone01_noise.png" id="2_tdoc8"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_l2vf3")
+shader_parameter/deep_color = Color(0.06, 0.09, 0.05, 1)
+shader_parameter/murk_color = Color(0.14, 0.2, 0.09, 1)
+shader_parameter/flow = 0.03
+shader_parameter/noise_tex = ExtResource("2_tdoc8")
+shader_parameter/depth_rect = null
+shader_parameter/depth_max = null
+shader_parameter/mud_color = null
+shader_parameter/duckweed = 0.18
+shader_parameter/weed_color = null
+shader_parameter/rain = null

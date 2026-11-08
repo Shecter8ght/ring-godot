@@ -1,3 +1,4 @@
+@tool
 extends "res://src/blockout/heli_terrain.gd"
 ## Земля «Санатория» (tools/build_sanatorium.py пишет данные, tools/build_sanatorium_ground.py — массивы слоёв):
 ## рельеф, ступени детализации и коллизия — как у стенда «Плотины» (heli_terrain.gd), поверхность — восемь грунтов

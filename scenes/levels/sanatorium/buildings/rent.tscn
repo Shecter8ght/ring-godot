@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/glass.tres" id="1_t75u5"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_y0w8a"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="3_mkrtc"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="4_dgrna"]
+
+[node name="Прокат — домик выдачи" type="Node3D" unique_id=1997537090]
+metadata/group = "rent"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1706539023]
+
+[node name="glass_0000" type="CSGBox3D" parent="Коробки" unique_id=384412568]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 5)
+use_collision = true
+size = Vector3(10.4, 3.4, 0.4)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0001" type="CSGBox3D" parent="Коробки" unique_id=1001811997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -5)
+use_collision = true
+size = Vector3(10.4, 3.4, 0.4)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0002" type="CSGBox3D" parent="Коробки" unique_id=84596137]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2, 2.899994)
+use_collision = true
+size = Vector3(0.4, 3.4, 4.6)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0003" type="CSGBox3D" parent="Коробки" unique_id=239426124]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2, -3.5)
+use_collision = true
+size = Vector3(0.4, 3.4, 3.4)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0004" type="CSGBox3D" parent="Коробки" unique_id=1812127429]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 3.3999999, -0.6000061)
+use_collision = true
+size = Vector3(0.4, 0.6, 2.4)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0005" type="CSGBox3D" parent="Коробки" unique_id=1080664948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, 2.899994)
+use_collision = true
+size = Vector3(0.4, 3.4, 4.6)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0006" type="CSGBox3D" parent="Коробки" unique_id=83480031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, -2.899994)
+use_collision = true
+size = Vector3(0.4, 3.4, 4.6)
+material = ExtResource("1_t75u5")
+
+[node name="glass_0007" type="CSGBox3D" parent="Коробки" unique_id=1445944704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3.2099998, 0)
+use_collision = true
+size = Vector3(0.4, 0.98, 1.2)
+material = ExtResource("1_t75u5")
+
+[node name="floor_0008" type="CSGBox3D" parent="Коробки" unique_id=1712603879]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14999998, 0)
+use_collision = true
+size = Vector3(10, 0.3, 10)
+material = ExtResource("2_y0w8a")
+
+[node name="roof_0009" type="CSGBox3D" parent="Коробки" unique_id=1878604107]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8749998, 0)
+use_collision = true
+size = Vector3(10.2, 0.35, 10.2)
+material = ExtResource("3_mkrtc")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=1114898329]
+
+[node name="Прокат — домик выдачи" type="Label3D" parent="Подписи" unique_id=2082329342]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3999999, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Прокат: домик выдачи"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Прокат — домик выдачи2" type="Label3D" parent="Подписи" unique_id=1248797881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Прокат: домик выдачи"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=507703944]
+script = ExtResource("4_dgrna")
+rooms = [{
+"at": [0.0, 0.3, 0.0],
+"building": "Прокат: домик выдачи",
+"floor": 1.0,
+"name": "Прокат: домик выдачи",
+"uid": "rent/1/R"
+}]
+routes = [{
+"building": "rent",
+"checks": [[3, "rent/1/R", 0.3]],
+"id": "tour_rent",
+"kind": "tour",
+"label": "Прокат: домик выдачи: все помещения",
+"points": [[-6.8, 0.27, -0.6], [-5.0, 0.3, -0.6], [-4.25, 0.3, -0.6], [0.0, 0.3, 0.0]]
+}]

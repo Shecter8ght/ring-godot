@@ -1,3 +1,4 @@
+@tool
 extends "res://src/world/district_terrain.gd"
 ## Рельеф серого стенда «Вертолёт» (tools/heli_study.gd): карта высот, шейдер и текстуры — как у DistrictTerrain,
 ## но горы видно на 2–3 км, поэтому у каждой плитки три ступени детализации: вблизи — шаг карты, дальше — ×4 и ×16.
@@ -57,21 +58,75 @@ func _build() -> void:
 	while tz < _rows - 1:
 		var tx: int = 0
 		while tx < _cols - 1:
+			_heli_tile(root, material, tx, tz)
+			tx += tile_cells
+		tz += tile_cells
+
+
+## Плитка (tx, tz — первая клетка): ступени детализации и коллизия.
+func _heli_tile(root: Node3D, material: ShaderMaterial, tx: int, tz: int) -> void:
+	var w: int = mini(tile_cells, _cols - 1 - tx)
+	var d: int = mini(tile_cells, _rows - 1 - tz)
+	var rect: Rect2 = Rect2(_origin.x + float(tx) * _step, _origin.y + float(tz) * _step, float(w) * _step, float(d) * _step)
+	var detailed: bool = detail_rect.intersects(rect)
+	if detailed:
+		_lod_tile(root, material, tx, tz, w, d, 1, 0.0, lod_ranges.x, 6.0, true)
+		built.lod0 += 1
+	# средняя ступень: от конца подробной (или с нуля, если её у плитки нет) до начала грубой
+	_lod_tile(root, material, tx, tz, w, d, 4, lod_ranges.x if detailed else 0.0, lod_ranges.y, 18.0, true)
+	built.lod1 += 1
+	_lod_tile(root, material, tx, tz, w, d, 16, lod_ranges.y, 0.0, 60.0, false)
+	built.lod2 += 1
+	if collision_rect.intersects(rect):
+		_ground(root, tx, tz, w, d)
+		built.ground += 1
+
+
+## Высоты в клетке карты (кисть земли в редакторе, tools/level_tools): прямой доступ к сетке.
+func cells() -> Vector2i:
+	return Vector2i(_cols, _rows)
+
+
+func cell_origin() -> Vector2:
+	return _origin
+
+
+func cell_step() -> float:
+	return _step
+
+
+func heights_data() -> PackedFloat32Array:
+	return _heights
+
+
+func set_heights_data(data: PackedFloat32Array) -> void:
+	if data.size() == _heights.size():
+		_heights = data
+
+
+## Пересобрать плитки, которые задевает прямоугольник мира (после правки высот кистью); нормали
+## грубых ступеней берут соседей на 16 клеток — запас на столько же.
+func rebuild_area(area: Rect2) -> void:
+	var root: Node3D = get_node_or_null("_Generated") as Node3D
+	if root == null or _material == null:
+		_build()
+		return
+	var grown: Rect2 = area.grow(16.0 * _step)
+	var tz: int = 0
+	while tz < _rows - 1:
+		var tx: int = 0
+		while tx < _cols - 1:
 			var w: int = mini(tile_cells, _cols - 1 - tx)
 			var d: int = mini(tile_cells, _rows - 1 - tz)
 			var rect: Rect2 = Rect2(_origin.x + float(tx) * _step, _origin.y + float(tz) * _step, float(w) * _step, float(d) * _step)
-			var detailed: bool = detail_rect.intersects(rect)
-			if detailed:
-				_lod_tile(root, material, tx, tz, w, d, 1, 0.0, lod_ranges.x, 6.0, true)
-				built.lod0 += 1
-			# средняя ступень: от конца подробной (или с нуля, если её у плитки нет) до начала грубой
-			_lod_tile(root, material, tx, tz, w, d, 4, lod_ranges.x if detailed else 0.0, lod_ranges.y, 18.0, true)
-			built.lod1 += 1
-			_lod_tile(root, material, tx, tz, w, d, 16, lod_ranges.y, 0.0, 60.0, false)
-			built.lod2 += 1
-			if collision_rect.intersects(rect):
-				_ground(root, tx, tz, w, d)
-				built.ground += 1
+			if rect.intersects(grown):
+				for n: String in ["Terrain_%d_%d_s1" % [tx, tz], "Terrain_%d_%d_s4" % [tx, tz], "Terrain_%d_%d_s16" % [tx, tz],
+						"Ground_%d_%d" % [tx, tz]]:
+					var old: Node = root.get_node_or_null(n)
+					if old:
+						root.remove_child(old)
+						old.free()
+				_heli_tile(root, _material, tx, tz)
 			tx += tile_cells
 		tz += tile_cells
 

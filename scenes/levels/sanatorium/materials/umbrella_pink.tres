@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "umbrella_pink"
+cull_mode = 2
+albedo_color = Color(0.8392157, 0.4627451, 0.56078434, 1)
+roughness = 0.9

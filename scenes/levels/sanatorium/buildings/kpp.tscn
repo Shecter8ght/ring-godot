@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/glass.tres" id="1_lulpl"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_653sj"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="3_21oy2"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="4_aj45g"]
+
+[node name="КПП" type="Node3D" unique_id=922490660]
+metadata/group = "kpp"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1877376980]
+
+[node name="glass_0000" type="CSGBox3D" parent="Коробки" unique_id=1158521409]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.399994, 1.8999977, 3)
+use_collision = true
+size = Vector3(3.6, 3.2, 0.4)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0001" type="CSGBox3D" parent="Коробки" unique_id=654406442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.399994, 1.8999977, 3)
+use_collision = true
+size = Vector3(3.6, 3.2, 0.4)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0002" type="CSGBox3D" parent="Коробки" unique_id=813365471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1100006, 3)
+use_collision = true
+size = Vector3(1.2, 0.78, 0.4)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0003" type="CSGBox3D" parent="Коробки" unique_id=1467229261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8999977, -3)
+use_collision = true
+size = Vector3(8.4, 3.2, 0.4)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0004" type="CSGBox3D" parent="Коробки" unique_id=504102542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.8999977, 1.8499999)
+use_collision = true
+size = Vector3(0.4, 3.2, 2.7)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0005" type="CSGBox3D" parent="Коробки" unique_id=647161585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.8999977, -1.9350004)
+use_collision = true
+size = Vector3(0.4, 3.2, 2.53)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0006" type="CSGBox3D" parent="Коробки" unique_id=1264152927]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.1100006, -0.08500004)
+use_collision = true
+size = Vector3(0.4, 0.78, 1.17)
+material = ExtResource("1_lulpl")
+
+[node name="glass_0007" type="CSGBox3D" parent="Коробки" unique_id=935740218]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.8999977, 0)
+use_collision = true
+size = Vector3(0.4, 3.2, 6.4)
+material = ExtResource("1_lulpl")
+
+[node name="floor_0008" type="CSGBox3D" parent="Коробки" unique_id=760757029]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14999771, 0)
+use_collision = true
+size = Vector3(8, 0.3, 6)
+material = ExtResource("2_653sj")
+
+[node name="roof_0009" type="CSGBox3D" parent="Коробки" unique_id=1359986363]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6749992, 0)
+use_collision = true
+size = Vector3(8.2, 0.35, 6.2)
+material = ExtResource("3_21oy2")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=1132295290]
+
+[node name="КПП" type="Label3D" parent="Подписи" unique_id=1217358439]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3999977, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "КПП"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="КПП2" type="Label3D" parent="Подписи" unique_id=819866131]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "КПП"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1707337676]
+script = ExtResource("4_aj45g")
+rooms = [{
+"at": [0.0, 0.3, 0.0],
+"building": "КПП",
+"floor": 1.0,
+"name": "КПП",
+"uid": "kpp/1/R"
+}]
+routes = [{
+"building": "kpp",
+"checks": [[3, "kpp/1/R", 0.3]],
+"id": "tour_kpp",
+"kind": "tour",
+"label": "КПП: все помещения",
+"points": [[0.0, 0.27, 4.8], [0.0, 0.3, 3.0], [0.0, 0.3, 2.25], [0.0, 0.3, 0.0]]
+}]

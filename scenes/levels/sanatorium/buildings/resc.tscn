@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/glass.tres" id="1_bmyok"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_uj527"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="3_j1byq"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="4_maawc"]
+
+[node name="Спасательная станция" type="Node3D" unique_id=1474816768]
+metadata/group = "resc"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1374725139]
+
+[node name="glass_0000" type="CSGBox3D" parent="Коробки" unique_id=449367055]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 6)
+use_collision = true
+size = Vector3(12.4, 3.4, 0.4)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0001" type="CSGBox3D" parent="Коробки" unique_id=774494480]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6)
+use_collision = true
+size = Vector3(12.4, 3.4, 0.4)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0002" type="CSGBox3D" parent="Коробки" unique_id=1436075873]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, 3.4000015)
+use_collision = true
+size = Vector3(0.4, 3.4, 5.6)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0003" type="CSGBox3D" parent="Коробки" unique_id=913341815]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, -3.4000015)
+use_collision = true
+size = Vector3(0.4, 3.4, 5.6)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0004" type="CSGBox3D" parent="Коробки" unique_id=645750766]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3.2099998, 0)
+use_collision = true
+size = Vector3(0.4, 0.98, 1.2)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0005" type="CSGBox3D" parent="Коробки" unique_id=676929372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, 3.4000015)
+use_collision = true
+size = Vector3(0.4, 3.4, 5.6)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0006" type="CSGBox3D" parent="Коробки" unique_id=183431612]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, -3.4000015)
+use_collision = true
+size = Vector3(0.4, 3.4, 5.6)
+material = ExtResource("1_bmyok")
+
+[node name="glass_0007" type="CSGBox3D" parent="Коробки" unique_id=1872571170]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 3.2099998, 0)
+use_collision = true
+size = Vector3(0.4, 0.98, 1.2)
+material = ExtResource("1_bmyok")
+
+[node name="floor_0008" type="CSGBox3D" parent="Коробки" unique_id=321674428]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14999998, 0)
+use_collision = true
+size = Vector3(12, 0.3, 12)
+material = ExtResource("2_uj527")
+
+[node name="roof_0009" type="CSGBox3D" parent="Коробки" unique_id=159711119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8749998, 0)
+use_collision = true
+size = Vector3(12.2, 0.35, 12.2)
+material = ExtResource("3_j1byq")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=1246259555]
+
+[node name="Спасательная станция" type="Label3D" parent="Подписи" unique_id=1799694501]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3999999, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Спасательная станция"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Спасательная станция2" type="Label3D" parent="Подписи" unique_id=1462491193]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.2, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Спасательная станция"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=621935855]
+script = ExtResource("4_maawc")
+rooms = [{
+"at": [0.0, 0.3, 0.0],
+"building": "Спасательная станция",
+"floor": 1.0,
+"name": "Спасательная станция",
+"uid": "resc/1/R"
+}]
+routes = [{
+"building": "resc",
+"checks": [[3, "resc/1/R", 0.3]],
+"id": "tour_resc",
+"kind": "tour",
+"label": "Спасательная станция: все помещения",
+"points": [[-7.8, 0.27, 0.0], [-6.0, 0.3, 0.0], [-5.25, 0.3, 0.0], [0.0, 0.3, 0.0]]
+}]
