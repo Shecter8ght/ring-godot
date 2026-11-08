@@ -1006,6 +1006,10 @@ func rebuild() -> void:
 	var filler: Dictionary = landscape.plan.get("filler", {}) as Dictionary
 	if filler.is_empty():
 		return
+	# вещи — узлы PropSpot (карта правится руками): в редакторе их видно самих, россыпь их не строит
+	if Engine.is_editor_hint() and bool(filler.get("from_nodes", false)):
+		filler = filler.duplicate()
+		filler["items"] = []
 	if is_instance_valid(generated):
 		generated.free()
 	generated = Node3D.new()
@@ -1040,6 +1044,70 @@ func rebuild() -> void:
 	set_meta("stats", stats)
 
 
+# ---------------------------------------------------------------- вещи узлами (PropSpot): вид и место, как в россыпи
+
+func _ensure_models() -> void:
+	if not _model_index.is_empty():
+		return
+	if landscape == null:
+		landscape = get_node_or_null("../Landscape") as MallLandscape
+	if landscape != null and not landscape.plan.is_empty():
+		_load_models(landscape.plan.get("filler", {}) as Dictionary)
+
+
+## Модель записи наполнения: [модель (вперемешку — по месту или закреплённая pinned), поворот модели°] или ["", 0] —
+## серая форма набора.
+func item_model(kit_id: String, x: float, z: float, pinned: String = "") -> Array:
+	_ensure_models()
+	var model_id: String = kit_id.substr(2) if kit_id.begins_with("m:") else ""
+	var yaw_offset: float = 0.0
+	if _kit_models.has(kit_id):
+		model_id = String((_kit_models[kit_id] as Dictionary).model)
+		yaw_offset = float((_kit_models[kit_id] as Dictionary).get("yaw", 0.0))
+	if model_id != "" and _model_index.has(model_id):
+		return [pinned if pinned != "" and _model_index.has(pinned) else _variant(model_id, x, z), yaw_offset]
+	return ["", 0.0]
+
+
+## Сетка вещи для вида в редакторе (модель — ближняя, набор — серые формы с цветом в вершинах).
+func preview_mesh(kit_id: String, x: float, z: float, pinned: String = "") -> Mesh:
+	var m: Array = item_model(kit_id, x, z, pinned)
+	if String(m[0]) != "":
+		return _model_mesh(String(m[0]))
+	if KITS.has(kit_id):
+		return _mesh(kit_id)
+	return null
+
+
+func preview_material() -> Material:
+	if _matte == null:
+		_matte = StandardMaterial3D.new()
+		_matte.vertex_color_use_as_albedo = true
+		_matte.roughness = 0.9
+	return _matte
+
+
+## Мировой трансформ вещи так, как её ставит россыпь (_items, _place_model): поворот с поворотом модели, крен,
+## масштаб, подъём над землёй и подъём лёгшей на бок машины.
+func item_transform(item: Array) -> Transform3D:
+	var x: float = float(item[1])
+	var z: float = float(item[2])
+	var m: Array = item_model(String(item[0]), x, z, String(item[8]) if item.size() > 8 else "")
+	var yaw: float = deg_to_rad(float(item[3]) + float(m[1]))
+	var s: float = float(item[4]) if item.size() > 4 else 1.0
+	var dy: float = float(item[5]) if item.size() > 5 else 0.0
+	var roll: float = deg_to_rad(float(item[7])) if item.size() > 7 else 0.0
+	var basis: Basis = Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, roll)
+	var lift: float = 0.0
+	if roll != 0.0:
+		var box: AABB = _model_aabb(String(m[0])) if String(m[0]) != "" else (_mesh(String(item[0])).get_aabb() if KITS.has(String(item[0])) else AABB())
+		var low: float = INF
+		for k: int in range(8):
+			low = minf(low, (basis * box.get_endpoint(k)).y)
+		lift = -low
+	return Transform3D(basis.scaled(Vector3.ONE * s), Vector3(x, landscape.ground(x, z) + dy + lift * s, z))
+
+
 # ---------------------------------------------------------------- россыпь наборов пачками
 
 ## Экземпляры по наборам и клеткам: клетка — половина дальности видимости (32–160 м), чтобы дальние
@@ -1056,7 +1124,10 @@ func _items(filler: Dictionary) -> void:
 			model_id = String((_kit_models[kit_id] as Dictionary).model)
 			yaw_offset = float((_kit_models[kit_id] as Dictionary).get("yaw", 0.0))
 		if model_id != "" and _model_index.has(model_id):
-			_place_model(groups, _variant(model_id, float(item[1]), float(item[2])), item, yaw_offset)
+			# item[8] — модель «вперемешку», закреплённая за вещью (узел PropSpot сдвинули — модель та же)
+			var pinned: String = String(item[8]) if item.size() > 8 else ""
+			var pick: String = pinned if pinned != "" and _model_index.has(pinned) else _variant(model_id, float(item[1]), float(item[2]))
+			_place_model(groups, pick, item, yaw_offset)
 			continue
 		if not KITS.has(kit_id):
 			push_warning("Наполнение: нет набора " + kit_id)

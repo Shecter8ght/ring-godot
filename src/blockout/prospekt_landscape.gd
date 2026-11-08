@@ -17,6 +17,7 @@ func load_plan() -> void:
 	plan = parsed as Dictionary
 	boundary = poly(plan.boundary)
 	forests.clear()
+	_items_from_nodes()
 
 
 ## Газоны (разделительные, газон рощи, приподнятые газоны сквера) — некошеная два года трава травяным покровом зоны 1

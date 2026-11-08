@@ -110,6 +110,30 @@ func _process(delta: float) -> void:
 		_weather_t = 0.0
 
 
+## Вещи наполнения — узлы PropSpot этой сцены (карта правится руками, docs/level_editing.md): plan.filler.items
+## собираются по нынешнему положению узлов (скрытые глазком — нет); в игре узлы потом убираются.
+func _items_from_nodes() -> void:
+	var filler: Dictionary = plan.get("filler", {}) as Dictionary
+	if not bool(filler.get("from_nodes", false)) or not is_inside_tree():
+		return
+	var found: Array = []
+	var k: int = 0
+	for n: Node in get_tree().get_nodes_in_group("prop_spot"):
+		if n.owner != owner:
+			continue
+		if (n as Node3D).is_visible_in_tree():
+			found.append([int(n.get("order")), k, n.call("current_item")])
+			k += 1
+		if not Engine.is_editor_hint():
+			n.queue_free()
+	# в прежнем порядке плана: коллизии наполнения у физики идут так же, как у генератора
+	found.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	var items: Array = []
+	for f: Array in found:
+		items.append(f[2])
+	filler["items"] = items
+
+
 func load_plan() -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PLAN))
 	if not parsed is Dictionary:

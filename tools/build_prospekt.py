@@ -54,6 +54,10 @@ OUT_JSON = ROOT / "data" / "blockouts" / "prospekt.json"
 OUT_SCENE = ROOT / "scenes" / "levels" / "prospekt_study.tscn"
 # PROSPEKT_OUT — своя папка для плана и сцены (варианты расширения проспекта на схему, не трогая карту)
 PREVIEW_DIR = os.environ.get("PROSPEKT_OUT", "")
+# с 2026-11-08 карта правится руками (решение владельца): в проект — только по PROSPEKT_OVERWRITE=1
+if not PREVIEW_DIR and os.environ.get("PROSPEKT_OVERWRITE") != "1":
+    print("tools/build_prospekt.py: «Проспект» правится руками в редакторе (docs/level_editing.md): запуск перезаписал бы ручные правки сцен и наполнения. Заготовки — в свою папку: PROSPEKT_OUT=<папка>; собрать карту заново поверх правок — только если владелец решил: PROSPEKT_OVERWRITE=1.")
+    raise SystemExit(1)
 if PREVIEW_DIR:
     OUT_JSON = Path(PREVIEW_DIR) / "prospekt.json"
     OUT_SCENE = Path(PREVIEW_DIR) / "prospekt_study.tscn"

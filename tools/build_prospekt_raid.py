@@ -24,6 +24,10 @@ import prospekt_light as LIGHT
 import prospekt_widen as WIDEN
 
 ROOT = Path(__file__).resolve().parent.parent
+# с 2026-11-08 рейдовая сцена «Проспекта» правится руками (решение владельца): перезапись — только по PROSPEKT_OVERWRITE=1
+if __import__("os").environ.get("PROSPEKT_OVERWRITE") != "1":
+    print("tools/build_prospekt_raid.py: «Проспект» правится руками в редакторе (docs/level_editing.md): запуск перезаписал бы ручные правки сцен и наполнения. Заготовки — в свою папку: PROSPEKT_OUT=<папка>; собрать карту заново поверх правок — только если владелец решил: PROSPEKT_OVERWRITE=1.")
+    raise SystemExit(1)
 PLAN = ROOT / "data" / "blockouts" / "prospekt.json"
 SECTOR = ROOT / "data" / "sectors" / "prospekt.json"
 SCENE = ROOT / "scenes" / "levels" / "prospekt.tscn"
