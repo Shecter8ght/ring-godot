@@ -85,12 +85,12 @@ def main() -> None:
     for ob in scene.objects:
         meshfix.clean(ob)
     # фаски на острых рёбрах мелких деталей (общие сетки копий — один раз)
-    t1, done, n_edges, n_obs = time.time(), set(), 0, 0
+    t1, done, n_edges, n_obs, failed = time.time(), set(), 0, 0, []
     for ob in scene.objects:
-        k = meshfix.chamfer(ob, done)
+        k = meshfix.chamfer(ob, done, failed=failed)
         n_edges += k
         n_obs += 1 if k else 0
-    print(f"фаски: деталей {n_obs}, рёбер {n_edges:,}, {time.time() - t1:.1f} с")
+    print(f"фаски: деталей {n_obs}, рёбер {n_edges:,}, {time.time() - t1:.1f} с; без фаски: {', '.join(failed) or 'нет'}")
     all_closed = [o for o in common + closed]
     all_open = [o for o in common + opened]
     print(f"итого: {time.time() - t0:.1f} с; «Целая» {tris_of(all_closed):,} тр., «Отсеки открыты» {tris_of(all_open):,} тр.")

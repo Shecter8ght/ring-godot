@@ -161,11 +161,14 @@ def locker_inside(sx: float, y0: float, y1: float, zb: float, tag: str, dep: flo
     n_shelves = 2 if h > 1.3 else 1
     for k in range(n_shelves):
         z = zb + h * (k + 1) / (n_shelves + 1)
-        shelf = s3d.box("shelf", depth - 0.06, yb - ya - 0.02, 0.012)
-        lip = s3d.box("shelf_lip", 0.012, yb - ya - 0.02, 0.05)
-        shelf = s3d.at(shelf, x=sx * (HW - FACE_IN - depth / 2 - 0.02), y=(ya + yb) / 2, z=z)
-        lip = s3d.at(lip, x=sx * (HW - FACE_IN - 0.06), y=(ya + yb) / 2, z=z)
-        s3d.join(shelf, lip)
+        # полка — один уголок: лист 12 мм и бортик 50 мм у проёма (сечение по X, Z; выдавливание вдоль Y)
+        xa, xb = HW - FACE_IN - depth + 0.01, HW - FACE_IN - 0.054
+        sec = [(xa, z), (xb, z), (xb, z + 0.05), (xb - 0.012, z + 0.05), (xb - 0.012, z + 0.012), (xa, z + 0.012)]
+        sec = [(-sx * x, zz) for x, zz in sec]
+        if sx < 0:
+            sec = sec[::-1]
+        shelf = s3d.extrude("shelf", s3d.poly(sec, fillet=[0, 0.003, 0.004, 0.004, 0.003, 0]), yb - ya - 0.02,
+                            on=lib.rear(ya + 0.01))
         lib.alu(shelf)
         out.append(shelf)
     for yy in (ya + 0.012, yb - 0.012):
@@ -261,6 +264,100 @@ def intake_boxes():
     return out
 
 
+def _bolts(name: str, n: int, r: float, d: float, h: float, frame, start: float = 0.0) -> list:
+    """Головки болтов (шестигранник ⌀d по углам, высота h) кольцом радиуса r на рамке frame, смотрят по её нормали."""
+    bolts = s3d.at(s3d.extrude(name, s3d.polygon(6, d), h), on=s3d.ring(n, r, start=start, on=frame))
+    for b in bolts:
+        lib.steel_dark(b)
+    return list(bolts)
+
+
+def _flange(name: str, d: float, t: float, frame, n: int, r_bolt: float, d_bolt: float = 0.022) -> list:
+    """Фланец ⌀d толщиной t на рамке frame (от неё по нормали) с болтами по наружной стороне."""
+    fl = s3d.extrude(name, s3d.circle(d), t, on=frame)
+    lib.steel_dark(fl)
+    return [fl] + _bolts(name + "_bolt", n, r_bolt, d_bolt, 0.011, frame.offset(t), start=180.0 / n)
+
+
+def _coupling(tag: str, x: float, y0: float, z: float, rb: float, r1: float, r2: float) -> list:
+    """Соединительная головка (как ГМ) на торце патрубка, смотрит назад (+Y) от y0: корпус с буртом, два клыка
+    по бокам, резиновое кольцо, заглушка со своими клыками (повёрнуты на 90°), ушко и цепочка к патрубку."""
+    out = []
+    L = 0.046
+    prof = [(rb, 0.0), (r1, 0.0), (r1, 0.012), (r2, 0.018), (r2, L - 0.006), (r2 - 0.006, L), (rb + 0.004, L),
+            (rb, L - 0.004)]
+    head = s3d.revolve(tag + "_head", s3d.poly(prof, fillet=[0, 0.002, 0.003, 0.003, 0.003, 0.002, 0.001, 0]))
+    lib.alu(head)
+    out.append(s3d.at(head, x=x, y=y0, z=z, rx=-90))
+    r_cap = r2 - 0.019                                       # заглушка уже корпуса: крючки клыков заходят за неё
+    for sx in (-1, 1):
+        c = [(r2 - 0.006, 0.016), (r2 + 0.012, 0.016), (r2 + 0.012, L + 0.022), (r2 - 0.016, L + 0.022),
+             (r2 - 0.016, L + 0.013), (r2 - 0.006, L + 0.013)]
+        pts = [(x + sx * a, y0 + b) for a, b in c]
+        if sx < 0:
+            pts = pts[::-1]
+        claw = s3d.extrude(tag + "_claw", s3d.poly(pts, fillet=[0.002, 0.004, 0.004, 0.003, 0.002, 0.002]), 0.034,
+                           on=s3d.Frame((0.0, 0.0, z - 0.017), (0, 0, 1)))
+        lib.alu(claw)
+        out.append(claw)
+    seal = s3d.tube(tag + "_seal", 2 * (r2 - 0.008), 2 * (rb + 0.006), 0.004)
+    lib.rubber(seal)
+    out.append(s3d.at(seal, x=x, y=y0 + L - 0.001, z=z, rx=-90))
+    yc0 = y0 + L + 0.003
+    cap_prof = [(0.0, 0.0), (r_cap, 0.0), (r_cap, 0.022), (r_cap - 0.008, 0.030), (0.028, 0.030), (0.028, 0.040),
+                (0.0, 0.040)]
+    cap = s3d.revolve(tag + "_cap", s3d.poly(cap_prof, fillet=[0, 0.002, 0.004, 0.004, 0.003, 0.004, 0]))
+    lib.alu(cap)
+    out.append(s3d.at(cap, x=x, y=yc0, z=z, rx=-90))
+    for sz in (-1, 1):
+        lug = s3d.fillet(s3d.box(tag + "_cap_lug", 0.034, 0.026, r2 + 0.010 - (r_cap - 0.008)), 0.005, edges="side")
+        lib.alu(lug)
+        z0 = z + r_cap - 0.008 if sz > 0 else z - (r2 + 0.010)
+        out.append(s3d.at(lug, x=x, y=yc0 + 0.015, z=z0))
+    ear = s3d.torus(tag + "_ear", 0.020, 0.006)
+    lib.steel_dark(ear)
+    ze = z + r2 + 0.010 + 0.008
+    out.append(s3d.at(ear, x=x, y=yc0 + 0.015, z=ze, ry=90))
+    chain = s3d.wire(tag + "_chain", [(x, yc0 + 0.015, ze + 0.008), (x + 0.02, yc0 - 0.03, ze + 0.02),
+                                      (x + 0.035, y0 - 0.05, z + r1 + 0.03), (x + 0.03, y0 - 0.07, z + r1 - 0.01)],
+                     0.006, fillet=0.02)
+    lib.steel_dark(chain)
+    out.append(chain)
+    return out
+
+
+def _valve(tag: str, x: float, ya: float, yb_: float, z: float, d_body: float, d_fl: float) -> list:
+    """Задвижка на патрубке вдоль +Y между ya и yb_: фланцы с болтами, корпус, крышка, шпиндель, маховик сверху."""
+    out = []
+    out += _flange(tag + "_flange", d_fl, 0.014, lib.front(ya + 0.014, x=x, z=z), 4, d_fl / 2 - 0.016, 0.02)
+    out += _flange(tag + "_flange", d_fl, 0.014, lib.rear(yb_ - 0.014, x=x, z=z), 4, d_fl / 2 - 0.016, 0.02)
+    body = s3d.extrude(tag + "_body", s3d.circle(d_body), yb_ - ya - 0.028, on=lib.rear(ya + 0.014, x=x, z=z))
+    lib.steel_dark(body)
+    ym = (ya + yb_) / 2
+    bonnet = s3d.fillet(s3d.cylinder(tag + "_bonnet", 0.075, 0.10), 0.010, edges="top")
+    lib.steel_dark(bonnet)
+    stem = s3d.cylinder(tag + "_stem", 0.018, 0.155)
+    lib.chrome(stem)
+    zw = z + 0.13
+    wheel = s3d.torus(tag + "_wheel", 0.14, 0.014)
+    lib.paint_red(wheel)
+    hub = s3d.cylinder(tag + "_wheel_hub", 0.036, 0.022)
+    lib.paint_red(hub)
+    out += [body, s3d.at(bonnet, x=x, y=ym, z=z), s3d.at(stem, x=x, y=ym, z=z), s3d.at(wheel, x=x, y=ym, z=zw),
+            s3d.at(hub, x=x, y=ym, z=zw - 0.004)]
+    import math as _m
+    for k in range(3):
+        a = _m.radians(90 + 120 * k)
+        sp = s3d.wire(tag + "_spoke", [(x, ym, zw + 0.007), (x + 0.066 * _m.cos(a), ym + 0.066 * _m.sin(a), zw + 0.007)],
+                      0.010)
+        lib.paint_red(sp)
+        out.append(sp)
+    knob = s3d.fillet(s3d.cylinder(tag + "_knob", 0.022, 0.04), 0.008, edges="top")
+    lib.black_plastic(knob)
+    out.append(s3d.at(knob, x=x + 0.07, y=ym, z=zw + 0.012))
+    return out
+
+
 def rear():
     """Задняя часть: угловые стойки с фонарями и маячками, рольставня насосного отсека, панель насоса
     с патрубками, подножка, лестница на крышу справа."""
@@ -297,40 +394,79 @@ def rear():
     cam = s3d.fillet(s3d.box("rear_camera", 0.10, 0.06, 0.08), 0.015, edges="side")
     lib.black_plastic(cam)
     out.append(s3d.at(cam, y=yb + 0.03, z=S.BAND[0] + 0.06))
-    # насос под кузовом между нижними отсеками: улитка, всасывающий патрубок к задней муфте, коллектор к напорным
+    # насос под кузовом между нижними отсеками: улитка с фланцами на болтах, всасывающий патрубок к задней
+    # головке 125, коллектор с фланцами к двум напорным 80 через задвижки с маховиками
     volute = s3d.fillet(s3d.cylinder("pump_volute", 0.42, 0.24), 0.04, edges="top bottom")
     lib.steel_dark(volute)
     out.append(s3d.at(volute, y=yb - 0.62, z=0.80, rx=-90))
+    out += _bolts("pump_volute_bolt", 12, 0.178, 0.022, 0.012, lib.rear(yb - 0.38, z=0.80), start=15.0)
     hub_ = s3d.cylinder("pump_drive", 0.20, 0.30)
     lib.steel_dark(hub_)
     out.append(s3d.at(hub_, y=yb - 0.92, z=0.80, rx=-90))
-    suction = s3d.cylinder("pump_suction_pipe", 0.15, 0.36)
+    out += _flange("pump_inlet_flange", 0.24, 0.02, lib.rear(yb - 0.38, z=0.80), 8, 0.097)
+    suction = s3d.cylinder("pump_suction_pipe", 0.15, 0.33)
     lib.steel_dark(suction)
-    out.append(s3d.at(suction, y=yb - 0.38, z=0.80, rx=-90))
+    out.append(s3d.at(suction, y=yb - 0.36, z=0.80, rx=-90))
+    out += _flange("suction_flange", 0.25, 0.016, lib.front(yb - 0.030, z=0.80), 8, 0.102, 0.024)
+    out += _flange("suction_flange", 0.25, 0.016, lib.rear(yb - 0.030, z=0.80), 8, 0.102, 0.024)
+    nip = s3d.extrude("suction_nipple", s3d.circle(0.15), 0.026, on=lib.rear(yb - 0.016, z=0.80))
+    lib.alu(nip)
+    out.append(nip)
+    out += _coupling("suction_coupling", 0.0, yb + 0.008, 0.80, 0.062, 0.078, 0.092)
     manifold = lib.along_x(s3d.cylinder("pump_manifold", 0.085, 0.80), -0.40, yb - 0.16, 0.66)
     lib.steel_dark(manifold)
     out.append(manifold)
+    for xf in (-0.20, 0.20):
+        out += _flange("manifold_flange", 0.15, 0.014, lib.side(xf - 0.007, 1, yb - 0.16, 0.66), 6, 0.058, 0.02)
     for x in (-0.38, 0.38):
-        riser = s3d.wire("outlet_pipe", [(x, yb - 0.16, 0.66), (x, yb - 0.16, 0.74), (x, yb - 0.02, 0.74)], 0.085, fillet=0.06)
+        riser = s3d.wire("outlet_pipe", [(x, yb - 0.16, 0.66), (x, yb - 0.16, 0.74), (x, yb - 0.10, 0.74)], 0.085,
+                         fillet=0.045)
         lib.steel_dark(riser)
-        pipe = s3d.cylinder("outlet", 0.11, 0.10)
-        cap = s3d.cylinder("outlet_cap", 0.13, 0.04)
-        lib.alu(pipe)
-        lib.alu(cap)
-        chain = s3d.wire("cap_chain", [(x + 0.06, yb + 0.10, 0.74), (x + 0.10, yb + 0.06, 0.62), (x + 0.05, yb + 0.0, 0.58)], 0.006)
-        lib.steel_dark(chain)
-        out += [riser, s3d.at(pipe, x=x, y=yb - 0.02, z=0.74, rx=-90), s3d.at(cap, x=x, y=yb + 0.08, z=0.74, rx=-90), chain]
+        out.append(riser)
+        out += _valve(f"outlet_valve", x, yb - 0.105, yb + 0.005, 0.74, 0.115, 0.15)
+        nip = s3d.extrude("outlet_nipple", s3d.circle(0.092), 0.032, on=lib.rear(yb + 0.004, x=x, z=0.74))
+        lib.alu(nip)
+        out.append(nip)
+        out += _coupling("outlet_coupling", x, yb + 0.034, 0.74, 0.040, 0.054, 0.066)
     guard = s3d.box("pump_guard", 1.10, 0.04, 0.05)
     lib.steel_dark(guard)
     out.append(s3d.at(guard, y=yb - 0.05, z=S.LOCKER_BOTTOM))
+    # подножка — гнутый лист 4 мм: площадка с пробитыми отверстиями, задний борт во всю высоту, передний загиб,
+    # снизу открыта; торцевые заглушки, кронштейны к концам лонжеронов и косынки под отсеками
     st = S.REAR_STEP
-    depth = st["y1"] - yb + 0.05
-    step = s3d.fillet(s3d.box("rear_step", st["w"], depth, st["z1"] - st["z0"]), 0.015, edges="side")
-    s3d.at(step, y=(yb - 0.05 + st["y1"]) / 2, z=st["z0"])
-    top = s3d.Frame((0, (yb - 0.05 + st["y1"]) / 2, st["z1"]))
+    ya, yz, z0, z1, t = yb - 0.05, st["y1"], st["z0"], st["z1"], 0.004
+    prof = [(ya, z1 - 0.06), (ya, z1), (yz, z1), (yz, z0), (yz - t, z0), (yz - t, z1 - t), (ya + t, z1 - t),
+            (ya + t, z1 - 0.06)]
+    step = s3d.extrude("rear_step", s3d.poly(prof, fillet=[0, 0.010, 0.012, 0, 0, 0.008, 0.006, 0]), st["w"],
+                       on=lib.side(-st["w"] / 2, 1, 0.0, 0.0))
+    top = s3d.Frame((0, (ya + yz) / 2, z1))
     s3d.hole(step, 0.022, on=s3d.grid(34, 4, 0.062, 0.058, stagger=True, on=top))
     lib.alu(step)
     out.append(step)
+    for sx in (-1, 1):
+        cap_pts = [(ya, z1 - 0.06), (ya, z1), (yz, z1), (yz, z0)]
+        end = s3d.extrude("rear_step_end", s3d.poly(cap_pts, fillet=[0, 0.010, 0.012, 0]), 0.008,
+                          on=lib.side(sx * st["w"] / 2 - (0.0 if sx > 0 else 0.008), 1, 0.0, 0.0))
+        lib.black_plastic(end)
+        out.append(end)
+        # кронштейн — по наружной стенке лонжерона, под напорными патрубками (не задевает задвижки и головки)
+        xi = sx * S.FRAME_X - (0.0 if sx > 0 else 0.012)
+        br = [(3.44, 0.80), (3.62, 0.80), (3.68, 0.70), (3.70, 0.645), (yz - 0.05, z1 - t), (3.76, z1 - t)]
+        plate = s3d.extrude("rear_step_bracket", s3d.poly(br, fillet=[0.01, 0.02, 0.03, 0.03, 0.01, 0.03]), 0.012,
+                            on=lib.side(xi, 1, 0.0, 0.0))
+        lib.steel_dark(plate)
+        out.append(plate)
+        xf = sx * (S.FRAME_X + 0.012)
+        for yy, zz in ((3.49, 0.765), (3.57, 0.765)):
+            bolt = s3d.extrude("rear_step_bolt", s3d.polygon(6, 0.024), 0.010, on=lib.side(xf, sx, yy, zz))
+            lib.steel_dark(bolt)
+            out.append(bolt)
+        for xg in (1.00, 0.70):
+            g = [(yb, z1 - t), (yz - 0.08, z1 - t), (yb, z1 - 0.075)]
+            gus = s3d.extrude("rear_step_gusset", s3d.poly(g, fillet=[0, 0.01, 0]), 0.008,
+                              on=lib.side(sx * xg - 0.004, 1, 0.0, 0.0))
+            lib.steel_dark(gus)
+            out.append(gus)
     # ремни крепления рукавов: с кромки крыши вниз по рольставне (ткань)
     for x in (0.48, -0.30):
         strap = s3d.wire("hose_strap_hang", [(x, yb - 0.06, S.BAND[1] + 0.10), (x, yb + 0.03, S.BAND[1] - 0.02),
@@ -379,20 +515,26 @@ def side_details():
         refl = s3d.box("rear_reflector", 0.16, 0.006, 0.05)
         lib.lens(refl, "#b00000")
         out.append(s3d.at(refl, x=sx * xl, y=yb + 0.025, z=0.53))
-    inlet = s3d.cylinder("suction_inlet", 0.16, 0.10)
-    cap = s3d.cylinder("suction_cap", 0.19, 0.05)
-    lugs = s3d.at(s3d.box("cap_lug", 0.05, 0.03, 0.05), on=s3d.ring(2, 0.11))
-    s3d.join(cap, lugs)
-    lib.alu(inlet)
-    lib.alu(cap)
-    out += [s3d.at(inlet, y=yb - 0.03, z=0.80, rx=-90), s3d.at(cap, y=yb + 0.07, z=0.80, rx=-90)]
     for x in (-0.62, 0.62):
         valve = s3d.wire("valve_handle", [(x, yb + 0.02, 0.62), (x, yb + 0.10, 0.62), (x + 0.10, yb + 0.12, 0.62)], 0.022, fillet=0.03)
         s3d.material(valve, "painted_metal", color="#c8a018")
         out.append(valve)
-    hook = s3d.at(s3d.torus("tow_hook_rear", 0.12, 0.03), y=S.REAR_STEP["y1"] - 0.02, z=S.REAR_STEP["z0"] - 0.06, rx=90)
-    lib.steel_dark(hook)
-    out.append(hook)
+    # буксирная вилка под подножкой: две щеки, палец с головкой и шплинтом-кольцом
+    st = S.REAR_STEP
+    for sx in (-1, 1):
+        cheek = [(st["y1"] - 0.10, st["z1"] - 0.004), (st["y1"] + 0.035, st["z1"] - 0.004), (st["y1"] + 0.06, 0.40),
+                 (st["y1"] + 0.035, 0.345), (st["y1"] - 0.06, 0.345)]
+        ch = s3d.extrude("tow_fork_cheek", s3d.poly(cheek, fillet=[0, 0.01, 0.03, 0.03, 0.02]), 0.016,
+                         on=lib.side(sx * 0.045 - (0.016 if sx > 0 else 0.0), 1, 0.0, 0.0))
+        lib.steel_dark(ch)
+        out.append(ch)
+    pin = s3d.extrude("tow_fork_pin", s3d.circle(0.032), 0.13, both=True, on=lib.side(0.0, 1, st["y1"] + 0.02, 0.395))
+    lib.chrome(pin)
+    head = s3d.extrude("tow_fork_pin_head", s3d.circle(0.05), 0.012, on=lib.side(0.065, 1, st["y1"] + 0.02, 0.395))
+    lib.chrome(head)
+    ring = s3d.torus("tow_fork_ring", 0.04, 0.006)
+    lib.steel_dark(ring)
+    out += [pin, head, s3d.at(ring, x=-0.068, y=st["y1"] + 0.02, z=0.395 - 0.02, ry=90)]
     return out
 
 
