@@ -158,8 +158,9 @@ def mirrors():
             out.append(s3d.at(clamp, x=sgn * (HW + 0.26), y=F + 0.52, z=z - 0.025))
     kerb = s3d.fillet(s3d.box("mirror_kerb", 0.22, 0.07, 0.15), 0.03, edges="side")
     lib.black_plastic(kerb)
-    out.append(s3d.at(kerb, x=-(HW - 0.20), y=F - 0.08, z=2.80, rx=-30))
-    kerb_arm = s3d.wire("kerb_arm", [(-(HW - 0.20), F + 0.10, S.CAB_ROOF - 0.02), (-(HW - 0.20), F - 0.05, 2.90)], 0.018)
+    # места зеркала и кронштейна — по правке владельца в файле отделки (2026-11-08)
+    out.append(s3d.at(kerb, x=-(HW - 0.20), y=F - 0.1086, z=2.7768, rx=-30))
+    kerb_arm = s3d.wire("kerb_arm", [(-(HW - 0.20), F + 0.239, S.CAB_ROOF - 0.02), (-(HW - 0.20), F + 0.089, 2.90)], 0.018)
     lib.black_plastic(kerb_arm)
     out.append(kerb_arm)
     return out

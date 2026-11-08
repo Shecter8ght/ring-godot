@@ -367,7 +367,8 @@ def rear():
         col = s3d.extrude("rear_column", s3d.rect(S.REAR_COL, 0.34, r=0.065), S.BAND[1] - S.LOCKER_BOTTOM)
         s3d.fillet(col, 0.025, edges="top")
         lib.paint_red(col)
-        out.append(s3d.at(col, x=sx * (HW - S.REAR_COL / 2 + 0.005), y=yb - 0.15, z=S.LOCKER_BOTTOM))
+        # стойка утоплена от борта на 2 см — правка владельца в файле отделки (2026-11-08); фонари — на прежних местах
+        out.append(s3d.at(col, x=sx * (HW - S.REAR_COL / 2 - 0.020), y=yb - 0.15, z=S.LOCKER_BOTTOM))
         xc = sx * (HW - S.REAR_COL / 2 + 0.005)
         for z0, z1 in ((0.545, 0.975), (1.525, 1.815)):
             bez = s3d.fillet(s3d.box("rear_lamp_bezel", 0.19, 0.012, z1 - z0), 0.04, edges="side")
@@ -717,7 +718,7 @@ def alu_profiles() -> list:
         out.append(rivet_row("rivets_band", [(sx * (HW + 0.0075), y, S.BAND[0] + 0.018) for y in ys], (sx, 0.0, 0.0)))
         xc = sx * (HW - S.REAR_COL / 2 + 0.005)
         zs = [0.60 + 0.12 * k for k in range(int((S.BAND[0] - 0.65) / 0.12))]
-        out.append(rivet_row("rivets_column", [(sx * (HW + 0.005), S.BODY_BACK - 0.05, z) for z in zs], (sx, 0.0, 0.0)))
+        out.append(rivet_row("rivets_column", [(sx * (HW - 0.020), S.BODY_BACK - 0.05, z) for z in zs], (sx, 0.0, 0.0)))
         out.append(rivet_row("rivets_column_rear", [(xc + sx * 0.12, S.BODY_BACK + 0.020, z) for z in zs if not (0.5 < z < 1.0
                                                                                                                   or 1.5 < z < 1.85)],
                              (0.0, 1.0, 0.0)))

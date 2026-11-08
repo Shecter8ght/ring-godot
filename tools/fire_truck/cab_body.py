@@ -332,11 +332,7 @@ def build_panels() -> list:
         out.append((f"Wiper_Arm_{k}", "black", *pt.strip_on_surface(surf, arm, 0.022, 0.010, 0.012, r=0.004)))
         out.append((f"Wiper_Blade_{k}", "black", *pt.strip_on_surface(surf, blade, 0.016, 0.014, 0.003, r=0.004)))
         out.append((f"Wiper_Rubber_{k}", "rubber", *pt.strip_on_surface(surf, blade, 0.008, 0.006, -0.001, r=0.002)))
-    for sgn in (1, -1):
-        u = sgn * rf_u(HW - 0.06, F + 0.10)
-        line = lift_poly(surf, rf, np.array([(u, S.WS_BOTTOM + 0.05), (u, S.WS_TOP - 0.02)]), 0.006)
-        out.append((f"Pillar_Deflector_{'L' if sgn > 0 else 'R'}", "black",
-                    *pt.strip_on_surface(surf, line, 0.13, 0.012, 0.0, r=0.005)))
+    # дефлекторов стоек нет — владелец убрал их в файле отделки (2026-11-08)
     return out
 
 

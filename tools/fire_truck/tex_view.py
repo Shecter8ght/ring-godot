@@ -6,7 +6,10 @@
 асфальта под машиной, камера спереди слева, вьюпорт сразу Rendered — смотреть самому в Blender.
 
 blender --background <FireTanker_uv_v01.blend> --factory-startup --python-exit-code 1 --python
-    tools/fire_truck/tex_view.py -- <папка карт> <выход.blend>
+    tools/fire_truck/tex_view.py -- <папка карт>[;<запасная папка>] <выход.blend> [worn]
+
+worn — этап 2 (износ): лак эмали остаётся только там, где поверхность ещё гладкая (на выгоревшем, пыльном и в налёте
+его нет), стекло пропускает меньше там, где грязное (матовее). Карты набора берутся из первой папки, где они есть.
 """
 from __future__ import annotations
 
@@ -39,6 +42,21 @@ def finishes():
     return {s["id"]: cat.get(s["finish"], {}) for s in spec["slots"]}
 
 
+WORN = False
+
+
+def _ramp(nt, src, a, b, top):
+    """top при src ≤ a, 0 при src ≥ b (Map Range с ограничением)."""
+    mr = nt.nodes.new("ShaderNodeMapRange")
+    mr.clamp = True
+    mr.inputs["From Min"].default_value = a
+    mr.inputs["From Max"].default_value = b
+    mr.inputs["To Min"].default_value = top
+    mr.inputs["To Max"].default_value = 0.0
+    nt.links.new(src, mr.inputs["Value"])
+    return mr.outputs["Result"]
+
+
 def material(st: str, kind: str, f: dict, maps: Path):
     name = f"FT_{st}__{kind}"
     m = bpy.data.materials.get(name)
@@ -69,10 +87,14 @@ def material(st: str, kind: str, f: dict, maps: Path):
     if "coat" in r:
         w, rough, ior = r["coat"]
         bsdf.inputs["Coat Weight"].default_value = w
+        if WORN:
+            nt.links.new(_ramp(nt, sep.outputs["Green"], 0.22, 0.45, w), bsdf.inputs["Coat Weight"])
         bsdf.inputs["Coat Roughness"].default_value = rough
         bsdf.inputs["Coat IOR"].default_value = ior
     if "transmission" in r:
         bsdf.inputs["Transmission Weight"].default_value = r["transmission"]
+        if WORN:
+            nt.links.new(_ramp(nt, sep.outputs["Green"], 0.1, 0.75, r["transmission"]), bsdf.inputs["Transmission Weight"])
         bsdf.inputs["IOR"].default_value = r.get("ior", 1.5)
         if hasattr(m, "surface_render_method"):
             m.surface_render_method = "BLENDED"
@@ -123,15 +145,18 @@ def studio(scene):
 
 
 def main():
+    global WORN
     a = sys.argv[sys.argv.index("--") + 1:]
-    maps, out = Path(a[0]), a[1]
+    dirs, out = [Path(x) for x in a[0].split(";")], a[1]
+    WORN = "worn" in a[2:]
     fin = finishes()
     missing = set()
     for o in [o for o in bpy.data.objects if o.type == "MESH"]:
         st, slot = o.get("ft_set"), o.get("ft_slot")
         if not st:
             continue
-        if not (maps / f"FT_{st}_baseColor.png").exists():
+        maps = next((d for d in dirs if (d / f"FT_{st}_baseColor.png").exists()), None)
+        if maps is None:
             missing.add(st)
             continue
         f = fin.get(slot, {})
