@@ -267,11 +267,23 @@ def visibility(objs) -> dict:
                 if p.index in vis:
                     continue
                 n = (nm @ p.normal).normalized()
-                c = mw @ p.center + n * 4e-4
-                for d in [n] + [d for d in dirs if d.dot(n) > 0.15]:
-                    rays += 1
-                    if bvh.ray_cast(c, d, RAY_LEN)[0] is None:
-                        vis.add(p.index)
+                # точки на самой грани: центр по вершинам у грани с вырезом («скважина» створки с окном) лежит
+                # в проёме, и луч из него не говорит о грани — плюс точки ближе к вершинам (как в asset_kit.uv)
+                c0 = mw @ p.center
+                vs = p.vertices
+                step = max(1, len(vs) // 6)
+                starts = [c0] + [c0 + ((mw @ me.vertices[vs[k]].co) - c0) * 0.85 for k in range(0, len(vs), step)][:6]
+                ds = [n] + [d for d in dirs if d.dot(n) > 0.15]
+                done_p = False
+                for st in starts:
+                    c = st + n * 4e-4
+                    for d in ds:
+                        rays += 1
+                        if bvh.ray_cast(c, d, RAY_LEN)[0] is None:
+                            vis.add(p.index)
+                            done_p = True
+                            break
+                    if done_p:
                         break
         del bvh
         log(f"  лучи: вариант «{var}» готов, {rays:,} лучей, {time.time() - t0:.0f} с")

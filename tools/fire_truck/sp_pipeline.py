@@ -54,7 +54,23 @@ def main():
         if "open" in steps:
             step(f"print(sp_truck.open_project('{proj}'))", "_project_ready.txt", 900, f"open_{proj}")
         if "create" in steps:
-            step(f"print(sp_truck.create('{proj}'))", "_project_ready.txt", 900, f"create_{proj}")
+            # событие готовности Painter иногда не приходит (проект уже открыт) — ждать и меткой, и опросом наборов
+            marker("_project_ready.txt")
+            print(" ", "create", sp_run.run(PRE + f"print(sp_truck.create('{proj}'))", 600, f"create_{proj}").strip()[-60:],
+                  flush=True)
+            want = len(T.PROJECTS[proj])
+            import time as _t
+            t0 = _t.time()
+            while _t.time() - t0 < 1200:
+                if (sp_run.SP_JOBS / "_project_ready.txt").exists():
+                    break
+                out = sp_run.run("import substance_painter.project as P, substance_painter.textureset as TS" + chr(10) +
+                                 "print(int(P.is_open() and not P.is_busy()), len(TS.all_texture_sets()) if P.is_open() else 0)",
+                                 120, "poll").strip().splitlines()[-1]
+                if out.startswith("1 ") and int(out.split()[1]) >= want:
+                    break
+                _t.sleep(15)
+            print("  create →", "готов", flush=True)
         if "bake" in steps:
             step(f"print(sp_truck.bake('{proj}'))", "_bake_done.txt", 5400, f"bake_{proj}")
         if "build" in steps:
