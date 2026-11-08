@@ -96,6 +96,30 @@ def main() -> None:
             left = sum(1 for f in bm.faces if f.calc_area() < 1e-10)
             bm.to_mesh(ob.data)
             print(f"  {ob.name}: нулевые грани убраны, осталось {left}")
+        # осколки разбиения панелей генератора (cab_body): треугольник в доли мм² на почти прямом участке контура
+        # даёт ребру третью грань — убрать только такие (у принятых машин «Проспекта» они тоже бывают)
+        tri3 = set()
+        for e in bm.edges:
+            if len(e.link_faces) > 2:
+                small = min((f for f in e.link_faces if len(f.verts) == 3), key=lambda f: f.calc_area(), default=None)
+                if small is not None and small.calc_area() < 2.5e-5:
+                    tri3.add(small)
+        if tri3:
+            bmesh.ops.delete(bm, geom=list(tri3), context="FACES_ONLY")
+            bmesh.ops.delete(bm, geom=[e for e in bm.edges if e.is_wire], context="EDGES")   # рёбра осколков без граней
+            print(f"  {ob.name}: осколков разбиения убрано {len(tri3)}")
+        if ob.name.startswith("Cab_") and (tri3 or any(not e.is_manifold and not e.is_boundary for e in bm.edges)):
+            # после осколков у соседних граней бывает разный обход — выровнять, сохранив сторону «наружу»
+            from mathutils import Vector
+            bm.faces.ensure_lookup_table()
+            before = sum((f.normal * f.calc_area() for f in bm.faces), Vector())
+            bmesh.ops.recalc_face_normals(bm, faces=list(bm.faces))
+            bm.normal_update()
+            after = sum((f.normal * f.calc_area() for f in bm.faces), Vector())
+            if before.dot(after) < 0:
+                bmesh.ops.reverse_faces(bm, faces=list(bm.faces))
+        if tri3 or ob.name.startswith("Cab_"):
+            bm.to_mesh(ob.data)
         bm.free()
         ob.data.update()
     all_closed = [o for o in common + closed]

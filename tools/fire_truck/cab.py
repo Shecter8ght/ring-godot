@@ -1,10 +1,9 @@
-"""Кабина «как КамАЗ после рестайлинга» (форма своя, без марок): корпус с лобовым и боковыми стёклами,
-швы дверей, решётка, бампер с фарами, белые крылья с арками и подножками, колпак с маячками, зеркала,
-дворники, ручки."""
+"""Кабина «как КамАЗ после рестайлинга» (форма своя, без марок). Корпус, панели с зазорами, стёкла, крылья,
+дворники и дефлекторы стоек — генератором кузовов «Проспекта» (cab_body.py); здесь — вставки решётки, бампер с фарами,
+расширители и ниши арок, подножки, колпак с маячками, зеркала, ручки, мелочи и тёмный салон-заглушка."""
 from __future__ import annotations
 
-import math
-
+import cab_body
 import lib
 import shapes
 import spec as S
@@ -14,94 +13,21 @@ F, B = S.CAB_FRONT, S.CAB_BACK
 HW = S.CAB_W / 2
 
 
-def ws_frame(inset: float = 0.0):
-    """Плоскость лобового стекла: начало в середине, нормаль наружу (вперёд и немного вверх)."""
-    y0, z0 = F + 0.012, S.WS_BOTTOM
-    y1, z1 = F + 0.012 + S.WS_LEAN, S.WS_TOP
-    dy, dz = y1 - y0, z1 - z0
-    L = math.hypot(dy, dz)
-    n = (0.0, -dz / L, dy / L)
-    o = (0.0, (y0 + y1) / 2 - n[1] * inset, (z0 + z1) / 2 - n[2] * inset)
-    return s3d.Frame(o, n), L
-
-
-def shell():
-    """Корпус кабины: профиль сбоку, выдавленный на ширину, скругления углов и крыши."""
-    pts = [(F, S.CAB_BOTTOM), (F + 0.012, S.WS_BOTTOM), (F + 0.012 + S.WS_LEAN, S.WS_TOP),
-           (F + 0.30, S.CAB_ROOF), (B, S.CAB_ROOF), (B, S.CAB_BOTTOM)]
-    prof = s3d.poly(pts, fillet=[0.0, 0.03, 0.10, 0.10, 0.04, 0.0])
-    # скругление контура боков — последним (build): после него EXACT перестаёт резать борт −X
-    return s3d.extrude("cab_shell", prof, S.CAB_W, both=True, on=lib.side(0))
-
-
-def windshield(cab):
-    fr, L = ws_frame()
-    w, h = 2.06, L - 0.10
-    rect = shapes.box_pts(-w / 2, w / 2, -h / 2, h / 2)
-    s3d.pocket(cab, shapes.outline(rect, 0.10), 0.035, on=fr)
-    seal = shapes.seal_ring("ws_seal", rect, 0.10, 0.022, 0.012, fr.offset(-0.035))
-    g = s3d.extrude("windshield", shapes.outline(shapes.box_pts(-w / 2 + 0.01, w / 2 - 0.01, -h / 2 + 0.01, h / 2 - 0.01),
-                                                0.09), 0.008, on=fr.offset(-0.028))
-    lib.glass(g)
-    return [seal, g]
-
-
-def side_windows(cab):
-    """Окна дверей: проём под стекло, уплотнитель, стекло с форточкой (стойка спереди)."""
-    out = []
-    w = S.SIDE_WIN
-    for sgn in (1, -1):
-        fr = lib.side(sgn * HW, sgn)
-        rect = shapes.box_pts(min(sgn * w["y0"], sgn * w["y1"]), max(sgn * w["y0"], sgn * w["y1"]), w["z0"], w["z1"])
-        s3d.pocket(cab, shapes.outline(rect, 0.05), 0.03, on=fr)
-        out.append(shapes.seal_ring("side_seal", rect, 0.05, 0.018, 0.01, fr.offset(-0.03)))
-        g = s3d.extrude("side_glass", shapes.outline(rect, 0.04), 0.006, on=fr.offset(-0.022))
-        lib.glass(g)
-        out.append(g)
-        # стойка форточки
-        yv = w["y0"] + 0.24
-        post = s3d.box("vent_post", 0.012, 0.025, w["z1"] - w["z0"] - 0.03)
-        lib.rubber(post)
-        out.append(s3d.at(post, x=sgn * (HW - 0.02), y=yv, z=w["z0"] + 0.015))
-    return out
-
-
-def door_seams(cab):
-    """Швы дверей и проём под ручку — резцом по контуру двери."""
-    d = S.DOOR
-    tools = []
-    for sgn in (1, -1):
-        fr = lib.side(sgn * HW, sgn)
-        ya, yb = sorted((sgn * d["y0"], sgn * d["y1"]))
-        rect = shapes.box_pts(ya, yb, d["z0"], d["z1"])
-        tools.append(shapes.ring_tool("door_seam", rect, 0.06, 0.006, 0.012, fr))
-        # горизонтальный шов под окном (накладка двери)
-    s3d.cut(cab, tools)
-
-
 GRILLE_SLOTS = [(1.46, 1.50, 0.085), (1.30, 1.33, 0.085)]     # ширина, середина по высоте, высота щели
 FACE_PANEL = dict(x=1.02, z0=1.13, z1=1.84)                    # откидная облицовка (решётка) — швы вокруг
 
 
-def grille(cab):
-    """Решётка: две длинные щели в облицовке, внутри — чёрные вставки с двумя рёбрами; швы откидной облицовки."""
+def grille_inserts():
+    """Чёрные вставки за щелями облицовки (облицовка — панель генератора) и по два ребра в каждой щели."""
     out = []
-    tools = []
     for w, z, h in GRILLE_SLOTS:
-        rect = shapes.box_pts(-w / 2, w / 2, z - h / 2, z + h / 2)
-        tools.append(s3d.extrude("slot", shapes.outline(rect, 0.035), 0.12, both=True, on=lib.front(F)))
-    fp = FACE_PANEL
-    tools.append(shapes.ring_tool("face_seam", shapes.box_pts(-fp["x"], fp["x"], fp["z0"], fp["z1"]), 0.05, 0.006, 0.012,
-                                  lib.front(F + 0.006)))
-    s3d.cut(cab, tools)
-    for w, z, h in GRILLE_SLOTS:
-        ins = s3d.fillet(s3d.box("grille_insert", w - 0.02, 0.02, h - 0.01), 0.012, edges="side")
+        ins = s3d.fillet(s3d.box("grille_insert", w - 0.02, 0.02, h + 0.02), 0.012, edges="side")
         lib.black_plastic(ins)
-        out.append(s3d.at(ins, y=F + 0.05, z=z - (h - 0.01) / 2))
+        out.append(s3d.at(ins, y=F + 0.075, z=z - (h + 0.02) / 2))
         for dz in (-h / 5, h / 5):
             fin = s3d.fillet(s3d.box("grille_fin", w - 0.05, 0.035, 0.007), 0.003, edges="side")
             lib.black_plastic(fin)
-            out.append(s3d.at(fin, y=F + 0.025, z=z + dz - 0.0035))
+            out.append(s3d.at(fin, y=F + 0.035, z=z + dz - 0.0035))
     return out
 
 
@@ -144,43 +70,38 @@ def bumper():
         hk = s3d.at(s3d.torus("tow_hook", 0.09, 0.022), x=sx * 0.42, y=b["y0"] - 0.03, z=0.47, rx=90)
         lib.steel_dark(hk)
         hooks.append(hk)
-    apron = s3d.fillet(s3d.box("front_apron", S.CAB_W - 0.06, 0.40, S.CAB_BOTTOM - b["z1"] + 0.03), 0.06, edges="side")
-    lib.paint_red(apron)
-    apron = s3d.at(apron, y=F + 0.20 + 0.001, z=b["z1"] - 0.03)
-    return [body, lip, apron] + lamps + hooks
+    return [body, lip] + lamps + hooks
 
 
 arch_ring = shapes.arch_ring
 
 
 def fenders():
-    """Белые крылья над передними колёсами: панель с аркой, чёрный расширитель, подножки за колесом."""
+    """Над передними колёсами: чёрные расширители арок и колёсные ниши; в нише подножки крыла — задняя
+    стенка и рифлёная площадка; нижняя подножка — висячая, на двух кронштейнах под крылом."""
     f = S.FENDER
     out = []
     for sgn in (1, -1):
-        panel = s3d.box("fender", f["t"], f["y1"] - f["y0"], f["z1"] - f["z0"])
-        s3d.at(panel, x=sgn * (HW - f["t"] / 2 + 0.01), y=(f["y0"] + f["y1"]) / 2, z=f["z0"])
-        arch = lib.along_x(s3d.cylinder("arch_cut", 2 * S.ARCH_R_F, 0.6), sgn * HW - 0.3, S.YF, S.WHEEL_Z)
-        s3d.cut(panel, arch)
-        lib.paint_white(panel)
         flare = arch_ring("arch_flare", S.ARCH_R_F + 0.05, S.ARCH_R_F - 0.005, f["t"] + 0.03,
                           sgn * (HW - f["t"] / 2 + 0.01), S.YF, S.WHEEL_Z, keep=0.12)
         lib.black_plastic(flare)
-        # подножки: две ступени в задней части крыла, за колесом — ниша и рифлёная площадка
-        fr = lib.side(sgn * (HW + 0.01), sgn)
-        for z in S.STEPS_Z:
-            ya, yb = sorted((sgn * (S.STEP_Y - 0.10), sgn * (S.STEP_Y + 0.10)))
-            s3d.pocket(panel, shapes.outline(shapes.box_pts(ya, yb, z, z + 0.20), 0.02), 0.13, on=fr)
-            tread = s3d.fillet(s3d.box("step", 0.15, 0.19, 0.025), 0.006, edges="side")
-            lib.black_plastic(tread)
-            out.append(s3d.at(tread, x=sgn * (HW - 0.07), y=S.STEP_Y, z=z))
-        s3d.fillet(panel, 0.04, edges="side")
-        out += [panel, flare]
-        # колёсная ниша изнутри — чтобы сквозь крыло не просвечивала рама
         liner = arch_ring("wheel_house", S.ARCH_R_F + 0.02, S.ARCH_R_F + 0.005, 0.45, sgn * (HW - 0.38), S.YF,
                           S.WHEEL_Z, keep=0.0)
         lib.black_plastic(liner)
-        out.append(liner)
+        z = S.STEPS_Z[1]
+        back = s3d.box("step_back", 0.012, 0.18, 0.21)
+        lib.black_plastic(back)
+        tread = s3d.fillet(s3d.box("step", 0.12, 0.155, 0.022), 0.005, edges="side")
+        lib.black_plastic(tread)
+        out += [flare, liner, s3d.at(back, x=sgn * (HW - 0.115), y=S.STEP_Y, z=z - 0.01),
+                s3d.at(tread, x=sgn * (HW - 0.06), y=S.STEP_Y, z=z)]
+        low = s3d.fillet(s3d.box("step_low", 0.20, 0.17, 0.025), 0.006, edges="side")
+        lib.black_plastic(low)
+        out.append(s3d.at(low, x=sgn * (HW - 0.06), y=S.STEP_Y, z=S.FENDER["z0"] - 0.12))
+        for dy in (-0.07, 0.07):
+            strap = s3d.box("step_strap", 0.012, 0.025, 0.14)
+            lib.steel_dark(strap)
+            out.append(s3d.at(strap, x=sgn * (HW - 0.10), y=S.STEP_Y + dy, z=S.FENDER["z0"] - 0.10))
     return out
 
 
@@ -227,7 +148,7 @@ def mirrors():
         for z in (2.70, 2.05):
             clamp = s3d.fillet(s3d.box("mirror_clamp", 0.05, 0.06, 0.06), 0.012, edges="side")
             lib.black_plastic(clamp)
-            out.append(s3d.at(clamp, x=sgn * (HW + 0.02), y=F + 0.55, z=z - 0.03))
+            out.append(s3d.at(clamp, x=sgn * (HW + 0.012), y=F + 0.55, z=z - 0.03))
         for z in (2.48, 2.16):
             clamp = s3d.cylinder("mirror_pivot", 0.045, 0.05)
             lib.black_plastic(clamp)
@@ -241,41 +162,13 @@ def mirrors():
     return out
 
 
-def _strip(cx: float, cy: float, ang: float, length: float, width: float, start: float = 0.0):
-    """Полоса в плоскости стекла: от точки (cx, cy) под углом `ang` (градусы), длиной `length`."""
-    import math as _m
-    c, s = _m.cos(_m.radians(ang)), _m.sin(_m.radians(ang))
-    nx, ny = -s * width / 2, c * width / 2
-    a0, a1 = start, start + length
-    return [(cx + c * a0 + nx, cy + s * a0 + ny), (cx + c * a1 + nx, cy + s * a1 + ny),
-            (cx + c * a1 - nx, cy + s * a1 - ny), (cx + c * a0 - nx, cy + s * a0 - ny)]
-
-
-def wipers():
-    """Два дворника в парковке у нижней кромки стекла: рычаг (швеллер), щётка с каркасом и резинкой, ось."""
-    out = []
-    for xp, ang in ((-0.86, 9.0), (0.04, 9.0)):
-        fr, L = ws_frame(-0.004)
-        py = -L / 2 + 0.05
-        arm = s3d.extrude("wiper_arm", s3d.poly(_strip(xp, py, ang, 0.60, 0.022)), 0.012, on=fr.offset(0.008))
-        lib.black_plastic(arm)
-        # щётка: каркас над резинкой, середина у конца рычага, чуть круче рычага
-        tip_x = xp + 0.60 * 0.9877
-        tip_y = py + 0.60 * 0.1564
-        frame_b = s3d.extrude("wiper_frame", s3d.poly(_strip(tip_x, tip_y, ang - 2.0, 0.66, 0.016, start=-0.33)), 0.014,
-                              on=fr.offset(0.004))
-        lib.black_plastic(frame_b)
-        rub = s3d.extrude("wiper_rubber", s3d.poly(_strip(tip_x, tip_y - 0.004, ang - 2.0, 0.64, 0.008, start=-0.32)), 0.006,
-                          on=fr.offset(-0.001))
-        lib.rubber(rub)
-        cap = s3d.extrude("wiper_cap", s3d.circle(0.05), 0.022, on=s3d.Frame(tuple(fr.point(xp, py)), tuple(fr.normal)))
-        lib.black_plastic(cap)
-        out += [arm, frame_b, rub, cap]
-    return out
-
-
 def handles_and_lamps():
     out = []
+    w = S.SIDE_WIN
+    for sgn in (1, -1):
+        post = s3d.box("vent_post", 0.012, 0.025, w["z1"] - w["z0"] - 0.04)
+        lib.rubber(post)
+        out.append(s3d.at(post, x=sgn * (HW - 0.012), y=w["y0"] + 0.24, z=w["z0"] + 0.02))
     for sgn in (1, -1):
         h = s3d.fillet(s3d.box("door_handle", 0.03, 0.17, 0.04), 0.012, edges="side")
         lib.black_plastic(h)
@@ -317,17 +210,7 @@ def cab_details():
     for sx in (-1, 1):
         gut = s3d.fillet(s3d.box("rain_gutter", 0.018, B - F - 0.45, 0.022), 0.008, edges="side")
         lib.black_plastic(gut)
-        out.append(s3d.at(gut, x=sx * (HW + 0.004), y=(F + 0.40 + B - 0.05) / 2, z=S.CAB_ROOF - 0.075))
-    # дефлекторы на передних стойках (чёрный пластик, как у КамАЗа): пластина вдоль скругления угла,
-    # наклонена как стойка; профиль: x рамки — по −X мира, y — вперёд
-    dy, dz = S.WS_LEAN, S.WS_TOP - S.WS_BOTTOM
-    n = lib.unit(0.0, dy, dz)
-    for sgn in (1, -1):
-        pts = [(-sgn * 0.028, 0.0), (-sgn * 0.040, 0.0), (-sgn * 0.040, -0.17), (-sgn * 0.028, -0.17)]
-        fin = s3d.extrude("pillar_deflector", s3d.poly(pts), (dz - 0.10) / n[2],
-                          on=s3d.Frame((sgn * HW, F + 0.02 + 0.05 * dy / dz, S.WS_BOTTOM + 0.05), n))
-        lib.black_plastic(fin)
-        out.append(fin)
+        out.append(s3d.at(gut, x=sx * (HW - 0.006), y=(F + 0.40 + B - 0.05) / 2, z=S.CAB_ROOF - 0.075))
     spk = s3d.fillet(s3d.box("siren_speaker", 0.26, 0.16, 0.20), 0.03, edges="side")
     lib.black_plastic(spk)
     out.append(s3d.at(spk, x=-0.62, y=b["y1"] + 0.06, z=0.50))
@@ -339,12 +222,27 @@ def cab_details():
     return out
 
 
+def interior():
+    """Салон — заглушкой (подробно только снаружи): тёмная коробка за стёклами, панель приборов, руль слева,
+    спинки сидений — чтобы сквозь стёкла не было видно пустой кабины и рамы под ней."""
+    out = []
+    box = s3d.box("cab_interior", S.CAB_W - 0.16, (B - 0.06) - (F + 0.30), S.DOOR["z1"] - 1.30)
+    lib.steel_dark(box)
+    out.append(s3d.at(box, y=((B - 0.06) + (F + 0.30)) / 2, z=1.30))
+    dash = s3d.fillet(s3d.box("dashboard", S.CAB_W - 0.22, 0.46, 0.42), 0.06, edges="top")
+    s3d.material(dash, "plastic", color="#26282a", roughness=0.7)
+    out.append(s3d.at(dash, y=F + 0.36, z=1.52))
+    wheel = s3d.torus("steering_wheel", 0.44, 0.03)
+    s3d.material(wheel, "plastic", color="#1a1a1a", roughness=0.6)
+    out.append(s3d.at(wheel, x=0.52, y=F + 0.72, z=1.95, rx=-55))
+    for x in (0.52, -0.40):
+        seat = s3d.fillet(s3d.box("seat_back", 0.50, 0.12, 0.62), 0.06, edges="side top")
+        s3d.material(seat, "fabric", color="#2c2f33")
+        out.append(s3d.at(seat, x=x, y=B - 0.20, z=1.70, rx=-8))
+    return out
+
+
 def build() -> dict:
-    cab = shell()
-    parts = windshield(cab) + side_windows(cab)
-    door_seams(cab)
-    parts += grille(cab)
-    s3d.fillet(cab, 0.07, edges="top bottom")
-    lib.paint_red(cab)
-    parts = [cab] + parts + bumper() + fenders() + roof_cap() + mirrors() + wipers() + handles_and_lamps() + cab_details()
+    parts = cab_body.build() + grille_inserts() + bumper() + fenders() + roof_cap() + mirrors() + handles_and_lamps() \
+        + cab_details() + interior()
     return {"common": [s3d.group("Кабина", *parts)]}

@@ -1,5 +1,6 @@
 """Проверка формы пожарной машины: габариты по коллекциям, сетка каждой детали (открытые и неразделённые
-рёбра, вырожденные грани, свободные вершины).
+рёбра, вырожденные грани, свободные вершины). Панели кабины генератора (Cab_*) — листы с отбортовкой: открытые
+кромки у них задуманы и считаются отдельно.
 
     "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background <файл.blend> --python tools/fire_truck/audit.py
 """
@@ -31,6 +32,7 @@ def world_bbox(objs):
 
 
 bad = []
+sheets = []
 total_tris = 0
 summary: dict = {"file": bpy.data.filepath, "collections": {}}
 for ob in bpy.data.objects:
@@ -43,7 +45,9 @@ for ob in bpy.data.objects:
     degen = sum(1 for f in bm.faces if f.calc_area() < 1e-10)
     loose = sum(1 for v in bm.verts if not v.link_edges)
     total_tris += sum(len(f.verts) - 2 for f in bm.faces)
-    if boundary or nonman or degen or loose:
+    if ob.name.startswith("Cab_") and not (nonman or degen or loose):
+        sheets.append(ob.name)
+    elif boundary or nonman or degen or loose:
         bad.append((ob.name, boundary, nonman, degen, loose))
     bm.free()
 
@@ -62,10 +66,12 @@ for name in ("Целая", "Отсеки открыты"):
           f"(без зеркал и антенн {bhi.x - blo.x:.3f} × {bhi.y - blo.y:.3f} × {bhi.z - blo.z:.3f}); "
           f"Y {lo.y:.2f}…{hi.y:.2f}, Z {lo.z:.3f}…{hi.z:.3f}")
 print(f"треугольников в файле: {total_tris:,}")
+print(f"листовых панелей кабины (кромки открыты намеренно): {len(sheets)}")
 print(f"деталей с замечаниями: {len(bad)}")
 for name, b, n, d, l in sorted(bad, key=lambda r: -(r[1] + r[2] + r[3])):
     print(f"  {name}: открытых рёбер {b}, неразделённых {n}, вырожденных граней {d}, свободных вершин {l}")
 summary["triangles"] = total_tris
+summary["sheet_panels"] = sheets
 summary["parts_with_issues"] = [dict(zip(("name", "boundary", "non_manifold", "degenerate", "loose"), r)) for r in bad]
 if REPORT:
     REPORT.parent.mkdir(parents=True, exist_ok=True)
