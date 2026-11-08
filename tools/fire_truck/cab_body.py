@@ -344,8 +344,12 @@ def _trim(ob):
     return lib.s3d.material(ob, "plastic", color="#34373a", roughness=0.65)
 
 
+def _beacon(ob):
+    return lib.s3d.material(ob, "glass", color="#2a55e0", roughness=0.05, opacity=0.55)
+
+
 PAINT = {"red": lib.paint_red, "white": lib.paint_white, "glass": lib.glass, "rubber": lib.rubber,
-         "black": lib.black_plastic, "dark": lib.steel_dark, "trim": _trim}
+         "black": lib.black_plastic, "dark": lib.steel_dark, "trim": _trim, "beacon": _beacon}
 DOOR_PARTS = ("Cab_Door_", "Cab_DoorEdge_", "Cab_DoorReveal_", "Cab_DoorCard_")
 LINED = ("Cab_Front_Mask", "Cab_Quarter_L", "Cab_Quarter_R")      # изнанка видна из салона — тёмная подкладка
 
@@ -371,8 +375,9 @@ def lining(ob, name: str):
 
 def build() -> dict:
     """Панели кабины объектами Blender (материалы — метками sand3d): {"common": […], "door_L": […], "door_R": […]}."""
+    import cap_bumper
     got = {"common": [], "door_L": [], "door_R": []}
-    for name, paint, V, Fc in build_panels():
+    for name, paint, V, Fc in build_panels() + cap_bumper.build():
         me = bpy.data.meshes.new(name)
         me.from_pydata([tuple(map(float, v)) for v in np.asarray(V)], [], [tuple(int(i) for i in f) for f in Fc])
         me.validate()

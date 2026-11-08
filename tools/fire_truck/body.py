@@ -267,10 +267,15 @@ def rear():
     out = []
     yb = S.BODY_BACK
     for sx in (-1, 1):
-        col = s3d.fillet(s3d.box("rear_column", S.REAR_COL, 0.34, S.BAND[1] - S.LOCKER_BOTTOM), 0.03, edges="side")
+        col = s3d.extrude("rear_column", s3d.rect(S.REAR_COL, 0.34, r=0.065), S.BAND[1] - S.LOCKER_BOTTOM)
+        s3d.fillet(col, 0.025, edges="top")
         lib.paint_red(col)
         out.append(s3d.at(col, x=sx * (HW - S.REAR_COL / 2 + 0.005), y=yb - 0.15, z=S.LOCKER_BOTTOM))
         xc = sx * (HW - S.REAR_COL / 2 + 0.005)
+        for z0, z1 in ((0.545, 0.975), (1.525, 1.815)):
+            bez = s3d.fillet(s3d.box("rear_lamp_bezel", 0.19, 0.012, z1 - z0), 0.04, edges="side")
+            lib.black_plastic(bez)
+            out.append(s3d.at(bez, x=xc, y=yb + 0.024, z=z0))
         for z, color in ((0.62, "#c81010"), (0.76, "#f0a020"), (0.90, "#f4f4f4"), (1.60, "#c81010"),
                          (1.74, "#c81010")):
             lamp = s3d.cylinder("rear_lamp", 0.11, 0.025)
@@ -505,6 +510,82 @@ def rear_compartment_open() -> list:
     return out
 
 
+def rivet_row(name: str, pts, normal, r: float = 0.0055):
+    """Ряд заклёпок одной сеткой: полусферы радиуса r в точках pts, смотрят по normal (без копий sand3d)."""
+    import math as _m
+
+    import bpy
+    import numpy as np
+    n = np.asarray(normal, float)
+    n /= np.linalg.norm(n)
+    a = np.array([0.0, 0.0, 1.0]) if abs(n[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    u = np.cross(n, a)
+    u /= np.linalg.norm(u)
+    v = np.cross(n, u)
+    seg, rings = 10, 3
+    V, Fc = [], []
+    for p in pts:
+        p = np.asarray(p, float)
+        base = len(V)
+        for k in range(rings):
+            phi = (_m.pi / 2) * k / rings
+            rr, hh = r * _m.cos(phi), r * 0.55 * _m.sin(phi)
+            for j in range(seg):
+                t = 2 * _m.pi * j / seg
+                V.append(p + u * rr * _m.cos(t) + v * rr * _m.sin(t) + n * hh)
+        top = len(V)
+        V.append(p + n * r * 0.55)
+        for k in range(rings - 1):
+            for j in range(seg):
+                j2 = (j + 1) % seg
+                Fc.append((base + k * seg + j, base + k * seg + j2, base + (k + 1) * seg + j2, base + (k + 1) * seg + j))
+        for j in range(seg):
+            Fc.append((base + (rings - 1) * seg + j, base + (rings - 1) * seg + (j + 1) % seg, top))
+        Fc.append(tuple(base + seg - 1 - j for j in range(seg)))          # донце: заклёпка — замкнутое тело
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(map(float, q)) for q in V], [], Fc)
+    me.validate()
+    me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    lib.alu(ob)
+    return ob
+
+
+def alu_profiles() -> list:
+    """Алюминиевые профили надстройки: скруглённые бруски на передних углах, кант по верхней кромке бортов и спереди,
+    нижний отбойный профиль по низу отсеков (с разрывом на арке), заклёпки по нижней кромке верхней полосы и по стойкам."""
+    out = []
+    zb, zt = S.LOCKER_BOTTOM, S.BAND[1]
+    for sx in (-1, 1):
+        corner = s3d.extrude("body_corner_profile", s3d.rect(0.05, 0.05, r=0.02), S.BAND[0] - zb)
+        lib.alu(corner)
+        out.append(s3d.at(corner, x=sx * (HW - 0.005), y=S.BODY_FRONT + 0.005, z=zb))
+        edge = s3d.extrude("roof_edge_profile", s3d.rect(0.028, 0.032, r=0.012), S.BODY_BACK - 0.32 - S.BODY_FRONT,
+                           on=lib.rear(S.BODY_FRONT, x=sx * (HW + 0.008), z=zt - 0.012))
+        lib.alu(edge)
+        out.append(edge)
+        a0, a1 = S.YR - S.ARCH_R_R - 0.07, S.YR + S.ARCH_R_R + 0.07
+        for y0, y1 in ((S.BODY_FRONT + 0.03, a0), (a1, S.BODY_BACK - S.REAR_COL + 0.02)):
+            sill = s3d.extrude("sill_profile", s3d.rect(0.024, 0.05, r=0.009), y1 - y0,
+                               on=lib.rear(y0, x=sx * (HW + 0.006), z=zb + 0.025))
+            lib.alu(sill)
+            out.append(sill)
+        ys = [S.BODY_FRONT + 0.10 + 0.12 * k for k in range(int((S.BODY_BACK - 0.40 - S.BODY_FRONT) / 0.12))]
+        out.append(rivet_row("rivets_band", [(sx * (HW + 0.0075), y, S.BAND[0] + 0.018) for y in ys], (sx, 0.0, 0.0)))
+        xc = sx * (HW - S.REAR_COL / 2 + 0.005)
+        zs = [0.60 + 0.12 * k for k in range(int((S.BAND[0] - 0.65) / 0.12))]
+        out.append(rivet_row("rivets_column", [(sx * (HW + 0.005), S.BODY_BACK - 0.05, z) for z in zs], (sx, 0.0, 0.0)))
+        out.append(rivet_row("rivets_column_rear", [(xc + sx * 0.12, S.BODY_BACK + 0.020, z) for z in zs if not (0.5 < z < 1.0
+                                                                                                                  or 1.5 < z < 1.85)],
+                             (0.0, 1.0, 0.0)))
+    front_edge = s3d.extrude("roof_edge_profile_front", s3d.rect(0.028, 0.032, r=0.012), 2 * HW + 0.016,
+                             on=lib.side(-(HW + 0.008), 1, S.BODY_FRONT - 0.008, zt - 0.012))
+    lib.alu(front_edge)
+    out.append(front_edge)
+    return out
+
+
 def mudflap_brackets() -> list:
     """Планки задних брызговиков: стальная полоса под низом отсека, к ней прикручен верх брызговика."""
     out = []
@@ -525,7 +606,7 @@ def build() -> dict:
     crew = crew_cut(h) + lower_doors(h)
     s3d.fillet(h, 0.012, edges="side")          # после вырезов: скругление до них ломает EXACT на борту −X
     common = [h] + crew + band() + rub_strips() + intake_boxes() + rear() + side_details() + crew_mod.hinge_body_parts() \
-        + crew_mod.interior() + mudflap_brackets()
+        + crew_mod.interior() + mudflap_brackets() + alu_profiles()
     closed, opened = rear_shutter_closed(), rear_compartment_open()
     for side, sx in (("L", 1.0), ("R", -1.0)):
         d = crew_mod.door(sx)

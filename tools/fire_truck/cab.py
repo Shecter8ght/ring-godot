@@ -36,51 +36,39 @@ def grille_inserts():
 def bumper():
     """Белый пластиковый бампер с фарами, противотуманками, нишей номера и чёрной нижней губой."""
     b = S.BUMPER
-    depth = b["y1"] - b["y0"]
-    body = s3d.box("bumper", b["w"], depth, b["z1"] - b["z0"])
-    s3d.fillet(body, 0.10, edges="side")
-    s3d.fillet(body, 0.025, edges="top bottom")
-    s3d.at(body, y=(b["y0"] + b["y1"]) / 2, z=b["z0"])
     fr = lib.front(b["y0"])
     lamps = []
     for sx in (-1, 1):
-        hl = shapes.box_pts(sx * 0.70 - 0.19, sx * 0.70 + 0.19, 0.73, 0.88)
-        s3d.pocket(body, shapes.outline(hl, 0.03), 0.05, on=fr)
         lensp = s3d.extrude("headlight", shapes.outline(shapes.box_pts(sx * 0.70 - 0.18, sx * 0.70 + 0.18, 0.74, 0.87), 0.025),
                             0.012, on=fr.offset(-0.04))
         lib.lens(lensp, "#e8eef0")
         reflector = s3d.extrude("reflector", shapes.outline(shapes.box_pts(sx * 0.70 - 0.18, sx * 0.70 + 0.18, 0.74, 0.87), 0.025),
                                 0.004, on=fr.offset(-0.05))
         lib.chrome(reflector)
-        ind = s3d.extrude("indicator", shapes.outline(shapes.box_pts(sx * 1.00 - 0.08, sx * 1.00 + 0.06, 0.75, 0.86), 0.02),
-                          0.01, on=fr.offset(-0.002))
+        ind = s3d.extrude("indicator", shapes.outline(shapes.box_pts(sx * 0.99 - 0.065, sx * 0.99 + 0.065, 0.755, 0.855), 0.018),
+                          0.01, on=fr.offset(-0.040))
         lib.lens(ind, "#f0a020")
-        fog_pts = shapes.box_pts(sx * 0.72 - 0.065, sx * 0.72 + 0.065, 0.55, 0.64)
-        s3d.pocket(body, shapes.outline(fog_pts, 0.012), 0.03, on=fr)
         fog = s3d.extrude("foglight", shapes.outline(shapes.box_pts(sx * 0.72 - 0.058, sx * 0.72 + 0.058, 0.557, 0.633), 0.01),
-                          0.01, on=fr.offset(-0.022))
+                          0.01, on=fr.offset(-0.038))
         lib.lens(fog, "#f3f3ea")
         drl = s3d.fillet(s3d.box("drl_strip", 0.32, 0.008, 0.014), 0.006, edges="side")
         s3d.material(drl, "glass", color="#ffffff", opacity=0.85, emission=0.6)
         drl = s3d.at(drl, x=sx * 0.70, y=b["y0"] + 0.03, z=0.85)
         lamps += [lensp, reflector, ind, fog, drl]
-    s3d.pocket(body, shapes.outline(shapes.box_pts(-0.28, 0.28, 0.50, 0.63), 0.01), 0.012, on=fr)
-    s3d.pocket(body, shapes.outline(shapes.box_pts(-0.45, 0.45, 0.64, 0.71), 0.02), 0.06, on=fr)
-    lib.paint_white(body)
-    plate = s3d.box("plate_front", 0.52, 0.004, 0.112)
+    plate = s3d.box("plate_front", 0.52, 0.004, 0.096)
     s3d.material(plate, "painted_metal", color="#f0f0ea")
-    pframe = s3d.fillet(s3d.box("plate_frame", 0.55, 0.006, 0.13), 0.01, edges="side")
+    pframe = s3d.fillet(s3d.box("plate_frame", 0.545, 0.006, 0.10), 0.01, edges="side")
     lib.black_plastic(pframe)
-    lamps += [s3d.at(pframe, y=b["y0"] + 0.009, z=0.50), s3d.at(plate, y=b["y0"] + 0.006, z=0.509)]
-    lip = s3d.fillet(s3d.box("bumper_lip", b["w"] - 0.30, 0.20, 0.06), 0.03, edges="side")
-    lib.black_plastic(lip)
-    lip = s3d.at(lip, y=b["y0"] + 0.14, z=b["z0"] - 0.03)
+    back = s3d.box("bumper_backing", b["w"] - 0.20, 0.02, b["z1"] - b["z0"] - 0.06)
+    lib.black_plastic(back)
+    lamps += [s3d.at(pframe, y=b["y0"] + 0.030, z=0.522), s3d.at(plate, y=b["y0"] + 0.027, z=0.524),
+              s3d.at(back, y=b["y1"] - 0.02, z=b["z0"] + 0.03)]
     hooks = []
     for sx in (-1, 1):
-        hk = s3d.at(s3d.torus("tow_hook", 0.09, 0.022), x=sx * 0.42, y=b["y0"] - 0.03, z=0.47, rx=90)
+        hk = s3d.at(s3d.torus("tow_hook", 0.09, 0.022), x=sx * 0.42, y=b["y0"] - 0.005, z=0.465, rx=90)
         lib.steel_dark(hk)
         hooks.append(hk)
-    return [body, lip] + lamps + hooks
+    return lamps + hooks
 
 
 arch_ring = shapes.arch_ring
@@ -116,23 +104,24 @@ def fenders():
 
 
 def roof_cap():
-    """Белый колпак на крыше кабины с двумя синими маячками на передних углах."""
-    pts = [(F + 0.20, S.CAB_ROOF - 0.03), (F + 0.34, S.CAP_TOP), (B - 0.03, S.CAP_TOP), (B - 0.03, S.CAB_ROOF - 0.03)]
-    cap = s3d.extrude("roof_cap", s3d.poly(pts, fillet=[0, 0.09, 0.05, 0]), S.CAB_W - 0.10, both=True, on=lib.side(0))
-    s3d.fillet(cap, 0.06, edges="top bottom")
-    lib.paint_white(cap)
-    out = [cap]
+    """Колпак — панель генератора (cap_bumper.py); здесь под синими линзами маячков отражатель и светодиодные модули
+    рядами, оранжевые габаритные огни по бокам колпака."""
+    import cap_bumper as cbp
+    P = cbp.POD
+    out = []
     for sx in (-1, 1):
-        base = s3d.fillet(s3d.box("beacon_base", 0.46, 0.30, 0.03), 0.04, edges="side")
-        lib.black_plastic(base)
-        out.append(s3d.at(base, x=sx * (HW - 0.34), y=F + 0.58, z=S.CAP_TOP - 0.005))
+        zb = P["top"] - 0.052
+        refl = s3d.fillet(s3d.box("beacon_reflector", 0.38, 0.23, 0.006), 0.04, edges="side")
+        lib.chrome(refl)
+        out.append(s3d.at(refl, x=sx * P["x"], y=P["y"], z=zb))
+        for i in range(6):
+            for j in range(3):
+                led = s3d.fillet(s3d.box("beacon_led", 0.034, 0.034, 0.012), 0.008, edges="side")
+                s3d.material(led, "glass", color="#3a6cff", opacity=0.9, emission=1.5)
+                out.append(s3d.at(led, x=sx * P["x"] - 0.15 + 0.06 * i, y=P["y"] - 0.07 + 0.07 * j, z=zb + 0.006))
         amber = s3d.fillet(s3d.box("cap_marker", 0.035, 0.06, 0.035), 0.01, edges="side")
         lib.lens(amber, "#f0a020")
-        out.append(s3d.at(amber, x=sx * (HW - 0.06), y=F + 0.95, z=S.CAP_TOP - 0.09))
-        dome = s3d.fillet(s3d.box("beacon", 0.44, 0.28, 0.11), 0.05, edges="side")
-        s3d.fillet(dome, 0.035, edges="top")
-        lib.lens(dome, "#2050d8")
-        out.append(s3d.at(dome, x=sx * (HW - 0.34), y=F + 0.58, z=S.CAP_TOP + 0.02))
+        out.append(s3d.at(amber, x=sx * (HW - 0.065), y=F + 0.95, z=S.CAP_TOP - 0.10))
     return out
 
 

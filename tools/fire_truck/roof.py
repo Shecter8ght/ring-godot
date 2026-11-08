@@ -85,66 +85,162 @@ def hose_tray():
     return out
 
 
+RUNG_PITCH = 0.28
+
+
+def _rail_profile(xc: float, sx: float) -> list:
+    """Сечение тетивы-швеллера (X, Z): стенка снаружи, полки и загибы внутрь лестницы; высота 75, ширина 30, стенка 4 мм."""
+    xo, xi = 0.015, -0.015
+    t, lip, h = 0.004, 0.012, 0.075
+    pts = [(xo, 0.0), (xo, h), (xi, h), (xi, h - lip), (xi + t, h - lip), (xi + t, h - t), (xo - t, h - t),
+           (xo - t, t), (xi + t, t), (xi + t, lip), (xi, lip), (xi, 0.0)]
+    return [(xc + sx * x, z) for x, z in pts]
+
+
 def ladder_section(name: str, w: float, length: float):
-    """Колено лестницы: две тетивы-короба и круглые ступени через 0,34 м, лежит вдоль +Y от 0."""
-    parts = []
+    """Колено лестницы вдоль +Y от 0: тетивы-швеллеры, круглые ступени с фланцами у тетив, заглушки на концах."""
+    caps = []
     for sx in (-1, 1):
-        rail = s3d.fillet(s3d.box(name + "_rail", 0.03, length, 0.075), 0.006, edges="side")
-        parts.append(s3d.at(rail, x=sx * (w / 2 - 0.015), y=length / 2))
-    n = int(length / 0.34)
+        for y in (0.0, length - 0.03):
+            cap = s3d.fillet(s3d.box(name + "_end_cap", 0.032, 0.03, 0.077), 0.006, edges="side")
+            caps.append(s3d.at(cap, x=sx * (w / 2 - 0.015), y=y + 0.015, z=-0.001))
+    parts = [caps[0]]                                    # первая деталь без рамки: at() двигает в осях мира
+    for sx in (-1, 1):
+        prof = [(-x, z) for x, z in _rail_profile(sx * (w / 2 - 0.015), sx)]
+        parts.append(s3d.extrude(name + "_rail", s3d.poly(prof, fillet=[0.0015] * len(prof)), length, on=lib.rear(0.0)))
+    n = int((length - 0.12) / RUNG_PITCH) + 1
     for k in range(n):
-        parts.append(s3d.extrude(name + "_rung", s3d.circle(0.028), w - 0.06, both=True,
-                                 on=lib.side(0, 1, 0.17 + k * 0.34, 0.037)))
-    s3d.join(parts[0], *parts[1:])
+        y = 0.10 + k * RUNG_PITCH
+        parts.append(s3d.extrude(name + "_rung", s3d.circle(0.03), w - 0.05, both=True, on=lib.side(0, 1, y, 0.0375)))
+        for sx in (-1, 1):
+            parts.append(s3d.extrude(name + "_rung_flange", s3d.circle(0.046), 0.004, both=True,
+                                     on=lib.side(sx * (w / 2 - 0.032), 1, y, 0.0375)))
+    s3d.join(parts[0], *parts[1:], *caps[1:])
     lib.alu(parts[0])
     return parts[0]
 
 
 def ladder():
+    """Трёхколенная лестница на опорах с роликами: колена одно в другом, направляющие на концах, блок и трос
+    выдвижения, защёлки, жёлтые прижимы на опорах."""
     l = S.LADDER
     length = l["y1"] - l["y0"]
     out = []
     z = TOP + 0.10
-    for k, w in enumerate((l["w"], l["w"] - 0.06, l["w"] - 0.12)):
+    widths = (l["w"], l["w"] - 0.06, l["w"] - 0.12)
+    for k, w in enumerate(widths):
         sec = ladder_section(f"ladder_{k + 1}", w, length - 0.1 * k)
         out.append(s3d.at(sec, x=l["x"], y=l["y0"] + 0.05 * k, z=z + 0.078 * k))
-    # опоры с роликами спереди и сзади
+    for k in range(2):
+        for y in (l["y0"] + 0.05 * (k + 1) + 0.05, l["y1"] - 0.10 - 0.05 * k):
+            for sx in (-1, 1):
+                g = s3d.fillet(s3d.box("ladder_guide", 0.02, 0.07, 0.10), 0.005, edges="side")
+                lib.alu(g)
+                out.append(s3d.at(g, x=l["x"] + sx * (widths[k] / 2 - 0.002), y=y, z=z + 0.078 * k + 0.02))
+    yp = l["y1"] - 0.08
+    pulley = s3d.extrude("ladder_pulley", s3d.circle(0.07), 0.025, both=True, on=lib.side(l["x"], 1, yp, z + 0.11))
+    lib.steel_dark(pulley)
+    axle = s3d.extrude("ladder_pulley_axle", s3d.circle(0.016), widths[0] - 0.04, both=True, on=lib.side(l["x"], 1, yp, z + 0.11))
+    lib.steel_dark(axle)
+    rope = s3d.wire("ladder_rope", [(l["x"], l["y0"] + 0.25, z + 0.20), (l["x"], yp - 0.02, z + 0.18),
+                                    (l["x"], yp + 0.04, z + 0.15), (l["x"], yp - 0.02, z + 0.04),
+                                    (l["x"], l["y0"] + 0.60, z + 0.03)], 0.011, fillet=0.03)
+    s3d.material(rope, "fabric", color="#c9b58a")
+    out += [pulley, axle, rope]
+    for sx in (-1, 1):
+        pawl = s3d.fillet(s3d.box("ladder_pawl", 0.025, 0.08, 0.05), 0.008, edges="side")
+        lib.black_plastic(pawl)
+        out.append(s3d.at(pawl, x=l["x"] + sx * (widths[1] / 2 + 0.012), y=l["y0"] + 0.30, z=z + 0.095))
+    # опоры с роликами спереди и сзади, прижимы поверх верхнего колена
     for y in (l["y0"] + 0.30, l["y1"] - 0.35):
-        beam = s3d.box("ladder_support", l["w"] + 0.10, 0.06, 0.05)
+        beam = s3d.fillet(s3d.box("ladder_support", l["w"] + 0.10, 0.06, 0.05), 0.008, edges="side")
         lib.steel_dark(beam)
         out.append(s3d.at(beam, x=l["x"], y=y, z=TOP + 0.05))
         for sx in (-1, 1):
-            leg = s3d.box("support_leg", 0.04, 0.06, 0.06)
+            leg = s3d.fillet(s3d.box("support_leg", 0.04, 0.06, 0.06), 0.006, edges="side")
             lib.steel_dark(leg)
             out.append(s3d.at(leg, x=l["x"] + sx * (l["w"] / 2 + 0.03), y=y, z=TOP))
             roller = s3d.extrude("roller", s3d.circle(0.06), 0.05, both=True,
                                  on=lib.side(l["x"] + sx * (l["w"] / 2 + 0.035), 1, y, TOP + 0.13))
             lib.black_plastic(roller)
             out.append(roller)
+        x0 = l["x"] + (l["w"] / 2 + 0.03)
+        clamp = s3d.wire("ladder_clamp", [(x0, y + 0.04, TOP + 0.06), (x0, y + 0.04, z + 0.27),
+                                          (l["x"] - widths[2] / 2 + 0.05, y + 0.04, z + 0.27),
+                                          (l["x"] - widths[2] / 2 + 0.05, y + 0.04, z + 0.225)], 0.018, fillet=0.03)
+        s3d.material(clamp, "painted_metal", color="#e0b020", roughness=0.4)
+        knob = s3d.cylinder("ladder_clamp_knob", 0.05, 0.03)
+        lib.black_plastic(knob)
+        out += [clamp, s3d.at(knob, x=x0, y=y + 0.04, z=z + 0.28)]
     return out
 
 
 def monitor():
-    """Лафетный ствол: фланец на крыше, поворотная часть с приводом, колено, ствол с насадком."""
+    """Лафетный ствол с электроприводом: фланец с болтами, нижний корпус с мотором поворота, стойка, шарнир подъёма
+    с мотором, колено, ствол с кольцами жёсткости, насадок с рукояткой распыла и резиновым бампером, румпель, кабель."""
     x, y = S.MONITOR["x"], S.MONITOR["y"]
-    base = s3d.cylinder("monitor_base", 0.30, 0.06)
-    turret = s3d.at(s3d.fillet(s3d.cylinder("monitor_turret", 0.22, 0.20), 0.03, edges="top"), z=0.06)
-    drive = s3d.at(s3d.fillet(s3d.box("monitor_drive", 0.18, 0.22, 0.16), 0.03, edges="side top"), x=0.16, z=0.08)
-    s3d.join(base, turret, drive)
-    lib.paint_white(base)
-    elbow = s3d.wire("monitor_elbow", [(0, 0, 0.18), (0, 0, 0.27), (0, -0.16, 0.33)], 0.11, fillet=0.09)
-    lib.paint_white(elbow)
-    barrel = s3d.at(s3d.cone("monitor_barrel", 0.11, 0.55, d2=0.085), y=-0.14, z=0.335, rx=85)
-    nozzle = s3d.at(s3d.cone("monitor_nozzle", 0.09, 0.16, d2=0.06), y=-0.68, z=0.382, rx=85)
+    parts = []
+    flange = s3d.cylinder("monitor_flange", 0.26, 0.022)
+    lib.paint_white(flange)
+    bolts = s3d.at(s3d.extrude("monitor_bolt", s3d.polygon(6, 0.022), 0.012), on=s3d.ring(8, 0.11, on=s3d.Frame((0, 0, 0.022))))
+    for b_ in bolts:
+        lib.steel_dark(b_)
+    lower = s3d.at(s3d.fillet(s3d.cylinder("monitor_lower", 0.20, 0.11), 0.025, edges="top"), z=0.022)
+    lib.paint_white(lower)
+    drive1 = s3d.extrude("monitor_drive_rot", s3d.circle(0.10), 0.17, on=lib.side(0.09, 1, 0.0, 0.085))
+    s3d.fillet(drive1, 0.015, edges="top")
+    lib.paint_white(drive1)
+    cap1 = s3d.extrude("monitor_drive_cap", s3d.circle(0.082), 0.025, on=lib.side(0.26, 1, 0.0, 0.085))
+    lib.black_plastic(cap1)
+    riser = s3d.at(s3d.cylinder("monitor_riser", 0.095, 0.10), z=0.13)
+    lib.paint_white(riser)
+    joint = s3d.extrude("monitor_joint", s3d.circle(0.15), 0.17, both=True, on=lib.side(0.0, 1, -0.01, 0.26))
+    s3d.fillet(joint, 0.02, edges="top bottom")
+    lib.paint_white(joint)
+    drive2 = s3d.extrude("monitor_drive_elev", s3d.circle(0.09), 0.12, on=lib.side(-0.085, -1, -0.01, 0.26))
+    s3d.fillet(drive2, 0.015, edges="top")
+    lib.paint_white(drive2)
+    cap2 = s3d.extrude("monitor_drive_cap2", s3d.circle(0.074), 0.022, on=lib.side(-0.205, -1, -0.01, 0.26))
+    lib.black_plastic(cap2)
+    parts += [flange, lower, drive1, cap1, riser, joint, drive2, cap2] + bolts
+    # ствол наклонён вперёд и чуть вверх (как прежде, rx = 85)
+    import math as _m
+    d = (0.0, -_m.sin(_m.radians(85)), _m.cos(_m.radians(85)))
+    p0 = (0.0, -0.06, 0.26)
+
+    def along(t):
+        return (p0[0] + d[0] * t, p0[1] + d[1] * t, p0[2] + d[2] * t)
+    barrel = s3d.at(s3d.cylinder("monitor_barrel", 0.088, 0.40), x=p0[0], y=p0[1], z=p0[2], rx=85)
     lib.paint_white(barrel)
-    lib.black_plastic(nozzle)
-    grip = s3d.wire("monitor_grip", [(0.0, -0.42, 0.37), (0.0, -0.44, 0.45), (0.0, -0.30, 0.46)], 0.025, fillet=0.03)
-    lib.black_plastic(grip)
-    motor = s3d.at(s3d.fillet(s3d.cylinder("monitor_motor", 0.09, 0.14), 0.02, edges="top bottom"), x=-0.12, y=0.02, z=0.15, ry=90)
-    lib.paint_white(motor)
-    cable = s3d.wire("monitor_cable", [(0.20, 0.0, 0.10), (0.30, 0.10, 0.03), (0.30, 0.40, 0.012)], 0.014, fillet=0.05)
+    parts.append(barrel)
+    for t in (0.13, 0.27):
+        q = along(t)
+        ring = s3d.tube("monitor_barrel_ring", 0.102, 0.086, 0.025)
+        lib.paint_white(ring)
+        parts.append(s3d.at(ring, x=q[0], y=q[1], z=q[2], rx=85))
+    q = along(0.40)
+    noz_prof = [(0.0, 0.0), (0.047, 0.0), (0.052, 0.02), (0.062, 0.04), (0.062, 0.11), (0.054, 0.13), (0.046, 0.17),
+                (0.036, 0.20), (0.0, 0.20)]
+    nozzle = s3d.revolve("monitor_nozzle", s3d.poly(noz_prof, fillet=[0, 0.004, 0.008, 0.006, 0.006, 0.01, 0.008, 0.004, 0]))
+    lib.alu(nozzle)
+    parts.append(s3d.at(nozzle, x=q[0], y=q[1], z=q[2], rx=85))
+    for t in (0.06, 0.085, 0.11):
+        rib = s3d.tube("monitor_nozzle_rib", 0.132, 0.12, 0.008)
+        lib.black_plastic(rib)
+        qq = along(0.40 + t)
+        parts.append(s3d.at(rib, x=qq[0], y=qq[1], z=qq[2], rx=85))
+    qb = along(0.585)
+    bumper = s3d.torus("monitor_nozzle_bumper", 0.098, 0.026)
+    lib.rubber(bumper)
+    parts.append(s3d.at(bumper, x=qb[0], y=qb[1], z=qb[2], rx=85))
+    a, b_ = along(0.10), along(0.30)
+    tiller = s3d.wire("monitor_tiller", [(0.05, a[1], a[2] + 0.02), (0.13, a[1] - 0.02, a[2] + 0.02),
+                                         (0.13, b_[1] + 0.02, b_[2] + 0.02), (0.05, b_[1], b_[2] + 0.02)], 0.024, fillet=0.03)
+    lib.black_plastic(tiller)
+    cable = s3d.wire("monitor_cable", [(0.27, 0.0, 0.085), (0.32, 0.06, 0.03), (0.32, 0.40, 0.012)], 0.014, fillet=0.04)
     lib.black_plastic(cable)
-    g = s3d.group("monitor", base, elbow, barrel, nozzle, grip, motor, cable)
+    parts += [tiller, cable]
+    g = s3d.group("monitor", *parts)
     return [s3d.at(g, x=x, y=y, z=TOP)]
 
 
