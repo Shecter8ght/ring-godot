@@ -352,14 +352,28 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
             # фотоматериал CC0 по развёртке (сырьё — sp["set"]: <путь>_Color/_Roughness/_Displacement.jpg): тон
             # и волокна — наложением на основу (свой оттенок отделки остаётся), рельеф — картой высоты, блеск — картой
             # шероховатости; волокна идут вдоль U (у досок развёртка выровнена по длине), плитка образца — mm
-            stem = f"{ROOT}/{sp['set']}"
+            # files — явные пути карт (у Poly Haven свои имена и EXR): {"color": …, "rough": …, "height": …},
+            # относительно корня проекта или абсолютные; без files — прежнее имя набора <set>_Color.jpg и т. д.
             lay = L.insert_fill(above(n))
-            lay.set_name(f"{tag} · фото {sp['set'].rsplit('/', 1)[-1]}")
-            chans = {CH.BaseColor: _bitmap(f"{stem}_Color.jpg")}
-            if sp.get("rough"):
-                chans[CH.SpecularRoughness] = _bitmap(f"{stem}_Roughness.jpg")
-            if sp.get("height"):
-                chans[CH.Height] = _bitmap(f"{stem}_Displacement.jpg")
+            files = sp.get("files")
+            if files:
+                def fp(k):
+                    p = files[k]
+                    return p if os.path.isabs(p) else f"{ROOT}/{p}"
+                lay.set_name(f"{tag} · фото {os.path.basename(files['color']).rsplit('.', 1)[0]}")
+                chans = {CH.BaseColor: _bitmap(fp("color"))}
+                if sp.get("rough") and files.get("rough"):
+                    chans[CH.SpecularRoughness] = _bitmap(fp("rough"))
+                if sp.get("height") and files.get("height"):
+                    chans[CH.Height] = _bitmap(fp("height"))
+            else:
+                stem = f"{ROOT}/{sp['set']}"
+                lay.set_name(f"{tag} · фото {sp['set'].rsplit('/', 1)[-1]}")
+                chans = {CH.BaseColor: _bitmap(f"{stem}_Color.jpg")}
+                if sp.get("rough"):
+                    chans[CH.SpecularRoughness] = _bitmap(f"{stem}_Roughness.jpg")
+                if sp.get("height"):
+                    chans[CH.Height] = _bitmap(f"{stem}_Displacement.jpg")
             lay.active_channels = set(chans)
             for c, src in chans.items():
                 lay.set_source(c, src)
