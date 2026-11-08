@@ -1,13 +1,13 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cfcoetxx4cnyu"]
 
-[ext_resource type="Script" path="res://src/blockout/plan_piece.gd" id="4_u54l0"]
-[ext_resource type="Script" path="res://src/blockout/prop_spot.gd" id="5_iugf6"]
-[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="build"]
-[ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
-[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]
-[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]
-[ext_resource type="Script" path="res://src/blockout/prospekt_landscape.gd" id="land"]
-[ext_resource type="Script" path="res://src/blockout/prospekt_study_level.gd" id="launch"]
+[ext_resource type="Script" uid="uid://dhoykxvmim11s" path="res://src/blockout/plan_piece.gd" id="4_u54l0"]
+[ext_resource type="Script" uid="uid://be5e4lyfic0qs" path="res://src/blockout/prop_spot.gd" id="5_iugf6"]
+[ext_resource type="Script" uid="uid://bp83j6lla822k" path="res://src/blockout/study_building.gd" id="build"]
+[ext_resource type="Environment" uid="uid://ekhwhgs8v36r" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
+[ext_resource type="Script" uid="uid://udta3enn66hu" path="res://src/blockout/mall_filler.gd" id="fill"]
+[ext_resource type="Script" uid="uid://dggdgk70ftwlf" path="res://src/blockout/flat_section.gd" id="flats"]
+[ext_resource type="Script" uid="uid://1ebhit2ekis0" path="res://src/blockout/prospekt_landscape.gd" id="land"]
+[ext_resource type="Script" uid="uid://dmteuigsn5ko5" path="res://src/blockout/prospekt_study_level.gd" id="launch"]
 
 [node name="ProspektStudy" type="Node3D" unique_id=446296185]
 script = ExtResource("launch")
@@ -1484,6 +1484,38 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 7.9, 128)
 order = 33
 pick_size = Vector3(10.4, 0.25, 16.4)
+
+[node name="Площадка спуска север" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1771634744]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.395, -2.8, -42.6605)
+script = ExtResource("4_u54l0")
+list = "slabs"
+data = {
+"holes": [],
+"id": "nentry_landing",
+"mat": "concrete",
+"rect": [-159.99, -45.877, -156.8, -39.444],
+"t": 1.0,
+"y_top": -2.3
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.395, -2.8, -42.6605)
+order = 100
+pick_size = Vector3(3.19, 1, 6.433)
+
+[node name="Площадка спуска север — полоса" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1730380437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -38.844)
+script = ExtResource("4_u54l0")
+list = "slabs"
+data = {
+"holes": [],
+"id": "nentry_landing_strip",
+"mat": "concrete",
+"rect": [-159.99, -39.444, -152.01, -38.244],
+"t": 1.0,
+"y_top": -2.3
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -38.844)
+order = 101
+pick_size = Vector3(7.98, 1, 1.2)
 
 [node name="Стены" type="Node3D" parent="Landscape/Улицы" unique_id=1660921852]
 
@@ -39773,21 +39805,6 @@ pick_size = Vector3(22, 0.01, 0.1)
 
 [node name="Кафель перехода" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=2013309379]
 
-[node name="Коробка 0001" type="Node3D" parent="Landscape/Улицы/Коробки/Кафель перехода" unique_id=155510307]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, -1.8, -39.276)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-155.25, -1.8, -39.276],
-"mat": "tunnel_tile",
-"size": [6.5, 3.6, 0.2],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, -1.8, -39.276)
-order = 1100
-pick_size = Vector3(6.5, 3.6, 0.2)
-
 [node name="Коробка 0002" type="Node3D" parent="Landscape/Улицы/Коробки/Кафель перехода" unique_id=1607007999]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, -1.8, 7.976)
 script = ExtResource("4_u54l0")
@@ -49811,20 +49828,23 @@ pick_size = Vector3(138.5, 6.9, 0.9)
 
 [node name="Лестницы" type="Node3D" parent="Landscape/Улицы" unique_id=1604276389]
 
-[node name="Лестница 0001" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=223701569]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -155.25, -1.5749999, -42.58)
+[node name="Спуск север — верхний марш" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=223701569]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -154.4, -1.0749999, -42.6605)
 script = ExtResource("4_u54l0")
 list = "stairs"
 data = {
-"count": 20.0,
-"from": [-152.0, 0.15, -42.58],
+"count": 16,
+"fill": -3.3,
+"from": [-152.0, 0.15, -42.6605],
 "mat": "concrete",
-"to": [-158.5, -3.3, -42.58],
-"width": 6.271
+"rails": "both",
+"to": [-156.8, -2.3, -42.6605],
+"width": 6.43
 }
-base = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -155.25, -1.5749999, -42.58)
+base = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -154.4, -1.0749999, -42.6605)
 order = 0
-pick_size = Vector3(6.271, 3.6499999, 6.5)
+pick_size = Vector3(6.43, 4.4, 4.800003)
+pick_center = Vector3(0, -0.025000025, 0)
 
 [node name="Лестница 0002" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=770124718]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -155.25, -1.5749999, 11.28)
@@ -50230,6 +50250,24 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.1, 6.1, 123.8)
 order = 27
 pick_size = Vector3(1.1, 4.049999, 5.5999985)
+
+[node name="Спуск север — широкий марш" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=718692521]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -37.194)
+script = ExtResource("4_u54l0")
+list = "stairs"
+data = {
+"count": 7,
+"fill": -3.3,
+"from": [-156.0, -2.3, -38.244],
+"mat": "concrete",
+"rails": "both",
+"to": [-156.0, -3.3, -36.144],
+"width": 7.98
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -37.194)
+order = 100
+pick_size = Vector3(7.98, 1.95, 2.0999985)
+pick_center = Vector3(0, 0.47499996, 0)
 
 [node name="Пандусы" type="Node3D" parent="Landscape/Улицы" unique_id=430344969]
 
@@ -60694,6 +60732,11 @@ pick_size = Vector3(0.8142857, 0.8142857, 0.8142857)
 
 [node name="Filler" type="Node3D" parent="." unique_id=1596022096]
 script = ExtResource("fill")
+metadata/stats = {
+"batches": 0,
+"collision_shapes": 0,
+"instances": 0
+}
 
 [node name="Наполнение" type="Node3D" parent="Filler" unique_id=1819514189]
 
@@ -60796,13 +60839,6 @@ script = ExtResource("5_iugf6")
 item = ["m:U06_02", 92.46, 146.0, -90.0]
 base = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 92.46, 0, 146)
 order = 14
-
-[node name="Перила спуска с промежуточной стойкой 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1421860625]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -155.25, 0, -39.69)
-script = ExtResource("5_iugf6")
-item = ["m:U03_04", -155.25, -39.69, -90.0]
-base = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -155.25, 0, -39.69)
-order = 35
 
 [node name="Номерная навигационная стела 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1652665510]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -150, 0, -38.62)
@@ -77184,7 +77220,7 @@ base = Transform3D(-0.11320321, 0, 0.9935719, 0, 1, 0, -0.9935719, 0, -0.1132032
 order = 44
 
 [node name="Комок бумаги 0002" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=827640949]
-transform = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -3.3, -39.36)
+transform = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -2.3, -39.36)
 script = ExtResource("5_iugf6")
 item = ["paper_ball", -159.21, -39.36, 340.8, 1.0, -3.3]
 base = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -3.3, -39.36)
@@ -77196,13 +77232,6 @@ script = ExtResource("5_iugf6")
 item = ["paper", -155.86, 9.66, 225.2, 1.0, -3.3]
 base = Transform3D(-0.70463425, 0, -0.7095707, 0, 1, 0, 0.7095707, 0, -0.70463425, -155.86, -3.3, 9.66)
 order = 46
-
-[node name="Банка 0002" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=545426871]
-transform = Transform3D(-0.94551855, 0, -0.32556826, 0, 1, 0, 0.32556826, 0, -0.94551855, -155.92, -3.3, -42.68)
-script = ExtResource("5_iugf6")
-item = ["can", -155.92, -42.68, 199.0, 1.0, -3.3]
-base = Transform3D(-0.94551855, 0, -0.32556826, 0, 1, 0, 0.32556826, 0, -0.94551855, -155.92, -3.3, -42.68)
-order = 47
 
 [node name="Бумага 0003" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1776252712]
 transform = Transform3D(-0.9077775, 0, -0.41945207, 0, 1, 0, 0.41945207, 0, -0.9077775, -153.68, -3.3, -2.09)
@@ -77268,7 +77297,7 @@ base = Transform3D(0.9114033, 0, 0.41151434, 0, 1, 0, -0.41151434, 0, 0.9114033,
 order = 56
 
 [node name="Бумага 0005" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1436608001]
-transform = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -3.3, -39.23)
+transform = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -2.3, -39.23)
 script = ExtResource("5_iugf6")
 item = ["paper", -154.37, -39.23, 111.5, 1.0, -3.3]
 base = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -3.3, -39.23)
@@ -77331,7 +77360,7 @@ base = Transform3D(-0.6573753, 0, 0.75356334, 0, 1, 0, -0.75356334, 0, -0.657375
 order = 65
 
 [node name="Бумага 0009" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=922813179]
-transform = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -3.3, -39.85)
+transform = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -2.3, -39.85)
 script = ExtResource("5_iugf6")
 item = ["paper", -159.32, -39.85, 33.5, 1.0, -3.3]
 base = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -3.3, -39.85)
@@ -91314,102 +91343,153 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -262, 0, -111.3)
 script = ExtResource("build")
 footprint = Vector2(18, 24)
 floors = 17
+metadata/height_m = 51.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_W40" type="Node3D" parent="Outside" unique_id=1083651593 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -264, 0, -71.3)
 script = ExtResource("build")
 footprint = Vector2(26, 22)
 floors = 44
+metadata/height_m = 132.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_W45" type="Node3D" parent="Outside" unique_id=1411875314 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -262, 0, 45)
 script = ExtResource("build")
 footprint = Vector2(16, 26)
 floors = 12
+metadata/height_m = 36.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_W85" type="Node3D" parent="Outside" unique_id=1766121881 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -258, 0, 85)
 script = ExtResource("build")
 footprint = Vector2(18, 22)
 floors = 25
+metadata/height_m = 75.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_S40" type="Node3D" parent="Outside" unique_id=2097557309 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.42, 0, 308)
 script = ExtResource("build")
 footprint = Vector2(30, 18)
 floors = 20
+metadata/height_m = 60.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_S90" type="Node3D" parent="Outside" unique_id=958196177 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121.3, 0, 310)
 script = ExtResource("build")
 footprint = Vector2(24, 20)
 floors = 26
+metadata/height_m = 78.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_S140" type="Node3D" parent="Outside" unique_id=2003642298 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 171.3, 0, 308)
 script = ExtResource("build")
 footprint = Vector2(26, 18)
 floors = 16
+metadata/height_m = 48.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_E196_60" type="Node3D" parent="Outside" unique_id=1997803458 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 227.3, 0, -91.3)
 script = ExtResource("build")
 footprint = Vector2(20, 26)
 floors = 22
+metadata/height_m = 66.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_E198_40" type="Node3D" parent="Outside" unique_id=109525611 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 229.3, 0, 8.7)
 script = ExtResource("build")
 footprint = Vector2(18, 24)
 floors = 18
+metadata/height_m = 54.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_E196_150" type="Node3D" parent="Outside" unique_id=1643808327 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 227.3, 0, 150)
 script = ExtResource("build")
 footprint = Vector2(22, 26)
 floors = 25
+metadata/height_m = 75.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_E20_150" type="Node3D" parent="Outside" unique_id=104333563 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -181.3)
 script = ExtResource("build")
 footprint = Vector2(24, 18)
 floors = 21
+metadata/height_m = 63.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_E60_152" type="Node3D" parent="Outside" unique_id=2057041098 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.3, 0, -183.3)
 script = ExtResource("build")
 footprint = Vector2(30, 20)
 floors = 16
+metadata/height_m = 48.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_N1" type="Node3D" parent="Outside" unique_id=1157734022 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 0, -169.3)
 script = ExtResource("build")
 footprint = Vector2(30, 14)
 floors = 9
+metadata/height_m = 27.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_N2" type="Node3D" parent="Outside" unique_id=1582845546 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 0, -175.3)
 script = ExtResource("build")
 footprint = Vector2(32, 22)
 floors = 38
+metadata/height_m = 114.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_S4" type="Node3D" parent="Outside" unique_id=677611172 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.3, 0, 332)
 script = ExtResource("build")
 footprint = Vector2(26, 26)
 floors = 50
+metadata/height_m = 150.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_N3" type="Node3D" parent="Outside" unique_id=1147788265 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0, -169.3)
 script = ExtResource("build")
 footprint = Vector2(24, 16)
 story_height = 3.2
+metadata/height_m = 16.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_N4" type="Node3D" parent="Outside" unique_id=1853533780 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 141.3, 0, -171.3)
 script = ExtResource("build")
 footprint = Vector2(36, 16)
 floors = 14
+metadata/height_m = 42.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_E1" type="Node3D" parent="Outside" unique_id=812560873 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 217.3, 0, -131.3)
@@ -91417,6 +91497,9 @@ script = ExtResource("build")
 footprint = Vector2(16, 30)
 floors = 6
 story_height = 3.2
+metadata/height_m = 19.200000000000003
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_E2" type="Node3D" parent="Outside" unique_id=1194243770 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.3, 0, 100)
@@ -91424,18 +91507,27 @@ script = ExtResource("build")
 footprint = Vector2(14, 40)
 floors = 2
 story_height = 4.5
+metadata/height_m = 9.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_E3" type="Node3D" parent="Outside" unique_id=1791260105 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 219.3, 0, 240)
 script = ExtResource("build")
 footprint = Vector2(20, 36)
 floors = 10
+metadata/height_m = 30.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_S1" type="Node3D" parent="Outside" unique_id=1897799227 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 306)
 script = ExtResource("build")
 footprint = Vector2(40, 14)
 floors = 9
+metadata/height_m = 27.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_S2" type="Node3D" parent="Outside" unique_id=275599315 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 0, 304)
@@ -91443,12 +91535,18 @@ script = ExtResource("build")
 footprint = Vector2(30, 16)
 floors = 3
 story_height = 4.5
+metadata/height_m = 13.5
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_S3" type="Node3D" parent="Outside" unique_id=932083007 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0, 306)
 script = ExtResource("build")
 footprint = Vector2(24, 16)
 floors = 12
+metadata/height_m = 36.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_W1" type="Node3D" parent="Outside" unique_id=936188366 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180, 0, 150)
@@ -91456,6 +91554,9 @@ script = ExtResource("build")
 footprint = Vector2(30, 50)
 floors = 2
 story_height = 5.0
+metadata/height_m = 10.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_W2" type="Node3D" parent="Outside" unique_id=165318850 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -182, 0, 236)
@@ -91463,30 +91564,45 @@ script = ExtResource("build")
 footprint = Vector2(26, 40)
 floors = 3
 story_height = 4.5
+metadata/height_m = 13.5
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_W3" type="Node3D" parent="Outside" unique_id=1066204578 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -238, 0, 140)
 script = ExtResource("build")
 footprint = Vector2(20, 30)
 floors = 14
+metadata/height_m = 42.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_W4" type="Node3D" parent="Outside" unique_id=611131643 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236, 0, -161.3)
 script = ExtResource("build")
 footprint = Vector2(22, 16)
 floors = 16
+metadata/height_m = 48.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_N5" type="Node3D" parent="Outside" unique_id=2117385387 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.15, 0, -174.8)
 script = ExtResource("build")
 footprint = Vector2(26, 16)
 floors = 9
+metadata/height_m = 27.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Outside_City_E4" type="Node3D" parent="Outside" unique_id=2051109710 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 243.3, 0, 39.35)
 script = ExtResource("build")
 footprint = Vector2(16, 26)
 floors = 12
+metadata/height_m = 36.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="West" type="Node3D" parent="." unique_id=1942065519]
 
@@ -91502,6 +91618,9 @@ interior = "shop"
 loot_theme = "register"
 loot_density = 0.6
 entry_door = 1.2
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Flowers" type="Node3D" parent="West" unique_id=2122577735 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168, 0, -53.8)
@@ -91514,6 +91633,9 @@ label = "цветы"
 interior = "shop"
 loot_theme = "shelf"
 loot_density = 0.6
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Pharmacy" type="Node3D" parent="West" unique_id=510000705 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153, 0, -53.8)
@@ -91526,6 +91648,9 @@ label = "аптека"
 interior = "pharmacy"
 loot_theme = "pharmacy"
 loot_density = 0.6
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Clothes" type="Node3D" parent="West" unique_id=461686641 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 0, -53.8)
@@ -91538,6 +91663,9 @@ label = "одежда «Modus»"
 interior = "shop"
 loot_theme = "shelf"
 loot_density = 0.6
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Bakery" type="Node3D" parent="West" unique_id=443541108 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101, 0, -53.8)
@@ -91550,6 +91678,9 @@ label = "пекарня"
 interior = "shop"
 loot_theme = "grocery"
 loot_density = 0.6
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Pavilion_Shut" type="Node3D" parent="West" unique_id=1362988458 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -76, 0, -53.8)
@@ -91558,6 +91689,9 @@ footprint = Vector2(32, 11)
 floors = 2
 story_height = 4.0
 label = "БЦ «Проспект, 11» · вестибюль и салон связи (закрыты)"
+metadata/height_m = 8.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="BC_Prospekt5" type="Node3D" parent="West" unique_id=1665935757 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -177.5, 8.03, -53.8)
@@ -91570,6 +91704,9 @@ floors = 7
 story_height = 3.6
 label = "БЦ «Проспект, 5» — 9 этажей (закрыт)"
 metadata/lift = 8.03
+metadata/height_m = 25.2
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="BC_Prospekt5_Lobby" type="Node3D" parent="West" unique_id=621133279 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -194, 0, -53.8)
@@ -91578,6 +91715,9 @@ footprint = Vector2(3.6, 8.8)
 floors = 1
 story_height = 4.6
 label = "БЦ «Проспект, 5» · вестибюль (закрыт)"
+metadata/height_m = 4.6
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="BC_Prospekt11" type="Node3D" parent="West" unique_id=792222618 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -76, 8, -53.8)
@@ -91590,6 +91730,9 @@ floors = 8
 story_height = 3.6
 label = "БЦ «Проспект, 11» — 10 этажей (закрыт)"
 metadata/lift = 8.0
+metadata/height_m = 28.8
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus1_A" type="Node3D" parent="West" unique_id=1441953553 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -175, 0, -100.3)
@@ -91599,6 +91742,9 @@ footprint = Vector2(30, 26)
 floors = 17
 story_height = 3.105
 label = "ЖК «Панорама», корпус 1 · подъезд 1 — 17 этажей (закрыт)"
+metadata/height_m = 52.785
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus1_B" type="Node3D" parent="West" unique_id=1333986668 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145, 0, -100.3)
@@ -91608,6 +91754,9 @@ footprint = Vector2(30, 26)
 floors = 17
 story_height = 3.105
 label = "ЖК «Панорама», корпус 1 · подъезд 2 — 17 этажей (закрыт)"
+metadata/height_m = 52.785
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus2_A" type="Node3D" parent="West" unique_id=1805684109 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89, 0, -100.3)
@@ -91617,6 +91766,9 @@ footprint = Vector2(30, 26)
 floors = 25
 story_height = 3.105
 label = "ЖК «Панорама», корпус 2 · подъезд 1 — 25 этажей (закрыт)"
+metadata/height_m = 77.625
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus2_B" type="Node3D" parent="West" unique_id=1969464948 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59, 0, -100.3)
@@ -91626,6 +91778,9 @@ footprint = Vector2(30, 26)
 floors = 25
 story_height = 3.105
 label = "ЖК «Панорама», корпус 2 · подъезд 2 — 25 этажей (закрыт)"
+metadata/height_m = 77.625
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="CarWash" type="Node3D" parent="West" unique_id=504826311 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -87.3)
@@ -91634,6 +91789,9 @@ footprint = Vector2(10, 20)
 floors = 1
 story_height = 4.2
 label = "автомойка «Блеск» (закрыта)"
+metadata/height_m = 4.2
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="South" type="Node3D" parent="." unique_id=1050316493]
 
@@ -91648,6 +91806,9 @@ label = "минимаркет «Весна»"
 interior = "shop"
 loot_theme = "grocery"
 loot_density = 0.5
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="House7" type="Node3D" parent="South" unique_id=1593279533 groups=["mall_study_snap"]]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -188, 0, 51)
@@ -91657,6 +91818,9 @@ footprint = Vector2(36, 26)
 floors = 12
 story_height = 3.105
 label = "дом 7 — 12 этажей (закрыт)"
+metadata/height_m = 37.26
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Supermarket" type="Node3D" parent="South" unique_id=395130950 groups=["mall_study_snap"]]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -102, 0, 68)
@@ -91670,6 +91834,9 @@ interior = "supermarket"
 loot_theme = "grocery"
 loot_density = 0.5
 staff_corridor = true
+metadata/height_m = 6.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="CartShelter" type="Node3D" parent="South" unique_id=908467222 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -124, 0, 36)
@@ -91679,6 +91846,9 @@ footprint = Vector2(8, 6)
 floors = 1
 story_height = 2.8
 label = "навес тележек"
+metadata/height_m = 2.8
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Site_Skeleton" type="Node3D" parent="South" unique_id=611860524 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -108, 0, 150)
@@ -91688,6 +91858,9 @@ footprint = Vector2(64, 16)
 floors = 9
 story_height = 3.1
 label = "недострой ЖК, 9 эт."
+metadata/height_m = 27.9
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Site_Skeleton_W" type="Node3D" parent="South" unique_id=1197358016 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84, 0, 174)
@@ -91697,6 +91870,9 @@ footprint = Vector2(16, 28)
 floors = 7
 story_height = 3.1
 label = "недострой ЖК, крыло 7 эт."
+metadata/height_m = 21.7
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="Site_Crane" type="Node3D" parent="South" unique_id=1624720058 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 176)
@@ -91704,6 +91880,9 @@ script = ExtResource("build")
 kind = "crane"
 footprint = Vector2(6, 6)
 floors = 1
+metadata/height_m = 3.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Tower_Povorot" type="Node3D" parent="South" unique_id=1050483475 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 4.65, 36)
@@ -91714,6 +91893,9 @@ floors = 26
 story_height = 3.105
 label = "«Проспект, 1» — башня 26 этажей (закрыта)"
 metadata/lift = 4.65
+metadata/height_m = 80.73
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="SquareCafe" type="Node3D" parent="South" unique_id=1871354005 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 126)
@@ -91726,6 +91908,9 @@ label = "кафе «Сквер»"
 interior = "shop"
 loot_theme = "kiosk"
 loot_density = 0.6
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="WC_Square" type="Node3D" parent="South" unique_id=54354220 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 190)
@@ -91733,6 +91918,9 @@ script = ExtResource("build")
 footprint = Vector2(4, 8)
 floors = 1
 label = "туалет (закрыт)"
+metadata/height_m = 3.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Minimarket2" type="Node3D" parent="South" unique_id=498889208 groups=["mall_study_snap"]]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 31, 0, 128)
@@ -91745,6 +91933,9 @@ label = "продукты «24 часа»"
 interior = "shop"
 loot_theme = "grocery"
 loot_density = 0.5
+metadata/height_m = 4.0
+metadata/enterable = true
+metadata/loot_count = 0
 
 [node name="East" type="Node3D" parent="." unique_id=1687279771]
 
@@ -91755,6 +91946,9 @@ footprint = Vector2(78, 60)
 floors = 2
 story_height = 4.5
 label = "ЖК «Вершина» · стилобат: офисы, фитнес (закрыт)"
+metadata/height_m = 9.0
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Vershina_T1" type="Node3D" parent="East" unique_id=982761685 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 9.3, -103.3)
@@ -91767,6 +91961,9 @@ floors = 44
 story_height = 3.3
 label = "ЖК «Вершина», башня 1 — пластина, 44 этажа"
 metadata/lift = 9.3
+metadata/height_m = 145.2
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Vershina_T2" type="Node3D" parent="East" unique_id=758655254 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.3, 9.3, -93.3)
@@ -91779,6 +91976,9 @@ floors = 58
 story_height = 3.3
 label = "ЖК «Вершина», башня 2 — 58 этажей"
 metadata/lift = 9.3
+metadata/height_m = 191.4
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Vershina_T3" type="Node3D" parent="East" unique_id=1689177778 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 161.3, 0, -102.3)
@@ -91790,6 +91990,9 @@ footprint = Vector2(28, 32)
 floors = 52
 story_height = 3.3
 label = "ЖК «Вершина», башня 3 — 52 этажа"
+metadata/height_m = 171.6
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Vershina_T4" type="Node3D" parent="East" unique_id=1156156501 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.3, 0, -61.3)
@@ -91801,6 +92004,9 @@ footprint = Vector2(42, 24)
 floors = 36
 story_height = 3.3
 label = "ЖК «Вершина», башня 4 — широкая, 36 этажей"
+metadata/height_m = 118.8
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus3_A" type="Node3D" parent="East" unique_id=1468466351 groups=["mall_study_snap"]]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 144.3, 0, 95)
@@ -91810,6 +92016,9 @@ footprint = Vector2(30, 26)
 floors = 17
 story_height = 3.105
 label = "ЖК «Панорама», корпус 3 · подъезд 1 — 17 этажей (закрыт)"
+metadata/height_m = 52.785
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Corpus3_B" type="Node3D" parent="East" unique_id=1616814220 groups=["mall_study_snap"]]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 144.3, 0, 125)
@@ -91819,6 +92028,9 @@ footprint = Vector2(30, 26)
 floors = 17
 story_height = 3.105
 label = "ЖК «Панорама», корпус 3 · подъезд 2 — 17 этажей (закрыт)"
+metadata/height_m = 52.785
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="Meridian" type="Node3D" parent="East" unique_id=2095944402 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 151.3, 0, 195)
@@ -91827,6 +92039,9 @@ footprint = Vector2(48, 44)
 floors = 8
 story_height = 3.6
 label = "бизнес-центр «Меридиан», 8 эт. (закрыт)"
+metadata/height_m = 28.8
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="MetroPavilion" type="Node3D" parent="East" unique_id=788397004 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 131.3, 0, -5.3)
@@ -91835,6 +92050,9 @@ footprint = Vector2(12, 18)
 floors = 1
 story_height = 4.5
 label = "вход в метро «Проспект» (закрыт)"
+metadata/height_m = 4.5
+metadata/enterable = false
+metadata/loot_count = 0
 
 [node name="BC_Prospekt13" type="Node3D" parent="East" unique_id=1069012978 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.65, 0, -85.5)
@@ -91846,3 +92064,6 @@ footprint = Vector2(15.3, 49)
 floors = 9
 story_height = 3.6
 label = "БЦ «Проспект, 13» — 9 этажей (закрыт)"
+metadata/height_m = 32.4
+metadata/enterable = false
+metadata/loot_count = 0

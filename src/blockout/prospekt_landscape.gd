@@ -694,6 +694,18 @@ func _column_tag(at: Vector3, size: float, tag: String) -> void:
 ## жёлтой краской (фото владельца 06, кассы вокзала; по нормам — контрастная полоса на крайних ступенях).
 const STAIR_MARK_W: float = 1.8
 const STAIR_STRIPE_M: float = 0.08
+## Перила по ступеням (запись лестницы "rails": "both" | "left" | "right" — сторона по ходу от from к to; владелец
+## 2026-11-08: «перила по сторонам соразмерные, с правильной установкой на ступени»): поручень на 0,9 м над линией
+## кромок ступеней, продлён на 0,3 м за первую и последнюю ступень (СП 59.13330), под ним — промежуточный ригель;
+## стойки — на середине проступи через ~1,2 м и на концах продления; от края марша — RAIL_INSET_M.
+const RAIL_H_M: float = 0.9
+const RAIL_MID_M: float = 0.45
+const RAIL_EXTEND_M: float = 0.3
+const RAIL_POST_STEP_M: float = 1.2
+const RAIL_INSET_M: float = 0.18
+const RAIL_SIZE_M: float = 0.05
+const RAIL_MID_SIZE_M: float = 0.03
+const RAIL_POST_SIZE_M: float = 0.04
 
 
 func _stairs(g: RefCounted) -> void:
@@ -705,9 +717,89 @@ func _stairs(g: RefCounted) -> void:
 		var width: float = float(s.width)
 		var count: int = int(s.count)
 		var mat: String = String(s.get("mat", "concrete"))
-		g.stairs(start, finish, width, count, mat)
+		if s.has("fill"):
+			_solid_stairs(g, start, finish, width, count, mat, float(s.fill))
+		else:
+			g.stairs(start, finish, width, count, mat)
 		if mat == "concrete" and width >= STAIR_MARK_W and count >= 2:
 			_stair_marks(start, finish, width, count)
+		var rails: String = String(s.get("rails", ""))
+		if rails != "":
+			_stair_rails(g, start, finish, width, count, rails)
+
+
+## Марш на сплошном основании до высоты base_y (запись лестницы "fill"): каждая ступень — коробка до основания, сбоку
+## ступенчатая щека, под маршем не пройти; физика — та же наклонная поверхность, что у Geometry.stairs, но клином до
+## основания.
+func _solid_stairs(g: RefCounted, start: Vector3, finish: Vector3, width: float, count: int, key: String, base_y: float) -> void:
+	var delta: Vector3 = finish - start
+	var flat := Vector3(delta.x, 0.0, delta.z)
+	var dir: Vector3 = flat.normalized()
+	var yaw: float = -atan2(dir.x, -dir.z)
+	for i: int in range(count):
+		var top: float = start.y + delta.y * float(i + 1) / float(count)
+		var h: float = maxf(top - base_y, 0.05)
+		var at: Vector3 = start + flat * ((float(i) + 0.5) / float(count))
+		at.y = top - h * 0.5
+		g.box(at, Vector3(width, h, flat.length() / float(count) + 0.01), key, false, yaw)
+	var side: Vector3 = dir.cross(Vector3.UP) * width * 0.5
+	var low := Vector3(0.0, base_y, 0.0)
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = PackedVector3Array([start - side, start + side, finish - side, finish + side,
+		Vector3(start.x, 0.0, start.z) - side + low, Vector3(start.x, 0.0, start.z) + side + low,
+		Vector3(finish.x, 0.0, finish.z) - side + low, Vector3(finish.x, 0.0, finish.z) + side + low])
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	cs.set_meta("surface", String(SURFACE_BY_MAT.get(key, BOX_SURFACE.get(key, "concrete"))))
+	(g.body as StaticBody3D).add_child(cs)
+
+
+## Перила марша (см. RAIL_*): линия кромок ступеней идёт от from к to; поручень и ригель — твёрдые (с марша не упасть),
+## стойки — без коллизии.
+func _stair_rails(g: RefCounted, start: Vector3, finish: Vector3, width: float, count: int, sides: String) -> void:
+	var delta: Vector3 = finish - start
+	var flat := Vector3(delta.x, 0.0, delta.z)
+	var length: float = flat.length()
+	if length < 0.01 or count < 1:
+		return
+	var dir: Vector3 = flat / length
+	var right: Vector3 = dir.cross(Vector3.UP).normalized()
+	var tread: float = length / float(count)
+	var riser: float = delta.y / float(count)
+	var signs: Array[float] = []
+	if sides in ["both", "right"]:
+		signs.append(1.0)
+	if sides in ["both", "left"]:
+		signs.append(-1.0)
+	var every: int = maxi(1, int(round(RAIL_POST_STEP_M / tread)))
+	for sgn: float in signs:
+		var off: Vector3 = right * sgn * (width * 0.5 - RAIL_INSET_M)
+		var a: Vector3 = start + off
+		var b: Vector3 = finish + off
+		var top_end: Vector3 = a - dir * RAIL_EXTEND_M
+		var bottom_end: Vector3 = b + dir * RAIL_EXTEND_M
+		# поручень: продление наверху, по маршу, продление внизу
+		var up := Vector3.UP * RAIL_H_M
+		g.beam(top_end + up, a + up, RAIL_SIZE_M, RAIL_SIZE_M, "rail_steel", true)
+		g.beam(a + up, b + up, RAIL_SIZE_M, RAIL_SIZE_M, "rail_steel", true)
+		g.beam(b + up, bottom_end + up, RAIL_SIZE_M, RAIL_SIZE_M, "rail_steel", true)
+		# промежуточный ригель — между крайними стойками на ступенях
+		var first: Vector3 = a + dir * (tread * 0.5) + Vector3.UP * (riser * 0.5)
+		var last: Vector3 = a + dir * (tread * (float(count) - 0.5)) + Vector3.UP * (riser * (float(count) - 0.5))
+		g.beam(first + Vector3.UP * RAIL_MID_M, last + Vector3.UP * RAIL_MID_M, RAIL_MID_SIZE_M, RAIL_MID_SIZE_M, "rail_steel", true)
+		# стойки: на концах продления (стоят на площадках) и на середине проступи
+		var posts: Array[Vector3] = [Vector3(top_end.x, start.y, top_end.z), Vector3(bottom_end.x, finish.y, bottom_end.z)]
+		for i: int in range(count):
+			if i % every == 0 or i == count - 1:
+				var p: Vector3 = a + dir * (tread * (float(i) + 0.5))
+				posts.append(Vector3(p.x, start.y + riser * float(i + 1), p.z))
+		for p: Vector3 in posts:
+			# верх стойки — поручень над этой точкой (линия кромок + RAIL_H_M; на продлении — над площадкой)
+			var s_along: float = (Vector3(p.x, 0.0, p.z) - Vector3(start.x, 0.0, start.z)).dot(dir)
+			var rail_y: float = start.y + clampf(s_along, 0.0, length) / length * delta.y + RAIL_H_M
+			var h: float = rail_y - p.y
+			if h > 0.05:
+				g.box(Vector3(p.x, p.y + h * 0.5, p.z), Vector3(RAIL_POST_SIZE_M, h, RAIL_POST_SIZE_M), "rail_steel", false)
 
 
 ## Жёлтая полоса у кромки ступени: те же размеры шагов, что у Geometry.stairs (верх ступени i — на (i + 1) / count подъёма).
@@ -1243,9 +1335,11 @@ func _tunnel_stairs(g: RefCounted, floor_r: Rect2, y0: float, ceil_y: float, z0:
 		var flat := Vector3(bottom.x - top.x, 0.0, bottom.z - top.z)
 		var side: Vector3 = flat.normalized().cross(Vector3.UP)
 		var inward: float = signf((z0 + z1) * 0.5 - bottom.z)
+		# у лестницы со своими перилами ("rails", _stair_rails) поручня и рельсов для колясок здесь нет
+		var own_rails: bool = st.has("rails")
 		# поручень на 0,9 м над ступенями у торцевой стены, стойки через 1,5 м (у стальной стенки со стороны перехода
 		# поручень — модель U03_04 плана)
-		for sgn: float in [-inward * signf(side.z)]:
+		for sgn: float in ([] if own_rails else [-inward * signf(side.z)]):
 			var off: Vector3 = side * sgn * (width * 0.5 - 0.12)
 			g.beam(top + off + Vector3.UP * 0.9, bottom + off + Vector3.UP * 0.9, 0.05, 0.05, "rail_steel")
 			var posts: int = int(flat.length() / 1.5)
@@ -1253,7 +1347,7 @@ func _tunnel_stairs(g: RefCounted, floor_r: Rect2, y0: float, ceil_y: float, z0:
 				var p: Vector3 = top.lerp(bottom, float(k) / float(maxi(posts, 1))) + off
 				g.box(p + Vector3.UP * 0.45, Vector3(0.04, 0.9, 0.04), "rail_steel", false)
 		# рельсы-пандус для колясок посередине: два швеллера по уклону над кромками ступеней
-		for sgn2: float in [-1.0, 1.0]:
+		for sgn2: float in ([] if own_rails else [-1.0, 1.0]):
 			var off2: Vector3 = side * sgn2 * 0.35
 			g.beam(top + off2 + Vector3.UP * 0.03, bottom + off2 + Vector3.UP * 0.03, 0.1, 0.04, "rail_steel")
 		# решётка ливнёвки на площадке под лестницей

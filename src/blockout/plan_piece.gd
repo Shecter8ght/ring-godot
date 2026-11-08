@@ -171,6 +171,10 @@ func current_entry() -> Array:
 			return ["ramps", rp]
 		"stairs":
 			var st: Dictionary = (entry as Dictionary).duplicate(true)
+			var mid: Vector3 = (Vector3(float((st.from as Array)[0]), 0.0, float((st.from as Array)[2]))
+				+ Vector3(float((st.to as Array)[0]), 0.0, float((st.to as Array)[2]))) * 0.5
+			if st.has("fill"):
+				st.fill = _y(delta, mid, float(st.fill))
 			st.from = _pt(delta, st.from as Array)
 			st.to = _pt(delta, st.to as Array)
 			st.width = snappedf(float(st.width) * scale_xyz.x, 0.001)

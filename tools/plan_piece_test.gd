@@ -6,8 +6,9 @@ extends Node
 ##   tools/godot.cmd --headless res://tools/plan_piece_test.tscn
 
 const SCENE: String = "res://scenes/levels/prospekt_study.tscn"
-const COUNTS: Dictionary = {"surfaces": 54, "ground_holes": 6, "walk_holes": 2, "slabs": 34, "walls": 1222, "boxes": 2074,
-	"columns": 2, "stairs": 28, "ramps": 11, "beams": 724, "lamps": 102, "signs": 89}
+## Списки улиц; сколько в них кусков — по сцене (владелец правит карту: число меняется).
+const LISTS: Array[String] = ["surfaces", "ground_holes", "walk_holes", "slabs", "walls", "boxes", "columns", "stairs", "ramps",
+	"beams", "lamps", "signs"]
 
 var _fails: int = 0
 
@@ -16,7 +17,8 @@ func _ready() -> void:
 	# как есть: списки плана из узлов — прежнего размера
 	var world: Node3D = (load(SCENE) as PackedScene).instantiate() as Node3D
 	var pieces: Dictionary = _by_list(world)
-	_check("кусков столько же, сколько записей было", _sizes(pieces) == COUNTS)
+	var counts: Dictionary = _sizes(pieces)
+	print("  кусков: ", counts)
 	var wall: PlanPiece = (pieces.walls as Array)[0]
 	var wall_turn: PlanPiece = (pieces.walls as Array)[1]
 	var wall_free: PlanPiece = (pieces.walls as Array)[2]
@@ -52,11 +54,11 @@ func _ready() -> void:
 	await get_tree().process_frame
 	var land: Node = world.get_node("Landscape")
 	var plan: Dictionary = land.get("plan")
-	var want: Dictionary = COUNTS.duplicate()
-	want.walls = 1221
-	want.boxes = 2075
-	want.surfaces = 53
-	want.lamps = 103
+	var want: Dictionary = counts.duplicate()
+	want.walls = int(counts.walls) - 1
+	want.boxes = int(counts.boxes) + 1
+	want.surfaces = int(counts.surfaces) - 1
+	want.lamps = int(counts.lamps) + 1
 	_check("после правок: стена в коробках, покрытие скрыто, фонарь скопирован", _sizes_plan(plan) == want)
 	var walls: Array = plan.walls
 	var moved: Dictionary = walls[0]
@@ -132,14 +134,18 @@ func _by_list(world: Node) -> Dictionary:
 
 func _sizes(pieces: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
-	for key: String in COUNTS:
-		out[key] = (pieces.get(key, []) as Array).size()
+	for key: String in LISTS:
+		var n: int = 0
+		for p: PlanPiece in pieces.get(key, []):
+			if p.visible:
+				n += 1
+		out[key] = n
 	return out
 
 
 func _sizes_plan(plan: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
-	for key: String in COUNTS:
+	for key: String in LISTS:
 		out[key] = (plan.get(key, []) as Array).size()
 	return out
 
