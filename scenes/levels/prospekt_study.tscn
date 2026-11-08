@@ -918,15 +918,15 @@ pick_size = Vector3(26.8, 0.12, 26.8)
 [node name="Вырезы тротуаров" type="Node3D" parent="Landscape/Улицы" unique_id=370056230]
 
 [node name="Вырез 0001" type="Node3D" parent="Landscape/Улицы/Вырезы тротуаров" unique_id=656872974]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0, -42.5765)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0, -41.3385)
 script = ExtResource("4_u54l0")
 list = "walk_holes"
 data = {
-"a": [-160.0, -45.877, -152.0, -39.276]
+"a": [-160.0, -45.877, -152.0, -36.8]
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0, -42.5765)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0, -41.3385)
 order = 0
-pick_size = Vector3(8, 0.12, 6.601)
+pick_size = Vector3(8, 0.12, 9.077)
 
 [node name="Вырез 0002" type="Node3D" parent="Landscape/Улицы/Вырезы тротуаров" unique_id=120925823]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0, 11.2765)
@@ -1486,36 +1486,36 @@ order = 33
 pick_size = Vector3(10.4, 0.25, 16.4)
 
 [node name="Площадка спуска север" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1771634744]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.395, -2.8, -42.6605)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.645, -2.4, -44.277)
 script = ExtResource("4_u54l0")
 list = "slabs"
 data = {
 "holes": [],
 "id": "nentry_landing",
 "mat": "concrete",
-"rect": [-159.99, -45.877, -156.8, -39.444],
-"t": 1.0,
-"y_top": -2.3
+"rect": [-159.99, -45.877, -155.3, -42.677],
+"t": 1.8,
+"y_top": -1.5
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.395, -2.8, -42.6605)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.645, -2.4, -44.277)
 order = 100
-pick_size = Vector3(3.19, 1, 6.433)
+pick_size = Vector3(4.69, 1.8, 3.2)
 
-[node name="Площадка спуска север — полоса" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1730380437]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -38.844)
+[node name="Площадка спуска север — на всю ширину" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1730380437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.4, -41.0885)
 script = ExtResource("4_u54l0")
 list = "slabs"
 data = {
 "holes": [],
 "id": "nentry_landing_strip",
 "mat": "concrete",
-"rect": [-159.99, -39.444, -152.01, -38.244],
-"t": 1.0,
-"y_top": -2.3
+"rect": [-159.99, -42.677, -152.01, -39.5],
+"t": 1.8,
+"y_top": -1.5
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -38.844)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.4, -41.0885)
 order = 101
-pick_size = Vector3(7.98, 1, 1.2)
+pick_size = Vector3(7.98, 1.8, 3.177)
 
 [node name="Стены" type="Node3D" parent="Landscape/Улицы" unique_id=1660921852]
 
@@ -39823,19 +39823,19 @@ pick_size = Vector3(6.5, 3.6, 0.2)
 [node name="Бетон" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=394626614]
 
 [node name="Коробка 0001" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=138296192]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, 0.5, -39.276)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0.5, -36.7)
 script = ExtResource("4_u54l0")
 list = "boxes"
 data = {
-"at": [-155.25, 0.5, -39.276],
+"at": [-156.0, 0.5, -36.7],
 "mat": "concrete",
-"size": [6.5, 1.0, 0.2],
+"size": [8.8, 1.0, 0.2],
 "solid": true,
 "yaw": 0.0
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, 0.5, -39.276)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0.5, -36.7)
 order = 1101
-pick_size = Vector3(6.5, 1, 0.2)
+pick_size = Vector3(8.8, 1, 0.2)
 
 [node name="Коробка 0002" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=414722145]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0.5, -46.207)
@@ -39853,34 +39853,34 @@ order = 1102
 pick_size = Vector3(8.8, 1, 0.4)
 
 [node name="Коробка 0003" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=944938384]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.45, 0.5, -39.276)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.8, 0.5, -39.739)
 script = ExtResource("4_u54l0")
 list = "boxes"
 data = {
-"at": [-159.45, 0.5, -39.276],
+"at": [-151.8, 0.5, -39.739],
 "mat": "concrete",
-"size": [1.9, 1.0, 0.2],
+"size": [0.4, 1.0, 5.877],
 "solid": true,
 "yaw": 0.0
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.45, 0.5, -39.276)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.8, 0.5, -39.739)
 order = 1103
-pick_size = Vector3(1.9, 1, 0.2)
+pick_size = Vector3(0.4, 1, 5.877)
 
 [node name="Коробка 0004" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=733560100]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.2, 0.5, -42.577)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.2, 0.5, -41.37)
 script = ExtResource("4_u54l0")
 list = "boxes"
 data = {
-"at": [-160.2, 0.5, -42.577],
+"at": [-160.2, 0.5, -41.37],
 "mat": "concrete",
-"size": [0.4, 1.0, 6.931],
+"size": [0.4, 1.0, 9.34],
 "solid": true,
 "yaw": 0.0
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.2, 0.5, -42.577)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.2, 0.5, -41.37)
 order = 1104
-pick_size = Vector3(0.4, 1, 6.931)
+pick_size = Vector3(0.4, 1, 9.34)
 
 [node name="Коробка 0005" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1717110043]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155.25, 0.5, 7.976)
@@ -49829,22 +49829,22 @@ pick_size = Vector3(138.5, 6.9, 0.9)
 [node name="Лестницы" type="Node3D" parent="Landscape/Улицы" unique_id=1604276389]
 
 [node name="Спуск север — верхний марш" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=223701569]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -154.4, -1.0749999, -42.6605)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -153.65, -0.675, -44.272)
 script = ExtResource("4_u54l0")
 list = "stairs"
 data = {
-"count": 16,
+"count": 11,
 "fill": -3.3,
-"from": [-152.0, 0.15, -42.6605],
+"from": [-152.0, 0.15, -44.272],
 "mat": "concrete",
 "rails": "both",
-"to": [-156.8, -2.3, -42.6605],
-"width": 6.43
+"to": [-155.3, -1.5, -44.272],
+"width": 3.19
 }
-base = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -154.4, -1.0749999, -42.6605)
+base = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -153.65, -0.675, -44.272)
 order = 0
-pick_size = Vector3(6.43, 4.4, 4.800003)
-pick_center = Vector3(0, -0.025000025, 0)
+pick_size = Vector3(3.19, 4.4, 3.300003)
+pick_center = Vector3(0, -0.425, 0)
 
 [node name="Лестница 0002" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=770124718]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -155.25, -1.5749999, 11.28)
@@ -50252,21 +50252,21 @@ order = 27
 pick_size = Vector3(1.1, 4.049999, 5.5999985)
 
 [node name="Спуск север — широкий марш" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=718692521]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -37.194)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.4, -37.7)
 script = ExtResource("4_u54l0")
 list = "stairs"
 data = {
-"count": 7,
+"count": 12,
 "fill": -3.3,
-"from": [-156.0, -2.3, -38.244],
+"from": [-156.0, -1.5, -39.5],
 "mat": "concrete",
 "rails": "both",
-"to": [-156.0, -3.3, -36.144],
+"to": [-156.0, -3.3, -35.9],
 "width": 7.98
 }
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.8, -37.194)
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.4, -37.7)
 order = 100
-pick_size = Vector3(7.98, 1.95, 2.0999985)
+pick_size = Vector3(7.98, 2.75, 3.5999985)
 pick_center = Vector3(0, 0.47499996, 0)
 
 [node name="Пандусы" type="Node3D" parent="Landscape/Улицы" unique_id=430344969]
@@ -77220,7 +77220,7 @@ base = Transform3D(-0.11320321, 0, 0.9935719, 0, 1, 0, -0.9935719, 0, -0.1132032
 order = 44
 
 [node name="Комок бумаги 0002" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=827640949]
-transform = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -2.3, -39.36)
+transform = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -1.65, -39.36)
 script = ExtResource("5_iugf6")
 item = ["paper_ball", -159.21, -39.36, 340.8, 1.0, -3.3]
 base = Transform3D(0.94437635, 0, -0.32886675, 0, 1, 0, 0.32886675, 0, 0.94437635, -159.21, -3.3, -39.36)
@@ -77297,7 +77297,7 @@ base = Transform3D(0.9114033, 0, 0.41151434, 0, 1, 0, -0.41151434, 0, 0.9114033,
 order = 56
 
 [node name="Бумага 0005" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1436608001]
-transform = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -2.3, -39.23)
+transform = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -1.65, -39.23)
 script = ExtResource("5_iugf6")
 item = ["paper", -154.37, -39.23, 111.5, 1.0, -3.3]
 base = Transform3D(-0.36650118, 0, 0.9304176, 0, 1, 0, -0.9304176, 0, -0.36650118, -154.37, -3.3, -39.23)
@@ -77360,7 +77360,7 @@ base = Transform3D(-0.6573753, 0, 0.75356334, 0, 1, 0, -0.75356334, 0, -0.657375
 order = 65
 
 [node name="Бумага 0009" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=922813179]
-transform = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -2.3, -39.85)
+transform = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -1.5, -39.85)
 script = ExtResource("5_iugf6")
 item = ["paper", -159.32, -39.85, 33.5, 1.0, -3.3]
 base = Transform3D(0.8338858, 0, 0.551937, 0, 1, 0, -0.551937, 0, 0.8338858, -159.32, -3.3, -39.85)

@@ -1,10 +1,10 @@
 {
 	"files": {
-		"res://data/blockouts/prospekt.json": "ad1e3840d99e76a4dfceed548ea1ae74d1f5ddc6ccf79e5dbd3ce159ca10f81f",
+		"res://data/blockouts/prospekt.json": "6831c7397b3a5bf4d89cb723c63fc39d6752dfeb0d496326d5442d6ef4f83325",
 		"res://data/sectors/prospekt.json": "a5d971a6f8449d6e972939d8eba0f32778450eaa89d86288aadc00243891411e",
 		"res://data/urban95_models.json": "53dce20c311cb364f81ee00a322ce6fc5806770ec66b7975e2c0557a1c8a9d3b",
 		"res://scenes/levels/prospekt.tscn": "590cbcb33a10a16ad66684223251ed0214fafeb4639c4508c2dfb1cbacdf96bc",
-		"res://scenes/levels/prospekt_study.tscn": "35fc8d9cc4800786e3faba07f783d503a7598497931ded736b7aae90673d358b",
+		"res://scenes/levels/prospekt_study.tscn": "b027fd0f79d84eb4d50b406e5c5eba983737beaabf05174f2f5396db5f178315",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",
