@@ -476,6 +476,10 @@ bash tools/prospekt_vehicles/wheels_cars.sh [класс …]          # колё
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
                                                               # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
                                                               # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/fire_truck/build.py -- <выход.blend>
+                                                              # пожарная автоцистерна (по мотивам АЦ на КамАЗ-43253) в sand3d (_asset_src/sand3d, v1.6.3):
+                                                              # high-poly форма, коллекции «Целая» / «Отсеки открыты»; размеры — tools/fire_truck/spec.py;
+                                                              # проверка — audit.py -- <отчёт.json>, виды — shots.py -- <папка> [виды] [closed|open] (blender --background <файл>)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_plants/<этап>.py -- [вид …] [preview]
                                                               # растения «Проспекта» (берёза, липа, тополь, сирень, изгородь): build_forms (форма) → python -X utf8
                                                               # tools/prospekt_plants/textures.py (листья, гладкая кора) → build_pbr (UCUPaint) → game.py -- atlas|meshes|preview
