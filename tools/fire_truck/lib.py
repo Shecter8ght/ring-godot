@@ -87,7 +87,8 @@ def chrome(ob):
 
 
 def glass(ob):
-    return s3d.material(ob, "glass", color="#9fb3b8", opacity=0.35)
+    """Стекло: светлое, с лёгкой зеленцой автомобильного стекла, прозрачное, с отражениями (без тонировки)."""
+    return s3d.material(ob, "glass", color="#e2f0ea", roughness=0.0, opacity=0.16)
 
 
 def lens(ob, color: str):

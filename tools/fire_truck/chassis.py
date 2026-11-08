@@ -161,9 +161,9 @@ def suspension_details():
     lib.steel_dark(link)
     out.append(link)
     for sx in (-1, 1):
-        flap = s3d.box("mudflap_rear", 0.62, 0.008, 0.34)
+        flap = s3d.box("mudflap_rear", 0.62, 0.008, 0.30)
         lib.rubber(flap)
-        out.append(s3d.at(flap, x=sx * (S.TRACK_R / 2), y=S.YR + 0.80, z=0.16))
+        out.append(s3d.at(flap, x=sx * (S.TRACK_R / 2), y=S.YR + 0.80, z=S.LOCKER_BOTTOM - 0.31))
     return out
 
 

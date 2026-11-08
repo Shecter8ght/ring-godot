@@ -3,7 +3,9 @@
 расширители и ниши арок, подножки, колпак с маячками, зеркала, ручки, мелочи и тёмный салон-заглушка."""
 from __future__ import annotations
 
+import bpy
 import cab_body
+import cab_interior
 import lib
 import shapes
 import spec as S
@@ -58,10 +60,18 @@ def bumper():
         fog = s3d.extrude("foglight", shapes.outline(shapes.box_pts(sx * 0.72 - 0.058, sx * 0.72 + 0.058, 0.557, 0.633), 0.01),
                           0.01, on=fr.offset(-0.022))
         lib.lens(fog, "#f3f3ea")
-        lamps += [lensp, reflector, ind, fog]
+        drl = s3d.fillet(s3d.box("drl_strip", 0.32, 0.008, 0.014), 0.006, edges="side")
+        s3d.material(drl, "glass", color="#ffffff", opacity=0.85, emission=0.6)
+        drl = s3d.at(drl, x=sx * 0.70, y=b["y0"] + 0.03, z=0.85)
+        lamps += [lensp, reflector, ind, fog, drl]
     s3d.pocket(body, shapes.outline(shapes.box_pts(-0.28, 0.28, 0.50, 0.63), 0.01), 0.012, on=fr)
     s3d.pocket(body, shapes.outline(shapes.box_pts(-0.45, 0.45, 0.64, 0.71), 0.02), 0.06, on=fr)
     lib.paint_white(body)
+    plate = s3d.box("plate_front", 0.52, 0.004, 0.112)
+    s3d.material(plate, "painted_metal", color="#f0f0ea")
+    pframe = s3d.fillet(s3d.box("plate_frame", 0.55, 0.006, 0.13), 0.01, edges="side")
+    lib.black_plastic(pframe)
+    lamps += [s3d.at(pframe, y=b["y0"] + 0.009, z=0.50), s3d.at(plate, y=b["y0"] + 0.006, z=0.509)]
     lip = s3d.fillet(s3d.box("bumper_lip", b["w"] - 0.30, 0.20, 0.06), 0.03, edges="side")
     lib.black_plastic(lip)
     lip = s3d.at(lip, y=b["y0"] + 0.14, z=b["z0"] - 0.03)
@@ -134,17 +144,21 @@ def mirrors():
         arm = s3d.wire("mirror_arm", [(xa, F + 0.55, 2.70), (sgn * (HW + 0.24), F + 0.52, 2.70),
                                       (sgn * (HW + 0.26), F + 0.52, 2.05), (xa, F + 0.55, 2.05)], 0.022, fillet=0.04)
         lib.black_plastic(arm)
-        head = s3d.fillet(s3d.box("mirror", 0.07, 0.21, 0.38), 0.025, edges="side")
-        s3d.fillet(head, 0.02, edges="top bottom")
+        head = s3d.fillet(s3d.box("mirror", 0.085, 0.22, 0.40), 0.038, edges="side")
+        s3d.fillet(head, 0.03, edges="top bottom")
         lib.black_plastic(head)
-        head = s3d.at(head, x=sgn * (HW + 0.28), y=F + 0.50, z=2.28, rz=sgn * 10)
+        head = s3d.at(head, x=sgn * (HW + 0.28), y=F + 0.495, z=2.27, rz=sgn * 10)
         glass_m = s3d.box("mirror_glass", 0.006, 0.19, 0.35)
         lib.chrome(glass_m)
         glass_m = s3d.at(glass_m, x=sgn * (HW + 0.28), y=F + 0.50 + 0.036, z=2.295, rz=sgn * 10 + 90)
-        wide = s3d.fillet(s3d.box("mirror_wide", 0.07, 0.19, 0.17), 0.03, edges="side")
+        wide = s3d.fillet(s3d.box("mirror_wide", 0.08, 0.20, 0.18), 0.036, edges="side")
+        s3d.fillet(wide, 0.025, edges="top bottom")
         lib.black_plastic(wide)
-        wide = s3d.at(wide, x=sgn * (HW + 0.28), y=F + 0.50, z=2.08, rz=sgn * 10)
-        out += [arm, head, glass_m, wide]
+        wide = s3d.at(wide, x=sgn * (HW + 0.28), y=F + 0.495, z=2.075, rz=sgn * 10)
+        wglass = s3d.box("mirror_wide_glass", 0.006, 0.17, 0.15)
+        lib.chrome(wglass)
+        wglass = s3d.at(wglass, x=sgn * (HW + 0.28), y=F + 0.50 + 0.04, z=2.09, rz=sgn * 10 + 90)
+        out += [arm, head, glass_m, wide, wglass]
         for z in (2.70, 2.05):
             clamp = s3d.fillet(s3d.box("mirror_clamp", 0.05, 0.06, 0.06), 0.012, edges="side")
             lib.black_plastic(clamp)
@@ -162,20 +176,53 @@ def mirrors():
     return out
 
 
-def handles_and_lamps():
+def door_outer_details(sgn: float) -> list:
+    """Наружные детали двери (едут с дверью): ручка в чашке, личинка замка, стойка форточки, петли (половинка двери)."""
     out = []
     w = S.SIDE_WIN
+    post = s3d.box("vent_post", 0.012, 0.025, w["z1"] - w["z0"] - 0.04)
+    lib.rubber(post)
+    out.append(s3d.at(post, x=sgn * (HW - 0.012), y=w["y0"] + 0.24, z=w["z0"] + 0.02))
+    cup = soft_cup = s3d.fillet(s3d.box("door_handle_cup", 0.012, 0.21, 0.07), 0.012, edges="side")
+    lib.black_plastic(soft_cup)
+    out.append(s3d.at(cup, x=sgn * (HW - 0.002), y=-1.86, z=1.805))
+    h = s3d.fillet(s3d.box("door_handle", 0.03, 0.17, 0.04), 0.012, edges="side")
+    lib.black_plastic(h)
+    out.append(s3d.at(h, x=sgn * (HW + 0.008), y=-1.86, z=1.82))
+    lock = s3d.cylinder("door_lock", 0.028, 0.012)
+    lib.chrome(lock)
+    out.append(s3d.at(lock, x=sgn * (HW + 0.004), y=-1.74, z=1.84, ry=90 * sgn))
+    belt = s3d.box("door_belt_rubber", 0.012, w["y1"] - w["y0"] + 0.02, 0.016)
+    lib.rubber(belt)
+    out.append(s3d.at(belt, x=sgn * (HW + 0.002), y=(w["y0"] + w["y1"]) / 2, z=w["z0"] - 0.035))
+    for z in (S.DOOR["z0"] + 0.32, S.DOOR["z1"] - 0.38):
+        leaf = s3d.fillet(s3d.box("hinge_leaf_door", 0.012, 0.06, 0.09), 0.004, edges="side")
+        lib.steel_dark(leaf)
+        out.append(s3d.at(leaf, x=sgn * (HW + 0.004), y=S.DOOR["y0"] + 0.035, z=z))
+    return out
+
+
+def hinge_body_parts() -> list:
+    """Петли кабины: половинки на стойке и оси (остаются на кабине)."""
+    out = []
+    px, py = cab_body.PIVOT
     for sgn in (1, -1):
-        post = s3d.box("vent_post", 0.012, 0.025, w["z1"] - w["z0"] - 0.04)
-        lib.rubber(post)
-        out.append(s3d.at(post, x=sgn * (HW - 0.012), y=w["y0"] + 0.24, z=w["z0"] + 0.02))
+        for z in (S.DOOR["z0"] + 0.32, S.DOOR["z1"] - 0.38):
+            pin = s3d.cylinder("hinge_pin", 0.022, 0.10)
+            lib.steel_dark(pin)
+            leaf = s3d.fillet(s3d.box("hinge_leaf_body", 0.012, 0.05, 0.09), 0.004, edges="side")
+            lib.steel_dark(leaf)
+            out += [s3d.at(pin, x=sgn * px, y=py, z=z - 0.005), s3d.at(leaf, x=sgn * (HW + 0.004), y=py - 0.028, z=z)]
+    return out
+
+
+hinged = shapes.hinged
+copy_tree = shapes.copy_tree
+
+
+def handles_and_lamps():
+    out = []
     for sgn in (1, -1):
-        h = s3d.fillet(s3d.box("door_handle", 0.03, 0.17, 0.04), 0.012, edges="side")
-        lib.black_plastic(h)
-        out.append(s3d.at(h, x=sgn * (HW + 0.005), y=-1.86, z=1.82))
-        lock = s3d.cylinder("door_lock", 0.028, 0.012)
-        lib.chrome(lock)
-        out.append(s3d.at(lock, x=sgn * (HW + 0.004), y=-1.74, z=1.84, ry=90 * sgn))
         rep = s3d.fillet(s3d.box("side_repeater", 0.02, 0.09, 0.04), 0.015, edges="side")
         lib.lens(rep, "#f0a020")
         out.append(s3d.at(rep, x=sgn * (HW + 0.005), y=F + 0.30, z=1.30))
@@ -211,6 +258,10 @@ def cab_details():
         gut = s3d.fillet(s3d.box("rain_gutter", 0.018, B - F - 0.45, 0.022), 0.008, edges="side")
         lib.black_plastic(gut)
         out.append(s3d.at(gut, x=sx * (HW - 0.006), y=(F + 0.40 + B - 0.05) / 2, z=S.CAB_ROOF - 0.075))
+    for sx in (-1, 1):
+        nozzle = s3d.fillet(s3d.box("washer_nozzle", 0.03, 0.025, 0.018), 0.008, edges="side")
+        lib.black_plastic(nozzle)
+        out.append(s3d.at(nozzle, x=sx * 0.34, y=F - 0.006, z=1.875))
     spk = s3d.fillet(s3d.box("siren_speaker", 0.26, 0.16, 0.20), 0.03, edges="side")
     lib.black_plastic(spk)
     out.append(s3d.at(spk, x=-0.62, y=b["y1"] + 0.06, z=0.50))
@@ -222,27 +273,20 @@ def cab_details():
     return out
 
 
-def interior():
-    """Салон — заглушкой (подробно только снаружи): тёмная коробка за стёклами, панель приборов, руль слева,
-    спинки сидений — чтобы сквозь стёкла не было видно пустой кабины и рамы под ней."""
-    out = []
-    box = s3d.box("cab_interior", S.CAB_W - 0.16, (B - 0.06) - (F + 0.30), S.DOOR["z1"] - 1.30)
-    lib.steel_dark(box)
-    out.append(s3d.at(box, y=((B - 0.06) + (F + 0.30)) / 2, z=1.30))
-    dash = s3d.fillet(s3d.box("dashboard", S.CAB_W - 0.22, 0.46, 0.42), 0.06, edges="top")
-    s3d.material(dash, "plastic", color="#26282a", roughness=0.7)
-    out.append(s3d.at(dash, y=F + 0.36, z=1.52))
-    wheel = s3d.torus("steering_wheel", 0.44, 0.03)
-    s3d.material(wheel, "plastic", color="#1a1a1a", roughness=0.6)
-    out.append(s3d.at(wheel, x=0.52, y=F + 0.72, z=1.95, rx=-55))
-    for x in (0.52, -0.40):
-        seat = s3d.fillet(s3d.box("seat_back", 0.50, 0.12, 0.62), 0.06, edges="side top")
-        s3d.material(seat, "fabric", color="#2c2f33")
-        out.append(s3d.at(seat, x=x, y=B - 0.20, z=1.70, rx=-8))
-    return out
+DOOR_OPEN_DEG = 68.0
 
 
 def build() -> dict:
-    parts = cab_body.build() + grille_inserts() + bumper() + fenders() + roof_cap() + mirrors() + handles_and_lamps() \
-        + cab_details() + interior()
-    return {"common": [s3d.group("Кабина", *parts)]}
+    """Кабина: общие детали — в обеих коллекциях; двери — на петлях: закрытые в «Целой», распахнутые на 68° —
+    в «Отсеки открыты» (те же сетки)."""
+    got = cab_body.build()
+    parts = got["common"] + grille_inserts() + bumper() + fenders() + roof_cap() + mirrors() + handles_and_lamps() \
+        + cab_details() + hinge_body_parts() + cab_interior.build()
+    closed, opened = [], []
+    px, py = cab_body.PIVOT
+    for side, sgn in (("L", 1.0), ("R", -1.0)):
+        door = got["door_" + side] + door_outer_details(sgn) + cab_interior.door_card_details(sgn)
+        door_open = copy_tree(door)
+        closed.append(hinged(f"Hinge_CabDoor_{side}_closed", door, (sgn * px, py), 0.0))
+        opened.append(hinged(f"Hinge_CabDoor_{side}_open", door_open, (sgn * px, py), -sgn * DOOR_OPEN_DEG))
+    return {"common": [s3d.group("Кабина", *parts)], "closed": closed, "open": opened}

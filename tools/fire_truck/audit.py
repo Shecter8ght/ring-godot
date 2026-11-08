@@ -66,6 +66,10 @@ for name in ("Целая", "Отсеки открыты"):
           f"(без зеркал и антенн {bhi.x - blo.x:.3f} × {bhi.y - blo.y:.3f} × {bhi.z - blo.z:.3f}); "
           f"Y {lo.y:.2f}…{hi.y:.2f}, Z {lo.z:.3f}…{hi.z:.3f}")
 print(f"треугольников в файле: {total_tris:,}")
+sc = bpy.context.scene
+stray = sorted(o.name for o in sc.objects if all(c == sc.collection for c in o.users_collection))
+print(f"деталей вне коллекций вариантов: {len(stray)}" + (f" — {', '.join(stray[:8])}" if stray else ""))
+summary["stray_objects"] = stray
 print(f"листовых панелей кабины (кромки открыты намеренно): {len(sheets)}")
 print(f"деталей с замечаниями: {len(bad)}")
 for name, b, n, d, l in sorted(bad, key=lambda r: -(r[1] + r[2] + r[3])):

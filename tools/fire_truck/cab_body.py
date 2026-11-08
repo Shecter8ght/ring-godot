@@ -99,6 +99,102 @@ def line_on(surf, view, a, b, step: float = 0.004) -> np.ndarray:
     return lift_poly(surf, view, np.array([a, b], float), step)
 
 
+DOOR_T = 0.075          # толщина двери от наружной панели до обивки
+JAMB_D = 0.085          # глубина откоса проёма
+PIVOT = (HW + 0.010, Y_DOOR0 - 0.005)     # ось петель левой двери: снаружи у передней кромки (дверь не задевает маску)
+
+
+def side_shift(surf, L: np.ndarray, d: float) -> np.ndarray:
+    """Контур на борту, сдвинутый в плоскости вида сбоку на d внутрь своей области (d < 0 — наружу), на поверхность."""
+    uv = L[:, 1:3]
+    area = 0.5 * float(np.sum(uv[:, 0] * np.roll(uv[:, 1], -1) - np.roll(uv[:, 0], -1) * uv[:, 1]))
+    t = np.roll(uv, -1, axis=0) - np.roll(uv, 1, axis=0)
+    left = np.c_[-t[:, 1], t[:, 0]]
+    left /= np.maximum(np.linalg.norm(left, axis=1, keepdims=True), 1e-12)
+    into = left if area > 0 else -left
+    P = L.copy()
+    P[:, 1:3] += into * d
+    P = surf.project(P)
+    for _ in range(3):                                   # углы: убрать петельки от сдвига
+        P = (np.roll(P, 1, axis=0) + 2 * P + np.roll(P, -1, axis=0)) / 4
+    return P
+
+
+def push(surf, L: np.ndarray, depth: float) -> np.ndarray:
+    """Контур, утопленный внутрь кузова по нормали поверхности."""
+    return L - surf.normal(L) * depth
+
+
+def band(A: np.ndarray, B: np.ndarray, outward: bool) -> tuple[np.ndarray, list]:
+    """Лента между двумя замкнутыми контурами одинаковой длины; грани — от центра контура (outward) или к нему."""
+    n = len(A)
+    V = np.vstack([A, B])
+    Fc = [(i, (i + 1) % n, n + (i + 1) % n, n + i) for i in range(n)]
+    c = A.mean(axis=0)
+    i = int(np.argmax(A[:, 2]))
+    nrm = np.cross(A[(i + 1) % n] - A[i], B[i] - A[i])
+    radial = (A[i] + A[(i + 1) % n]) / 2 - c
+    radial[0] = 0.0
+    if (float(nrm @ radial) > 0) != outward:
+        Fc = [f[::-1] for f in Fc]
+    return V, Fc
+
+
+def tube_loop(P: np.ndarray, r: float, n_sec: int = 8) -> tuple[np.ndarray, list]:
+    """Резиновый жгут по замкнутому контуру (уплотнитель проёма)."""
+    n = len(P)
+    T = np.roll(P, -1, axis=0) - np.roll(P, 1, axis=0)
+    T /= np.maximum(np.linalg.norm(T, axis=1, keepdims=True), 1e-12)
+    up = np.tile([1.0, 0.0, 0.0], (n, 1))
+    Bn = np.cross(T, up)
+    Bn /= np.maximum(np.linalg.norm(Bn, axis=1, keepdims=True), 1e-12)
+    Nn = np.cross(Bn, T)
+    ang = np.linspace(0, 2 * math.pi, n_sec, endpoint=False)
+    V = np.vstack([P + r * (math.cos(a) * Nn + math.sin(a) * Bn) for a in ang])
+    Fc = []
+    for k in range(n_sec):
+        k2 = (k + 1) % n_sec
+        for i in range(n):
+            i2 = (i + 1) % n
+            Fc.append((k * n + i, k * n + i2, k2 * n + i2, k2 * n + i))
+    return V, Fc
+
+
+def fill_side(outer: np.ndarray, holes: list, face_x: float) -> tuple[np.ndarray, list]:
+    """Почти плоская панель по контуру с проёмами (обивка): разбиение на виде сбоку, грани смотрят по знаку face_x."""
+    loops = [outer] + list(holes)
+    V3 = np.vstack(loops)
+    v2, tris = pt.poly_mesh(outer[:, 1:3], [h[:, 1:3] for h in holes])
+    if len(v2) != len(V3):
+        idx = [int(np.argmin(np.sum((V3[:, 1:3] - p) ** 2, axis=1))) for p in v2]
+        V3 = V3[idx]
+    t0 = tris[0]
+    nrm = np.cross(V3[t0[1]] - V3[t0[0]], V3[t0[2]] - V3[t0[0]])
+    if nrm[0] * face_x < 0:
+        tris = [t[::-1] for t in tris]
+    return V3, tris
+
+
+def door_inner(surf, door_outer: np.ndarray, win_loop: np.ndarray) -> list:
+    """Левая дверь изнутри и её проём: торец двери, откос окна, обивка; откос проёма с уплотнителем."""
+    out = []
+    door = vlib.resample_closed(door_outer, 0.008)
+    win = vlib.resample_closed(win_loop, 0.008)
+    eA = push(surf, side_shift(surf, door, 0.008), 0.010)
+    eB = push(surf, eA, DOOR_T - 0.010)
+    out.append(("Cab_DoorEdge_L", "white", *band(eA, eB, outward=True)))
+    wA = push(surf, side_shift(surf, win, -0.006), 0.040)
+    wB = push(surf, wA, DOOR_T - 0.040)
+    out.append(("Cab_DoorReveal_L", "black", *band(wA, wB, outward=False)))
+    out.append(("Cab_DoorCard_L", "trim", *fill_side(eB, [wB[::-1]], -1.0)))
+    aA = push(surf, side_shift(surf, door, -0.008), 0.012)
+    aB = push(surf, aA, JAMB_D)
+    out.append(("Cab_Jamb_L", "white", *band(aA, aB, outward=False)))
+    seal = push(surf, side_shift(surf, door, -0.001), 0.045)
+    out.append(("Cab_JambSeal_L", "rubber", *tube_loop(seal, 0.008)))
+    return out
+
+
 def build_panels() -> list:
     """[(имя, покраска, V, F)] панелей левой половины + симметричных; правые — зеркалом."""
     field = BoxField(field_spec())
@@ -164,6 +260,9 @@ def build_panels() -> list:
     panel("Cab_Windshield", "glass", "ws", ws_loop, h=0.05, gap=0.004, flange=0.02, fit_deg=2, fit_blend=0.03)
     out.append(("Cab_Windshield_Seal", "rubber", *pt.strip_on_surface(surf, np.vstack([ws_loop, ws_loop[:1]]), 0.022, 0.008,
                                                                          0.0, r=0.003)))
+    frit = vlib.offset_loop(surf, wsv, ws_loop, 0.034)
+    out.append(("Cab_Windshield_Frit", "black", *pt.strip_on_surface(surf, np.vstack([frit, frit[:1]]), 0.05, 0.0012,
+                                                                        -0.0045, r=0.0004)))
 
     # --- борт (левый; правый — зеркалом) -------------------------------------------------------------------
     left: list = []
@@ -177,6 +276,7 @@ def build_panels() -> list:
     panel("Cab_Door_Glass_L", "glass", "side", win_loop, h=0.05, gap=0.004, flange=0.02, fit_deg=2, fit_blend=0.03)
     out.append(("Cab_Door_Seal_L", "rubber", *pt.strip_on_surface(surf, np.vstack([win_loop, win_loop[:1]]), 0.018, 0.007,
                                                                      0.0, r=0.0025)))
+    out += door_inner(surf, door_outer, win_loop)
     q_outer = loop([seam_low_q, q_rear, top_q[::-1], door_rear[::-1]], tol=0.015)
     panel("Cab_Quarter_L", "white", "side", q_outer, h=0.018, gap=GAP)
     # крыло: перед — за бампером, верх — по шву низа дверей, сзади — подножки, низ — по арке
@@ -240,13 +340,38 @@ def build_panels() -> list:
     return out
 
 
+def _trim(ob):
+    return lib.s3d.material(ob, "plastic", color="#34373a", roughness=0.65)
+
+
 PAINT = {"red": lib.paint_red, "white": lib.paint_white, "glass": lib.glass, "rubber": lib.rubber,
-         "black": lib.black_plastic, "dark": lib.steel_dark}
+         "black": lib.black_plastic, "dark": lib.steel_dark, "trim": _trim}
+DOOR_PARTS = ("Cab_Door_", "Cab_DoorEdge_", "Cab_DoorReveal_", "Cab_DoorCard_")
+LINED = ("Cab_Front_Mask", "Cab_Quarter_L", "Cab_Quarter_R")      # изнанка видна из салона — тёмная подкладка
 
 
-def build() -> list:
-    """Панели кабины объектами Blender (материалы — метками sand3d, как у остальных деталей)."""
-    objs = []
+def lining(ob, name: str):
+    """Подкладка листовой панели изнутри: та же сетка, сдвинутая на 4 мм внутрь по нормалям, грани развёрнуты,
+    цвет обивки — чтобы из салона не была видна краска наружной стороны."""
+    import meshfix
+    meshfix.clean(ob, verbose=False)              # подкладка — с уже чистой сетки (без осколков разбиения)
+    me = ob.data
+    me.update()
+    V = np.array([v.co[:] for v in me.vertices]) - np.array([v.normal[:] for v in me.vertices]) * 0.004
+    Fc = [tuple(p.vertices)[::-1] for p in me.polygons]
+    m2 = bpy.data.meshes.new(name)
+    m2.from_pydata([tuple(map(float, v)) for v in V], [], Fc)
+    m2.validate()
+    m2.polygons.foreach_set("use_smooth", [True] * len(m2.polygons))
+    o2 = bpy.data.objects.new(name, m2)
+    bpy.context.scene.collection.objects.link(o2)
+    _trim(o2)
+    return o2
+
+
+def build() -> dict:
+    """Панели кабины объектами Blender (материалы — метками sand3d): {"common": […], "door_L": […], "door_R": […]}."""
+    got = {"common": [], "door_L": [], "door_R": []}
     for name, paint, V, Fc in build_panels():
         me = bpy.data.meshes.new(name)
         me.from_pydata([tuple(map(float, v)) for v in np.asarray(V)], [], [tuple(int(i) for i in f) for f in Fc])
@@ -255,5 +380,10 @@ def build() -> list:
         ob = bpy.data.objects.new(name, me)
         bpy.context.scene.collection.objects.link(ob)
         PAINT[paint](ob)
-        objs.append(ob)
-    return objs
+        if name in LINED:
+            got["common"].append(lining(ob, name + "_Lining"))
+        key = "common"
+        if name.startswith(DOOR_PARTS):
+            key = "door_L" if name.endswith("_L") else "door_R"
+        got[key].append(ob)
+    return got

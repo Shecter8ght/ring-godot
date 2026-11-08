@@ -48,6 +48,38 @@ def arch_ring(name: str, r_out: float, r_in: float, length: float, xc: float, y:
     return s3d.at(ring, x=xc - length / 2, y=y, z=z, ry=90)
 
 
+def hinged(name: str, parts: list, pivot: tuple, angle_deg: float):
+    """Створка на петле: пустышка на вертикальной оси через pivot (x, y), детали — её дети на своих местах;
+    angle — поворот створки вокруг оси (градусы)."""
+    import math as _m
+
+    import bpy
+    from mathutils import Matrix
+    e = bpy.data.objects.new(name, None)
+    e.empty_display_type = "SINGLE_ARROW"
+    e.empty_display_size = 0.3
+    bpy.context.scene.collection.objects.link(e)
+    e.matrix_world = Matrix.Translation((pivot[0], pivot[1], 1.0))
+    bpy.context.view_layer.update()
+    inv = e.matrix_world.inverted()
+    for ob in parts:
+        ob.parent = e
+        ob.matrix_parent_inverse = inv
+    e.rotation_euler = (0.0, 0.0, _m.radians(angle_deg))
+    return e
+
+
+def copy_tree(parts: list) -> list:
+    """Копии деталей для варианта «открыто»: та же сетка, свой объект."""
+    import bpy
+    out = []
+    for ob in parts:
+        c = ob.copy()
+        bpy.context.scene.collection.objects.link(c)
+        out.append(c)
+    return out
+
+
 def outline(pts: list[tuple[float, float]], r: float):
     return s3d.poly(pts, fillet=r)
 
