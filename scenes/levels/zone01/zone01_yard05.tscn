@@ -1,894 +1,869 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/world/district_model.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_yard05_gameplay.tscn" id="nw_gameplay"]
 [ext_resource type="Script" path="res://src/world/district_paving.gd" id="2"]
 [ext_resource type="Material" path="res://assets/zone01/materials/YardAsphalt.tres" id="3"]
 [ext_resource type="Material" path="res://assets/zone01/materials/YardWalk.tres" id="4"]
 [ext_resource type="Material" path="res://assets/zone01/materials/Curb.tres" id="5"]
 [ext_resource type="Script" path="res://src/world/district_scatter.gd" id="6"]
+[ext_resource type="Script" path="res://src/blockout/tree_spot.gd" id="7_nd66u"]
+[ext_resource type="PackedScene" path="res://scenes/levels/zone01/zone01_yard05_gameplay.tscn" id="nw_gameplay"]
 
-[node name="Yard05" type="Node3D"]
+[node name="Yard05" type="Node3D" unique_id=1174648319]
 
-[node name="Buildings" parent="." type="Node3D" groups=["nav_source"]]
+[node name="Buildings" type="Node3D" parent="." unique_id=1932236469 groups=["nav_source"]]
 
-[node name="Korpus1" parent="Buildings" type="StaticBody3D"]
+[node name="Korpus1" type="StaticBody3D" parent="Buildings" unique_id=2021982910]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212, 0.3731, -138)
 script = ExtResource("1")
-position = Vector3(-212.0, 0.3731, -138.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/nw/panel_playable.glb"
 manifest = "res://assets/zone01/nw/manifest.json"
-surface = "concrete"
-shadow_proxy = false
+metadata/surface = "concrete"
 
-[node name="Korpus2" parent="Buildings" type="StaticBody3D"]
+[node name="Korpus2" type="StaticBody3D" parent="Buildings" unique_id=1475289452]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -154, 0.3892, -108)
 script = ExtResource("1")
-position = Vector3(-154.0, 0.3892, -108.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/khrushchevka_panel_b.glb"
 manifest = "res://assets/zone01/models/khrushchevka.json"
-surface = "concrete"
 shadow_proxy = true
+metadata/surface = "concrete"
 
-[node name="Korpus3" parent="Buildings" type="StaticBody3D"]
+[node name="Korpus3" type="StaticBody3D" parent="Buildings" unique_id=296168890]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -238, 0.2737, -80)
 script = ExtResource("1")
-position = Vector3(-238.0, 0.2737, -80.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/khrushchevka_brick.glb"
 manifest = "res://assets/zone01/models/khrushchevka.json"
-surface = "concrete"
 shadow_proxy = true
+metadata/surface = "concrete"
 
-[node name="Paving" parent="." type="Node3D" groups=["nav_source"]]
+[node name="Paving" type="Node3D" parent="." unique_id=637492250 groups=["nav_source"]]
 
-[node name="DriveIn" parent="Paving" type="StaticBody3D"]
+[node name="DriveIn" type="StaticBody3D" parent="Paving" unique_id=1814350403]
 script = ExtResource("2")
-local_points = true
-points = PackedVector2Array(-174.0, -160.0, -174.0, -123.0)
+points = PackedVector2Array(-174, -160, -174, -123)
 width = 6.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="DriveLoop" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-223.0, -123.0, -169.0, -123.0, -169.0, -60.0, -223.0, -60.0, -223.0, -123.0)
-width = 5.5
-curb_height = 0.15
+
+[node name="DriveLoop" type="StaticBody3D" parent="Paving" unique_id=1729207492]
+script = ExtResource("2")
+points = PackedVector2Array(-223, -123, -169, -123, -169, -60, -223, -60, -223, -123)
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="DriveMarket" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-196.0, -60.0, -196.0, -50.0)
-width = 5.5
+
+[node name="DriveMarket" type="StaticBody3D" parent="Paving" unique_id=1125439270]
+script = ExtResource("2")
+points = PackedVector2Array(-196, -60, -196, -50)
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="DriveGarages" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-223.0, -118.0, -262.0, -118.0)
+
+[node name="DriveGarages" type="StaticBody3D" parent="Paving" unique_id=111810150]
+script = ExtResource("2")
+points = PackedVector2Array(-223, -118, -262, -118)
 width = 5.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="GarageLane" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-263.0, -162.0, -263.0, -100.0)
+
+[node name="GarageLane" type="StaticBody3D" parent="Paving" unique_id=726331952]
+script = ExtResource("2")
+points = PackedVector2Array(-263, -162, -263, -100)
 width = 6.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="WalkK1" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-240.0, -128.4, -184.0, -128.4)
+
+[node name="WalkK1" type="StaticBody3D" parent="Paving" unique_id=1414595646]
+script = ExtResource("2")
+points = PackedVector2Array(-240, -128.4, -184, -128.4)
 width = 2.0
 curb_height = 0.12
+lift = 0.1
 material = ExtResource("4")
 curb_material = ExtResource("5")
-lift = 0.1
-
-[node name="WalkK2" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-164.0, -136.0, -164.0, -80.0)
+
+[node name="WalkK2" type="StaticBody3D" parent="Paving" unique_id=28653258]
+script = ExtResource("2")
+points = PackedVector2Array(-164, -136, -164, -80)
 width = 2.0
 curb_height = 0.12
+lift = 0.1
 material = ExtResource("4")
 curb_material = ExtResource("5")
-lift = 0.1
-
-[node name="WalkK3" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-228.5, -106.0, -228.5, -54.0)
+
+[node name="WalkK3" type="StaticBody3D" parent="Paving" unique_id=114611856]
+script = ExtResource("2")
+points = PackedVector2Array(-228.5, -106, -228.5, -54)
 width = 2.0
 curb_height = 0.12
+lift = 0.1
 material = ExtResource("4")
 curb_material = ExtResource("5")
-lift = 0.1
-
-[node name="ParkingN" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-218.0, -117.4, -176.0, -117.4)
+
+[node name="ParkingN" type="StaticBody3D" parent="Paving" unique_id=544581673]
+script = ExtResource("2")
+points = PackedVector2Array(-218, -117.4, -176, -117.4)
 width = 5.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="ParkingE" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-174.6, -112.0, -174.6, -70.0)
+
+[node name="ParkingE" type="StaticBody3D" parent="Paving" unique_id=399478207]
+script = ExtResource("2")
+points = PackedVector2Array(-174.6, -112, -174.6, -70)
 width = 5.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
-
-[node name="ContainerApron" parent="Paving" type="StaticBody3D"]
-script = ExtResource("2")
 local_points = true
-points = PackedVector2Array(-169.0, -68.0, -178.0, -68.0)
+
+[node name="ContainerApron" type="StaticBody3D" parent="Paving" unique_id=2067801883]
+script = ExtResource("2")
+points = PackedVector2Array(-169, -68, -178, -68)
 width = 4.0
 curb_height = 0.0
 material = ExtResource("3")
 curb_material = ExtResource("5")
-lift = 0.05
+local_points = true
 
-[node name="Props" parent="." type="Node3D" groups=["nav_source"]]
+[node name="Props" type="Node3D" parent="." unique_id=1064659751 groups=["nav_source"]]
 
-[node name="BenchK1_0" parent="Props" type="StaticBody3D"]
+[node name="BenchK1_0" type="StaticBody3D" parent="Props" unique_id=1987025541]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -230.2, 0.3548, -127)
 script = ExtResource("1")
-position = Vector3(-230.2, 0.3548, -127.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK1_1" parent="Props" type="StaticBody3D"]
+[node name="BenchK1_1" type="StaticBody3D" parent="Props" unique_id=2041788490]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -214.2, 0.2381, -127)
 script = ExtResource("1")
-position = Vector3(-214.2, 0.2381, -127.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK1_2" parent="Props" type="StaticBody3D"]
+[node name="BenchK1_2" type="StaticBody3D" parent="Props" unique_id=770056129]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -201.4, 0.3351, -127)
 script = ExtResource("1")
-position = Vector3(-201.4, 0.3351, -127.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK1_3" parent="Props" type="StaticBody3D"]
+[node name="BenchK1_3" type="StaticBody3D" parent="Props" unique_id=2095999866]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -185.4, 0.3209, -127)
 script = ExtResource("1")
-position = Vector3(-185.4, 0.3209, -127.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK2_0" parent="Props" type="StaticBody3D"]
+[node name="BenchK2_0" type="StaticBody3D" parent="Props" unique_id=208722319]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -165.4, 0.2786, -126.2)
 script = ExtResource("1")
-position = Vector3(-165.4, 0.2786, -126.2)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK2_1" parent="Props" type="StaticBody3D"]
+[node name="BenchK2_1" type="StaticBody3D" parent="Props" unique_id=131508231]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -165.4, 0.3044, -110.2)
 script = ExtResource("1")
-position = Vector3(-165.4, 0.3044, -110.2)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK2_2" parent="Props" type="StaticBody3D"]
+[node name="BenchK2_2" type="StaticBody3D" parent="Props" unique_id=1857160182]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -165.4, 0.2563, -97.4)
 script = ExtResource("1")
-position = Vector3(-165.4, 0.2563, -97.4)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK2_3" parent="Props" type="StaticBody3D"]
+[node name="BenchK2_3" type="StaticBody3D" parent="Props" unique_id=300832409]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -165.4, 0.2704, -81.4)
 script = ExtResource("1")
-position = Vector3(-165.4, 0.2704, -81.4)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK3_0" parent="Props" type="StaticBody3D"]
+[node name="BenchK3_0" type="StaticBody3D" parent="Props" unique_id=1521307798]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -227.2, 0.2581, -60.5)
 script = ExtResource("1")
-position = Vector3(-227.2, 0.2581, -60.5)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK3_1" parent="Props" type="StaticBody3D"]
+[node name="BenchK3_1" type="StaticBody3D" parent="Props" unique_id=1844815154]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -227.2, 0.2709, -77.5)
 script = ExtResource("1")
-position = Vector3(-227.2, 0.2709, -77.5)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="BenchK3_3" parent="Props" type="StaticBody3D"]
+[node name="BenchK3_3" type="StaticBody3D" parent="Props" unique_id=555356496]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -227.2, 0.4018, -104.7)
 script = ExtResource("1")
-position = Vector3(-227.2, 0.4018, -104.7)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/bench_back.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="Lamp_0" parent="Props" type="StaticBody3D"]
+[node name="Lamp_0" type="StaticBody3D" parent="Props" unique_id=164512629]
+transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, -226.5, 0.3163, -126.5)
 script = ExtResource("1")
-position = Vector3(-226.5, 0.3163, -126.5)
-rotation_degrees = Vector3(0.0, 45.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_1" parent="Props" type="StaticBody3D"]
+[node name="Lamp_1" type="StaticBody3D" parent="Props" unique_id=580614738]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196, 0.3968, -126)
 script = ExtResource("1")
-position = Vector3(-196.0, 0.3968, -126.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_2" parent="Props" type="StaticBody3D"]
+[node name="Lamp_2" type="StaticBody3D" parent="Props" unique_id=74717365]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -165.5, 0.2122, -121)
 script = ExtResource("1")
-position = Vector3(-165.5, 0.2122, -121.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_3" parent="Props" type="StaticBody3D"]
+[node name="Lamp_3" type="StaticBody3D" parent="Props" unique_id=801531929]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -165.8, 0.3455, -90)
 script = ExtResource("1")
-position = Vector3(-165.8, 0.3455, -90.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_4" parent="Props" type="StaticBody3D"]
+[node name="Lamp_4" type="StaticBody3D" parent="Props" unique_id=2083825903]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -166, 0.25, -57)
 script = ExtResource("1")
-position = Vector3(-166.0, 0.25, -57.0)
-rotation_degrees = Vector3(0.0, -135.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_5" parent="Props" type="StaticBody3D"]
+[node name="Lamp_5" type="StaticBody3D" parent="Props" unique_id=1905300459]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -196, 0.25, -57)
 script = ExtResource("1")
-position = Vector3(-196.0, 0.25, -57.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_6" parent="Props" type="StaticBody3D"]
+[node name="Lamp_6" type="StaticBody3D" parent="Props" unique_id=1493142819]
+transform = Transform3D(-0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, -0.70710677, -226, 0.2566, -60)
 script = ExtResource("1")
-position = Vector3(-226.0, 0.2566, -60.0)
-rotation_degrees = Vector3(0.0, 135.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_7" parent="Props" type="StaticBody3D"]
+[node name="Lamp_7" type="StaticBody3D" parent="Props" unique_id=697101098]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -226, 0.3296, -92)
 script = ExtResource("1")
-position = Vector3(-226.0, 0.3296, -92.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Lamp_8" parent="Props" type="StaticBody3D"]
+[node name="Lamp_8" type="StaticBody3D" parent="Props" unique_id=1793107393]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174, 0.4776, -150)
 script = ExtResource("1")
-position = Vector3(-174.0, 0.4776, -150.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/lamp_post.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
 lamp_head = Vector3(0, 8.99, 2.05)
+metadata/surface = "concrete"
 
-[node name="Sandbox" parent="Props" type="StaticBody3D"]
+[node name="Sandbox" type="StaticBody3D" parent="Props" unique_id=283410599]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, -200, 0.3254, -96)
 script = ExtResource("1")
-position = Vector3(-200.0, 0.3254, -96.0)
-rotation_degrees = Vector3(0.0, 8.0, 0.0)
 model = "res://assets/zone01/models/play_sandbox.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Swing" parent="Props" type="StaticBody3D"]
+[node name="Swing" type="StaticBody3D" parent="Props" unique_id=1511298114]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -190, 0.3531, -88)
 script = ExtResource("1")
-position = Vector3(-190.0, 0.3531, -88.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/play_swing.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Slide" parent="Props" type="StaticBody3D"]
+[node name="Slide" type="StaticBody3D" parent="Props" unique_id=322335407]
+transform = Transform3D(0.8660254, 0, -0.5, 0, 1, 0, 0.5, 0, 0.8660254, -204, 0.2457, -84)
 script = ExtResource("1")
-position = Vector3(-204.0, 0.2457, -84.0)
-rotation_degrees = Vector3(0.0, -30.0, 0.0)
 model = "res://assets/zone01/models/play_slide.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Carousel" parent="Props" type="StaticBody3D"]
+[node name="Carousel" type="StaticBody3D" parent="Props" unique_id=1334568322]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -193, 0.2776, -98)
 script = ExtResource("1")
-position = Vector3(-193.0, 0.2776, -98.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/play_carousel.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Arch" parent="Props" type="StaticBody3D"]
+[node name="Arch" type="StaticBody3D" parent="Props" unique_id=1834939603]
+transform = Transform3D(0.9659258, 0, 0.25881904, 0, 1, 0, -0.25881904, 0, 0.9659258, -188, 0.2755, -95)
 script = ExtResource("1")
-position = Vector3(-188.0, 0.2755, -95.0)
-rotation_degrees = Vector3(0.0, 15.0, 0.0)
 model = "res://assets/zone01/models/play_arch.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="PlayBench_0" parent="Props" type="StaticBody3D"]
+[node name="PlayBench_0" type="StaticBody3D" parent="Props" unique_id=1836585443]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -209, 0.2908, -94)
 script = ExtResource("1")
-position = Vector3(-209.0, 0.2908, -94.0)
-rotation_degrees = Vector3(0.0, -90.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="PlayBench_1" parent="Props" type="StaticBody3D"]
+[node name="PlayBench_1" type="StaticBody3D" parent="Props" unique_id=1047035995]
+transform = Transform3D(-0.34202012, 0, -0.9396926, 0, 1, 0, 0.9396926, 0, -0.34202012, -208, 0.2379, -86)
 script = ExtResource("1")
-position = Vector3(-208.0, 0.2379, -86.0)
-rotation_degrees = Vector3(0.0, -110.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="PlayBench_2" parent="Props" type="StaticBody3D"]
+[node name="PlayBench_2" type="StaticBody3D" parent="Props" unique_id=1569357681]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -197, 0.2719, -79)
 script = ExtResource("1")
-position = Vector3(-197.0, 0.2719, -79.0)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="PlayBench_3" parent="Props" type="StaticBody3D"]
+[node name="PlayBench_3" type="StaticBody3D" parent="Props" unique_id=1893170912]
+transform = Transform3D(-0.9396926, 0, 0.3420202, 0, 1, 0, -0.3420202, 0, -0.9396926, -185, 0.3336, -82)
 script = ExtResource("1")
-position = Vector3(-185.0, 0.3336, -82.0)
-rotation_degrees = Vector3(0.0, 160.0, 0.0)
 model = "res://assets/zone01/models/bench_plain.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="ContainerSite" parent="Props" type="StaticBody3D"]
+[node name="ContainerSite" type="StaticBody3D" parent="Props" unique_id=86431503]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -181, 0.3713, -68)
 script = ExtResource("1")
-position = Vector3(-181.0, 0.3713, -68.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/container_site.glb"
 manifest = "res://assets/zone01/models/props.json"
-surface = "concrete"
+metadata/surface = "concrete"
 
-[node name="Dumpster_0" parent="Props" type="StaticBody3D"]
+[node name="Dumpster_0" type="StaticBody3D" parent="Props" unique_id=519146962]
+transform = Transform3D(0.09769231, 0, 0.99521667, 0, 1, 0, -0.99521667, 0, 0.09769231, -181.6, 0.3642, -69.6)
 script = ExtResource("1")
-position = Vector3(-181.6, 0.3642, -69.6)
-rotation_degrees = Vector3(0.0, 84.3937, 0.0)
 model = "res://assets/zone01/models/sf_dumpster_a.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Dumpster_1" parent="Props" type="StaticBody3D"]
+[node name="Dumpster_1" type="StaticBody3D" parent="Props" unique_id=300253173]
+transform = Transform3D(-0.096002124, 0, 0.9953811, 0, 1, 0, -0.9953811, 0, -0.096002124, -181.6, 0.3679, -68)
 script = ExtResource("1")
-position = Vector3(-181.6, 0.3679, -68.0)
-rotation_degrees = Vector3(0.0, 95.509, 0.0)
 model = "res://assets/zone01/models/sf_dumpster_b.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Dumpster_2" parent="Props" type="StaticBody3D"]
+[node name="Dumpster_2" type="StaticBody3D" parent="Props" unique_id=476488446]
+transform = Transform3D(0.061257567, 0, 0.998122, 0, 1, 0, -0.998122, 0, 0.061257567, -181.6, 0.3945, -66.4)
 script = ExtResource("1")
-position = Vector3(-181.6, 0.3945, -66.4)
-rotation_degrees = Vector3(0.0, 86.488, 0.0)
 model = "res://assets/zone01/models/sf_dumpster_a.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="DumpsterTipped" parent="Props" type="StaticBody3D"]
+[node name="DumpsterTipped" type="StaticBody3D" parent="Props" unique_id=1365630846]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -176, 0.3814, -63.5)
 script = ExtResource("1")
-position = Vector3(-176.0, 0.3814, -63.5)
-rotation_degrees = Vector3(0.0, 30.0, 0.0)
 model = "res://assets/zone01/models/sf_dumpster_tipped.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
+materials_dir = ""
 surface = "metal"
-materials_dir = ""
+metadata/surface = "metal"
 
-[node name="DeadTree_0" parent="Props" type="StaticBody3D"]
+[node name="DeadTree_0" type="StaticBody3D" parent="Props" unique_id=1707668772]
+transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, -278, 0.3983, -96)
 script = ExtResource("1")
-position = Vector3(-278.0, 0.3983, -96.0)
-rotation_degrees = Vector3(0.0, 40.0, 0.0)
 model = "res://assets/zone01/models/sf_dead_tree.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="DeadTree_1" parent="Props" type="StaticBody3D"]
+[node name="DeadTree_1" type="StaticBody3D" parent="Props" unique_id=612253772]
+transform = Transform3D(-0.9396926, 0, 0.3420202, 0, 1, 0, -0.3420202, 0, -0.9396926, -150, 0.2977, -150)
 script = ExtResource("1")
-position = Vector3(-150.0, 0.2977, -150.0)
-rotation_degrees = Vector3(0.0, 160.0, 0.0)
 model = "res://assets/zone01/models/sf_dead_tree.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="WoodBlock_0" parent="Props" type="StaticBody3D"]
+[node name="WoodBlock_0" type="StaticBody3D" parent="Props" unique_id=762544010]
+transform = Transform3D(0.9396926, 0.34202012, -1.4950174e-08, 0, -4.371139e-08, -1, -0.34202012, 0.9396926, -4.1075268e-08, -258, 0.5012, -112)
 script = ExtResource("1")
-position = Vector3(-258.0, 0.5012, -112.0)
-rotation_degrees = Vector3(90.0, 20.0, 0.0)
 model = "res://assets/zone01/models/sf_wood_block.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="WoodBlock_1" parent="Props" type="StaticBody3D"]
+[node name="WoodBlock_1" type="StaticBody3D" parent="Props" unique_id=984286468]
+transform = Transform3D(0.25881907, 0.9659258, -4.222196e-08, 0, -4.371139e-08, -1, -0.9659258, 0.25881907, -1.1313341e-08, -257, 0.4877, -110.5)
 script = ExtResource("1")
-position = Vector3(-257.0, 0.4877, -110.5)
-rotation_degrees = Vector3(90.0, 75.0, 0.0)
 model = "res://assets/zone01/models/sf_wood_block.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="WoodBlock_2" parent="Props" type="StaticBody3D"]
+[node name="WoodBlock_2" type="StaticBody3D" parent="Props" unique_id=775223413]
+transform = Transform3D(-0.64278764, 0.76604444, -3.3484866e-08, 0, -4.371139e-08, -1, -0.76604444, -0.64278764, 2.809714e-08, -180, 0.3608, -61)
 script = ExtResource("1")
-position = Vector3(-180.0, 0.3608, -61.0)
-rotation_degrees = Vector3(90.0, 130.0, 0.0)
 model = "res://assets/zone01/models/sf_wood_block.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="WoodBlock_3" parent="Props" type="StaticBody3D"]
+[node name="WoodBlock_3" type="StaticBody3D" parent="Props" unique_id=452343801]
+transform = Transform3D(0.9848077, 0.17364818, -7.590403e-09, 0, -4.371139e-08, -1, -0.17364818, 0.9848077, -4.304731e-08, -230, 0.3358, -63)
 script = ExtResource("1")
-position = Vector3(-230.0, 0.3358, -63.0)
-rotation_degrees = Vector3(90.0, 10.0, 0.0)
 model = "res://assets/zone01/models/sf_wood_block.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="WoodBlock_4" parent="Props" type="StaticBody3D"]
+[node name="WoodBlock_4" type="StaticBody3D" parent="Props" unique_id=19576721]
+transform = Transform3D(-0.08715577, 0.9961947, -4.3545054e-08, 0, -4.371139e-08, -1, -0.9961947, -0.08715577, 3.8096997e-09, -246, 0.346, -50)
 script = ExtResource("1")
-position = Vector3(-246.0, 0.346, -50.0)
-rotation_degrees = Vector3(90.0, 95.0, 0.0)
 model = "res://assets/zone01/models/sf_wood_block.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "wood"
 materials_dir = ""
+surface = "wood"
+metadata/surface = "wood"
 
-[node name="Laundry_0" parent="Props" type="StaticBody3D"]
+[node name="Laundry_0" type="StaticBody3D" parent="Props" unique_id=1520543653]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214, 0.2482, -70)
 script = ExtResource("1")
-position = Vector3(-214.0, 0.2482, -70.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/laundry_pair.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Laundry_1" parent="Props" type="StaticBody3D"]
+[node name="Laundry_1" type="StaticBody3D" parent="Props" unique_id=490643594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -214, 0.3618, -104)
 script = ExtResource("1")
-position = Vector3(-214.0, 0.3618, -104.0)
-rotation_degrees = Vector3(0.0, 0.0, 0.0)
 model = "res://assets/zone01/models/laundry_pair.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_0" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_0" type="StaticBody3D" parent="Props" unique_id=1416327496]
+transform = Transform3D(0.99990094, 0, 0.014077361, 0, 1, 0, -0.014077361, 0, 0.99990094, -236.5, 0.3311, -126.8)
 script = ExtResource("1")
-position = Vector3(-236.5, 0.3311, -126.8)
-rotation_degrees = Vector3(0.0, 0.8066, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_1" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_1" type="StaticBody3D" parent="Props" unique_id=1514219585]
+transform = Transform3D(0.99989647, 0, -0.014389744, 0, 1, 0, 0.014389744, 0, 0.99989647, -227.5, 0.3222, -126.8)
 script = ExtResource("1")
-position = Vector3(-227.5, 0.3222, -126.8)
-rotation_degrees = Vector3(0.0, -0.8245, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_2" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_2" type="StaticBody3D" parent="Props" unique_id=1173428961]
+transform = Transform3D(0.9997879, 0, 0.020595172, 0, 1, 0, -0.020595172, 0, 0.9997879, -224.5, 0.2903, -126.8)
 script = ExtResource("1")
-position = Vector3(-224.5, 0.2903, -126.8)
-rotation_degrees = Vector3(0.0, 1.1801, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_3" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_3" type="StaticBody3D" parent="Props" unique_id=1448498358]
+transform = Transform3D(0.9999491, 0, 0.010091322, 0, 1, 0, -0.010091322, 0, 0.9999491, -221.5, 0.2263, -126.8)
 script = ExtResource("1")
-position = Vector3(-221.5, 0.2263, -126.8)
-rotation_degrees = Vector3(0.0, 0.5782, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_4" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_4" type="StaticBody3D" parent="Props" unique_id=1164695197]
+transform = Transform3D(0.9995293, 0, -0.030678073, 0, 1, 0, 0.030678073, 0, 0.9995293, -212.5, 0.2582, -126.8)
 script = ExtResource("1")
-position = Vector3(-212.5, 0.2582, -126.8)
-rotation_degrees = Vector3(0.0, -1.758, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_5" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_5" type="StaticBody3D" parent="Props" unique_id=1237633027]
+transform = Transform3D(0.99948627, 0, 0.032049228, 0, 1, 0, -0.032049228, 0, 0.99948627, -209.5, 0.2964, -126.8)
 script = ExtResource("1")
-position = Vector3(-209.5, 0.2964, -126.8)
-rotation_degrees = Vector3(0.0, 1.8366, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_6" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_6" type="StaticBody3D" parent="Props" unique_id=1979777923]
+transform = Transform3D(0.9997134, 0, 0.023940139, 0, 1, 0, -0.023940139, 0, 0.9997134, -200.5, 0.3416, -126.8)
 script = ExtResource("1")
-position = Vector3(-200.5, 0.3416, -126.8)
-rotation_degrees = Vector3(0.0, 1.3718, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_7" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_7" type="StaticBody3D" parent="Props" unique_id=1939688632]
+transform = Transform3D(0.99997777, 0, -0.006672344, 0, 1, 0, 0.006672344, 0, 0.99997777, -197.5, 0.3782, -126.8)
 script = ExtResource("1")
-position = Vector3(-197.5, 0.3782, -126.8)
-rotation_degrees = Vector3(0.0, -0.3823, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_8" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_8" type="StaticBody3D" parent="Props" unique_id=1486665585]
+transform = Transform3D(0.9999969, 0, 0.0024870916, 0, 1, 0, -0.0024870916, 0, 0.9999969, -194.5, 0.4068, -126.8)
 script = ExtResource("1")
-position = Vector3(-194.5, 0.4068, -126.8)
-rotation_degrees = Vector3(0.0, 0.1425, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_9" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_9" type="StaticBody3D" parent="Props" unique_id=1715581613]
+transform = Transform3D(0.9998801, 0, 0.015487432, 0, 1, 0, -0.015487432, 0, 0.9998801, -191.5, 0.3903, -126.8)
 script = ExtResource("1")
-position = Vector3(-191.5, 0.3903, -126.8)
-rotation_degrees = Vector3(0.0, 0.8874, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_10" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_10" type="StaticBody3D" parent="Props" unique_id=1945879233]
+transform = Transform3D(-0.017201215, 0, 0.99985206, 0, 1, 0, -0.99985206, 0, -0.017201215, -165.6, 0.2657, -132.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.2657, -132.5)
-rotation_degrees = Vector3(0.0, 90.9856, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_11" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_11" type="StaticBody3D" parent="Props" unique_id=792898150]
+transform = Transform3D(-0.023844171, 0, 0.9997157, 0, 1, 0, -0.9997157, 0, -0.023844171, -165.6, 0.2287, -123.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.2287, -123.5)
-rotation_degrees = Vector3(0.0, 91.3663, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_12" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_12" type="StaticBody3D" parent="Props" unique_id=1510970321]
+transform = Transform3D(-0.03267021, 0, 0.9994662, 0, 1, 0, -0.9994662, 0, -0.03267021, -165.6, 0.214, -120.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.214, -120.5)
-rotation_degrees = Vector3(0.0, 91.8722, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_13" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_13" type="StaticBody3D" parent="Props" unique_id=1314830570]
+transform = Transform3D(-0.030207135, 0, 0.99954367, 0, 1, 0, -0.99954367, 0, -0.030207135, -165.6, 0.2443, -117.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.2443, -117.5)
-rotation_degrees = Vector3(0.0, 91.731, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_14" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_14" type="StaticBody3D" parent="Props" unique_id=1448959551]
+transform = Transform3D(0.017504709, 0, 0.99984676, 0, 1, 0, -0.99984676, 0, 0.017504709, -165.6, 0.3432, -108.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.3432, -108.5)
-rotation_degrees = Vector3(0.0, 88.997, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_15" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_15" type="StaticBody3D" parent="Props" unique_id=2134050340]
+transform = Transform3D(0.033509374, 0, 0.9994384, 0, 1, 0, -0.9994384, 0, 0.033509374, -165.6, 0.3439, -105.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.3439, -105.5)
-rotation_degrees = Vector3(0.0, 88.0797, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_16" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_16" type="StaticBody3D" parent="Props" unique_id=1864871059]
+transform = Transform3D(0.015330385, 0, 0.99988246, 0, 1, 0, -0.99988246, 0, 0.015330385, -165.6, 0.2663, -96.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.2663, -96.5)
-rotation_degrees = Vector3(0.0, 89.1216, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_17" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_17" type="StaticBody3D" parent="Props" unique_id=799018242]
+transform = Transform3D(0.020033406, 0, 0.9997993, 0, 1, 0, -0.9997993, 0, 0.020033406, -165.6, 0.3286, -93.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.3286, -93.5)
-rotation_degrees = Vector3(0.0, 88.8521, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_18" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_18" type="StaticBody3D" parent="Props" unique_id=1634952890]
+transform = Transform3D(-0.018368566, 0, 0.99983126, 0, 1, 0, -0.99983126, 0, -0.018368566, -165.6, 0.3552, -90.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.3552, -90.5)
-rotation_degrees = Vector3(0.0, 91.0525, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="LawnFence_19" parent="Props" type="StaticBody3D"]
+[node name="LawnFence_19" type="StaticBody3D" parent="Props" unique_id=1744613592]
+transform = Transform3D(-0.018928753, 0, 0.9998208, 0, 1, 0, -0.9998208, 0, -0.018928753, -165.6, 0.2919, -87.5)
 script = ExtResource("1")
-position = Vector3(-165.6, 0.2919, -87.5)
-rotation_degrees = Vector3(0.0, 91.0846, 0.0)
 model = "res://assets/zone01/models/lawn_fence.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_0" parent="Props" type="StaticBody3D"]
+[node name="Garage_0" type="StaticBody3D" parent="Props" unique_id=168743069]
+transform = Transform3D(-0.03737966, 0, 0.99930114, 0, 1, 0, -0.99930114, 0, -0.03737966, -269.2138, 0.2198, -160)
 script = ExtResource("1")
-position = Vector3(-269.2138, 0.2198, -160.0)
-rotation_degrees = Vector3(0.0, 92.1422, 0.0)
 model = "res://assets/zone01/models/rakushka_green.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_1" parent="Props" type="StaticBody3D"]
+[node name="Garage_1" type="StaticBody3D" parent="Props" unique_id=772303257]
+transform = Transform3D(0.051424418, 0, -0.9986769, 0, 1, 0, 0.9986769, 0, 0.051424418, -269.3338, 0.2199, -157)
 script = ExtResource("1")
-position = Vector3(-269.3338, 0.2199, -157.0)
-rotation_degrees = Vector3(0.0, -87.0523, 0.0)
 model = "res://assets/zone01/models/garage_box_brown.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_2" parent="Props" type="StaticBody3D"]
+[node name="Garage_2" type="StaticBody3D" parent="Props" unique_id=714999110]
+transform = Transform3D(0.012351394, 0, 0.9999237, 0, 1, 0, -0.9999237, 0, 0.012351394, -269.3548, 0.2608, -153.4)
 script = ExtResource("1")
-position = Vector3(-269.3548, 0.2608, -153.4)
-rotation_degrees = Vector3(0.0, 89.2923, 0.0)
 model = "res://assets/zone01/models/rakushka_rust.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_3" parent="Props" type="StaticBody3D"]
+[node name="Garage_3" type="StaticBody3D" parent="Props" unique_id=204345297]
+transform = Transform3D(0.033744797, 0, -0.9994305, 0, 1, 0, 0.9994305, 0, 0.033744797, -269.3224, 0.2957, -150.4)
 script = ExtResource("1")
-position = Vector3(-269.3224, 0.2957, -150.4)
-rotation_degrees = Vector3(0.0, -88.0662, 0.0)
 model = "res://assets/zone01/models/garage_box_blue.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_4" parent="Props" type="StaticBody3D"]
+[node name="Garage_4" type="StaticBody3D" parent="Props" unique_id=927160900]
+transform = Transform3D(-0.02653113, 0, -0.999648, 0, 1, 0, 0.999648, 0, -0.02653113, -269.6129, 0.3548, -146.8)
 script = ExtResource("1")
-position = Vector3(-269.6129, 0.3548, -146.8)
-rotation_degrees = Vector3(0.0, -91.5203, 0.0)
 model = "res://assets/zone01/models/garage_box_open.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_5" parent="Props" type="StaticBody3D"]
+[node name="Garage_5" type="StaticBody3D" parent="Props" unique_id=398583771]
+transform = Transform3D(0.04478597, 0, 0.9989966, 0, 1, 0, -0.9989966, 0, 0.04478597, -269.6889, 0.3799, -143.2)
 script = ExtResource("1")
-position = Vector3(-269.6889, 0.3799, -143.2)
-rotation_degrees = Vector3(0.0, 87.4331, 0.0)
 model = "res://assets/zone01/models/rakushka_green.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_6" parent="Props" type="StaticBody3D"]
+[node name="Garage_6" type="StaticBody3D" parent="Props" unique_id=1757762889]
+transform = Transform3D(-0.05204999, 0, 0.9986445, 0, 1, 0, -0.9986445, 0, -0.05204999, -269.3617, 0.4198, -140.2)
 script = ExtResource("1")
-position = Vector3(-269.3617, 0.4198, -140.2)
-rotation_degrees = Vector3(0.0, 92.9836, 0.0)
 model = "res://assets/zone01/models/rakushka_green.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_7" parent="Props" type="StaticBody3D"]
+[node name="Garage_7" type="StaticBody3D" parent="Props" unique_id=1777189099]
+transform = Transform3D(0.008478735, 0, -0.99996406, 0, 1, 0, 0.99996406, 0, 0.008478735, -269.3175, 0.4434, -137.2)
 script = ExtResource("1")
-position = Vector3(-269.3175, 0.4434, -137.2)
-rotation_degrees = Vector3(0.0, -89.5142, 0.0)
 model = "res://assets/zone01/models/garage_box_brown.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_8" parent="Props" type="StaticBody3D"]
+[node name="Garage_8" type="StaticBody3D" parent="Props" unique_id=1277074078]
+transform = Transform3D(0.010208267, 0, 0.9999479, 0, 1, 0, -0.9999479, 0, 0.010208267, -269.2547, 0.439, -133.6)
 script = ExtResource("1")
-position = Vector3(-269.2547, 0.439, -133.6)
-rotation_degrees = Vector3(0.0, 89.4151, 0.0)
 model = "res://assets/zone01/models/rakushka_rust.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_9" parent="Props" type="StaticBody3D"]
+[node name="Garage_9" type="StaticBody3D" parent="Props" unique_id=1380211650]
+transform = Transform3D(-0.051515102, 0, -0.9986722, 0, 1, 0, 0.9986722, 0, -0.051515102, -269.5763, 0.5026, -130.6)
 script = ExtResource("1")
-position = Vector3(-269.5763, 0.5026, -130.6)
-rotation_degrees = Vector3(0.0, -92.9529, 0.0)
 model = "res://assets/zone01/models/garage_box_blue.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_10" parent="Props" type="StaticBody3D"]
+[node name="Garage_10" type="StaticBody3D" parent="Props" unique_id=274481823]
+transform = Transform3D(0.018595414, 0, -0.9998271, 0, 1, 0, 0.9998271, 0, 0.018595414, -269.6976, 0.518, -127)
 script = ExtResource("1")
-position = Vector3(-269.6976, 0.518, -127.0)
-rotation_degrees = Vector3(0.0, -88.9345, 0.0)
 model = "res://assets/zone01/models/garage_box_open.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_11" parent="Props" type="StaticBody3D"]
+[node name="Garage_11" type="StaticBody3D" parent="Props" unique_id=481294954]
+transform = Transform3D(-0.049036305, 0, 0.998797, 0, 1, 0, -0.998797, 0, -0.049036305, -269.5487, 0.5471, -123.4)
 script = ExtResource("1")
-position = Vector3(-269.5487, 0.5471, -123.4)
-rotation_degrees = Vector3(0.0, 92.8107, 0.0)
 model = "res://assets/zone01/models/rakushka_green.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_12" parent="Props" type="StaticBody3D"]
+[node name="Garage_12" type="StaticBody3D" parent="Props" unique_id=902387698]
+transform = Transform3D(-0.038687747, 0, 0.99925137, 0, 1, 0, -0.99925137, 0, -0.038687747, -269.7938, 0.5366, -120.4)
 script = ExtResource("1")
-position = Vector3(-269.7938, 0.5366, -120.4)
-rotation_degrees = Vector3(0.0, 92.2172, 0.0)
 model = "res://assets/zone01/models/rakushka_green.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_13" parent="Props" type="StaticBody3D"]
+[node name="Garage_13" type="StaticBody3D" parent="Props" unique_id=7389634]
+transform = Transform3D(0.013016289, 0, -0.9999153, 0, 1, 0, 0.9999153, 0, 0.013016289, -269.3123, 0.5265, -117.4)
 script = ExtResource("1")
-position = Vector3(-269.3123, 0.5265, -117.4)
-rotation_degrees = Vector3(0.0, -89.2542, 0.0)
 model = "res://assets/zone01/models/garage_box_brown.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_14" parent="Props" type="StaticBody3D"]
+[node name="Garage_14" type="StaticBody3D" parent="Props" unique_id=450032525]
+transform = Transform3D(-0.014621853, 0, 0.99989307, 0, 1, 0, -0.99989307, 0, -0.014621853, -269.4281, 0.4677, -113.8)
 script = ExtResource("1")
-position = Vector3(-269.4281, 0.4677, -113.8)
-rotation_degrees = Vector3(0.0, 90.8378, 0.0)
 model = "res://assets/zone01/models/rakushka_rust.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_15" parent="Props" type="StaticBody3D"]
+[node name="Garage_15" type="StaticBody3D" parent="Props" unique_id=1835424349]
+transform = Transform3D(-0.011210012, 0, -0.9999372, 0, 1, 0, 0.9999372, 0, -0.011210012, -269.7587, 0.3758, -110.8)
 script = ExtResource("1")
-position = Vector3(-269.7587, 0.3758, -110.8)
-rotation_degrees = Vector3(0.0, -90.6423, 0.0)
 model = "res://assets/zone01/models/garage_box_blue.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Garage_16" parent="Props" type="StaticBody3D"]
+[node name="Garage_16" type="StaticBody3D" parent="Props" unique_id=1927112913]
+transform = Transform3D(0.0005952874, 0, -0.9999998, 0, 1, 0, 0.9999998, 0, 0.0005952874, -269.2231, 0.3252, -107.2)
 script = ExtResource("1")
-position = Vector3(-269.2231, 0.3252, -107.2)
-rotation_degrees = Vector3(0.0, -89.9659, 0.0)
 model = "res://assets/zone01/models/garage_box_open.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "metal"
+metadata/surface = "metal"
 
-[node name="Sheds" parent="Props" type="StaticBody3D"]
+[node name="Sheds" type="StaticBody3D" parent="Props" unique_id=1854808351]
+transform = Transform3D(0.9975641, 0, 0.06975647, 0, 1, 0, -0.06975647, 0, 0.9975641, -252, 0.2188, -46)
 script = ExtResource("1")
-position = Vector3(-252.0, 0.2188, -46.0)
-rotation_degrees = Vector3(0.0, 4.0, 0.0)
 model = "res://assets/zone01/models/shed_row.glb"
 manifest = "res://assets/zone01/models/props.json"
 surface = "wood"
+metadata/surface = "wood"
 
-[node name="Car_0" parent="Props" type="StaticBody3D"]
+[node name="Car_0" type="StaticBody3D" parent="Props" unique_id=589078718]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -208, 0.3766, -117.4)
 script = ExtResource("1")
-position = Vector3(-208.0, 0.3766, -117.4)
-rotation_degrees = Vector3(0.0, 180.0, 0.0)
 model = "res://assets/zone01/models/sf_vaz2104.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_1" parent="Props" type="StaticBody3D"]
+[node name="Car_1" type="StaticBody3D" parent="Props" unique_id=1143112537]
+transform = Transform3D(-0.99939084, 0, -0.034899388, 0, 1, 0, 0.034899388, 0, -0.99939084, -196, 0.4146, -117.6)
 script = ExtResource("1")
-position = Vector3(-196.0, 0.4146, -117.6)
-rotation_degrees = Vector3(0.0, 182.0, 0.0)
 model = "res://assets/zone01/models/sf_car_burned.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_2" parent="Props" type="StaticBody3D"]
+[node name="Car_2" type="StaticBody3D" parent="Props" unique_id=1672753492]
+transform = Transform3D(-0.99939084, 0, 0.03489945, 0, 1, 0, -0.03489945, 0, -0.99939084, -185, 0.4118, -117.2)
 script = ExtResource("1")
-position = Vector3(-185.0, 0.4118, -117.2)
-rotation_degrees = Vector3(0.0, 178.0, 0.0)
 model = "res://assets/zone01/models/sf_vaz2104.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_3" parent="Props" type="StaticBody3D"]
+[node name="Car_3" type="StaticBody3D" parent="Props" unique_id=1564660407]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -174.6, 0.3737, -100)
 script = ExtResource("1")
-position = Vector3(-174.6, 0.3737, -100.0)
-rotation_degrees = Vector3(0.0, 90.0, 0.0)
 model = "res://assets/zone01/models/sf_vaz2104.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_4" parent="Props" type="StaticBody3D"]
+[node name="Car_4" type="StaticBody3D" parent="Props" unique_id=795277042]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, -174.6, 0.2455, -86)
 script = ExtResource("1")
-position = Vector3(-174.6, 0.2455, -86.0)
-rotation_degrees = Vector3(0.0, 270.0, 0.0)
 model = "res://assets/zone01/models/sf_car_burned.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_5" parent="Props" type="StaticBody3D"]
+[node name="Car_5" type="StaticBody3D" parent="Props" unique_id=61733290]
+transform = Transform3D(-0.9961947, 0, -0.08715581, 0, 1, 0, 0.08715581, 0, -0.9961947, -210, 0.255, -60.5)
 script = ExtResource("1")
-position = Vector3(-210.0, 0.255, -60.5)
-rotation_degrees = Vector3(0.0, 185.0, 0.0)
 model = "res://assets/zone01/models/sf_vaz2104.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Car_6" parent="Props" type="StaticBody3D"]
+[node name="Car_6" type="StaticBody3D" parent="Props" unique_id=2037809349]
+transform = Transform3D(-0.06975648, 0, 0.9975641, 0, 1, 0, -0.9975641, 0, -0.06975648, -262.5, 0.4168, -140)
 script = ExtResource("1")
-position = Vector3(-262.5, 0.4168, -140.0)
-rotation_degrees = Vector3(0.0, 94.0, 0.0)
 model = "res://assets/zone01/models/sf_vaz2104.glb"
 manifest = "res://assets/zone01/models/sketchfab.json"
-surface = "metal"
 materials_dir = ""
+surface = "metal"
+metadata/surface = "metal"
 
-[node name="Vegetation" parent="." type="Node3D"]
+[node name="Vegetation" type="Node3D" parent="." unique_id=1595439687]
 
-[node name="TreePoplar0" parent="Vegetation" type="Node3D"]
+[node name="TreePoplar0" type="Node3D" parent="Vegetation" unique_id=1790449649]
 script = ExtResource("6")
-local_points = true
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_0"
 model = "res://assets/zone01/trees/tree_poplar_0_lod0.glb"
@@ -899,12 +874,12 @@ trunk_radius = 0.36
 far_model = "res://assets/zone01/trees/tree_poplar_0_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_poplar_0_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="TreePoplar1" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="TreePoplar1" type="Node3D" parent="Vegetation" unique_id=928530205]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_1"
 model = "res://assets/zone01/trees/tree_poplar_1_lod0.glb"
@@ -915,12 +890,12 @@ trunk_radius = 0.44
 far_model = "res://assets/zone01/trees/tree_poplar_1_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_poplar_1_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="TreePoplar2" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="TreePoplar2" type="Node3D" parent="Vegetation" unique_id=742221873]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_poplar_2"
 model = "res://assets/zone01/trees/tree_poplar_2_lod0.glb"
@@ -931,12 +906,12 @@ trunk_radius = 0.16
 far_model = "res://assets/zone01/trees/tree_poplar_2_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_poplar_2_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="TreeMaple0" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="TreeMaple0" type="Node3D" parent="Vegetation" unique_id=1020983953]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_0"
 model = "res://assets/zone01/trees/tree_maple_0_lod0.glb"
@@ -947,12 +922,12 @@ trunk_radius = 0.22
 far_model = "res://assets/zone01/trees/tree_maple_0_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_maple_0_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="TreeMaple1" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="TreeMaple1" type="Node3D" parent="Vegetation" unique_id=714189646]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_1"
 model = "res://assets/zone01/trees/tree_maple_1_lod0.glb"
@@ -963,12 +938,12 @@ trunk_radius = 0.13
 far_model = "res://assets/zone01/trees/tree_maple_1_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_maple_1_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="TreeMaple2" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="TreeMaple2" type="Node3D" parent="Vegetation" unique_id=1566296961]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "tree_maple_2"
 model = "res://assets/zone01/trees/tree_maple_2_lod0.glb"
@@ -979,223 +954,479 @@ trunk_radius = 0.18
 far_model = "res://assets/zone01/trees/tree_maple_2_far.glb"
 near_distance = 160.0
 mid_model = "res://assets/zone01/trees/tree_maple_2_lod1.glb"
-mid_distance = 45.0
 far_cell = 128.0
-
-[node name="BirchA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="BirchA" type="Node3D" parent="Vegetation" unique_id=375505608]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_a"
 model = "res://assets/zone01/models/birch_a.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/birch_a_far.glb"
 near_distance = 320.0
-
-[node name="BirchB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="BirchB" type="Node3D" parent="Vegetation" unique_id=1490208802]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_b"
 model = "res://assets/zone01/models/birch_b.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/birch_b_far.glb"
 near_distance = 320.0
-
-[node name="BirchC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="BirchC" type="Node3D" parent="Vegetation" unique_id=1906158775]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_c"
 model = "res://assets/zone01/models/birch_c.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/birch_c_far.glb"
 near_distance = 320.0
-
-[node name="BirchBare" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="BirchBare" type="Node3D" parent="Vegetation" unique_id=1500545966]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_bare"
 model = "res://assets/zone01/models/birch_bare.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/birch_bare_far.glb"
 near_distance = 320.0
-
-[node name="BirchYoung" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="BirchYoung" type="Node3D" parent="Vegetation" unique_id=1545168903]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "birch_young"
 model = "res://assets/zone01/models/birch_young.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/birch_young_far.glb"
 near_distance = 320.0
-
-[node name="SpruceOpen" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="SpruceOpen" type="Node3D" parent="Vegetation" unique_id=513326136]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_open"
 model = "res://assets/zone01/models/spruce_open.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/spruce_open_far.glb"
 near_distance = 320.0
-
-[node name="SpruceYoungA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="SpruceYoungA" type="Node3D" parent="Vegetation" unique_id=827893073]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_young_a"
 model = "res://assets/zone01/models/spruce_young_a.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/spruce_young_a_far.glb"
 near_distance = 320.0
-
-[node name="SpruceYoungB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="SpruceYoungB" type="Node3D" parent="Vegetation" unique_id=1711911865]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "spruce_young_b"
 model = "res://assets/zone01/models/spruce_young_b.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.25
 far_model = "res://assets/zone01/models/spruce_young_b_far.glb"
 near_distance = 320.0
-
-[node name="PineYard" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="PineYard" type="Node3D" parent="Vegetation" unique_id=1695657035]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_yard"
 model = "res://assets/zone01/models/pine_yard.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.298
 far_model = "res://assets/zone01/models/pine_yard_far.glb"
 near_distance = 320.0
-
-[node name="PineTwin" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="PineTwin" type="Node3D" parent="Vegetation" unique_id=1287214393]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_twin"
 model = "res://assets/zone01/models/pine_twin.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.282
 far_model = "res://assets/zone01/models/pine_twin_far.glb"
 near_distance = 320.0
-
-[node name="PineOld" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="PineOld" type="Node3D" parent="Vegetation" unique_id=164586575]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "pine_old"
 model = "res://assets/zone01/models/pine_old.glb"
-view_distance = 900.0
 cell = 96.0
+view_distance = 900.0
 trunk_radius = 0.473
 far_model = "res://assets/zone01/models/pine_old_far.glb"
 near_distance = 320.0
-
-[node name="UgBushA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+from_nodes = true
+
+[node name="UgBushA" type="Node3D" parent="Vegetation" unique_id=2006807121]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_a"
 model = "res://assets/zone01/models/ug_bush_a.glb"
-view_distance = 260.0
 cell = 48.0
-shadows = true
+view_distance = 260.0
 foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
-
-[node name="UgBushB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgBushB" type="Node3D" parent="Vegetation" unique_id=1419259796]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_b"
 model = "res://assets/zone01/models/ug_bush_b.glb"
-view_distance = 260.0
 cell = 48.0
-shadows = true
+view_distance = 260.0
 foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
-
-[node name="UgBushC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgBushC" type="Node3D" parent="Vegetation" unique_id=839923638]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_c"
 model = "res://assets/zone01/models/ug_bush_c.glb"
-view_distance = 260.0
 cell = 48.0
-shadows = true
+view_distance = 260.0
 foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
-
-[node name="UgBushD" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgBushD" type="Node3D" parent="Vegetation" unique_id=969588814]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_bush_d"
 model = "res://assets/zone01/models/ug_bush_d.glb"
-view_distance = 260.0
 cell = 48.0
-shadows = true
+view_distance = 260.0
 foliage = true
 foliage_tint = Color(0.82, 0.8, 0.62, 1)
-
-[node name="UgSaplingA" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgSaplingA" type="Node3D" parent="Vegetation" unique_id=178743021]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_a"
 model = "res://assets/zone01/models/ug_sapling_a.glb"
-view_distance = 200.0
 cell = 48.0
-shadows = true
+view_distance = 200.0
 foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
-
-[node name="UgSaplingB" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgSaplingB" type="Node3D" parent="Vegetation" unique_id=2023561878]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_b"
 model = "res://assets/zone01/models/ug_sapling_b.glb"
-view_distance = 200.0
 cell = 48.0
-shadows = true
+view_distance = 200.0
 foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
-
-[node name="UgSaplingC" parent="Vegetation" type="Node3D"]
-script = ExtResource("6")
 local_points = true
+
+[node name="UgSaplingC" type="Node3D" parent="Vegetation" unique_id=1003715901]
+script = ExtResource("6")
 data_path = "res://data/zone01_yard_scatter.json"
 key = "ug_sapling_c"
 model = "res://assets/zone01/models/ug_sapling_c.glb"
-view_distance = 200.0
 cell = 48.0
-shadows = true
+view_distance = 200.0
 foliage = true
 foliage_tint = Color(0.78, 0.82, 0.72, 1)
+local_points = true
 
-[node name="GameplayInterior" parent="." instance=ExtResource("nw_gameplay")]
+[node name="Деревья" type="Node3D" parent="Vegetation" unique_id=1418772111]
+
+[node name="Тополь 1" type="Node3D" parent="Vegetation/Деревья" unique_id=777277775]
+
+[node name="Тополь 1 0001" type="Node3D" parent="Vegetation/Деревья/Тополь 1" unique_id=76947538]
+transform = Transform3D(-0.92388284, 0, -0.07595691, 0, 0.927, 0, 0.07595691, 0, -0.92388284, -238.03, 0.436, -151.95)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_0"
+
+[node name="Тополь 1 0002" type="Node3D" parent="Vegetation/Деревья/Тополь 1" unique_id=639042312]
+transform = Transform3D(-0.89606076, 0, -0.6534188, 0, 1.109, 0, 0.6534188, 0, -0.89606076, -210.55, 0.318, -151.48)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_0"
+
+[node name="Тополь 1 0003" type="Node3D" parent="Vegetation/Деревья/Тополь 1" unique_id=1083357954]
+transform = Transform3D(0.7737085, 0, 0.35914353, 0, 0.853, 0, -0.35914353, 0, 0.7737085, -184, 0.405, -151.94)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_0"
+
+[node name="Тополь 2" type="Node3D" parent="Vegetation/Деревья" unique_id=407439213]
+
+[node name="Тополь 2 0001" type="Node3D" parent="Vegetation/Деревья/Тополь 2" unique_id=1378777788]
+transform = Transform3D(0.017696654, 0, -1.0138457, 0, 1.014, 0, 1.0138457, 0, 0.017696654, -228.91, 0.358, -151.89)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_1"
+
+[node name="Тополь 2 0002" type="Node3D" parent="Vegetation/Деревья/Тополь 2" unique_id=790026031]
+transform = Transform3D(-0.8911387, 0, 0.057627413, 0, 0.893, 0, -0.057627413, 0, -0.8911387, -202.89, 0.286, -151.52)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_1"
+
+[node name="Тополь 3" type="Node3D" parent="Vegetation/Деревья" unique_id=1437551017]
+
+[node name="Тополь 3 0001" type="Node3D" parent="Vegetation/Деревья/Тополь 3" unique_id=1178605516]
+transform = Transform3D(0.44931903, 0, -0.89337134, 0, 1, 0, 0.89337134, 0, 0.44931903, -220.78, 0.412, -151)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_2"
+
+[node name="Тополь 3 0002" type="Node3D" parent="Vegetation/Деревья/Тополь 3" unique_id=1680345049]
+transform = Transform3D(-0.18374582, 0, -0.9279835, 0, 0.946, 0, 0.9279835, 0, -0.18374582, -194, 0.249, -151.12)
+script = ExtResource("7_nd66u")
+species = "tree_poplar_2"
+
+[node name="Клён 1" type="Node3D" parent="Vegetation/Деревья" unique_id=436740237]
+
+[node name="Клён 1 0001" type="Node3D" parent="Vegetation/Деревья/Клён 1" unique_id=1870455069]
+transform = Transform3D(-0.009215215, 0, 1.0559598, 0, 1.056, 0, -1.0559598, 0, -0.009215215, -273.06, 0.17, -158.48)
+script = ExtResource("7_nd66u")
+species = "tree_maple_0"
+
+[node name="Клён 1 0002" type="Node3D" parent="Vegetation/Деревья/Клён 1" unique_id=955550667]
+transform = Transform3D(1.0223567, 0, 0.41929907, 0, 1.105, 0, -0.41929907, 0, 1.0223567, -277.87, 0.342, -137.08)
+script = ExtResource("7_nd66u")
+species = "tree_maple_0"
+
+[node name="Клён 1 0003" type="Node3D" parent="Vegetation/Деревья/Клён 1" unique_id=347252932]
+transform = Transform3D(-0.056222484, 0, 0.9463314, 0, 0.948, 0, -0.9463314, 0, -0.056222484, -274.81, 0.348, -113.55)
+script = ExtResource("7_nd66u")
+species = "tree_maple_0"
+
+[node name="Клён 2" type="Node3D" parent="Vegetation/Деревья" unique_id=501323948]
+
+[node name="Клён 2 0001" type="Node3D" parent="Vegetation/Деревья/Клён 2" unique_id=1998597547]
+transform = Transform3D(1.090665, 0, -0.09733946, 0, 1.095, 0, 0.09733946, 0, 1.090665, -278.81, 0.214, -153.03)
+script = ExtResource("7_nd66u")
+species = "tree_maple_1"
+
+[node name="Клён 2 0002" type="Node3D" parent="Vegetation/Деревья/Клён 2" unique_id=2053058085]
+transform = Transform3D(0.59282535, 0, -0.804089, 0, 0.999, 0, 0.804089, 0, 0.59282535, -273.1, 0.451, -129.02)
+script = ExtResource("7_nd66u")
+species = "tree_maple_1"
+
+[node name="Клён 2 0003" type="Node3D" parent="Vegetation/Деревья/Клён 2" unique_id=1934536957]
+transform = Transform3D(-0.98990875, 0, 0.42427552, 0, 1.077, 0, -0.42427552, 0, -0.98990875, -275.58, 0.239, -102.34)
+script = ExtResource("7_nd66u")
+species = "tree_maple_1"
+
+[node name="Клён 3" type="Node3D" parent="Vegetation/Деревья" unique_id=865845448]
+
+[node name="Клён 3 0001" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=1852248579]
+transform = Transform3D(-0.046016444, 0, 0.94087535, 0, 0.942, 0, -0.94087535, 0, -0.046016444, -184.58, 0.374, -110.37)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0002" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=1332703257]
+transform = Transform3D(1.1350876, 0, -0.081363864, 0, 1.138, 0, 0.081363864, 0, 1.1350876, -213.11, 0.195, -78.34)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0003" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=919239341]
+transform = Transform3D(0.91100436, 0, -0.52809083, 0, 1.053, 0, 0.52809083, 0, 0.91100436, -205.96, 0.272, -66.31)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0004" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=555546368]
+transform = Transform3D(0.501555, 0, -0.98012424, 0, 1.101, 0, 0.98012424, 0, 0.501555, -182.01, 0.239, -92.96)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0005" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=718739900]
+transform = Transform3D(-0.728339, 0, 0.7728948, 0, 1.062, 0, -0.7728948, 0, -0.728339, -156.72, 0.344, -68.54)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0006" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=1993729149]
+transform = Transform3D(0.10987703, 0, 1.0281456, 0, 1.034, 0, -1.0281456, 0, 0.10987703, -243.29, 0.389, -127.19)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0007" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=1471441583]
+transform = Transform3D(-0.89396596, 0, 0.0078016133, 0, 0.894, 0, -0.0078016133, 0, -0.89396596, -278.46, 0.261, -143.85)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Клён 3 0008" type="Node3D" parent="Vegetation/Деревья/Клён 3" unique_id=1466074299]
+transform = Transform3D(-0.19543095, 0, -1.0753864, 0, 1.093, 0, 1.0753864, 0, -0.19543095, -277.07, 0.415, -118.44)
+script = ExtResource("7_nd66u")
+species = "tree_maple_2"
+
+[node name="Берёза 1" type="Node3D" parent="Vegetation/Деревья" unique_id=917375656]
+
+[node name="Берёза 1 0001" type="Node3D" parent="Vegetation/Деревья/Берёза 1" unique_id=459457760]
+transform = Transform3D(0.43741637, 0, 0.8331554, 0, 0.941, 0, -0.8331554, 0, 0.43741637, -214.17, 0.296, -110.97)
+script = ExtResource("7_nd66u")
+species = "birch_a"
+
+[node name="Берёза 1 0002" type="Node3D" parent="Vegetation/Деревья/Берёза 1" unique_id=901906912]
+transform = Transform3D(-0.60423034, 0, -0.69508755, 0, 0.921, 0, 0.69508755, 0, -0.60423034, -218.11, 0.344, -97.47)
+script = ExtResource("7_nd66u")
+species = "birch_a"
+
+[node name="Берёза 1 0003" type="Node3D" parent="Vegetation/Деревья/Берёза 1" unique_id=970606551]
+transform = Transform3D(0.7047983, 0, -0.70234203, 0, 0.995, 0, 0.70234203, 0, 0.7047983, -151.2, 0.357, -141.4)
+script = ExtResource("7_nd66u")
+species = "birch_a"
+
+[node name="Берёза 2" type="Node3D" parent="Vegetation/Деревья" unique_id=1406535622]
+
+[node name="Берёза 2 0001" type="Node3D" parent="Vegetation/Деревья/Берёза 2" unique_id=658319929]
+transform = Transform3D(0.016319923, 0, -1.0388719, 0, 1.039, 0, 1.0388719, 0, 0.016319923, -208.73, 0.342, -107.99)
+script = ExtResource("7_nd66u")
+species = "birch_b"
+
+[node name="Берёза 2 0002" type="Node3D" parent="Vegetation/Деревья/Берёза 2" unique_id=1209518028]
+transform = Transform3D(-0.93684053, 0, 0.14503053, 0, 0.948, 0, -0.14503053, 0, -0.93684053, -176.91, 0.22, -83.06)
+script = ExtResource("7_nd66u")
+species = "birch_b"
+
+[node name="Берёза 2 0003" type="Node3D" parent="Vegetation/Деревья/Берёза 2" unique_id=2092169367]
+transform = Transform3D(-0.75299895, 0, 0.83044195, 0, 1.121, 0, -0.83044195, 0, -0.75299895, -230.74, 0.329, -146.94)
+script = ExtResource("7_nd66u")
+species = "birch_b"
+
+[node name="Берёза 3" type="Node3D" parent="Vegetation/Деревья" unique_id=2045999042]
+
+[node name="Берёза 3 0001" type="Node3D" parent="Vegetation/Деревья/Берёза 3" unique_id=79751233]
+transform = Transform3D(0.181872, 0, -0.863045, 0, 0.882, 0, 0.863045, 0, 0.181872, -179.3, 0.295, -104.18)
+script = ExtResource("7_nd66u")
+species = "birch_c"
+
+[node name="Берёза 3 0002" type="Node3D" parent="Vegetation/Деревья/Берёза 3" unique_id=1100554776]
+transform = Transform3D(-0.6499709, 0, -0.5872936, 0, 0.876, 0, 0.5872936, 0, -0.6499709, -246.65, 0.358, -60.29)
+script = ExtResource("7_nd66u")
+species = "birch_c"
+
+[node name="Берёза 3 0003" type="Node3D" parent="Vegetation/Деревья/Берёза 3" unique_id=1518230139]
+transform = Transform3D(-0.99983793, 0, 0.24743494, 0, 1.03, 0, -0.24743494, 0, -0.99983793, -248.51, 0.178, -92.59)
+script = ExtResource("7_nd66u")
+species = "birch_c"
+
+[node name="Берёза голая" type="Node3D" parent="Vegetation/Деревья" unique_id=833201773]
+
+[node name="Берёза голая 0001" type="Node3D" parent="Vegetation/Деревья/Берёза голая" unique_id=1886728957]
+transform = Transform3D(-0.88410974, 0, -0.21552269, 0, 0.91, 0, 0.21552269, 0, -0.88410974, -214.79, 0.179, -81.62)
+script = ExtResource("7_nd66u")
+species = "birch_bare"
+
+[node name="Берёза голая 0002" type="Node3D" parent="Vegetation/Деревья/Берёза голая" unique_id=598805863]
+transform = Transform3D(-0.68299633, 0, 0.6901862, 0, 0.971, 0, -0.6901862, 0, -0.68299633, -188.96, 0.334, -67.37)
+script = ExtResource("7_nd66u")
+species = "birch_bare"
+
+[node name="Берёза голая 0003" type="Node3D" parent="Vegetation/Деревья/Берёза голая" unique_id=675638472]
+transform = Transform3D(-0.18910272, 0, 1.0947881, 0, 1.111, 0, -1.0947881, 0, -0.18910272, -251.19, 0.248, -74.3)
+script = ExtResource("7_nd66u")
+species = "birch_bare"
+
+[node name="Берёза молодая" type="Node3D" parent="Vegetation/Деревья" unique_id=1506359452]
+
+[node name="Берёза молодая 0001" type="Node3D" parent="Vegetation/Деревья/Берёза молодая" unique_id=1329322723]
+transform = Transform3D(0.079479106, 0, -1.0098772, 0, 1.013, 0, 1.0098772, 0, 0.079479106, -181.72, 0.268, -75.53)
+script = ExtResource("7_nd66u")
+species = "birch_young"
+
+[node name="Берёза молодая 0002" type="Node3D" parent="Vegetation/Деревья/Берёза молодая" unique_id=1777798354]
+transform = Transform3D(1.1487043, 0, 0.026067749, 0, 1.149, 0, -0.026067749, 0, 1.1487043, -235.93, 0.325, -114.57)
+script = ExtResource("7_nd66u")
+species = "birch_young"
+
+[node name="Ель на просторе" type="Node3D" parent="Vegetation/Деревья" unique_id=368140105]
+
+[node name="Ель на просторе 0001" type="Node3D" parent="Vegetation/Деревья/Ель на просторе" unique_id=352946338]
+transform = Transform3D(0.5323627, 0, 0.80127025, 0, 0.962, 0, -0.80127025, 0, 0.5323627, -158.5, 0.325, -96)
+script = ExtResource("7_nd66u")
+species = "spruce_open"
+
+[node name="Ель молодая 1" type="Node3D" parent="Vegetation/Деревья" unique_id=304897220]
+
+[node name="Ель молодая 1 0001" type="Node3D" parent="Vegetation/Деревья/Ель молодая 1" unique_id=249523634]
+transform = Transform3D(-0.54390967, 0, -0.9016491, 0, 1.053, 0, 0.9016491, 0, -0.54390967, -246.5, 0.325, -66)
+script = ExtResource("7_nd66u")
+species = "spruce_young_a"
+
+[node name="Ель молодая 1 0002" type="Node3D" parent="Vegetation/Деревья/Ель молодая 1" unique_id=1390438756]
+transform = Transform3D(0.2143428, 0, 0.85968196, 0, 0.886, 0, -0.85968196, 0, 0.2143428, -187, 0.196, -131)
+script = ExtResource("7_nd66u")
+species = "spruce_young_a"
+
+[node name="Ель молодая 2" type="Node3D" parent="Vegetation/Деревья" unique_id=398170128]
+
+[node name="Ель молодая 2 0001" type="Node3D" parent="Vegetation/Деревья/Ель молодая 2" unique_id=2110967949]
+transform = Transform3D(-0.78409743, 0, 0.82338333, 0, 1.137, 0, -0.82338333, 0, -0.78409743, -159, 0.269, -128)
+script = ExtResource("7_nd66u")
+species = "spruce_young_b"
+
+[node name="Сосна во дворе" type="Node3D" parent="Vegetation/Деревья" unique_id=9280484]
+
+[node name="Сосна во дворе 0001" type="Node3D" parent="Vegetation/Деревья/Сосна во дворе" unique_id=1323616655]
+transform = Transform3D(0.9156861, 0, 0.37368456, 0, 0.989, 0, -0.37368456, 0, 0.9156861, -208, 0.227, -72)
+script = ExtResource("7_nd66u")
+species = "pine_yard"
+
+[node name="Сосна во дворе 0002" type="Node3D" parent="Vegetation/Деревья/Сосна во дворе" unique_id=1524187238]
+transform = Transform3D(-0.15145576, 0, -0.97834617, 0, 0.99, 0, 0.97834617, 0, -0.15145576, -146, 0.387, -66)
+script = ExtResource("7_nd66u")
+species = "pine_yard"
+
+[node name="Сосна двойная" type="Node3D" parent="Vegetation/Деревья" unique_id=1646853873]
+
+[node name="Сосна двойная 0001" type="Node3D" parent="Vegetation/Деревья/Сосна двойная" unique_id=432146202]
+transform = Transform3D(-0.2691718, 0, 1.0045629, 0, 1.04, 0, -1.0045629, 0, -0.2691718, -252.5, 0.259, -84)
+script = ExtResource("7_nd66u")
+species = "pine_twin"
+
+[node name="Сосна старая" type="Node3D" parent="Vegetation/Деревья" unique_id=52600269]
+
+[node name="Сосна старая 0001" type="Node3D" parent="Vegetation/Деревья/Сосна старая" unique_id=1952309970]
+transform = Transform3D(-1.0136539, 0, -0.36094585, 0, 1.076, 0, 0.36094585, 0, -1.0136539, -160, 0.429, -151)
+script = ExtResource("7_nd66u")
+species = "pine_old"
+
+[node name="GameplayInterior" parent="." unique_id=1923575244 instance=ExtResource("nw_gameplay")]

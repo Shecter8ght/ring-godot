@@ -186,22 +186,22 @@ func _trees(spots: Array[Node]) -> int:
 	var by: Dictionary = {}
 	for n: Node in spots:
 		var spot: TreeSpot = n as TreeSpot
-		var p: Vector3 = spot.global_position
 		if not by.has(spot.species):
 			by[spot.species] = []
-		(by[spot.species] as Array).append([p.x, p.y, p.z, rad_to_deg(spot.global_rotation.y), spot.tree_scale()])
+		(by[spot.species] as Array).append(spot.scatter_point())
 	var total: int = spots.size()
 	snapshot.trees = by.duplicate(true)
 	for key: String in by:
 		var spec: Array = TreeSpot.SPECIES[key]
-		root.add_child(_scatter(key, String(spec[0]), float(spec[1]), by[key]))
+		root.add_child(_scatter(key, String(spec[0]), String(spec[1]), float(spec[2]), by[key]))
 	if FileAccess.file_exists(VEG_PATH):
 		var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(VEG_PATH)) as Dictionary
 		for key: String in data:
 			var list: Array = data[key]
 			if list.is_empty() or not key.ends_with("_bg"):
 				continue
-			var s: DistrictScatter = _scatter(key, String(BG_SPECIES[key.trim_suffix("_bg")]), 0.0, [])
+			var bg: String = "res://assets/zone01/models/%s" % String(BG_SPECIES[key.trim_suffix("_bg")])
+			var s: DistrictScatter = _scatter(key, bg + ".glb", bg + "_far.glb", 0.0, [])
 			s.data_path = VEG_PATH
 			s.key = key
 			root.add_child(s)
@@ -222,12 +222,12 @@ func write_snapshot() -> void:
 		f.close()
 
 
-func _scatter(key: String, model: String, trunk: float, points: Array) -> DistrictScatter:
+func _scatter(key: String, model: String, far_model: String, trunk: float, points: Array) -> DistrictScatter:
 	var scatter: DistrictScatter = DistrictScatter.new()
 	scatter.name = key
 	scatter.points_override = points
-	scatter.model = "res://assets/zone01/models/%s.glb" % model
-	scatter.far_model = "res://assets/zone01/models/%s_far.glb" % model
+	scatter.model = model
+	scatter.far_model = far_model
 	scatter.near_distance = 220.0
 	scatter.view_distance = 2400.0
 	scatter.cell = 64.0

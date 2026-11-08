@@ -9,6 +9,8 @@ const GROUND_SHADER: Shader = preload("res://src/world/sanatorium_ground.gdshade
 const KINDS: Array[String] = ["grass", "dirt", "grass", "dirt", "gravel", "gravel", "sand"]
 
 var _splat2: Image
+var _mask2_file: String = ""
+var _mask2_texture: ImageTexture
 
 
 func _surface_shader() -> Shader:
@@ -17,6 +19,8 @@ func _surface_shader() -> Shader:
 
 func _extra_textures(material: ShaderMaterial, terrain: Dictionary) -> void:
 	var file: String = String(terrain.get("splat2_file", ""))
+	_mask2_file = file
+	_mask2_texture = null
 	_splat2 = null
 	if file != "":
 		var image: Image = Image.load_from_file(ProjectSettings.globalize_path(file))
@@ -26,6 +30,39 @@ func _extra_textures(material: ShaderMaterial, terrain: Dictionary) -> void:
 	var gain: Array = terrain.get("layer_gain", [])
 	if gain.size() == 8:
 		material.set_shader_parameter("layer_gain", PackedFloat32Array(gain))
+
+
+## Кисть земли: газон — основа, дальше семь грунтов двух масок (у второй маски канал A — сырость у воды, не кисть).
+func brush_grounds() -> PackedStringArray:
+	return PackedStringArray(["Газон", "Вытоптанный газон", "Хвоя", "Мох", "Тропа, грунтовка", "Гранит", "Щебень", "Песок"])
+
+
+func brush_masks() -> Array[Image]:
+	var out: Array[Image] = []
+	if _splat != null:
+		out.append(_splat)
+	if _splat2 != null:
+		out.append(_splat2)
+	return out
+
+
+func brush_mask_channels() -> PackedInt32Array:
+	return PackedInt32Array([4, 3])
+
+
+func brush_mask_paths() -> PackedStringArray:
+	return PackedStringArray([_mask_file, _mask2_file])
+
+
+func brush_push_masks() -> void:
+	super.brush_push_masks()
+	if _splat2 == null or _material == null:
+		return
+	if _mask2_texture == null:
+		_mask2_texture = ImageTexture.create_from_image(_splat2)
+		_material.set_shader_parameter("splat2", _mask2_texture)
+	else:
+		_mask2_texture.update(_splat2)
 
 
 ## Из чего земля в точке (шаги, попадания): преобладающий грунт двух масок; крутой склон — щебень и камень.

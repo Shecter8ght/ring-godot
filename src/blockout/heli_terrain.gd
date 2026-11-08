@@ -17,6 +17,8 @@ const HELI_SHADER: Shader = preload("res://src/blockout/heli_terrain.gdshader")
 ## Прямоугольник мира, где у плиток есть коллизия.
 @export var collision_rect: Rect2 = Rect2()
 
+var _mask_file: String = ""
+
 ## Сколько плиток собрано по ступеням (для отчёта стенда).
 var built: Dictionary = {"lod0": 0, "lod1": 0, "lod2": 0, "ground": 0}
 
@@ -40,6 +42,8 @@ func _build() -> void:
 		if ResourceLoader.exists(path):
 			material.set_shader_parameter(key, load(path))
 	var splat_file: String = String(terrain.get("splat_file", ""))
+	_mask_file = splat_file
+	_mask_texture = null
 	_splat_path = ""
 	_splat = null
 	if splat_file != "":
@@ -82,26 +86,16 @@ func _heli_tile(root: Node3D, material: ShaderMaterial, tx: int, tz: int) -> voi
 		built.ground += 1
 
 
-## Высоты в клетке карты (кисть земли в редакторе, tools/level_tools): прямой доступ к сетке.
-func cells() -> Vector2i:
-	return Vector2i(_cols, _rows)
+## Кисть земли: маска — PNG без импорта (splat_file), шейдер берёт её текстурой из картинки.
+func brush_masks() -> Array[Image]:
+	var out: Array[Image] = []
+	if _splat != null:
+		out.append(_splat)
+	return out
 
 
-func cell_origin() -> Vector2:
-	return _origin
-
-
-func cell_step() -> float:
-	return _step
-
-
-func heights_data() -> PackedFloat32Array:
-	return _heights
-
-
-func set_heights_data(data: PackedFloat32Array) -> void:
-	if data.size() == _heights.size():
-		_heights = data
+func brush_mask_paths() -> PackedStringArray:
+	return PackedStringArray([_mask_file])
 
 
 ## Пересобрать плитки, которые задевает прямоугольник мира (после правки высот кистью); нормали

@@ -41,6 +41,10 @@ var _splat: Image
 var _material: ShaderMaterial
 ## «Трава издали» от DistrictGrass (имена параметров шейдера → значения): переживает пересборку рельефа.
 var _far_grass: Dictionary = {}
+## Высоты из файла до выемок (excavations): кисть земли правит обе сетки, сохраняется эта — выемки не впекаются.
+var _source_heights: PackedFloat32Array = PackedFloat32Array()
+var _heights_file: String = ""
+var _mask_texture: ImageTexture
 
 
 func _ready() -> void:
@@ -132,6 +136,8 @@ func _load() -> Dictionary:
 	_step = float(terrain.get("step", 1.0))
 	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(String(terrain.get("heights", "")))
 	_heights = bytes.to_float32_array()
+	_heights_file = String(terrain.get("heights", ""))
+	_source_heights = _heights.duplicate()
 	if _heights.size() != _cols * _rows:
 		push_error("DistrictTerrain: карта высот %s не совпадает с сеткой %dx%d" % [terrain.get("heights", ""), _cols, _rows])
 		_heights = PackedFloat32Array()
@@ -166,6 +172,7 @@ func _build() -> void:
 			material.set_shader_parameter(key, load(path))
 	_splat_path = String((terrain.get("textures", {}) as Dictionary).get("splat", ""))
 	_splat = null
+	_mask_texture = null
 	material.set_shader_parameter("splat_origin", _origin)
 	material.set_shader_parameter("splat_size", Vector2(float(_cols - 1), float(_rows - 1)) * _step)
 	var tiles: Array = terrain.get("layer_tiles", [3.0, 3.0, 2.5, 3.0, 4.0, 2.0])
@@ -180,6 +187,112 @@ func _build() -> void:
 			_tile(root, material, tx, tz, mini(cells, _cols - 1 - tx), mini(cells, _rows - 1 - tz))
 			tx += cells
 		tz += cells
+
+
+# ---------------------------------------------------------------- кисть земли в редакторе (addons/ring_level_tools)
+
+func cells() -> Vector2i:
+	return Vector2i(_cols, _rows)
+
+
+func cell_origin() -> Vector2:
+	return _origin
+
+
+func cell_step() -> float:
+	return _step
+
+
+func heights_data() -> PackedFloat32Array:
+	return _heights
+
+
+## Новые высоты от кисти: разница идёт и в исходную сетку (её и сохраняем — выемки остаются отдельно).
+func set_heights_data(data: PackedFloat32Array) -> void:
+	if data.size() != _heights.size():
+		return
+	if _source_heights.size() == data.size():
+		for i: int in range(data.size()):
+			if data[i] != _heights[i]:
+				_source_heights[i] += data[i] - _heights[i]
+	_heights = data
+
+
+func heights_for_save() -> PackedFloat32Array:
+	return _source_heights if _source_heights.size() == _heights.size() else _heights
+
+
+func heights_path() -> String:
+	return _heights_file
+
+
+## Грунты кисти: 0 — основа (все маски вниз), дальше — каналы масок по порядку.
+func brush_grounds() -> PackedStringArray:
+	return PackedStringArray(["Газон", "Грязь", "Камень", "Щебень", "Листва"])
+
+
+## Маски грунта для правки (живые картинки — правка сразу видна и в шагах, и в попаданиях).
+func brush_masks() -> Array[Image]:
+	if _splat == null and _splat_path != "" and ResourceLoader.exists(_splat_path):
+		_splat = (load(_splat_path) as Texture2D).get_image()
+	if _splat != null:
+		if _splat.is_compressed():
+			_splat.decompress()
+		# из импортированной текстуры приходит с мипами: правка шла бы только в нулевой уровень, издали — старая маска
+		if _splat.has_mipmaps():
+			_splat.clear_mipmaps()
+		if _splat.get_format() != Image.FORMAT_RGBA8:
+			_splat.convert(Image.FORMAT_RGBA8)
+	var out: Array[Image] = []
+	if _splat != null:
+		out.append(_splat)
+	return out
+
+
+func brush_mask_channels() -> PackedInt32Array:
+	return PackedInt32Array([4])
+
+
+func brush_mask_paths() -> PackedStringArray:
+	return PackedStringArray([_splat_path])
+
+
+## Показать правку масок в шейдере (своя текстура вместо импортированной; после сохранения — снова файл).
+func brush_push_masks() -> void:
+	var masks: Array[Image] = brush_masks()
+	if masks.is_empty() or _material == null:
+		return
+	if _mask_texture == null or Vector2i(_mask_texture.get_size()) != masks[0].get_size():
+		_mask_texture = ImageTexture.create_from_image(masks[0])
+		_material.set_shader_parameter("splat", _mask_texture)
+	else:
+		_mask_texture.update(masks[0])
+
+
+## Пересобрать плитки, которые задевает прямоугольник мира (после правки высот кистью).
+func rebuild_area(area: Rect2) -> void:
+	var root: Node3D = get_node_or_null("_Generated") as Node3D
+	if root == null or _material == null:
+		_build()
+		return
+	var grown: Rect2 = area.grow(2.0 * _step)
+	var n: int = int(round(float(tile_size) / _step))
+	var tz: int = 0
+	while tz < _rows - 1:
+		var tx: int = 0
+		while tx < _cols - 1:
+			var w: int = mini(n, _cols - 1 - tx)
+			var d: int = mini(n, _rows - 1 - tz)
+			var rect: Rect2 = Rect2(_origin.x + float(tx) * _step, _origin.y + float(tz) * _step, float(w) * _step, float(d) * _step)
+			if rect.intersects(grown):
+				for name: String in ["Terrain_%d_%d" % [tx, tz], "Ground_%d_%d" % [tx, tz]]:
+					var old: Node = root.get_node_or_null(name)
+					if old:
+						root.remove_child(old)
+						old.free()
+				_tile(root, _material, tx, tz, w, d)
+			tx += n
+		tz += n
 
 
 func _tile(root: Node3D, material: ShaderMaterial, x0: int, z0: int, w: int, d: int) -> void:

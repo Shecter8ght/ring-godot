@@ -54,9 +54,19 @@ extends Node3D
 		local_points = value
 		_queue()
 
+## Точки — из деревьев TreeSpot этой же сцены с породой = key (карта правится руками, docs/level_editing.md):
+## в редакторе россыпь не строится — деревья видны сами, в игре их точки идут сюда, а узлы деревьев убираются.
+## Скрытое глазком дерево в игру не попадает.
+@export var from_nodes: bool = false:
+	set(value):
+		from_nodes = value
+		_queue()
+
 ## Точки готовым списком ([x, y, z, поворот, масштаб]) вместо JSON — их собирает уровень из узлов сцены
 ## (деревья TreeSpot, расставленные руками); задать до добавления в дерево.
 var points_override: Array = []
+## Брать points_override, даже пустой (кисть «Растительность» в редакторе всё убрала, файл ещё не сохранён).
+var use_override: bool = false
 var _pending: bool = false
 
 
@@ -77,7 +87,12 @@ func _build() -> void:
 		if String(child.name).begins_with("_"):
 			child.free()
 	var points: Array = points_override
-	if points.is_empty():
+	if from_nodes and points.is_empty():
+		if Engine.is_editor_hint() or not is_inside_tree():
+			return
+		points = _points_from_nodes()
+		points_override = points
+	elif points.is_empty() and not use_override:
 		if data_path == "" or not FileAccess.file_exists(data_path):
 			return
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(data_path))
@@ -105,7 +120,7 @@ func _build() -> void:
 	var detail_end: float = float(tree_sh.detail_m) + cell * 0.5 if float(tree_sh.detail_m) > 0.0 else 0.0
 	# из координат точек — в координаты узла: мир минус положение узла или через корень сцены
 	var to_node: Transform3D = Transform3D(Basis.IDENTITY, -global_position)
-	if local_points and is_inside_tree():
+	if local_points and not from_nodes and is_inside_tree():
 		var frame: Node3D = owner as Node3D if owner is Node3D else get_parent_node_3d()
 		if frame:
 			to_node = global_transform.affine_inverse() * frame.global_transform
@@ -266,6 +281,18 @@ func _mesh() -> Mesh:
 	if model != "":
 		return _load_model(model)
 	return _tuft()
+
+
+## Деревья TreeSpot этой же сцены (тот же owner) с породой = key: видимые — в точки (мировые), узлы породы убираются.
+func _points_from_nodes() -> Array:
+	var out: Array = []
+	for n: Node in get_tree().get_nodes_in_group("tree_spot"):
+		if n.owner != owner or String(n.get("species")) != key:
+			continue
+		if (n as Node3D).is_visible_in_tree():
+			out.append(n.call("scatter_point"))
+		n.queue_free()
+	return out
 
 
 ## Первый меш модели; материалы — по именам слотов из materials_dir (или листва, если foliage).

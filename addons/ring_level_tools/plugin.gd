@@ -1,18 +1,30 @@
 @tool
 extends EditorPlugin
 ## Кисть земли (решение владельца 2026-11-08: править карты руками в редакторе, docs/level_editing.md).
-## Выбрать в дереве сцены узел Terrain (группа "blockout_terrain": рельеф из карты высот — «Санаторий»), включить
-## кисть в панели «Кисть земли» справа и рисовать левой кнопкой мыши в окне 3D:
-##   «Грунт» — газон, вытоптанный газон, хвоя, мох, тропа (грунтовка), гранит, щебень, песок (маски splat / splat2);
-##   «Трава» — убрать, густая трава, сорняки (карта густоты травы узла Grass);
-##   «Высота» — поднять, опустить, сгладить, выровнять по высоте первой точки мазка.
-## Shift + колесо — размер кисти. Ctrl+Z — отмена мазка. Ctrl+S — сохранить: PNG масок и травы, карта высот .r32.
+## Выбрать в дереве сцены узел Terrain (группа "blockout_terrain": «Санаторий», «Пригород»), включить кисть в панели
+## «Кисть земли» справа и рисовать левой кнопкой мыши в окне 3D:
+##   «Грунт» — грунты масок земли (у каждой карты свои: Terrain.brush_grounds);
+##   «Трава» — убрать, густая трава, сорняки (карта густоты травы узла DistrictGrass в сцене);
+##   «Высота» — поднять, опустить, сгладить, выровнять по высоте первой точки мазка;
+##   «Растительность» — убрать или посадить кусты, подрост, папоротник, пни, коряги, камни (россыпи данными;
+##   деревья — узлы TreeSpot, их двигают как дома).
+## Shift + колесо — размер кисти. Ctrl+Z — отмена мазка. Ctrl+S — сохранить: маски и трава PNG, высоты .r32,
+## растительность — её JSON.
 
-const MODES: Array[String] = ["Грунт", "Трава", "Высота"]
-const GROUNDS: Array[String] = ["Газон", "Вытоптанный газон", "Хвоя", "Мох", "Тропа, грунтовка", "Гранит", "Щебень", "Песок"]
+const MODES: Array[String] = ["Грунт", "Трава", "Высота", "Растительность"]
 const GRASS_OPS: Array[String] = ["Убрать траву", "Густая трава", "Сорняки"]
 const HEIGHT_OPS: Array[String] = ["Поднять", "Опустить", "Сгладить", "Выровнять (по первой точке)"]
-const CURSOR_COLORS: Array[Color] = [Color(1.0, 0.6, 0.2), Color(0.35, 0.95, 0.35), Color(0.35, 0.7, 1.0)]
+const VEG_OPS: Array[String] = ["Убрать", "Посадить"]
+## Растительность по началу ключа россыпи → подпись в списке.
+const VEG_GROUPS: Array = [
+	["ug_bush", "Кусты"], ["ug_sapling", "Подрост"], ["forest_fern", "Папоротник"], ["forest_stump", "Пни"],
+	["forest_dry_branches", "Ветки и коряги"], ["forest_dead_trunk", "Ветки и коряги"], ["forest_roots", "Ветки и коряги"],
+	["forest_rocks", "Камни"],
+]
+const VEG_ALL: String = "Вся растительность"
+## Сколько квадратных метров на одну посаженную вещь за движение мыши при силе 1.
+const PLANT_M2: float = 10.0
+const CURSOR_COLORS: Array[Color] = [Color(1.0, 0.6, 0.2), Color(0.35, 0.95, 0.35), Color(0.35, 0.7, 1.0), Color(0.85, 0.4, 0.9)]
 ## Доля силы за одно движение мыши (движений в секунду много — мазок набирается плавно).
 const DAB: float = 0.35
 ## Подъём за одно движение при силе 1, м.
@@ -30,6 +42,8 @@ var mode_opt: OptionButton
 var ground_opt: OptionButton
 var grass_opt: OptionButton
 var height_opt: OptionButton
+var veg_opt: OptionButton
+var veg_op_opt: OptionButton
 var radius_slider: HSlider
 var strength_slider: HSlider
 var radius_label: Label
@@ -41,9 +55,6 @@ var grass_node: Node
 var grass_path: String = ""
 var grass_image: Image
 var grass_tex: ImageTexture
-var splat_tex: ImageTexture
-var splat2_tex: ImageTexture
-var tex_material: Material
 var cursor: MeshInstance3D
 var cursor_mat: StandardMaterial3D
 var painting: bool = false
@@ -53,7 +64,11 @@ var stroke_rect: Rect2
 var flat_target: float = 0.0
 var last_rebuild_ms: int = 0
 var rebuild_pending: Rect2 = Rect2()
-var dirty: Dictionary = {"heights": false, "splat": false, "grass": false}
+var dirty: Dictionary = {"heights": false, "splat": false, "grass": false, "veg": false}
+## Растительность данными: файл → разобранный JSON; россыпи сцены по подписи группы.
+var veg_data: Dictionary = {}
+var veg_dirty_files: Dictionary = {}
+var veg_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
 func _enter_tree() -> void:
@@ -63,10 +78,11 @@ func _enter_tree() -> void:
 	enabled_box.text = "Кисть включена"
 	dock.add_child(enabled_box)
 	mode_opt = _option("Что рисовать", MODES)
-	ground_opt = _option("Грунт", GROUNDS)
-	ground_opt.select(4)
+	ground_opt = _option("Грунт", [])
 	grass_opt = _option("Трава", GRASS_OPS)
 	height_opt = _option("Высота", HEIGHT_OPS)
+	veg_opt = _option("Растительность", [])
+	veg_op_opt = _option("Действие", VEG_OPS)
 	radius_label = Label.new()
 	dock.add_child(radius_label)
 	radius_slider = _slider(0.5, 30.0, 3.0, 0.5)
@@ -101,13 +117,13 @@ func _exit_tree() -> void:
 	dock.queue_free()
 
 
-func _option(title: String, items: Array[String]) -> OptionButton:
+func _option(title: String, items: Array) -> OptionButton:
 	var l: Label = Label.new()
 	l.text = title
 	dock.add_child(l)
 	var o: OptionButton = OptionButton.new()
-	for it: String in items:
-		o.add_item(it)
+	for it: Variant in items:
+		o.add_item(String(it))
 	dock.add_child(o)
 	return o
 
@@ -122,23 +138,28 @@ func _slider(lo: float, hi: float, value: float, step: float) -> HSlider:
 	return s
 
 
+func _show_option(o: OptionButton, on: bool) -> void:
+	o.visible = on
+	o.get_parent().get_child(o.get_index() - 1).visible = on
+
+
 func _refresh_ui() -> void:
 	var m: int = mode_opt.selected
-	ground_opt.get_parent().get_child(ground_opt.get_index() - 1).visible = m == 0
-	ground_opt.visible = m == 0
-	grass_opt.get_parent().get_child(grass_opt.get_index() - 1).visible = m == 1
-	grass_opt.visible = m == 1
-	height_opt.get_parent().get_child(height_opt.get_index() - 1).visible = m == 2
-	height_opt.visible = m == 2
+	_show_option(ground_opt, m == 0)
+	_show_option(grass_opt, m == 1)
+	_show_option(height_opt, m == 2)
+	_show_option(veg_opt, m == 3)
+	_show_option(veg_op_opt, m == 3)
 	radius_label.text = "Размер кисти: %.1f м" % radius_slider.value
 	strength_label.text = "Сила: %d %%" % int(round(strength_slider.value * 100.0))
 	if terrain == null:
 		status_label.text = "Земля не выбрана."
 	else:
 		var unsaved: PackedStringArray = []
+		var names: Dictionary = {"heights": "высоты", "splat": "грунт", "grass": "трава", "veg": "растительность"}
 		for k: String in dirty:
 			if bool(dirty[k]):
-				unsaved.append({"heights": "высоты", "splat": "грунт", "grass": "трава"}[k])
+				unsaved.append(String(names[k]))
 		status_label.text = "Земля: %s. %s" % [terrain.name,
 			("Не сохранено: " + ", ".join(unsaved) + ".") if not unsaved.is_empty() else "Всё сохранено."]
 	if cursor_mat:
@@ -148,7 +169,7 @@ func _refresh_ui() -> void:
 # ---------------------------------------------------------------- выбор узла
 
 func _handles(object: Object) -> bool:
-	return object is Node3D and (object as Node).is_in_group("blockout_terrain") and object.has_method("heights_data")
+	return object is Node3D and (object as Node).is_in_group("blockout_terrain") and object.has_method("brush_masks")
 
 
 func _edit(object: Object) -> void:
@@ -157,16 +178,16 @@ func _edit(object: Object) -> void:
 		return
 	if object == terrain:
 		return
-	if terrain != null and _any_dirty():
+	if terrain != null and is_instance_valid(terrain) and _any_dirty():
 		_save_all()
 	terrain = object as Node3D
-	grass_node = terrain.get_parent().get_node_or_null("Grass") if terrain.get_parent() else null
-	grass_image = null
-	grass_path = ""
-	if grass_node != null and String(grass_node.get("density_map")) != "":
-		grass_path = String(grass_node.get("density_map"))
-		grass_image = Image.load_from_file(ProjectSettings.globalize_path(grass_path))
+	ground_opt.clear()
+	for g: String in terrain.call("brush_grounds"):
+		ground_opt.add_item(g)
+	ground_opt.select(mini(4, ground_opt.item_count - 1) if ground_opt.item_count > 5 else mini(1, ground_opt.item_count - 1))
+	_find_grass()
 	_show_grass()
+	_fill_veg_groups()
 	_refresh_ui()
 
 
@@ -175,11 +196,29 @@ func _make_visible(visible: bool) -> void:
 		_drop_cursor()
 
 
+## Трава: первый узел DistrictGrass сцены с картой густоты.
+func _find_grass() -> void:
+	grass_node = null
+	grass_image = null
+	grass_path = ""
+	var root: Node = EditorInterface.get_edited_scene_root()
+	if root == null:
+		return
+	for n: Node in [root] + root.find_children("*", "Node3D", true, false):
+		if n is DistrictGrass and String(n.get("density_map")) != "":
+			grass_node = n
+			grass_path = String(n.get("density_map"))
+			grass_image = Image.load_from_file(ProjectSettings.globalize_path(grass_path))
+			if grass_image != null and grass_image.get_format() != Image.FORMAT_RGB8:
+				grass_image.convert(Image.FORMAT_RGB8)
+			return
+
+
 ## Трава в редакторе — видом газона «в траве» (как издали в игре), по карте густоты; правки кисти видны сразу.
 func _show_grass() -> void:
 	if terrain == null or grass_image == null or not terrain.has_method("set_far_grass"):
 		return
-	if grass_tex == null or grass_tex.get_size() != Vector2(grass_image.get_size()):
+	if grass_tex == null or Vector2i(grass_tex.get_size()) != grass_image.get_size():
 		grass_tex = ImageTexture.create_from_image(grass_image)
 	else:
 		grass_tex.update(grass_image)
@@ -188,6 +227,39 @@ func _show_grass() -> void:
 	params["grass_origin"] = grass_node.get("origin")
 	params["grass_size"] = Vector2(grass_image.get_size())
 	terrain.call("set_far_grass", params)
+
+
+## Растительность данными в сцене: россыпи DistrictScatter не из узлов, по группам ключей.
+func _veg_scatters() -> Array[Node]:
+	var out: Array[Node] = []
+	var root: Node = EditorInterface.get_edited_scene_root()
+	if root == null:
+		return out
+	for n: Node in root.find_children("*", "Node3D", true, false):
+		if n is DistrictScatter and not bool(n.get("from_nodes")) and String(n.get("data_path")) != "" \
+				and String(n.get("key")) != "" and _veg_group(String(n.get("key"))) != "":
+			out.append(n)
+	return out
+
+
+func _veg_group(key: String) -> String:
+	for g: Array in VEG_GROUPS:
+		if key.begins_with(String(g[0])):
+			return String(g[1])
+	return ""
+
+
+func _fill_veg_groups() -> void:
+	veg_opt.clear()
+	var seen: Array[String] = []
+	for s: Node in _veg_scatters():
+		var g: String = _veg_group(String(s.get("key")))
+		if not g in seen:
+			seen.append(g)
+	for g: String in seen:
+		veg_opt.add_item(g)
+	if not seen.is_empty():
+		veg_opt.add_item(VEG_ALL)
 
 
 # ---------------------------------------------------------------- мышь
@@ -228,15 +300,13 @@ func _hit(camera: Camera3D, pos: Vector2) -> Vector3:
 	var from: Vector3 = camera.project_ray_origin(pos)
 	var dir: Vector3 = camera.project_ray_normal(pos)
 	var prev_t: float = 0.0
-	var prev_d: float = from.y - _h(from.x, from.z)
-	if prev_d <= 0.0:
+	if from.y - _h(from.x, from.z) <= 0.0:
 		return Vector3.INF
 	var t: float = 0.0
 	while t < 4000.0:
 		t += clampf(t * 0.01, 0.5, 4.0)
 		var p: Vector3 = from + dir * t
-		var d: float = p.y - _h(p.x, p.z)
-		if d <= 0.0:
+		if p.y - _h(p.x, p.z) <= 0.0:
 			var a: float = prev_t
 			var b: float = t
 			for i: int in range(14):
@@ -249,7 +319,6 @@ func _hit(camera: Camera3D, pos: Vector2) -> Vector3:
 			var hit: Vector3 = from + dir * b
 			return Vector3(hit.x, _h(hit.x, hit.z), hit.z)
 		prev_t = t
-		prev_d = d
 	return Vector3.INF
 
 
@@ -307,14 +376,15 @@ func _begin(hit: Vector3) -> void:
 
 func _end() -> void:
 	painting = false
+	var area: Rect2 = stroke_rect.grow(radius_slider.value + 1.0)
 	if stroke_mode == 2:
-		_rebuild(stroke_rect.grow(radius_slider.value + 1.0))
-		_snap_trees(stroke_rect.grow(radius_slider.value + 1.0))
+		_rebuild(area)
+		_snap_trees(area)
 	var after: Variant = _snapshot(stroke_mode)
 	var ur: EditorUndoRedoManager = get_undo_redo()
 	ur.create_action("Кисть земли — " + MODES[stroke_mode].to_lower(), UndoRedo.MERGE_DISABLE, terrain)
-	ur.add_do_method(self, "_restore", stroke_mode, after, stroke_rect.grow(radius_slider.value + 1.0))
-	ur.add_undo_method(self, "_restore", stroke_mode, stroke_before, stroke_rect.grow(radius_slider.value + 1.0))
+	ur.add_do_method(self, "_restore", stroke_mode, after, area)
+	ur.add_undo_method(self, "_restore", stroke_mode, stroke_before, area)
 	ur.commit_action(false)
 	stroke_before = null
 	EditorInterface.mark_scene_as_unsaved()
@@ -324,13 +394,19 @@ func _end() -> void:
 func _snapshot(mode: int) -> Variant:
 	match mode:
 		0:
-			var a: Image = terrain.get("_splat") as Image
-			var b: Image = terrain.get("_splat2") as Image
-			return [a.duplicate() if a else null, b.duplicate() if b else null]
+			var copies: Array = []
+			for img: Image in terrain.call("brush_masks"):
+				copies.append(img.duplicate())
+			return copies
 		1:
 			return grass_image.duplicate() if grass_image else null
-		_:
+		2:
 			return (terrain.call("heights_data") as PackedFloat32Array).duplicate()
+		_:
+			var state: Dictionary = {}
+			for s: Node in _veg_scatters():
+				state[s] = (_veg_points(s) as Array).duplicate(true)
+			return state
 
 
 func _restore(mode: int, state: Variant, area: Rect2) -> void:
@@ -338,30 +414,40 @@ func _restore(mode: int, state: Variant, area: Rect2) -> void:
 		return
 	match mode:
 		0:
-			var a: Image = terrain.get("_splat") as Image
-			var b: Image = terrain.get("_splat2") as Image
-			if a and state[0]:
-				a.copy_from(state[0] as Image)
-			if b and state[1]:
-				b.copy_from(state[1] as Image)
-			_push_splat()
+			var masks: Array = terrain.call("brush_masks")
+			for i: int in range(mini(masks.size(), (state as Array).size())):
+				(masks[i] as Image).copy_from(state[i] as Image)
+			terrain.call("brush_push_masks")
 			dirty.splat = true
 		1:
 			if grass_image:
 				grass_image.copy_from(state as Image)
 				_show_grass()
 				dirty.grass = true
-		_:
+		2:
 			terrain.call("set_heights_data", (state as PackedFloat32Array).duplicate())
 			_rebuild(area)
 			_snap_trees(area)
 			dirty.heights = true
+		_:
+			for s: Variant in (state as Dictionary):
+				if is_instance_valid(s):
+					var list: Array = _veg_points(s as Node)
+					list.clear()
+					list.append_array((state[s] as Array).duplicate(true))
+					_veg_mark(s as Node)
+					_veg_refresh(s as Node)
+			dirty.veg = true
 	_refresh_ui()
 
 
 ## Одно движение мыши: клетки карты в круге кисти, сила спадает к краю.
 func _dab(hit: Vector3) -> void:
 	var r: float = radius_slider.value
+	stroke_rect = stroke_rect.expand(Vector2(hit.x - r, hit.z - r)).expand(Vector2(hit.x + r, hit.z + r))
+	if stroke_mode == 3:
+		_paint_veg(hit, r)
+		return
 	var step: float = float(terrain.call("cell_step"))
 	var origin: Vector2 = terrain.call("cell_origin")
 	var cells: Vector2i = terrain.call("cells")
@@ -375,7 +461,6 @@ func _dab(hit: Vector3) -> void:
 	if i0 > i1 or j0 > j1:
 		return
 	var s: float = strength_slider.value * DAB
-	stroke_rect = stroke_rect.expand(Vector2(hit.x - r, hit.z - r)).expand(Vector2(hit.x + r, hit.z + r))
 	match stroke_mode:
 		0:
 			_paint_ground(i0, i1, j0, j1, ci, cj, rc, s, cells)
@@ -393,47 +478,29 @@ func _falloff(i: int, j: int, ci: float, cj: float, rc: float) -> float:
 	return f * f * (3.0 - 2.0 * f)
 
 
+## Грунт: каналы всех масок подряд (0 — основа, все вниз; k — свой канал вверх, остальные вниз).
 func _paint_ground(i0: int, i1: int, j0: int, j1: int, ci: float, cj: float, rc: float, s: float, cells: Vector2i) -> void:
-	var a: Image = terrain.get("_splat") as Image
-	var b: Image = terrain.get("_splat2") as Image
-	if a == null:
+	var masks: Array = terrain.call("brush_masks")
+	var channels: PackedInt32Array = terrain.call("brush_mask_channels")
+	if masks.is_empty():
 		return
-	var target: int = ground_opt.selected      # 0 — газон (все маски вниз), 1…7 — свой канал
+	var target: int = ground_opt.selected
 	for j: int in range(j0, j1 + 1):
 		for i: int in range(i0, i1 + 1):
 			var w: float = _falloff(i, j, ci, cj, rc) * s
 			if w <= 0.0:
 				continue
-			var pa: Vector2i = Vector2i(i * a.get_width() / cells.x, j * a.get_height() / cells.y)
-			var ca: Color = a.get_pixelv(pa)
-			var cb: Color = b.get_pixelv(pa) if b else Color(0, 0, 0, 0)
-			var v: Array[float] = [ca.r, ca.g, ca.b, ca.a, cb.r, cb.g, cb.b]
-			for k: int in range(7):
-				v[k] = lerpf(v[k], 1.0 if k + 1 == target else 0.0, w)
-			a.set_pixelv(pa, Color(v[0], v[1], v[2], v[3]))
-			if b:
-				b.set_pixelv(pa, Color(v[4], v[5], v[6], cb.a))
+			var k: int = 0
+			for mi: int in range(masks.size()):
+				var img: Image = masks[mi]
+				var px: Vector2i = Vector2i(i * img.get_width() / cells.x, j * img.get_height() / cells.y)
+				var c: Color = img.get_pixelv(px)
+				for ch: int in range(channels[mi] if mi < channels.size() else 4):
+					k += 1
+					c[ch] = lerpf(c[ch], 1.0 if k == target else 0.0, w)
+				img.set_pixelv(px, c)
 	dirty.splat = true
-	_push_splat()
-
-
-func _push_splat() -> void:
-	var mat: Material = terrain.get("_material") as Material
-	var a: Image = terrain.get("_splat") as Image
-	var b: Image = terrain.get("_splat2") as Image
-	if mat == null or a == null:
-		return
-	if tex_material != mat or splat_tex == null:
-		splat_tex = ImageTexture.create_from_image(a)
-		splat2_tex = ImageTexture.create_from_image(b) if b else null
-		tex_material = mat
-		(mat as ShaderMaterial).set_shader_parameter("splat", splat_tex)
-		if splat2_tex:
-			(mat as ShaderMaterial).set_shader_parameter("splat2", splat2_tex)
-		return
-	splat_tex.update(a)
-	if splat2_tex and b:
-		splat2_tex.update(b)
+	terrain.call("brush_push_masks")
 
 
 func _paint_grass(i0: int, i1: int, j0: int, j1: int, ci: float, cj: float, rc: float, s: float, cells: Vector2i) -> void:
@@ -461,7 +528,7 @@ func _paint_grass(i0: int, i1: int, j0: int, j1: int, ci: float, cj: float, rc: 
 
 func _paint_height(i0: int, i1: int, j0: int, j1: int, ci: float, cj: float, rc: float, s: float, cells: Vector2i,
 		hit: Vector3, r: float) -> void:
-	var data: PackedFloat32Array = terrain.call("heights_data")
+	var data: PackedFloat32Array = (terrain.call("heights_data") as PackedFloat32Array).duplicate()
 	var src: PackedFloat32Array = data.duplicate()
 	var op: int = height_opt.selected
 	for j: int in range(j0, j1 + 1):
@@ -507,17 +574,104 @@ func _snap_trees(area: Rect2) -> void:
 	var root: Node = EditorInterface.get_edited_scene_root()
 	if root == null:
 		return
-	for n: Node in root.find_children("*", "Node3D", true, false):
-		if n.has_method("ground_y") and bool(n.get("on_ground")):
-			var p: Vector3 = (n as Node3D).global_position
-			if area.has_point(Vector2(p.x, p.z)):
-				n.call("_snap")
+	for n: Node in get_tree().get_nodes_in_group("tree_spot"):
+		if not root.is_ancestor_of(n) or not bool(n.get("on_ground")):
+			continue
+		var p: Vector3 = (n as Node3D).global_position
+		if area.has_point(Vector2(p.x, p.z)):
+			n.call("_snap")
+
+
+# ---------------------------------------------------------------- растительность данными
+
+## Список точек россыпи (тот же массив, что в разобранном JSON её файла — правка сразу в данных).
+func _veg_points(s: Node) -> Array:
+	var path: String = String(s.get("data_path"))
+	if not veg_data.has(path):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		veg_data[path] = parsed if parsed is Dictionary else {}
+	var data: Dictionary = veg_data[path]
+	var key: String = String(s.get("key"))
+	if not data.has(key):
+		data[key] = []
+	return data[key]
+
+
+func _veg_mark(s: Node) -> void:
+	veg_dirty_files[String(s.get("data_path"))] = true
+
+
+func _veg_refresh(s: Node) -> void:
+	s.set("points_override", _veg_points(s))
+	s.set("use_override", true)
+	s.call("_build")
+
+
+## Точки россыпи в её координатах: мировые или от корня её сцены (local_points — готовые куски на новом месте).
+func _veg_frame(s: Node) -> Transform3D:
+	if bool(s.get("local_points")):
+		var frame: Node3D = s.owner as Node3D if s.owner is Node3D else (s as Node3D).get_parent_node_3d()
+		if frame:
+			return frame.global_transform
+	return Transform3D.IDENTITY
+
+
+func _paint_veg(hit: Vector3, r: float) -> void:
+	var group: String = veg_opt.get_item_text(veg_opt.selected) if veg_opt.selected >= 0 else ""
+	if group == "":
+		return
+	var targets: Array[Node] = []
+	for s: Node in _veg_scatters():
+		if group == VEG_ALL or _veg_group(String(s.get("key"))) == group:
+			targets.append(s)
+	if targets.is_empty():
+		return
+	var strength: float = strength_slider.value
+	if veg_op_opt.selected == 0:
+		for s: Node in targets:
+			var frame: Transform3D = _veg_frame(s)
+			var list: Array = _veg_points(s)
+			var keep: Array = []
+			var removed: bool = false
+			for p: Array in list:
+				var w: Vector3 = frame * Vector3(float(p[0]), float(p[1]), float(p[2]))
+				if Vector2(w.x - hit.x, w.z - hit.z).length() < r and veg_rng.randf() < strength:
+					removed = true
+					continue
+				keep.append(p)
+			if removed:
+				list.clear()
+				list.append_array(keep)
+				_veg_mark(s)
+				_veg_refresh(s)
+		dirty.veg = true
+		return
+	# посадить: случайно в круге, порода — случайная из выбранной группы, высота — по земле
+	var n: int = maxi(1, int(round(strength * PI * r * r / PLANT_M2 * DAB)))
+	var touched: Dictionary = {}
+	for k: int in range(n):
+		var a: float = veg_rng.randf() * TAU
+		var d: float = sqrt(veg_rng.randf()) * r
+		var x: float = hit.x + cos(a) * d
+		var z: float = hit.z + sin(a) * d
+		var s: Node = targets[veg_rng.randi() % targets.size()]
+		var local: Vector3 = _veg_frame(s).affine_inverse() * Vector3(x, _h(x, z), z)
+		_veg_points(s).append([snappedf(local.x, 0.01), snappedf(local.y, 0.01), snappedf(local.z, 0.01),
+			snappedf(veg_rng.randf() * 360.0, 0.1), snappedf(veg_rng.randf_range(0.8, 1.2), 0.01)])
+		touched[s] = true
+	for s: Variant in touched:
+		_veg_mark(s as Node)
+		_veg_refresh(s as Node)
+	dirty.veg = true
 
 
 # ---------------------------------------------------------------- сохранение
 
 func _any_dirty() -> bool:
-	return bool(dirty.heights) or bool(dirty.splat) or bool(dirty.grass)
+	for k: String in dirty:
+		if bool(dirty[k]):
+			return true
+	return false
 
 
 func _save_external_data() -> void:
@@ -528,26 +682,33 @@ func _save_external_data() -> void:
 func _save_all() -> void:
 	if terrain == null or not is_instance_valid(terrain):
 		return
-	var cfg: Variant = JSON.parse_string(FileAccess.get_file_as_string(String(terrain.get("data_path"))))
-	var t: Dictionary = (cfg as Dictionary).get("terrain", {}) if cfg is Dictionary else {}
 	var reimport: PackedStringArray = []
-	if bool(dirty.heights) and String(t.get("heights", "")) != "":
-		var f: FileAccess = FileAccess.open(ProjectSettings.globalize_path(String(t.heights)), FileAccess.WRITE)
-		f.store_buffer((terrain.call("heights_data") as PackedFloat32Array).to_byte_array())
+	if bool(dirty.heights) and String(terrain.call("heights_path")) != "":
+		var f: FileAccess = FileAccess.open(ProjectSettings.globalize_path(String(terrain.call("heights_path"))), FileAccess.WRITE)
+		f.store_buffer((terrain.call("heights_for_save") as PackedFloat32Array).to_byte_array())
 		f.close()
 		dirty.heights = false
 	if bool(dirty.splat):
-		for pair: Array in [["splat_file", "_splat"], ["splat2_file", "_splat2"]]:
-			var path: String = String(t.get(pair[0], ""))
-			var img: Image = terrain.get(pair[1]) as Image
-			if path != "" and img:
-				img.save_png(ProjectSettings.globalize_path(path))
-				reimport.append(path)
+		var masks: Array = terrain.call("brush_masks")
+		var paths: PackedStringArray = terrain.call("brush_mask_paths")
+		for i: int in range(mini(masks.size(), paths.size())):
+			if paths[i] != "":
+				(masks[i] as Image).save_png(ProjectSettings.globalize_path(paths[i]))
+				reimport.append(paths[i])
 		dirty.splat = false
 	if bool(dirty.grass) and grass_image and grass_path != "":
 		grass_image.save_png(ProjectSettings.globalize_path(grass_path))
 		reimport.append(grass_path)
 		dirty.grass = false
-	if not reimport.is_empty():
-		EditorInterface.get_resource_filesystem().reimport_files(reimport)
+	if bool(dirty.veg):
+		for path: String in veg_dirty_files:
+			var f2: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+			f2.store_string(JSON.stringify(veg_data[path], "", false) + "\n")
+			f2.close()
+		veg_dirty_files.clear()
+		dirty.veg = false
+	var fs: EditorFileSystem = EditorInterface.get_resource_filesystem()
+	for p: String in reimport:
+		if FileAccess.file_exists(p + ".import"):
+			fs.reimport_files(PackedStringArray([p]))
 	_refresh_ui()

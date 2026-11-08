@@ -99,6 +99,7 @@ class Yard:
 
 
 def main() -> None:
+    z1.ensure_overwrite_allowed('tools/build_zone01_yard.py')
     load_heights()
     info = json.loads((ROOT / "assets/zone01/models/khrushchevka.json").read_text(encoding="utf-8"))
     y = Yard()
