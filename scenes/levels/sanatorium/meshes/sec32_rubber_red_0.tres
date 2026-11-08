@@ -4,12 +4,12 @@
 
 [resource]
 _surfaces = [{
-"aabb": AABB(-71, 0.15000153, 131, 24, 1e-05, 40),
+"aabb": AABB(-71, 0.049999237, 131, 24, 1e-05, 40),
 "attribute_data": PackedByteArray("AAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBBAAAQQQAAEEEAABBB"),
 "format": 34359738423,
 "material": ExtResource("1_nf5g8"),
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 6,
-"vertex_data": PackedByteArray("AACOwgCaGT4AACtDAAA8wgCaGT4AAANDAAA8wgCaGT4AACtDAACOwgCaGT4AACtDAACOwgCaGT4AAANDAAA8wgCaGT4AAAND/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+"vertex_data": PackedByteArray("AACOwgDMTD0AACtDAAA8wgDMTD0AAANDAAA8wgDMTD0AACtDAACOwgDMTD0AACtDAACOwgDMTD0AAANDAAA8wgDMTD0AAAND/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
 }]

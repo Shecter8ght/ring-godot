@@ -172,7 +172,7 @@ func _water_bodies(nodes: Array[Node]) -> Array:
 		if body.has("circle"):
 			var c: Array = body.circle
 			var w2: Vector3 = xf * Vector3(float(c[0]), level, float(c[1]))
-			body.circle = [w2.x, w2.z, float(c[2])]
+			body.circle = [w2.x, w2.z, float(c[2]) * BlockoutMerge.split(xf.basis)[1].x]
 		out.append(body)
 	return out
 

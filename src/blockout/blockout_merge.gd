@@ -18,6 +18,9 @@ var trees: Array[Node] = []
 var checks: Array[Node] = []
 var water: Array[Node] = []
 var sources: Array[Node] = []
+## Скрытые глазком в редакторе (вариант, который владелец пробует и отложил): в игре их нет — ни вида, ни коллизии,
+## ни проверок; узлы убираются вместе с исходными.
+var hidden: Array[Node] = []
 var counts: Dictionary = {"boxes": 0, "stairs": 0, "cyls": 0, "csg": 0, "tris": 0}
 ## Узлы по видам — склейка идёт видами, в том же порядке, что у генератора (коробки, марши, ленты, цилиндры,
 ## покрытия): у физики фигуры одного тела в том же порядке, ходок на тесных площадках ведёт себя как раньше.
@@ -43,6 +46,9 @@ func _init(target: Node3D, runtime_palette: Dictionary, dir: String) -> void:
 func collect(root: Node) -> void:
 	for child: Node in root.get_children():
 		if String(child.name).begins_with("_"):
+			continue
+		if child is Node3D and not (child as Node3D).visible:
+			hidden.append(child)
 			continue
 		if child is CSGShape3D:
 			sources.append(child)
@@ -97,6 +103,10 @@ func free_sources() -> void:
 		if is_instance_valid(n):
 			n.free()
 	sources.clear()
+	for n: Node in hidden:
+		if is_instance_valid(n):
+			n.free()
+	hidden.clear()
 
 
 func key_of(m: Material, fallback: String = "struct") -> String:
@@ -196,13 +206,17 @@ func _stair(node: BlockoutStair) -> void:
 	var bottom: Vector3 = ends[0]
 	var top: Vector3 = ends[1]
 	var key: String = key_of(node.material, "stair")
+	# масштаб марша руками: длина и подъём — уже в концах, ширина и низ сплошных ступеней — здесь
+	var scale: Vector3 = split(node.global_transform.basis)[1]
+	var width: float = node.width * scale.x
+	var below: float = node.solid_bottom * scale.y
 	if record:
 		(snapshot.stairs as Array).append([_r(bottom.x), _r(bottom.y), _r(bottom.z), _r(top.x), _r(top.y), _r(top.z),
-			_r(node.width), node.steps, _r(bottom.y + node.solid_bottom) if node.solid else null, _mat_index(key)])
+			_r(width), node.steps, _r(bottom.y + below) if node.solid else null, _mat_index(key)])
 	if not node.solid:
-		geometry.call("stairs", bottom, top, node.width, node.steps, key, true)
+		geometry.call("stairs", bottom, top, width, node.steps, key, true)
 		return
-	var fill: float = bottom.y + node.solid_bottom
+	var fill: float = bottom.y + below
 	var delta: Vector3 = top - bottom
 	var flat: Vector3 = Vector3(delta.x, 0.0, delta.z)
 	var direction: Vector3 = flat.normalized()
@@ -213,8 +227,8 @@ func _stair(node: BlockoutStair) -> void:
 		var at: Vector3 = bottom + flat * k
 		var h: float = maxf(tread - fill, 0.05)
 		at.y = tread - h * 0.5
-		geometry.call("box", at, Vector3(node.width, h, flat.length() / float(node.steps) + 0.01), key, true, yaw)
-	geometry.call("stairs", bottom, top, node.width, node.steps, key, false)
+		geometry.call("box", at, Vector3(width, h, flat.length() / float(node.steps) + 0.01), key, true, yaw)
+	geometry.call("stairs", bottom, top, width, node.steps, key, false)
 
 
 ## Покрытие (асфальт, мощение, тропа, плотина вдали): треугольники сетки в склейку, твёрдое — с коллизией.

@@ -21,7 +21,6 @@ func world_rooms() -> Array:
 ## Обходы в мировых координатах (точки и высоты проверок — по положению узла).
 func world_routes() -> Array:
 	var out: Array = []
-	var lift: float = global_position.y
 	for r: Dictionary in routes:
 		var w: Dictionary = r.duplicate(true)
 		var pts: Array = []
@@ -31,7 +30,7 @@ func world_routes() -> Array:
 		var checks: Array = []
 		for c: Array in r.get("checks", []):
 			var cc: Array = c.duplicate()
-			cc[2] = float(c[2]) + lift
+			cc[2] = (global_transform * Vector3(0.0, float(c[2]), 0.0)).y     # постройку подняли или растянули — высоты с ней
 			checks.append(cc)
 		w.checks = checks
 		out.append(w)

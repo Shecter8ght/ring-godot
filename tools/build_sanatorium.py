@@ -1963,12 +1963,15 @@ tw_box(gx0_1, N_END + CW / 2, TOP_X, N_END + CW / 2 + TW)
 tw_box(gx0_1, -CW / 2 - TW, TOP_X, -CW / 2)
 tw_box(gx0_1 - 0.6, S_END - CW / 2, gx0_1 - 0.6 + TW, -CW / 2 - TW)
 # фонтан на парадной террасе, киоск, лавка, смотровой балкон
+item('fountain_terrace', 'Фонтан на террасе')
 O.cyl(-72.0, 0.0, CENTRAL, CENTRAL + 0.55, 5.0, 'stone')
 O.cyl(-72.0, 0.0, CENTRAL + 0.55, CENTRAL + 2.6, 0.5, 'stone')
 O.water.append({'name': 'FountainTerrace', 'level': r3(CENTRAL + 0.5), 'circle': [-72.0, 0.0, 4.6]})
+item('kiosk_terrace', 'Киоск на террасе')
 kz_ = float(CD['kiosk_z'])
 O.box(*KIOSK, kz_, kz_ + 2.6, 'kiosk')
 O.label((KIOSK[0] + KIOSK[2]) / 2, (KIOSK[1] + KIOSK[3]) / 2, kz_ + 3.2, 'киоск', 0.8, 'object')
+item('bench_cascade', 'Лавка на каскаде')
 lv = GALLERIES[1]['end']['z_top']             # лавка у южного парапета, спинкой к парапету
 bx0_, by0_, bx1_, by1_ = CAS_BENCH
 O.box(bx0_, by0_, bx1_, by1_, lv + 0.4, lv + 0.48, 'wood')
@@ -1976,6 +1979,7 @@ O.box(bx0_, by0_ - 0.08, bx1_, by0_, lv + 0.48, lv + 0.9, 'wood', solid=False)
 for bxx in (bx0_ + 0.1, bx1_ - 0.2):
     O.box(bxx, by0_ + 0.05, bxx + 0.1, by1_ - 0.05, lv, lv + 0.4, 'wood')
 O.label((bx0_ + bx1_) / 2, (by0_ + by1_) / 2, lv + 1.6, 'лавка', 0.7, 'object')
+item()
 bal = BALCONY
 lv3 = GALLERIES[2]['end']['z_top']
 O.box(*bal, rect_stat(*bal, fn=np.min) - 0.6, lv3, 'stone')
@@ -2010,19 +2014,22 @@ for gx_, gy_ in GAZEBOS:
         O.cyl(gx_ + 2.3 * math.cos(a), gy_ + 2.3 * math.sin(a), zk, zk + 2.4, 0.09, 'wood')
     O.cyl(gx_, gy_, zk + 2.4, zk + 2.7, 2.8, 'roof', solid=False, sides=8)
     O.label(gx_, gy_, zk + 3.3, 'беседка', 0.8, 'object')
-item()
+item('spring', 'Родник')
 zs_ = J_LAND[2]
 O.box(SPRING[0] - 1.2, SPRING[1] - 2.2, SPRING[0] + 1.2, SPRING[1] + 2.2, zs_ - 0.5, zs_ + 1.4, 'stone')       # кладка
 O.box(SPRING[0] - 2.0, SPRING[1] - 0.8, SPRING[0] - 1.2, SPRING[1] + 0.8, zs_ - 0.3, zs_ + 0.45, 'stone')     # чаша
 O.label(SPRING[0], SPRING[1], zs_ + 2.2, 'родник', 0.7, 'object')
+item('bench_spring', 'Лавка у родника')
 zb_ = J_LAND[2]
 O.box(BENCH[0] - 0.9, BENCH[1] - 0.25, BENCH[0] + 0.9, BENCH[1] + 0.25, zb_ + 0.4, zb_ + 0.48, 'wood', solid=False)
 O.box(BENCH[0] - 0.9, BENCH[1] + 0.2, BENCH[0] + 0.9, BENCH[1] + 0.28, zb_ + 0.48, zb_ + 0.9, 'wood', solid=False)
 for bx_ in (BENCH[0] - 0.8, BENCH[0] + 0.8):
     O.box(bx_ - 0.05, BENCH[1] - 0.2, bx_ + 0.05, BENCH[1] + 0.2, zb_, zb_ + 0.4, 'wood')
 O.label(BENCH[0], BENCH[1], zb_ + 1.6, 'развилка: к коттеджам', 0.7, 'object')
+item('kiosk_trail', 'Ларёк у начала тропы')
 O.box(-97.0, -105.0, -93.0, -101.0, CENTRAL - 0.2, CENTRAL + 2.6, 'kiosk')
 O.label(-95.0, -103.0, CENTRAL + 3.2, 'ларёк у начала тропы', 0.8, 'object')
+item()
 
 # ================================================================ ДОРОГИ И ПАРКОВКИ ПО РЕЛЬЕФУ
 def strip(pts, w, m, lift=0.05, step=2.0):
@@ -2249,13 +2256,16 @@ outline_parapet(mp + [], MOLE, skip_last=True)
 O.stair((-138.0 - DS, 10.0, MOLE), (-136.0 - DS, 10.0, QUAY), 72.0, 3, MOLE - 0.3, 'stone')
 O.label(-205.0 - DS, 10.0, MOLE + 7.5, '«Стрелка»', 3.0, 'building')
 # фонтанная площадь, киоски, колоннада под навесом, ротонда, клумбы и стенки
+item('fountain_mole', 'Фонтан на «Стрелке»')
 O.cyl(-182.0 - DS, 10.0, MOLE, MOLE + 0.6, 9.0, 'stone', sides=32)
 O.cyl(-182.0 - DS, 10.0, MOLE + 0.6, MOLE + 3.0, 0.7, 'stone')
 O.water.append({'name': 'FountainMole', 'level': r3(MOLE + 0.55), 'circle': [-182.0 - DS, -10.0, 8.6]})
 for kx, ky in ((-200.0 - DS, -8.0), (-262.0 - DS, 18.0), (-232.0 - DS, 30.0)):
+    item_next('kiosk', 'Киоск')
     O.box(kx - 3, ky - 2.5, kx + 3, ky + 2.5, MOLE, MOLE + 3.0, 'kiosk')
     O.box(kx - 3.4, ky - 2.9, kx + 3.4, ky + 2.9, MOLE + 3.0, MOLE + 3.25, 'roof')
     O.label(kx, ky, MOLE + 4.0, 'киоск', 0.8, 'object')
+item('colonnade', 'Колоннада')
 col = [(-192.0 - DS - k * 5.5, 36.0 - k * 0.9) for k in range(10)]
 for x_, y_ in col:
     O.cyl(x_, y_, MOLE, MOLE + 3.8, 0.4, 'white', sides=12)
@@ -2264,6 +2274,7 @@ mid = ((col[0][0] + col[-1][0]) / 2, (col[0][1] + col[-1][1]) / 2)
 O.obox(mid[0] + 1.6 * math.sin(math.radians(ang)), mid[1] - 1.6 * math.cos(math.radians(ang)), math.dist(col[0], col[-1]) + 2.0, 4.2,
        MOLE + 3.8, MOLE + 4.2, ang, 'roof', solid=False)
 O.label(mid[0], mid[1], MOLE + 5.0, 'колоннада', 0.8, 'object')
+item('rotunda', 'Ротонда')
 for k in range(8):
     a = math.radians(k * 45 + 22.5)
     O.cyl(-270.0 - DS + 4.4 * math.cos(a), 10.0 + 4.4 * math.sin(a), MOLE, MOLE + 3.6, 0.3, 'white')
@@ -2271,10 +2282,13 @@ O.cyl(-270.0 - DS, 10.0, MOLE + 3.6, MOLE + 4.1, 5.0, 'white', solid=False, side
 O.label(-270.0 - DS, 10.0, MOLE + 5.0, 'ротонда', 0.8, 'object')
 for px_, py_ in ((-192, 2), (-206, 18), (-226, -6), (-252, 10), (-170, -8), (-240, 36), (-166, 30), (-172, 22), (-176, -16),
                  (-212, -12), (-196, -13)):
+    item_next('planter', 'Клумба')
     O.box(px_ - DS - 3.5, py_ - 1.2, px_ - DS + 3.5, py_ + 1.2, MOLE, MOLE + 0.9, 'planter')
 # моторка у маяка (выход В5)
+item('boat_lh', 'Моторка у маяка')
 O.obox(-291.5 - DS, 1.0, 5.5, 2.0, -0.2, 0.6, 0.0, 'boat', solid=False)
 # наружная лестница с крыши павильона на мол
+item('pav', pav.title)
 dk = [d for d in pav.floors[2]['doors'] if d['a'] == 'DECK'][0]
 o_, c_, a_, b_, mid_ = door_geom(dk)
 n_ = int(round(PAV_H / 0.16))
@@ -2283,6 +2297,7 @@ for xx in (a_ - 0.25, b_ + 0.25):
     O.box(xx - 0.06, c_ + 0.3, xx + 0.06, c_ + 0.3 + (n_ - 1) * 0.3, MOLE, MOLE + PAV_H + RAIL_H, 'rail', solid=False)
 pav_ext = {'top': (mid_[0], c_ + 0.8, MOLE + PAV_H), 'bottom': (mid_[0], c_ + 0.3 + (n_ - 1) * 0.3 + 1.0, MOLE)}
 
+item()
 # набережная: стенка у воды с парапетом (кроме пляжа и примыканий мола, пирсов, слипа), невидимая преграда
 ys_shore = np.arange(GRID_Y[0] + 4, GRID_Y[1] - 4 + 0.1, 4.0)
 
@@ -2322,23 +2337,30 @@ outline_parapet(pontoon, 0.55, skip_last=True, h=0.9, t=0.12, m='rail')
 SURFACES.append(('poly', finger, QUAY))
 SURFACES.append(('poly', pontoon, 0.55))
 for k in range(4):
+    item_next('boat', 'Лодки у понтона')
     for dy in (0.0, 2.6):
         O.box(-178.0 + Q + k * 8, 132.4 + dy, -173.0 + Q + k * 8, 133.6 + dy, -0.1, 0.5, 'boat', solid=False)
     O.box(-178.0 + Q + k * 8, 145.0, -172.0 + Q + k * 8, 147.5, -0.1, 0.5, 'boat', solid=False)
 for k in range(5):
+    item_next('boat_rack', 'Лодка на стеллаже')
     O.box(-133.0 + Q, 133.0 + k * 3.2 - 0.3, -129.0 + Q, 133.0 + k * 3.2 + 0.3, QUAY, QUAY + 1.6, 'boat')
 # пляж 42 м (v11): кабинки у подошвы склона, грибки двумя рядами ближе к воде, мороженое под зонтиком
+item()
 for c_ in PLAN['CABINS']:
+    item_next('cabin', 'Кабинка')
     cx_, cy_ = (c_[0] + c_[2]) / 2, (c_[1] + c_[3]) / 2
     O.box(*c_, h_at(cx_, cy_), h_at(cx_, cy_) + 2.3, 'kiosk')
 for x_, y_ in PLAN['UMBRELLAS']:
+    item_next('umbrella', 'Зонтик')
     g_ = h_at(x_, y_)
     O.cyl(x_, y_, g_ - 0.3, g_ + 2.4, 0.07, 'metal')
     O.cyl(x_, y_, g_ + 2.4, g_ + 2.55, 2.0, 'umbrella', solid=False)
+item('ice_cream', 'Мороженое')
 ix_, iy_ = PLAN['ICE']
 O.cyl(ix_, iy_, h_at(ix_, iy_) + 2.2, h_at(ix_, iy_) + 2.35, 3.2, 'umbrella_pink', solid=False)
 O.box(ix_ - 1.2, iy_ - 1.0, ix_ + 1.2, iy_ + 1.0, h_at(ix_, iy_), h_at(ix_, iy_) + 1.0, 'kiosk')
 O.label(ix_, iy_, h_at(ix_, iy_) + 3.0, 'мороженое', 0.8, 'object')
+item()
 O.label(-178.0, -165.0, 6.0, 'Пляж', 2.4, 'building')
 O.label(-195.0, 175.0, 9.0, 'Лодочная станция', 2.4, 'building')
 
@@ -2412,6 +2434,7 @@ for p, q in (((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), (
     else:
         O.box(min(p[0], q[0]), p[1] - 0.05, max(p[0], q[0]), p[1] + 0.05, PG_LEVEL, PG_LEVEL + 1.2, 'fence_green')
 for it in pg['items']:
+    item_next('play', 'Снаряд площадки')
     k = it['kind']
     g = it['geo']
     hgt = float(it['height'])
@@ -2459,6 +2482,7 @@ for it in pg['items']:
         O.box(gx0, gy0, gx1, gy1, PG_LEVEL + 2.4, PG_LEVEL + 2.55, 'roof', solid=False)
         for xx, yy in ((gx0, gy0), (gx1, gy0), (gx1, gy1), (gx0, gy1)):
             O.cyl(xx, yy, PG_LEVEL, PG_LEVEL + 2.4, 0.06, 'wood')
+item()
 O.label(30.0, -123.0, PG_LEVEL + 7.0, 'Детская площадка', 2.4, 'building')
 # корты и волейбол за сеткой
 sx0, sy0, sx1, sy1 = SPORT_RECT

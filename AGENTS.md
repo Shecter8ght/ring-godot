@@ -417,6 +417,8 @@ tools/sanatorium_study.cmd                                    # карта «С�
 python -X utf8 tools/fetch_sanatorium_ground.py                 # земля «Санатория»: восемь грунтов 4K (CC0 ambientCG, Poly Haven) → _asset_src/textures/<id>
 python -X utf8 tools/build_sanatorium_ground.py                 # массивы слоёв земли → assets/terrain/sanatorium_{albedo,normal,arm}.jpg; затем --import
                                                               # (маски и трава — «Кисть земли» в редакторе; шейдеры src/world/sanatorium_ground, sanatorium_lake)
+tools/godot.cmd --headless res://tools/blockout_edit_test.tscn # «Санаторий», правка руками: скрытое глазком в игре не существует (ни стен, ни помещений
+                                                              # в проверке), валун ×2 — коллизия ×2, повёрнутая беседка, марш шире — в склейке шире
 tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
                                                               # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;

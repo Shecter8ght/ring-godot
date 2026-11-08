@@ -12,452 +12,452 @@
 [ext_resource type="Script" path="res://src/blockout/blockout_stair.gd" id="10_ns4p8"]
 [ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="11_04db7"]
 
-[node name="Коттедж 5" type="Node3D" unique_id=1358109268]
+[node name="Коттедж 5" type="Node3D" unique_id=777484106]
 metadata/group = "cot05"
 
-[node name="Коробки" type="Node3D" parent="." unique_id=1729201427]
+[node name="Коробки" type="Node3D" parent="." unique_id=1636313064]
 
-[node name="stair_0000" type="CSGBox3D" parent="Коробки" unique_id=1085527200]
+[node name="stair_0000" type="CSGBox3D" parent="Коробки" unique_id=1772102610]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.415001, 1.8950005, 5.875)
 use_collision = true
 size = Vector3(1.17, 3.39, 0.25)
 material = ExtResource("1_vuks1")
 
-[node name="stair_0001" type="CSGBox3D" parent="Коробки" unique_id=1824635471]
+[node name="stair_0001" type="CSGBox3D" parent="Коробки" unique_id=1589009338]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.415001, 0.22499847, 0.5)
 use_collision = true
 size = Vector3(1.17, 0.05, 1)
 material = ExtResource("1_vuks1")
 
-[node name="slab_0002" type="CSGBox3D" parent="Коробки" unique_id=285385809]
+[node name="slab_0002" type="CSGBox3D" parent="Коробки" unique_id=390761943]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3899994, 3.5, 3)
 use_collision = true
 size = Vector3(2.78, 0.3, 6)
 material = ExtResource("2_intt7")
 
-[node name="slab_0003" type="CSGBox3D" parent="Коробки" unique_id=1571206622]
+[node name="slab_0003" type="CSGBox3D" parent="Коробки" unique_id=1758359940]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3899994, 3.5, 5.875)
 use_collision = true
 size = Vector3(1.22, 0.3, 0.25)
 material = ExtResource("2_intt7")
 
-[node name="rail_0004" type="CSGBox3D" parent="Коробки" unique_id=1751465711]
+[node name="rail_0004" type="CSGBox3D" parent="Коробки" unique_id=1435887446]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7699966, 4.200001, 2.225006)
 use_collision = true
 size = Vector3(0.08, 1.1, 4.45)
 material = ExtResource("3_cwesm")
 
-[node name="partition_0005" type="CSGBox3D" parent="Коробки" unique_id=1019140112]
+[node name="partition_0005" type="CSGBox3D" parent="Коробки" unique_id=1897599878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.080002, 1.9500008, 0)
 use_collision = true
 size = Vector3(1.99, 3.4, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0006" type="CSGBox3D" parent="Коробки" unique_id=716525124]
+[node name="partition_0006" type="CSGBox3D" parent="Коробки" unique_id=1431860983]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3079987, 1.9500008, 0)
 use_collision = true
 size = Vector3(3.215, 3.4, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0007" type="CSGBox3D" parent="Коробки" unique_id=1418561903]
+[node name="partition_0007" type="CSGBox3D" parent="Коробки" unique_id=242301049]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3880005, 1.9500008, 0)
 use_collision = true
 size = Vector3(1.375, 3.4, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="struct_0008" type="CSGBox3D" parent="Коробки" unique_id=331946431]
+[node name="struct_0008" type="CSGBox3D" parent="Коробки" unique_id=1450626232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.175003, 1.9500008, 0)
 use_collision = true
 size = Vector3(0.65, 3.4, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0009" type="CSGBox3D" parent="Коробки" unique_id=1971819742]
+[node name="struct_0009" type="CSGBox3D" parent="Коробки" unique_id=490935362]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.824997, 1.9500008, 0)
 use_collision = true
 size = Vector3(0.65, 3.4, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0010" type="CSGBox3D" parent="Коробки" unique_id=1455568966]
+[node name="struct_0010" type="CSGBox3D" parent="Коробки" unique_id=2020584264]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3.3499985, 0)
 use_collision = true
 size = Vector3(3, 0.6, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="partition_0011" type="CSGBox3D" parent="Коробки" unique_id=1016464517]
+[node name="partition_0011" type="CSGBox3D" parent="Коробки" unique_id=1272869411]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 3.3499985, 0)
 use_collision = true
 size = Vector3(2.4, 0.6, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0012" type="CSGBox3D" parent="Коробки" unique_id=1635529245]
+[node name="partition_0012" type="CSGBox3D" parent="Коробки" unique_id=2015526774]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 3.1599998, 0)
 use_collision = true
 size = Vector3(1.17, 0.98, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="wood_dark_0013" type="CSGBox3D" parent="Коробки" unique_id=490591761]
+[node name="wood_dark_0013" type="CSGBox3D" parent="Коробки" unique_id=1607282420]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3929977, 1.9500008, -6)
 use_collision = true
 size = Vector3(11.615, 3.4, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="wood_dark_0014" type="CSGBox3D" parent="Коробки" unique_id=631660056]
+[node name="wood_dark_0014" type="CSGBox3D" parent="Коробки" unique_id=855963631]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.3929977, 1.9500008, -6)
 use_collision = true
 size = Vector3(1.615, 3.4, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="wood_dark_0015" type="CSGBox3D" parent="Коробки" unique_id=1901415367]
+[node name="wood_dark_0015" type="CSGBox3D" parent="Коробки" unique_id=1187536409]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3.1599998, -6)
 use_collision = true
 size = Vector3(1.17, 0.98, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="struct_0016" type="CSGBox3D" parent="Коробки" unique_id=1741955669]
+[node name="struct_0016" type="CSGBox3D" parent="Коробки" unique_id=335256257]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.9500008, 5.324997)
 use_collision = true
 size = Vector3(0.3, 3.4, 1.65)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0017" type="CSGBox3D" parent="Коробки" unique_id=1385947247]
+[node name="struct_0017" type="CSGBox3D" parent="Коробки" unique_id=1485449880]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.9500008, 0.67500305)
 use_collision = true
 size = Vector3(0.3, 3.4, 1.65)
 material = ExtResource("5_pu6qj")
 
-[node name="partition_0018" type="CSGBox3D" parent="Коробки" unique_id=1183009642]
+[node name="partition_0018" type="CSGBox3D" parent="Коробки" unique_id=248609102]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.9500008, -1.1699982)
 use_collision = true
 size = Vector3(0.15, 3.4, 2.49)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0019" type="CSGBox3D" parent="Коробки" unique_id=1053678581]
+[node name="partition_0019" type="CSGBox3D" parent="Коробки" unique_id=324730201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.9500008, -4.830002)
 use_collision = true
 size = Vector3(0.15, 3.4, 2.49)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0020" type="CSGBox3D" parent="Коробки" unique_id=1422125882]
+[node name="partition_0020" type="CSGBox3D" parent="Коробки" unique_id=31243993]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.1599998, -3)
 use_collision = true
 size = Vector3(0.15, 0.98, 1.17)
 material = ExtResource("4_5yw5m")
 
-[node name="struct_0021" type="CSGBox3D" parent="Коробки" unique_id=379599578]
+[node name="struct_0021" type="CSGBox3D" parent="Коробки" unique_id=430178658]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3.3499985, 3)
 use_collision = true
 size = Vector3(0.3, 0.6, 3)
 material = ExtResource("5_pu6qj")
 
-[node name="wood_dark_0022" type="CSGBox3D" parent="Коробки" unique_id=1227496492]
+[node name="wood_dark_0022" type="CSGBox3D" parent="Коробки" unique_id=1003259642]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1.9500008, 0)
 use_collision = true
 size = Vector3(0.4, 3.4, 12.4)
 material = ExtResource("6_b3gdp")
 
-[node name="partition_0023" type="CSGBox3D" parent="Коробки" unique_id=1085927469]
+[node name="partition_0023" type="CSGBox3D" parent="Коробки" unique_id=1520935348]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.9500008, -1.9199982)
 use_collision = true
 size = Vector3(0.15, 3.4, 3.99)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0024" type="CSGBox3D" parent="Коробки" unique_id=532251314]
+[node name="partition_0024" type="CSGBox3D" parent="Коробки" unique_id=925874829]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.9500008, -5.580002)
 use_collision = true
 size = Vector3(0.15, 3.4, 0.99)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0025" type="CSGBox3D" parent="Коробки" unique_id=488148438]
+[node name="partition_0025" type="CSGBox3D" parent="Коробки" unique_id=1607531303]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3.1599998, -4.5)
 use_collision = true
 size = Vector3(0.15, 0.98, 1.17)
 material = ExtResource("4_5yw5m")
 
-[node name="partition_0026" type="CSGBox3D" parent="Коробки" unique_id=2048085567]
+[node name="partition_0026" type="CSGBox3D" parent="Коробки" unique_id=1084421555]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 1.9500008, -3)
 use_collision = true
 size = Vector3(5.15, 3.4, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="glass_0027" type="CSGBox3D" parent="Коробки" unique_id=1643804084]
+[node name="glass_0027" type="CSGBox3D" parent="Коробки" unique_id=1386851565]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.9500008, 3)
 use_collision = true
 size = Vector3(0.4, 3.4, 6.4)
 material = ExtResource("7_monsa")
 
-[node name="wood_dark_0028" type="CSGBox3D" parent="Коробки" unique_id=837496942]
+[node name="wood_dark_0028" type="CSGBox3D" parent="Коробки" unique_id=1016154657]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.9500008, -1.8580017)
 use_collision = true
 size = Vector3(0.4, 3.4, 4.115)
 material = ExtResource("6_b3gdp")
 
-[node name="wood_dark_0029" type="CSGBox3D" parent="Коробки" unique_id=986593009]
+[node name="wood_dark_0029" type="CSGBox3D" parent="Коробки" unique_id=1525055238]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.9500008, -5.6419983)
 use_collision = true
 size = Vector3(0.4, 3.4, 1.115)
 material = ExtResource("6_b3gdp")
 
-[node name="wood_dark_0030" type="CSGBox3D" parent="Коробки" unique_id=22521601]
+[node name="wood_dark_0030" type="CSGBox3D" parent="Коробки" unique_id=1176314035]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 3.1599998, -4.5)
 use_collision = true
 size = Vector3(0.4, 0.98, 1.17)
 material = ExtResource("6_b3gdp")
 
-[node name="glass_0031" type="CSGBox3D" parent="Коробки" unique_id=773254446]
+[node name="glass_0031" type="CSGBox3D" parent="Коробки" unique_id=1803867122]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.699997, 1.9500008, 6)
 use_collision = true
 size = Vector3(3, 3.4, 0.4)
 material = ExtResource("7_monsa")
 
-[node name="glass_0032" type="CSGBox3D" parent="Коробки" unique_id=1992225113]
+[node name="glass_0032" type="CSGBox3D" parent="Коробки" unique_id=1563284622]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.69999695, 1.9500008, 6)
 use_collision = true
 size = Vector3(5, 3.4, 0.4)
 material = ExtResource("7_monsa")
 
-[node name="wood_dark_0033" type="CSGBox3D" parent="Коробки" unique_id=541602622]
+[node name="wood_dark_0033" type="CSGBox3D" parent="Коробки" unique_id=1365293841]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.9500008, 6)
 use_collision = true
 size = Vector3(4.4, 3.4, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="glass_0034" type="CSGBox3D" parent="Коробки" unique_id=594290723]
+[node name="glass_0034" type="CSGBox3D" parent="Коробки" unique_id=1513455954]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 3.3499985, 6)
 use_collision = true
 size = Vector3(2.4, 0.6, 0.4)
 material = ExtResource("7_monsa")
 
-[node name="floor_0035" type="CSGBox3D" parent="Коробки" unique_id=1115935426]
+[node name="floor_0035" type="CSGBox3D" parent="Коробки" unique_id=1308896558]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.099998474, -3)
 use_collision = true
 size = Vector3(4, 0.3, 6)
 material = ExtResource("8_ms6y7")
 
-[node name="floor_0036" type="CSGBox3D" parent="Коробки" unique_id=1102868650]
+[node name="floor_0036" type="CSGBox3D" parent="Коробки" unique_id=1491010711]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.099998474, -3)
 use_collision = true
 size = Vector3(5, 0.3, 6)
 material = ExtResource("8_ms6y7")
 
-[node name="floor_0037" type="CSGBox3D" parent="Коробки" unique_id=455086585]
+[node name="floor_0037" type="CSGBox3D" parent="Коробки" unique_id=293242374]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0.099998474, -4.5)
 use_collision = true
 size = Vector3(5, 0.3, 3)
 material = ExtResource("8_ms6y7")
 
-[node name="floor_0038" type="CSGBox3D" parent="Коробки" unique_id=2072588811]
+[node name="floor_0038" type="CSGBox3D" parent="Коробки" unique_id=116930269]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 0.099998474, -1.5)
 use_collision = true
 size = Vector3(5, 0.3, 3)
 material = ExtResource("8_ms6y7")
 
-[node name="floor_0039" type="CSGBox3D" parent="Коробки" unique_id=576185026]
+[node name="floor_0039" type="CSGBox3D" parent="Коробки" unique_id=554632039]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.099998474, 3)
 use_collision = true
 size = Vector3(4, 0.3, 6)
 material = ExtResource("8_ms6y7")
 
-[node name="floor_0040" type="CSGBox3D" parent="Коробки" unique_id=664349299]
+[node name="floor_0040" type="CSGBox3D" parent="Коробки" unique_id=1057087034]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.099998474, 3)
 use_collision = true
 size = Vector3(10, 0.3, 6)
 material = ExtResource("8_ms6y7")
 
-[node name="wood_dark_0041" type="CSGBox3D" parent="Коробки" unique_id=39132060]
+[node name="wood_dark_0041" type="CSGBox3D" parent="Коробки" unique_id=216436512]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, 6)
 use_collision = true
 size = Vector3(14.4, 3.4, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="partition_0042" type="CSGBox3D" parent="Коробки" unique_id=357235140]
+[node name="partition_0042" type="CSGBox3D" parent="Коробки" unique_id=1015147464]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 5.3499985, 0)
 use_collision = true
 size = Vector3(7.15, 3.4, 0.15)
 material = ExtResource("4_5yw5m")
 
-[node name="struct_0043" type="CSGBox3D" parent="Коробки" unique_id=162893601]
+[node name="struct_0043" type="CSGBox3D" parent="Коробки" unique_id=973795903]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 5.3499985, 0)
 use_collision = true
 size = Vector3(4.3, 3.4, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0044" type="CSGBox3D" parent="Коробки" unique_id=994351303]
+[node name="struct_0044" type="CSGBox3D" parent="Коробки" unique_id=56577493]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 5.3499985, 5.324997)
 use_collision = true
 size = Vector3(0.3, 3.4, 1.65)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0045" type="CSGBox3D" parent="Коробки" unique_id=1551260444]
+[node name="struct_0045" type="CSGBox3D" parent="Коробки" unique_id=2060819887]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 5.3499985, 0.54299927)
 use_collision = true
 size = Vector3(0.3, 3.4, 1.915)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0046" type="CSGBox3D" parent="Коробки" unique_id=1301139014]
+[node name="struct_0046" type="CSGBox3D" parent="Коробки" unique_id=1907071715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 5.3499985, -1.8679962)
 use_collision = true
 size = Vector3(0.3, 3.4, 0.565)
 material = ExtResource("5_pu6qj")
 
-[node name="partition_0047" type="CSGBox3D" parent="Коробки" unique_id=177036827]
+[node name="partition_0047" type="CSGBox3D" parent="Коробки" unique_id=1401873994]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 5.3499985, -4)
 use_collision = true
 size = Vector3(0.15, 3.4, 4.15)
 material = ExtResource("4_5yw5m")
 
-[node name="struct_0048" type="CSGBox3D" parent="Коробки" unique_id=1882688137]
+[node name="struct_0048" type="CSGBox3D" parent="Коробки" unique_id=1947240660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6.75, 3)
 use_collision = true
 size = Vector3(0.3, 0.6, 3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0049" type="CSGBox3D" parent="Коробки" unique_id=360577812]
+[node name="struct_0049" type="CSGBox3D" parent="Коробки" unique_id=642753149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 6.5600014, -1)
 use_collision = true
 size = Vector3(0.3, 0.98, 1.17)
 material = ExtResource("5_pu6qj")
 
-[node name="wood_dark_0050" type="CSGBox3D" parent="Коробки" unique_id=834802264]
+[node name="wood_dark_0050" type="CSGBox3D" parent="Коробки" unique_id=1393123712]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 5.3499985, 0)
 use_collision = true
 size = Vector3(0.4, 3.4, 12.4)
 material = ExtResource("6_b3gdp")
 
-[node name="struct_0051" type="CSGBox3D" parent="Коробки" unique_id=707004197]
+[node name="struct_0051" type="CSGBox3D" parent="Коробки" unique_id=387712389]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.38200378, 5.3499985, -2)
 use_collision = true
 size = Vector3(1.065, 3.4, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0052" type="CSGBox3D" parent="Коробки" unique_id=1920955156]
+[node name="struct_0052" type="CSGBox3D" parent="Коробки" unique_id=1115991152]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6179962, 5.3499985, -2)
 use_collision = true
 size = Vector3(1.065, 3.4, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0053" type="CSGBox3D" parent="Коробки" unique_id=872035029]
+[node name="struct_0053" type="CSGBox3D" parent="Коробки" unique_id=258321817]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 6.5600014, -2)
 use_collision = true
 size = Vector3(1.17, 0.98, 0.3)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0054" type="CSGBox3D" parent="Коробки" unique_id=1792669944]
+[node name="struct_0054" type="CSGBox3D" parent="Коробки" unique_id=1365845059]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, 4.867996)
 use_collision = true
 size = Vector3(0.3, 3.4, 2.565)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0055" type="CSGBox3D" parent="Коробки" unique_id=1723033387]
+[node name="struct_0055" type="CSGBox3D" parent="Коробки" unique_id=2076212410]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, 1)
 use_collision = true
 size = Vector3(0.3, 3.4, 2.83)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0056" type="CSGBox3D" parent="Коробки" unique_id=245252696]
+[node name="struct_0056" type="CSGBox3D" parent="Коробки" unique_id=431951204]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, -1.8679962)
 use_collision = true
 size = Vector3(0.3, 3.4, 0.565)
 material = ExtResource("5_pu6qj")
 
-[node name="partition_0057" type="CSGBox3D" parent="Коробки" unique_id=1471476290]
+[node name="partition_0057" type="CSGBox3D" parent="Коробки" unique_id=2123107631]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, -4)
 use_collision = true
 size = Vector3(0.15, 3.4, 4.15)
 material = ExtResource("4_5yw5m")
 
-[node name="struct_0058" type="CSGBox3D" parent="Коробки" unique_id=992811156]
+[node name="struct_0058" type="CSGBox3D" parent="Коробки" unique_id=1406039348]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5600014, -1)
 use_collision = true
 size = Vector3(0.3, 0.98, 1.17)
 material = ExtResource("5_pu6qj")
 
-[node name="struct_0059" type="CSGBox3D" parent="Коробки" unique_id=2044974278]
+[node name="struct_0059" type="CSGBox3D" parent="Коробки" unique_id=1216914736]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5600014, 3)
 use_collision = true
 size = Vector3(0.3, 0.98, 1.17)
 material = ExtResource("5_pu6qj")
 
-[node name="wood_dark_0060" type="CSGBox3D" parent="Коробки" unique_id=267142451]
+[node name="wood_dark_0060" type="CSGBox3D" parent="Коробки" unique_id=1320232918]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3499985, -6)
 use_collision = true
 size = Vector3(14.4, 3.4, 0.4)
 material = ExtResource("6_b3gdp")
 
-[node name="wood_dark_0061" type="CSGBox3D" parent="Коробки" unique_id=502063397]
+[node name="wood_dark_0061" type="CSGBox3D" parent="Коробки" unique_id=1917184389]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 5.3499985, 0)
 use_collision = true
 size = Vector3(0.4, 3.4, 12.4)
 material = ExtResource("6_b3gdp")
 
-[node name="roof_0062" type="CSGBox3D" parent="Коробки" unique_id=1903704480]
+[node name="roof_0062" type="CSGBox3D" parent="Коробки" unique_id=785548407]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 7.2249985, 3)
 use_collision = true
 size = Vector3(4.2, 0.35, 6.2)
 material = ExtResource("9_inwbn")
 
-[node name="slab_0063" type="CSGBox3D" parent="Коробки" unique_id=248574749]
+[node name="slab_0063" type="CSGBox3D" parent="Коробки" unique_id=1325670553]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3.5, 2)
 use_collision = true
 size = Vector3(3, 0.3, 8)
 material = ExtResource("2_intt7")
 
-[node name="roof_0064" type="CSGBox3D" parent="Коробки" unique_id=1287338760]
+[node name="roof_0064" type="CSGBox3D" parent="Коробки" unique_id=119262919]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 7.2249985, 2)
 use_collision = true
 size = Vector3(3.2, 0.35, 8.2)
 material = ExtResource("9_inwbn")
 
-[node name="slab_0065" type="CSGBox3D" parent="Коробки" unique_id=1935987972]
+[node name="slab_0065" type="CSGBox3D" parent="Коробки" unique_id=57983639]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3.5, -4)
 use_collision = true
 size = Vector3(3, 0.3, 4)
 material = ExtResource("2_intt7")
 
-[node name="roof_0066" type="CSGBox3D" parent="Коробки" unique_id=1306944836]
+[node name="roof_0066" type="CSGBox3D" parent="Коробки" unique_id=25038281]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 7.2249985, -4)
 use_collision = true
 size = Vector3(3.2, 0.35, 4.2)
 material = ExtResource("9_inwbn")
 
-[node name="slab_0067" type="CSGBox3D" parent="Коробки" unique_id=1728709175]
+[node name="slab_0067" type="CSGBox3D" parent="Коробки" unique_id=1714572948]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 3.5, -3)
 use_collision = true
 size = Vector3(4, 0.3, 6)
 material = ExtResource("2_intt7")
 
-[node name="roof_0068" type="CSGBox3D" parent="Коробки" unique_id=844242629]
+[node name="roof_0068" type="CSGBox3D" parent="Коробки" unique_id=137469979]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 7.2249985, -3)
 use_collision = true
 size = Vector3(4.2, 0.35, 6.2)
 material = ExtResource("9_inwbn")
 
-[node name="slab_0069" type="CSGBox3D" parent="Коробки" unique_id=180391302]
+[node name="slab_0069" type="CSGBox3D" parent="Коробки" unique_id=607486941]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.5, -3)
 use_collision = true
 size = Vector3(7, 0.3, 6)
 material = ExtResource("2_intt7")
 
-[node name="roof_0070" type="CSGBox3D" parent="Коробки" unique_id=606974443]
+[node name="roof_0070" type="CSGBox3D" parent="Коробки" unique_id=1753575825]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 7.2249985, -3)
 use_collision = true
 size = Vector3(7.2, 0.35, 6.2)
 material = ExtResource("9_inwbn")
 
-[node name="slab_0071" type="CSGBox3D" parent="Коробки" unique_id=1379513011]
+[node name="slab_0071" type="CSGBox3D" parent="Коробки" unique_id=1580895268]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.5, 3)
 use_collision = true
 size = Vector3(7, 0.3, 6)
 material = ExtResource("2_intt7")
 
-[node name="roof_0072" type="CSGBox3D" parent="Коробки" unique_id=1439710252]
+[node name="roof_0072" type="CSGBox3D" parent="Коробки" unique_id=796985916]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 7.2249985, 3)
 use_collision = true
 size = Vector3(7.2, 0.35, 6.2)
 material = ExtResource("9_inwbn")
 
-[node name="Лестницы" type="Node3D" parent="." unique_id=1499534199]
+[node name="Лестницы" type="Node3D" parent="." unique_id=2111603515]
 
-[node name="Марш_073" type="Node3D" parent="Лестницы" unique_id=876234777]
+[node name="Марш_073" type="Node3D" parent="Лестницы" unique_id=1374814169]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.415001, 0.25, 1)
 script = ExtResource("10_ns4p8")
 run = 4.75
@@ -466,9 +466,9 @@ width = 1.11
 steps = 20
 material = ExtResource("1_vuks1")
 
-[node name="Подписи" type="Node3D" parent="." unique_id=842353363]
+[node name="Подписи" type="Node3D" parent="." unique_id=1066732759]
 
-[node name="Прихожая" type="Label3D" parent="Подписи" unique_id=365346661]
+[node name="Прихожая" type="Label3D" parent="Подписи" unique_id=698295396]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.3499985, -3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -481,7 +481,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Кухня" type="Label3D" parent="Подписи" unique_id=1137272954]
+[node name="Кухня" type="Label3D" parent="Подписи" unique_id=1829046989]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 2.3499985, -3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -494,7 +494,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Котельная, кладовая" type="Label3D" parent="Подписи" unique_id=1701811506]
+[node name="Котельная, кладовая" type="Label3D" parent="Подписи" unique_id=338349413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.3499985, -4.5)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -507,7 +507,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Санузел" type="Label3D" parent="Подписи" unique_id=719610226]
+[node name="Санузел" type="Label3D" parent="Подписи" unique_id=1113681413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.3499985, -1.5)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -520,7 +520,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Лестница" type="Label3D" parent="Подписи" unique_id=1813243029]
+[node name="Лестница" type="Label3D" parent="Подписи" unique_id=464057976]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.580002, 2.3499985, 2)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -533,7 +533,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Гостиная-столовая с камином" type="Label3D" parent="Подписи" unique_id=662841332]
+[node name="Гостиная-столовая с камином" type="Label3D" parent="Подписи" unique_id=1274238609]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.3499985, 3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -546,7 +546,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Лестница2" type="Label3D" parent="Подписи" unique_id=1118468055]
+[node name="Лестница2" type="Label3D" parent="Подписи" unique_id=911601823]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.580002, 5.75, 2)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -559,7 +559,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Холл" type="Label3D" parent="Подписи" unique_id=1711147674]
+[node name="Холл" type="Label3D" parent="Подписи" unique_id=1054261901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 5.75, 2)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -572,7 +572,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Ванная" type="Label3D" parent="Подписи" unique_id=1236406900]
+[node name="Ванная" type="Label3D" parent="Подписи" unique_id=2108026488]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 5.75, -4)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -585,7 +585,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Детская" type="Label3D" parent="Подписи" unique_id=1946174161]
+[node name="Детская" type="Label3D" parent="Подписи" unique_id=687301114]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 5.75, -3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -598,7 +598,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Спальня" type="Label3D" parent="Подписи" unique_id=639017784]
+[node name="Спальня" type="Label3D" parent="Подписи" unique_id=1285399021]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 5.75, -3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -611,7 +611,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Спальня с балконом" type="Label3D" parent="Подписи" unique_id=1640147670]
+[node name="Спальня с балконом" type="Label3D" parent="Подписи" unique_id=211005352]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 5.75, 3)
 visibility_range_begin = 1.2
 visibility_range_end = 22.0
@@ -624,7 +624,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "room"
 
-[node name="Коттедж 5" type="Label3D" parent="Подписи" unique_id=1068867052]
+[node name="Коттедж 5" type="Label3D" parent="Подписи" unique_id=1195205764]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.549999, 0)
 visibility_range_begin = 45.0
 visibility_range_end = 650.0
@@ -637,7 +637,7 @@ font_size = 48
 outline_size = 10
 metadata/kind = "building"
 
-[node name="Проверки" type="Node3D" parent="." unique_id=1075350696]
+[node name="Проверки" type="Node3D" parent="." unique_id=732865824]
 script = ExtResource("11_04db7")
 rooms = [{
 "at": [5.0, 0.25, -3.0],

@@ -9,25 +9,25 @@
 [ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec28_stripe_0.tres" id="7_cjl0q"]
 [ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec28_water_FountainCircle.tres" id="8_52mno"]
 
-[node name="Дороги и парковки по рельефу" type="Node3D" unique_id=595733015]
+[node name="Дороги и парковки по рельефу" type="Node3D" unique_id=260129451]
 metadata/group = "sec28"
 
-[node name="Коробки" type="Node3D" parent="." unique_id=1446445425]
+[node name="Коробки" type="Node3D" parent="." unique_id=491695230]
 
-[node name="barrier_red_0000" type="CSGBox3D" parent="Коробки" unique_id=1341819810]
+[node name="barrier_red_0000" type="CSGBox3D" parent="Коробки" unique_id=315280038]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.5, 5.2770004, -8.8)
 size = Vector3(0.4, 0.15, 9.6)
 material = ExtResource("1_v6tmr")
 
-[node name="metal_0001" type="CSGBox3D" parent="Коробки" unique_id=527039122]
+[node name="metal_0001" type="CSGBox3D" parent="Коробки" unique_id=1904163210]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.5, 5.040001, -14.1)
 use_collision = true
 size = Vector3(0.8, 1.1, 0.6)
 material = ExtResource("2_a8hji")
 
-[node name="Цилиндры" type="Node3D" parent="." unique_id=705563035]
+[node name="Цилиндры" type="Node3D" parent="." unique_id=850410558]
 
-[node name="stone_0002" type="CSGCylinder3D" parent="Цилиндры" unique_id=1761930945]
+[node name="stone_0002" type="CSGCylinder3D" parent="Цилиндры" unique_id=1563385819]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.5, 0.29999924, -38.8)
 use_collision = true
 radius = 5.5
@@ -35,7 +35,7 @@ height = 0.6
 sides = 16
 material = ExtResource("3_gdjhy")
 
-[node name="stone_0003" type="CSGCylinder3D" parent="Цилиндры" unique_id=1215455707]
+[node name="stone_0003" type="CSGCylinder3D" parent="Цилиндры" unique_id=358562426]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.5, 1.5, -38.8)
 use_collision = true
 radius = 0.6
@@ -43,35 +43,35 @@ height = 3.0
 sides = 16
 material = ExtResource("3_gdjhy")
 
-[node name="Покрытия" type="Node3D" parent="." unique_id=562690167]
+[node name="Покрытия" type="Node3D" parent="." unique_id=627100315]
 
-[node name="paving" type="MeshInstance3D" parent="Покрытия" unique_id=98027757]
+[node name="paving" type="MeshInstance3D" parent="Покрытия" unique_id=489430827]
 cast_shadow = 0
 mesh = ExtResource("4_5epib")
 metadata/blockout_mat = "paving"
 metadata/solid = false
 
-[node name="asphalt" type="MeshInstance3D" parent="Покрытия" unique_id=1697282502]
+[node name="asphalt" type="MeshInstance3D" parent="Покрытия" unique_id=2094958070]
 cast_shadow = 0
 mesh = ExtResource("5_0m2lr")
 metadata/blockout_mat = "asphalt"
 metadata/solid = false
 
-[node name="trail_strip" type="MeshInstance3D" parent="Покрытия" unique_id=496179455]
+[node name="trail_strip" type="MeshInstance3D" parent="Покрытия" unique_id=277309872]
 cast_shadow = 0
 mesh = ExtResource("6_tvpif")
 metadata/blockout_mat = "trail_strip"
 metadata/solid = false
 
-[node name="stripe" type="MeshInstance3D" parent="Покрытия" unique_id=2070706046]
+[node name="stripe" type="MeshInstance3D" parent="Покрытия" unique_id=320266442]
 cast_shadow = 0
 mesh = ExtResource("7_cjl0q")
 metadata/blockout_mat = "stripe"
 metadata/solid = false
 
-[node name="Вода" type="Node3D" parent="." unique_id=223714982]
+[node name="Вода" type="Node3D" parent="." unique_id=1514928600]
 
-[node name="FountainCircle" type="MeshInstance3D" parent="Вода" unique_id=1715126293]
+[node name="FountainCircle" type="MeshInstance3D" parent="Вода" unique_id=1801330687]
 cast_shadow = 0
 mesh = ExtResource("8_52mno")
 metadata/water_body = {

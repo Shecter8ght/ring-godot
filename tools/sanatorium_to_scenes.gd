@@ -18,7 +18,13 @@ const WATER_SHADER: Shader = preload("res://src/world/district_water.gdshader")
 const LAKE_SHADER: Shader = preload("res://src/world/sanatorium_lake.gdshader")
 const NOISE: String = "res://assets/terrain/zone01_noise.png"
 const FAR_EDGE_M: float = 9.0
-const ITEM_FOLDERS: Dictionary = {"gazebo": "Беседки", "car": "Машины", "site": "Стройплощадки", "rock": "Валуны"}
+## Отдельные вещи (метка генератора без номера на конце → папка в сцене уровня): каждая — свой узел, его двигают,
+## крутят, масштабируют, копируют и прячут глазком (владелец пробует раскладку руками).
+const ITEM_FOLDERS: Dictionary = {"gazebo": "Беседки", "car": "Машины", "site": "Стройплощадки", "rock": "Валуны",
+	"bench_cascade": "Лавки", "bench_spring": "Лавки", "kiosk": "Киоски", "kiosk_terrace": "Киоски", "kiosk_trail": "Киоски",
+	"ice_cream": "Киоски", "fountain_terrace": "Фонтаны и родник", "fountain_mole": "Фонтаны и родник",
+	"spring": "Фонтаны и родник", "cabin": "Пляж", "umbrella": "Пляж", "boat": "Лодки", "boat_rack": "Лодки",
+	"boat_lh": "Лодки", "play": "Детская площадка", "colonnade": "«Стрелка»", "rotunda": "«Стрелка»", "planter": "«Стрелка»"}
 const SPECIES_TITLE: Dictionary = {"spruce_a": "Ель", "spruce_b": "Ель б", "spruce_young": "Ель молодая", "pine": "Сосна",
 	"pine_slim": "Сосна стройная"}
 ## Что остаётся в плане (data/blockouts/sanatorium.json): всё, кроме геометрии и меток.
@@ -68,7 +74,12 @@ func _ready() -> void:
 	for c: Node in land.get_children():
 		c.free()
 	var folders: Dictionary = {}
-	for f: String in ["Постройки", "Участок"] + ITEM_FOLDERS.values() + ["Деревья"]:
+	var folder_names: Array[String] = ["Постройки", "Участок"]
+	for f0: Variant in ITEM_FOLDERS.values():
+		if not String(f0) in folder_names:
+			folder_names.append(String(f0))
+	folder_names.append("Деревья")
+	for f: String in folder_names:
 		var n: Node3D = Node3D.new()
 		n.name = f
 		land.add_child(n)
@@ -213,7 +224,7 @@ func _prefix(gid: String) -> String:
 func _kind(gid: String, g: Dictionary) -> String:
 	if building_ids.has(gid) or gid.begins_with("s_corps_"):
 		return "building"
-	if ITEM_FOLDERS.has(_prefix(gid)) and _prefix(gid) != gid:
+	if ITEM_FOLDERS.has(_prefix(gid)):
 		return "inline"
 	var geometry: int = (g.boxes as Array).size() + (g.stairs as Array).size() + (g.beams as Array).size() + \
 		(g.cyls as Array).size() + (g.tris as Dictionary).size() + (g.water as Array).size() + (g.barriers as Array).size()
