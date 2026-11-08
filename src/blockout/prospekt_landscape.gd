@@ -7,6 +7,8 @@ extends "res://src/blockout/mall_landscape.gd"
 ## земля ровная (ground = 0), подземное — геометрией, не высотами.
 
 const PROSPEKT_PLAN: String = "res://data/blockouts/prospekt.json"
+## Снимок плана по узлам сцены (улицы, вещи, постройки) — для схемы левел-дизайна tools/prospekt_ld_plan.py.
+const SNAPSHOT_PATH: String = "res://data/blockouts/prospekt_snapshot.json"
 
 
 func load_plan() -> void:
@@ -18,6 +20,34 @@ func load_plan() -> void:
 	boundary = poly(plan.boundary)
 	forests.clear()
 	_items_from_nodes()
+	_pieces_from_nodes()
+
+
+## Записать снимок плана (data/blockouts/prospekt_snapshot.json) в формате генератора: улицы и вещи наполнения — как их
+## собрали узлы, постройки — по своим узлам StudyBuilding (по имени = id плана; удалённые и скрытые глазком — нет).
+## Пишет tools/prospekt_study.tscn -- snapshot.
+func write_snapshot() -> void:
+	var out: Dictionary = plan.duplicate(true)
+	out.erase("lists_from_nodes")
+	(out.get("filler", {}) as Dictionary).erase("from_nodes")
+	var root: Node = owner if owner != null else get_parent()
+	var buildings: Array = []
+	for b: Dictionary in plan.get("buildings", []):
+		var node: Node3D = root.find_child(String(b.id), true, false) as Node3D
+		if node == null or not node.is_visible_in_tree():
+			continue
+		var e: Dictionary = b.duplicate(true)
+		var p: Vector3 = node.global_position
+		var z: Vector3 = node.global_basis.z
+		e.at = [snappedf(p.x, 0.01), snappedf(p.z, 0.01)]
+		# поворот генератора — в обратную сторону от поворота узла вокруг Y (tools/build_prospekt.py, tf)
+		e.yaw = snappedf(-rad_to_deg(atan2(z.x, z.z)), 0.01)
+		e.lift = snappedf(p.y, 0.01)
+		buildings.append(e)
+	out.buildings = buildings
+	var f: FileAccess = FileAccess.open(SNAPSHOT_PATH, FileAccess.WRITE)
+	f.store_string(JSON.stringify(out, "", false, true))
+	f.close()
 
 
 ## Газоны (разделительные, газон рощи, приподнятые газоны сквера) — некошеная два года трава травяным покровом зоны 1

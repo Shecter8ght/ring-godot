@@ -69,9 +69,13 @@ var dirty: Dictionary = {"heights": false, "splat": false, "grass": false, "veg"
 var veg_data: Dictionary = {}
 var veg_dirty_files: Dictionary = {}
 var veg_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+## Щелчок по куску улицы, вещи, дереву выделяет его узел (pick_gizmo.gd).
+var pick_gizmo: EditorNode3DGizmoPlugin
 
 
 func _enter_tree() -> void:
+	pick_gizmo = (load("res://addons/ring_level_tools/pick_gizmo.gd") as GDScript).new() as EditorNode3DGizmoPlugin
+	add_node_3d_gizmo_plugin(pick_gizmo)
 	dock = VBoxContainer.new()
 	dock.name = "Кисть земли"
 	enabled_box = CheckButton.new()
@@ -112,6 +116,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	remove_node_3d_gizmo_plugin(pick_gizmo)
 	_drop_cursor()
 	remove_control_from_docks(dock)
 	dock.queue_free()

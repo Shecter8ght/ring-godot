@@ -132,6 +132,8 @@ func _preview() -> void:
 		mi.visibility_range_begin = float(pair[1])
 		mi.visibility_range_end = float(pair[2])
 		add_child(mi)
+	# щелчок по дереву — гизмо по габариту вида (addons/ring_level_tools/pick_gizmo.gd)
+	update_gizmos()
 
 
 ## Первый меш модели с материалами слотов из папки материалов (как у DistrictScatter), один на модель.

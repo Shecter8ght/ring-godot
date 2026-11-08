@@ -94,6 +94,19 @@ var _roll_raster: PackedFloat32Array = PackedFloat32Array()
 var _rail_half: float = 3.2
 var _rail_slope: float = 1.5
 var _weather_t: float = 0.0
+## Пересборка в редакторе после правки кусков плана (PlanPiece): ждёт, пока куски не замрут на EDIT_REBUILD_MS.
+const EDIT_REBUILD_MS: int = 600
+var _built: bool = false
+var _entered_frame: int = -1
+var _rebuild_due: int = 0
+var _rebuild_waiting: bool = false
+## В игре узлы кусков и вещей после первой сборки убираются — повторный load_plan берёт собранное отсюда.
+var _runtime_lists: Dictionary = {}
+var _runtime_items: Array = []
+
+
+func _enter_tree() -> void:
+	_entered_frame = Engine.get_process_frames()
 
 
 func _ready() -> void:
@@ -101,6 +114,70 @@ func _ready() -> void:
 	rebuild()
 	snap_buildings.call_deferred()
 	set_process(not Engine.is_editor_hint())
+	_built = true
+
+
+## Кусок плана сдвинули, повернули, скопировали, удалили или спрятали (редактор): пересобрать, когда куски замрут.
+## Вход всей сцены в дерево (смена вкладки) — не правка: в том же кадре, что и сам ландшафт, просьбы не считаются.
+func request_rebuild() -> void:
+	if not Engine.is_editor_hint() or not _built or not is_inside_tree():
+		return
+	if Engine.get_process_frames() == _entered_frame:
+		return
+	_rebuild_due = Time.get_ticks_msec() + EDIT_REBUILD_MS
+	if not _rebuild_waiting:
+		_rebuild_waiting = true
+		get_tree().create_timer(float(EDIT_REBUILD_MS) / 1000.0).timeout.connect(_rebuild_when_still)
+
+
+func _rebuild_when_still() -> void:
+	if not is_inside_tree():
+		_rebuild_waiting = false
+		return
+	var left: int = _rebuild_due - Time.get_ticks_msec()
+	if left > 0:
+		get_tree().create_timer(float(left) / 1000.0).timeout.connect(_rebuild_when_still)
+		return
+	_rebuild_waiting = false
+	load_plan()
+	rebuild()
+
+
+## Списки плана, которые правятся руками (plan.lists_from_nodes — у «Проспекта» улицы: покрытия, плиты, стены, коробки,
+## лестницы, пандусы, балки, фонари…), — узлы PlanPiece этой сцены: каждый список собирается по нынешнему положению
+## узлов в прежнем порядке записей (скрытые глазком — нет; стена, повёрнутая не на 90°, — коробкой); в игре узлы потом
+## убираются.
+func _pieces_from_nodes() -> void:
+	var names: Array = plan.get("lists_from_nodes", []) as Array
+	if names.is_empty() or not is_inside_tree():
+		return
+	if not Engine.is_editor_hint() and not _runtime_lists.is_empty():
+		for list_name: String in names:
+			plan[list_name] = _runtime_lists.get(list_name, [])
+		return
+	var found: Dictionary = {}
+	var k: int = 0
+	for n: Node in get_tree().get_nodes_in_group("plan_piece"):
+		if n.owner != owner:
+			continue
+		if (n as Node3D).is_visible_in_tree():
+			var e: Array = n.call("current_entry")
+			if not found.has(e[0]):
+				found[e[0]] = []
+			(found[e[0]] as Array).append([int(n.get("order")), k, e[1]])
+			k += 1
+		if not Engine.is_editor_hint():
+			n.queue_free()
+	for list_name: String in names:
+		var entries: Array = found.get(list_name, [])
+		# прежний порядок записей: коллизии улиц у физики идут так же, как у генератора
+		entries.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+		var out: Array = []
+		for f: Array in entries:
+			out.append(f[2])
+		plan[list_name] = out
+		if not Engine.is_editor_hint():
+			_runtime_lists[list_name] = out
 
 
 func _process(delta: float) -> void:
@@ -115,6 +192,9 @@ func _process(delta: float) -> void:
 func _items_from_nodes() -> void:
 	var filler: Dictionary = plan.get("filler", {}) as Dictionary
 	if not bool(filler.get("from_nodes", false)) or not is_inside_tree():
+		return
+	if not Engine.is_editor_hint() and not _runtime_items.is_empty():
+		filler["items"] = _runtime_items
 		return
 	var found: Array = []
 	var k: int = 0
@@ -132,6 +212,8 @@ func _items_from_nodes() -> void:
 	for f: Array in found:
 		items.append(f[2])
 	filler["items"] = items
+	if not Engine.is_editor_hint():
+		_runtime_items = items
 
 
 func load_plan() -> void:

@@ -83,3 +83,4 @@ func _preview() -> void:
 	mi.mesh = st.commit()
 	mi.material_override = material
 	add_child(mi)
+	update_gizmos()

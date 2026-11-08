@@ -74,3 +74,5 @@ func _preview() -> void:
 	if mesh.get_surface_count() > 0 and mesh.surface_get_material(0) == null:
 		mi.material_override = filler.call("preview_material") as Material
 	add_child(mi)
+	# щелчок по вещи — гизмо по габариту вида (addons/ring_level_tools/pick_gizmo.gd)
+	update_gizmos()

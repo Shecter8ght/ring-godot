@@ -427,7 +427,10 @@ tools/prospekt_study.cmd                                      # прогулка
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон
                                                               # не пройти; -- shots — снимки docs/screens/prospekt/ (PROSPEKT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр,
                                                               # несколько — через «;», или имена готовых кадров); PROSPEKT_LIGHT=all_variants -- shots — стенд света
-                                                              # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png
+                                                              # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png;
+                                                              # -- snapshot — план по узлам сцены (улицы, вещи, постройки) → data/blockouts/prospekt_snapshot.json
+tools/godot.cmd --headless res://tools/plan_piece_test.tscn  # улицы «Проспекта» узлами (PlanPiece): сдвиг, поворот 90° и 30° (стена → коробка), растяжение,
+                                                              # глазок, копия, разворот пандуса, подъём лестницы, покрытие с вырезами — в плане и в физике
 tools/paving_probe.cmd                                        # стенд покрытий «Проспекта» по фото владельца (docs/design/prospekt_paving.md): три куска
                                                               # улицы А / Б / В — газон, бордюры ГОСТ 6665, тротуар, дорога с зеброй, площадь у вокзала; детская
                                                               # и корт; F2 — время, F3 — погода, F5–F8 — куски; -- shots — снимки docs/screens/paving_probe
@@ -437,6 +440,7 @@ tools/godot.cmd --headless res://tools/prospekt_surfaces_test.tscn # «Прос�
                                                               # 14 точек: асфальт, плитка, газоны, крошка, корт, грунт стройки, паркинг, фонтан, бордюр, люк, решётка
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
+                                                              # (по снимку сцены: сначала prospekt_study -- snapshot)
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
@@ -912,7 +916,11 @@ docs/          STATUS.md (что сделано / что дальше), реше
    **сцена — источник правды, генератор её не перезаписывает.** Сейчас это «Санаторий», «Пригород» и «Проспект».
    «Проспект»: здания — узлы `prospekt_study.tscn` (были), 4 370 вещей наполнения — узлы `PropSpot` в `Filler/Наполнение`
    (план `filler.from_nodes`: `MallLandscape._items_from_nodes` собирает их в `plan.filler.items`, у вещей «вперемешку»
-   модель закреплена девятым полем); улицы (покрытия, бордюры, стены, переход, паркинг) — пока данными; генераторы
+   модель закреплена девятым полем); улицы — 4 348 узлов `PlanPiece` в `Landscape/Улицы` (покрытия, вырезы, плиты,
+   стены, коробки, колонны, лестницы, пандусы, балки, фонари, надписи; план `lists_from_nodes`: `MallLandscape.
+   _pieces_from_nodes` собирает списки по узлам в прежнем порядке, в редакторе после правки — пересборка сама); места
+   лута — данными (ящики — узлы `prospekt.tscn`); щелчок по кускам, вещам, деревьям — гизмо плагина
+   `addons/ring_level_tools/pick_gizmo.gd`; схеме `prospekt_ld_plan.py` — снимок `prospekt_study -- snapshot`; генераторы
    `build_prospekt.py` / `build_prospekt_raid.py` — только с `PROSPEKT_OVERWRITE=1` (или `PROSPEKT_OUT` — в свою папку).
    «Пригород»: дома,
    машины, укрытия, мусор и так далее — узлы сцен `scenes/levels/zone01*` (были и раньше), деревья — узлы `TreeSpot`

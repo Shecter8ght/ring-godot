@@ -39,7 +39,7 @@ func _ready() -> void:
 	get_node("/root/Quests").process_mode = Node.PROCESS_MODE_DISABLED
 	get_node("/root/Contracts").process_mode = Node.PROCESS_MODE_DISABLED
 	for arg: String in OS.get_cmdline_user_args():
-		if arg in ["verify", "shots"]:
+		if arg in ["verify", "shots", "snapshot"]:
 			mode = arg
 	output_dir = OS.get_environment("PROSPEKT_OUTPUT")
 	if output_dir.is_empty():
@@ -54,6 +54,12 @@ func _ready() -> void:
 	add_child(walker)
 	_ui()
 	await _frames(4)
+	if mode == "snapshot":
+		# план по узлам сцены — для схемы левел-дизайна (tools/prospekt_ld_plan.py)
+		landscape.call("write_snapshot")
+		print("prospekt_study: снимок сцены → data/blockouts/prospekt_snapshot.json")
+		get_tree().quit(0)
+		return
 	_jump_to(START)
 	if mode == "walk":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

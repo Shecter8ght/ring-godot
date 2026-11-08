@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Левел-дизайн карты «Проспект»: схема и замер обзора по плану data/blockouts/prospekt.json.
+"""Левел-дизайн карты «Проспект»: схема и замер обзора по снимку сцены data/blockouts/prospekt_snapshot.json (карта
+правится руками — улицы, вещи и постройки узлами; снимок в формате плана пишет
+tools/godot.cmd --headless res://tools/prospekt_study.tscn -- snapshot).
 
     python -X utf8 tools/prospekt_ld_plan.py            → docs/design/prospekt_level_design.png + docs/screens/prospekt/sightlines.json
 
@@ -18,7 +20,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-PLAN = ROOT / "data" / "blockouts" / "prospekt.json"
+PLAN = ROOT / "data" / "blockouts" / "prospekt_snapshot.json"
 OUT_PNG = ROOT / "docs" / "design" / "prospekt_level_design.png"
 OUT_JSON = ROOT / "docs" / "screens" / "prospekt" / "sightlines.json"
 
@@ -258,6 +260,8 @@ def draw(plan: dict, footprints: list, sl: dict) -> None:
 
 
 def main() -> None:
+    if not PLAN.exists():
+        raise SystemExit("нет снимка сцены: сначала tools/godot.cmd --headless res://tools/prospekt_study.tscn -- snapshot")
     plan = json.loads(PLAN.read_text(encoding="utf-8"))
     g, footprints = build(plan)
     sl = sightlines(plan, g, footprints)
