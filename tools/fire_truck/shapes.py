@@ -38,6 +38,16 @@ def ribbed_panel_x(name: str, y_out: float, outward: float, x0: float, x1: float
     return s3d.extrude(name, prof, x1 - x0, on=lib.side(x0))
 
 
+def arch_ring(name: str, r_out: float, r_in: float, length: float, xc: float, y: float, z: float, keep: float = 0.0):
+    """Полукольцо арки осью вдоль X, по центру `xc`: верхняя половина и ещё `keep` ниже оси.
+
+    Труба строится вдоль своей Z от 0; после поворота ry = 90 своя Z смотрит по +X мира, своя +X — вниз.
+    `at()` при повороте перезаписывает прежние смещения, поэтому центр задаётся одним вызовом в конце."""
+    ring = s3d.tube(name, 2 * r_out, 2 * r_in, length)
+    s3d.cut(ring, s3d.at(s3d.box(name + "_cut", 2.0, 2.0 * r_out + 0.2, length + 0.2), x=1.0 + keep, z=-0.1))
+    return s3d.at(ring, x=xc - length / 2, y=y, z=z, ry=90)
+
+
 def outline(pts: list[tuple[float, float]], r: float):
     return s3d.poly(pts, fillet=r)
 

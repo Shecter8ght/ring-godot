@@ -21,10 +21,13 @@ N_STUDS = 10
 def tyre():
     """Шина: боковины с выпуклостью, плечо, беговая дорожка; продольные канавки и ламели плеча."""
     hw = HALF_W
-    sec = [(BEAD_R, -hw + 0.03), (BEAD_R + 0.035, -hw + 0.012), (0.40, -hw - 0.004), (0.47, -hw + 0.004),
-           (R - 0.022, -hw + 0.022), (R, -hw + 0.048), (R, hw - 0.048), (R - 0.022, hw - 0.022), (0.47, hw - 0.004),
-           (0.40, hw + 0.004), (BEAD_R + 0.035, hw - 0.012), (BEAD_R, hw - 0.03)]
-    t = s3d.revolve("tyre", s3d.poly(sec, fillet=[0, 0.01, 0.0, 0.03, 0.02, 0.012, 0.012, 0.02, 0.03, 0.0, 0.01, 0]))
+    # боковина: у обода — выступающее защитное кольцо, дальше выпуклость и плечо
+    side_out = [(BEAD_R, -hw + 0.03), (BEAD_R + 0.030, -hw + 0.010), (0.328, -hw - 0.006), (0.346, -hw - 0.006),
+                (0.356, -hw + 0.002), (0.40, -hw - 0.004), (0.47, -hw + 0.004), (R - 0.022, -hw + 0.022), (R, -hw + 0.048)]
+    side_in = [(r, -a) for r, a in reversed(side_out)]
+    sec = side_out + side_in
+    fil_out = [0, 0.006, 0.004, 0.004, 0.006, 0.0, 0.03, 0.02, 0.012]
+    t = s3d.revolve("tyre", s3d.poly(sec, fillet=fil_out + list(reversed(fil_out))))
     # продольные канавки протектора
     grooves = []
     for a in (-0.082, -0.028, 0.028, 0.082):
@@ -41,6 +44,12 @@ def tyre():
             c, s = math.cos(math.radians(ang)), math.sin(math.radians(ang))
             grooves.append(s3d.at(blade, x=(R + 0.005) * c, y=(R + 0.005) * s, z=z - 0.0225,
                                   rz=ang + 90 + sgn * 12))
+    for k in range(64):
+        ang = 360.0 * (k + 0.5) / 64
+        c, s = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+        for z0, z1 in ((-0.072, -0.040), (-0.018, 0.018), (0.040, 0.072)):
+            sipe = s3d.box("sipe", 0.0028, 0.022, z1 - z0)
+            grooves.append(s3d.at(sipe, x=(R + 0.002) * c, y=(R + 0.002) * s, z=z0, rz=ang + 90))
     s3d.cut(t, grooves)
     lib.rubber(t)
     return t
@@ -66,6 +75,17 @@ def rim(dish: float = 0.135):
     s3d.join(shell, disc)
     lib.steel_dark(shell)
     return shell
+
+
+def valve():
+    """Вентиль: латунный стержень с колпачком, торчит из диска между окнами."""
+    stem = s3d.cylinder("valve_stem", 0.011, 0.045)
+    cap = s3d.at(s3d.cylinder("valve_cap", 0.014, 0.014), z=0.045)
+    s3d.join(stem, cap)
+    s3d.material(stem, "brass")
+    import math as _m
+    a = _m.radians(36.0)
+    return s3d.at(stem, x=0.245 * _m.cos(a), y=0.245 * _m.sin(a), z=0.10)
 
 
 def hub(front: bool):
@@ -94,7 +114,7 @@ def wheel(name: str, front: bool, outer: bool = True):
     t = tyre()
     r = rim()
     h = s3d.at(hub(front), z=0.135 - 0.006) if outer else None
-    parts = [t, r] + ([h] if h is not None else [])
+    parts = [t, r] + ([h, valve()] if h is not None else [])
     g = s3d.group(name, *parts)
     if not outer:
         s3d.at(g, rx=180)

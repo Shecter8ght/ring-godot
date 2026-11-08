@@ -79,23 +79,29 @@ def door_seams(cab):
     s3d.cut(cab, tools)
 
 
+GRILLE_SLOTS = [(1.46, 1.50, 0.085), (1.30, 1.33, 0.085)]     # ширина, середина по высоте, высота щели
+FACE_PANEL = dict(x=1.02, z0=1.13, z1=1.84)                    # откидная облицовка (решётка) — швы вокруг
+
+
 def grille(cab):
-    """Решётка: три чёрных щели, сужающиеся книзу, в красной панели; под ней — фальшпанель."""
+    """Решётка: две длинные щели в облицовке, внутри — чёрные вставки с двумя рёбрами; швы откидной облицовки."""
     out = []
-    slots = [(1.40, 1.54), (1.18, 1.42), (0.96, 1.30)]
     tools = []
-    for w, z in slots:
-        rect = shapes.box_pts(-w / 2, w / 2, z - 0.035, z + 0.035)
-        tools.append(s3d.extrude("slot", shapes.outline(rect, 0.03), 0.10, both=True, on=lib.front(F)))
+    for w, z, h in GRILLE_SLOTS:
+        rect = shapes.box_pts(-w / 2, w / 2, z - h / 2, z + h / 2)
+        tools.append(s3d.extrude("slot", shapes.outline(rect, 0.035), 0.12, both=True, on=lib.front(F)))
+    fp = FACE_PANEL
+    tools.append(shapes.ring_tool("face_seam", shapes.box_pts(-fp["x"], fp["x"], fp["z0"], fp["z1"]), 0.05, 0.006, 0.012,
+                                  lib.front(F + 0.006)))
     s3d.cut(cab, tools)
-    for w, z in slots:
-        bar = s3d.fillet(s3d.box("grille_insert", w - 0.02, 0.03, 0.06), 0.012, edges="side")
-        lib.black_plastic(bar)
-        out.append(s3d.at(bar, y=F + 0.05, z=z - 0.03))
-    # верхний обвод решётки и полосы «зубьями» — накладка из чёрного пластика между щелями
-    rib = s3d.fillet(s3d.box("grille_rib", 1.50, 0.02, 0.02), 0.008, edges="side")
-    lib.black_plastic(rib)
-    out.append(s3d.at(rib, y=F - 0.002, z=1.62))
+    for w, z, h in GRILLE_SLOTS:
+        ins = s3d.fillet(s3d.box("grille_insert", w - 0.02, 0.02, h - 0.01), 0.012, edges="side")
+        lib.black_plastic(ins)
+        out.append(s3d.at(ins, y=F + 0.05, z=z - (h - 0.01) / 2))
+        for dz in (-h / 5, h / 5):
+            fin = s3d.fillet(s3d.box("grille_fin", w - 0.05, 0.035, 0.007), 0.003, edges="side")
+            lib.black_plastic(fin)
+            out.append(s3d.at(fin, y=F + 0.025, z=z + dz - 0.0035))
     return out
 
 
@@ -121,9 +127,11 @@ def bumper():
         ind = s3d.extrude("indicator", shapes.outline(shapes.box_pts(sx * 1.00 - 0.08, sx * 1.00 + 0.06, 0.75, 0.86), 0.02),
                           0.01, on=fr.offset(-0.002))
         lib.lens(ind, "#f0a020")
-        fog = s3d.extrude("foglight", s3d.circle(0.09), 0.012, on=s3d.Frame((sx * 0.86, b["y0"] - 0.0, 0.56), (0, -1, 0)))
+        fog_pts = shapes.box_pts(sx * 0.72 - 0.065, sx * 0.72 + 0.065, 0.55, 0.64)
+        s3d.pocket(body, shapes.outline(fog_pts, 0.012), 0.03, on=fr)
+        fog = s3d.extrude("foglight", shapes.outline(shapes.box_pts(sx * 0.72 - 0.058, sx * 0.72 + 0.058, 0.557, 0.633), 0.01),
+                          0.01, on=fr.offset(-0.022))
         lib.lens(fog, "#f3f3ea")
-        s3d.pocket(body, shapes.outline(shapes.box_pts(sx * 0.86 - 0.06, sx * 0.86 + 0.06, 0.50, 0.62), 0.05), 0.02, on=fr)
         lamps += [lensp, reflector, ind, fog]
     s3d.pocket(body, shapes.outline(shapes.box_pts(-0.28, 0.28, 0.50, 0.63), 0.01), 0.012, on=fr)
     s3d.pocket(body, shapes.outline(shapes.box_pts(-0.45, 0.45, 0.64, 0.71), 0.02), 0.06, on=fr)
@@ -142,12 +150,7 @@ def bumper():
     return [body, lip, apron] + lamps + hooks
 
 
-def arch_ring(name: str, r_out: float, r_in: float, length: float, x: float, y: float, z: float, keep: float):
-    """Полукольцо арки осью вдоль X с центром (x, y, z): верхняя половина и ещё `keep` ниже оси."""
-    ring = s3d.at(s3d.tube(name, 2 * r_out, 2 * r_in, length), z=-length / 2)
-    # после поворота ry = 90 своя +X смотрит вниз: срезать x > keep (оставить верх)
-    s3d.cut(ring, s3d.at(s3d.box(name + "_cut", 2.0, 2.0 * r_out + 0.2, length + 0.2), x=1.0 + keep, z=-length / 2 - 0.1))
-    return s3d.at(ring, x=x, y=y, z=z, ry=90)
+arch_ring = shapes.arch_ring
 
 
 def fenders():
@@ -192,6 +195,9 @@ def roof_cap():
         base = s3d.fillet(s3d.box("beacon_base", 0.46, 0.30, 0.03), 0.04, edges="side")
         lib.black_plastic(base)
         out.append(s3d.at(base, x=sx * (HW - 0.34), y=F + 0.58, z=S.CAP_TOP - 0.005))
+        amber = s3d.fillet(s3d.box("cap_marker", 0.035, 0.06, 0.035), 0.01, edges="side")
+        lib.lens(amber, "#f0a020")
+        out.append(s3d.at(amber, x=sx * (HW - 0.06), y=F + 0.95, z=S.CAP_TOP - 0.09))
         dome = s3d.fillet(s3d.box("beacon", 0.44, 0.28, 0.11), 0.05, edges="side")
         s3d.fillet(dome, 0.035, edges="top")
         lib.lens(dome, "#2050d8")
@@ -218,6 +224,14 @@ def mirrors():
         lib.black_plastic(wide)
         wide = s3d.at(wide, x=sgn * (HW + 0.28), y=F + 0.50, z=2.08, rz=sgn * 10)
         out += [arm, head, glass_m, wide]
+        for z in (2.70, 2.05):
+            clamp = s3d.fillet(s3d.box("mirror_clamp", 0.05, 0.06, 0.06), 0.012, edges="side")
+            lib.black_plastic(clamp)
+            out.append(s3d.at(clamp, x=sgn * (HW + 0.02), y=F + 0.55, z=z - 0.03))
+        for z in (2.48, 2.16):
+            clamp = s3d.cylinder("mirror_pivot", 0.045, 0.05)
+            lib.black_plastic(clamp)
+            out.append(s3d.at(clamp, x=sgn * (HW + 0.26), y=F + 0.52, z=z - 0.025))
     kerb = s3d.fillet(s3d.box("mirror_kerb", 0.22, 0.07, 0.15), 0.03, edges="side")
     lib.black_plastic(kerb)
     out.append(s3d.at(kerb, x=-(HW - 0.20), y=F - 0.08, z=2.80, rx=-30))
@@ -227,19 +241,36 @@ def mirrors():
     return out
 
 
+def _strip(cx: float, cy: float, ang: float, length: float, width: float, start: float = 0.0):
+    """Полоса в плоскости стекла: от точки (cx, cy) под углом `ang` (градусы), длиной `length`."""
+    import math as _m
+    c, s = _m.cos(_m.radians(ang)), _m.sin(_m.radians(ang))
+    nx, ny = -s * width / 2, c * width / 2
+    a0, a1 = start, start + length
+    return [(cx + c * a0 + nx, cy + s * a0 + ny), (cx + c * a1 + nx, cy + s * a1 + ny),
+            (cx + c * a1 - nx, cy + s * a1 - ny), (cx + c * a0 - nx, cy + s * a0 - ny)]
+
+
 def wipers():
-    """Два дворника на лобовом стекле: оси у нижней кромки, рычаги вдоль стекла наискось."""
-    fr, L = ws_frame(-0.012)
+    """Два дворника в парковке у нижней кромки стекла: рычаг (швеллер), щётка с каркасом и резинкой, ось."""
     out = []
-    for xp in (-0.48, 0.38):
-        p0 = fr.point(xp, -L / 2 + 0.06)
-        p1 = fr.point(xp + 0.55, -L / 2 + 0.30)
-        arm = s3d.wire("wiper", [tuple(p0), tuple(p1)], 0.014)
-        blade = s3d.wire("wiper_blade", [tuple(fr.point(xp + 0.30, -L / 2 + 0.07)),
-                                         tuple(fr.point(xp + 0.80, -L / 2 + 0.33))], 0.018)
+    for xp, ang in ((-0.86, 9.0), (0.04, 9.0)):
+        fr, L = ws_frame(-0.004)
+        py = -L / 2 + 0.05
+        arm = s3d.extrude("wiper_arm", s3d.poly(_strip(xp, py, ang, 0.60, 0.022)), 0.012, on=fr.offset(0.008))
         lib.black_plastic(arm)
-        lib.rubber(blade)
-        out += [arm, blade]
+        # щётка: каркас над резинкой, середина у конца рычага, чуть круче рычага
+        tip_x = xp + 0.60 * 0.9877
+        tip_y = py + 0.60 * 0.1564
+        frame_b = s3d.extrude("wiper_frame", s3d.poly(_strip(tip_x, tip_y, ang - 2.0, 0.66, 0.016, start=-0.33)), 0.014,
+                              on=fr.offset(0.004))
+        lib.black_plastic(frame_b)
+        rub = s3d.extrude("wiper_rubber", s3d.poly(_strip(tip_x, tip_y - 0.004, ang - 2.0, 0.64, 0.008, start=-0.32)), 0.006,
+                          on=fr.offset(-0.001))
+        lib.rubber(rub)
+        cap = s3d.extrude("wiper_cap", s3d.circle(0.05), 0.022, on=s3d.Frame(tuple(fr.point(xp, py)), tuple(fr.normal)))
+        lib.black_plastic(cap)
+        out += [arm, frame_b, rub, cap]
     return out
 
 
@@ -249,6 +280,9 @@ def handles_and_lamps():
         h = s3d.fillet(s3d.box("door_handle", 0.03, 0.17, 0.04), 0.012, edges="side")
         lib.black_plastic(h)
         out.append(s3d.at(h, x=sgn * (HW + 0.005), y=-1.86, z=1.82))
+        lock = s3d.cylinder("door_lock", 0.028, 0.012)
+        lib.chrome(lock)
+        out.append(s3d.at(lock, x=sgn * (HW + 0.004), y=-1.74, z=1.84, ry=90 * sgn))
         rep = s3d.fillet(s3d.box("side_repeater", 0.02, 0.09, 0.04), 0.015, edges="side")
         lib.lens(rep, "#f0a020")
         out.append(s3d.at(rep, x=sgn * (HW + 0.005), y=F + 0.30, z=1.30))
@@ -273,6 +307,9 @@ def cab_details():
             lensr = s3d.cylinder("projector_lens", 0.06, 0.012)
             lib.lens(lensr, "#dfe8ee")
             out.append(s3d.at(lensr, x=sx * 0.70 + dx, y=b["y0"] + 0.025, z=0.805, rx=90))
+            cup = s3d.shell(s3d.dome("projector_cup", 0.11, 0.05), 0.003, open="bottom")
+            lib.chrome(cup)
+            out.append(s3d.at(cup, x=sx * 0.70 + dx, y=b["y0"] + 0.04, z=0.805, rx=-90))
     for z in (0.69, 0.665):
         bar = s3d.fillet(s3d.box("bumper_intake_bar", 0.86, 0.02, 0.012), 0.005, edges="side")
         lib.black_plastic(bar)
@@ -281,11 +318,6 @@ def cab_details():
         gut = s3d.fillet(s3d.box("rain_gutter", 0.018, B - F - 0.45, 0.022), 0.008, edges="side")
         lib.black_plastic(gut)
         out.append(s3d.at(gut, x=sx * (HW + 0.004), y=(F + 0.40 + B - 0.05) / 2, z=S.CAB_ROOF - 0.075))
-    fr, L = ws_frame(-0.004)
-    for xp in (-0.48, 0.38):
-        piv = s3d.extrude("wiper_pivot", s3d.circle(0.045), 0.03, on=s3d.Frame(tuple(fr.point(xp, -L / 2 + 0.03)), tuple(fr.normal)))
-        lib.black_plastic(piv)
-        out.append(piv)
     # дефлекторы на передних стойках (чёрный пластик, как у КамАЗа): пластина вдоль скругления угла,
     # наклонена как стойка; профиль: x рамки — по −X мира, y — вперёд
     dy, dz = S.WS_LEAN, S.WS_TOP - S.WS_BOTTOM

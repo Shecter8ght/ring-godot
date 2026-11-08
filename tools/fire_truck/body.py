@@ -70,14 +70,19 @@ def rub_strips():
     a0, a1 = S.YR - S.ARCH_R_R - 0.04, S.YR + S.ARCH_R_R + 0.04
     for sx in (-1, 1):
         for y0, y1 in ((S.BODY_FRONT + 0.02, a0), (a1, S.BODY_BACK - S.REAR_COL + 0.02)):
-            st = s3d.fillet(s3d.box("rub_strip", 0.025, y1 - y0, zt - zb), 0.008, edges="side")
+            prof = s3d.poly([(-sx * (HW - 0.002), zb), (-sx * (HW + 0.018), zb + 0.012), (-sx * (HW + 0.026), zb + 0.05),
+                             (-sx * (HW + 0.026), zt - 0.03), (-sx * (HW + 0.016), zt), (-sx * (HW - 0.002), zt)],
+                            fillet=[0, 0.006, 0.01, 0.01, 0.006, 0])
+            st = s3d.extrude("rub_strip", prof, y1 - y0, on=lib.rear(y0))
             lib.paint_white(st)
-            out.append(s3d.at(st, x=sx * (HW + 0.0125), y=(y0 + y1) / 2, z=zb))
-        trim = s3d.at(s3d.tube("arch_trim", 2 * (S.ARCH_R_R + 0.06), 2 * (S.ARCH_R_R - 0.008), 0.03), z=-0.015)
-        s3d.cut(trim, s3d.at(s3d.box("trim_cut", 2.0, 2 * S.ARCH_R_R + 0.4, 0.2), x=1.0 + 0.10, z=-0.1))
-        trim = s3d.at(trim, x=sx * (HW + 0.0), y=S.YR, z=S.WHEEL_Z, ry=90)
+            out.append(st)
+        trim = shapes.arch_ring("arch_trim", S.ARCH_R_R + 0.06, S.ARCH_R_R - 0.008, 0.03, sx * HW, S.YR, S.WHEEL_Z, keep=0.10)
         lib.paint_white(trim)
         out.append(trim)
+        liner = shapes.arch_ring("rear_wheel_house", S.ARCH_R_R - 0.006, S.ARCH_R_R - 0.016, HW - S.LOCKER_IN - 0.03,
+                                 sx * (HW + S.LOCKER_IN) / 2, S.YR, S.WHEEL_Z, keep=0.05)
+        lib.black_plastic(liner)
+        out.append(liner)
     return out
 
 
@@ -97,7 +102,7 @@ def shutter_closed(sx: float, y0: float, y1: float, zb: float, tag: str):
                                          (sx * (HW - FACE_IN + 0.018), (ya + yb) / 2 + 0.16, zb + 0.015)], 0.016,
                      fillet=0.012)
     lib.chrome(handle)
-    return [panel, bar, handle]
+    return [panel, bar, handle] + latches(sx, ya, yb, zb + 0.03)
 
 
 def shutter_open(sx: float, y0: float, y1: float, zb: float, tag: str):
@@ -112,12 +117,28 @@ def shutter_open(sx: float, y0: float, y1: float, zb: float, tag: str):
     strap = s3d.box("pull_strap", 0.004, 0.04, 0.30)
     lib.black_plastic(strap)
     strap = s3d.at(strap, x=sx * (HW - FACE_IN + 0.02), y=(ya + yb) / 2, z=zt - 0.43)
-    return [panel, bar, strap]
+    return [panel, bar, strap] + latches(sx, ya, yb, zt - 0.10)
+
+
+def latches(sx: float, ya: float, yb: float, z_bar: float):
+    """Две чёрные защёлки на нижней планке шторки (у краёв) и личинка замка посередине."""
+    out = []
+    for yy in (ya + 0.10, yb - 0.10):
+        lt = s3d.fillet(s3d.box("shutter_latch", 0.028, 0.045, 0.032), 0.006, edges="side")
+        lib.black_plastic(lt)
+        out.append(s3d.at(lt, x=sx * (HW - FACE_IN + 0.02), y=yy, z=z_bar - 0.012))
+    lock = s3d.cylinder("shutter_lock", 0.022, 0.012)
+    lib.chrome(lock)
+    out.append(s3d.at(lock, x=sx * (HW - FACE_IN + 0.019), y=(ya + yb) / 2 + 0.22, z=z_bar + 0.03, ry=90 * sx))
+    return out
 
 
 def guides(sx: float, y0: float, y1: float, zb: float):
-    """Боковые направляющие рольставни (алюминиевый профиль) — видны в обоих состояниях."""
+    """Боковые направляющие рольставни (алюминиевый профиль) и козырёк короба барабана — в обоих состояниях."""
     out = []
+    hood = s3d.fillet(s3d.box("shutter_hood", 0.022, (y1 - y0) - 0.04, 0.05), 0.008, edges="side")
+    lib.alu(hood)
+    out.append(s3d.at(hood, x=sx * (HW + 0.002), y=(y0 + y1) / 2, z=S.SHUTTER_TOP - 0.005))
     for yy in (y0 + 0.02, y1 - 0.02):
         g = s3d.box("shutter_guide", 0.02, 0.04, S.SHUTTER_TOP - zb)
         lib.alu(g)
@@ -129,7 +150,7 @@ def locker_inside(sx: float, y0: float, y1: float, zb: float, tag: str, dep: flo
     """Отсек изнутри (только в открытом варианте): алюминиевая облицовка, две полки с бортиками,
     светодиодные планки по бокам. Пусто — место под лут."""
     ya, yb = y0 + 0.045, y1 - 0.045
-    depth = dep + 0.02
+    depth = dep - 0.03            # задняя стенка облицовки на 1 см перед стенкой ниши (ниша — dep от борта)
     h = S.SHUTTER_TOP - zb - 0.005
     liner = s3d.box("locker_liner_" + tag, depth, yb - ya, h)
     s3d.shell(liner, 0.004, open="+X" if sx > 0 else "-X")
@@ -188,6 +209,35 @@ def crew_cut(hull_ob):
     return out
 
 
+LOWER_DOORS = [(0.12, 1.30), (2.86, 3.46)]       # нижние откидные отсеки под шторками C и A, по Y
+
+
+def lower_doors(hull_ob):
+    """Нижние откидные двери отсеков: швы по контуру в красной юбке, утопленные ручки-лопатки, петли сверху."""
+    tools, out = [], []
+    z0, z1 = S.LOCKER_BOTTOM + 0.05, S.RUB[0] - 0.03
+    for sx in (1, -1):
+        fr = lib.side(sx * HW, sx)
+        for y0, y1 in LOWER_DOORS:
+            ya, yb = sorted((sx * y0, sx * y1))
+            tools.append(shapes.ring_tool("lower_seam", shapes.box_pts(ya, yb, z0, z1), 0.03, 0.006, 0.012, fr))
+    s3d.cut(hull_ob, tools)
+    for sx in (1, -1):
+        fr = lib.side(sx * HW, sx)
+        for y0, y1 in LOWER_DOORS:
+            yc = (y0 + y1) / 2
+            ya, yb = sorted((sx * (yc - 0.09), sx * (yc + 0.09)))
+            s3d.pocket(hull_ob, shapes.outline(shapes.box_pts(ya, yb, z0 + 0.06, z0 + 0.13), 0.02), 0.025, on=fr)
+            paddle = s3d.fillet(s3d.box("paddle_handle", 0.012, 0.15, 0.045), 0.01, edges="side")
+            lib.black_plastic(paddle)
+            out.append(s3d.at(paddle, x=sx * (HW - 0.018), y=yc, z=z0 + 0.072))
+            for yh in (y0 + 0.12, y1 - 0.12):
+                hinge = s3d.cylinder("flap_hinge", 0.022, 0.09)
+                lib.alu(hinge)
+                out.append(s3d.at(hinge, x=sx * (HW + 0.006), y=yh - 0.045, z=z1 - 0.012, rx=-90))
+    return out
+
+
 def intake_boxes():
     """Белые рифлёные короба за кабиной (воздухозаборник и кожух стыка) по обоим бортам."""
     i = S.INTAKE
@@ -202,6 +252,21 @@ def intake_boxes():
         cap = s3d.fillet(s3d.box("intake_cap", i["t"] + 0.01, i["y1"] - i["y0"], 0.05), 0.02, edges="top")
         lib.paint_white(cap)
         out.append(s3d.at(cap, x=sx * (HW - i["t"] / 2), y=(i["y0"] + i["y1"]) / 2, z=i["z1"]))
+        # круглый оголовок воздухозаборника вверху короба: белый стакан и чёрная решётка с прорезями
+        yc = (i["y0"] + i["y1"]) / 2
+        head = s3d.fillet(s3d.cylinder("intake_head", 0.26, 0.07), 0.02, edges="top")
+        lib.paint_white(head)
+        out.append(s3d.at(head, x=sx * (HW - 0.01), y=yc, z=2.60, ry=90 * sx))
+        grill = s3d.cylinder("intake_grille", 0.19, 0.02)
+        slots = [s3d.at(s3d.box("intake_slot", 0.15, 0.012, 0.05), y=dy, z=-0.01) for dy in (-0.06, -0.03, 0.0, 0.03, 0.06)]
+        s3d.cut(grill, slots)
+        lib.black_plastic(grill)
+        out.append(s3d.at(grill, x=sx * (HW + 0.05), y=yc, z=2.60, ry=90 * sx))
+        vent = s3d.fillet(s3d.box("crew_vent", 0.012, 0.10, 0.14), 0.01, edges="side")
+        cuts = [s3d.at(s3d.box("vent_slot", 0.03, 0.07, 0.008), z=0.02 + 0.022 * k) for k in range(5)]
+        s3d.cut(vent, cuts)
+        lib.black_plastic(vent)
+        out.append(s3d.at(vent, x=sx * (HW + 0.004), y=S.BODY_FRONT + 0.12, z=2.50))
     # перемычка между кабиной и кузовом над рамой — тёмная, закрывает просвет
     gap = s3d.box("cab_gap_cover", S.BODY_W - 2 * i["t"], i["y1"] - i["y0"] - 0.02, i["z1"] - 1.2)
     lib.steel_dark(gap)
@@ -237,23 +302,67 @@ def rear():
     bar = s3d.fillet(s3d.box("rear_shutter_bar", 2 * rs["x"] - 0.08, 0.03, 0.06), 0.008, edges="side")
     lib.alu(bar)
     out += [sh, s3d.at(bar, y=yb - 0.008, z=rs["z0"])]
-    gauges = s3d.fillet(s3d.box("gauge_window", 0.34, 0.02, 0.12), 0.02, edges="side")
+    bezel = s3d.fillet(s3d.box("gauge_bezel", 0.38, 0.03, 0.16), 0.03, edges="side")
+    lib.black_plastic(bezel)
+    out.append(s3d.at(bezel, y=yb - 0.0, z=1.80))
+    for x in (-0.085, 0.085):
+        dial = s3d.cylinder("gauge_dial", 0.10, 0.008)
+        s3d.material(dial, "plastic", color="#e8e8e2")
+        ring = s3d.tube("gauge_ring", 0.115, 0.098, 0.014)
+        lib.chrome(ring)
+        out += [s3d.at(dial, x=x, y=yb + 0.015, z=1.88, rx=-90), s3d.at(ring, x=x, y=yb + 0.012, z=1.88, rx=-90)]
+    gauges = s3d.box("gauge_window", 0.34, 0.006, 0.12)
     lib.glass(gauges)
-    out.append(s3d.at(gauges, y=yb - 0.0, z=1.85))
-    # панель насоса внизу: патрубки с заглушками
-    panel = s3d.box("pump_panel", 2 * (HW - S.REAR_COL), 0.08, S.BODY_FLOOR + 0.02 - S.LOCKER_BOTTOM)
-    lib.steel_dark(panel)
-    out.append(s3d.at(panel, y=yb - 0.06, z=S.LOCKER_BOTTOM))
+    out.append(s3d.at(gauges, y=yb + 0.024, z=1.82))
+    cam = s3d.fillet(s3d.box("rear_camera", 0.10, 0.06, 0.08), 0.015, edges="side")
+    lib.black_plastic(cam)
+    out.append(s3d.at(cam, y=yb + 0.03, z=2.62))
+    for x in (-0.45, 0.45):
+        hd = s3d.wire("rear_shutter_handle", [(x - 0.07, yb + 0.002, rs["z0"] + 0.02), (x - 0.06, yb + 0.04, rs["z0"] + 0.015),
+                                              (x + 0.06, yb + 0.04, rs["z0"] + 0.015), (x + 0.07, yb + 0.002, rs["z0"] + 0.02)],
+                      0.016, fillet=0.012)
+        lib.black_plastic(hd)
+        out.append(hd)
+    # насос под кузовом между нижними отсеками: улитка, всасывающий патрубок к задней муфте, коллектор к напорным
+    volute = s3d.fillet(s3d.cylinder("pump_volute", 0.42, 0.24), 0.04, edges="top bottom")
+    lib.steel_dark(volute)
+    out.append(s3d.at(volute, y=yb - 0.62, z=0.80, rx=-90))
+    hub_ = s3d.cylinder("pump_drive", 0.20, 0.30)
+    lib.steel_dark(hub_)
+    out.append(s3d.at(hub_, y=yb - 0.92, z=0.80, rx=-90))
+    suction = s3d.cylinder("pump_suction_pipe", 0.15, 0.36)
+    lib.steel_dark(suction)
+    out.append(s3d.at(suction, y=yb - 0.38, z=0.80, rx=-90))
+    manifold = lib.along_x(s3d.cylinder("pump_manifold", 0.085, 0.80), -0.40, yb - 0.16, 0.66)
+    lib.steel_dark(manifold)
+    out.append(manifold)
     for x in (-0.38, 0.38):
-        pipe = s3d.cylinder("outlet", 0.11, 0.12)
+        riser = s3d.wire("outlet_pipe", [(x, yb - 0.16, 0.66), (x, yb - 0.16, 0.74), (x, yb - 0.02, 0.74)], 0.085, fillet=0.06)
+        lib.steel_dark(riser)
+        pipe = s3d.cylinder("outlet", 0.11, 0.10)
         cap = s3d.cylinder("outlet_cap", 0.13, 0.04)
         lib.alu(pipe)
         lib.alu(cap)
-        out += [s3d.at(pipe, x=x, y=yb - 0.03, z=0.74, rx=-90), s3d.at(cap, x=x, y=yb + 0.09, z=0.74, rx=-90)]
+        chain = s3d.wire("cap_chain", [(x + 0.06, yb + 0.10, 0.74), (x + 0.10, yb + 0.06, 0.62), (x + 0.05, yb + 0.0, 0.58)], 0.006)
+        lib.steel_dark(chain)
+        out += [riser, s3d.at(pipe, x=x, y=yb - 0.02, z=0.74, rx=-90), s3d.at(cap, x=x, y=yb + 0.08, z=0.74, rx=-90), chain]
+    guard = s3d.box("pump_guard", 1.10, 0.04, 0.05)
+    lib.steel_dark(guard)
+    out.append(s3d.at(guard, y=yb - 0.05, z=S.LOCKER_BOTTOM))
     st = S.REAR_STEP
-    step = s3d.fillet(s3d.box("rear_step", st["w"], st["y1"] - yb + 0.05, st["z1"] - st["z0"]), 0.015, edges="side")
+    depth = st["y1"] - yb + 0.05
+    step = s3d.fillet(s3d.box("rear_step", st["w"], depth, st["z1"] - st["z0"]), 0.015, edges="side")
+    s3d.at(step, y=(yb - 0.05 + st["y1"]) / 2, z=st["z0"])
+    top = s3d.Frame((0, (yb - 0.05 + st["y1"]) / 2, st["z1"]))
+    s3d.hole(step, 0.022, on=s3d.grid(34, 4, 0.062, 0.058, stagger=True, on=top))
     lib.alu(step)
-    out.append(s3d.at(step, y=(yb - 0.05 + st["y1"]) / 2, z=st["z0"]))
+    out.append(step)
+    # ремни крепления рукавов: с кромки крыши вниз по рольставне (ткань)
+    for x in (0.48, -0.30):
+        strap = s3d.wire("hose_strap_hang", [(x, yb - 0.06, S.BAND[1] + 0.10), (x, yb + 0.03, S.BAND[1] - 0.02),
+                                             (x + 0.02, yb + 0.035, 1.60), (x + 0.03, yb + 0.03, 1.18)], 0.012, fillet=0.05)
+        s3d.material(strap, "fabric", color="#5f7d55")
+        out.append(strap)
     # лестница на крышу у правой (−X) стойки
     xl = -(HW - S.REAR_COL / 2 + 0.005)
     rails = []
@@ -315,7 +424,7 @@ def side_details():
 
 def build() -> dict:
     h = hull()
-    crew = crew_cut(h)
+    crew = crew_cut(h) + lower_doors(h)
     s3d.fillet(h, 0.012, edges="side")          # после вырезов: скругление до них ломает EXACT на борту −X
     common = [h] + crew + band() + rub_strips() + intake_boxes() + rear() + side_details()
     closed, opened = [], []

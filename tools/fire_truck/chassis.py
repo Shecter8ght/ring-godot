@@ -17,6 +17,16 @@ def rail(sign: float):
     pts = [(sign * x, z) for x, z in pts]
     prof = s3d.poly([(-x, z) for x, z in pts], fillet=[0, 0, 0, 0, 0.006, 0.006, 0, 0])
     r = s3d.extrude("frame_rail", prof, S.FRAME_Y[1] - S.FRAME_Y[0], on=lib.rear(S.FRAME_Y[0]))
+    frames = []
+    for z in (zt - 0.07, zb + 0.07):
+        y = S.FRAME_Y[0] + 0.12
+        k = 0
+        while y < S.FRAME_Y[1] - 0.10:
+            if k % 9 not in (4, 5):                       # пропуски — места кронштейнов
+                frames.append(s3d.Frame((sign * xo, y, z), (sign, 0, 0)))
+            y += 0.10
+            k += 1
+    s3d.hole(r, 0.017, on=frames, depth=0.03)
     lib.steel_dark(r)
     return r
 
@@ -157,7 +167,42 @@ def suspension_details():
     return out
 
 
+def frame_extras():
+    """Ресиверы между лонжеронами, кронштейны и серьги рессор, тормозные шланги, крестовины карданного вала."""
+    out = []
+    for x, y in ((0.20, -0.75), (-0.20, -0.75)):
+        tank = lib.along_y(s3d.fillet(s3d.cylinder("air_tank", 0.24, 0.62), 0.06, edges="top bottom"), x, y, S.FRAME_TOP - 0.30)
+        lib.steel_dark(tank)
+        out.append(tank)
+    for y0 in (S.YF, S.YR):
+        L = 1.45 if y0 == S.YF else 1.55
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                hanger = s3d.fillet(s3d.box("spring_hanger", 0.10, 0.10, 0.12), 0.015, edges="side")
+                lib.steel_dark(hanger)
+                out.append(s3d.at(hanger, x=sx * (S.FRAME_X - 0.04), y=y0 + sy * L / 2, z=S.FRAME_TOP - S.FRAME_H - 0.08))
+    for sx in (-1, 1):
+        hose = s3d.wire("brake_hose", [(sx * S.FRAME_X, S.YR - 0.35, S.FRAME_TOP - 0.12),
+                                       (sx * (S.FRAME_X + 0.10), S.YR - 0.30, S.WHEEL_Z + 0.25),
+                                       (sx * (S.TRACK_R / 2 - 0.42), S.YR - 0.24, S.WHEEL_Z + 0.12)], 0.016, fillet=0.08)
+        lib.rubber(hose)
+        out.append(hose)
+        hose_f = s3d.wire("brake_hose_front", [(sx * S.FRAME_X, S.YF - 0.20, S.FRAME_TOP - 0.12),
+                                               (sx * (S.FRAME_X + 0.14), S.YF - 0.16, S.WHEEL_Z + 0.30),
+                                               (sx * (S.TRACK_F / 2 - 0.20), S.YF - 0.12, S.WHEEL_Z + 0.10)], 0.016, fillet=0.08)
+        lib.rubber(hose_f)
+        out.append(hose_f)
+    for y in (-1.20, 2.00 - 0.10):
+        yoke = lib.along_y(s3d.fillet(s3d.cylinder("u_joint", 0.15, 0.10), 0.02, edges="top bottom"), 0.0, y - 0.05, 0.70)
+        lib.steel_dark(yoke)
+        out.append(yoke)
+    bearing = s3d.fillet(s3d.box("center_bearing", 0.22, 0.10, 0.16), 0.02, edges="side")
+    lib.steel_dark(bearing)
+    out.append(s3d.at(bearing, y=0.40, z=0.64))
+    return out
+
+
 def build() -> dict:
     frame = [rail(1), rail(-1)] + crossmembers()
-    parts = frame + axle_front() + axle_rear() + all_wheels() + driveline() + mudflaps() + suspension_details()
+    parts = frame + axle_front() + axle_rear() + all_wheels() + driveline() + mudflaps() + suspension_details() + frame_extras()
     return {"common": [s3d.group("Шасси", *parts)]}

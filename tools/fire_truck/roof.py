@@ -11,12 +11,32 @@ TOP = S.BAND[1]
 
 
 def deck():
-    """Настил крыши: алюминиевый лист с ромбовидным рифлением (бугорки), чуть ниже кромки полосы."""
+    """Настил крыши: алюминиевый лист; на проходе между лотком рукавов и лестницей — рифление «чечевица»
+    (бугорки накрест через один), отдельной сеткой без булевых."""
     y0, y1 = S.BODY_FRONT + 0.06, S.BODY_BACK - 0.36
     plate = s3d.box("roof_deck", S.BODY_W - 0.12, y1 - y0, 0.006)
     plate = s3d.at(plate, y=(y0 + y1) / 2, z=TOP - 0.004)
     lib.alu(plate)
-    return [plate]
+    x0, x1 = -0.34, 0.16
+    wy0, wy1 = S.BODY_FRONT + 0.25, S.BODY_BACK - 0.55
+    px, py = 0.045, 0.045
+    nx, ny = int((x1 - x0) / px), int((wy1 - wy0) / py)
+    bumps = []
+    # бугорок строится уже повёрнутым профилем: merge в sand3d 1.6.3 неверно сводит повёрнутые копии
+    import math as _m
+    for turn in (45, -45):
+        c, s_ = _m.cos(_m.radians(turn)), _m.sin(_m.radians(turn))
+        rect = [(-0.003, -0.012), (0.003, -0.012), (0.003, 0.012), (-0.003, 0.012)]
+        lug = s3d.extrude("tread_lug", s3d.poly([(x * c - y * s_, x * s_ + y * c) for x, y in rect], fillet=0.0025), 0.0022)
+        frames = []
+        for i in range(nx):
+            for j in range(ny):
+                if (i + j) % 2 == (0 if turn > 0 else 1):
+                    frames.append(s3d.Frame((x0 + (i + 0.5) * px, wy0 + (j + 0.5) * py, TOP + 0.002)))
+        bumps += s3d.at(lug, on=frames)
+    tread = s3d.merge(*bumps)
+    lib.alu(tread)
+    return [plate, tread]
 
 
 def suction_hose(length: float):
@@ -120,7 +140,11 @@ def monitor():
     lib.black_plastic(nozzle)
     grip = s3d.wire("monitor_grip", [(0.0, -0.42, 0.37), (0.0, -0.44, 0.45), (0.0, -0.30, 0.46)], 0.025, fillet=0.03)
     lib.black_plastic(grip)
-    g = s3d.group("monitor", base, elbow, barrel, nozzle, grip)
+    motor = s3d.at(s3d.fillet(s3d.cylinder("monitor_motor", 0.09, 0.14), 0.02, edges="top bottom"), x=-0.12, y=0.02, z=0.15, ry=90)
+    lib.paint_white(motor)
+    cable = s3d.wire("monitor_cable", [(0.20, 0.0, 0.10), (0.30, 0.10, 0.03), (0.30, 0.40, 0.012)], 0.014, fillet=0.05)
+    lib.black_plastic(cable)
+    g = s3d.group("monitor", base, elbow, barrel, nozzle, grip, motor, cable)
     return [s3d.at(g, x=x, y=y, z=TOP)]
 
 
@@ -153,6 +177,19 @@ def floodlights():
         x, y = sx * (HW - 0.30), S.BODY_BACK - 0.55
         out += [s3d.at(bracket, x=x, y=y, z=TOP), s3d.at(body, x=x, y=y, z=TOP + 0.10),
                 s3d.at(lens, x=x, y=y + 0.052, z=TOP + 0.115)]
+    bar = s3d.fillet(s3d.box("work_light_bar", 0.50, 0.05, 0.05), 0.015, edges="side")
+    lib.black_plastic(bar)
+    out.append(s3d.at(bar, x=-0.10, y=S.BODY_BACK - 0.40, z=TOP + 0.12))
+    for dx in (-0.14, 0.14):
+        post = s3d.cylinder("work_light_post", 0.03, 0.12)
+        lib.black_plastic(post)
+        lamp = s3d.fillet(s3d.cylinder("work_light", 0.13, 0.09), 0.02, edges="top bottom")
+        lib.black_plastic(lamp)
+        lens_ = s3d.cylinder("work_light_lens", 0.11, 0.008)
+        lib.lens(lens_, "#f5f5ee")
+        out += [s3d.at(post, x=-0.10 + dx, y=S.BODY_BACK - 0.40, z=TOP),
+                s3d.at(lamp, x=-0.10 + dx, y=S.BODY_BACK - 0.43, z=TOP + 0.235, rx=-90),
+                s3d.at(lens_, x=-0.10 + dx, y=S.BODY_BACK - 0.34, z=TOP + 0.235, rx=-90)]
     ant = s3d.wire("antenna", [(0.6, S.BODY_FRONT + 0.4, TOP), (0.6, S.BODY_FRONT + 0.4, TOP + 0.55)], 0.008)
     lib.black_plastic(ant)
     out.append(ant)
