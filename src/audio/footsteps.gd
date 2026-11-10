@@ -3,7 +3,7 @@ extends Node
 ## Шаги — звук у каждого peer: по перемещению родителя (своего игрока, чужого — по синхронизации,
 ## мародёра — тоже), поэтому в коопе слышно и напарника, и мародёров, которых считает хост.
 ## Темп — от скорости (Balance.STEP_*), бег — отдельными записями, поверхность — под ногами
-## (Audio.step: плитка/бетон, асфальт, металл, снег), левая/правая — источник у стопы и чуть разный тон.
+## (Audio.step: плитка/бетон, асфальт, металл, снег), левая/правая — источник у соответствующей стопы.
 ## Шум для слуха AI сюда не относится — его шлёт Player._footsteps (только свой игрок).
 ## У своего игрока по этой же фазе качается камера и оружие в руках (CameraMotion: stride_phase,
 ## steps_taken) — шаг слышен ровно тогда, когда камера проседает.
@@ -34,10 +34,19 @@ var _walking: bool = false
 var _speed: float = 0.0
 ## Какой ногой был последний шаг.
 var _left: bool = false
+var _local_steps: bool = false
+var _timing_revision: int = -1
+var _walk_scale: float = 1.0
+var _run_scale: float = 1.0
+var _custom_start: bool = false
+var _start_sec: float = Balance.STEP_START_SEC
+var _start_left: float = 0.0
 
 
 func _ready() -> void:
-	_last = (get_parent() as Node3D).global_position
+	var actor: Node3D = get_parent() as Node3D
+	_last = actor.global_position
+	_local_steps = actor.is_in_group("players") and bool(actor.call("is_local"))
 
 
 ## Фаза пары шагов для камеры и оружия в руках: 0 — удар левой, 0.5 — удар правой, 1 — снова левой.
@@ -61,16 +70,19 @@ func _process(delta: float) -> void:
 	var pos := (get_parent() as Node3D).global_position
 	var v := Vector2(pos.x - _last.x, pos.z - _last.z).length() / delta
 	_last = pos
+	var landed: bool = false
 	if grounded.is_valid():
 		on_ground = bool(grounded.call())
 		if not on_ground:
 			_was_airborne = true
 			_walking = false
+			_start_left = 0.0
 			# приземлился — сразу шаг
 			_phase = 1.0
 			return
 		if _was_airborne:
 			_was_airborne = false
+			landed = true
 			Audio.play("land", pos, float(Balance.JUMP.land_db))
 	# телепорт (спавн, тест) — не шаги
 	if v > 20.0:
@@ -82,14 +94,29 @@ func _process(delta: float) -> void:
 	# у чужих позиция приходит рывками — скорость сглаживаем
 	_speed = lerpf(_speed, v, minf(1.0, delta * 8.0))
 	_interval = clampf(Balance.STEP_STRIDE / maxf(_speed, 0.01), float(Balance.STEP_INTERVAL[0]), float(Balance.STEP_INTERVAL[1]))
+	if _local_steps:
+		_read_timing()
+		var running: float = smoothstep(Balance.PLAYER_WALK_SPEED, Balance.PLAYER_SPRINT_SPEED, _speed)
+		_interval *= lerpf(_walk_scale, _run_scale, running)
 	if _speed < 0.35:
 		# встал — следующий шаг сразу, как тронется (фаза подходит к этому плавно, без скачка)
 		_walking = false
+		_start_left = 0.0
 		var ready := 1.0 - Balance.STEP_START_SEC / float(Balance.STEP_INTERVAL[1])
 		if _phase < ready:
 			_phase = minf(ready, _phase + delta * Balance.STEP_READY_RATE)
 		return
+	if not _walking and _custom_start and not landed:
+		_start_left = _start_sec
+		_phase = 1.0
 	_walking = true
+	if _start_left > 0.0:
+		var waited: float = minf(_start_left, delta)
+		_start_left -= waited
+		delta -= waited
+		_phase = maxf(0.0, 1.0 - _start_left / _interval)
+		if _start_left > 0.0:
+			return
 	# темп следует за скоростью сразу, а не со следующего шага
 	_phase += delta / _interval
 	if _phase < 1.0:
@@ -105,4 +132,16 @@ func _process(delta: float) -> void:
 	if special != "" and special != "step_crouch":
 		Audio.play(special, pos, extra)
 		return
-	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left, (get_parent() as Node3D).global_basis.x)
+	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left, (get_parent() as Node3D).global_basis.x, _local_steps)
+
+
+func _read_timing() -> void:
+	if _timing_revision == LabTuning.revision:
+		return
+	_timing_revision = LabTuning.revision
+	_walk_scale = Balance.lab_number("step_timing", "walk_sec") / Balance.STEP_WALK_SEC
+	_run_scale = Balance.lab_number("step_timing", "run_sec") / Balance.STEP_RUN_SEC
+	_custom_start = Balance.lab_number("step_timing", "start_custom") >= 0.5
+	_start_sec = Balance.lab_number("step_timing", "start_sec")
+	if not _custom_start:
+		_start_left = 0.0

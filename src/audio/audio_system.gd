@@ -27,6 +27,7 @@ var _scan_needed: bool = true
 var _scene_paths: Dictionary = {}
 var _object_bindings: Dictionary = {}
 var _surface_steps: Dictionary = {}
+var _step_slots: Array = []
 var _surface_shells: Dictionary = {}
 var _stream_files: Dictionary = {}
 var _mix: Dictionary = {"schemaVersion": 1, "events": {}, "files": {}}
@@ -48,7 +49,8 @@ func _ready() -> void:
 		if files is Dictionary:
 			_local_map_files = files
 	var surface_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/audio_surfaces.json")) as Dictionary
-	for entry: Dictionary in surface_data.get("footsteps", []):
+	_step_slots = surface_data.get("footsteps", [])
+	for entry: Dictionary in _step_slots:
 		for surface: String in entry.surfaces:
 			_surface_steps[surface] = String(entry.hook)
 	for entry: Dictionary in surface_data.get("casings", []):
@@ -615,7 +617,8 @@ func _fade_out(p: AudioStreamPlayer3D, sec: float) -> void:
 ## Подставить записи поверх assets/audio (см. _preview); пустой словарь — только assets/audio.
 
 
-func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right: Vector3 = Vector3.ZERO) -> void:
+func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right: Vector3 = Vector3.ZERO,
+		own: bool = false) -> void:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
 	if _has_ears() and _listener_pos().distance_to(pos) > float(Balance.AUDIO_EVENT_PROFILES.step_stone_run["max"]):
 		return
@@ -626,7 +629,17 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	if run and kind != "step_stone_run":
 		db += 3.0
 	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
-	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
+	var axis: Vector3 = right
+	var side_m: float = Balance.STEP_FOOT_SIDE_M
+	if own:
+		var listener: Node3D = get_viewport().get_audio_listener_3d()
+		if not listener:
+			listener = get_viewport().get_camera_3d()
+		if listener:
+			axis = listener.global_basis.x
+			axis.y = 0.0
+		side_m *= Balance.lab_number("step_timing", "pan_pct") / 100.0
+	var sound_pos: Vector3 = pos + axis.normalized() * side_m * (-1.0 if left else 1.0)
 	play(kind, sound_pos, db, 0.0, null, _step_recording(takes, surf, pos))
 	_play_step_layers(pos, sound_pos, kind, db, ai)
 	if run:
@@ -731,7 +744,9 @@ func step_surface_name(surface: String) -> String:
 	return String({"asphalt": "асфальт", "concrete": "бетон", "tile": "плитка", "gravel": "гравий / щебень",
 		"grass": "трава", "sand": "песок", "dirt": "земля", "mud": "грязь", "leaves": "листья",
 		"fabric": "ткань", "wood": "дерево", "metal": "металл", "glass": "стекло",
-		"water": "вода", "puddle": "лужи", "carpet": "ковёр", "snow": "снег", "trash": "мусор"}.get(surface, surface))
+		"water": "вода", "puddle": "лужи", "carpet": "ковёр", "snow": "снег", "trash": "мусор",
+		"rubble": "щебень", "trash_bags": "мусорные пакеты", "plastic": "пластик",
+		"cardboard": "картон", "ladder": "лестница", "asphalt_wet": "мокрый асфальт"}.get(surface, surface))
 
 
 func step_event_name(hook: String) -> String:
@@ -739,6 +754,26 @@ func step_event_name(hook: String) -> String:
 	var event: Dictionary = _events.get(id, {})
 	var count: int = (_samples.get(id, []) as Array).size()
 	return "%s · %s" % [String(event.get("name", hook)), "%d записей" % count if count > 0 else "без записи"]
+
+
+func step_catalog() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var slots: Array = _step_slots + [
+		{"hook": "step_stone_run", "name": "Бег по плитке", "surfaces": ["tile"]},
+		{"hook": "crawl", "name": "Ползание", "surfaces": []},
+		{"hook": "land", "name": "Приземление", "surfaces": []},
+	]
+	for slot: Dictionary in slots:
+		var id: String = resolve_event(String(slot.hook))
+		var event: Dictionary = _events.get(id, {})
+		var loaded: Dictionary = {}
+		for stream: AudioStream in _samples.get(id, []):
+			var path: String = String(_stream_files.get(stream.get_instance_id(), ""))
+			if not path.is_empty():
+				loaded[path] = stream
+		result.append({"hook": slot.hook, "name": event.get("name", slot.name), "surfaces": slot.surfaces,
+			"files": event.get("files", []), "loaded": loaded})
+	return result
 
 
 func shell_hook(surface: String, weapon_id: String = "") -> String:

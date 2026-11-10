@@ -1,6 +1,8 @@
 extends Node
 ## Реальные сцены, UI, свет, частицы, лучи и состояния мародёра; отдельный файл настроек.
 
+const FootstepAudit := preload("res://src/debug/footstep_audit.gd")
+
 var _lab: DevelopmentLab
 var _checks: int = 0
 var _fails: int = 0
@@ -220,7 +222,12 @@ func _surface_audio() -> void:
 	var scene: PackedScene = load("res://scenes/debug/surface_audio_lab.tscn") as PackedScene
 	var lab: DevelopmentLab = scene.instantiate() as DevelopmentLab
 	var steps_path: String = "user://lab_steps_test.cfg"
+	var notes_path: String = "user://lab_step_notes_test.cfg"
+	var report_path: String = "user://lab_step_report_test.md"
+	DirAccess.remove_absolute(notes_path)
 	lab.set("step_files_path", steps_path)
+	lab.set("review_notes_path", notes_path)
+	lab.set("review_report_path", report_path)
 	get_tree().root.add_child(lab)
 	get_tree().current_scene = lab
 	await _frames(6)
@@ -283,6 +290,8 @@ func _surface_audio() -> void:
 				" blocked=", lab.player.keys_blocked())
 		_check("walking plays the imported recording in zone %d" % index, latest[0] == 96000 + 2000 * index)
 	Audio.event_played.disconnect(observe)
+	await _step_timing(lab, outside)
+	await _step_review(lab, files[0], report_path, notes_path)
 	await _surface_layers(lab, files[0])
 	await _surface_transition(lab, course, files[1])
 	lab.player.position = outside
@@ -316,10 +325,118 @@ func _surface_audio() -> void:
 	await _frames(6)
 	_check("step previews cleared after leaving", Audio._step_preview.is_empty())
 	DirAccess.remove_absolute(steps_path)
+	DirAccess.remove_absolute(notes_path)
+	DirAccess.remove_absolute(report_path)
 	DirAccess.remove_absolute(Audio.map_ambience_save_path)
 	Audio.map_ambience_save_path = old_storage
 	for path: String in files:
 		DirAccess.remove_absolute(path)
+
+
+func _step_timing(lab: DevelopmentLab, outside: Vector3) -> void:
+	var footsteps: Footsteps = lab.player.get_node("Footsteps") as Footsteps
+	lab.set_editing(true)
+	lab.call("_move_to", outside, 0.0, false)
+	lab.rig.set_process_input(false)
+	for frame: int in range(28):
+		await get_tree().physics_frame
+	var timing: VBoxContainer = lab.get("_timing_page") as VBoxContainer
+	(timing.find_child("walk_sec", true, false) as SpinBox).value = 0.54
+	(timing.find_child("run_sec", true, false) as SpinBox).value = 0.28
+	(timing.find_child("start_custom", true, false) as CheckButton).button_pressed = true
+	(timing.find_child("start_sec", true, false) as SpinBox).value = 0.32
+	lab.set_editing(false)
+	Input.action_press("move_forward")
+	for frame: int in range(40):
+		await get_tree().physics_frame
+		if footsteps.walking():
+			break
+	var started: int = Engine.get_physics_frames()
+	var before: int = footsteps.steps_taken
+	for frame: int in range(50):
+		await get_tree().physics_frame
+		if footsteps.steps_taken > before:
+			break
+	var pause: float = float(Engine.get_physics_frames() - started) / float(Engine.physics_ticks_per_second)
+	_check("custom pause delays the first audible step", footsteps.steps_taken > before and absf(pause - 0.32) < 0.05)
+	for frame: int in range(105):
+		await get_tree().physics_frame
+	_check("walk setting controls both step intervals and actual cadence", absf(footsteps.interval() - 0.54) < 0.025
+		and absf(float(lab.get("_last_interval")) - 0.54) < 0.045)
+	Input.action_press("sprint")
+	for frame: int in range(85):
+		await get_tree().physics_frame
+	_check("run has its own interval", absf(footsteps.interval() - 0.28) < 0.025)
+	Input.action_release("move_forward")
+	Input.action_release("sprint")
+	lab.set_editing(true)
+	lab.call("_move_to", outside, PI * 0.5, false)
+	await _frames(4)
+	var captured: Array[Vector3] = []
+	var observe: Callable = func(_id: String, hook: String, at: Vector3) -> void:
+		if hook == "step_concrete":
+			captured.append(at)
+	Audio.event_played.connect(observe)
+	Audio.step(outside, false, false, 0.0, true, Vector3.RIGHT, true)
+	Audio.step(outside, false, false, 0.0, false, Vector3.RIGHT, true)
+	(timing.find_child("pan_pct", true, false) as SpinBox).value = 0.0
+	Audio.step(outside, false, false, 0.0, true, Vector3.RIGHT, true)
+	Audio.event_played.disconnect(observe)
+	var listener: AudioListener3D = get_viewport().get_audio_listener_3d()
+	var side: Vector3 = listener.global_basis.x
+	side.y = 0.0
+	side = side.normalized() * Balance.STEP_FOOT_SIDE_M
+	_check("own footsteps pan around the listener axis and can be centered", captured.size() == 3
+		and captured[0].is_equal_approx(outside - side) and captured[1].is_equal_approx(outside + side)
+		and captured[2].is_equal_approx(outside))
+	_select_lab_tab(lab, "Темп")
+	await _shot("step_timing")
+	lab.call("_save_timing")
+	_check("timing and panning are explicitly enabled for the game", LabTuning.enabled("step_timing")
+		and is_zero_approx(float(LabTuning.preset("step_timing").pan_pct)))
+	LabTuning.save("step_timing", "Темп и панорама", LabTuning.defaults("step_timing"), false)
+	lab.set("_timing", LabTuning.defaults("step_timing"))
+	lab.call("_refresh_preview")
+	lab.rig.set_process_input(true)
+
+
+func _step_review(lab: DevelopmentLab, fixture: String, report_path: String, notes_path: String) -> void:
+	_select_lab_tab(lab, "Ведомость")
+	lab.call("_refresh_review")
+	lab.call("_export_review")
+	var current: String = FileAccess.get_file_as_string(report_path)
+	_check("review exports the current game assignments", "Общие наборы по назначению" in current and "Бег по плитке" in current)
+	if not _out.is_empty():
+		var copy: FileAccess = FileAccess.open(_out.path_join("footsteps_report.md"), FileAccess.WRITE)
+		copy.store_string(current)
+		copy.close()
+	var note: LineEdit = lab.get("_review_note") as LineEdit
+	note.text = "Проверочная заметка"
+	lab.call("_save_review_note")
+	var config: ConfigFile = ConfigFile.new()
+	_check("review note is saved under the stable event", config.load(notes_path) == OK
+		and config.get_value("notes", "step_concrete", "") == "Проверочная заметка")
+	var track: AudioStream = Audio.load_audio_file(fixture)
+	var rows: Array[Dictionary] = [
+		{"name": "Бетон", "hook": "step_concrete", "surfaces": ["concrete", "asphalt"],
+			"files": ["test_copy_a.wav"], "loaded": {"test_copy_a.wav": track}},
+		{"name": "Плитка", "hook": "step_stone", "surfaces": ["tile"],
+			"files": ["test_copy_b.wav"], "loaded": {"test_copy_b.wav": track}},
+		{"name": "Мусор", "hook": "step_trash", "surfaces": ["trash"],
+			"files": [], "loaded": {}},
+	]
+	var review: Dictionary = FootstepAudit.scan(rows, config)
+	_check("audit separates true audio copies, shared assignments and gaps", int(review.gaps) == 1
+		and int(review.duplicates) == 1 and "бетон, асфальт" in String(review.text)
+		and "Проверочная заметка" in String(review.text))
+	await _shot("step_review")
+
+
+func _select_lab_tab(lab: DevelopmentLab, title: String) -> void:
+	for tab: int in range(lab.panel.tabs.get_tab_count()):
+		if lab.panel.tabs.get_tab_title(tab) == title:
+			lab.panel.tabs.current_tab = tab
+			return
 
 
 func _surface_layers(lab: DevelopmentLab, fixture: String) -> void:

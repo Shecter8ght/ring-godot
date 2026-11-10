@@ -37,6 +37,10 @@ const LAYER_START: Vector3 = Vector3(0, 0.08, 20)
 const StepLayerPatch := preload("res://src/audio/step_layer_patch.gd")
 const MapSamples := preload("res://src/debug/map_surface_samples.gd")
 const MapReadout := preload("res://src/debug/surface_map_readout.gd")
+const FootstepAudit := preload("res://src/debug/footstep_audit.gd")
+const TIMING_DOMAIN: String = "step_timing"
+const REVIEW_NOTES: String = "user://footsteps_review.cfg"
+const REVIEW_REPORT: String = "user://footsteps_report.md"
 
 var _floors: Array[StaticBody3D] = []
 var _surface_index: int = 0
@@ -54,7 +58,23 @@ var _layer_mix: Dictionary = {}
 var _layer_labels: Dictionary = {}
 var _map_samples: Array[Dictionary] = []
 var _surface_picker: OptionButton
+var _timing: Dictionary = {}
+var _timing_page: VBoxContainer
+var _footsteps: Footsteps
+var _last_count: int = 0
+var _walking_clock: float = 0.0
+var _last_beat: float = -1.0
+var _last_interval: float = 0.0
+var _review_page: VBoxContainer
+var _review_notes: ConfigFile = ConfigFile.new()
+var _review_slots: Array[Dictionary] = []
+var _review_picker: OptionButton
+var _review_note: LineEdit
+var _review_summary: Label
+var _review_text: TextEdit
 var step_files_path: String = STEP_FILES
+var review_notes_path: String = REVIEW_NOTES
+var review_report_path: String = REVIEW_REPORT
 
 
 func _ready() -> void:
@@ -71,6 +91,7 @@ func _ready() -> void:
 	panel.tabs.set_tab_hidden(1, true)
 	panel.tabs.set_tab_hidden(2, true)
 	panel.tabs.set_tab_title(0, "Шаги")
+	panel.tabs.add_theme_font_size_override("font_size", 15)
 	panel.save_button.hide()
 	panel.play_button.text = "Взять управление · F6"
 	panel.label(panel.context, "Выбери покрытие и добавь WAV, OGG или MP3. Игра берёт записи с выбранного места на диске.")
@@ -85,7 +106,11 @@ func _ready() -> void:
 	_add_step_controls("Комната", "room", INSIDE)
 	_build_map_controls()
 	_build_layer_controls()
+	_build_timing_controls()
+	_build_review_controls()
 	_build_samples_controls()
+	panel.offset_right = 560.0
+	($Interface/Hint as Control).offset_left = 580.0
 	panel.action("В главное меню", _back)
 	($Interface/Hint/Label as Label).text = "F6 — панель / прогулка   ·   F7 — штатные шаги   ·   F8 — обзор\nИди по полосам и смотри, какой тип пола и набор шагов определила игра"
 	var readout: PanelContainer = $Interface/Telemetry
@@ -357,6 +382,8 @@ func _refresh_preview() -> void:
 	Audio.set_step_preview({"asphalt_wet": {"hook": Audio.step_hook("puddle")}} if panel.compare.button_pressed else _tracks)
 	if not _layer_mix.is_empty():
 		LabTuning.preview("step_layers", {} if panel.compare.button_pressed else _layer_mix)
+	if not _timing.is_empty():
+		LabTuning.preview(TIMING_DOMAIN, {} if panel.compare.button_pressed else _timing)
 	panel.status.text = "Штатные шаги · F7" if panel.compare.button_pressed else "Прослушивание на игровых шагах · F6"
 
 
@@ -365,8 +392,123 @@ func _save() -> bool:
 	return true
 
 
+func _build_timing_controls() -> void:
+	_timing = LabTuning.preset(TIMING_DOMAIN)
+	_footsteps = player.get_node("Footsteps") as Footsteps
+	_timing_page = panel._page("Темп")
+	panel.label(_timing_page, "Интервал задаётся для обычной скорости. При замедлении, в приседе и на разгоне темп следует за движением.")
+	panel.action("Проверить шаг и бег на улице", func() -> void: _move_to(OUTSIDE, 0.0, true), _timing_page)
+	panel.action("Применять этот темп и панораму в игре", _save_timing, _timing_page)
+	var rules: Dictionary = Balance.lab_rules(TIMING_DOMAIN)
+	for key: String in ["walk_sec", "run_sec", "start_custom", "start_sec", "pan_pct"]:
+		var rule: Array = rules[key]
+		if key == "start_custom":
+			var toggle: CheckButton = panel.toggle(String(rule[0]), float(_timing[key]) >= 0.5,
+				func(enabled: bool) -> void: _change_timing(key, 1.0 if enabled else 0.0), _timing_page)
+			toggle.name = key
+		else:
+			var field: SpinBox = panel.number(String(rule[0]), float(_timing[key]), float(rule[2]), float(rule[3]), float(rule[4]),
+				func(value: float) -> void: _change_timing(key, value), _timing_page)
+			field.name = key
+	panel.label(_timing_page, "0 % — общий источник под игроком. 100 % — 12 см влево или вправо от центра. Для шагов подходят монофайлы без записанного увода в сторону.", 14)
+	panel.label(_timing_page, "Подсказка справа показывает интервал по скорости и последний измеренный интервал. F7 сравнивает со штатными настройками.", 14)
+	panel.action("В главное меню", _back, _timing_page)
+
+
+func _change_timing(key: String, value: float) -> void:
+	_timing[key] = value
+	_last_interval = 0.0
+	panel.compare.set_pressed_no_signal(false)
+	_refresh_preview()
+
+
+func _save_timing() -> void:
+	var result: Error = LabTuning.save(TIMING_DOMAIN, "Темп и панорама", _timing, true)
+	panel.status.text = "Темп и панорама своих шагов сохранены для игры." if result == OK else "Темп не сохранён · " + error_string(result)
+
+
+func _build_review_controls() -> void:
+	_review_notes.load(review_notes_path)
+	_review_page = panel._page("Ведомость")
+	_review_summary = panel.label(_review_page, "", 16)
+	panel.action("Перечитать игровой каталог", func() -> void:
+		Audio.reload_events()
+		_refresh_review(), _review_page)
+	_review_picker = panel.option("Набор для заметки", [], func(_index: int) -> void: _load_review_note(), _review_page)
+	_review_note = LineEdit.new()
+	_review_note.placeholder_text = "Что нужно записать или заменить"
+	_review_note.max_length = 220
+	_review_page.add_child(_review_note)
+	_review_note.text_submitted.connect(func(_value: String) -> void: _save_review_note())
+	panel.action("Сохранить заметку", _save_review_note, _review_page)
+	panel.action("Записать отчёт .md", _export_review, _review_page)
+	panel.action("Открыть папку отчёта", func() -> void:
+		OS.shell_open(ProjectSettings.globalize_path("user://")), _review_page)
+	_review_text = TextEdit.new()
+	_review_text.editable = false
+	_review_text.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_review_text.custom_minimum_size.y = 360
+	_review_text.add_theme_font_size_override("font_size", 14)
+	_review_text.add_theme_color_override("font_readonly_color", Color("#dedbd4"))
+	_review_page.add_child(_review_text)
+	panel.action("В главное меню", _back, _review_page)
+	panel.tabs.tab_changed.connect(func(index: int) -> void:
+		if index == _review_page.get_parent().get_index() and _review_slots.is_empty():
+			_refresh_review())
+
+
+func _refresh_review() -> void:
+	var selected: int = maxi(_review_picker.selected, 0)
+	_review_slots = Audio.step_catalog()
+	_review_picker.clear()
+	for slot: Dictionary in _review_slots:
+		_review_picker.add_item(String(slot.name))
+	_review_picker.select(mini(selected, _review_slots.size() - 1))
+	_load_review_note()
+	_render_review()
+
+
+func _load_review_note() -> void:
+	var index: int = _review_picker.selected
+	if index >= 0:
+		_review_note.text = String(_review_notes.get_value("notes", String(_review_slots[index].hook), ""))
+
+
+func _save_review_note() -> void:
+	var index: int = _review_picker.selected
+	if index < 0:
+		return
+	var next: ConfigFile = ConfigFile.new()
+	next.parse(_review_notes.encode_to_text())
+	next.set_value("notes", String(_review_slots[index].hook), _review_note.text)
+	var result: Error = next.save(review_notes_path)
+	if result != OK:
+		panel.status.text = "Заметка не сохранена · " + error_string(result)
+		return
+	_review_notes = next
+	_render_review()
+	panel.status.text = "Заметка сохранена."
+
+
+func _render_review() -> void:
+	var report: Dictionary = FootstepAudit.scan(_review_slots, _review_notes)
+	_review_summary.text = "Игровой каталог · пропусков %d · групп дублей %d" % [report.gaps, report.duplicates]
+	_review_text.text = String(report.text)
+
+
+func _export_review() -> void:
+	var file: FileAccess = FileAccess.open(review_report_path, FileAccess.WRITE)
+	if file == null:
+		panel.status.text = "Отчёт не записан · " + error_string(FileAccess.get_open_error())
+		return
+	file.store_string(_review_text.text)
+	var result: Error = file.get_error()
+	file.close()
+	panel.status.text = "Записан %s. Его можно открыть из папки отчёта." % review_report_path.get_file() if result == OK else "Ошибка записи отчёта."
+
+
 func _build_map_controls() -> void:
-	var page: VBoxContainer = panel._page("Фон карты")
+	var page: VBoxContainer = panel._page("Фон")
 	panel.label(page, "Выбери карту и назначь зацикленный фон. Он прозвучит здесь и при входе на карту.", 16)
 	var names: Array[String] = ["Убежище"]
 	_map_paths.append(Balance.HIDEOUT_SCENE)
@@ -500,7 +642,8 @@ func _open_dialog(dialog: FileDialog) -> void:
 	dialog.popup_centered_clamped(Vector2i(860, 620))
 
 
-func _lab_tick(_delta: float) -> void:
+func _lab_tick(delta: float) -> void:
+	_measure_timing(delta)
 	if player.on_ladder:
 		telemetry.text = "Вертикальная лестница\n" + ("Штатные записи игры" if Audio.has_sound("ladder_step") else "Для лестницы пока нет записей")
 		return
@@ -527,9 +670,32 @@ func _lab_tick(_delta: float) -> void:
 			layers.append(String(Balance.STEP_LAYERS[id]))
 	if not layers.is_empty():
 		telemetry.text += "\nСлои · " + " + ".join(layers)
+	if _timing_page and panel.tabs.current_tab == _timing_page.get_parent().get_index():
+		if _footsteps.walking():
+			var interval: float = _footsteps.interval()
+			telemetry.text += "\nТемп · %.2f с / %.1f шага в секунду" % [interval, 1.0 / interval]
+		if _last_interval > 0.0:
+			telemetry.text += "\nПоследний интервал · %.2f с" % _last_interval
+
+
+func _measure_timing(delta: float) -> void:
+	if not _footsteps:
+		return
+	if not _footsteps.walking():
+		_walking_clock = 0.0
+		_last_beat = -1.0
+		_last_count = _footsteps.steps_taken
+		return
+	_walking_clock += delta
+	if _footsteps.steps_taken != _last_count:
+		if _last_beat >= 0.0:
+			_last_interval = _walking_clock - _last_beat
+		_last_beat = _walking_clock
+		_last_count = _footsteps.steps_taken
 
 
 func _exit_tree() -> void:
 	Audio.set_step_preview({})
 	LabTuning.end_preview("step_layers")
+	LabTuning.end_preview(TIMING_DOMAIN)
 	super._exit_tree()
