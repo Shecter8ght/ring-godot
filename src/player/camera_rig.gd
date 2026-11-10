@@ -804,10 +804,13 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# руки и оружие — со своим полем зрения, сколько бы ни было у мира
 	var vk := viewmodel_scale(_ads_cam.fov)
 	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)
+	# Вес тела отдельным слоем. Он не меняет ввод мыши и отдачу.
+	_motion.update(pl, delta, aim_t, _look_yaw)
+	var idle_scale: float = _motion.idle_sway_scale()
 	# раскачка — по эргономике и стойке; на сошках (сидя/лёжа) почти нет
-	_sway_t += delta
+	_sway_t += delta * _motion.weapon_rate
 	var amp := float(spec.get("sway", 0.0)) * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * lerpf(0.4, 1.0, aim_t)
-	amp *= lerpf(1.0, Balance.ADS_SWAY_SCALE, aim_t)
+	amp *= lerpf(1.0, Balance.ADS_SWAY_SCALE, aim_t) * idle_scale
 	# стресс — руки ходят сильнее
 	amp *= 1.0 + float(Balance.STRESS.sway_k) * pl.stress_k()
 	if pl.stance != Player.Stance.STAND:
@@ -818,12 +821,10 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	# дыхание: в прицеле линия медленно ходит вверх-вниз с дрейфом вбок; устал, стресс — сильнее,
 	# сидя и лёжа — слабее, задержал дыхание — почти стоит (Player.breath_k)
 	var br: Dictionary = Balance.BREATH
-	_breath_t += delta * TAU / float(br.period)
+	_breath_t += delta * TAU / float(br.period) * _motion.weapon_rate
 	if pl.aiming and wid != "":
-		var breath_amp: float = deg_to_rad(float(br.deg)) * pl.breath_k() * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * aim_t
+		var breath_amp: float = deg_to_rad(float(br.deg)) * pl.breath_k() * float(Balance.SWAY_STANCE.get(pl.stance_key(), 1.0)) * aim_t * idle_scale
 		sway += Vector2(sin(_breath_t * 0.5 + 0.7) * float(br.side), sin(_breath_t)) * breath_amp
-	# вес тела: шаги, инерция, крен — своим слоем, поверх взгляда мышью; ни мышь, ни отдачу не трогает
-	_motion.update(pl, delta, aim_t, _look_yaw)
 	# отдача подкидывает взгляд, дальше игрок сам возвращает прицел
 	var pitch := _look_pitch + pl.recoil() + sway.y + _motion.pitch
 	var yaw := _look_yaw + sway.x - pl.recoil_h() + _motion.yaw

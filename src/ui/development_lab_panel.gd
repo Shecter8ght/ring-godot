@@ -118,19 +118,20 @@ func option(text: String, items: Array, callback: Callable, parent: Node = null)
 	return control
 
 
-func toggle(text: String, initial: bool, callback: Callable) -> CheckButton:
+func toggle(text: String, initial: bool, callback: Callable, parent: Node = null) -> CheckButton:
 	var control: CheckButton = CheckButton.new()
 	control.text = text
 	control.focus_mode = Control.FOCUS_NONE
 	control.set_pressed_no_signal(initial)
-	context.add_child(control)
+	(parent if parent else context).add_child(control)
 	control.toggled.connect(callback)
 	return control
 
 
-func number(text: String, initial: float, minimum: float, maximum: float, step_size: float, callback: Callable) -> SpinBox:
-	label(context, text, 16)
-	return _numeric(context, initial, minimum, maximum, step_size, callback)
+func number(text: String, initial: float, minimum: float, maximum: float, step_size: float, callback: Callable, parent: Node = null) -> SpinBox:
+	var body: Node = parent if parent else context
+	label(body, text, 16)
+	return _numeric(body, initial, minimum, maximum, step_size, callback)
 
 
 func _numeric(parent: Node, initial: float, minimum: float, maximum: float, step_size: float, callback: Callable) -> SpinBox:

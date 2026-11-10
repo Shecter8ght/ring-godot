@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/debug/development_lab_base.tscn" id="1_base"]
+[ext_resource type="Script" path="res://src/debug/motion_lab.gd" id="2_lab"]
+
+[node name="MotionLab" instance=ExtResource("1_base")]
+script = ExtResource("2_lab")
+lab_domain = "motion"
+lab_title = "Камера и движение оружия"

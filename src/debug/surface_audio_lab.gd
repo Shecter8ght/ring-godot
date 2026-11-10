@@ -33,6 +33,10 @@ const INSIDE: Vector3 = Vector3(0, 0.08, 9)
 const ROUTE: Vector3 = Vector3(13, 0.08, -6)
 const ROUTE_TILE_M: float = 3.0
 const ROUTE_WIDTH_M: float = 5.0
+const LAYER_START: Vector3 = Vector3(0, 0.08, 20)
+const StepLayerPatch := preload("res://src/audio/step_layer_patch.gd")
+const MapSamples := preload("res://src/debug/map_surface_samples.gd")
+const MapReadout := preload("res://src/debug/surface_map_readout.gd")
 
 var _floors: Array[StaticBody3D] = []
 var _surface_index: int = 0
@@ -46,6 +50,10 @@ var _map_paths: Array[String] = []
 var _map_note: Label
 var _map_play: AudioStreamPlayer
 var _map_playing: bool = false
+var _layer_mix: Dictionary = {}
+var _layer_labels: Dictionary = {}
+var _map_samples: Array[Dictionary] = []
+var _surface_picker: OptionButton
 var step_files_path: String = STEP_FILES
 
 
@@ -56,6 +64,8 @@ func _ready() -> void:
 	player.clear_range_weapon()
 	_build_track()
 	_build_route()
+	_build_layer_floor()
+	_build_map_samples()
 	_files.load(step_files_path)
 	_load_tracks()
 	panel.tabs.set_tab_hidden(1, true)
@@ -68,20 +78,23 @@ func _ready() -> void:
 	var labels: Array[String] = []
 	for entry: Array in SURFACES:
 		labels.append(String(entry[0]))
-	panel.option("Покрытие для одиночной пробы", labels, select_surface)
+	_surface_picker = panel.option("Покрытие для одиночной пробы", labels, select_surface)
 	panel.action("Загрузить шаги для улицы и комнаты…", func() -> void:
 		_audio_dialog(true, _assign_steps.bind(["outdoor", "room"])))
 	_add_step_controls("Улица", "outdoor", OUTSIDE)
 	_add_step_controls("Комната", "room", INSIDE)
 	_build_map_controls()
+	_build_layer_controls()
+	_build_samples_controls()
 	panel.action("В главное меню", _back)
-	($Interface/Hint/Label as Label).text = "F6 — панель / прогулка   ·   F7 — штатные шаги   ·   F8 — обзор\nНа маршруте иди вперёд по полосам   ·   Shift — бег"
+	($Interface/Hint/Label as Label).text = "F6 — панель / прогулка   ·   F7 — штатные шаги   ·   F8 — обзор\nИди по полосам и смотри, какой тип пола и набор шагов определила игра"
 	var readout: PanelContainer = $Interface/Telemetry
 	readout.anchor_left = 1.0
-	readout.offset_left = -380
-	readout.offset_bottom = 165
+	readout.offset_left = -485
+	readout.offset_bottom = 201
 	select_surface(0)
-	_move_to(ROUTE + Vector3.RIGHT * 0.4, PI * 0.5, false)
+	if not _map_samples.is_empty():
+		_go_to_sample(0, false)
 
 
 func _build_track() -> void:
@@ -137,6 +150,97 @@ func _build_route() -> void:
 	observer.look_at(center)
 
 
+func _build_layer_floor() -> void:
+	var floor: StaticBody3D = box($Samples, "LayerTestFloor", LAYER_START + Vector3(0, -0.11, 6),
+		Vector3(6, 0.16, 12), Color.WHITE, "tile")
+	(floor.get_child(0) as MeshInstance3D).material_override = SectorMaterials.get_material("large_floor_tiles_02")
+	for id: String in Balance.STEP_LAYERS:
+		var patch: StepLayerPatch = StepLayerPatch.new()
+		patch.name = "Layer_" + id
+		patch.layer = id
+		patch.position = LAYER_START + Vector3(0, -0.03, 8)
+		patch.size = Vector2(6, 8)
+		$Samples.add_child(patch)
+	var glass: GlassPanes = GlassPanes.new()
+	$Samples.add_child(glass)
+	glass._pile(Transform3D(Basis.IDENTITY, LAYER_START + Vector3.FORWARD * -8.0), Vector2(5.0, 1.0), 0.054, false)
+	text_3d($Samples, "ПЛИТКА", LAYER_START + Vector3(1.9, 1.15, 2))
+	text_3d($Samples, "ПЛИТКА + СЛОИ", LAYER_START + Vector3(1.9, 1.15, 5.4))
+
+
+func _build_map_samples() -> void:
+	var rows: Dictionary = MapSamples.rows()
+	var gallery: Node3D = Node3D.new()
+	gallery.name = "MapSamples"
+	add_child(gallery)
+	var row_index: int = 0
+	for map_name: String in rows:
+		var index: int = 0
+		for entry: Dictionary in rows[map_name]:
+			var pos: Vector3 = Vector3(14.0 + float(index) * 4.0, 0.05, 10.0 + float(row_index) * 6.0)
+			var surface: String = String(entry.kind)
+			var body: StaticBody3D = box(gallery, "Sample_%d" % _map_samples.size(), pos - Vector3.UP * 0.08,
+				Vector3(4.0, 0.16, 5.0), Color("#696960"), surface)
+			var label: String = "%s · %s" % [map_name, entry.name]
+			body.set_meta("sample", label)
+			# Уличный шейдер читает размеры отрезка в CUSTOM0. Собираем так же, как на «Проспекте».
+			var material: Material = entry.material as Material
+			var visual: MeshInstance3D = body.get_child(0) as MeshInstance3D
+			visual.material_override = material
+			if material is ShaderMaterial and (material as ShaderMaterial).shader.resource_path == "res://src/world/street_paving.gdshader":
+				var street: Script = load("res://src/world/street_paving.gd") as Script
+				visual.mesh = street.call("surface_mesh", Rect2(-2.0, -2.5, 4.0, 5.0), 0.08, Color(0, 0, 0, 0))
+			var sign: Label3D = text_3d(gallery, "%s\n%s" % [entry.name, Audio.step_surface_name(surface)],
+				pos + Vector3(0, 0.9, 1.85))
+			sign.pixel_size = 0.004
+			sign.visibility_range_begin = 2.5
+			sign.visibility_range_end = 15.0
+			_map_samples.append({"label": label, "kind": surface, "at": pos + Vector3(-1.5, 0.05, 0)})
+			index += 1
+		row_index += 1
+
+
+func _build_samples_controls() -> void:
+	var page: VBoxContainer = panel._page("Покрытия карт")
+	panel.tabs.move_child(page.get_parent(), 0)
+	panel.tabs.current_tab = 0
+	panel.label(page, "Материалы с карт уложены полосами. Подпись под названием показывает, каким типом пола игра считает образец.")
+	var labels: Array[String] = []
+	for entry: Dictionary in _map_samples:
+		labels.append(String(entry.label))
+	var picker: OptionButton = panel.option("Образец", labels, func(index: int) -> void: _go_to_sample(index, false), page)
+	picker.fit_to_longest_item = false
+	picker.clip_text = true
+	panel.action("Встать на образец и пройтись", func() -> void: _go_to_sample(picker.selected, true), page)
+	panel.action("Открыть настройки шагов этого типа", func() -> void: _edit_sample_kind(picker.selected), page)
+	panel.label(page, "На самой карте можно проверить любое место. F6 вернёт на стенд.")
+	for map: Dictionary in Floors.all():
+		var path: String = String(map.get("scene", ""))
+		if path.is_empty() or not ResourceLoader.exists(path, "PackedScene"):
+			continue
+		var title: String = String(map.name)
+		panel.action("Пройти по карте · " + title, MapReadout.open.bind(path, title), page)
+	panel.action("В главное меню", _back, page)
+
+
+func _go_to_sample(index: int, play: bool) -> void:
+	if index >= 0 and index < _map_samples.size():
+		_move_to(_map_samples[index].at, PI * 0.5, play)
+		rig._look_pitch = -0.25
+
+
+func _edit_sample_kind(sample: int) -> void:
+	if sample < 0 or sample >= _map_samples.size():
+		return
+	var kind: String = String(_map_samples[sample].kind)
+	for index: int in range(SURFACES.size()):
+		if String(SURFACES[index][1]) == kind:
+			_surface_picker.select(index)
+			select_surface(index)
+			panel.tabs.current_tab = _surface_picker.get_parent().get_parent().get_index()
+			return
+
+
 func _move_to(destination: Vector3, yaw: float, play: bool) -> void:
 	player.position = destination
 	player.reset_physics_interpolation()
@@ -176,6 +280,12 @@ func _load_tracks() -> void:
 		if surface == "asphalt_wet":
 			sets["hook"] = Audio.step_hook("puddle")
 		_tracks[surface] = sets
+	for id: String in Balance.STEP_LAYERS:
+		var key: String = "layer_" + id
+		var sets: Dictionary = {}
+		for place: String in ["outdoor", "room"]:
+			sets[place] = _read_steps(_files.get_value(key, place, PackedStringArray()))
+		_tracks[key] = sets
 
 
 func _default_steps(surface: String) -> Array[AudioStream]:
@@ -206,14 +316,14 @@ func _read_steps(paths: PackedStringArray) -> Array[AudioStream]:
 	return takes
 
 
-func _assign_steps(paths: PackedStringArray, places: Array) -> void:
+func _assign_steps(paths: PackedStringArray, places: Array, override: String = "") -> void:
 	var takes: Array[AudioStream] = _read_steps(paths)
 	if takes.size() != paths.size():
 		panel.status.text = "Часть записей не открылась. Выбери исправные WAV, OGG или MP3."
 		return
 	var next: ConfigFile = ConfigFile.new()
 	next.parse(_files.encode_to_text())
-	var surface: String = String(SURFACES[_surface_index][1])
+	var surface: String = override if override != "" else String(SURFACES[_surface_index][1])
 	for place: String in places:
 		next.set_value(surface, place, paths)
 	var result: Error = next.save(step_files_path)
@@ -223,7 +333,10 @@ func _assign_steps(paths: PackedStringArray, places: Array) -> void:
 	_files = next
 	for place: String in places:
 		_tracks[surface][place] = takes if not paths.is_empty() else _default_steps(surface)
-		_step_status(surface, place, (_tracks[surface][place] as Array).size(), paths.size())
+		if override == "":
+			_step_status(surface, place, (_tracks[surface][place] as Array).size(), paths.size())
+	if override != "":
+		_layer_status(override.trim_prefix("layer_"))
 	panel.compare.set_pressed_no_signal(false)
 	_refresh_preview()
 
@@ -242,6 +355,8 @@ func _recording_label(surface: String, count: int) -> String:
 
 func _refresh_preview() -> void:
 	Audio.set_step_preview({"asphalt_wet": {"hook": Audio.step_hook("puddle")}} if panel.compare.button_pressed else _tracks)
+	if not _layer_mix.is_empty():
+		LabTuning.preview("step_layers", {} if panel.compare.button_pressed else _layer_mix)
 	panel.status.text = "Штатные шаги · F7" if panel.compare.button_pressed else "Прослушивание на игровых шагах · F6"
 
 
@@ -273,6 +388,48 @@ func _build_map_controls() -> void:
 	panel.action("Вернуть штатный фон карты", func() -> void: _assign_map(""), page)
 	panel.action("В главное меню", _back, page)
 	_select_map(0)
+
+
+func _build_layer_controls() -> void:
+	_layer_mix = LabTuning.preset("step_layers")
+	var page: VBoxContainer = panel._page("Слои")
+	panel.label(page, "Основной шаг всегда звучит по полу. На второй половине дорожки поверх плитки подмешиваются включённые слои.")
+	panel.action("Пройти от чистой плитки к смеси →", func() -> void: _move_to(LAYER_START + Vector3.FORWARD * -0.5, 0.0, true), page)
+	panel.action("Применять этот микс в игре", _save_layers, page)
+	for id: String in Balance.STEP_LAYERS:
+		var title: String = String(Balance.STEP_LAYERS[id])
+		var key: String = "layer_" + id
+		panel.toggle(title, float(_layer_mix[id + "_on"]) > 0.5,
+			func(value: bool) -> void: _change_layer(id + "_on", 1.0 if value else 0.0), page)
+		panel.number("Громкость слоя, дБ", float(_layer_mix[id + "_db"]), -36.0, 0.0, 1.0,
+			func(value: float) -> void: _change_layer(id + "_db", value), page)
+		_layer_labels[id] = panel.label(page, "", 14)
+		_layer_status(id)
+		panel.action("Загрузить записи слоя…", func() -> void:
+			_audio_dialog(true, _assign_steps.bind(["outdoor", "room"], key)), page)
+		panel.action("Вернуть записи каталога", func() -> void: _assign_steps(PackedStringArray(), ["outdoor", "room"], key), page)
+	panel.label(page, "Применение сохраняет включение, громкость и выбранные записи слоёв для игры на этом компьютере.", 14)
+	panel.action("В главное меню", _back, page)
+
+
+func _change_layer(key: String, value: float) -> void:
+	_layer_mix[key] = value
+	panel.compare.set_pressed_no_signal(false)
+	_refresh_preview()
+
+
+func _save_layers() -> void:
+	for id: String in Balance.STEP_LAYERS:
+		_layer_mix[id + "_files"] = _files.get_value("layer_" + id, "outdoor", PackedStringArray())
+	var result: Error = LabTuning.save("step_layers", "Микс слоёв", _layer_mix, true)
+	panel.status.text = "Микс слоёв сохранён для игры." if result == OK else "Микс не сохранён · " + error_string(result)
+
+
+func _layer_status(id: String) -> void:
+	var label: Label = _layer_labels[id]
+	var takes: Array = _tracks["layer_" + id].outdoor
+	label.text = "Своих записей · %d" % takes.size() if not takes.is_empty() else (
+		"Записи каталога" if Audio.has_sound(Audio.step_hook(id)) else "Пока нет записи слоя")
 
 
 func _select_map(index: int) -> void:
@@ -348,14 +505,31 @@ func _lab_tick(_delta: float) -> void:
 		telemetry.text = "Вертикальная лестница\n" + ("Штатные записи игры" if Audio.has_sound("ladder_step") else "Для лестницы пока нет записей")
 		return
 	var outdoor: bool = Audio.place_at(player.global_position + Vector3.UP) == "outdoor"
-	var surface: String = Audio._surface_under(player.global_position)
+	var hit: Dictionary = Audio.ground_hit(player.global_position)
+	var surface: String = Surfaces.kind_at(hit)
 	var sets: Dictionary = _tracks.get(surface, {})
 	var tracks: Array = sets.get("outdoor" if outdoor else "room", [])
 	var place: String = "Маршрут" if player.global_position.x >= ROUTE.x else ("Улица" if outdoor else "Комната")
-	telemetry.text = "%s   ·   %s\n%s" % [place, String(_names.get(surface, surface)),
-		_recording_label(surface, 0 if panel.compare.button_pressed else tracks.size())]
+	var body: Node = hit.get("collider") as Node
+	var sample: String = String(body.get_meta("sample", "")) if body else ""
+	var loaded: int = 0 if panel.compare.button_pressed else tracks.size()
+	if sample == "":
+		telemetry.text = "%s   ·   %s\n%s" % [place, String(_names.get(surface, surface)), _recording_label(surface, loaded)]
+	else:
+		var running: bool = Vector2(player.velocity.x, player.velocity.z).length() > Balance.STEP_RUN_SPEED
+		var kind: String = Audio.step_kind_at(player.global_position, surface, running)
+		telemetry.text = "%s\nТип · %s\n%s" % [sample, Audio.step_surface_name(surface),
+			_recording_label(surface, loaded) if loaded > 0 else Audio.step_event_name(kind)]
+	var layers: PackedStringArray = PackedStringArray()
+	for node: Node in Audio.step_layers_at(player.global_position):
+		var id: String = (node as StepLayerPatch).layer
+		if Balance.STEP_LAYERS.has(id) and Balance.lab_number("step_layers", id + "_on") >= 0.5:
+			layers.append(String(Balance.STEP_LAYERS[id]))
+	if not layers.is_empty():
+		telemetry.text += "\nСлои · " + " + ".join(layers)
 
 
 func _exit_tree() -> void:
 	Audio.set_step_preview({})
+	LabTuning.end_preview("step_layers")
 	super._exit_tree()

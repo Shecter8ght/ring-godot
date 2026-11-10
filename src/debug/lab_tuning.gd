@@ -1,6 +1,6 @@
 class_name LabTuning
 extends RefCounted
-## Именованные варианты трёх стендов. Черновики действуют только пока открыт стенд;
+## Именованные варианты стендов. Черновики действуют только пока открыт стенд;
 ## игра получает лишь сохранённый и явно включённый профиль. Проверки используют свой файл.
 
 static var storage_path: String = "user://development_labs.cfg"
@@ -27,6 +27,9 @@ static func sanitize(domain: String, values: Dictionary) -> Dictionary:
 				var color: Color = item as Color
 				if is_finite(color.r) and is_finite(color.g) and is_finite(color.b):
 					result[key] = Color(clampf(color.r, 0, 1), clampf(color.g, 0, 1), clampf(color.b, 0, 1), 1)
+		elif rule[1] is Array:
+			if item is PackedStringArray:
+				result[key] = (item as PackedStringArray).duplicate()
 		elif (item is float or item is int) and is_finite(float(item)):
 			result[key] = clampf(float(item), float(rule[2]), float(rule[3]))
 	return result

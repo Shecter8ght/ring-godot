@@ -17,6 +17,7 @@ extends Node3D
 const HP := 100.0
 const DAMAGED_SHADER: Shader = preload("res://src/world/glass_damaged.gdshader")
 const PARTICLES_SHADER: Shader = preload("res://src/combat/impact_particles.gdshader")
+const STEP_LAYER: Script = preload("res://src/audio/step_layer_patch.gd")
 
 ## Панели: {xf: Transform3D (центр, X — вдоль, Z — нормаль), size: Vector2 (ширина, высота),
 ## floor_y, sill: Vector3 (размер подоконника, центр — под панелью), hp, broken, tempered,
@@ -479,7 +480,7 @@ func _pile(xf: Transform3D, size: Vector2, floor_y: float, cubes: bool) -> void:
 	var along := xf.basis.x.normalized()
 	var nrm := xf.basis.z.normalized()
 	for i in range(mm.instance_count):
-		var p := xf.origin + along * _rng.randf_range(-size.x * 0.55, size.x * 0.55) + nrm * _rng.randf_range(-1.1, 1.1) * pow(_rng.randf(), 1.8)
+		var p := xf.origin + along * _rng.randf_range(-size.x * 0.55, size.x * 0.55) + nrm * _rng.randf_range(-Balance.STEP_GLASS_SPREAD, Balance.STEP_GLASS_SPREAD) * pow(_rng.randf(), 1.8)
 		p.y = floor_y + 0.004
 		var b := Basis(Vector3.UP, _rng.randf() * TAU) * (Basis.IDENTITY if cubes else Basis(Vector3.RIGHT, -PI * 0.5))
 		var scale: float = _rng.randf_range(0.008, 0.018) if cubes else _rng.randf_range(0.012, 0.04)
@@ -490,3 +491,9 @@ func _pile(xf: Transform3D, size: Vector2, floor_y: float, cubes: bool) -> void:
 	if cubes:
 		mi.material_override = _cubes_material()
 	add_child(mi)
+	# Область живёт вместе с видимой россыпью и появляется у каждого участника рейда.
+	var patch: Node3D = STEP_LAYER.new()
+	patch.name = "GlassFootsteps"
+	patch.set("size", Vector2(size.x * 1.1, Balance.STEP_GLASS_SPREAD * 2.0))
+	patch.transform = Transform3D(Basis(along, Vector3.UP, nrm), Vector3(xf.origin.x, floor_y, xf.origin.z))
+	mi.add_child(patch)

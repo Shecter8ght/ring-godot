@@ -180,6 +180,7 @@ func _ready() -> void:
 	_check("AI draft removed on exit", is_equal_approx(Balance.lab_number("perception", "hearing"), 1.0))
 	await _surface_audio()
 	await _enemy_lab()
+	await _motion_lab()
 	await _menu_routes()
 	DirAccess.remove_absolute(LabTuning.storage_path)
 	DirAccess.remove_absolute("user://development_labs_profile_test.json")
@@ -189,7 +190,7 @@ func _ready() -> void:
 
 func _menu_routes() -> void:
 	for title: String in ["Свет и атмосфера", "Попадания и эффекты", "Зрение и слух противников",
-			"Поверхности и звуки карт", "Противник"]:
+			"Поверхности и звуки карт", "Противник", "Камера и движение оружия"]:
 		var menu: Control = (load("res://scenes/ui/main_menu.tscn") as PackedScene).instantiate() as Control
 		get_tree().root.add_child(menu)
 		get_tree().current_scene = menu
@@ -227,6 +228,15 @@ func _surface_audio() -> void:
 	var inside: Vector3 = Vector3(0, 0.08, 9)
 	_check("same physical surface in both lanes", Audio._surface_under(outside) == "asphalt" and Audio._surface_under(inside) == "asphalt")
 	_check("physics distinguishes street and room", Audio.place_at(outside + Vector3.UP) == "outdoor" and Audio.place_at(inside + Vector3.UP) == "room")
+	var map_samples: Array = lab.get("_map_samples")
+	var valid: bool = map_samples.size() >= 15
+	for sample: Dictionary in map_samples:
+		var hit: Dictionary = Audio.ground_hit(sample.at)
+		var shape: StaticBody3D = hit.get("collider") as StaticBody3D
+		valid = valid and shape != null and shape.has_meta("sample") and Surfaces.kind_at(hit) == sample.kind \
+			and (shape.get_child(0) as MeshInstance3D).material_override != null
+	_check("map samples use materials and real collision surface IDs", valid)
+	await _shot("map_materials")
 	var course: Node3D = lab.get_node("SurfaceRoute") as Node3D
 	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/audio_surfaces.json")) as Dictionary
 	for entry: Dictionary in catalog.footsteps:
@@ -273,6 +283,7 @@ func _surface_audio() -> void:
 				" blocked=", lab.player.keys_blocked())
 		_check("walking plays the imported recording in zone %d" % index, latest[0] == 96000 + 2000 * index)
 	Audio.event_played.disconnect(observe)
+	await _surface_layers(lab, files[0])
 	await _surface_transition(lab, course, files[1])
 	lab.player.position = outside
 	lab.rig._look_yaw = 0.0
@@ -309,6 +320,47 @@ func _surface_audio() -> void:
 	Audio.map_ambience_save_path = old_storage
 	for path: String in files:
 		DirAccess.remove_absolute(path)
+
+
+func _surface_layers(lab: DevelopmentLab, fixture: String) -> void:
+	var previous: Dictionary = Audio._preview
+	var track: AudioStream = Audio.load_audio_file(fixture)
+	Audio.set_preview(previous.merged({"step_stone": [track], "step_glass": [track], "step_grass": [track], "step_trash": [track]}, true))
+	var pos: Vector3 = Vector3(0, 0.08, 27)
+	lab.call("_move_to", pos, 0.0, false)
+	await _frames(3)
+	var heard: Array[String] = []
+	var observe: Callable = func(_id: String, hook: String, _pos: Vector3) -> void: heard.append(hook)
+	Audio.event_played.connect(observe)
+	Audio.step(pos, false, false, 0.0, true)
+	_check("one step plays tile and all enabled overlays", heard == ["step_stone", "step_glass", "step_grass", "step_trash"])
+	heard.clear()
+	lab.call("_change_layer", "leaves_on", 0.0)
+	Audio.step(pos, false, false, 0.0, true)
+	_check("muting a layer preserves the base and other layers", heard == ["step_stone", "step_glass", "step_trash"])
+	_check("overlay does not carry through floors", Audio.step_layers_at(pos + Vector3.UP * 3.0).is_empty())
+	var panes: GlassPanes = GlassPanes.new()
+	lab.add_child(panes)
+	var pile: Vector3 = Vector3(1, 0.05, 22)
+	panes._pile(Transform3D(Basis.IDENTITY, pile), Vector2(2, 2), pile.y, false)
+	heard.clear()
+	Audio.step(pile, false, false, 0.0, true)
+	_check("glass pile automatically adds a glass layer over tile", heard == ["step_stone", "step_glass"])
+	Audio.event_played.disconnect(observe)
+	Audio.set_preview(previous)
+	panes.queue_free()
+	lab.set_editing(true)
+	for tab: int in range(lab.panel.tabs.get_tab_count()):
+		if lab.panel.tabs.get_tab_title(tab) == "Слои":
+			lab.panel.tabs.current_tab = tab
+			break
+	await _shot("footstep_layers")
+	lab.call("_assign_steps", PackedStringArray([fixture]), ["outdoor", "room"], "layer_glass")
+	lab.call("_save_layers")
+	LabTuning.reload()
+	_check("manual layer mix and recording persist", LabTuning.enabled("step_layers")
+		and LabTuning.preset("step_layers").glass_files == PackedStringArray([fixture])
+		and is_zero_approx(float(LabTuning.preset("step_layers").leaves_on)))
 
 
 func _surface_transition(lab: DevelopmentLab, course: Node3D, tile_file: String) -> void:
@@ -409,9 +461,14 @@ func _enemy_lab() -> void:
 	enemy = _lab.get("enemy") as Marauder
 	_check("reset spawns a fresh living enemy", enemy._health.alive)
 	_lab.set_editing(false)
-	_lab.rig._look_yaw = 0.0
-	_lab.rig._look_pitch = -0.05
-	await _frames(24)
+	# У бедра пуля идёт по наклонённому стволу. Для проверки попадания целимся по оси взгляда.
+	_lab.rig.set_process_input(false)
+	Input.action_press("aim")
+	for frame: int in range(45):
+		var direction: Vector3 = enemy.global_position + Vector3.UP * 1.2 - _lab.player.eye_position()
+		_lab.rig._look_yaw = atan2(direction.x, direction.z)
+		_lab.rig._look_pitch = atan2(direction.y, Vector2(direction.x, direction.z).length())
+		await get_tree().physics_frame
 	_check("F6 returns from the orbit camera to the shooter", not _lab.overview and _lab.player.is_physics_processing())
 	Input.action_press("fire")
 	for frame: int in range(45):
@@ -419,11 +476,60 @@ func _enemy_lab() -> void:
 		if enemy._health.last_zone != "":
 			break
 	Input.action_release("fire")
+	Input.action_release("aim")
 	_check("player can shoot the enemy in first person", enemy._health.last_zone != "")
 	# Как при переходе с экраном загрузки, даём короткой вспышке выстрела закончиться.
 	await get_tree().create_timer(0.15).timeout
 	_lab.queue_free()
 	await _frames(6)
+
+
+func _motion_lab() -> void:
+	await _open("motion")
+	var movement: CameraMotion = _lab.rig._motion
+	var settings: Dictionary = _lab.panel.fields
+	(settings.idle_amp as SpinBox).value = 0.0
+	await _frames(4)
+	_check("idle control silences weapon breath", movement.weapon_bob.is_zero_approx() and is_zero_approx(movement.idle_sway_scale()))
+	(settings.weapon_speed as SpinBox).value = 2.0
+	await _frames(2)
+	_check("speed control drives the real weapon oscillator", is_equal_approx(movement.weapon_rate, 2.0))
+	movement._amp = 1.0
+	movement._sprint = 0.0
+	movement._weapon(Balance.CAMERA_MOTION, 0.0, 1.0, 0.27)
+	var walk: Vector3 = movement.weapon_bob
+	(settings.walk_angle as SpinBox).value = 90.0
+	movement._read_tuning()
+	movement._weapon(Balance.CAMERA_MOTION, 0.0, 1.0, 0.27)
+	_check("walk direction rotates the weapon trajectory", movement.weapon_bob.is_equal_approx(walk.rotated(Vector3.BACK, PI * 0.5)))
+	movement._sprint = 1.0
+	movement._weapon(Balance.CAMERA_MOTION, 0.0, 1.0, 0.27)
+	var run: Vector3 = movement.weapon_bob
+	(settings.run_angle as SpinBox).value = -90.0
+	movement._read_tuning()
+	movement._weapon(Balance.CAMERA_MOTION, 0.0, 1.0, 0.27)
+	_check("run has an independent direction", movement.weapon_bob.is_equal_approx(run.rotated(Vector3.BACK, -PI * 0.5)))
+	(settings.head as SpinBox).value = 0.0
+	_lab.set_editing(false)
+	for frame: int in range(12):
+		await get_tree().physics_frame
+	Input.action_press("move_forward")
+	for frame: int in range(24):
+		await get_tree().physics_frame
+	Input.action_release("move_forward")
+	_check("head adjustment preserves weapon bob while walking", movement.offset.is_zero_approx() and movement.weapon_bob.length() > 0.001)
+	_lab.player._try_jump()
+	for frame: int in range(10):
+		await get_tree().physics_frame
+	_check("jump movement is independent of head bob", _lab.player.airborne and absf(movement.offset.y) > 0.001)
+	(settings.jump as SpinBox).value = 0.0
+	await _frames(4)
+	_check("jump control cancels the air offset", movement.offset.is_zero_approx())
+	_lab.set_editing(true)
+	await _shot("motion_parameters")
+	_lab.queue_free()
+	await _frames(6)
+	_check("motion draft clears on exit", is_equal_approx(Balance.lab_number("motion", "head"), 1.0))
 
 
 func _open(name: String) -> void:

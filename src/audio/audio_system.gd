@@ -5,6 +5,7 @@ const REGISTRY: String = "res://data/audio_events.json"
 const MIX_PATH: String = "res://data/audio_mix.json"
 const MAP_AMBIENCE_PATH: String = "user://map_ambience.cfg"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
+const StepLayerPatch := preload("res://src/audio/step_layer_patch.gd")
 
 signal stepped(kind: String, surface: String, pos: Vector3)
 signal event_played(event_id: String, hook: String, pos: Vector3)
@@ -20,6 +21,8 @@ var _triggered: Dictionary = {}
 var _ambient: AudioStreamPlayer
 var _preview: Dictionary = {}
 var _step_preview: Dictionary = {}
+var _layer_revision: int = -1
+var _layer_samples: Dictionary = {}
 var _scan_needed: bool = true
 var _scene_paths: Dictionary = {}
 var _object_bindings: Dictionary = {}
@@ -616,29 +619,71 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
 	if _has_ears() and _listener_pos().distance_to(pos) > float(Balance.AUDIO_EVENT_PROFILES.step_stone_run["max"]):
 		return
-	var surf := _surface_under(pos)
-	# вброд — плеск, что бы ни было на дне
-	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
-		surf = "water"
+	var surf: String = step_surface_at(pos, _surface_under(pos))
 	var takes: Dictionary = _step_preview.get(surf, {}) if not ai else {}
-	var kind: String = String(takes.get("hook", step_hook(surf, run)))
+	var kind: String = String(takes.get("hook", step_kind_at(pos, surf, run)))
 	var db := extra_db + (1.5 if ai else 0.0)
 	if run and kind != "step_stone_run":
 		db += 3.0
-	if surf == "asphalt" and _wet_asphalt_at(pos):
-		kind = "step_water"
 	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
 	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
-	var recording: AudioStream = null
-	if not takes.is_empty():
-		var place: String = place_at(pos + Vector3.UP)
-		var tracks: Array = takes.get("outdoor" if place == AcousticPlace.OUTDOOR else "room", [])
-		if not tracks.is_empty():
-			recording = _pick_from(tracks, "lab:" + surf + ":" + place)
-	play(kind, sound_pos, db, 0.0, null, recording)
+	play(kind, sound_pos, db, 0.0, null, _step_recording(takes, surf, pos))
+	_play_step_layers(pos, sound_pos, kind, db, ai)
 	if run:
 		play("gear_rattle", pos, db - 5.0)
 	stepped.emit(kind, surf, pos)
+
+
+func _step_recording(takes: Dictionary, key: String, pos: Vector3) -> AudioStream:
+	if (takes.get("outdoor", []) as Array).is_empty() and (takes.get("room", []) as Array).is_empty():
+		return null
+	var place: String = "outdoor" if place_at(pos + Vector3.UP) == AcousticPlace.OUTDOOR else "room"
+	var tracks: Array = takes.get(place, [])
+	return null if tracks.is_empty() else _pick_from(tracks, "lab:" + key + ":" + place)
+
+
+func step_layers_at(pos: Vector3) -> Array[Node]:
+	var found: Array[Node] = []
+	for patch: Node in get_tree().get_nodes_in_group(StepLayerPatch.GROUP):
+		if (patch as StepLayerPatch).covers(pos):
+			found.append(patch)
+	return found
+
+
+func _play_step_layers(pos: Vector3, sound_pos: Vector3, base: String, db: float, ai: bool) -> void:
+	var heard: Dictionary = {}
+	for node: Node in step_layers_at(pos):
+		var patch: StepLayerPatch = node as StepLayerPatch
+		if not Balance.STEP_LAYERS.has(patch.layer) or Balance.lab_number("step_layers", patch.layer + "_on") < 0.5:
+			continue
+		# Две соседние россыпи стекла не удваивают громкость на стыке.
+		var extra: float = Balance.lab_number("step_layers", patch.layer + "_db") + patch.gain_db
+		if not heard.has(patch.layer) or extra > float(heard[patch.layer][1]):
+			heard[patch.layer] = [patch.sound_event if patch.sound_event != "" else step_hook(patch.layer), extra]
+	for layer: String in heard:
+		var entry: Array = heard[layer]
+		var hook: String = String(entry[0])
+		var key: String = "layer_" + layer
+		var recording: AudioStream = _layer_recording(layer, key, pos, ai)
+		if recording != null or hook != base:
+			play(hook, sound_pos, db + float(entry[1]), 0.0, null, recording)
+
+
+func _layer_recording(layer: String, key: String, pos: Vector3, ai: bool) -> AudioStream:
+	if not ai and _step_preview.has(key):
+		return _step_recording(_step_preview[key], key, pos)
+	if _layer_revision != LabTuning.revision:
+		_layer_revision = LabTuning.revision
+		_layer_samples.clear()
+	if not _layer_samples.has(layer):
+		var takes: Array[AudioStream] = []
+		for path: String in LabTuning.value("step_layers", layer + "_files"):
+			var stream: AudioStream = load_audio_file(path)
+			if stream != null:
+				takes.append(stream)
+		_layer_samples[layer] = takes
+	var tracks: Array = _layer_samples[layer]
+	return null if tracks.is_empty() else _pick_from(tracks, key)
 
 
 ## Гильза упала рядом со стрелком (from — его ноги, right — вправо от него): звук по полу под ней,
@@ -671,6 +716,31 @@ func step_hook(surface: String, run: bool = false) -> String:
 	return hook
 
 
+func step_surface_at(pos: Vector3, surface: String) -> String:
+	# Вброд слышна вода независимо от того, какое покрытие под ней.
+	return "water" if WaterBody.depth_at(pos) > float(Balance.WATER.ankle) else surface
+
+
+func step_kind_at(pos: Vector3, surface: String, run: bool = false) -> String:
+	if surface == "asphalt" and _wet_asphalt_at(pos):
+		return "step_water"
+	return step_hook(surface, run)
+
+
+func step_surface_name(surface: String) -> String:
+	return String({"asphalt": "асфальт", "concrete": "бетон", "tile": "плитка", "gravel": "гравий / щебень",
+		"grass": "трава", "sand": "песок", "dirt": "земля", "mud": "грязь", "leaves": "листья",
+		"fabric": "ткань", "wood": "дерево", "metal": "металл", "glass": "стекло",
+		"water": "вода", "puddle": "лужи", "carpet": "ковёр", "snow": "снег", "trash": "мусор"}.get(surface, surface))
+
+
+func step_event_name(hook: String) -> String:
+	var id: String = resolve_event(hook)
+	var event: Dictionary = _events.get(id, {})
+	var count: int = (_samples.get(id, []) as Array).size()
+	return "%s · %s" % [String(event.get("name", hook)), "%d записей" % count if count > 0 else "без записи"]
+
+
 func shell_hook(surface: String, weapon_id: String = "") -> String:
 	var hook: String = String(_surface_shells.get(surface, "shell_concrete"))
 	var own: String = weapon_id + "_" + hook
@@ -699,16 +769,20 @@ func _wet_asphalt_at(pos: Vector3) -> bool:
 
 
 func _surface_under(pos: Vector3) -> String:
+	return Surfaces.kind_at(ground_hit(pos))
+
+
+func ground_hit(pos: Vector3) -> Dictionary:
 	var world := get_viewport().find_world_3d() if get_viewport() else null
 	if world == null:
-		return "concrete"
+		return {}
 	var q := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.4, pos + Vector3.DOWN * 0.6, Hitscan.LAYER_WORLD)
 	var hit := world.direct_space_state.intersect_ray(q)
 	# бесконечная «земля» (WorldBoundary) лежит над полами двора — смотрим, что под ней
 	if not hit.is_empty() and _is_boundary(hit):
 		q.exclude = [(hit.collider as CollisionObject3D).get_rid()]
 		hit = world.direct_space_state.intersect_ray(q)
-	return Surfaces.kind_at(hit) if not hit.is_empty() else "concrete"
+	return hit
 
 
 func _is_boundary(hit: Dictionary) -> bool:
