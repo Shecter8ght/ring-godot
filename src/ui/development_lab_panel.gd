@@ -1,6 +1,6 @@
 class_name DevelopmentLabPanel
 extends PanelContainer
-## Общая панель трёх стендов. Основные действия закреплены, длинные настройки прокручиваются.
+## Общая панель стендов. Основные действия закреплены, длинные настройки прокручиваются.
 
 signal value_changed(key: String, value: Variant)
 signal save_requested
@@ -21,6 +21,9 @@ var compare: CheckButton
 var status: Label
 var tabs: TabContainer
 var _title: Label
+var save_button: Button
+var play_button: Button
+var overview_button: Button
 
 
 func _ready() -> void:
@@ -61,10 +64,10 @@ func _ready() -> void:
 	body.add_child(compare)
 	compare.toggled.connect(func(original: bool) -> void: comparison_changed.emit(original))
 	action("Вернуть исходные значения в черновик", func() -> void: defaults_requested.emit(), body)
-	action("Камера сверху / из глаз · F8", func() -> void: overview_requested.emit(), body)
+	overview_button = action("Камера сверху / из глаз · F8", func() -> void: overview_requested.emit(), body)
 	action("В главное меню", func() -> void: back_requested.emit(), body)
-	action("Сохранить вариант · Ctrl+S", func() -> void: save_requested.emit(), frame)
-	action("Проверить в движении · F6", func() -> void: play_requested.emit(), frame)
+	save_button = action("Сохранить вариант · Ctrl+S", func() -> void: save_requested.emit(), frame)
+	play_button = action("Проверить в движении · F6", func() -> void: play_requested.emit(), frame)
 	status = label(frame, "", 15)
 	status.add_theme_color_override("font_color", Color(1.0, 0.82, 0.5))
 
@@ -101,15 +104,16 @@ func action(text: String, callback: Callable, parent: Node = null) -> Button:
 	return button
 
 
-func option(text: String, items: Array, callback: Callable) -> OptionButton:
-	label(context, text, 16)
+func option(text: String, items: Array, callback: Callable, parent: Node = null) -> OptionButton:
+	var body: Node = parent if parent else context
+	label(body, text, 16)
 	var control: OptionButton = OptionButton.new()
 	control.focus_mode = Control.FOCUS_NONE
 	control.custom_minimum_size.y = 34
 	control.add_theme_font_size_override("font_size", 16)
 	for title: Variant in items:
 		control.add_item(String(title))
-	context.add_child(control)
+	body.add_child(control)
 	control.item_selected.connect(callback)
 	return control
 

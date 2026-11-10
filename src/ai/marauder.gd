@@ -2343,7 +2343,7 @@ func _start_reload() -> void:
 			if state == State.COMBAT:
 				_start_retreat()
 		return
-	_reload_t = float(_spec.reload)
+	_reload_t = float(_spec.reload) / Balance.lab_number("enemy", "reload_speed")
 	_burst_left = 0
 	# магазин из подсумка на броне — липучка в тот же момент, что у игрока (Balance.POUCH_VELCRO)
 	_velcro_left = -1.0
@@ -2485,7 +2485,7 @@ func _try_fire(suppress: bool = false) -> void:
 	if _burst_left > 0:
 		_shot_t = float(_spec.interval)
 	else:
-		_shot_t = float(_spec.interval) + float(_spec.burst_pause) + (0.6 if suppress else 0.0) \
+		_shot_t = float(_spec.interval) + float(_spec.burst_pause) * Balance.lab_number("enemy", "burst_pause") + (0.6 if suppress else 0.0) \
 			+ (float(Balance.AI_FIRE_TOKENS.untoken_pause) if _untoken else 0.0)
 
 
@@ -2573,7 +2573,7 @@ func _shoot(suppress: bool) -> void:
 	elif at_ai:
 		h = 0.35 if _foe.state == State.DOWNED else 1.2
 	var target := last_known + Vector3.UP * h
-	var spread := float(_spec.spread) * _aim
+	var spread := float(_spec.spread) * _aim * Balance.lab_number("enemy", "shot_spread")
 	if _target_player and is_instance_valid(_target_player) and _target_player.velocity.length() > 2.0:
 		spread *= Balance.AI_TARGET_MOVING
 	if Vector2(velocity.x, velocity.z).length() > 0.5:
@@ -3072,6 +3072,7 @@ func _spawn_ragdoll() -> void:
 		away.y = 0.0
 		var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
 		var imp := away.normalized() * (float(push.base) + float(push.per_damage) * _last_damage) if away.length() > 0.01 else Vector3.ZERO
+		imp *= Balance.lab_number("enemy", "death_push")
 		if anim.ragdoll(velocity, imp * 4.0, global_position + Vector3.UP * 1.2):
 			_died_shown = true
 			# оружие ушло в ящик с телом — в мёртвой руке его не рисуем
@@ -3088,7 +3089,7 @@ func _spawn_ragdoll() -> void:
 	away.y = 0.0
 	away = away.normalized() if away.length() > 0.01 else -Vector3(sin(_facing), 0.0, cos(_facing))
 	var push: Dictionary = Balance.RAGDOLL_DEATH_PUSH
-	var imp := away * (float(push.base) + float(push.per_damage) * _last_damage)
+	var imp := away * (float(push.base) + float(push.per_damage) * _last_damage) * Balance.lab_number("enemy", "death_push")
 	var xf := Transform3D(Basis(Vector3.UP, _body.rotation.y), global_position)
 	_ragdoll = Ragdoll.spawn(get_tree().current_scene, xf, velocity, imp, global_position + Vector3.UP * 1.25, mat, mat)
 	velocity = Vector3.ZERO

@@ -61,13 +61,14 @@ var _frozen: bool = false
 
 ## Положить скелет в регдолл: поза — как сейчас, скорость тела — velocity, толчок impulse в точке at
 ## (мир). Анимация и модификаторы скелета должны быть уже остановлены. null — скелет не тот.
-static func start(skel: Skeleton3D, velocity: Vector3, impulse: Vector3, at: Vector3) -> SkinRagdoll:
+static func start(skel: Skeleton3D, velocity: Vector3, impulse: Vector3, at: Vector3,
+		damp_scale: float = 1.0, joint_scale: float = 1.0) -> SkinRagdoll:
 	if skel == null or skel.find_bone("mixamorig_Hips") < 0:
 		return null
 	var r := SkinRagdoll.new()
 	r.name = "SkinRagdoll"
 	skel.add_child(r)
-	r._build(skel)
+	r._build(skel, damp_scale, joint_scale)
 	var lift := r._ground_lift(skel)
 	if lift > 0.0:
 		skel.global_position += Vector3.UP * lift
@@ -90,7 +91,7 @@ func _bones() -> Array[PhysicalBone3D]:
 	return out
 
 
-func _build(skel: Skeleton3D) -> void:
+func _build(skel: Skeleton3D, damp_scale: float, joint_scale: float) -> void:
 	var damp: Dictionary = Balance.RAGDOLL_DAMP
 	for key in BONES:
 		var spec: Array = BONES[key]
@@ -128,18 +129,18 @@ func _build(skel: Skeleton3D) -> void:
 		match String(spec[2]):
 			"cone":
 				pb.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
-				pb.set("joint_constraints/swing_span", 50.0 if String(key) != "Head" else 35.0)
-				pb.set("joint_constraints/twist_span", 25.0)
+				pb.set("joint_constraints/swing_span", (50.0 if String(key) != "Head" else 35.0) * joint_scale)
+				pb.set("joint_constraints/twist_span", 25.0 * joint_scale)
 			"limb":
 				pb.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
-				pb.set("joint_constraints/swing_span", 70.0)
-				pb.set("joint_constraints/twist_span", 8.0)
+				pb.set("joint_constraints/swing_span", 70.0 * joint_scale)
+				pb.set("joint_constraints/twist_span", 8.0 * joint_scale)
 			"foot":
 				# стопа гнётся мало (носок «как у Аладдина» — от свободного сустава; уже 35° — решатель
 				# с лёгкой короткой стопой срывается)
 				pb.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
-				pb.set("joint_constraints/swing_span", 35.0)
-				pb.set("joint_constraints/twist_span", 10.0)
+				pb.set("joint_constraints/swing_span", 35.0 * joint_scale)
+				pb.set("joint_constraints/twist_span", 10.0 * joint_scale)
 			"hinge":
 				pb.joint_type = PhysicalBone3D.JOINT_TYPE_HINGE
 				pb.set("joint_constraints/angular_limit_enabled", true)
@@ -151,8 +152,8 @@ func _build(skel: Skeleton3D) -> void:
 			_:
 				pb.joint_type = PhysicalBone3D.JOINT_TYPE_NONE
 		pb.mass = float(MASS.get(key, 2.0))
-		pb.linear_damp = float(damp.linear) * 0.5
-		pb.angular_damp = float(damp.angular)
+		pb.linear_damp = float(damp.linear) * 0.5 * damp_scale
+		pb.angular_damp = float(damp.angular) * damp_scale
 		pb.friction = 1.0
 		pb.bounce = 0.0
 		# с миром; друг с другом — только левая нога с правой (колено не проходит в колено). Части

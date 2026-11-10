@@ -10,6 +10,7 @@ var draft: Dictionary = {}
 var editing: bool = true
 var overview: bool = false
 var dirty: bool = false
+var leave_overview_to_play: bool = false
 var _domains: Array[String] = []
 var _drafts: Dictionary = {}
 var _conditions_before: Dictionary = {}
@@ -171,6 +172,10 @@ func is_open() -> bool:
 
 
 func set_editing(enabled: bool) -> void:
+	if leave_overview_to_play and not enabled and editing and overview:
+		overview = false
+		rig.set_process(true)
+		rig._ads_cam.make_current()
 	editing = enabled
 	panel.visible = enabled
 	player.set_physics_process(not enabled and not overview)
@@ -286,8 +291,8 @@ func _input(event: InputEvent) -> void:
 		toggle_overview()
 	elif key.ctrl_pressed and key.physical_keycode == KEY_S:
 		_save()
-	elif editing and event.is_action_pressed("pause"):
-		set_editing(false)
+	elif event.is_action_pressed("pause") and (editing or (leave_overview_to_play and overview)):
+		set_editing(not editing)
 	else:
 		handled = false
 	if handled:

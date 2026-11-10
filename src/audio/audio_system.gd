@@ -3,6 +3,7 @@ extends Node
 
 const REGISTRY: String = "res://data/audio_events.json"
 const MIX_PATH: String = "res://data/audio_mix.json"
+const MAP_AMBIENCE_PATH: String = "user://map_ambience.cfg"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
 
 signal stepped(kind: String, surface: String, pos: Vector3)
@@ -18,6 +19,7 @@ var _shooters: Array[Dictionary] = []
 var _triggered: Dictionary = {}
 var _ambient: AudioStreamPlayer
 var _preview: Dictionary = {}
+var _step_preview: Dictionary = {}
 var _scan_needed: bool = true
 var _scene_paths: Dictionary = {}
 var _object_bindings: Dictionary = {}
@@ -28,12 +30,20 @@ var _mix: Dictionary = {"schemaVersion": 1, "events": {}, "files": {}}
 var mix_save_path: String = MIX_PATH
 var _map_ambient: AudioStreamPlayer
 var _map_scene_id: int = 0
-var _map_event: String = ""
+var _map_scene_path: String = ""
 var _map_paths: Dictionary = {}
+var _local_map_files: Dictionary = {}
+var _local_map_streams: Dictionary = {}
+var map_ambience_save_path: String = MAP_AMBIENCE_PATH
 
 func _ready() -> void:
 	_rng.randomize()
 	_load_mix()
+	var local: ConfigFile = ConfigFile.new()
+	if local.load(map_ambience_save_path) == OK:
+		var files: Variant = local.get_value("ambient", "files", {})
+		if files is Dictionary:
+			_local_map_files = files
 	var surface_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/audio_surfaces.json")) as Dictionary
 	for entry: Dictionary in surface_data.get("footsteps", []):
 		for surface: String in entry.surfaces:
@@ -56,6 +66,7 @@ func reload_events() -> void:
 	_triggered.clear()
 	_map_scene_id = 0
 	if is_instance_valid(_map_ambient):
+		_map_ambient.stop()
 		_map_ambient.queue_free()
 	_scene_paths.clear()
 	_object_bindings.clear()
@@ -90,13 +101,13 @@ func reload_events() -> void:
 			var rel: String = String(relative)
 			if rel.begins_with("/") or rel.contains(":") or ".." in rel.split("/"):
 				continue
-			var stream: AudioStream = _load_audio_file("res://assets/audio/" + rel)
+			var stream: AudioStream = load_audio_file("res://assets/audio/" + rel)
 			if stream != null:
 				streams.append(stream)
 				_stream_files[stream.get_instance_id()] = rel
 		_samples[id] = streams
 	for node: Node in get_tree().root.find_children("*", "Node3D", true, false):
-		if _map_paths.has(node.scene_file_path):
+		if _map_paths.has(node.scene_file_path) or _local_map_files.has(node.scene_file_path):
 			node.add_to_group("sonora_map_roots")
 	if is_instance_valid(_ambient):
 		_ambient.queue_free()
@@ -139,7 +150,8 @@ func _pick_from(records: Array, key: String) -> AudioStream:
 	_last_pick[key] = index
 	return records[index] as AudioStream
 
-func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0, emitter: Node = null) -> void:
+func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0, emitter: Node = null,
+		recording: AudioStream = null) -> void:
 	if hook == "":
 		return
 	var spec: Dictionary = _kind_spec(hook)
@@ -154,7 +166,7 @@ func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0
 			if _matches_object(emitter, binding):
 				id = candidate
 				break
-	var stream: AudioStream = _pick(id if id != "" and not _preview.has(hook) else hook, pos)
+	var stream: AudioStream = recording if recording != null else _pick(id if id != "" and not _preview.has(hook) else hook, pos)
 	if stream == null:
 		return
 	var delay: float = distance / float(Balance.AUDIO_FAR.sound_mps) if _has_ears() and bool(spec.get("far", false)) and distance > float(Balance.AUDIO_FAR.delay_from_m) else 0.0
@@ -292,35 +304,83 @@ func _apply_mix(player: Node) -> void:
 
 func _update_map_ambient() -> void:
 	var found: Node = null
-	var event_id: String = ""
-	for scene_path: String in _map_paths:
-		var id: String = _map_paths[scene_path]
-		if not has_sound(id):
+	var roots: Array[Node] = get_tree().get_nodes_in_group("sonora_map_roots")
+	for scene_path: String in _local_map_files.keys() + _map_paths.keys():
+		if not _local_map_files.has(scene_path) and not has_sound(String(_map_paths[scene_path])):
 			continue
-		for node: Node in get_tree().get_nodes_in_group("sonora_map_roots"):
+		for node: Node in roots:
 			if node.scene_file_path == scene_path:
 				found = node
-				event_id = id
 				break
 		if found != null:
 			break
+	var path: String = found.scene_file_path if found != null else ""
 	var scene_id: int = found.get_instance_id() if found != null else 0
-	if scene_id == _map_scene_id and event_id == _map_event:
+	if scene_id == _map_scene_id and path == _map_scene_path:
 		return
 	_map_scene_id = scene_id
-	_map_event = event_id
+	_map_scene_path = path
 	if is_instance_valid(_map_ambient):
+		_map_ambient.stop()
 		_map_ambient.queue_free()
-	if found == null:
-		return
-	var stream: AudioStream = _pick(event_id, Vector3.ZERO)
-	make_loop(stream)
-	_map_ambient = AudioStreamPlayer.new()
-	_map_ambient.stream = stream
-	_map_ambient.bus = &"Ambient"
-	_tag_mix(_map_ambient, event_id, stream, float(Balance.SONORA_AUDIO.ambient_db))
-	found.add_child(_map_ambient)
-	_map_ambient.play()
+	if found != null:
+		_map_ambient = play_map_ambience(path, found)
+
+
+func local_map_ambience(scene_path: String) -> String:
+	return String(_local_map_files.get(scene_path, ""))
+
+
+func local_map_scenes() -> PackedStringArray:
+	return PackedStringArray(_local_map_files.keys())
+
+
+func set_map_ambience(scene_path: String, audio_path: String) -> Error:
+	if not scene_path.begins_with("res://") or not ResourceLoader.exists(scene_path, "PackedScene"):
+		return ERR_INVALID_PARAMETER
+	var stream: AudioStream = load_audio_file(audio_path) if audio_path != "" else null
+	if audio_path != "" and stream == null:
+		return ERR_FILE_UNRECOGNIZED
+	var next: Dictionary = _local_map_files.duplicate()
+	if audio_path.is_empty():
+		next.erase(scene_path)
+	else:
+		next[scene_path] = audio_path
+	var config: ConfigFile = ConfigFile.new()
+	config.set_value("ambient", "files", next)
+	var result: Error = config.save(map_ambience_save_path)
+	if result != OK:
+		return result
+	_local_map_files = next
+	_local_map_streams.erase(scene_path)
+	if stream != null:
+		_local_map_streams[scene_path] = stream
+		for node: Node in get_tree().root.find_children("*", "Node3D", true, false):
+			if node.scene_file_path == scene_path:
+				node.add_to_group("sonora_map_roots")
+	# Перезапустить фон, если назначение поменялось на открытой карте.
+	if _map_scene_path == scene_path:
+		_map_scene_id = 0
+	return OK
+
+
+func play_map_ambience(scene_path: String, parent: Node) -> AudioStreamPlayer:
+	var event_id: String = String(_map_paths.get(scene_path, ""))
+	if _local_map_files.has(scene_path) and not _local_map_streams.has(scene_path):
+		_local_map_streams[scene_path] = load_audio_file(local_map_ambience(scene_path))
+	var stream: AudioStream = _local_map_streams.get(scene_path) as AudioStream
+	if stream == null:
+		stream = _pick(event_id, Vector3.ZERO)
+	if stream == null:
+		return null
+	var player: AudioStreamPlayer = AudioStreamPlayer.new()
+	player.stream = stream.duplicate() as AudioStream
+	make_loop(player.stream)
+	player.bus = &"Ambient"
+	_tag_mix(player, event_id, stream, float(Balance.SONORA_AUDIO.ambient_db))
+	parent.add_child(player)
+	player.play()
+	return player
 
 
 ## Стенд выбирает конкретную запись, но использует тот же профиль, шину и пространственную подачу.
@@ -417,8 +477,13 @@ func set_preview(streams: Dictionary) -> void:
 	_preview = streams
 	_last_pick.clear()
 
+
+func set_step_preview(streams: Dictionary) -> void:
+	_step_preview = streams
+	_place_cache.clear()
+
 func _on_audio_node_added(node: Node) -> void:
-	if _map_paths.has(node.scene_file_path):
+	if _map_paths.has(node.scene_file_path) or _local_map_files.has(node.scene_file_path):
 		node.add_to_group("sonora_map_roots")
 	if node is AudioStreamPlayer3D:
 		_configure_recorded_player(node as AudioStreamPlayer3D)
@@ -480,7 +545,9 @@ func _add_area(id: String, anchor: Node3D, radius: float) -> void:
 		if body is Player and (body as Player).is_local():
 			play(id, anchor.global_position))
 
-func _load_audio_file(path: String) -> AudioStream:
+func load_audio_file(path: String) -> AudioStream:
+	if path.get_extension().to_lower() not in ["wav", "ogg", "mp3"]:
+		return null
 	if ResourceLoader.exists(path):
 		return load(path) as AudioStream
 	if not FileAccess.file_exists(path):
@@ -553,7 +620,8 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 	# вброд — плеск, что бы ни было на дне
 	if WaterBody.depth_at(pos) > float(Balance.WATER.ankle):
 		surf = "water"
-	var kind: String = step_hook(surf, run)
+	var takes: Dictionary = _step_preview.get(surf, {}) if not ai else {}
+	var kind: String = String(takes.get("hook", step_hook(surf, run)))
 	var db := extra_db + (1.5 if ai else 0.0)
 	if run and kind != "step_stone_run":
 		db += 3.0
@@ -561,7 +629,13 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 		kind = "step_water"
 	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
 	var sound_pos: Vector3 = pos + right.normalized() * Balance.STEP_FOOT_SIDE_M * (-1.0 if left else 1.0)
-	play(kind, sound_pos, db)
+	var recording: AudioStream = null
+	if not takes.is_empty():
+		var place: String = place_at(pos + Vector3.UP)
+		var tracks: Array = takes.get("outdoor" if place == AcousticPlace.OUTDOOR else "room", [])
+		if not tracks.is_empty():
+			recording = _pick_from(tracks, "lab:" + surf + ":" + place)
+	play(kind, sound_pos, db, 0.0, null, recording)
 	if run:
 		play("gear_rattle", pos, db - 5.0)
 	stepped.emit(kind, surf, pos)

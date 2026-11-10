@@ -58,6 +58,7 @@ var _last_event_seq: int = 0
 var _one_shot: String = ""
 var _one_shot_kind: String = ""
 var _one_shot_t: float = 0.0
+var _one_shot_rate: float = 1.0
 ## Что видно сейчас (набор и направление или поза) — для тестов и отладки.
 var _current: String = ""
 var _set: String = ""
@@ -121,6 +122,7 @@ var _lod_interval: float = 0.0
 var _lod_acc: float = 0.0
 var _logic_acc: float = 0.0
 var _lod_frame: int = 0
+var _clip_preview: AnimationPlayer
 
 
 func _ready() -> void:
@@ -270,7 +272,9 @@ static func _build_tree(skel_path: String) -> AnimationNodeBlendTree:
 	_filter(upper, skel_path, true)
 	root.add_node("act", upper)
 	root.connect_node("act", 0, "live")
-	root.connect_node("act", 1, "act_clip")
+	root.add_node("act_rate", AnimationNodeTimeScale.new())
+	root.connect_node("act_rate", 0, "act_clip")
+	root.connect_node("act", 1, "act_rate")
 	var full := _acts_node(root, "full", FULL_ACTS)
 	root.add_node("full", full)
 	root.connect_node("full", 0, "act")
@@ -527,7 +531,7 @@ func _process(delta: float) -> void:
 		_logic_acc = 0.0
 	if _mode != "live":
 		_pose_t += delta * absf(_pose_rate)
-	_one_shot_t += delta
+	_one_shot_t += delta * _one_shot_rate
 	if _dead or _held:
 		_settle_motion(delta)
 		return
@@ -615,7 +619,8 @@ func _process(delta: float) -> void:
 				_downed_fire = true
 			else:
 				var b: Dictionary = Balance.BODY_MOTION
-				_recoil_v += float(b.recoil_pistol if family == "pistol" else b.recoil_kick) * (float(b.recoil_prone) if prone else 1.0)
+				var recoil_scale: float = Balance.lab_number("enemy", "recoil") if _actor is Marauder else 1.0
+				_recoil_v += float(b.recoil_pistol if family == "pistol" else b.recoil_kick) * (float(b.recoil_prone) if prone else 1.0) * recoil_scale
 		elif event_name == "hit":
 			# вздрагивание поверх любой стойки; раненому и лежащему — нет
 			if not downed and not prone:
@@ -821,8 +826,12 @@ func _event_action(ev: String, family: String, crouched: bool, prone: bool, movi
 func _start_act(kind: String, clip: String) -> void:
 	if not _has(String(POSE_CLIP.get(clip, clip))):
 		return
+	_one_shot_rate = 1.0
 	match kind:
 		"upper":
+			if _actor is Marauder and clip in ["rifle_reload", "pistol_reload"]:
+				_one_shot_rate = Balance.lab_number("enemy", "reload_speed")
+			_tree.set("parameters/act_rate/scale", _one_shot_rate)
 			_tree.set("parameters/act_clip/transition_request", clip)
 			_tree.set("parameters/act/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 		"full":
@@ -878,6 +887,54 @@ func hold_pose(clip: String, at: float) -> void:
 	_pose_to(clip, 0.0, at)
 	_tree.advance(0.0)
 	_tree.advance(float(Balance.CHARACTER_ANIM.pose_blend_sec) + 0.01)
+
+
+## Отдельный просмотр исходного клипа на том же скелете, с возвратом к штатному дереву.
+func preview_clip(clip: String, speed: float) -> AnimationPlayer:
+	if _tree == null or not _has(clip) or _dead:
+		return null
+	stop_clip_preview()
+	_tree.active = false
+	_motion.active = false
+	_hips_height.active = false
+	if _support:
+		_support.active = false
+	if _collision_ik:
+		_collision_ik.active = false
+	set_process(false)
+	var animation: Animation = _lib.get_animation(clip).duplicate() as Animation
+	animation.loop_mode = Animation.LOOP_LINEAR
+	var library: AnimationLibrary = AnimationLibrary.new()
+	library.add_animation(&"clip", animation)
+	_clip_preview = AnimationPlayer.new()
+	_clip_preview.root_node = NodePath("..")
+	_clip_preview.add_animation_library(&"", library)
+	_model.add_child(_clip_preview)
+	_clip_preview.speed_scale = speed
+	_clip_preview.play(&"clip")
+	_clip_preview.advance(0.0)
+	return _clip_preview
+
+
+func stop_clip_preview() -> void:
+	if not is_instance_valid(_clip_preview):
+		return
+	_clip_preview.active = false
+	_clip_preview.queue_free()
+	_clip_preview = null
+	if _dead:
+		return
+	_tree.active = true
+	_hips_height.active = true
+	if _support:
+		_support.active = true
+	if _collision_ik:
+		_collision_ik.active = true
+	set_process(true)
+
+
+static func clip_names() -> PackedStringArray:
+	return _lib.get_animation_list() if _prepare() else PackedStringArray()
 
 
 ## Живость поверх клипов: корпус догоняет поворот тела, ноги отстают, корпус смотрит за прицелом,
@@ -982,6 +1039,7 @@ static func _approach_angle(from: float, to: float, delta: float, sec: float) ->
 func die(clip: String) -> void:
 	if _tree == null:
 		return
+	stop_clip_preview()
 	_dead = true
 	_one_shot = ""
 	_one_shot_kind = ""
@@ -1114,6 +1172,7 @@ func ragdoll(velocity: Vector3, impulse: Vector3, at: Vector3) -> bool:
 	if skel.is_empty():
 		return false
 	_dead = true
+	stop_clip_preview()
 	_model.scale = Vector3.ONE
 	if _tree:
 		# дерево больше не двигает скелет: регдолл берёт текущую позу
@@ -1128,4 +1187,6 @@ func ragdoll(velocity: Vector3, impulse: Vector3, at: Vector3) -> bool:
 	if _grip:
 		_grip.visible = false
 	set_process(false)
-	return SkinRagdoll.start(skel[0] as Skeleton3D, velocity, impulse, at) != null
+	var damp: float = Balance.lab_number("enemy", "ragdoll_damp") if _actor is Marauder else 1.0
+	var joints: float = Balance.lab_number("enemy", "ragdoll_joints") if _actor is Marauder else 1.0
+	return SkinRagdoll.start(skel[0] as Skeleton3D, velocity, impulse, at, damp, joints) != null

@@ -30,6 +30,7 @@ func _ready() -> void:
 	_check("named presets survive reload", LabTuning.names("perception").size() == 2 and is_equal_approx(Balance.lab_number("perception", "view"), 2.0))
 	LabTuning.save("perception", "Проверка Б", LabTuning.defaults("perception"), false)
 	await _frames(1)
+	Settings.sky_mode = "calc"
 	await _open("atmosphere")
 	var atmosphere: AtmosphereLab = _lab as AtmosphereLab
 	_check("atmosphere uses real day cycle", DayCycle.current != null and RaidWeather.current != null)
@@ -177,6 +178,8 @@ func _ready() -> void:
 	_lab.queue_free()
 	await _frames(5)
 	_check("AI draft removed on exit", is_equal_approx(Balance.lab_number("perception", "hearing"), 1.0))
+	await _surface_audio()
+	await _enemy_lab()
 	await _menu_routes()
 	DirAccess.remove_absolute(LabTuning.storage_path)
 	DirAccess.remove_absolute("user://development_labs_profile_test.json")
@@ -185,14 +188,18 @@ func _ready() -> void:
 
 
 func _menu_routes() -> void:
-	for title: String in ["Свет и атмосфера", "Попадания и эффекты", "Зрение и слух противников"]:
+	for title: String in ["Свет и атмосфера", "Попадания и эффекты", "Зрение и слух противников",
+			"Поверхности и звуки карт", "Противник"]:
 		var menu: Control = (load("res://scenes/ui/main_menu.tscn") as PackedScene).instantiate() as Control
 		get_tree().root.add_child(menu)
 		get_tree().current_scene = menu
 		menu.call("_show_labs")
 		var side: VBoxContainer = menu.get("_side") as VBoxContainer
 		var found: bool = false
-		for child: Node in side.get_children():
+		if title == "Свет и атмосфера":
+			await _frames(3)
+			await _shot("stands_catalog")
+		for child: Node in side.find_children("*", "Button", true, false):
 			if child is Button and (child as Button).text == title:
 				(child as Button).pressed.emit()
 				found = true
@@ -206,6 +213,217 @@ func _menu_routes() -> void:
 		if get_tree().current_scene:
 			get_tree().current_scene.queue_free()
 		await _frames(6)
+
+
+func _surface_audio() -> void:
+	var scene: PackedScene = load("res://scenes/debug/surface_audio_lab.tscn") as PackedScene
+	var lab: DevelopmentLab = scene.instantiate() as DevelopmentLab
+	var steps_path: String = "user://lab_steps_test.cfg"
+	lab.set("step_files_path", steps_path)
+	get_tree().root.add_child(lab)
+	get_tree().current_scene = lab
+	await _frames(6)
+	var outside: Vector3 = Vector3(0, 0.08, -6)
+	var inside: Vector3 = Vector3(0, 0.08, 9)
+	_check("same physical surface in both lanes", Audio._surface_under(outside) == "asphalt" and Audio._surface_under(inside) == "asphalt")
+	_check("physics distinguishes street and room", Audio.place_at(outside + Vector3.UP) == "outdoor" and Audio.place_at(inside + Vector3.UP) == "room")
+	var course: Node3D = lab.get_node("SurfaceRoute") as Node3D
+	var catalog: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/audio_surfaces.json")) as Dictionary
+	for entry: Dictionary in catalog.footsteps:
+		for surface: String in entry.surfaces:
+			if surface == "ladder":
+				_check("footstep route includes the real ladder", course.get_node_or_null("Ladder") is Ladder)
+				continue
+			var pad: Node3D = course.get_node_or_null("Pad_" + surface) as Node3D
+			_check("footstep route includes " + surface, pad != null and Audio._surface_under(pad.global_position + Vector3.UP * 0.1) == surface)
+	_check("wet asphalt uses the existing uploaded tracks", (lab.get("_wet_recordings") as Array).size() >= 16
+		and course.has_node("Pad_asphalt_wet"))
+	var files: PackedStringArray = ["user://lab_steps_outdoor.wav", "user://lab_steps_room.wav"]
+	var recording: AudioStreamWAV = AudioStreamWAV.new()
+	recording.format = AudioStreamWAV.FORMAT_16_BITS
+	recording.mix_rate = 48000
+	for index: int in range(files.size()):
+		var samples: PackedByteArray = PackedByteArray()
+		samples.resize(96000 + 2000 * index)
+		recording.data = samples
+		_check("write fixture WAV", recording.save_to_wav(files[index]) == OK)
+	lab.call("_assign_steps", PackedStringArray([files[0]]), ["outdoor", "room"])
+	lab.call("_assign_steps", PackedStringArray([files[1]]), ["room"])
+	var latest: Array[int] = [0]
+	var observe: Callable = func(_id: String, hook: String, _pos: Vector3) -> void:
+		if hook != "step_concrete":
+			return
+		var mixed: Array[Node] = get_tree().get_nodes_in_group("sonora_mixed_players")
+		var played: AudioStreamPlayer3D = mixed.back() as AudioStreamPlayer3D
+		latest[0] = (played.stream as AudioStreamWAV).data.size()
+	Audio.event_played.connect(observe)
+	lab.set_editing(false)
+	for index: int in range(2):
+		lab.player.position = outside if index == 0 else inside
+		lab.player.reset_physics_interpolation()
+		latest[0] = 0
+		Input.action_press("move_forward")
+		for frame: int in range(60):
+			await get_tree().physics_frame
+			if latest[0] != 0:
+				break
+		Input.action_release("move_forward")
+		if latest[0] != 96000 + 2000 * index:
+			print("step diagnostic: bytes=", latest[0], " position=", lab.player.position, " velocity=", lab.player.velocity,
+				" blocked=", lab.player.keys_blocked())
+		_check("walking plays the imported recording in zone %d" % index, latest[0] == 96000 + 2000 * index)
+	Audio.event_played.disconnect(observe)
+	await _surface_transition(lab, course, files[1])
+	lab.player.position = outside
+	lab.rig._look_yaw = 0.0
+	lab.rig._look_pitch = 0.0
+	lab.set_editing(true)
+	await _frames(3)
+	await _shot("surface_audio")
+	await _surface_ladder(lab, course, files[0])
+	lab.set_editing(true)
+	var saved_steps: ConfigFile = ConfigFile.new()
+	_check("both step assignments persist", saved_steps.load(steps_path) == OK
+		and saved_steps.get_value("asphalt", "outdoor", []) == PackedStringArray([files[0]])
+		and saved_steps.get_value("asphalt", "room", []) == PackedStringArray([files[1]]))
+	var map_path: String = "res://scenes/levels/dorm_study.tscn"
+	var old_storage: String = Audio.map_ambience_save_path
+	var old_file: String = Audio.local_map_ambience(map_path)
+	Audio.map_ambience_save_path = "user://lab_ambient_test.cfg"
+	_check("assign ambience to another map", Audio.set_map_ambience(map_path, files[1]) == OK)
+	var preview: AudioStreamPlayer = Audio.play_map_ambience(map_path, lab)
+	_check("preview uses game bus and loops", preview != null and preview.bus == &"Ambient"
+		and (preview.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD)
+	var map_root: Node3D = Node3D.new()
+	map_root.scene_file_path = map_path
+	add_child(map_root)
+	await _frames(3)
+	_check("map receives assigned background", is_instance_valid(Audio._map_ambient) and Audio._map_ambient.get_parent() == map_root)
+	_check("restore built-in ambience", Audio.set_map_ambience(map_path, old_file) == OK)
+	map_root.queue_free()
+	lab.queue_free()
+	await _frames(6)
+	_check("step previews cleared after leaving", Audio._step_preview.is_empty())
+	DirAccess.remove_absolute(steps_path)
+	DirAccess.remove_absolute(Audio.map_ambience_save_path)
+	Audio.map_ambience_save_path = old_storage
+	for path: String in files:
+		DirAccess.remove_absolute(path)
+
+
+func _surface_transition(lab: DevelopmentLab, course: Node3D, tile_file: String) -> void:
+	lab.call("select_surface", 1)
+	lab.call("_assign_steps", PackedStringArray([tile_file]), ["outdoor"])
+	lab.call("select_surface", 0)
+	var asphalt: Node3D = course.get_node("Pad_asphalt") as Node3D
+	var start: Vector3 = asphalt.global_position + Vector3(-1.2, 0.12, 0)
+	lab.call("_move_to", start, PI * 0.5, false)
+	lab.set_editing(true)
+	await _frames(3)
+	await _shot("surface_route")
+	var heard: Array[String] = []
+	var observer: Callable = func(hook: String, surface: String, _pos: Vector3) -> void:
+		var next: String = surface + "/" + hook
+		if heard.is_empty() or heard.back() != next:
+			heard.append(next)
+	Audio.stepped.connect(observer)
+	lab.set_editing(false)
+	Input.action_press("move_forward")
+	for frame: int in range(220):
+		await get_tree().physics_frame
+		if "tile/step_stone" in heard:
+			break
+	Input.action_release("move_forward")
+	Audio.stepped.disconnect(observer)
+	_check("steps change from asphalt to tile without stopping", heard.size() >= 2
+		and heard[0] == "asphalt/step_concrete" and heard[1] == "tile/step_stone")
+	var played: Array[Node] = get_tree().get_nodes_in_group("sonora_mixed_players")
+	var sound: AudioStreamPlayer3D = played.back() as AudioStreamPlayer3D if not played.is_empty() else null
+	_check("tile keeps its own loaded WAV after switching the sample picker",
+		sound != null and sound.stream is AudioStreamWAV and (sound.stream as AudioStreamWAV).data.size() == 98000)
+
+
+func _surface_ladder(lab: DevelopmentLab, course: Node3D, fixture: String) -> void:
+	var ladder: Ladder = course.get_node("Ladder") as Ladder
+	lab.call("_move_to", ladder.global_position + Vector3(-0.8, 0.04, 0), PI * 0.5, true)
+	for frame: int in range(12):
+		await get_tree().physics_frame
+	lab.player._try_vault()
+	_check("the player can grab the route ladder", lab.player.ladder == ladder)
+	var previous: Dictionary = Audio._preview
+	if not Audio.has_sound("ladder_step"):
+		Audio.set_preview(previous.merged({"ladder_step": [Audio.load_audio_file(fixture)]}))
+	var heard: Array[String] = []
+	var observe: Callable = func(_id: String, hook: String, _pos: Vector3) -> void:
+		if hook == "ladder_step":
+			heard.append(hook)
+	Audio.event_played.connect(observe)
+	Input.action_press("move_forward")
+	for frame: int in range(120):
+		await get_tree().physics_frame
+		if not heard.is_empty():
+			break
+	Input.action_release("move_forward")
+	Audio.event_played.disconnect(observe)
+	Audio.set_preview(previous)
+	_check("climbing plays the assigned ladder step", not heard.is_empty())
+
+
+func _enemy_lab() -> void:
+	await _open("enemy")
+	var enemy: Marauder = _lab.get("enemy") as Marauder
+	var animator: CharacterAnimator = _lab.get("animator") as CharacterAnimator
+	_check("enemy uses the actual character model", animator.has_model())
+	_lab.call("_play_clip")
+	var clip: AnimationPlayer = _lab.get("clip_player") as AnimationPlayer
+	_check("chosen clip plays on the character", is_instance_valid(clip) and clip.is_playing())
+	(_lab.panel.fields.clip_speed as SpinBox).value = 0.5
+	_check("clip speed changes in place", is_equal_approx(clip.speed_scale, 0.5))
+	(_lab.get("_timeline") as HSlider).value = 0.4
+	_check("clip seeks to the requested frame", absf(clip.current_animation_position - 0.4) < 0.02)
+	_lab.panel.tabs.current_tab = 1
+	await _frames(2)
+	await _shot("enemy_animation")
+	_lab.call("_stop_clip")
+	var rounds: int = enemy._mag
+	_lab.set("_one_shot", true)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_check("enemy fires a real round", enemy._mag == rounds - 1)
+	(_lab.panel.fields.reload_speed as SpinBox).value = 2.0
+	enemy._start_reload()
+	_check("reload speed changes the real reload", is_equal_approx(enemy._reload_t, float(enemy._spec.reload) * 0.5))
+	(_lab.panel.fields.ragdoll_damp as SpinBox).value = 2.0
+	(_lab.panel.fields.ragdoll_joints as SpinBox).value = 0.5
+	_lab.call("_play_clip")
+	_lab.call("_fall")
+	await _frames(10)
+	var bodies: Array[Node] = enemy.find_children("*", "PhysicalBone3D", true, false)
+	_check("fall from clip uses the real ragdoll", not enemy._health.alive and bodies.size() == 14)
+	var chest: PhysicalBone3D = enemy.find_child("PB_Spine2", true, false) as PhysicalBone3D
+	_check("ragdoll uses adjusted joints and damping", chest != null
+		and is_equal_approx(chest.angular_damp, float(Balance.RAGDOLL_DAMP.angular) * 2.0)
+		and is_equal_approx(float(chest.get("joint_constraints/swing_span")), 25.0))
+	await _shot("enemy_ragdoll")
+	_lab.call("_reset_enemy")
+	enemy = _lab.get("enemy") as Marauder
+	_check("reset spawns a fresh living enemy", enemy._health.alive)
+	_lab.set_editing(false)
+	_lab.rig._look_yaw = 0.0
+	_lab.rig._look_pitch = -0.05
+	await _frames(24)
+	_check("F6 returns from the orbit camera to the shooter", not _lab.overview and _lab.player.is_physics_processing())
+	Input.action_press("fire")
+	for frame: int in range(45):
+		await get_tree().physics_frame
+		if enemy._health.last_zone != "":
+			break
+	Input.action_release("fire")
+	_check("player can shoot the enemy in first person", enemy._health.last_zone != "")
+	# Как при переходе с экраном загрузки, даём короткой вспышке выстрела закончиться.
+	await get_tree().create_timer(0.15).timeout
+	_lab.queue_free()
+	await _frames(6)
 
 
 func _open(name: String) -> void:
