@@ -851,7 +851,7 @@ order = 1000003
 pick_size = Vector3(3.5, 0.15, 2.5)
 metadata/patch_stage = "1_street"
 
-[node name="Асфальт drive_road этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=727981117]
+[node name="Асфальт drive_road этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=273238994]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -116.1, 0.04, -99.875)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -866,7 +866,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -116.1, 0.04, -99.875)
 pick_size = Vector3(7.8, 0.08, 105.85)
 metadata/patch_stage = "2_backs"
 
-[node name="Тротуар drive_walk_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=702800867]
+[node name="Тротуар drive_walk_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1064490507]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -121.5, 0.04, -80.125)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -882,7 +882,7 @@ order = 1000001
 pick_size = Vector3(3, 0.08, 66.35)
 metadata/patch_stage = "2_backs"
 
-[node name="Тротуар drive_walk_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=103329316]
+[node name="Тротуар drive_walk_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=881592459]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110.1, 0.04, -80.125)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -898,7 +898,7 @@ order = 1000002
 pick_size = Vector3(4.2, 0.08, 66.35)
 metadata/patch_stage = "2_backs"
 
-[node name="Парковка lot_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=587023000]
+[node name="Парковка lot_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=682874880]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.5, 0.025, -76.4)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -914,7 +914,7 @@ order = 1000003
 pick_size = Vector3(73, 0.05, 19.8)
 metadata/patch_stage = "2_backs"
 
-[node name="Асфальт service_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1434279083]
+[node name="Асфальт service_w этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=704898652]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.5, 0.025, -62.9)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -930,7 +930,7 @@ order = 1000004
 pick_size = Vector3(73, 0.05, 7.2)
 metadata/patch_stage = "2_backs"
 
-[node name="Парковка lot_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1846982]
+[node name="Парковка lot_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1182474019]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -77, 0.025, -76.4)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -946,7 +946,7 @@ order = 1000005
 pick_size = Vector3(62, 0.05, 19.8)
 metadata/patch_stage = "2_backs"
 
-[node name="Асфальт service_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=227547957]
+[node name="Асфальт service_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1125072238]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -77, 0.025, -62.9)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -962,7 +962,7 @@ order = 1000006
 pick_size = Vector3(62, 0.05, 7.2)
 metadata/patch_stage = "2_backs"
 
-[node name="Асфальт yard_road_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1527195750]
+[node name="Асфальт yard_road_e этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1600177242]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.25, 0.04, -149.3)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -978,7 +978,7 @@ order = 1000007
 pick_size = Vector3(59.5, 0.08, 7)
 metadata/patch_stage = "2_backs"
 
-[node name="Асфальт yard_road_e2 этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=163382150]
+[node name="Асфальт yard_road_e2 этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1767024333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.25, 0.04, -151.3)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -994,7 +994,7 @@ order = 1000008
 pick_size = Vector3(3.5, 0.08, 3)
 metadata/patch_stage = "2_backs"
 
-[node name="Асфальт yard_cross этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1670878537]
+[node name="Асфальт yard_cross этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1470377515]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.25, 0.085, -147.8)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -1010,7 +1010,7 @@ order = 1000009
 pick_size = Vector3(3.5, 0.17, 4)
 metadata/patch_stage = "2_backs"
 
-[node name="Парковка bank_lot этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1373511261]
+[node name="Парковка bank_lot этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1764159407]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0.025, -123)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -1679,6 +1679,39 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, -2.4, -41.0885)
 order = 101
 pick_size = Vector3(7.98, 1.8, 3.177)
+
+[node name="Перекрытие bridge_floor этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=474218219]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.025, -53.8)
+script = ExtResource("4_u54l0")
+list = "slabs"
+data = {
+"holes": [],
+"id": "bridge_floor",
+"mat": "slab",
+"rect": [-146.0, -59.3, -143.0, -48.3],
+"t": 0.3,
+"y_top": 4.175
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.025, -53.8)
+pick_size = Vector3(3, 0.3, 11)
+metadata/patch_stage = "3_frontline"
+
+[node name="Перекрытие bridge_roof этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1589759330]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.9, -53.8)
+script = ExtResource("4_u54l0")
+list = "slabs"
+data = {
+"holes": [],
+"id": "bridge_roof",
+"mat": "slab",
+"rect": [-145.8, -59.5, -143.2, -48.1],
+"t": 0.25,
+"y_top": 8.025
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.9, -53.8)
+order = 1000001
+pick_size = Vector3(2.6, 0.25, 11.4)
+metadata/patch_stage = "3_frontline"
 
 [node name="Стены" type="Node3D" parent="Landscape/Улицы" unique_id=1660921852]
 
@@ -17018,6 +17051,156 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.0925, 5.975, 128)
 order = 1217
 pick_size = Vector3(7.815, 3.6, 0.15)
 
+[node name="Стена этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1932432648]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.6, 5.975, -48.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-146.0, -48.425, -145.2, -48.175],
+"y0": 4.175,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.6, 5.975, -48.3)
+order = 1000002
+pick_size = Vector3(0.8, 3.6, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 2" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=11634501]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.125, -48.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-145.2, -48.425, -143.8, -48.175],
+"y0": 6.475,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.125, -48.3)
+order = 1000003
+pick_size = Vector3(1.4, 1.3, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 3" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=529800109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.625, -48.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-145.2, -48.425, -143.8, -48.175],
+"y0": 4.175,
+"y1": 5.075
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.625, -48.3)
+order = 1000004
+pick_size = Vector3(1.4, 0.9, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 4" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=557207367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.4, 5.975, -48.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-143.8, -48.425, -143.0, -48.175],
+"y0": 4.175,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.4, 5.975, -48.3)
+order = 1000005
+pick_size = Vector3(0.8, 3.6, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 5" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1965886947]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.6, 5.975, -59.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-146.0, -59.425, -145.2, -59.175],
+"y0": 4.175,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.6, 5.975, -59.3)
+order = 1000006
+pick_size = Vector3(0.8, 3.6, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 6" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1976918237]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.125, -59.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-145.2, -59.425, -143.8, -59.175],
+"y0": 6.475,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 7.125, -59.3)
+order = 1000007
+pick_size = Vector3(1.4, 1.3, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 7" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1716333238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.625, -59.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-145.2, -59.425, -143.8, -59.175],
+"y0": 4.175,
+"y1": 5.075
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 4.625, -59.3)
+order = 1000008
+pick_size = Vector3(1.4, 0.9, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 8" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=150223667]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.4, 5.975, -59.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-143.8, -59.425, -143.0, -59.175],
+"y0": 4.175,
+"y1": 7.775
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.4, 5.975, -59.3)
+order = 1000009
+pick_size = Vector3(0.8, 3.6, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 9" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2087399279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.1, 4.0125, -48.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-94.0, -48.425, -92.2, -48.175],
+"y0": 0.0,
+"y1": 8.025
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.1, 4.0125, -48.3)
+order = 1000012
+pick_size = Vector3(1.8, 8.025, 0.25)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 10" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=106064100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.1, 4.0125, -59.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-94.0, -59.425, -92.2, -59.175],
+"y0": 0.0,
+"y1": 8.025
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93.1, 4.0125, -59.3)
+order = 1000013
+pick_size = Vector3(1.8, 8.025, 0.25)
+metadata/patch_stage = "3_frontline"
+
 [node name="Бетон" type="Node3D" parent="Landscape/Улицы/Стены" unique_id=2010477403]
 
 [node name="Стена 0001" type="Node3D" parent="Landscape/Улицы/Стены/Бетон" unique_id=1013631754]
@@ -18125,6 +18308,36 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 8.525, 119.9)
 order = 1221
 pick_size = Vector3(10, 1, 0.2)
+
+[node name="Стена этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Стены/Бетон" unique_id=1889539101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 8.525, -59.4)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "concrete",
+"rect": [-145.8, -59.5, -143.2, -59.3],
+"y0": 8.025,
+"y1": 9.025
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 8.525, -59.4)
+order = 1000010
+pick_size = Vector3(2.6, 1, 0.2)
+metadata/patch_stage = "3_frontline"
+
+[node name="Стена этап 3_frontline 2" type="Node3D" parent="Landscape/Улицы/Стены/Бетон" unique_id=1815626501]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 8.525, -48.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "concrete",
+"rect": [-145.8, -48.3, -143.2, -48.099999999999994],
+"y0": 8.025,
+"y1": 9.025
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144.5, 8.525, -48.2)
+order = 1000011
+pick_size = Vector3(2.6, 1, 0.2)
+metadata/patch_stage = "3_frontline"
 
 [node name="Грунт" type="Node3D" parent="Landscape/Улицы/Стены" unique_id=571057096]
 
@@ -39796,7 +40009,7 @@ order = 1000023
 pick_size = Vector3(0.15, 0.02, 2.2)
 metadata/patch_stage = "1_street"
 
-[node name="Полоса этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1235684357]
+[node name="Полоса этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1259379585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39812,7 +40025,7 @@ order = 1000011
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 2" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1735545262]
+[node name="Полоса этап 2_backs 2" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1941450387]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -193.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39828,7 +40041,7 @@ order = 1000012
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 3" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2042296085]
+[node name="Полоса этап 2_backs 3" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=930588116]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -191, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39844,7 +40057,7 @@ order = 1000013
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 4" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=955723627]
+[node name="Полоса этап 2_backs 4" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1823390903]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39860,7 +40073,7 @@ order = 1000014
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 5" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=111030567]
+[node name="Полоса этап 2_backs 5" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=856069694]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39876,7 +40089,7 @@ order = 1000015
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 6" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1007619213]
+[node name="Полоса этап 2_backs 6" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1582342642]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39892,7 +40105,7 @@ order = 1000016
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 7" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1716920385]
+[node name="Полоса этап 2_backs 7" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=36477326]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -181, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39908,7 +40121,7 @@ order = 1000017
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 8" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=198494130]
+[node name="Полоса этап 2_backs 8" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=104352076]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -178.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39924,7 +40137,7 @@ order = 1000018
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 9" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=170285157]
+[node name="Полоса этап 2_backs 9" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=702466901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39940,7 +40153,7 @@ order = 1000019
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 10" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=355786531]
+[node name="Полоса этап 2_backs 10" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1999415820]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39956,7 +40169,7 @@ order = 1000020
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 11" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=862092325]
+[node name="Полоса этап 2_backs 11" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2022457101]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39972,7 +40185,7 @@ order = 1000021
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 12" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=146341901]
+[node name="Полоса этап 2_backs 12" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1969190027]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -39988,7 +40201,7 @@ order = 1000022
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 13" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2139460111]
+[node name="Полоса этап 2_backs 13" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=912381831]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -166, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40004,7 +40217,7 @@ order = 1000023
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 14" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1916874172]
+[node name="Полоса этап 2_backs 14" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1412607632]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -163.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40020,7 +40233,7 @@ order = 1000024
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 15" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=918044773]
+[node name="Полоса этап 2_backs 15" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=770447254]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -161, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40036,7 +40249,7 @@ order = 1000025
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 16" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=934670679]
+[node name="Полоса этап 2_backs 16" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1624986844]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40052,7 +40265,7 @@ order = 1000026
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 17" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1488829379]
+[node name="Полоса этап 2_backs 17" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=345786494]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40068,7 +40281,7 @@ order = 1000027
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 18" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1423450835]
+[node name="Полоса этап 2_backs 18" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1780264966]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40084,7 +40297,7 @@ order = 1000028
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 19" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=987976165]
+[node name="Полоса этап 2_backs 19" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1098690595]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40100,7 +40313,7 @@ order = 1000029
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 20" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2001367271]
+[node name="Полоса этап 2_backs 20" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1516338944]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40116,7 +40329,7 @@ order = 1000030
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 21" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=125176831]
+[node name="Полоса этап 2_backs 21" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=527343873]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40132,7 +40345,7 @@ order = 1000031
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 22" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=974210613]
+[node name="Полоса этап 2_backs 22" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1311902359]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40148,7 +40361,7 @@ order = 1000032
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 23" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=509531828]
+[node name="Полоса этап 2_backs 23" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=282346396]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -141, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40164,7 +40377,7 @@ order = 1000033
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 24" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=603583385]
+[node name="Полоса этап 2_backs 24" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1044726338]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -138.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40180,7 +40393,7 @@ order = 1000034
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 25" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=115705289]
+[node name="Полоса этап 2_backs 25" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=858638916]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40196,7 +40409,7 @@ order = 1000035
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 26" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1198076559]
+[node name="Полоса этап 2_backs 26" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1386851547]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40212,7 +40425,7 @@ order = 1000036
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 27" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=665488609]
+[node name="Полоса этап 2_backs 27" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=673213193]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40228,7 +40441,7 @@ order = 1000037
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 28" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=635377715]
+[node name="Полоса этап 2_backs 28" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1247094053]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40244,7 +40457,7 @@ order = 1000038
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 29" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1899228895]
+[node name="Полоса этап 2_backs 29" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1547438119]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40260,7 +40473,7 @@ order = 1000039
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 30" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=683546555]
+[node name="Полоса этап 2_backs 30" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=991356078]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -123.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40276,7 +40489,7 @@ order = 1000040
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 31" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1755211544]
+[node name="Полоса этап 2_backs 31" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1628067616]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -196, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40292,7 +40505,7 @@ order = 1000041
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 32" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=975318891]
+[node name="Полоса этап 2_backs 32" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2117971387]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -193.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40308,7 +40521,7 @@ order = 1000042
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 33" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=223044642]
+[node name="Полоса этап 2_backs 33" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1188386415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -191, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40324,7 +40537,7 @@ order = 1000043
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 34" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1052271722]
+[node name="Полоса этап 2_backs 34" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1464898043]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -188.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40340,7 +40553,7 @@ order = 1000044
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 35" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=381037117]
+[node name="Полоса этап 2_backs 35" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1638432332]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40356,7 +40569,7 @@ order = 1000045
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 36" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=836641241]
+[node name="Полоса этап 2_backs 36" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1131212505]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40372,7 +40585,7 @@ order = 1000046
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 37" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1087031351]
+[node name="Полоса этап 2_backs 37" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=946725190]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -181, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40388,7 +40601,7 @@ order = 1000047
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 38" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1475599238]
+[node name="Полоса этап 2_backs 38" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2102381296]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -178.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40404,7 +40617,7 @@ order = 1000048
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 39" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=452547375]
+[node name="Полоса этап 2_backs 39" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1569898725]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40420,7 +40633,7 @@ order = 1000049
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 40" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1102424031]
+[node name="Полоса этап 2_backs 40" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=740869865]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -173.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40436,7 +40649,7 @@ order = 1000050
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 41" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2005875745]
+[node name="Полоса этап 2_backs 41" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1933285514]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -171, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40452,7 +40665,7 @@ order = 1000051
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 42" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1959276147]
+[node name="Полоса этап 2_backs 42" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=433025942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40468,7 +40681,7 @@ order = 1000052
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 43" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=354024182]
+[node name="Полоса этап 2_backs 43" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2021969041]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -166, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40484,7 +40697,7 @@ order = 1000053
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 44" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=720750451]
+[node name="Полоса этап 2_backs 44" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1715774117]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -163.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40500,7 +40713,7 @@ order = 1000054
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 45" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=485030757]
+[node name="Полоса этап 2_backs 45" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=44674744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -161, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40516,7 +40729,7 @@ order = 1000055
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 46" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=448991215]
+[node name="Полоса этап 2_backs 46" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=294517693]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -158.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40532,7 +40745,7 @@ order = 1000056
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 47" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=325748253]
+[node name="Полоса этап 2_backs 47" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1467765344]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -156, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40548,7 +40761,7 @@ order = 1000057
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 48" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2039752046]
+[node name="Полоса этап 2_backs 48" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1459928438]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40564,7 +40777,7 @@ order = 1000058
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 49" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=473028346]
+[node name="Полоса этап 2_backs 49" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=529780578]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40580,7 +40793,7 @@ order = 1000059
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 50" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1691899385]
+[node name="Полоса этап 2_backs 50" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=108756843]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40596,7 +40809,7 @@ order = 1000060
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 51" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=762746686]
+[node name="Полоса этап 2_backs 51" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1833388458]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -146, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40612,7 +40825,7 @@ order = 1000061
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 52" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=630891575]
+[node name="Полоса этап 2_backs 52" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1247717911]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40628,7 +40841,7 @@ order = 1000062
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 53" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=794741561]
+[node name="Полоса этап 2_backs 53" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=542491436]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -141, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40644,7 +40857,7 @@ order = 1000063
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 54" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1943464089]
+[node name="Полоса этап 2_backs 54" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1883987703]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -138.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40660,7 +40873,7 @@ order = 1000064
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 55" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1684753024]
+[node name="Полоса этап 2_backs 55" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=615237046]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40676,7 +40889,7 @@ order = 1000065
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 56" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1963099461]
+[node name="Полоса этап 2_backs 56" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=912756163]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40692,7 +40905,7 @@ order = 1000066
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 57" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=272826500]
+[node name="Полоса этап 2_backs 57" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1287202749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40708,7 +40921,7 @@ order = 1000067
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 58" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=603327056]
+[node name="Полоса этап 2_backs 58" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=487265752]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40724,7 +40937,7 @@ order = 1000068
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 59" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=329321854]
+[node name="Полоса этап 2_backs 59" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=326004366]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40740,7 +40953,7 @@ order = 1000069
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 60" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1134793089]
+[node name="Полоса этап 2_backs 60" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1883410519]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -123.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40756,7 +40969,7 @@ order = 1000070
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 61" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=871478055]
+[node name="Полоса этап 2_backs 61" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1069663084]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -108, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40772,7 +40985,7 @@ order = 1000071
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 62" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1050721232]
+[node name="Полоса этап 2_backs 62" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=745388513]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40788,7 +41001,7 @@ order = 1000072
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 63" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=520425680]
+[node name="Полоса этап 2_backs 63" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1592317944]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -103, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40804,7 +41017,7 @@ order = 1000073
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 64" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=705332214]
+[node name="Полоса этап 2_backs 64" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=971388137]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40820,7 +41033,7 @@ order = 1000074
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 65" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=772553082]
+[node name="Полоса этап 2_backs 65" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1667201973]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40836,7 +41049,7 @@ order = 1000075
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 66" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1928361746]
+[node name="Полоса этап 2_backs 66" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2137645005]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40852,7 +41065,7 @@ order = 1000076
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 67" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2016546928]
+[node name="Полоса этап 2_backs 67" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2017747670]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40868,7 +41081,7 @@ order = 1000077
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 68" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1141077602]
+[node name="Полоса этап 2_backs 68" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=849526481]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40884,7 +41097,7 @@ order = 1000078
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 69" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1754256614]
+[node name="Полоса этап 2_backs 69" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=912849742]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40900,7 +41113,7 @@ order = 1000079
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 70" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1736351137]
+[node name="Полоса этап 2_backs 70" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=572144925]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40916,7 +41129,7 @@ order = 1000080
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 71" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=610859383]
+[node name="Полоса этап 2_backs 71" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=612990821]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -83, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40932,7 +41145,7 @@ order = 1000081
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 72" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1809235967]
+[node name="Полоса этап 2_backs 72" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1523369630]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40948,7 +41161,7 @@ order = 1000082
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 73" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=654786764]
+[node name="Полоса этап 2_backs 73" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1571004729]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -78, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40964,7 +41177,7 @@ order = 1000083
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 74" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=877728120]
+[node name="Полоса этап 2_backs 74" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1810779276]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40980,7 +41193,7 @@ order = 1000084
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 75" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1771864674]
+[node name="Полоса этап 2_backs 75" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1448940747]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -40996,7 +41209,7 @@ order = 1000085
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 76" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1518686924]
+[node name="Полоса этап 2_backs 76" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=537376019]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41012,7 +41225,7 @@ order = 1000086
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 77" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1319103265]
+[node name="Полоса этап 2_backs 77" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1473084394]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41028,7 +41241,7 @@ order = 1000087
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 78" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1466161683]
+[node name="Полоса этап 2_backs 78" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1347157236]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41044,7 +41257,7 @@ order = 1000088
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 79" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2014049588]
+[node name="Полоса этап 2_backs 79" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1732013830]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41060,7 +41273,7 @@ order = 1000089
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 80" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2079275929]
+[node name="Полоса этап 2_backs 80" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=39799186]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41076,7 +41289,7 @@ order = 1000090
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 81" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1157017573]
+[node name="Полоса этап 2_backs 81" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1026315762]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41092,7 +41305,7 @@ order = 1000091
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 82" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1479445974]
+[node name="Полоса этап 2_backs 82" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=408326855]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41108,7 +41321,7 @@ order = 1000092
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 83" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2124656099]
+[node name="Полоса этап 2_backs 83" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1545448175]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -53, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41124,7 +41337,7 @@ order = 1000093
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 84" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2114630317]
+[node name="Полоса этап 2_backs 84" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1989237365]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50.5, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41140,7 +41353,7 @@ order = 1000094
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 85" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=715855002]
+[node name="Полоса этап 2_backs 85" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1551365249]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 0.06, -69.15)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41156,7 +41369,7 @@ order = 1000095
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 86" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=981680898]
+[node name="Полоса этап 2_backs 86" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1763060723]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -108, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41172,7 +41385,7 @@ order = 1000096
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 87" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=697731953]
+[node name="Полоса этап 2_backs 87" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=993518182]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41188,7 +41401,7 @@ order = 1000097
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 88" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=261984270]
+[node name="Полоса этап 2_backs 88" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1302378843]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -103, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41204,7 +41417,7 @@ order = 1000098
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 89" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1092686398]
+[node name="Полоса этап 2_backs 89" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1881040624]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41220,7 +41433,7 @@ order = 1000099
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 90" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1297074986]
+[node name="Полоса этап 2_backs 90" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=897990072]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41236,7 +41449,7 @@ order = 1000100
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 91" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1051964466]
+[node name="Полоса этап 2_backs 91" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1001098842]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41252,7 +41465,7 @@ order = 1000101
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 92" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1071304069]
+[node name="Полоса этап 2_backs 92" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1644807365]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -93, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41268,7 +41481,7 @@ order = 1000102
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 93" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1668832463]
+[node name="Полоса этап 2_backs 93" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2105079398]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41284,7 +41497,7 @@ order = 1000103
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 94" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1978877427]
+[node name="Полоса этап 2_backs 94" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1130189380]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41300,7 +41513,7 @@ order = 1000104
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 95" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1771704707]
+[node name="Полоса этап 2_backs 95" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1280402102]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41316,7 +41529,7 @@ order = 1000105
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 96" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1404834597]
+[node name="Полоса этап 2_backs 96" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1795874200]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -83, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41332,7 +41545,7 @@ order = 1000106
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 97" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=382095767]
+[node name="Полоса этап 2_backs 97" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=627655261]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41348,7 +41561,7 @@ order = 1000107
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 98" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=943811196]
+[node name="Полоса этап 2_backs 98" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1105534060]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -78, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41364,7 +41577,7 @@ order = 1000108
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 99" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=853090287]
+[node name="Полоса этап 2_backs 99" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2098199602]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41380,7 +41593,7 @@ order = 1000109
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 100" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=4044229]
+[node name="Полоса этап 2_backs 100" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1680382322]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41396,7 +41609,7 @@ order = 1000110
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 101" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1824439763]
+[node name="Полоса этап 2_backs 101" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1260462675]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41412,7 +41625,7 @@ order = 1000111
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 102" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=618265733]
+[node name="Полоса этап 2_backs 102" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1915026146]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41428,7 +41641,7 @@ order = 1000112
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 103" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2094626090]
+[node name="Полоса этап 2_backs 103" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1708432223]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41444,7 +41657,7 @@ order = 1000113
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 104" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=104374806]
+[node name="Полоса этап 2_backs 104" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=363205660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41460,7 +41673,7 @@ order = 1000114
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 105" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=146663184]
+[node name="Полоса этап 2_backs 105" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1679129111]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41476,7 +41689,7 @@ order = 1000115
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 106" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2053865550]
+[node name="Полоса этап 2_backs 106" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2049171929]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41492,7 +41705,7 @@ order = 1000116
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 107" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1948230841]
+[node name="Полоса этап 2_backs 107" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1289457265]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41508,7 +41721,7 @@ order = 1000117
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 108" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=630175178]
+[node name="Полоса этап 2_backs 108" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=666486543]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -53, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41524,7 +41737,7 @@ order = 1000118
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 109" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1765145549]
+[node name="Полоса этап 2_backs 109" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=484369626]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50.5, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41540,7 +41753,7 @@ order = 1000119
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 110" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1433197823]
+[node name="Полоса этап 2_backs 110" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=422063166]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 0.06, -82.25)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41556,7 +41769,7 @@ order = 1000120
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 111" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=960624045]
+[node name="Полоса этап 2_backs 111" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=29891141]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41572,7 +41785,7 @@ order = 1000121
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 112" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2102185781]
+[node name="Полоса этап 2_backs 112" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2006918942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41588,7 +41801,7 @@ order = 1000122
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 113" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=368906672]
+[node name="Полоса этап 2_backs 113" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1703417575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41604,7 +41817,7 @@ order = 1000123
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 114" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1512553110]
+[node name="Полоса этап 2_backs 114" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=349941975]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41620,7 +41833,7 @@ order = 1000124
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 115" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1602809617]
+[node name="Полоса этап 2_backs 115" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=171831886]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41636,7 +41849,7 @@ order = 1000125
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 116" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2090976269]
+[node name="Полоса этап 2_backs 116" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1162134000]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41652,7 +41865,7 @@ order = 1000126
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 117" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1411237822]
+[node name="Полоса этап 2_backs 117" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=439254399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41668,7 +41881,7 @@ order = 1000127
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 118" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1653647922]
+[node name="Полоса этап 2_backs 118" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=673546197]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41684,7 +41897,7 @@ order = 1000128
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 119" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=639409456]
+[node name="Полоса этап 2_backs 119" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2125546493]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41700,7 +41913,7 @@ order = 1000129
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 120" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=234154470]
+[node name="Полоса этап 2_backs 120" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=646425507]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41716,7 +41929,7 @@ order = 1000130
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 121" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=867865896]
+[node name="Полоса этап 2_backs 121" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1166320401]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41732,7 +41945,7 @@ order = 1000131
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 122" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=816446374]
+[node name="Полоса этап 2_backs 122" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1580758710]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41748,7 +41961,7 @@ order = 1000132
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 123" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=387646549]
+[node name="Полоса этап 2_backs 123" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2117336330]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.06, -140.35)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41764,7 +41977,7 @@ order = 1000133
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 124" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=684505476]
+[node name="Полоса этап 2_backs 124" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1166908870]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41780,7 +41993,7 @@ order = 1000134
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 125" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=911392951]
+[node name="Полоса этап 2_backs 125" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2036770241]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41796,7 +42009,7 @@ order = 1000135
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 126" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1607753839]
+[node name="Полоса этап 2_backs 126" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1493624653]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41812,7 +42025,7 @@ order = 1000136
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 127" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1058276095]
+[node name="Полоса этап 2_backs 127" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=187775368]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41828,7 +42041,7 @@ order = 1000137
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 128" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=162229077]
+[node name="Полоса этап 2_backs 128" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1224483377]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41844,7 +42057,7 @@ order = 1000138
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 129" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1791193615]
+[node name="Полоса этап 2_backs 129" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=739237039]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41860,7 +42073,7 @@ order = 1000139
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 130" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=597288416]
+[node name="Полоса этап 2_backs 130" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=86569431]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41876,7 +42089,7 @@ order = 1000140
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 131" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=542687022]
+[node name="Полоса этап 2_backs 131" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=220159646]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41892,7 +42105,7 @@ order = 1000141
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 132" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=817169912]
+[node name="Полоса этап 2_backs 132" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1116458948]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41908,7 +42121,7 @@ order = 1000142
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 133" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1291289249]
+[node name="Полоса этап 2_backs 133" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=147603288]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41924,7 +42137,7 @@ order = 1000143
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 134" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=70301594]
+[node name="Полоса этап 2_backs 134" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1553337199]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41940,7 +42153,7 @@ order = 1000144
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 135" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=101616278]
+[node name="Полоса этап 2_backs 135" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1941662230]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41956,7 +42169,7 @@ order = 1000145
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 136" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1071590505]
+[node name="Полоса этап 2_backs 136" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1711658661]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.06, -121.95)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41972,7 +42185,7 @@ order = 1000146
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 137" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1198265920]
+[node name="Полоса этап 2_backs 137" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=629325907]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -41988,7 +42201,7 @@ order = 1000147
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 138" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1022240499]
+[node name="Полоса этап 2_backs 138" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2112576537]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42004,7 +42217,7 @@ order = 1000148
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 139" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1186544063]
+[node name="Полоса этап 2_backs 139" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=772743759]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42020,7 +42233,7 @@ order = 1000149
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 140" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=344652548]
+[node name="Полоса этап 2_backs 140" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1642233206]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42036,7 +42249,7 @@ order = 1000150
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 141" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1718964925]
+[node name="Полоса этап 2_backs 141" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1604285273]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42052,7 +42265,7 @@ order = 1000151
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 142" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=432112905]
+[node name="Полоса этап 2_backs 142" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1388867040]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42068,7 +42281,7 @@ order = 1000152
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 143" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1366072696]
+[node name="Полоса этап 2_backs 143" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1332199426]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42084,7 +42297,7 @@ order = 1000153
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 144" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1934365630]
+[node name="Полоса этап 2_backs 144" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=905433141]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42100,7 +42313,7 @@ order = 1000154
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 145" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1679053038]
+[node name="Полоса этап 2_backs 145" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=180244474]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42116,7 +42329,7 @@ order = 1000155
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 146" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1261240890]
+[node name="Полоса этап 2_backs 146" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1039845567]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42132,7 +42345,7 @@ order = 1000156
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 147" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=600078675]
+[node name="Полоса этап 2_backs 147" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=515018306]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42148,7 +42361,7 @@ order = 1000157
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 148" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=281658884]
+[node name="Полоса этап 2_backs 148" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1421678859]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -42164,7 +42377,7 @@ order = 1000158
 pick_size = Vector3(0.1, 0.02, 4.9)
 metadata/patch_stage = "2_backs"
 
-[node name="Полоса этап 2_backs 149" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2098546353]
+[node name="Полоса этап 2_backs 149" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1007443878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.06, -116.65)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -43548,6 +43761,22 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61.1, 0.7, 243.4)
 order = 2069
 pick_size = Vector3(0.5, 1.4, 2.4)
+
+[node name="Коробка этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1631252133]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.5, 5.2, -49.2)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-115.5, 5.2, -49.2],
+"mat": "concrete",
+"size": [15.0, 1.2, 1.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.5, 5.2, -49.2)
+order = 1000014
+pick_size = Vector3(15, 1.2, 1.5)
+metadata/patch_stage = "3_frontline"
 
 [node name="Тёмное" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1008615883]
 
@@ -51874,7 +52103,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -83, 0.3, 128)
 order = 1912
 pick_size = Vector3(0.6, 0.6, 6)
 
-[node name="Коробка этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=1874722467]
+[node name="Коробка этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=447406939]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 9, -119.5)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -51890,7 +52119,7 @@ order = 1000160
 pick_size = Vector3(1.4, 18, 1.4)
 metadata/patch_stage = "2_backs"
 
-[node name="Коробка этап 2_backs 2" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=977112989]
+[node name="Коробка этап 2_backs 2" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=30493304]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 9, -119.5)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -51906,7 +52135,7 @@ order = 1000161
 pick_size = Vector3(1.4, 18, 1.4)
 metadata/patch_stage = "2_backs"
 
-[node name="Коробка этап 2_backs 3" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=1710201003]
+[node name="Коробка этап 2_backs 3" type="Node3D" parent="Landscape/Улицы/Коробки/Ржавое" unique_id=1072992688]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 9, -119.5)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -63080,7 +63309,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139.3, 3.6, 34.5)
 order = 88
 pick_size = Vector3(0.8142857, 0.8142857, 0.8142857)
 
-[node name="Надпись «продукты» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=484291623]
+[node name="Надпись «продукты» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=148586159]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -182.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63094,7 +63323,7 @@ order = 1000163
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «салон красоты» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1221316416]
+[node name="Надпись «салон красоты» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1680989610]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -167.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63108,7 +63337,7 @@ order = 1000164
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «стоматология» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=625482299]
+[node name="Надпись «стоматология» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1431793711]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63122,7 +63351,7 @@ order = 1000165
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «ремонт обуви» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1679163676]
+[node name="Надпись «ремонт обуви» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=955261352]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -137.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63136,7 +63365,7 @@ order = 1000166
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «зоотовары» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1380144765]
+[node name="Надпись «зоотовары» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1043933345]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63150,7 +63379,7 @@ order = 1000167
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «пункт выдачи» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1343939536]
+[node name="Надпись «пункт выдачи» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=640044005]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63164,7 +63393,7 @@ order = 1000168
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «нотариус» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=955358677]
+[node name="Надпись «нотариус» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=2084106739]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63178,7 +63407,7 @@ order = 1000169
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
 
-[node name="Надпись «химчистка» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=591503902]
+[node name="Надпись «химчистка» этап 2_backs 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=672391663]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51.5, 3.6, -86.9)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -63191,6 +63420,20 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51.5, 3.6, -86.9)
 order = 1000170
 pick_size = Vector3(0.7714286, 0.7714286, 0.7714286)
 metadata/patch_stage = "2_backs"
+
+[node name="Надпись «двор ЖК «Панорама»» этап 3_frontline 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1725306372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.5, 5.2, -48.1)
+script = ExtResource("4_u54l0")
+list = "signs"
+data = {
+"at": [-115.5, 5.2, -48.1],
+"size": 40.0,
+"text": "двор ЖК «Панорама»"
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.5, 5.2, -48.1)
+order = 1000015
+pick_size = Vector3(0.8571429, 0.8571429, 0.8571429)
+metadata/patch_stage = "3_frontline"
 
 [node name="Filler" type="Node3D" parent="." unique_id=1596022096]
 script = ExtResource("fill")
@@ -76371,13 +76614,6 @@ item = ["kiosk", 19.5, -55.5, 90.0]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.5, 0, -55.5)
 order = 4314
 
-[node name="@Node3D@369" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1039423147]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.6, 0, -118)
-script = ExtResource("5_iugf6")
-item = ["container20", 22.6, -118.0, 0.0, 1.0, 0.0, -1, 0.0, "PC03_C20_BEIGE"]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.6, 0, -118)
-order = 4315
-
 [node name="ГАЗель-фургон, целый 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=737954795]
 transform = Transform3D(-0.9975641, 0, 0.06975647, 0, 1, 0, -0.06975647, 0, -0.9975641, 23.4, 0, -86)
 script = ExtResource("5_iugf6")
@@ -76945,7 +77181,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.4, 0, -34.63)
 order = 1000042
 metadata/patch_stage = "1_street"
 
-[node name="Трансформаторная подстанция киоскового т этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1559092274]
+[node name="Трансформаторная подстанция киоскового т этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=328129907]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -123.8, 0, -131.3)
 script = ExtResource("5_iugf6")
 item = ["ktp", -123.8, -131.3, 0.0]
@@ -76953,7 +77189,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -123.8, 0, -131.3)
 order = 1000002
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1516844188]
+[node name="Седан, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=98218947]
 transform = Transform3D(0.9982398, 0, 0.059306376, 0, 1, 0, -0.059306376, 0, 0.9982398, -194.757, 0, -69.033)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -194.757, -69.033, 3.4, 1.0, 0.0, -1.0, 0.0, "PV_sedan"]
@@ -76961,7 +77197,7 @@ base = Transform3D(0.9982398, 0, 0.059306376, 0, 1, 0, -0.059306376, 0, 0.998239
 order = 1000003
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, битый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=682019700]
+[node name="Седан, битый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=396327834]
 transform = Transform3D(0.9976843, 0, 0.06801529, 0, 1, 0, -0.06801529, 0, 0.9976843, -189.703, 0, -69.082)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -189.703, -69.082, 3.9, 1.0, 0.0, -1.0, 0.0, "PV_sedan_wreck"]
@@ -76969,7 +77205,7 @@ base = Transform3D(0.9976843, 0, 0.06801529, 0, 1, 0, -0.06801529, 0, 0.9976843,
 order = 1000004
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=542726362]
+[node name="Седан, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1524673577]
 transform = Transform3D(0.99978065, 0, -0.02094242, 0, 1, 0, 0.02094242, 0, 0.99978065, -182.337, 0, -69.242)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -182.337, -69.242, -1.2, 1.0, 0.0, -1.0, 0.0, "PV_sedan"]
@@ -76977,7 +77213,7 @@ base = Transform3D(0.99978065, 0, -0.02094242, 0, 1, 0, 0.02094242, 0, 0.9997806
 order = 1000005
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=335130428]
+[node name="Седан, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1898688289]
 transform = Transform3D(0.9952274, 0, -0.0975829, 0, 1, 0, 0.0975829, 0, 0.9952274, -174.643, 0, -69.243)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -174.643, -69.243, -5.6, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -76985,7 +77221,7 @@ base = Transform3D(0.9952274, 0, -0.0975829, 0, 1, 0, 0.0975829, 0, 0.9952274, -
 order = 1000006
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=652293394]
+[node name="Внедорожник, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=719647085]
 transform = Transform3D(0.9958844, 0, -0.09063258, 0, 1, 0, 0.09063258, 0, 0.9958844, -169.779, 0, -69.069)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -169.779, -69.069, -5.2, 1.0, 0.0, -1.0, 0.0, "PV_suv"]
@@ -76993,7 +77229,7 @@ base = Transform3D(0.9958844, 0, -0.09063258, 0, 1, 0, 0.09063258, 0, 0.9958844,
 order = 1000007
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1226834595]
+[node name="Внедорожник, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1262561380]
 transform = Transform3D(0.99950653, 0, 0.03141076, 0, 1, 0, -0.03141076, 0, 0.99950653, -162.158, 0, -69.132)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -162.158, -69.132, 1.8, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77001,7 +77237,7 @@ base = Transform3D(0.99950653, 0, 0.03141076, 0, 1, 0, -0.03141076, 0, 0.9995065
 order = 1000008
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=737514280]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=324869509]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.752, 0, -69.172)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -159.752, -69.172, 0.0, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77009,7 +77245,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -159.752, 0, -69.172)
 order = 1000009
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1836734505]
+[node name="Хэтчбек, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=570732372]
 transform = Transform3D(0.9982398, 0, -0.059306376, 0, 1, 0, 0.059306376, 0, 0.9982398, -154.712, 0, -69.236)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -154.712, -69.236, -3.4, 1.0, 0.0, -1.0, 0.0, "PV_hatch"]
@@ -77017,7 +77253,7 @@ base = Transform3D(0.9982398, 0, -0.059306376, 0, 1, 0, 0.059306376, 0, 0.998239
 order = 1000010
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=694000390]
+[node name="Внедорожник, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1788349853]
 transform = Transform3D(0.9999619, 0, 0.008726535, 0, 1, 0, -0.008726535, 0, 0.9999619, -152.17, 0, -69.251)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -152.17, -69.251, 0.5, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77025,7 +77261,7 @@ base = Transform3D(0.9999619, 0, 0.008726535, 0, 1, 0, -0.008726535, 0, 0.999961
 order = 1000011
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=493828368]
+[node name="Седан, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1889651407]
 transform = Transform3D(0.9981348, 0, -0.06104854, 0, 1, 0, 0.06104854, 0, 0.9981348, -147.158, 0, -69.347)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -147.158, -69.347, -3.5, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77033,7 +77269,7 @@ base = Transform3D(0.9981348, 0, -0.06104854, 0, 1, 0, 0.06104854, 0, 0.9981348,
 order = 1000012
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1717871509]
+[node name="Универсал, целый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=592256712]
 transform = Transform3D(0.9976843, 0, -0.06801529, 0, 1, 0, 0.06801529, 0, 0.9976843, -144.832, 0, -69.025)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -144.832, -69.025, -3.9, 1.0, 0.0, -1.0, 0.0, "PV_wagon"]
@@ -77041,7 +77277,7 @@ base = Transform3D(0.9976843, 0, -0.06801529, 0, 1, 0, 0.06801529, 0, 0.9976843,
 order = 1000013
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=715630449]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2114357610]
 transform = Transform3D(0.99904823, 0, 0.043619387, 0, 1, 0, -0.043619387, 0, 0.99904823, -127.219, 0, -69.113)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -127.219, -69.113, 2.5, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77049,7 +77285,7 @@ base = Transform3D(0.99904823, 0, 0.043619387, 0, 1, 0, -0.043619387, 0, 0.99904
 order = 1000014
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=764834790]
+[node name="Хэтчбек, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=990573159]
 transform = Transform3D(0.99897057, 0, -0.04536299, 0, 1, 0, 0.04536299, 0, 0.99897057, -86.842, 0, -69.131)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -86.842, -69.131, -2.6, 1.0, 0.0, -1.0, 0.0, "PV_hatch"]
@@ -77057,7 +77293,7 @@ base = Transform3D(0.99897057, 0, -0.04536299, 0, 1, 0, 0.04536299, 0, 0.9989705
 order = 1000015
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=514186166]
+[node name="Хэтчбек, битый этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=684731952]
 transform = Transform3D(0.99649286, 0, -0.08367784, 0, 1, 0, 0.08367784, 0, 0.99649286, -81.767, 0, -69.32)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -81.767, -69.32, -4.8, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77065,7 +77301,7 @@ base = Transform3D(0.99649286, 0, -0.08367784, 0, 1, 0, 0.08367784, 0, 0.9964928
 order = 1000016
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=935383381]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1212022720]
 transform = Transform3D(0.9953962, 0, 0.09584575, 0, 1, 0, -0.09584575, 0, 0.9953962, -76.719, 0, -68.99)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -76.719, -68.99, 5.5, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77073,7 +77309,7 @@ base = Transform3D(0.9953962, 0, 0.09584575, 0, 1, 0, -0.09584575, 0, 0.9953962,
 order = 1000017
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, битый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1683413425]
+[node name="Седан, битый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=644382684]
 transform = Transform3D(0.99897057, 0, 0.04536299, 0, 1, 0, -0.04536299, 0, 0.99897057, -71.841, 0, -69.023)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -71.841, -69.023, 2.6, 1.0, 0.0, -1.0, 0.0, "PV_sedan_wreck"]
@@ -77081,7 +77317,7 @@ base = Transform3D(0.99897057, 0, 0.04536299, 0, 1, 0, -0.04536299, 0, 0.9989705
 order = 1000018
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=694663203]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=422483048]
 transform = Transform3D(0.99731445, 0, 0.073238194, 0, 1, 0, -0.073238194, 0, 0.99731445, -64.304, 0, -69.027)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -64.304, -69.027, 4.2, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77089,7 +77325,7 @@ base = Transform3D(0.99731445, 0, 0.073238194, 0, 1, 0, -0.073238194, 0, 0.99731
 order = 1000019
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2100954422]
+[node name="Седан, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=955852115]
 transform = Transform3D(0.9986295, 0, -0.05233596, 0, 1, 0, 0.05233596, 0, 0.9986295, -54.131, 0, -69.282)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -54.131, -69.282, -3.0, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77097,7 +77333,7 @@ base = Transform3D(0.9986295, 0, -0.05233596, 0, 1, 0, 0.05233596, 0, 0.9986295,
 order = 1000020
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=412460112]
+[node name="Внедорожник, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=855006941]
 transform = Transform3D(0.99939084, 0, 0.034899496, 0, 1, 0, -0.034899496, 0, 0.99939084, -124.854, 0, -69.094)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -124.854, -69.094, 2.0, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77105,7 +77341,7 @@ base = Transform3D(0.99939084, 0, 0.034899496, 0, 1, 0, -0.034899496, 0, 0.99939
 order = 1000021
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=507477287]
+[node name="Внедорожник, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1804156588]
 transform = Transform3D(0.9947028, 0, 0.10279253, 0, 1, 0, -0.10279253, 0, 0.9947028, -139.826, 0, -69.196)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -139.826, -69.196, 5.9, 1.0, 0.0, -1.0, 0.0, "PV_suv"]
@@ -77113,7 +77349,7 @@ base = Transform3D(0.9947028, 0, 0.10279253, 0, 1, 0, -0.10279253, 0, 0.9947028,
 order = 1000022
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1991760293]
+[node name="Универсал, целый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=100657905]
 transform = Transform3D(0.9966374, 0, -0.08193851, 0, 1, 0, 0.08193851, 0, 0.9966374, -106.691, 0, -69.237)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -106.691, -69.237, -4.7, 1.0, 0.0, -1.0, 0.0, "PV_wagon"]
@@ -77121,7 +77357,7 @@ base = Transform3D(0.9966374, 0, -0.08193851, 0, 1, 0, 0.08193851, 0, 0.9966374,
 order = 1000023
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=266467667]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1076835053]
 transform = Transform3D(0.9998766, 0, 0.015707318, 0, 1, 0, -0.015707318, 0, 0.9998766, -51.664, 0, -69.018)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -51.664, -69.018, 0.9, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77129,7 +77365,7 @@ base = Transform3D(0.9998766, 0, 0.015707318, 0, 1, 0, -0.015707318, 0, 0.999876
 order = 1000024
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1153517179]
+[node name="Хэтчбек, битый этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1706746774]
 transform = Transform3D(0.99888986, 0, -0.047106452, 0, 1, 0, 0.047106452, 0, 0.99888986, -177.14, 0, -69.03)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -177.14, -69.03, -2.7, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77137,7 +77373,7 @@ base = Transform3D(0.99888986, 0, -0.047106452, 0, 1, 0, 0.047106452, 0, 0.99888
 order = 1000025
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=560834307]
+[node name="Внедорожник, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1916215205]
 transform = Transform3D(0.9988061, 0, 0.04884977, 0, 1, 0, -0.04884977, 0, 0.9988061, -59.306, 0, -69.017)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -59.306, -69.017, 2.8, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77145,7 +77381,7 @@ base = Transform3D(0.9988061, 0, 0.04884977, 0, 1, 0, -0.04884977, 0, 0.9988061,
 order = 1000026
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=844504026]
+[node name="Хэтчбек, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=791137441]
 transform = Transform3D(0.9993284, 0, -0.036643706, 0, 1, 0, 0.036643706, 0, 0.9993284, -104.228, 0, -69.253)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -104.228, -69.253, -2.1, 1.0, 0.0, -1.0, 0.0, "PV_hatch"]
@@ -77153,7 +77389,7 @@ base = Transform3D(0.9993284, 0, -0.036643706, 0, 1, 0, 0.036643706, 0, 0.999328
 order = 1000027
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1302046365]
+[node name="Хэтчбек, битый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=291320347]
 transform = Transform3D(0.9953962, 0, -0.09584575, 0, 1, 0, 0.09584575, 0, 0.9953962, -172.155, 0, -69.204)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -172.155, -69.204, -5.5, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77161,7 +77397,7 @@ base = Transform3D(0.9953962, 0, -0.09584575, 0, 1, 0, 0.09584575, 0, 0.9953962,
 order = 1000028
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1105816188]
+[node name="Седан, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=322573538]
 transform = Transform3D(0.9983418, 0, 0.057564024, 0, 1, 0, -0.057564024, 0, 0.9983418, -137.185, 0, -69.26)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -137.185, -69.26, 3.3, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77169,7 +77405,7 @@ base = Transform3D(0.9983418, 0, 0.057564024, 0, 1, 0, -0.057564024, 0, 0.998341
 order = 1000029
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=401200536]
+[node name="Внедорожник, двери открыты этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=278729185]
 transform = Transform3D(0.9986295, 0, 0.05233596, 0, 1, 0, -0.05233596, 0, 0.9986295, -91.745, 0, -68.96)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -91.745, -68.96, 3.0, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77177,7 +77413,7 @@ base = Transform3D(0.9986295, 0, 0.05233596, 0, 1, 0, -0.05233596, 0, 0.9986295,
 order = 1000030
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=784081015]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=871974383]
 transform = Transform3D(0.9995599, 0, 0.029666245, 0, 1, 0, -0.029666245, 0, 0.9995599, -184.701, 0, -69.284)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -184.701, -69.284, 1.7, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77185,7 +77421,7 @@ base = Transform3D(0.9995599, 0, 0.029666245, 0, 1, 0, -0.029666245, 0, 0.999559
 order = 1000031
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1322571707]
+[node name="Седан, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=880709162]
 transform = Transform3D(0.9999863, 0, 0.005235964, 0, 1, 0, -0.005235964, 0, 0.9999863, -164.75, 0, -69.044)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -164.75, -69.044, 0.3, 1.0, 0.0, -1.0, 0.0, "PV_sedan"]
@@ -77193,7 +77429,7 @@ base = Transform3D(0.9999863, 0, 0.005235964, 0, 1, 0, -0.005235964, 0, 0.999986
 order = 1000032
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1445301339]
+[node name="Хэтчбек, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=434430570]
 transform = Transform3D(0.99871933, 0, -0.05059294, 0, 1, 0, 0.05059294, 0, 0.99871933, -187.277, 0, -69.227)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -187.277, -69.227, -2.9, 1.0, 0.0, -1.0, 0.0, "PV_hatch"]
@@ -77201,7 +77437,7 @@ base = Transform3D(0.99871933, 0, -0.05059294, 0, 1, 0, 0.05059294, 0, 0.9987193
 order = 1000033
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=305601677]
+[node name="Универсал, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=784551169]
 transform = Transform3D(0.9952274, 0, 0.0975829, 0, 1, 0, -0.0975829, 0, 0.9952274, -79.365, 0, -69.034)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -79.365, -69.034, 5.6, 1.0, 0.0, -1.0, 0.0, "PV_wagon"]
@@ -77209,7 +77445,7 @@ base = Transform3D(0.9952274, 0, 0.0975829, 0, 1, 0, -0.0975829, 0, 0.9952274, -
 order = 1000034
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1878457784]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1276798570]
 transform = Transform3D(-0.9983418, 0, 0.057564043, 0, 1, 0, -0.057564043, 0, -0.9983418, -194.715, 0, -82.358)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -194.715, -82.358, 176.7, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77217,7 +77453,7 @@ base = Transform3D(-0.9983418, 0, 0.057564043, 0, 1, 0, -0.057564043, 0, -0.9983
 order = 1000035
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=412906789]
+[node name="Хэтчбек, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1769441400]
 transform = Transform3D(-0.9999619, 0, 0.008726637, 0, 1, 0, -0.008726637, 0, -0.9999619, -189.7, 0, -82.314)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -189.7, -82.314, 179.5, 1.0, 0.0, -1.0, 0.0, "PV_hatch_open"]
@@ -77225,7 +77461,7 @@ base = Transform3D(-0.9999619, 0, 0.008726637, 0, 1, 0, -0.008726637, 0, -0.9999
 order = 1000036
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1845339988]
+[node name="Внедорожник, двери открыты этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=414744487]
 transform = Transform3D(-0.9999254, 0, -0.012217067, 0, 1, 0, 0.012217067, 0, -0.9999254, -187.228, 0, -82.1)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -187.228, -82.1, 180.7, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77233,7 +77469,7 @@ base = Transform3D(-0.9999254, 0, -0.012217067, 0, 1, 0, 0.012217067, 0, -0.9999
 order = 1000037
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1781889884]
+[node name="Внедорожник, целый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=517476863]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -182.294, 0, -82.254)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -182.294, -82.254, 180.0, 1.0, 0.0, -1.0, 0.0, "PV_suv"]
@@ -77241,7 +77477,7 @@ base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -182.294,
 order = 1000038
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1289278921]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1549035876]
 transform = Transform3D(-0.9963453, 0, -0.08541686, 0, 1, 0, 0.08541686, 0, -0.9963453, -177.229, 0, -82.305)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -177.229, -82.305, 184.9, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77249,7 +77485,7 @@ base = Transform3D(-0.9963453, 0, -0.08541686, 0, 1, 0, 0.08541686, 0, -0.996345
 order = 1000039
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, битый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1339545800]
+[node name="Седан, битый этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=884482994]
 transform = Transform3D(-0.9945219, 0, 0.104528494, 0, 1, 0, -0.104528494, 0, -0.9945219, -172.191, 0, -82.273)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -172.191, -82.273, 174.0, 1.0, 0.0, -1.0, 0.0, "PV_sedan_wreck"]
@@ -77257,7 +77493,7 @@ base = Transform3D(-0.9945219, 0, 0.104528494, 0, 1, 0, -0.104528494, 0, -0.9945
 order = 1000040
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=315100060]
+[node name="Хэтчбек, битый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=791305227]
 transform = Transform3D(-0.99488074, 0, -0.10105624, 0, 1, 0, 0.10105624, 0, -0.99488074, -164.8, 0, -82.184)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -164.8, -82.184, 185.8, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77265,7 +77501,7 @@ base = Transform3D(-0.99488074, 0, -0.10105624, 0, 1, 0, 0.10105624, 0, -0.99488
 order = 1000041
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1330492920]
+[node name="Хэтчбек, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=394365943]
 transform = Transform3D(-0.9995599, 0, -0.029666211, 0, 1, 0, 0.029666211, 0, -0.9995599, -162.15, 0, -82.441)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -162.15, -82.441, 181.7, 1.0, 0.0, -1.0, 0.0, "PV_hatch_open"]
@@ -77273,7 +77509,7 @@ base = Transform3D(-0.9995599, 0, -0.029666211, 0, 1, 0, 0.029666211, 0, -0.9995
 order = 1000042
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1823672541]
+[node name="Универсал, двери открыты этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1946105963]
 transform = Transform3D(-0.99888986, 0, 0.04710638, 0, 1, 0, -0.04710638, 0, -0.99888986, -159.864, 0, -82.35)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -159.864, -82.35, 177.3, 1.0, 0.0, -1.0, 0.0, "PV_wagon_open"]
@@ -77281,7 +77517,7 @@ base = Transform3D(-0.99888986, 0, 0.04710638, 0, 1, 0, -0.04710638, 0, -0.99888
 order = 1000043
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=122647542]
+[node name="Хэтчбек, битый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2143608487]
 transform = Transform3D(-0.9981348, 0, -0.06104852, 0, 1, 0, 0.06104852, 0, -0.9981348, -152.241, 0, -82.158)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -152.241, -82.158, 183.5, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77289,7 +77525,7 @@ base = Transform3D(-0.9981348, 0, -0.06104852, 0, 1, 0, 0.06104852, 0, -0.998134
 order = 1000044
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=540340574]
+[node name="Универсал, двери открыты этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=464890837]
 transform = Transform3D(-0.99505556, 0, 0.09931986, 0, 1, 0, -0.09931986, 0, -0.99505556, -144.86, 0, -82.321)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -144.86, -82.321, 174.3, 1.0, 0.0, -1.0, 0.0, "PV_wagon_open"]
@@ -77297,7 +77533,7 @@ base = Transform3D(-0.99505556, 0, 0.09931986, 0, 1, 0, -0.09931986, 0, -0.99505
 order = 1000045
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=150664508]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1278592363]
 transform = Transform3D(-0.9999254, 0, -0.012217067, 0, 1, 0, 0.012217067, 0, -0.9999254, -134.632, 0, -82.382)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -134.632, -82.382, 180.7, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77305,7 +77541,7 @@ base = Transform3D(-0.9999254, 0, -0.012217067, 0, 1, 0, 0.012217067, 0, -0.9999
 order = 1000046
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1378201092]
+[node name="Хэтчбек, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1758680670]
 transform = Transform3D(-0.9961947, 0, -0.08715581, 0, 1, 0, 0.08715581, 0, -0.9961947, -129.834, 0, -82.401)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -129.834, -82.401, 185.0, 1.0, 0.0, -1.0, 0.0, "PV_hatch_open"]
@@ -77313,7 +77549,7 @@ base = Transform3D(-0.9961947, 0, -0.08715581, 0, 1, 0, 0.08715581, 0, -0.996194
 order = 1000047
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=63276235]
+[node name="Седан, двери открыты этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=175247075]
 transform = Transform3D(-0.9986295, 0, -0.052335985, 0, 1, 0, 0.052335985, 0, -0.9986295, -127.156, 0, -82.359)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -127.156, -82.359, 183.0, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77321,7 +77557,7 @@ base = Transform3D(-0.9986295, 0, -0.052335985, 0, 1, 0, 0.052335985, 0, -0.9986
 order = 1000048
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=99376218]
+[node name="Хэтчбек, битый этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=649951178]
 transform = Transform3D(-0.9963453, 0, 0.08541692, 0, 1, 0, -0.08541692, 0, -0.9963453, -104.264, 0, -82.366)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -104.264, -82.366, 175.1, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77329,7 +77565,7 @@ base = Transform3D(-0.9963453, 0, 0.08541692, 0, 1, 0, -0.08541692, 0, -0.996345
 order = 1000049
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1636632402]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1419130110]
 transform = Transform3D(-0.9997426, 0, 0.022687308, 0, 1, 0, -0.022687308, 0, -0.9997426, -96.679, 0, -82.381)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -96.679, -82.381, 178.7, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77337,7 +77573,7 @@ base = Transform3D(-0.9997426, 0, 0.022687308, 0, 1, 0, -0.022687308, 0, -0.9997
 order = 1000050
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=484303938]
+[node name="Седан, двери открыты этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=716187273]
 transform = Transform3D(-0.9986295, 0, 0.05233605, 0, 1, 0, -0.05233605, 0, -0.9986295, -94.159, 0, -82.435)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -94.159, -82.435, 177.0, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77345,7 +77581,7 @@ base = Transform3D(-0.9986295, 0, 0.05233605, 0, 1, 0, -0.05233605, 0, -0.998629
 order = 1000051
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1347666232]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1715583426]
 transform = Transform3D(-0.9947028, 0, -0.10279261, 0, 1, 0, 0.10279261, 0, -0.9947028, -89.138, 0, -82.093)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -89.138, -82.093, 185.9, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77353,7 +77589,7 @@ base = Transform3D(-0.9947028, 0, -0.10279261, 0, 1, 0, 0.10279261, 0, -0.994702
 order = 1000052
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1504777093]
+[node name="Внедорожник, двери открыты этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=13938828]
 transform = Transform3D(-0.9996101, 0, -0.02792171, 0, 1, 0, 0.02792171, 0, -0.9996101, -76.653, 0, -82.311)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -76.653, -82.311, 181.6, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77361,7 +77597,7 @@ base = Transform3D(-0.9996101, 0, -0.02792171, 0, 1, 0, 0.02792171, 0, -0.999610
 order = 1000053
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=315317789]
+[node name="Седан, двери открыты этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=915682810]
 transform = Transform3D(-0.9991944, 0, -0.040131845, 0, 1, 0, 0.040131845, 0, -0.9991944, -64.275, 0, -82.143)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -64.275, -82.143, 182.3, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77369,7 +77605,7 @@ base = Transform3D(-0.9991944, 0, -0.040131845, 0, 1, 0, 0.040131845, 0, -0.9991
 order = 1000054
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 12" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1954217167]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 12" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=517528019]
 transform = Transform3D(-0.9963453, 0, -0.08541686, 0, 1, 0, 0.08541686, 0, -0.9963453, -59.163, 0, -82.265)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -59.163, -82.265, 184.9, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77377,7 +77613,7 @@ base = Transform3D(-0.9963453, 0, -0.08541686, 0, 1, 0, 0.08541686, 0, -0.996345
 order = 1000055
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=828755496]
+[node name="Хэтчбек, битый этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1623085753]
 transform = Transform3D(-0.99939084, 0, -0.034899388, 0, 1, 0, 0.034899388, 0, -0.99939084, -54.264, 0, -82.339)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -54.264, -82.339, 182.0, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77385,7 +77621,7 @@ base = Transform3D(-0.99939084, 0, -0.034899388, 0, 1, 0, 0.034899388, 0, -0.999
 order = 1000056
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 13" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2140399551]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 13" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2007332708]
 transform = Transform3D(-0.9998766, 0, -0.01570741, 0, 1, 0, 0.01570741, 0, -0.9998766, -51.708, 0, -82.428)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -51.708, -82.428, 180.9, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77393,7 +77629,7 @@ base = Transform3D(-0.9998766, 0, -0.01570741, 0, 1, 0, 0.01570741, 0, -0.999876
 order = 1000057
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 14" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2028477136]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 14" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1762816047]
 transform = Transform3D(-0.9961947, 0, 0.08715564, 0, 1, 0, -0.08715564, 0, -0.9961947, -137.15, 0, -82.364)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -137.15, -82.364, 175.0, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77401,7 +77637,7 @@ base = Transform3D(-0.9961947, 0, 0.08715564, 0, 1, 0, -0.08715564, 0, -0.996194
 order = 1000058
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=122343764]
+[node name="Универсал, двери открыты этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1841167775]
 transform = Transform3D(-0.99871933, 0, 0.0505929, 0, 1, 0, -0.0505929, 0, -0.99871933, -79.219, 0, -82.373)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -79.219, -82.373, 177.1, 1.0, 0.0, -1.0, 0.0, "PV_wagon_open"]
@@ -77409,7 +77645,7 @@ base = Transform3D(-0.99871933, 0, 0.0505929, 0, 1, 0, -0.0505929, 0, -0.9987193
 order = 1000059
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, двери открыты этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=440624357]
+[node name="Седан, двери открыты этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=571571478]
 transform = Transform3D(-0.99853665, 0, 0.0540788, 0, 1, 0, -0.0540788, 0, -0.99853665, -154.733, 0, -82.315)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -154.733, -82.315, 176.9, 1.0, 0.0, -1.0, 0.0, "PV_sedan_open"]
@@ -77417,7 +77653,7 @@ base = Transform3D(-0.99853665, 0, 0.0540788, 0, 1, 0, -0.0540788, 0, -0.9985366
 order = 1000060
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 15" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2015120496]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 15" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1386413650]
 transform = Transform3D(-0.9999254, 0, 0.012216892, 0, 1, 0, -0.012216892, 0, -0.9999254, -101.819, 0, -82.26)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -101.819, -82.26, 179.3, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77425,7 +77661,7 @@ base = Transform3D(-0.9999254, 0, 0.012216892, 0, 1, 0, -0.012216892, 0, -0.9999
 order = 1000061
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 16" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1348830348]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 16" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1124582901]
 transform = Transform3D(-0.99488074, 0, -0.10105624, 0, 1, 0, 0.10105624, 0, -0.99488074, -66.65, 0, -82.104)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -66.65, -82.104, 185.8, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77433,7 +77669,7 @@ base = Transform3D(-0.99488074, 0, -0.10105624, 0, 1, 0, 0.10105624, 0, -0.99488
 order = 1000062
 metadata/patch_stage = "2_backs"
 
-[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 17" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1314773649]
+[node name="Брошенный хэтчбек с открытым багажником этап 2_backs 17" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1772382207]
 transform = Transform3D(-0.9988061, 0, -0.048849773, 0, 1, 0, 0.048849773, 0, -0.9988061, -71.759, 0, -82.134)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -71.759, -82.134, 182.8, 1.0, 0.0, -1.0, 0.0, "U14_01"]
@@ -77441,7 +77677,7 @@ base = Transform3D(-0.9988061, 0, -0.048849773, 0, 1, 0, 0.048849773, 0, -0.9988
 order = 1000063
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, двери открыты этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1627098793]
+[node name="Внедорожник, двери открыты этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=828908411]
 transform = Transform3D(-0.99897057, 0, -0.04536296, 0, 1, 0, 0.04536296, 0, -0.99897057, -69.238, 0, -82.229)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -69.238, -82.229, 182.6, 1.0, 0.0, -1.0, 0.0, "PV_suv_open"]
@@ -77449,7 +77685,7 @@ base = Transform3D(-0.99897057, 0, -0.04536296, 0, 1, 0, 0.04536296, 0, -0.99897
 order = 1000064
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=590640442]
+[node name="Внедорожник, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1239922693]
 transform = Transform3D(-0.9988061, 0, -0.048849773, 0, 1, 0, 0.048849773, 0, -0.9988061, -169.702, 0, -82.327)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -169.702, -82.327, 182.8, 1.0, 0.0, -1.0, 0.0, "PV_suv"]
@@ -77457,7 +77693,7 @@ base = Transform3D(-0.9988061, 0, -0.048849773, 0, 1, 0, 0.048849773, 0, -0.9988
 order = 1000065
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=526266364]
+[node name="Хэтчбек, битый этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1006854493]
 transform = Transform3D(-0.9997015, 0, -0.024432223, 0, 1, 0, 0.024432223, 0, -0.9997015, -139.712, 0, -82.235)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -139.712, -82.235, 181.4, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77465,71 +77701,71 @@ base = Transform3D(-0.9997015, 0, -0.024432223, 0, 1, 0, 0.024432223, 0, -0.9997
 order = 1000066
 metadata/patch_stage = "2_backs"
 
-[node name="Прямой светодиодный уличный фонарь этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=781164935]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0, -75.7)
+[node name="Прямой светодиодный уличный фонарь этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=726296148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U12_03", -176.0, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0, -75.7)
+item = ["m:U12_03", -176.0, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 0, -66.5)
 order = 1000067
 metadata/patch_stage = "2_backs"
 
-[node name="Прямой светодиодный уличный фонарь этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=619848271]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0, -75.7)
+[node name="Прямой светодиодный уличный фонарь этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=628424559]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U12_03", -150.0, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0, -75.7)
+item = ["m:U12_03", -150.0, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 0, -66.5)
 order = 1000068
 metadata/patch_stage = "2_backs"
 
-[node name="Прямой светодиодный уличный фонарь этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1902642266]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86, 0, -75.7)
+[node name="Прямой светодиодный уличный фонарь этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2081077044]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U12_03", -86.0, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86, 0, -75.7)
+item = ["m:U12_03", -86.0, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86, 0, -66.5)
 order = 1000069
 metadata/patch_stage = "2_backs"
 
-[node name="Прямой светодиодный уличный фонарь этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1930676374]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 0, -75.7)
+[node name="Прямой светодиодный уличный фонарь этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=417600203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U12_03", -62.0, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 0, -75.7)
+item = ["m:U12_03", -62.0, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 0, -66.5)
 order = 1000070
 metadata/patch_stage = "2_backs"
 
-[node name="Прямоугольная уличная кадка этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1377055389]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -173.5, 0, -75.7)
+[node name="Прямоугольная уличная кадка этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1574674042]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -173.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U02_02", -173.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -173.5, 0, -75.7)
+item = ["m:U02_02", -173.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -173.5, 0, -66.5)
 order = 1000071
 metadata/patch_stage = "2_backs"
 
-[node name="Прямоугольная уличная кадка этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=676860577]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -147.5, 0, -75.7)
+[node name="Прямоугольная уличная кадка этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=877809523]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -144.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U02_02", -147.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -147.5, 0, -75.7)
+item = ["m:U02_02", -144.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -144.5, 0, -66.5)
 order = 1000072
 metadata/patch_stage = "2_backs"
 
-[node name="Прямоугольная уличная кадка этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=906004007]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83.5, 0, -75.7)
+[node name="Прямоугольная уличная кадка этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=402785175]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U02_02", -83.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83.5, 0, -75.7)
+item = ["m:U02_02", -83.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83.5, 0, -66.5)
 order = 1000073
 metadata/patch_stage = "2_backs"
 
-[node name="Прямоугольная уличная кадка этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=413009840]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -59.5, 0, -75.7)
+[node name="Прямоугольная уличная кадка этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1986595198]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -59.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U02_02", -59.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -59.5, 0, -75.7)
+item = ["m:U02_02", -59.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -59.5, 0, -66.5)
 order = 1000074
 metadata/patch_stage = "2_backs"
 
-[node name="Секция лежачего полицейского этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1691760644]
+[node name="Секция лежачего полицейского этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=582220468]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -182, 0, -75.7)
 script = ExtResource("5_iugf6")
 item = ["m:U06_01", -182.0, -75.7, 90.0]
@@ -77537,7 +77773,7 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -182, 0, 
 order = 1000075
 metadata/patch_stage = "2_backs"
 
-[node name="Секция лежачего полицейского этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1282379021]
+[node name="Секция лежачего полицейского этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2121214987]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -134, 0, -75.7)
 script = ExtResource("5_iugf6")
 item = ["m:U06_01", -134.0, -75.7, 90.0]
@@ -77545,7 +77781,7 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -134, 0, 
 order = 1000076
 metadata/patch_stage = "2_backs"
 
-[node name="Секция лежачего полицейского этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1625623202]
+[node name="Секция лежачего полицейского этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=850480778]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -98, 0, -75.7)
 script = ExtResource("5_iugf6")
 item = ["m:U06_01", -98.0, -75.7, 90.0]
@@ -77553,7 +77789,7 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -98, 0, -
 order = 1000077
 metadata/patch_stage = "2_backs"
 
-[node name="Секция лежачего полицейского этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2115154938]
+[node name="Секция лежачего полицейского этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1301121323]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -70, 0, -75.7)
 script = ExtResource("5_iugf6")
 item = ["m:U06_01", -70.0, -75.7, 90.0]
@@ -77561,39 +77797,39 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -70, 0, -
 order = 1000078
 metadata/patch_stage = "2_backs"
 
-[node name="Дорожная веха в старой шине этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1520748527]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.5, 0, -75.7)
+[node name="Дорожная веха в старой шине этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1429736087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U07_04", -195.5, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.5, 0, -75.7)
+item = ["m:U07_04", -195.5, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195.5, 0, -66.5)
 order = 1000079
 metadata/patch_stage = "2_backs"
 
-[node name="Дорожная веха в старой шине этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=137534546]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0, -75.7)
+[node name="Дорожная веха в старой шине этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1123845702]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U07_04", -105.5, -75.7, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0, -75.7)
+item = ["m:U07_04", -105.5, -66.5, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105.5, 0, -66.5)
 order = 1000080
 metadata/patch_stage = "2_backs"
 
-[node name="Знак парковки на стойке этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1158619448]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -195.5, 0, -75.7)
+[node name="Знак парковки на стойке этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1330340656]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -195.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U03_03", -195.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -195.5, 0, -75.7)
+item = ["m:U03_03", -195.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -195.5, 0, -66.5)
 order = 1000081
 metadata/patch_stage = "2_backs"
 
-[node name="Знак парковки на стойке этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1023332843]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105.5, 0, -75.7)
+[node name="Знак парковки на стойке этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=492579382]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105.5, 0, -66.5)
 script = ExtResource("5_iugf6")
-item = ["m:U03_03", -105.5, -75.7, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105.5, 0, -75.7)
+item = ["m:U03_03", -105.5, -66.5, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105.5, 0, -66.5)
 order = 1000082
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1753993797]
+[node name="Большой мусорный бункер этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1101213276]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.75, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -186.75, -65.2, 0.0]
@@ -77601,7 +77837,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.75, 0, -65.2)
 order = 1000083
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2046243908]
+[node name="Большой мусорный бункер этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1325780259]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.25, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -183.25, -65.2, 0.0]
@@ -77609,7 +77845,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.25, 0, -65.2)
 order = 1000084
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1584636107]
+[node name="Большой мусорный бункер этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=620456012]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.75, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -151.75, -65.2, 0.0]
@@ -77617,7 +77853,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -151.75, 0, -65.2)
 order = 1000085
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=740692755]
+[node name="Большой мусорный бункер этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2114142107]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.25, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -148.25, -65.2, 0.0]
@@ -77625,7 +77861,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.25, 0, -65.2)
 order = 1000086
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1988566801]
+[node name="Большой мусорный бункер этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1242499289]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.75, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -101.75, -65.2, 0.0]
@@ -77633,7 +77869,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.75, 0, -65.2)
 order = 1000087
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1004574198]
+[node name="Большой мусорный бункер этап 2_backs 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=862028802]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98.25, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -98.25, -65.2, 0.0]
@@ -77641,7 +77877,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -98.25, 0, -65.2)
 order = 1000088
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2134918687]
+[node name="Большой мусорный бункер этап 2_backs 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1744391839]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -67.75, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -67.75, -65.2, 0.0]
@@ -77649,7 +77885,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -67.75, 0, -65.2)
 order = 1000089
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=956349211]
+[node name="Большой мусорный бункер этап 2_backs 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1935919784]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.25, 0, -65.2)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -64.25, -65.2, 0.0]
@@ -77657,7 +77893,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.25, 0, -65.2)
 order = 1000090
 metadata/patch_stage = "2_backs"
 
-[node name="Большой мусорный бункер этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1546977962]
+[node name="Большой мусорный бункер этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=544489259]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.1, 0, -136.6)
 script = ExtResource("5_iugf6")
 item = ["m:R02", 19.1, -136.6, 90.0]
@@ -77665,7 +77901,7 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.1, 0, 
 order = 1000093
 metadata/patch_stage = "2_backs"
 
-[node name="Берёза повислая, взрослая, 16 м этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1536980983]
+[node name="Берёза повислая, взрослая, 16 м этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=678073212]
 transform = Transform3D(-1.011929, 0, 0.16933878, 0, 1.026, 0, -0.16933878, 0, -1.011929, 18.9, 0, -133)
 script = ExtResource("5_iugf6")
 item = ["tree_birch", 18.9, -133.0, 170.5, 1.026, 0.0, -1.0, 0.0, "P_birch_a"]
@@ -77673,7 +77909,7 @@ base = Transform3D(-1.011929, 0, 0.16933878, 0, 1.026, 0, -0.16933878, 0, -1.011
 order = 1000094
 metadata/patch_stage = "2_backs"
 
-[node name="Внедорожник, целый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2111200446]
+[node name="Внедорожник, целый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=777587472]
 transform = Transform3D(-0.9991944, 0, 0.040131908, 0, 1, 0, -0.040131908, 0, -0.9991944, -38.701, 0, -122.075)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -38.701, -122.075, 177.7, 1.0, 0.0, -1.0, 0.0, "PV_suv"]
@@ -77681,7 +77917,7 @@ base = Transform3D(-0.9991944, 0, 0.040131908, 0, 1, 0, -0.040131908, 0, -0.9991
 order = 1000095
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, целый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1888707703]
+[node name="Хэтчбек, целый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1485918008]
 transform = Transform3D(0.99939084, 0, 0.034899496, 0, 1, 0, -0.034899496, 0, 0.99939084, -16.276, 0, -140.417)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -16.276, -140.417, 2.0, 1.0, 0.0, -1.0, 0.0, "PV_hatch"]
@@ -77689,7 +77925,7 @@ base = Transform3D(0.99939084, 0, 0.034899496, 0, 1, 0, -0.034899496, 0, 0.99939
 order = 1000096
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1654688894]
+[node name="Хэтчбек, битый этап 2_backs 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=728460802]
 transform = Transform3D(0.99912286, 0, 0.041875653, 0, 1, 0, -0.041875653, 0, 0.99912286, -21.339, 0, -116.461)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -21.339, -116.461, 2.4, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77697,7 +77933,7 @@ base = Transform3D(0.99912286, 0, 0.041875653, 0, 1, 0, -0.041875653, 0, 0.99912
 order = 1000097
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1128150279]
+[node name="Седан, целый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1109735415]
 transform = Transform3D(0.9998477, 0, 0.017452406, 0, 1, 0, -0.017452406, 0, 0.9998477, -26.286, 0, -116.598)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -26.286, -116.598, 1.0, 1.0, 0.0, -1.0, 0.0, "PV_sedan"]
@@ -77705,7 +77941,7 @@ base = Transform3D(0.9998477, 0, 0.017452406, 0, 1, 0, -0.017452406, 0, 0.999847
 order = 1000098
 metadata/patch_stage = "2_backs"
 
-[node name="Универсал, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=911089637]
+[node name="Универсал, двери открыты этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1820044573]
 transform = Transform3D(0.9952274, 0, 0.0975829, 0, 1, 0, -0.0975829, 0, 0.9952274, -18.824, 0, -116.601)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -18.824, -116.601, 5.6, 1.0, 0.0, -1.0, 0.0, "PV_wagon_open"]
@@ -77713,7 +77949,7 @@ base = Transform3D(0.9952274, 0, 0.0975829, 0, 1, 0, -0.0975829, 0, 0.9952274, -
 order = 1000099
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1314661140]
+[node name="Хэтчбек, битый этап 2_backs 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=809378819]
 transform = Transform3D(0.9961947, 0, -0.08715574, 0, 1, 0, 0.08715574, 0, 0.9961947, -11.143, 0, -140.548)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -11.143, -140.548, -5.0, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77721,7 +77957,7 @@ base = Transform3D(0.9961947, 0, -0.08715574, 0, 1, 0, 0.08715574, 0, 0.9961947,
 order = 1000100
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, битый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=411365312]
+[node name="Седан, битый этап 2_backs 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=402512942]
 transform = Transform3D(-0.99912286, 0, 0.041875664, 0, 1, 0, -0.041875664, 0, -0.99912286, -36.262, 0, -121.953)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -36.262, -121.953, 177.6, 1.0, 0.0, -1.0, 0.0, "PV_sedan_wreck"]
@@ -77729,7 +77965,7 @@ base = Transform3D(-0.99912286, 0, 0.041875664, 0, 1, 0, -0.041875664, 0, -0.999
 order = 1000101
 metadata/patch_stage = "2_backs"
 
-[node name="Седан, битый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1879167883]
+[node name="Седан, битый этап 2_backs 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=923453085]
 transform = Transform3D(-0.99990255, 0, -0.013962141, 0, 1, 0, 0.013962141, 0, -0.99990255, -16.251, 0, -122.063)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -16.251, -122.063, 180.8, 1.0, 0.0, -1.0, 0.0, "PV_sedan_wreck"]
@@ -77737,7 +77973,7 @@ base = Transform3D(-0.99990255, 0, -0.013962141, 0, 1, 0, 0.013962141, 0, -0.999
 order = 1000102
 metadata/patch_stage = "2_backs"
 
-[node name="Хэтчбек, битый этап 2_backs 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1759697017]
+[node name="Хэтчбек, битый этап 2_backs 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1306041269]
 transform = Transform3D(-0.9996101, 0, -0.02792171, 0, 1, 0, 0.02792171, 0, -0.9996101, -21.182, 0, -121.944)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -21.182, -121.944, 181.6, 1.0, 0.0, -1.0, 0.0, "PV_hatch_wreck"]
@@ -77745,13 +77981,20 @@ base = Transform3D(-0.9996101, 0, -0.02792171, 0, 1, 0, 0.02792171, 0, -0.999610
 order = 1000103
 metadata/patch_stage = "2_backs"
 
-[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1897545765]
+[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=229631594]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11, 0, -132.5)
 script = ExtResource("5_iugf6")
 item = ["container20", -11.0, -132.5, 90.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20_GREEN"]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11, 0, -132.5)
 order = 1000104
 metadata/patch_stage = "2_backs"
+
+[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 3_frontline 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=276960644]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.6, 0, -125)
+script = ExtResource("5_iugf6")
+item = ["container20", 22.6, -125.0, 0.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20_BEIGE"]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.6, 0, -125)
+metadata/patch_stage = "3_frontline"
 
 [node name="Столбы и фонари" type="Node3D" parent="Filler/Наполнение" unique_id=1963609857]
 
@@ -79939,7 +80182,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, -33.48)
 order = 1000046
 metadata/patch_stage = "1_street"
 
-[node name="barrier_arm этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=384807433]
+[node name="barrier_arm этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1736371268]
 transform = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -119.75, 0, -62.6)
 script = ExtResource("5_iugf6")
 item = ["barrier_arm", -119.75, -62.6, 90.0, 1.3, 0.0]
@@ -87452,7 +87695,7 @@ item = ["bags", -43.8, 150.8, 252.8]
 base = Transform3D(-0.29570806, 0, -0.95527834, 0, 1, 0, 0.95527834, 0, -0.29570806, -43.8, 0, 150.8)
 order = 3461
 
-[node name="trash_pile этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1218023271]
+[node name="trash_pile этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=559724136]
 transform = Transform3D(0.6128356, 0, 0.5142301, 0, 0.8, 0, -0.5142301, 0, 0.6128356, -181, 0, -64.3)
 script = ExtResource("5_iugf6")
 item = ["trash_pile", -181.0, -64.3, 40.0, 0.8, 0.0]
@@ -87460,7 +87703,7 @@ base = Transform3D(0.6128356, 0, 0.5142301, 0, 0.8, 0, -0.5142301, 0, 0.6128356,
 order = 1000091
 metadata/patch_stage = "2_backs"
 
-[node name="trash_pile этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1030147724]
+[node name="trash_pile этап 2_backs 2" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=812234331]
 transform = Transform3D(-0.7517541, 0, -0.27361614, 0, 0.8, 0, 0.27361614, 0, -0.7517541, -96, 0, -64.3)
 script = ExtResource("5_iugf6")
 item = ["trash_pile", -96.0, -64.3, 200.0, 0.8, 0.0]
@@ -87468,7 +87711,7 @@ base = Transform3D(-0.7517541, 0, -0.27361614, 0, 0.8, 0, 0.27361614, 0, -0.7517
 order = 1000092
 metadata/patch_stage = "2_backs"
 
-[node name="trash_pile этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1473236754]
+[node name="trash_pile этап 2_backs 3" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1474677643]
 transform = Transform3D(0.47869182, 0, -0.877983, 0, 1, 0, 0.877983, 0, 0.47869182, -38.6, 0, -105.4)
 script = ExtResource("5_iugf6")
 item = ["trash_pile", -38.6, -105.4, 298.6]
@@ -87476,7 +87719,7 @@ base = Transform3D(0.47869182, 0, -0.877983, 0, 1, 0, 0.877983, 0, 0.47869182, -
 order = 1000105
 metadata/patch_stage = "2_backs"
 
-[node name="bags этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1344080004]
+[node name="bags этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Мусор" unique_id=1382667226]
 transform = Transform3D(0.07149749, 0, 0.99744076, 0, 1, 0, -0.99744076, 0, 0.07149749, -37.4, 0, -104.6)
 script = ExtResource("5_iugf6")
 item = ["bags", -37.4, -104.6, 85.9]
@@ -88005,7 +88248,7 @@ base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -81.5, 0,
 order = 1000036
 metadata/patch_stage = "1_street"
 
-[node name="booth этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Киоски, лавки, площадки" unique_id=330518249]
+[node name="booth этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Киоски, лавки, площадки" unique_id=1246028608]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -121.5, 0, -62.6)
 script = ExtResource("5_iugf6")
 item = ["booth", -121.5, -62.6, 0.0]
@@ -88520,7 +88763,7 @@ base = Transform3D(-0.036643688, 0, -0.9993284, 0, 1, 0, 0.9993284, 0, -0.036643
 order = 1000018
 metadata/patch_stage = "1_street"
 
-[node name="Грузовик этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=1761158566]
+[node name="Грузовик этап 2_backs 1" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=1249712880]
 transform = Transform3D(0.9961947, 0, 0.08715574, 0, 1, 0, -0.08715574, 0, 0.9961947, -18, 0, -108.5)
 script = ExtResource("5_iugf6")
 item = ["truck", -18.0, -108.5, 5.0]
@@ -94836,7 +95079,7 @@ metadata/height_m = 32.4
 metadata/enterable = false
 metadata/loot_count = 0
 
-[node name="CTP" type="Node3D" parent="East" unique_id=1861310547 groups=["mall_study_snap"]]
+[node name="CTP" type="Node3D" parent="East" unique_id=340252919 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0, -129)
 script = ExtResource("build")
 footprint = Vector2(19, 14)

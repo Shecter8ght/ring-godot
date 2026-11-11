@@ -421,14 +421,23 @@ def stage_2_backs() -> Patch:
     p.log.append(f"машины стоянок: было {len(cars)}, переставлено {n_old}, добавлено {len(final) - n_old}, итого {len(final)} "
                  f"из {all_slots} мест ({100 * len(final) // all_slots} %)")
 
-    # фонари, кадки, лежачие, вехи и знаки стоянок — на ось проезда между рядами
+    # фонари, кадки, вехи и знаки стоянок — на границу служебного проезда и ряда 1 (Z −66.5), а не на ось проезда между рядами,
+    # где они мешают проезду (исправление после приёмки этапа 2); лежачие полицейские (m:U06_01) остаются на проезде
+    # на оси; там, где у кромки стоит бак или трансформаторная, вещь сдвинута по X на 3 м
+    blockers = [bx + dx for bx in (-185.0, -150.0, -100.0, -66.0) for dx in (-1.75, 1.75)] + [-80.0, -134.0]
     moved = 0
     for kit in ("m:U12_03", "m:U02_02", "m:U06_01", "m:U07_04", "m:U03_03"):
         for it in items:
             if it[0] == kit and -197 <= it[1] <= -45 and -80 <= it[2] <= -68:
-                p.move_item(kit, it[1], it[2], it[1], aisle_z)
+                if kit == "m:U06_01":
+                    p.move_item(kit, it[1], it[2], it[1], aisle_z)
+                    continue
+                nx = it[1]
+                if any(abs(nx - b) < 1.6 for b in blockers):
+                    nx += 3.0
+                p.move_item(kit, it[1], it[2], nx, svc0)
                 moved += 1
-    p.log.append(f"вещей стоянок на ось проезда {moved}")
+    p.log.append(f"вещей стоянок на границу проезда и ряда 1 (Z {svc0}): {moved}")
 
     # контейнерные площадки: по два бака у северной кромки проезда, рядом мусор у двух из них
     for bx in (-185.0, -150.0, -100.0, -66.0):
@@ -490,7 +499,132 @@ def stage_2_backs() -> Patch:
     return p
 
 
-STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs}
+# ------------------------------------------------------------------ этап 3: первая линия (лист 5, поз. 2)
+BASE_REV_3 = "44f6a481"           # коммит этапа 2 — основа этапов 3 и 4
+UP_Y = 4.175                      # низ второго этажа павильонов первой линии (как у их стен и плит)
+ROOF_Y = 8.025                    # верх плиты крыши павильонов
+
+
+def stage_3_frontline() -> Patch:
+    p = Patch("3_frontline", BASE_REV_3)
+    fz, bz = N.FACADE, N.BACK     # −48.3, −59.3
+    # 1. перемычка аптека — «Modus»: объём X −146…−143 на втором этаже, под ним проход 3 м; высоты — как у соседних павильонов
+    bx0, bx1 = -146.0, -143.0
+    p.slab("bridge_floor", [bx0, bz, bx1, fz], UP_Y, 0.3, "slab")
+    p.slab("bridge_roof", [bx0 + 0.2, bz - 0.2, bx1 - 0.2, fz + 0.2], ROOF_Y, 0.25, "slab")   # между парапетами соседних крыш
+    win = [((bx0 + bx1) / 2.0, 1.4, 2.3, 0.9)]
+    for z in (fz, bz):
+        p.wall_x(z, bx0, bx1, UP_Y, 3.6, win, 0.25, "wall")
+    p.wall(bx0 + 0.2, bz - 0.2, bx1 - 0.2, bz, ROOF_Y, ROOF_Y + 1.0, "concrete")     # парапет крыши, как у соседей
+    p.wall(bx0 + 0.2, fz, bx1 - 0.2, fz + 0.2, ROOF_Y, ROOF_Y + 1.0, "concrete")
+    # 2. щель пекарня — БЦ 11: закрыта по обоим фасадам на всю высоту
+    for z in (fz, bz):
+        p.wall_x(z, -94.0, -92.2, 0.0, ROOF_Y, (), 0.25, "wall")
+    # 3. перемычка-ворота над въездом во двор и надпись на ней с юга
+    p.box(-115.5, 5.2, -49.2, 15.0, 1.2, 1.5, "concrete")
+    p.add["signs"].append({"at": [-115.5, 5.2, -48.1], "size": 40.0, "text": "двор ЖК «Панорама»"})
+    # 4. контейнер на проезжей части переулка (22,6; −118) стоял в полосе маршрута «за «Вершиной» → к насыпи» (прямая от (131; −131)
+    # к (12; −114) задевает его угол): проверка проходила только за счёт случайных обходов ходока — он на 4 м севернее, вне полосы
+    p.move_item("container20", 22.6, -118.0, 22.6, -125.0)
+    return p
+
+
+# ------------------------------------------------------------------ этап 4: автомойка «Блеск» (лист 8)
+def stage_4_wash() -> Patch:
+    p = Patch("4_wash", BASE_REV_3)
+    x0, x1, z0, z1 = N.WASH                       # 6.8, 17.0, −92, −66
+    H = N.WASH_H                                  # 5.0
+    T = 0.25
+    cx0, cx1, cz0, cz1 = x0 + T / 2, x1 - T / 2, z0 + T / 2, z1 - T / 2     # оси наружных стен: грани — ровно по контуру
+    tx0 = N.TUNNEL[0]                             # 11.2 — стена между тоннелем и боковым блоком
+    gate_x = (tx0 + x1) / 2.0                     # 14.1
+    DOOR_W, DOOR_H = 1.17, 2.415
+
+    # --- 1. что убрать: прежняя мойка, контейнеры за ней, старая надпись, берёзы и столбики переулка
+    p.remove["nodes"].append("CarWash")
+    p.log.append("контейнеров убрано %d" % p.drop_items(["container20"], [11.0, -103.0, 13.0, -101.5]))
+    p.remove["pieces"].append({"list": "signs", "rect": [11.5, -77.5, 12.5, -76.3]})
+    p.log.append("берёз убрано %d" % (p.drop_items(["tree_birch"], [18.5, -62.5, 19.3, -61.5])
+                                       + p.drop_items(["tree_birch"], [18.5, -104.5, 19.3, -103.5])))
+    p.log.append("столбиков устья убрано %d" % p.drop_items(["m:U02_04"], [21.5, -57.9, 29.5, -56.9]))
+
+    # --- 2. покрытие площадок и съезды через западный тротуар переулка
+    p.surface("wash_road", "road", 6.0, -121.5, 17.5, -59.3, 0.0, 0.08)
+    p.surface("wash_cross_n", "road", 17.5, -104.0, 21.0, -96.0, 0.0, 0.17)
+    p.surface("wash_cross_s", "road", 17.5, -66.0, 21.0, -60.0, 0.0, 0.17)
+
+    # --- 3. здание: наружные стены с воротами и дверями, внутренняя стена, перегородки, крыша с парапетом
+    p.wall_x(cz1, cx0 - T / 2, cx1 + T / 2, 0.0, H - 0.3, [(9.0, 1.6, DOOR_H), (gate_x, 4.0, 3.6)], T, "wall")       # южная
+    p.wall_x(cz0, cx0 - T / 2, cx1 + T / 2, 0.0, H - 0.3, [(9.0, DOOR_W, DOOR_H), (gate_x, 4.0, 3.6)], T, "wall")    # северная
+    p.wall_z(cx0, cz0, cz1, 0.0, H - 0.3, (), T, "wall")                                                      # западная
+    wins = [(z0 + 0.6 + 1.2 + 3.0 * i, 2.4, 3.3, 0.9) for i in range(8)]                                    # «стекло» — окна без стёкол
+    p.wall_z(cx1, cz0, cz1, 0.0, H - 0.3, wins, T, "wall")
+    doors = [(-70.0, DOOR_W, DOOR_H), (-76.5, DOOR_W, DOOR_H), (-81.0, DOOR_W, DOOR_H), (-87.5, DOOR_W, DOOR_H)]
+    p.wall_z(tx0, cz0, cz1, 0.0, H - 0.3, doors, T, "wall")
+    for z in (-74.0, -79.0, -83.0):
+        p.wall_x(z, cx0, tx0, 0.0, H - 0.3, (), 0.15, "wall")
+    p.slab("wash_roof", [x0, z0, x1, z1], H, 0.3, "slab")
+    for r in ([x0, z0, x1, z0 + 0.2], [x0, z1 - 0.2, x1, z1], [x0, z0, x0 + 0.2, z1], [x1 - 0.2, z0, x1, z1]):
+        p.wall(r[0], r[1], r[2], r[3], H, H + 0.4, "wall")                              # парапет 0,4
+    # портал мойки: две рамы на Z −89 и −83 по краям тоннеля; проезд 3,9 м между стойками
+    for zz in (-89.0, -83.0):
+        for xx in (12.0, 16.2):
+            p.box(xx, 1.65, zz, 0.3, 3.3, 0.3, "steel")
+        p.box(gate_x, 3.45, zz, 4.5, 0.3, 0.3, "accent")
+    # оборудование: касса, баки, стеллаж
+    p.box(8.0, 0.55, -71.5, 2.0, 1.1, 0.6, "accent")
+    p.box(7.9, 0.9, -89.0, 1.2, 1.8, 1.2, "steel")
+    p.box(7.9, 0.9, -85.5, 1.2, 1.8, 1.2, "steel")
+    p.box(7.35, 1.0, -81.0, 0.6, 2.0, 3.2, "steel")
+    p.box(7.35, 1.5, -80.2, 0.4, 0.4, 0.5, "accent")
+    p.add["signs"].append({"at": [12.0, 5.6, -65.6], "size": 40.0, "text": "автомойка «Блеск»"})
+
+    # --- 4. площадки: навес с пылесосами, шиномонтаж, стела
+    vx0, vx1, vz0, vz1 = N.VACUUM
+    p.slab("wash_canopy", [vx0, vz0, vx1, vz1], 3.4, 0.2, "slab")
+    for xx, zz in ((vx0 + 0.2, vz0 + 0.2), (vx1 - 0.2, vz0 + 0.2), (vx0 + 0.2, vz1 - 0.2), (vx1 - 0.2, vz1 - 0.2)):
+        p.box(xx, 1.6, zz, 0.2, 3.2, 0.2, "steel")
+    p.box(9.0, 0.75, -101.0, 0.6, 1.5, 0.6, "accent")
+    p.box(11.0, 0.75, -101.0, 0.6, 1.5, 0.6, "accent")
+    sx0, sx1, sz0, sz1 = N.TIRE_SHOP
+    p.put("container20", (sx0 + sx1) / 2.0, (sz0 + sz1) / 2.0, 90.0, 1.0, 0.0, -1, 0.0, "PC03_C20_BLUE")   # длинной стороной вдоль X
+    p.add["signs"].append({"at": [(sx0 + sx1) / 2.0, 2.0, sz1 + 0.4], "size": 30.0, "text": "шиномонтаж"})
+    p.box(8.0, 4.5, -60.4, 1.2, 9.0, 0.4, "accent")
+    p.add["signs"].append({"at": [8.0, 6.5, -60.1], "size": 30.0, "text": "автомойка 24"})
+    return p
+
+
+# места лута мойки и убранная запись здания — данные плана, не узлы: правятся в data/blockouts/prospekt.json (идемпотентно, текстом,
+# чтобы не менять остальное форматирование файла)
+WASH_LOOT = [
+    ([8.0, 0.08, -71.0], "register", "common", "автомойка «Блеск»: касса клиентской"),
+    ([7.6, 0.08, -76.5], "cabinet", "common", "автомойка «Блеск»: шкафчик бытовки"),
+    ([8.3, 0.08, -81.0], "crate", "common", "автомойка «Блеск»: стеллаж химии"),
+    ([10.4, 0.08, -89.6], "crate", "common", "автомойка «Блеск»: ящик техпомещения"),
+    ([10.0, 0.08, -109.4], "crate", "common", "шиномонтаж: ящик у контейнера"),
+]
+
+
+def plan_data_4() -> None:
+    import re
+    path = ROOT / "data" / "blockouts" / "prospekt.json"
+    text = path.read_text(encoding="utf-8")
+    text = re.sub(r'  \{\n   "id": "CarWash",.*?\n  \},\n', "", text, count=1, flags=re.S)
+    add = ""
+    for at, kind, tier, note in WASH_LOOT:
+        if note in text:
+            continue
+        add += (',\n  {\n   "at": [%s, %s, %s],\n   "kind": "%s",\n   "tier": "%s",\n   "note": "%s",\n   "yaw": 0.0\n  }'
+                % (at[0], at[1], at[2], kind, tier, note))
+    if add:
+        i = text.index('"loot": [')
+        j = text.index("\n ],", i)          # конец массива loot
+        text = text[:j].rstrip("\n") + add + text[j:]
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
+STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+          "4_wash": stage_4_wash}
 
 
 def main() -> None:
@@ -500,6 +634,8 @@ def main() -> None:
             raise SystemExit(f"нет этапа {name}; есть: {', '.join(STAGES)}")
         p = STAGES[name]()
         path = p.save()
+        if name == "4_wash":
+            plan_data_4()
         print(f"{path}: убрать вещей {len(p.remove['items'])} правил, кусков {len(p.remove['pieces'])}, узлов {len(p.remove['nodes'])}; "
               + ", ".join(f"{k} {len(v)}" for k, v in p.add.items() if v))
         for line_ in p.log:
