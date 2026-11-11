@@ -1088,6 +1088,53 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 0.075, -49.625)
 pick_size = Vector3(49, 0.15, 5.35)
 metadata/patch_stage = "5a_bank_site"
 
+[node name="Тротуар vershina_yard этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=742681367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.3, 0.04, -114.65)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "vershina_yard",
+"mat": "walk",
+"rect": [49.3, -146.0, 147.3, -83.3],
+"t": 0.08,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.3, 0.04, -114.65)
+pick_size = Vector3(98, 0.08, 62.7)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Тротуар vershina_pass_d этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=818042376]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 132.8, 0.04, -71.3)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "vershina_pass_d",
+"mat": "walk",
+"rect": [127.3, -83.3, 138.3, -59.3],
+"t": 0.08,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 132.8, 0.04, -71.3)
+order = 1000001
+pick_size = Vector3(11, 0.08, 24)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Газон vershina_garden этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1181695753]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86, 0.06, -101)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "vershina_garden",
+"mat": "grass",
+"rect": [77.0, -112.0, 95.0, -90.0],
+"t": 0.12,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86, 0.06, -101)
+order = 1000002
+pick_size = Vector3(18, 0.12, 22)
+metadata/patch_stage = "6a_vershina_site"
+
 [node name="Вырезы в земле" type="Node3D" parent="Landscape/Улицы" unique_id=2038579997]
 
 [node name="Вырез 0001" type="Node3D" parent="Landscape/Улицы/Вырезы в земле" unique_id=1199009024]
@@ -46024,6 +46071,182 @@ order = 1000016
 pick_size = Vector3(2.6, 0.24, 3.4)
 metadata/patch_stage = "5a_bank_site"
 
+[node name="Коробка этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=175402326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -59.7)
+order = 1000003
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 2" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1356245791]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [58.0, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 3, -59.7)
+order = 1000004
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 3" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=935386739]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.4, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [66.4, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.4, 3, -59.7)
+order = 1000005
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 4" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=984478740]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.8, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [74.8, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.8, 3, -59.7)
+order = 1000006
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 5" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=461179184]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.2, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [83.2, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.2, 3, -59.7)
+order = 1000007
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 6" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1163551881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.6, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [91.6, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.6, 3, -59.7)
+order = 1000008
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 7" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1698068911]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [100.0, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 3, -59.7)
+order = 1000009
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 8" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=88855495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 108.8, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [108.8, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 108.8, 3, -59.7)
+order = 1000010
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 9" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1467078828]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.8, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [116.8, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.8, 3, -59.7)
+order = 1000011
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 10" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1934770147]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -59.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [126.9, 3.0, -59.7],
+"mat": "concrete",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -59.7)
+order = 1000012
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 11" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=49519718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.2, 3.655, -106.8)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [120.2, 3.655, -106.8],
+"mat": "concrete",
+"size": [1.2, 0.24, 1.1],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.2, 3.655, -106.8)
+order = 1000042
+pick_size = Vector3(1.2, 0.24, 1.1)
+metadata/patch_stage = "6a_vershina_site"
+
 [node name="Тёмное" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1008615883]
 
 [node name="Коробка 0001" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=240617848]
@@ -49858,36 +50081,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 4.055, 120.6)
 order = 1994
 pick_size = Vector3(1.9, 0.24, 1.6)
 
-[node name="Коробка 0108" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1470265609]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 3.32, -58.1)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [71.3, 3.32, -58.1],
-"mat": "steel",
-"size": [8.4, 0.14, 2.4],
-"solid": false,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 3.32, -58.1)
-order = 2003
-pick_size = Vector3(8.4, 0.14, 2.4)
-
-[node name="Коробка 0109" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=786512976]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.3, 3.32, -58.1)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [105.3, 3.32, -58.1],
-"mat": "steel",
-"size": [8.4, 0.14, 2.4],
-"solid": false,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.3, 3.32, -58.1)
-order = 2004
-pick_size = Vector3(8.4, 0.14, 2.4)
-
 [node name="Коробка 0110" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1042992640]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 25.1, 4.055, 128.5)
 script = ExtResource("4_u54l0")
@@ -50583,6 +50776,502 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 5.15, -77.5)
 order = 1000195
 pick_size = Vector3(0.8, 1.3, 0.8)
 metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1465175544]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -82.9)
+order = 1000013
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 2" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=728339268]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.1, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [57.1, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.1, 3, -82.9)
+order = 1000014
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 3" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1563116178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.9, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [64.9, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.9, 3, -82.9)
+order = 1000015
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 4" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=601059218]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.7, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.7, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.7, 3, -82.9)
+order = 1000016
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 5" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1465326978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80.5, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [80.5, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80.5, 3, -82.9)
+order = 1000017
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 6" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=202746082]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [88.3, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 3, -82.9)
+order = 1000018
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 7" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1738642684]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.1, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [96.1, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96.1, 3, -82.9)
+order = 1000019
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 8" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1108890682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.9, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [103.9, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.9, 3, -82.9)
+order = 1000020
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 9" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=209660821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.7, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [111.7, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.7, 3, -82.9)
+order = 1000021
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 10" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=734854608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.5, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [119.5, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.5, 3, -82.9)
+order = 1000022
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 11" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1239344874]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -82.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [126.9, 3.0, -82.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -82.9)
+order = 1000023
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 12" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=517345777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -75.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -75.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -75.3)
+order = 1000024
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 13" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=978886192]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -67.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -67.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -67.3)
+order = 1000025
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 14" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=7793235]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -75.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [126.9, 3.0, -75.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -75.3)
+order = 1000026
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 15" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1181323693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -67.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [126.9, 3.0, -67.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.9, 3, -67.3)
+order = 1000027
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 16" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=750960078]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -118.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -118.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -118.9)
+order = 1000028
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 17" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1710518401]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 3, -118.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [57.3, 3.0, -118.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 3, -118.9)
+order = 1000029
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 18" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1845118210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 3, -118.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [65.3, 3.0, -118.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 3, -118.9)
+order = 1000030
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 19" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1339671336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -118.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.9, 3.0, -118.9],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -118.9)
+order = 1000031
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 20" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=291478873]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -83.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -83.7],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -83.7)
+order = 1000032
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 21" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=795650745]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 3, -83.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [57.3, 3.0, -83.7],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 3, -83.7)
+order = 1000033
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 22" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=716622983]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 3, -83.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [65.3, 3.0, -83.7],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.3, 3, -83.7)
+order = 1000034
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 23" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1283311445]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -83.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.9, 3.0, -83.7],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -83.7)
+order = 1000035
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 24" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=164390335]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -110.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -110.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -110.3)
+order = 1000036
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 25" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=437433721]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -101.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -101.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -101.3)
+order = 1000037
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 26" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1453906784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -92.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [49.7, 3.0, -92.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.7, 3, -92.3)
+order = 1000038
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 27" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1716824063]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -110.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.9, 3.0, -110.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -110.3)
+order = 1000039
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 28" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=946429476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -101.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.9, 3.0, -101.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -101.3)
+order = 1000040
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 29" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=961413404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -92.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [72.9, 3.0, -92.3],
+"mat": "steel",
+"size": [0.8, 6.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.9, 3, -92.3)
+order = 1000041
+pick_size = Vector3(0.8, 6, 0.8)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 30" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=285194938]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.2, 4.275, -107.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [120.2, 4.275, -107.3],
+"mat": "steel",
+"size": [1.2, 1.0, 0.08],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.2, 4.275, -107.3)
+order = 1000043
+pick_size = Vector3(1.2, 1, 0.08)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 31" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=40629273]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.8, 4.275, -106.8)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [120.8, 4.275, -106.8],
+"mat": "steel",
+"size": [0.08, 1.0, 1.1],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.8, 4.275, -106.8)
+order = 1000044
+pick_size = Vector3(0.08, 1, 1.1)
+metadata/patch_stage = "6a_vershina_site"
 
 [node name="Цветное" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1994079742]
 
@@ -54058,6 +54747,86 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.6, -1.6, -70.3)
 order = 1416
 pick_size = Vector3(137.6, 0.5, 1.2)
 
+[node name="Коробка этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Простые" unique_id=602535288]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 114.6, 4.275, -106.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [114.6, 4.275, -106.3],
+"mat": "wall",
+"size": [10.0, 1.0, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 114.6, 4.275, -106.3)
+order = 1000045
+pick_size = Vector3(10, 1, 0.2)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 2" type="Node3D" parent="Landscape/Улицы/Коробки/Простые" unique_id=1959074495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 123.6, 4.275, -106.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [123.6, 4.275, -106.3],
+"mat": "wall",
+"size": [5.6, 1.0, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 123.6, 4.275, -106.3)
+order = 1000046
+pick_size = Vector3(5.6, 1, 0.2)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 3" type="Node3D" parent="Landscape/Улицы/Коробки/Простые" unique_id=1565490010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 118, 4.275, -95.7)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [118.0, 4.275, -95.7],
+"mat": "wall",
+"size": [16.8, 1.0, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 118, 4.275, -95.7)
+order = 1000047
+pick_size = Vector3(16.8, 1, 0.2)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 4" type="Node3D" parent="Landscape/Улицы/Коробки/Простые" unique_id=1291951016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.7, 4.275, -101)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [109.7, 4.275, -101.0],
+"mat": "wall",
+"size": [0.2, 1.0, 10.4],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.7, 4.275, -101)
+order = 1000048
+pick_size = Vector3(0.2, 1, 10.4)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Коробка этап 6a_vershina_site 5" type="Node3D" parent="Landscape/Улицы/Коробки/Простые" unique_id=847213655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.3, 4.275, -101)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [126.3, 4.275, -101.0],
+"mat": "wall",
+"size": [0.2, 1.0, 10.4],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126.3, 4.275, -101)
+order = 1000049
+pick_size = Vector3(0.2, 1, 10.4)
+metadata/patch_stage = "6a_vershina_site"
+
 [node name="Красные трубы" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=689623150]
 
 [node name="Коробка 0001" type="Node3D" parent="Landscape/Улицы/Коробки/Красные трубы" unique_id=1773751654]
@@ -55735,6 +56504,22 @@ base = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, -1.6, -75.15)
 order = 1000197
 pick_size = Vector3(1.6, 3.4, 5.699997)
 metadata/patch_stage = "5b_bank_plan"
+
+[node name="Лестница этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=1263637159]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 115.3, 1.8875, -106.8)
+script = ExtResource("4_u54l0")
+list = "stairs"
+data = {
+"count": 22.0,
+"from": [111.0, 0.0, -106.8],
+"mat": "concrete",
+"to": [119.6, 3.775, -106.8],
+"width": 1.1
+}
+base = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 115.3, 1.8875, -106.8)
+order = 1000050
+pick_size = Vector3(1.1, 3.9750001, 8.599998)
+metadata/patch_stage = "6a_vershina_site"
 
 [node name="Пандусы" type="Node3D" parent="Landscape/Улицы" unique_id=430344969]
 
@@ -65963,19 +66748,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 6, 76)
 order = 71
 pick_size = Vector3(0.94285715, 0.94285715, 0.94285715)
 
-[node name="Надпись «ЖК «Вершина» · четыре башни» 0001" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=670161755]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 11, -58.5)
-script = ExtResource("4_u54l0")
-list = "signs"
-data = {
-"at": [88.3, 11.0, -58.5],
-"size": 64.0,
-"text": "ЖК «Вершина» · четыре башни"
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 11, -58.5)
-order = 72
-pick_size = Vector3(1.3714287, 1.3714287, 1.3714287)
-
 [node name="Надпись «пункт эвакуации · штаб ЧВК» 0001" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1966250583]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.3, 6, 18.7)
 script = ExtResource("4_u54l0")
@@ -66365,6 +67137,20 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.4, 2, -50.6)
 order = 1000019
 pick_size = Vector3(0.64285713, 0.64285713, 0.64285713)
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Надпись «ЖК «Вершина» · четыре башни» этап 6a_vershina_site 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=1754034593]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 16.5, -58.9)
+script = ExtResource("4_u54l0")
+list = "signs"
+data = {
+"at": [88.3, 16.5, -58.9],
+"size": 64.0,
+"text": "ЖК «Вершина» · четыре башни"
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 16.5, -58.9)
+order = 1000051
+pick_size = Vector3(1.3714287, 1.3714287, 1.3714287)
+metadata/patch_stage = "6a_vershina_site"
 
 [node name="Filler" type="Node3D" parent="." unique_id=1596022096]
 script = ExtResource("fill")
@@ -73224,188 +74010,6 @@ item = ["tree_round", 21.0, 235.0, 200.0, 1.0, 0.0, -1.0, 80.0, "P_linden_a"]
 base = Transform3D(-0.16317596, 0.9254165, -0.34202015, 0.9848077, 0.17364822, 0, 0.059391193, -0.3368241, -0.9396926, 21, 5.5499587, 235)
 order = 1738
 
-[node name="Криволинейный модуль стеклянного фасада 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=38115743]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.8, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 53.8, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.8, 0, -59.15)
-order = 1782
-
-[node name="Каменный парапет со световой щелью 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=688502616]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.8, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 53.8, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.8, 9, -59)
-order = 1783
-
-[node name="Криволинейный модуль стеклянного фасада 0004" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=484123271]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 62.2, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 0, -59.15)
-order = 1784
-
-[node name="Каменный парапет со световой щелью 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1058706629]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 62.2, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.2, 9, -59)
-order = 1785
-
-[node name="Каменный парапет со световой щелью 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1438135482]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70.6, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 70.6, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70.6, 9, -59)
-order = 1786
-
-[node name="Криволинейный модуль стеклянного фасада 0005" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1006078134]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 79.0, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79, 0, -59.15)
-order = 1787
-
-[node name="Каменный парапет со световой щелью 0004" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=664834314]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 79.0, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79, 9, -59)
-order = 1788
-
-[node name="Криволинейный модуль стеклянного фасада 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1904549728]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.4, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 87.4, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.4, 0, -59.15)
-order = 1789
-
-[node name="Каменный парапет со световой щелью 0005" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=667900113]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.4, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 87.4, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 87.4, 9, -59)
-order = 1790
-
-[node name="Криволинейный модуль стеклянного фасада 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=382228678]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.8, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 95.8, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.8, 0, -59.15)
-order = 1791
-
-[node name="Каменный парапет со световой щелью 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1846450003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.8, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 95.8, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.8, 9, -59)
-order = 1792
-
-[node name="Каменный парапет со световой щелью 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=61519629]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.2, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 104.2, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.2, 9, -59)
-order = 1793
-
-[node name="Криволинейный модуль стеклянного фасада 0008" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1953491088]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112.6, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 112.6, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112.6, 0, -59.15)
-order = 1794
-
-[node name="Каменный парапет со световой щелью 0008" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1190339469]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112.6, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 112.6, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112.6, 9, -59)
-order = 1795
-
-[node name="Криволинейный модуль стеклянного фасада 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=700248054]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121, 0, -59.15)
-script = ExtResource("5_iugf6")
-item = ["m:U08_04", 121.0, -59.15, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121, 0, -59.15)
-order = 1796
-
-[node name="Каменный парапет со световой щелью 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1711897999]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121, 9, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U12_04", 121.0, -59.0, 0.0, 1.0, 9.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121, 9, -59)
-order = 1797
-
-[node name="Карусельная стеклянная дверь 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=496719943]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 0, -58.75)
-script = ExtResource("5_iugf6")
-item = ["m:U08_01", 71.3, -58.75, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 0, -58.75)
-order = 1798
-
-[node name="Двустворчатая входная дверь с фрамугой 0005" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2050390616]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68.65, 0, -59.22)
-script = ExtResource("5_iugf6")
-item = ["m:U08_02", 68.65, -59.22, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68.65, 0, -59.22)
-order = 1799
-
-[node name="Двустворчатая входная дверь с фрамугой 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1524564725]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.95, 0, -59.22)
-script = ExtResource("5_iugf6")
-item = ["m:U08_02", 73.95, -59.22, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.95, 0, -59.22)
-order = 1800
-
-[node name="Карусельная стеклянная дверь 0004" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=388489146]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.3, 0, -58.75)
-script = ExtResource("5_iugf6")
-item = ["m:U08_01", 105.3, -58.75, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.3, 0, -58.75)
-order = 1801
-
-[node name="Двустворчатая входная дверь с фрамугой 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1283190713]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.65, 0, -59.22)
-script = ExtResource("5_iugf6")
-item = ["m:U08_02", 102.65, -59.22, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.65, 0, -59.22)
-order = 1802
-
-[node name="Двустворчатая входная дверь с фрамугой 0008" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=515252432]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.95, 0, -59.22)
-script = ExtResource("5_iugf6")
-item = ["m:U08_02", 107.95, -59.22, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.95, 0, -59.22)
-order = 1803
-
-[node name="Двустворчатая входная дверь с фрамугой 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1934842178]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 0, -59.1)
-script = ExtResource("5_iugf6")
-item = ["m:U08_02", 88.3, -59.1, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 0, -59.1)
-order = 1804
-
-[node name="Треугольная консоль входного навеса 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=243899581]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 3.4, -59)
-script = ExtResource("5_iugf6")
-item = ["m:U08_03", 88.3, -59.0, 0.0, 1.0, 3.4]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 3.4, -59)
-order = 1805
-
-[node name="Волнообразная полоса парковочного фасада 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1155360605]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 5, -58.8)
-script = ExtResource("5_iugf6")
-item = ["m:U12_01", 57.3, -58.8, 0.0, 1.0, 5.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.3, 5, -58.8)
-order = 1806
-
-[node name="Волнообразная полоса парковочного фасада 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=115607107]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.3, 5, -58.8)
-script = ExtResource("5_iugf6")
-item = ["m:U12_01", 119.3, -58.8, 0.0, 1.0, 5.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 119.3, 5, -58.8)
-order = 1807
-
 [node name="Панель из треугольных фасадных кассет 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1149818608]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 49.1, 1.5, -91.3)
 script = ExtResource("5_iugf6")
@@ -74812,27 +75416,6 @@ script = ExtResource("5_iugf6")
 item = ["ktp", 93.3, -122.3, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.3, 0, -122.3)
 order = 3510
-
-[node name="Морские контейнеры 20 и 40 футов · 20 футов · за 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1453176781]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 131.3, 0, -143.3)
-script = ExtResource("5_iugf6")
-item = ["container20", 131.3, -143.3, 0.0, 1.0, 0.0, -1, 0.0, "PC03_C20_GREEN"]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 131.3, 0, -143.3)
-order = 3511
-
-[node name="Гаражи_ кирпичный ГСК и ракушка · Кирпичный · за 0035" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1372214000]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 171.3, 0, -122.3)
-script = ExtResource("5_iugf6")
-item = ["garage", 171.3, -122.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 171.3, 0, -122.3)
-order = 3512
-
-[node name="Гаражи_ кирпичный ГСК и ракушка · Кирпичный · за 0036" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1969000360]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 174.7, 0, -122.3)
-script = ExtResource("5_iugf6")
-item = ["garage", 174.7, -122.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 174.7, 0, -122.3)
-order = 3513
 
 [node name="Кофейный киоск с роллетой 0016" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2111172281]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -190, 0, -143.3)
@@ -81034,6 +81617,85 @@ item = ["m:R02", -32.4, -97.6, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.4, 0, -97.6)
 order = 1000029
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Липа мелколистная, взрослая, 15 м этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2087533587]
+transform = Transform3D(1.0806465, 0, 0.39332312, 0, 1.15, 0, -0.39332312, 0, 1.0806465, 80.5, 0, -108.5)
+script = ExtResource("5_iugf6")
+item = ["tree_round", 80.5, -108.5, 20.0, 1.15, 0.0, -1.0, 0.0, "P_linden_a"]
+base = Transform3D(1.0806465, 0, 0.39332312, 0, 1.15, 0, -0.39332312, 0, 1.0806465, 80.5, 0, -108.5)
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Липа мелколистная, средняя, 11 м этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1347152645]
+transform = Transform3D(-0.37622213, 0, 1.0336618, 0, 1.1, 0, -1.0336618, 0, -0.37622213, 91.5, 0, -108.5)
+script = ExtResource("5_iugf6")
+item = ["tree_round", 91.5, -108.5, 110.0, 1.1, 0.0, -1.0, 0.0, "P_linden_b"]
+base = Transform3D(-0.37622213, 0, 1.0336618, 0, 1.1, 0, -1.0336618, 0, -0.37622213, 91.5, 0, -108.5)
+order = 1000001
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Липа мелколистная, молодая уличная, 7 м этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=211309413]
+transform = Transform3D(-1.1276312, 0, -0.4104242, 0, 1.2, 0, 0.4104242, 0, -1.1276312, 80.5, 0, -93.5)
+script = ExtResource("5_iugf6")
+item = ["tree_round", 80.5, -93.5, 200.0, 1.2, 0.0, -1.0, 0.0, "P_linden_c"]
+base = Transform3D(-1.1276312, 0, -0.4104242, 0, 1.2, 0, 0.4104242, 0, -1.1276312, 80.5, 0, -93.5)
+order = 1000002
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Липа мелколистная, взрослая, 15 м этап 6a_vershina_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1190043225]
+transform = Transform3D(0.35912108, 0, -0.9866772, 0, 1.05, 0, 0.9866772, 0, 0.35912108, 91.5, 0, -93.5)
+script = ExtResource("5_iugf6")
+item = ["tree_round", 91.5, -93.5, 290.0, 1.05, 0.0, -1.0, 0.0, "P_linden_a"]
+base = Transform3D(0.35912108, 0, -0.9866772, 0, 1.05, 0, 0.9866772, 0, 0.35912108, 91.5, 0, -93.5)
+order = 1000003
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Гаражи_ кирпичный ГСК и ракушка · Кирпич этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=242534741]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 183.5, 0, -95)
+script = ExtResource("5_iugf6")
+item = ["garage", 183.5, -95.0, -90.0]
+base = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 183.5, 0, -95)
+order = 1000004
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Гаражи_ кирпичный ГСК и ракушка · Кирпич этап 6a_vershina_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=531494765]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 183.5, 0, -91.4)
+script = ExtResource("5_iugf6")
+item = ["garage", 183.5, -91.4, -90.0]
+base = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 183.5, 0, -91.4)
+order = 1000005
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=512788998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139, 0, -148)
+script = ExtResource("5_iugf6")
+item = ["container20", 139.0, -148.0, 0.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20_GREEN"]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 139, 0, -148)
+order = 1000006
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 6a_vershina_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=555146005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170, 0, -90)
+script = ExtResource("5_iugf6")
+item = ["container20", 170.0, -90.0, 0.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20_BEIGE"]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 170, 0, -90)
+order = 1000007
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Морские контейнеры 20 и 40 футов · 20 фу этап 6a_vershina_site 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1523978626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86, 0, -149)
+script = ExtResource("5_iugf6")
+item = ["container20", 86.0, -149.0, 0.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20"]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86, 0, -149)
+order = 1000008
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="ГАЗель-фургон, целый этап 6a_vershina_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2132863227]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 184, 0, -66)
+script = ExtResource("5_iugf6")
+item = ["van", 184.0, -66.0, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 184, 0, -66)
+order = 1000009
+metadata/patch_stage = "6a_vershina_site"
 
 [node name="Столбы и фонари" type="Node3D" parent="Filler/Наполнение" unique_id=1963609857]
 
@@ -97594,6 +98256,30 @@ metadata/height_m = 36.0
 metadata/enterable = false
 metadata/loot_count = 0
 
+[node name="Outside_New_D1" type="Node3D" parent="Outside" unique_id=663235320 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -202)
+script = ExtResource("build")
+footprint = Vector2(32, 32)
+floors = 48
+story_height = 3.3
+metadata/height_m = 158.39999999999998
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Outside_New_D2" type="Node3D" parent="Outside" unique_id=329026136 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, -185)
+script = ExtResource("build")
+footprint = Vector2(30, 30)
+floors = 54
+story_height = 3.3
+metadata/height_m = 178.2
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
 [node name="West" type="Node3D" parent="." unique_id=1942065519]
 
 [node name="Coffee" parent="West" unique_id=905340245 groups=["mall_study_snap"] instance=ExtResource("zerno")]
@@ -97907,75 +98593,6 @@ metadata/loot_count = 0
 
 [node name="East" type="Node3D" parent="." unique_id=1687279771]
 
-[node name="Vershina_Podium" type="Node3D" parent="East" unique_id=621776735 groups=["mall_study_snap"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 0, -89.3)
-script = ExtResource("build")
-footprint = Vector2(78, 60)
-floors = 2
-story_height = 4.5
-label = "ЖК «Вершина» · стилобат: офисы, фитнес (закрыт)"
-metadata/height_m = 9.0
-metadata/enterable = false
-metadata/loot_count = 0
-
-[node name="Vershina_T1" type="Node3D" parent="East" unique_id=982761685 groups=["mall_study_snap"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.3, 9.3, -103.3)
-script = ExtResource("flats")
-open_floors = 0
-balconies = false
-glass_bands = true
-footprint = Vector2(40, 24)
-floors = 44
-story_height = 3.3
-label = "ЖК «Вершина», башня 1 — пластина, 44 этажа"
-metadata/lift = 9.3
-metadata/height_m = 145.2
-metadata/enterable = false
-metadata/loot_count = 0
-
-[node name="Vershina_T2" type="Node3D" parent="East" unique_id=758655254 groups=["mall_study_snap"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.3, 9.3, -93.3)
-script = ExtResource("flats")
-open_floors = 0
-balconies = false
-glass_bands = true
-footprint = Vector2(30, 30)
-floors = 58
-story_height = 3.3
-label = "ЖК «Вершина», башня 2 — 58 этажей"
-metadata/lift = 9.3
-metadata/height_m = 191.4
-metadata/enterable = false
-metadata/loot_count = 0
-
-[node name="Vershina_T3" type="Node3D" parent="East" unique_id=1689177778 groups=["mall_study_snap"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 161.3, 0, -102.3)
-script = ExtResource("flats")
-open_floors = 0
-balconies = false
-glass_bands = true
-footprint = Vector2(28, 32)
-floors = 52
-story_height = 3.3
-label = "ЖК «Вершина», башня 3 — 52 этажа"
-metadata/height_m = 171.6
-metadata/enterable = false
-metadata/loot_count = 0
-
-[node name="Vershina_T4" type="Node3D" parent="East" unique_id=1156156501 groups=["mall_study_snap"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.3, 0, -61.3)
-script = ExtResource("flats")
-open_floors = 0
-balconies = false
-glass_bands = true
-footprint = Vector2(42, 24)
-floors = 36
-story_height = 3.3
-label = "ЖК «Вершина», башня 4 — широкая, 36 этажей"
-metadata/height_m = 118.8
-metadata/enterable = false
-metadata/loot_count = 0
-
 [node name="Corpus3_A" type="Node3D" parent="East" unique_id=1468466351 groups=["mall_study_snap"]]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 144.3, 0, 95)
 script = ExtResource("flats")
@@ -98047,3 +98664,200 @@ metadata/height_m = 6.0
 metadata/enterable = false
 metadata/loot_count = 0
 metadata/patch_stage = "2_backs"
+
+[node name="Vershina_T1" type="Node3D" parent="East" unique_id=1739239776 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74, 18, -71.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(40, 24)
+floors = 38
+story_height = 3.3
+label = "ЖК «Вершина», башня А — пластина, 44 этажа"
+metadata/height_m = 125.39999999999999
+metadata/lift = 18.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T1_Top" type="Node3D" parent="East" unique_id=1277485118 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74, 143.4, -71.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(28, 24)
+floors = 6
+story_height = 3.3
+label = "башня А — верх (сужение)"
+metadata/height_m = 19.799999999999997
+metadata/lift = 143.4
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T2_Base" type="Node3D" parent="East" unique_id=1978142885 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 0, -129.3)
+script = ExtResource("build")
+footprint = Vector2(30, 30)
+floors = 2
+story_height = 4.65
+label = "башня Б — основание, 2 этажа (закрыто)"
+metadata/height_m = 9.3
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T2" type="Node3D" parent="East" unique_id=642694759 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 9.3, -129.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(30, 30)
+floors = 46
+story_height = 3.3
+label = "ЖК «Вершина», башня Б — самая высокая, 58 этажей"
+metadata/height_m = 151.79999999999998
+metadata/lift = 9.3
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T2_Top" type="Node3D" parent="East" unique_id=1963534379 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 161.1, -129.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(24, 24)
+floors = 12
+story_height = 3.3
+label = "башня Б — верх (сужение)"
+metadata/height_m = 39.599999999999994
+metadata/lift = 161.1
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T3" type="Node3D" parent="East" unique_id=880807243 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 154.3, 0, -126.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+footprint = Vector2(14, 32)
+floors = 52
+story_height = 3.3
+label = "ЖК «Вершина», башня В — двойная, 52 этажа (западная половина)"
+metadata/height_m = 171.6
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T3_Low" type="Node3D" parent="East" unique_id=1512142504 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 168.3, 0, -126.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+footprint = Vector2(14, 32)
+floors = 44
+story_height = 3.3
+label = "башня В — восточная половина, 44 этажа"
+metadata/height_m = 145.2
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T4" type="Node3D" parent="East" unique_id=1031495473 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.3, 0, -61.3)
+script = ExtResource("flats")
+open_floors = 0
+footprint = Vector2(42, 24)
+floors = 30
+story_height = 3.3
+label = "ЖК «Вершина», башня Г — жилая с лоджиями, 36 этажей"
+metadata/height_m = 99.0
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_T4_Top" type="Node3D" parent="East" unique_id=818515802 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 159.3, 99, -61.3)
+script = ExtResource("flats")
+open_floors = 0
+footprint = Vector2(30, 24)
+floors = 6
+story_height = 3.3
+label = "башня Г — верх (сужение)"
+metadata/height_m = 19.799999999999997
+metadata/lift = 99.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_Podium_S" type="Node3D" parent="East" unique_id=1951307770 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88.3, 6, -71.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(78, 24)
+floors = 3
+story_height = 4.0
+label = "ЖК «Вершина» · стилобат: офисы (закрыт)"
+metadata/height_m = 12.0
+metadata/lift = 6.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_Podium_W" type="Node3D" parent="East" unique_id=1037443775 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.3, 6, -101.3)
+script = ExtResource("flats")
+open_floors = 0
+balconies = false
+glass_bands = true
+footprint = Vector2(24, 36)
+floors = 3
+story_height = 4.0
+label = "ЖК «Вершина» · стилобат: фитнес (закрыт)"
+metadata/height_m = 12.0
+metadata/lift = 6.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_YardCafe" type="Node3D" parent="East" unique_id=1046084490 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 118, 0, -101)
+script = ExtResource("build")
+kind = "hall"
+footprint = Vector2(16, 10)
+floors = 1
+story_height = 3.6
+label = "кафе двора"
+interior = "shop"
+loot_theme = "kiosk"
+loot_density = 0.6
+metadata/height_m = 3.6
+metadata/lift = 0.0
+metadata/enterable = true
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"
+
+[node name="Vershina_ParkingRamp" type="Node3D" parent="East" unique_id=328173078 groups=["mall_study_snap"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 153.9, 0, -90)
+script = ExtResource("build")
+footprint = Vector2(7.8, 28)
+floors = 1
+story_height = 3.2
+label = "въезд в паркинг −1 (закрыт)"
+metadata/height_m = 3.2
+metadata/lift = 0.0
+metadata/enterable = false
+metadata/loot_count = 0
+metadata/patch_stage = "6a_vershina_site"

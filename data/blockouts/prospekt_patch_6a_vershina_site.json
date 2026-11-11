@@ -1,0 +1,1292 @@
+{
+ "stage": "6a_vershina_site",
+ "base_rev": "f5d6b3f6",
+ "remove": {
+  "items": [
+   {
+    "kits": [
+     "m:U12_04",
+     "m:U08_04",
+     "m:U08_02",
+     "m:U08_01",
+     "m:U12_01",
+     "m:U08_03"
+    ],
+    "rect": [
+     49.0,
+     -59.6,
+     128.0,
+     -57.9
+    ]
+   },
+   {
+    "kits": [
+     "garage"
+    ],
+    "rect": [
+     171.24,
+     -122.36,
+     171.36,
+     -122.24
+    ]
+   },
+   {
+    "kits": [
+     "garage"
+    ],
+    "rect": [
+     174.64,
+     -122.36,
+     174.76,
+     -122.24
+    ]
+   },
+   {
+    "kits": [
+     "container20"
+    ],
+    "rect": [
+     131.24,
+     -143.36,
+     131.36,
+     -143.24
+    ]
+   }
+  ],
+  "pieces": [
+   {
+    "list": "boxes",
+    "rect": [
+     71.0,
+     -58.7,
+     71.6,
+     -57.5
+    ],
+    "mat": "steel"
+   },
+   {
+    "list": "boxes",
+    "rect": [
+     105.0,
+     -58.7,
+     105.6,
+     -57.5
+    ],
+    "mat": "steel"
+   },
+   {
+    "list": "signs",
+    "rect": [
+     87.8,
+     -59.0,
+     88.8,
+     -58.0
+    ]
+   }
+  ],
+  "nodes": [
+   "Vershina_Podium",
+   "Vershina_T1",
+   "Vershina_T2",
+   "Vershina_T3",
+   "Vershina_T4"
+  ]
+ },
+ "add": {
+  "surfaces": [
+   {
+    "id": "vershina_yard",
+    "mat": "walk",
+    "rect": [
+     49.3,
+     -146.0,
+     147.3,
+     -83.3
+    ],
+    "y": 0.0,
+    "t": 0.08
+   },
+   {
+    "id": "vershina_pass_d",
+    "mat": "walk",
+    "rect": [
+     127.3,
+     -83.3,
+     138.3,
+     -59.3
+    ],
+    "y": 0.0,
+    "t": 0.08
+   },
+   {
+    "id": "vershina_garden",
+    "mat": "grass",
+    "rect": [
+     77.0,
+     -112.0,
+     95.0,
+     -90.0
+    ],
+    "y": 0.0,
+    "t": 0.12
+   }
+  ],
+  "boxes": [
+   {
+    "at": [
+     49.7,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     58.0,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     66.4,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     74.8,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     83.2,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     91.6,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     100.0,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     108.8,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     116.8,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     126.9,
+     3.0,
+     -59.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     57.1,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     64.9,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.7,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     80.5,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     88.3,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     96.1,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     103.9,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     111.7,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     119.5,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     126.9,
+     3.0,
+     -82.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -75.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -67.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     126.9,
+     3.0,
+     -75.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     126.9,
+     3.0,
+     -67.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -118.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     57.3,
+     3.0,
+     -118.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     65.3,
+     3.0,
+     -118.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.9,
+     3.0,
+     -118.9
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -83.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     57.3,
+     3.0,
+     -83.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     65.3,
+     3.0,
+     -83.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.9,
+     3.0,
+     -83.7
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -110.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -101.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     49.7,
+     3.0,
+     -92.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.9,
+     3.0,
+     -110.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.9,
+     3.0,
+     -101.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     72.9,
+     3.0,
+     -92.3
+    ],
+    "size": [
+     0.8,
+     6.0,
+     0.8
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     120.2,
+     3.655,
+     -106.8
+    ],
+    "size": [
+     1.2,
+     0.24,
+     1.1
+    ],
+    "mat": "concrete",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     120.2,
+     4.275,
+     -107.3
+    ],
+    "size": [
+     1.2,
+     1.0,
+     0.08
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     120.8,
+     4.275,
+     -106.8
+    ],
+    "size": [
+     0.08,
+     1.0,
+     1.1
+    ],
+    "mat": "steel",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     114.6,
+     4.275,
+     -106.3
+    ],
+    "size": [
+     10.0,
+     1.0,
+     0.2
+    ],
+    "mat": "wall",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     123.6,
+     4.275,
+     -106.3
+    ],
+    "size": [
+     5.6,
+     1.0,
+     0.2
+    ],
+    "mat": "wall",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     118.0,
+     4.275,
+     -95.7
+    ],
+    "size": [
+     16.8,
+     1.0,
+     0.2
+    ],
+    "mat": "wall",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     109.7,
+     4.275,
+     -101.0
+    ],
+    "size": [
+     0.2,
+     1.0,
+     10.4
+    ],
+    "mat": "wall",
+    "yaw": 0.0,
+    "solid": true
+   },
+   {
+    "at": [
+     126.3,
+     4.275,
+     -101.0
+    ],
+    "size": [
+     0.2,
+     1.0,
+     10.4
+    ],
+    "mat": "wall",
+    "yaw": 0.0,
+    "solid": true
+   }
+  ],
+  "stairs": [
+   {
+    "from": [
+     111.0,
+     0.0,
+     -106.8
+    ],
+    "to": [
+     119.6,
+     3.775,
+     -106.8
+    ],
+    "width": 1.1,
+    "count": 22,
+    "mat": "concrete"
+   }
+  ],
+  "signs": [
+   {
+    "at": [
+     88.3,
+     16.5,
+     -58.9
+    ],
+    "size": 64.0,
+    "text": "ЖК «Вершина» · четыре башни"
+   }
+  ],
+  "items": [
+   [
+    "tree_round",
+    80.5,
+    -108.5,
+    20.0,
+    1.15,
+    0.0,
+    -1,
+    0.0,
+    "P_linden_a"
+   ],
+   [
+    "tree_round",
+    91.5,
+    -108.5,
+    110.0,
+    1.1,
+    0.0,
+    -1,
+    0.0,
+    "P_linden_b"
+   ],
+   [
+    "tree_round",
+    80.5,
+    -93.5,
+    200.0,
+    1.2,
+    0.0,
+    -1,
+    0.0,
+    "P_linden_c"
+   ],
+   [
+    "tree_round",
+    91.5,
+    -93.5,
+    290.0,
+    1.05,
+    0.0,
+    -1,
+    0.0,
+    "P_linden_a"
+   ],
+   [
+    "garage",
+    183.5,
+    -95.0,
+    -90.0
+   ],
+   [
+    "garage",
+    183.5,
+    -91.4,
+    -90.0
+   ],
+   [
+    "container20",
+    139.0,
+    -148.0,
+    0.0,
+    1.0,
+    0.0,
+    -1,
+    0.0,
+    "PC03_C20_GREEN"
+   ],
+   [
+    "container20",
+    170.0,
+    -90.0,
+    0.0,
+    1.0,
+    0.0,
+    -1,
+    0.0,
+    "PC03_C20_BEIGE"
+   ],
+   [
+    "container20",
+    86.0,
+    -149.0,
+    0.0,
+    1.0,
+    0.0,
+    -1,
+    0.0,
+    "PC03_C20"
+   ],
+   [
+    "van",
+    184.0,
+    -66.0,
+    90.0
+   ]
+  ],
+  "buildings": [
+   {
+    "id": "Vershina_T1",
+    "parent": "East",
+    "at": [
+     74.0,
+     -71.3
+    ],
+    "footprint": [
+     40.0,
+     24.0
+    ],
+    "floors": 38,
+    "story_height": 3.3,
+    "label": "ЖК «Вершина», башня А — пластина, 44 этажа",
+    "kind": "flats",
+    "lift": 18.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_T1_Top",
+    "parent": "East",
+    "at": [
+     74.0,
+     -71.3
+    ],
+    "footprint": [
+     28.0,
+     24.0
+    ],
+    "floors": 6,
+    "story_height": 3.3,
+    "label": "башня А — верх (сужение)",
+    "kind": "flats",
+    "lift": 143.4,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_T2_Base",
+    "parent": "East",
+    "at": [
+     115.0,
+     -129.3
+    ],
+    "footprint": [
+     30.0,
+     30.0
+    ],
+    "floors": 2,
+    "story_height": 4.65,
+    "label": "башня Б — основание, 2 этажа (закрыто)",
+    "kind": "mass",
+    "lift": 0.0,
+    "script": "build"
+   },
+   {
+    "id": "Vershina_T2",
+    "parent": "East",
+    "at": [
+     115.0,
+     -129.3
+    ],
+    "footprint": [
+     30.0,
+     30.0
+    ],
+    "floors": 46,
+    "story_height": 3.3,
+    "label": "ЖК «Вершина», башня Б — самая высокая, 58 этажей",
+    "kind": "flats",
+    "lift": 9.3,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_T2_Top",
+    "parent": "East",
+    "at": [
+     115.0,
+     -129.3
+    ],
+    "footprint": [
+     24.0,
+     24.0
+    ],
+    "floors": 12,
+    "story_height": 3.3,
+    "label": "башня Б — верх (сужение)",
+    "kind": "flats",
+    "lift": 161.1,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_T3",
+    "parent": "East",
+    "at": [
+     154.3,
+     -126.3
+    ],
+    "footprint": [
+     14.0,
+     32.0
+    ],
+    "floors": 52,
+    "story_height": 3.3,
+    "label": "ЖК «Вершина», башня В — двойная, 52 этажа (западная половина)",
+    "kind": "flats",
+    "lift": 0.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": false
+    }
+   },
+   {
+    "id": "Vershina_T3_Low",
+    "parent": "East",
+    "at": [
+     168.3,
+     -126.3
+    ],
+    "footprint": [
+     14.0,
+     32.0
+    ],
+    "floors": 44,
+    "story_height": 3.3,
+    "label": "башня В — восточная половина, 44 этажа",
+    "kind": "flats",
+    "lift": 0.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": false
+    }
+   },
+   {
+    "id": "Vershina_T4",
+    "parent": "East",
+    "at": [
+     159.3,
+     -61.3
+    ],
+    "footprint": [
+     42.0,
+     24.0
+    ],
+    "floors": 30,
+    "story_height": 3.3,
+    "label": "ЖК «Вершина», башня Г — жилая с лоджиями, 36 этажей",
+    "kind": "flats",
+    "lift": 0.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": true,
+     "glass_bands": false
+    }
+   },
+   {
+    "id": "Vershina_T4_Top",
+    "parent": "East",
+    "at": [
+     159.3,
+     -61.3
+    ],
+    "footprint": [
+     30.0,
+     24.0
+    ],
+    "floors": 6,
+    "story_height": 3.3,
+    "label": "башня Г — верх (сужение)",
+    "kind": "flats",
+    "lift": 99.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": true,
+     "glass_bands": false
+    }
+   },
+   {
+    "id": "Vershina_Podium_S",
+    "parent": "East",
+    "at": [
+     88.3,
+     -71.3
+    ],
+    "footprint": [
+     78.0,
+     24.0
+    ],
+    "floors": 3,
+    "story_height": 4.0,
+    "label": "ЖК «Вершина» · стилобат: офисы (закрыт)",
+    "kind": "flats",
+    "lift": 6.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_Podium_W",
+    "parent": "East",
+    "at": [
+     61.3,
+     -101.3
+    ],
+    "footprint": [
+     24.0,
+     36.0
+    ],
+    "floors": 3,
+    "story_height": 4.0,
+    "label": "ЖК «Вершина» · стилобат: фитнес (закрыт)",
+    "kind": "flats",
+    "lift": 6.0,
+    "script": "flats",
+    "extra": {
+     "open_floors": 0,
+     "balconies": false,
+     "glass_bands": true
+    }
+   },
+   {
+    "id": "Vershina_YardCafe",
+    "parent": "East",
+    "at": [
+     118.0,
+     -101.0
+    ],
+    "footprint": [
+     16.0,
+     10.0
+    ],
+    "floors": 1,
+    "story_height": 3.6,
+    "label": "кафе двора",
+    "kind": "hall",
+    "interior": "shop",
+    "loot_theme": "kiosk",
+    "loot_density": 0.6,
+    "lift": 0.0,
+    "script": "build"
+   },
+   {
+    "id": "Vershina_ParkingRamp",
+    "parent": "East",
+    "at": [
+     153.9,
+     -90.0
+    ],
+    "footprint": [
+     7.800000000000011,
+     28.0
+    ],
+    "floors": 1,
+    "story_height": 3.2,
+    "label": "въезд в паркинг −1 (закрыт)",
+    "kind": "mass",
+    "lift": 0.0,
+    "script": "build"
+   },
+   {
+    "id": "Outside_New_D1",
+    "parent": "Outside",
+    "at": [
+     36.0,
+     -202.0
+    ],
+    "footprint": [
+     32.0,
+     32.0
+    ],
+    "floors": 48,
+    "story_height": 3.3,
+    "label": "",
+    "kind": "mass",
+    "lift": 0.0,
+    "script": "build"
+   },
+   {
+    "id": "Outside_New_D2",
+    "parent": "Outside",
+    "at": [
+     205.0,
+     -185.0
+    ],
+    "footprint": [
+     30.0,
+     30.0
+    ],
+    "floors": 54,
+    "story_height": 3.3,
+    "label": "",
+    "kind": "mass",
+    "lift": 0.0,
+    "script": "build"
+   }
+  ]
+ }
+}

@@ -884,9 +884,200 @@ def plan_data_5b() -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+# ------------------------------------------------------------------ этап 6a: «Вершина», объёмы и двор
+import prospekt_vershina_plan as V  # noqa: E402  (чертежи «Вершины»; при импорте ничего не пишет)
+
+BASE_REV_6 = "f5d6b3f6"          # коммит этапа 5b — основа этапа 6
+TEMP_SUPPORT_MAT = "steel"        # временные опоры 6a (в 6b их заменят стены): колонны галереи — "concrete"
+
+
+def _flat(bid: str, rect: tuple, lift: float, floors: int, label: str, balconies: bool = False, glass: bool = False,
+          story: float = V.STORY) -> dict:
+    cx, cz = (rect[0] + rect[1]) / 2.0, (rect[2] + rect[3]) / 2.0
+    return {"id": bid, "parent": "East", "at": [round(cx, 3), round(cz, 3)], "footprint": [round(rect[1] - rect[0], 3), round(rect[3] - rect[2], 3)],
+            "floors": floors, "story_height": story, "label": label, "kind": "flats", "lift": round(lift, 3), "script": "flats",
+            "extra": {"open_floors": 0, "balconies": balconies, "glass_bands": glass}}
+
+
+def vershina_buildings() -> list[dict]:
+    """Узлы башен, стилобата, кафе двора, въезда и двух башен за забором — одним списком (патч 6a и данные плана)."""
+    T = {t["key"]: t for t in V.TOWERS}
+    a, b, c, d = T["А"], T["Б"], T["В"], T["Г"]
+    out: list[dict] = []
+    # А: 38 этажей на стилобате (подъём 18) и верх 6 этажей
+    out.append(_flat("Vershina_T1", a["rect"], 18.0, 38, "ЖК «Вершина», башня А — пластина, 44 этажа", False, True))
+    out.append(_flat("Vershina_T1_Top", a["top"]["rect"], 18.0 + 38 * V.STORY, 6, "башня А — верх (сужение)", False, True))
+    # Б: основание 2 этажа на земле, 46 этажей, верх 12
+    bx = b["rect"]
+    out.append({"id": "Vershina_T2_Base", "parent": "East", "at": [(bx[0] + bx[1]) / 2.0, (bx[2] + bx[3]) / 2.0], "footprint": [30.0, 30.0],
+                "floors": 2, "story_height": 4.65, "label": "башня Б — основание, 2 этажа (закрыто)", "kind": "mass", "lift": 0.0, "script": "build"})
+    out.append(_flat("Vershina_T2", bx, 9.3, 46, "ЖК «Вершина», башня Б — самая высокая, 58 этажей", False, True))
+    out.append(_flat("Vershina_T2_Top", b["top"]["rect"], 9.3 + 46 * V.STORY, 12, "башня Б — верх (сужение)", False, True))
+    # В: две половины
+    cr, lo = c["rect"], c["low"]
+    west = (cr[0], lo["rect"][0], cr[2], cr[3])
+    out.append(_flat("Vershina_T3", west, 0.0, 52, "ЖК «Вершина», башня В — двойная, 52 этажа (западная половина)"))
+    out.append(_flat("Vershina_T3_Low", lo["rect"], 0.0, lo["floors"], "башня В — восточная половина, 44 этажа"))
+    # Г: на месте, верх уже
+    out.append(_flat("Vershina_T4", d["rect"], 0.0, 30, "ЖК «Вершина», башня Г — жилая с лоджиями, 36 этажей", True))
+    out.append(_flat("Vershina_T4_Top", d["top"]["rect"], 30 * V.STORY, 6, "башня Г — верх (сужение)", True))
+    # стилобат: верхние этажи двух крыльев на высоте 6,0
+    out.append(_flat("Vershina_Podium_S", V.WING_S, 6.0, 3, "ЖК «Вершина» · стилобат: офисы (закрыт)", False, True, 4.0))
+    out.append(_flat("Vershina_Podium_W", V.WING_W, 6.0, 3, "ЖК «Вершина» · стилобат: фитнес (закрыт)", False, True, 4.0))
+    # двор
+    pv = V.PAVILION
+    out.append({"id": "Vershina_YardCafe", "parent": "East", "at": [(pv[0] + pv[1]) / 2.0, (pv[2] + pv[3]) / 2.0],
+                "footprint": [pv[1] - pv[0], pv[3] - pv[2]], "floors": 1, "story_height": 3.6, "label": "кафе двора", "kind": "hall",
+                "interior": "shop", "loot_theme": "kiosk", "loot_density": 0.6, "lift": 0.0, "script": "build"})
+    rp = V.RAMP
+    out.append({"id": "Vershina_ParkingRamp", "parent": "East", "at": [(rp[0] + rp[1]) / 2.0, (rp[2] + rp[3]) / 2.0],
+                "footprint": [rp[1] - rp[0], rp[3] - rp[2]], "floors": 1, "story_height": 3.2, "label": "въезд в паркинг −1 (закрыт)",
+                "kind": "mass", "lift": 0.0, "script": "build"})
+    # башни за забором
+    for o, nm in zip(V.OUTSIDE_NEW, ("Outside_New_D1", "Outside_New_D2")):
+        r = o["rect"]
+        out.append({"id": nm, "parent": "Outside", "at": [(r[0] + r[1]) / 2.0, (r[2] + r[3]) / 2.0], "footprint": [r[1] - r[0], r[3] - r[2]],
+                    "floors": o["floors"], "story_height": V.STORY, "label": "", "kind": "mass", "lift": 0.0, "script": "build"})
+    return out
+
+
+# путь от захода «За Вершиной» вдоль северного забора (как П4) к прежним точкам западнее X 30; перебивки обходит с севера / юга
+ROUTE_V2N = [[181.3, -135.3], [178.0, -148.5], [150.0, -148.5], [143.5, -151.8], [134.0, -151.8], [128.0, -148.5], [92.5, -148.5],
+             [86.0, -152.5], [79.5, -148.5], [58.0, -148.5], [42.0, -128.0], [32.0, -112.0],
+             [12.0, -114.0]]
+
+
+def stage_6a_vershina_site() -> Patch:
+    p = Patch("6a_vershina_site", BASE_REV_6)
+    p.add_buildings = vershina_buildings()
+    p.remove["nodes"] += ["Vershina_Podium", "Vershina_T1", "Vershina_T2", "Vershina_T3", "Vershina_T4"]
+    # --- колонны галереи и временные опоры контура крыльев (6b заменит опоры стенами)
+    for x in V.COLUMNS_X:
+        p.box(x, 3.0, -59.7, 0.8, 6.0, 0.8, "concrete")
+    sup = 0
+    seen: set = set()
+    for (x0, x1, z0, z1) in (V.WING_S, V.WING_W):
+        edges = [(False, x0, x1, z0 + 0.4), (False, x0, x1, z1 - 0.4), (True, z0, z1, x0 + 0.4), (True, z0, z1, x1 - 0.4)]
+        for vert, lo, hi, fixed in edges:
+            n = max(1, int(round((hi - lo) / 8.0)))
+            for i in range(n + 1):
+                v = lo + (hi - lo) * i / n
+                x, z = (fixed, v) if vert else (v, fixed)
+                x = min(max(x, x0 + 0.4), x1 - 0.4)
+                z = min(max(z, z0 + 0.4), z1 - 0.4)
+                if z > -60.5 and V.WING_S[0] <= x <= V.WING_S[1]:
+                    continue                                        # южный край крыла — колонны галереи
+                key = (round(x, 1), round(z, 1))
+                if key in seen:
+                    continue
+                seen.add(key)
+                p.box(x, 3.0, z, 0.8, 6.0, 0.8, TEMP_SUPPORT_MAT)
+                sup += 1
+    p.log.append(f"временных опор {sup}")
+    # --- отделка старого фасада на площади: вещи, козырьки, надпись
+    n = p.drop_items(["m:U12_04", "m:U08_04", "m:U08_02", "m:U08_01", "m:U12_01", "m:U08_03"], [49.0, -59.6, 128.0, -57.9])
+    p.log.append(f"отделки фасада (вещей) убрано {n}")
+    for cx in (71.3, 105.3):
+        p.remove["pieces"].append({"list": "boxes", "rect": [cx - 0.3, -58.7, cx + 0.3, -57.5], "mat": "steel"})
+    p.remove["pieces"].append({"list": "signs", "rect": [87.8, -59.0, 88.8, -58.0]})
+    p.add["signs"].append({"at": [88.3, 16.5, -58.9], "size": 64.0, "text": "ЖК «Вершина» · четыре башни"})
+    # --- покрытия
+    p.surface("vershina_yard", "walk", 49.3, -146.0, 147.3, -83.3, 0.0, 0.08)
+    p.surface("vershina_pass_d", "walk", 127.3, -83.3, 138.3, -59.3, 0.0, 0.08)
+    gx0, gx1, gz0, gz1 = V.GARDEN
+    p.surface("vershina_garden", "grass", gx0, gz0, gx1, gz1, 0.0, 0.12)
+    # --- деревья сада
+    for (tx, tz), md, yaw, sc in zip(((80.5, -108.5), (91.5, -108.5), (80.5, -93.5), (91.5, -93.5)),
+                                     ("P_linden_a", "P_linden_b", "P_linden_c", "P_linden_a"), (20.0, 110.0, 200.0, 290.0),
+                                     (1.15, 1.1, 1.2, 1.05)):
+        p.put("tree_round", tx, tz, yaw, sc, 0.0, -1, 0.0, md)
+    # --- кафе двора: наружная лестница на крышу вдоль северной стены (марш 1,1 м) и парапет 1,0 коробками
+    cx0, cx1, cz0, cz1 = V.PAVILION
+    roof = 3.6 + 0.175                                          # верх плиты крыши
+    zs = cz0 - 0.15 - 0.1 - 0.55                                # марш вдоль северной стены с зазором 0,1
+    p.stair((cx0 + 1.0, 0.0, zs), (cx0 + 9.6, roof, zs), 1.1, "concrete")
+    p.box(cx0 + 10.2, roof - 0.12, zs, 1.2, 0.24, 1.1, "concrete")                 # верхняя площадка
+    p.box(cx0 + 10.2, roof + 0.5, zs - 0.5, 1.2, 1.0, 0.08, "steel")               # ограждение площадки с севера
+    p.box(cx0 + 10.8, roof + 0.5, zs, 0.08, 1.0, 1.1, "steel")                     # и с востока
+    rx0, rx1, rz0, rz1 = cx0 - 0.4, cx1 + 0.4, cz0 - 0.4, cz1 + 0.4
+    py = roof + 0.5
+    gap0, gap1 = cx0 + 9.6, cx0 + 10.8                                              # проход на крышу с площадки
+    p.box((rx0 + gap0) / 2.0, py, rz0 + 0.1, gap0 - rx0, 1.0, 0.2, "wall")
+    p.box((gap1 + rx1) / 2.0, py, rz0 + 0.1, rx1 - gap1, 1.0, 0.2, "wall")
+    p.box((rx0 + rx1) / 2.0, py, rz1 - 0.1, rx1 - rx0, 1.0, 0.2, "wall")
+    for x in (rx0 + 0.1, rx1 - 0.1):
+        p.box(x, py, (rz0 + rz1) / 2.0, 0.2, 1.0, rz1 - rz0 - 0.4, "wall")
+    # --- что переставить: два гаража к восточному забору, контейнер, перебивки обзора
+    p.move_item("garage", 171.3, -122.3, 183.5, -95.0, -90.0)
+    p.move_item("garage", 174.7, -122.3, 183.5, -91.4, -90.0)
+    p.move_item("container20", 131.3, -143.3, 139.0, -148.0)
+    p.put("container20", 170.0, -90.0, 0.0, 1.0, 0.0, -1, 0.0, "PC03_C20_BEIGE")
+    p.put("container20", 86.0, -149.0, 0.0, 1.0, 0.0, -1, 0.0, "PC03_C20")
+    p.put("van", 184.0, -66.0, 90.0)
+    return p
+
+
+def _entry_text(e: dict) -> str:
+    """Запись здания в тексте prospekt.json — как у соседних (CTP, SquareCafe, Vershina_T1)."""
+    def num(v: float) -> str:
+        return repr(round(float(v), 3))
+    kind = e.get("kind", "mass")
+    s = '  {\n   "id": "%s",\n   "label": "%s",\n   "at": [%s, %s],\n   "size": [%s, %s],\n   "floors": %d,\n   "story_height": %s,\n' % (
+        e["id"], e["label"], num(e["at"][0]), num(e["at"][1]), num(e["footprint"][0]), num(e["footprint"][1]), e["floors"], num(e["story_height"]))
+    s += '   "yaw": 0.0,\n   "kind": "%s",\n   "lift": %s,\n   "interior": "%s",\n   "loot_theme": "%s",\n   "loot_density": %s,\n' % (
+        kind, num(e.get("lift", 0.0)), e.get("interior", ""), e.get("loot_theme", "home" if kind == "flats" else ""), num(e.get("loot_density", 0.0)))
+    s += '   "region": "%s",\n   "script": "%s",\n' % (e["parent"], e["script"])
+    if e.get("extra"):
+        x = e["extra"]
+        s += '   "extra": {\n    "open_floors": %d,\n    "balconies": %s,\n    "glass_bands": %s\n   }\n  }' % (
+            x["open_floors"], str(x["balconies"]).lower(), str(x["glass_bands"]).lower())
+    else:
+        s += '   "extra": {}\n  }'
+    return s
+
+
+def _set_buildings(text: str, entries: list[dict], drop: list[str], after: str) -> str:
+    """Убрать записи drop и старые записи с теми же id, затем вставить entries после записи after (идемпотентно, текстом)."""
+    import re
+    for bid in drop + [e["id"] for e in entries]:
+        text = re.sub(r'  \{\n   "id": "%s",.*?\n  \},\n' % re.escape(bid), "", text, count=1, flags=re.S)
+    m = re.search(r'  \{\n   "id": "%s",.*?\n  \},\n' % re.escape(after), text, flags=re.S)
+    if not m:
+        raise SystemExit(f"нет записи {after}")
+    block = "".join(_entry_text(e) + ",\n" for e in entries)
+    return text[:m.end()] + block + text[m.end():]
+
+
+def plan_data_6a() -> None:
+    import re
+    path = ROOT / "data" / "blockouts" / "prospekt.json"
+    text = path.read_text(encoding="utf-8")
+    text = _set_buildings(text, vershina_buildings(), ["Vershina_Podium"], "CTP")
+    rx = re.compile(r'(\{\n   "id": "vershina_to_north",\n   "label": "[^"]*",\n   "max_open_m": [0-9.]+,\n   "points": \[\n)(.*?)(\n   \])', re.S)
+    m = rx.search(text)
+    if not m:
+        raise SystemExit("маршрут vershina_to_north не найден")
+    # прежние точки после (12; −114) — без изменений; сами новые точки заменяют всё до неё включительно
+    old = re.findall(r"\[(-?[0-9.]+), (-?[0-9.]+)\]", m.group(2))
+    keep: list = []
+    seen = False
+    for a, b in old:
+        if seen:
+            keep.append((float(a), float(b)))
+        if abs(float(a) - 12.0) < 1e-6 and abs(float(b) + 114.0) < 1e-6:
+            seen = True
+    if not seen:
+        raise SystemExit("в маршруте нет точки (12; −114) — это не прежний маршрут")
+    body = ",\n".join("    [%s, %s]" % (_num(a), _num(b)) for a, b in ROUTE_V2N)
+    body += "".join(",\n    [%s, %s]" % (_num(a), _num(b)) for a, b in keep)
+    text = text[:m.start()] + m.group(1) + body + m.group(3) + text[m.end():]
+    text = text.replace("за «Вершиной» → вдоль стилобата → дворы → к насыпи", "за «Вершиной» → вдоль северного забора → переулок → дворы → к насыпи")
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
 STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
-          "5b_bank_plan": stage_5b_bank_plan}
+          "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site}
 
 
 def main() -> None:
@@ -900,6 +1091,8 @@ def main() -> None:
             plan_data_4()
         if name == "5b_bank_plan":
             plan_data_5b()
+        if name == "6a_vershina_site":
+            plan_data_6a()
         print(f"{path}: убрать вещей {len(p.remove['items'])} правил, кусков {len(p.remove['pieces'])}, узлов {len(p.remove['nodes'])}; "
               + ", ".join(f"{k} {len(v)}" for k, v in p.add.items() if v))
         for line_ in p.log:

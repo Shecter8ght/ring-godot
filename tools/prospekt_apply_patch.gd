@@ -240,7 +240,7 @@ func _add_item(raw: Array) -> void:
 	spot.transform = xf
 	spot.base = xf
 	spot.set_meta(META, _stage)
-	top.add_child(spot)
+	top.add_child(spot, true)
 	spot.owner = _root
 	_stats["добавлено вещей"] += 1
 
@@ -255,21 +255,35 @@ func _add_building(b: Dictionary) -> void:
 		return
 	var node: Node3D = Node3D.new()
 	node.name = String(b.id)
-	node.set_script(load("res://src/blockout/study_building.gd"))
+	# "script": "flats" — секция flat_section.gd (башня, стилобат): open_floors / balconies / glass_bands — из "extra"
+	var flats: bool = String(b.get("script", "build")) == "flats"
+	node.set_script(load("res://src/blockout/flat_section.gd" if flats else "res://src/blockout/study_building.gd"))
 	var fp: Array = b.footprint
-	node.set("kind", String(b.get("kind", "mass")))
+	if flats:
+		var extra: Dictionary = b.get("extra", {})
+		node.set("open_floors", int(extra.get("open_floors", 0)))
+		node.set("balconies", bool(extra.get("balconies", false)))
+		node.set("glass_bands", bool(extra.get("glass_bands", false)))
+	else:
+		node.set("kind", String(b.get("kind", "mass")))
+		if b.has("interior"):
+			node.set("interior", String(b.interior))
+			node.set("loot_theme", String(b.get("loot_theme", "")))
+			node.set("loot_density", float(b.get("loot_density", 0.0)))
 	node.set("footprint", Vector2(float(fp[0]), float(fp[1])))
 	node.set("floors", int(b.get("floors", 1)))
 	node.set("story_height", float(b.get("story_height", 3.0)))
 	node.set("label", String(b.get("label", "")))
 	var at: Array = b.at
-	node.transform = Transform3D(Basis.IDENTITY, Vector3(float(at[0]), 0.0, float(at[1])))
+	var lift: float = float(b.get("lift", 0.0))
+	node.transform = Transform3D(Basis.IDENTITY, Vector3(float(at[0]), lift, float(at[1])))
 	node.add_to_group("mall_study_snap", true)
 	node.set_meta("height_m", int(b.get("floors", 1)) * float(b.get("story_height", 3.0)))
-	node.set_meta("enterable", false)
+	node.set_meta("lift", lift)
+	node.set_meta("enterable", String(b.get("interior", "")) != "")
 	node.set_meta("loot_count", 0)
 	node.set_meta(META, _stage)
-	parent.add_child(node)
+	parent.add_child(node, true)
 	node.owner = _root
 	_stats["добавлено зданий"] += 1
 
@@ -371,7 +385,7 @@ func _add_piece(list_name: String, e: Variant) -> void:
 	var key: String = "%d|%s" % [parent.get_instance_id(), title]
 	_counts[key] = int(_counts.get(key, 0)) + 1
 	piece.name = ("%s этап %s %d" % [title, _stage, int(_counts[key])]).validate_node_name()
-	parent.add_child(piece)
+	parent.add_child(piece, true)
 	piece.owner = _root
 	_stats["добавлено кусков"] += 1
 
