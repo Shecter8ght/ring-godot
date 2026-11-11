@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_tile_run — Шаги: плитка
+Файлы: sonora/step_tile_run_01.wav, sonora/step_tile_run_02.wav, sonora/step_tile_run_03.wav, sonora/step_tile_run_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 1.wav, 2.wav
+
+

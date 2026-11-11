@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_concrete — Шаг по бетону и асфальту
+Файлы: sonora/step_concrete_01.wav, sonora/step_concrete_02.wav, sonora/step_concrete_03.wav, sonora/step_concrete_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 2.wav, 3.wav, 4.wav, 1.wav
+
+

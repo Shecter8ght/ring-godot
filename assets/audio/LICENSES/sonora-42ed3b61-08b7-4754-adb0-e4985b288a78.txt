@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shell_sand — Гильза — песок
+Файлы: sonora/wpn_hg_01_shell_sand_01.wav, sonora/wpn_hg_01_shell_sand_02.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 2.wav, 1.wav
+
+

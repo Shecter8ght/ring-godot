@@ -42,7 +42,19 @@ func _ready() -> void:
 	probe.data.resize(48000)
 	var previews: Dictionary = {}
 	for entry: Dictionary in surfaces.casings:
-		previews[String(entry.hook)] = [probe]
+		var hook: String = String(entry.hook)
+		var hook_12: String = "shell_12_" + hook.trim_prefix("shell_")
+		check(Audio._bindings.has(hook_12), "12-gauge card: " + hook_12)
+		for id: String in WeaponDb.weapon_ids():
+			var weapon: Dictionary = WeaponDb.weapon(id)
+			var expected: String = hook_12 if weapon.caliber == "12x76" else hook
+			if weapon["class"] == "SPECIAL":
+				expected = ""
+			for surface: String in entry.surfaces:
+				check(Audio.shell_hook(surface, id) == expected, id + " casing on " + surface)
+		previews[hook] = [probe]
+		previews[hook_12] = [probe]
+	check(Audio._kind_spec("shell_metal") == Audio._kind_spec("shell_12_metal"), "both metal cards use the metal profile")
 	Audio.set_preview(previews)
 	var x: float = 0.0
 	for entry: Dictionary in surfaces.casings:
@@ -66,8 +78,17 @@ func _ready() -> void:
 		check(Audio._surface_under(pos) == entry.surfaces[0], "physics surface: " + String(entry.hook))
 		Audio._shell_land(pos, 0.0, "wpn_hg_01")
 		check(not heard.is_empty() and heard.back() == entry.hook, "casing hits the requested surface: " + String(entry.hook))
+		var hook_12: String = "shell_12_" + String(entry.hook).trim_prefix("shell_")
+		for id: String in ["wpn_sg_02", "wpn_sg_03"]:
+			var played: int = heard.size()
+			Audio._shell_land(pos, 0.0, id)
+			check(heard.size() == played + 1 and heard.back() == hook_12, id + " plays its 12-gauge surface")
 		x += 4.0
 	Audio.set_preview({})
+	var original_12: Array = Audio._samples.shell_12_concrete
+	Audio._samples.shell_12_concrete = []
+	check(Audio._pick(Audio.shell_hook("concrete", "wpn_sg_02"), Vector3.ZERO) == null, "empty 12-gauge card stays silent")
+	Audio._samples.shell_12_concrete = original_12
 	# Compare a selected variant on the bench with ordinary gameplay and a live gain edit.
 	var originals: Array = Audio._samples.step_wood
 	Audio._samples.step_wood = [probe]

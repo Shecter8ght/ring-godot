@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_ar_01_shot_sup_outdoor — С глушителем на улице
+Файлы: sonora/wpn_ar_01_shot_sup_outdoor_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Верас 54 выстрел с глушителем на улице.wav
+
+

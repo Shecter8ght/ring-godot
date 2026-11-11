@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shot_room — Выстрел в небольшом помещении
+Файлы: sonora/wpn_hg_01_shot_room_01.wav, sonora/wpn_hg_01_shot_room_02.wav, sonora/wpn_hg_01_shot_room_03.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Выстрел ПМ по слоям1.wav, Выстрел ПМ по слоям2.wav, Выстрел ПМ по слоям3.wav
+
+

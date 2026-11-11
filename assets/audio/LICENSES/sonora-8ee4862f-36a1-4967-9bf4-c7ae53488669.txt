@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_ar_01_shot — Выстрел — основной
+Файлы: sonora/wpn_ar_01_shot_02.wav, sonora/wpn_ar_01_shot_03.wav, sonora/wpn_ar_01_shot_04.wav, sonora/wpn_ar_01_shot_05.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Выстрел_2.wav, Выстрел_3.wav, Выстрел_4.wav, Выстрел.wav
+
+

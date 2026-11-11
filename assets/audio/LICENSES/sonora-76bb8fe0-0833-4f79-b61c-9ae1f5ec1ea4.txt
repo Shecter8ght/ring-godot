@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shot_hall — Выстрел в большом помещении
+Файлы: sonora/wpn_hg_01_shot_hall_01.wav, sonora/wpn_hg_01_shot_hall_02.wav, sonora/wpn_hg_01_shot_hall_03.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Выстрел ПМ по слоям1.wav, Выстрел ПМ по слоям2.wav, Выстрел ПМ по слоям3.wav
+
+

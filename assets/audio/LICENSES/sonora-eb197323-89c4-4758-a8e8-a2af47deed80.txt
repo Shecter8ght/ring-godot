@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_sp_02_shot — Выстрел — основной
+Файлы: sonora/wpn_sp_02_shot_01.wav, sonora/wpn_sp_02_shot_02.wav, sonora/wpn_sp_02_shot_03.wav, sonora/wpn_sp_02_shot_04.wav, sonora/wpn_sp_02_shot_05.wav, sonora/wpn_sp_02_shot_06.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav
+
+

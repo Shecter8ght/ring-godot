@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shot_outdoor — Выстрел на улице
+Файлы: sonora/wpn_hg_01_shot_outdoor_02.wav, sonora/wpn_hg_01_shot_outdoor_03.wav, sonora/wpn_hg_01_shot_outdoor_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav
+
+

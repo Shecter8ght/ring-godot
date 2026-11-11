@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_sp_02_shot_sup_room — С глушителем в помещении
+Файлы: sonora/wpn_sp_02_shot_sup_room_01.wav, sonora/wpn_sp_02_shot_sup_room_02.wav, sonora/wpn_sp_02_shot_sup_room_03.wav, sonora/wpn_sp_02_shot_sup_room_04.wav, sonora/wpn_sp_02_shot_sup_room_05.wav, sonora/wpn_sp_02_shot_sup_room_06.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav
+
+

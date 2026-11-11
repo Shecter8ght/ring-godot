@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Выстрелы The Free Firearm Sound Library (CC0) по слоям дистанции → кандидаты стенда звуков.
+"""Выстрелы The Free Firearm Sound Library (CC0) по слоям дистанции → кандидаты звуков.
 
 python -X utf8 tools/prepare_firearm_layers.py [--only ключ,ключ] [--force]
 
@@ -81,7 +81,7 @@ EVENT_PEAK_RANGE_DB = 9.0
 BUMP_FROM_S = 0.9
 BUMP_DB = 14.0
 
-# Наборы: событие стенда (слой «вблизи»; остальные слои — событие + _self/_mid/_far/_distant),
+# Наборы: событие каталога (слой «вблизи»; остальные слои — событие + _self/_mid/_far/_distant),
 # название папки, оружие записи, дорожки по слоям. Соответствие стволам игры — docs/STATUS.md.
 SETS: list[dict] = [
     {"key": "pistol", "event": "shot_pistol", "title": "Пистолет 9×19 — общий набор (Walther PPQ)",

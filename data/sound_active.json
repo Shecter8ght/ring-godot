@@ -1,4 +1,9 @@
 {
   "schemaVersion": 2,
-  "_comment": "Управление назначениями перенесено в data/audio_events.json."
+  "_comment": "Управление назначениями перенесено в data/audio_events.json.",
+  "disabled": [
+    "guns/hg_01_shot_01.wav",
+    "guns/hg_01_shot_sup_01.wav",
+    "guns/hg_01_shot_sup_02.wav"
+  ]
 }

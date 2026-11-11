@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_carpet — Шаги: грунт
+Файлы: sonora/step_carpet_07.wav, sonora/step_carpet_08.wav, sonora/step_carpet_09.wav, sonora/step_carpet_10.wav, sonora/step_carpet_11.wav, sonora/step_carpet_12.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 1.wav
+
+

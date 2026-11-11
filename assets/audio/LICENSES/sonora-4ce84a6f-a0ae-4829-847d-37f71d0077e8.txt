@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shell_tile — Гильза — плитка
+Файлы: sonora/wpn_hg_01_shell_tile_01.wav, sonora/wpn_hg_01_shell_tile_02.wav, sonora/wpn_hg_01_shell_tile_03.wav, sonora/wpn_hg_01_shell_tile_04.wav, sonora/wpn_hg_01_shell_tile_05.wav, sonora/wpn_hg_01_shell_tile_06.wav, sonora/wpn_hg_01_shell_tile_07.wav, sonora/wpn_hg_01_shell_tile_08.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav, 8.wav
+
+

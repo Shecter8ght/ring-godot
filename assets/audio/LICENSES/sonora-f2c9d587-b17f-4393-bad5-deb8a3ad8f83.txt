@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_tile — Шаги: асфальт
+Файлы: sonora/step_tile_01.wav, sonora/step_tile_02.wav, sonora/step_tile_03.wav, sonora/step_tile_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav
+
+

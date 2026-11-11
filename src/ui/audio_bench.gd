@@ -1,7 +1,11 @@
 extends CanvasLayer
 ## Прослушивание через Audio в текущем мире. Настройки относятся к событию и к исходной записи.
 
+const ReloadPanel := preload("res://src/ui/reload_audio_panel.gd")
+
 var _root: Control
+var _reload_tab: VBoxContainer
+var _reload_panel: ReloadPanel
 var _list: ItemList
 var _search: LineEdit
 var _category: OptionButton
@@ -82,11 +86,21 @@ func _build() -> void:
 	header.add_child(heading)
 	header.add_child(_button("Обновить назначения", _refresh))
 	header.add_child(_button("Закрыть · Esc", _close))
-	column.add_child(_label("Громкость сохраняется для игры. Прослушивание учитывает шины, расстояние, гарнитуру и преграды текущей сцены."))
+	var tabs := TabContainer.new()
+	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(tabs)
+	var catalog := VBoxContainer.new()
+	catalog.name = "Каталог"
+	tabs.add_child(catalog)
+	_reload_tab = VBoxContainer.new()
+	_reload_tab.name = "Перезарядка"
+	tabs.add_child(_reload_tab)
+	tabs.tab_changed.connect(_show_tab)
+	catalog.add_child(_label("Громкость сохраняется для игры. Прослушивание учитывает шины, расстояние, гарнитуру и преграды текущей сцены."))
 	var row: HBoxContainer = HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 24)
-	column.add_child(row)
+	catalog.add_child(row)
 	var left: VBoxContainer = VBoxContainer.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.size_flags_stretch_ratio = 1.2
@@ -163,6 +177,16 @@ func _build() -> void:
 	add_child(_save_timer)
 
 
+func _show_tab(index: int) -> void:
+	_stop()
+	if index == 1 and not _reload_panel:
+		_reload_panel = ReloadPanel.new()
+		_reload_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_reload_tab.add_child(_reload_panel)
+	elif _reload_panel:
+		_reload_panel.stop()
+
+
 func _level_control(parent: VBoxContainer, text: String, file_level: bool) -> SpinBox:
 	parent.add_child(_label(text))
 	var row: HBoxContainer = HBoxContainer.new()
@@ -191,6 +215,8 @@ func _level_control(parent: VBoxContainer, text: String, file_level: bool) -> Sp
 func _refresh() -> void:
 	_stop()
 	Audio.reload_events()
+	if _reload_panel:
+		_reload_panel.refresh()
 	_category.clear()
 	_category.add_item("Все категории")
 	var categories: Array[String] = []
@@ -362,6 +388,8 @@ func _stop() -> void:
 
 
 func _close() -> void:
+	if _reload_panel and not _reload_panel.can_close():
+		return
 	_save()
 	if _dirty:
 		return

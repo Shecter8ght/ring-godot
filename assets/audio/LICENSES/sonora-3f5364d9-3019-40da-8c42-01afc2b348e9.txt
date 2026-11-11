@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_carpet — Шаг по ковру
+Файлы: sonora/step_carpet_18.wav, sonora/step_carpet_19.wav, sonora/step_carpet_20.wav, sonora/step_carpet_21.wav, sonora/step_carpet_22.wav, sonora/step_carpet_23.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav
+
+

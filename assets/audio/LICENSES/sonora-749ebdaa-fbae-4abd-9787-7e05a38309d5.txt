@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: ambient_prospekt — Окружение — Проспект
+Файлы: sonora/ambient_prospekt_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 4.wav
+
+

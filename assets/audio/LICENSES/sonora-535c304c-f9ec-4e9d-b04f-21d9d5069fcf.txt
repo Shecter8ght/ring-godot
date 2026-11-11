@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_ar_01_shot_room — Выстрел в небольшом помещении
+Файлы: sonora/wpn_ar_01_shot_room_01.wav, sonora/wpn_ar_01_shot_room_02.wav, sonora/wpn_ar_01_shot_room_03.wav, sonora/wpn_ar_01_shot_room_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Выстрел_2.wav, Выстрел_3.wav, Выстрел_4.wav, Выстрел.wav
+
+

@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_asphalt — Шаг по грунту
+Файлы: sonora/step_asphalt_01.wav, sonora/step_asphalt_02.wav, sonora/step_asphalt_03.wav, sonora/step_asphalt_04.wav, sonora/step_asphalt_05.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 2.wav, 3.wav, 4.wav, 5.wav, 1.wav
+
+

@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_sp_02_ads_raise — Поднять оружие
+Файлы: sonora/wpn_sp_02_ads_raise_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 4.wav
+
+

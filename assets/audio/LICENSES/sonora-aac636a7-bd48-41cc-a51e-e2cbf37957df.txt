@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: sound_ee772fba257045188308fe8273e79483 — Поднимание и спуск по вертикальной лестнице
+Файлы: sonora/sound_ee772fba257045188308fe8273e79483_01.wav, sonora/sound_ee772fba257045188308fe8273e79483_02.wav, sonora/sound_ee772fba257045188308fe8273e79483_03.wav, sonora/sound_ee772fba257045188308fe8273e79483_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 1.wav, 2.wav
+
+

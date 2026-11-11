@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: shell_metal — Падение гильзы — металл
+Файлы: sonora/shell_metal_01.wav, sonora/shell_metal_02.wav, sonora/shell_metal_03.wav, sonora/shell_metal_04.wav, sonora/shell_metal_05.wav, sonora/shell_metal_06.wav, sonora/shell_metal_07.wav, sonora/shell_metal_08.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav, 8.wav
+
+

@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_gravel — Шаги: гравий и камушки
+Файлы: sonora/step_gravel_01.wav, sonora/step_gravel_02.wav, sonora/step_gravel_03.wav, sonora/step_gravel_04.wav, sonora/step_gravel_05.wav, sonora/step_gravel_06.wav, sonora/step_gravel_07.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav
+
+

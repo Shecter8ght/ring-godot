@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_glass — Шаги: стекло
+Файлы: sonora/step_glass_01.wav, sonora/step_glass_02.wav, sonora/step_glass_03.wav, sonora/step_glass_04.wav, sonora/step_glass_05.wav, sonora/step_glass_06.wav, sonora/step_glass_07.wav, sonora/step_glass_08.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 5.wav, 6.wav, 7.wav, 8.wav, 1.wav, 2.wav
+
+

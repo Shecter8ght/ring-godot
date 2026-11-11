@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_smg_03_shot_outdoor — Выстрел на улице
+Файлы: sonora/wpn_smg_03_shot_outdoor_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Вектор выстрел.wav
+
+

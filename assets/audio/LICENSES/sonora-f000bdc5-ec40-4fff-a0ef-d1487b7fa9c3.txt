@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: shell_concrete — Падение гильзы — бетон и асфальт
+Файлы: sonora/shell_concrete_01.wav, sonora/shell_concrete_02.wav, sonora/shell_concrete_03.wav, sonora/shell_concrete_04.wav, sonora/shell_concrete_05.wav, sonora/shell_concrete_06.wav, sonora/shell_concrete_07.wav, sonora/shell_concrete_08.wav, sonora/shell_concrete_09.wav, sonora/shell_concrete_10.wav, sonora/shell_concrete_11.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 5.wav, 6.wav, 7.wav, 8.wav, 9.wav, 10.wav, 11.wav, 1.wav, 2.wav
+
+

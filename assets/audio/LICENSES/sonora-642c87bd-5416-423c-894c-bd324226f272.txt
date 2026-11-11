@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: shell_sand — Падение гильзы — песок
+Файлы: sonora/shell_sand_01.wav, sonora/shell_sand_02.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav
+
+

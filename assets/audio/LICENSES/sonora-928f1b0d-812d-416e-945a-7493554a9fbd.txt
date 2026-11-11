@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_sp_02_dry_fire — Сухой спуск
+Файлы: sonora/wpn_sp_02_dry_fire_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 6.wav
+
+

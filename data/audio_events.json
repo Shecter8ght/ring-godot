@@ -2,62 +2,8 @@
   "schemaVersion": 2,
   "events": [
     {
-      "id": "wpn_hg_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": [
-        "sonora/wpn_hg_01_shot_01.wav"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "wpn_hg_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": [
-        "sonora/wpn_hg_01_shot_suppressed_01.wav"
-      ],
-      "enabled": true
-    },
-    {
-      "id": "wpn_hg_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": [
-        "sonora/wpn_hg_01_shot_outdoor_01.wav"
-      ],
-      "enabled": true
-    },
-    {
       "id": "wpn_hg_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_hg_01",
       "action": "shot_room",
@@ -69,42 +15,42 @@
       "type": "one",
       "profile": "shot_pistol",
       "files": [
-        "guns/hg_01_shot_room_01.wav",
-        "guns/hg_01_shot_room_02.wav",
-        "guns/hg_01_shot_room_03.wav",
-        "guns/hg_01_shot_room_04.wav",
-        "guns/hg_01_shot_room_05.wav"
-      ]
+        "sonora/wpn_hg_01_shot_room_11.wav",
+        "sonora/wpn_hg_01_shot_room_12.wav",
+        "sonora/wpn_hg_01_shot_room_13.wav",
+        "sonora/wpn_hg_01_shot_room_14.wav",
+        "sonora/wpn_hg_01_shot_room_15.wav",
+        "sonora/wpn_hg_01_shot_room_16.wav",
+        "sonora/wpn_hg_01_shot_room_17.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_hg_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shot_hall"
+        "hook": "wpn_hg_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shot_sup_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_shot_outdoor_05.wav",
+        "sonora/wpn_hg_01_shot_outdoor_06.wav",
+        "sonora/wpn_hg_01_shot_outdoor_07.wav",
+        "sonora/wpn_hg_01_shot_outdoor_08.wav",
+        "sonora/wpn_hg_01_shot_outdoor_09.wav",
+        "sonora/wpn_hg_01_shot_outdoor_10.wav",
+        "sonora/wpn_hg_01_shot_outdoor_11.wav",
+        "sonora/wpn_hg_01_shot_outdoor_12.wav",
+        "sonora/wpn_hg_01_shot_outdoor_13.wav",
+        "sonora/wpn_hg_01_shot_outdoor_14.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_shot_sup_room",
@@ -119,22 +65,39 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_shot_sup_room_09.wav",
+        "sonora/wpn_hg_01_shot_sup_room_10.wav",
+        "sonora/wpn_hg_01_shot_sup_room_11.wav",
+        "sonora/wpn_hg_01_shot_sup_room_12.wav",
+        "sonora/wpn_hg_01_shot_sup_room_13.wav",
+        "sonora/wpn_hg_01_shot_sup_room_14.wav",
+        "sonora/wpn_hg_01_shot_sup_room_15.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_hg_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shot_sup_hall"
+        "hook": "wpn_hg_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_shot_sup_outdoor_05.wav",
+        "sonora/wpn_hg_01_shot_sup_outdoor_06.wav",
+        "sonora/wpn_hg_01_shot_sup_outdoor_07.wav",
+        "sonora/wpn_hg_01_shot_sup_outdoor_08.wav",
+        "sonora/wpn_hg_01_shot_sup_outdoor_09.wav",
+        "sonora/wpn_hg_01_shot_sup_outdoor_10.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_mechanism",
@@ -142,7 +105,7 @@
       "category": "Оружие",
       "weapon": "wpn_hg_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_hg_01_mechanism"
@@ -166,7 +129,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_dry_fire_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_jam",
@@ -181,7 +147,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_hg_01_jam_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_hg_01_clear_jam",
@@ -417,61 +386,8 @@
       ]
     },
     {
-      "id": "wpn_hg_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": [
-        "guns/hg_02_shot_01.wav",
-        "guns/hg_02_shot_02.wav",
-        "guns/hg_02_shot_03.wav"
-      ]
-    },
-    {
-      "id": "wpn_hg_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": [
-        "guns/hg_02_shot_sup_02.wav",
-        "guns/hg_02_shot_sup_03.wav",
-        "guns/hg_02_shot_sup_04.wav"
-      ]
-    },
-    {
-      "id": "wpn_hg_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_hg_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_hg_02",
       "action": "shot_room",
@@ -482,37 +398,30 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "guns/hg_02_shot_01.wav",
+        "guns/hg_02_shot_02.wav",
+        "guns/hg_02_shot_03.wav"
+      ]
     },
     {
-      "id": "wpn_hg_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_hg_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_02_shot_hall"
+        "hook": "wpn_hg_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shot_sup_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "guns/hg_02_shot_01.wav",
+        "guns/hg_02_shot_02.wav",
+        "guns/hg_02_shot_03.wav"
+      ]
     },
     {
       "id": "wpn_hg_02_shot_sup_room",
@@ -527,22 +436,30 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "guns/hg_02_shot_sup_02.wav",
+        "guns/hg_02_shot_sup_03.wav",
+        "guns/hg_02_shot_sup_04.wav"
+      ]
     },
     {
-      "id": "wpn_hg_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_hg_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_02_shot_sup_hall"
+        "hook": "wpn_hg_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "guns/hg_02_shot_sup_02.wav",
+        "guns/hg_02_shot_sup_03.wav",
+        "guns/hg_02_shot_sup_04.wav"
+      ]
     },
     {
       "id": "wpn_hg_02_mechanism",
@@ -550,7 +467,7 @@
       "category": "Оружие",
       "weapon": "wpn_hg_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_hg_02_mechanism"
@@ -788,53 +705,8 @@
       "files": []
     },
     {
-      "id": "wpn_hg_03_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_hg_03_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_hg_03",
       "action": "shot_room",
@@ -848,30 +720,15 @@
       "files": []
     },
     {
-      "id": "wpn_hg_03_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_hg_03_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_03",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_03_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_hg_03_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_hg_03",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_03_shot_sup_outdoor"
+        "hook": "wpn_hg_03_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -893,15 +750,15 @@
       "files": []
     },
     {
-      "id": "wpn_hg_03_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_hg_03_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_hg_03",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_03_shot_sup_hall"
+        "hook": "wpn_hg_03_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -913,7 +770,7 @@
       "category": "Оружие",
       "weapon": "wpn_hg_03",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_hg_03_mechanism"
@@ -1148,53 +1005,8 @@
       "files": []
     },
     {
-      "id": "wpn_smg_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_smg_01",
       "action": "shot_room",
@@ -1208,30 +1020,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_smg_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_01_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_01_shot_sup_outdoor"
+        "hook": "wpn_smg_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -1253,15 +1050,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_smg_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_01_shot_sup_hall"
+        "hook": "wpn_smg_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -1273,7 +1070,7 @@
       "category": "Оружие",
       "weapon": "wpn_smg_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_smg_01_mechanism"
@@ -1523,53 +1320,8 @@
       "files": []
     },
     {
-      "id": "wpn_smg_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_smg_02",
       "action": "shot_room",
@@ -1583,30 +1335,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_smg_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_02_shot_sup_outdoor"
+        "hook": "wpn_smg_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -1628,15 +1365,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_smg_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_02_shot_sup_hall"
+        "hook": "wpn_smg_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -1648,7 +1385,7 @@
       "category": "Оружие",
       "weapon": "wpn_smg_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_smg_02_mechanism"
@@ -1898,53 +1635,8 @@
       "files": []
     },
     {
-      "id": "wpn_smg_03_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_03_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_smg_03",
       "action": "shot_room",
@@ -1955,18 +1647,39 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_smg_03_shot_room_01.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_smg_03_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_smg_03_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_03",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_03_shot_hall"
+        "hook": "wpn_smg_03_shot_outdoor"
+      },
+      "type": "one",
+      "profile": "shot_pistol",
+      "files": [
+        "sonora/wpn_smg_03_shot_outdoor_01.wav"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "wpn_smg_03_shot_sup_room",
+      "name": "С глушителем в помещении",
+      "category": "Оружие",
+      "weapon": "wpn_smg_03",
+      "action": "shot_sup_room",
+      "group": "Выстрел",
+      "binding": {
+        "type": "action",
+        "hook": "wpn_smg_03_shot_sup_room"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -1988,42 +1701,12 @@
       "files": []
     },
     {
-      "id": "wpn_smg_03_shot_sup_room",
-      "name": "С глушителем в помещении",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shot_sup_room",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shot_sup_room"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_03_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shot_sup_hall",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shot_sup_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_03_mechanism",
       "name": "Механика выстрела",
       "category": "Оружие",
       "weapon": "wpn_smg_03",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_smg_03_mechanism"
@@ -2273,53 +1956,8 @@
       "files": []
     },
     {
-      "id": "wpn_smg_04_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_04_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_smg_04",
       "action": "shot_room",
@@ -2333,30 +1971,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_04_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_smg_04_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_04",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_04_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_04_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shot_sup_outdoor"
+        "hook": "wpn_smg_04_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -2378,15 +2001,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_04_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_smg_04_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_04",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_04_shot_sup_hall"
+        "hook": "wpn_smg_04_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -2398,7 +2021,7 @@
       "category": "Оружие",
       "weapon": "wpn_smg_04",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_smg_04_mechanism"
@@ -2648,53 +2271,8 @@
       "files": []
     },
     {
-      "id": "wpn_smg_05_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_smg_05_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_smg_05",
       "action": "shot_room",
@@ -2708,30 +2286,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_05_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_smg_05_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_05",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_05_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_smg_05_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shot_sup_outdoor"
+        "hook": "wpn_smg_05_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -2753,15 +2316,15 @@
       "files": []
     },
     {
-      "id": "wpn_smg_05_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_smg_05_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_smg_05",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_smg_05_shot_sup_hall"
+        "hook": "wpn_smg_05_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -2773,7 +2336,7 @@
       "category": "Оружие",
       "weapon": "wpn_smg_05",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_smg_05_mechanism"
@@ -3023,53 +2586,8 @@
       "files": []
     },
     {
-      "id": "wpn_ar_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_ar_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_01",
       "action": "shot_room",
@@ -3080,37 +2598,38 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_shot_room_11.wav",
+        "sonora/wpn_ar_01_shot_room_12.wav",
+        "sonora/wpn_ar_01_shot_room_13.wav",
+        "sonora/wpn_ar_01_shot_room_14.wav",
+        "sonora/wpn_ar_01_shot_room_15.wav",
+        "sonora/wpn_ar_01_shot_room_16.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_ar_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_01_shot_hall"
+        "hook": "wpn_ar_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shot_sup_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_shot_outdoor_01.wav",
+        "sonora/wpn_ar_01_shot_outdoor_02.wav",
+        "sonora/wpn_ar_01_shot_outdoor_03.wav",
+        "sonora/wpn_ar_01_shot_outdoor_04.wav",
+        "sonora/wpn_ar_01_shot_outdoor_05.wav",
+        "sonora/wpn_ar_01_shot_outdoor_06.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_01_shot_sup_room",
@@ -3125,22 +2644,38 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_shot_sup_room_05.wav",
+        "sonora/wpn_ar_01_shot_sup_room_06.wav",
+        "sonora/wpn_ar_01_shot_sup_room_07.wav",
+        "sonora/wpn_ar_01_shot_sup_room_08.wav",
+        "sonora/wpn_ar_01_shot_sup_room_09.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_ar_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_01_shot_sup_hall"
+        "hook": "wpn_ar_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_shot_sup_outdoor_02.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_03.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_04.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_05.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_06.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_07.wav",
+        "sonora/wpn_ar_01_shot_sup_outdoor_08.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_01_mechanism",
@@ -3148,7 +2683,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_01_mechanism"
@@ -3170,7 +2705,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_dry_fire_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_01_jam",
@@ -3185,7 +2723,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_01_jam_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_01_clear_jam",
@@ -3398,53 +2939,8 @@
       "files": []
     },
     {
-      "id": "wpn_sp_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sp_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sp_01",
       "action": "shot_room",
@@ -3458,30 +2954,15 @@
       "files": []
     },
     {
-      "id": "wpn_sp_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sp_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sp_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sp_01_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sp_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_01_shot_sup_outdoor"
+        "hook": "wpn_sp_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -3503,15 +2984,15 @@
       "files": []
     },
     {
-      "id": "wpn_sp_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_sp_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_sp_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sp_01_shot_sup_hall"
+        "hook": "wpn_sp_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -3523,7 +3004,7 @@
       "category": "Оружие",
       "weapon": "wpn_sp_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sp_01_mechanism"
@@ -3773,79 +3254,27 @@
       "files": []
     },
     {
-      "id": "wpn_sp_02_shot",
-      "name": "Выстрел — основной",
+      "id": "wpn_sp_02_shot_sup_room",
+      "name": "С глушителем в помещении",
       "category": "Оружие",
       "weapon": "wpn_sp_02",
-      "action": "shot",
+      "action": "shot_sup_room",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sp_02_shot"
+        "hook": "wpn_sp_02_shot_sup_room"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_room",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_room"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_hall",
-      "name": "Выстрел в большом помещении",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_hall",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_shot_sup_room_01.wav",
+        "sonora/wpn_sp_02_shot_sup_room_02.wav",
+        "sonora/wpn_sp_02_shot_sup_room_03.wav",
+        "sonora/wpn_sp_02_shot_sup_room_04.wav",
+        "sonora/wpn_sp_02_shot_sup_room_05.wav",
+        "sonora/wpn_sp_02_shot_sup_room_06.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_shot_sup_outdoor",
@@ -3860,37 +3289,12 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_sup_room",
-      "name": "С глушителем в помещении",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_sup_room",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_sup_room"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sp_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shot_sup_hall",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shot_sup_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_shot_sup_outdoor_01.wav",
+        "sonora/wpn_sp_02_shot_sup_outdoor_02.wav",
+        "sonora/wpn_sp_02_shot_sup_outdoor_03.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_mechanism",
@@ -3898,7 +3302,7 @@
       "category": "Оружие",
       "weapon": "wpn_sp_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sp_02_mechanism"
@@ -3920,7 +3324,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_dry_fire_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_jam",
@@ -3935,7 +3342,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_jam_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_clear_jam",
@@ -3980,7 +3390,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_reload_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_mag_out",
@@ -3995,7 +3408,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_mag_out_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_mag_in",
@@ -4010,7 +3426,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_mag_in_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_mag_drop",
@@ -4130,7 +3549,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_ads_raise_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_sp_02_ads_lower",
@@ -4145,56 +3567,14 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_sp_02_ads_lower_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_02",
       "action": "shot_room",
@@ -4208,30 +3588,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_02_shot_sup_outdoor"
+        "hook": "wpn_ar_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -4253,15 +3618,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_02_shot_sup_hall"
+        "hook": "wpn_ar_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -4273,7 +3638,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_02_mechanism"
@@ -4523,53 +3888,8 @@
       "files": []
     },
     {
-      "id": "wpn_ar_03_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_ar_03_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_03",
       "action": "shot_room",
@@ -4583,30 +3903,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_03_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_03_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_03",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_03_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_03_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_03",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_03_shot_sup_outdoor"
+        "hook": "wpn_ar_03_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -4628,15 +3933,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_03_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_03_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_03",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_03_shot_sup_hall"
+        "hook": "wpn_ar_03_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -4648,7 +3953,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_03",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_03_mechanism"
@@ -4898,53 +4203,8 @@
       "files": []
     },
     {
-      "id": "wpn_ar_04_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_ar_04_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_04",
       "action": "shot_room",
@@ -4958,30 +4218,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_04_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_04_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_04",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_04_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_04_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_04",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_04_shot_sup_outdoor"
+        "hook": "wpn_ar_04_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5003,15 +4248,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_04_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_04_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_04",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_04_shot_sup_hall"
+        "hook": "wpn_ar_04_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5023,7 +4268,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_04",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_04_mechanism"
@@ -5273,53 +4518,8 @@
       "files": []
     },
     {
-      "id": "wpn_ar_05_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_ar_05_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_05",
       "action": "shot_room",
@@ -5333,30 +4533,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_05_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_05_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_05",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_05_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_05_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shot_sup_outdoor"
+        "hook": "wpn_ar_05_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5378,15 +4563,15 @@
       "files": []
     },
     {
-      "id": "wpn_ar_05_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_05_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_05",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_05_shot_sup_hall"
+        "hook": "wpn_ar_05_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5398,7 +4583,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_05",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_05_mechanism"
@@ -5648,53 +4833,8 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_dmr_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_dmr_01",
       "action": "shot_room",
@@ -5708,30 +4848,15 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_dmr_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_dmr_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_dmr_01_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shot_sup_outdoor"
+        "hook": "wpn_dmr_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5753,15 +4878,15 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_dmr_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_dmr_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_dmr_01_shot_sup_hall"
+        "hook": "wpn_dmr_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -5773,7 +4898,7 @@
       "category": "Оружие",
       "weapon": "wpn_dmr_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_dmr_01_mechanism"
@@ -6008,53 +5133,8 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_dmr_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_dmr_02",
       "action": "shot_room",
@@ -6068,30 +5148,15 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_dmr_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_dmr_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_dmr_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_dmr_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_02_shot_sup_outdoor"
+        "hook": "wpn_dmr_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -6113,15 +5178,15 @@
       "files": []
     },
     {
-      "id": "wpn_dmr_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_dmr_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_dmr_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_dmr_02_shot_sup_hall"
+        "hook": "wpn_dmr_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -6133,7 +5198,7 @@
       "category": "Оружие",
       "weapon": "wpn_dmr_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_dmr_02_mechanism"
@@ -6368,53 +5433,8 @@
       "files": []
     },
     {
-      "id": "wpn_sr_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sr_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sr_01",
       "action": "shot_room",
@@ -6428,30 +5448,15 @@
       "files": []
     },
     {
-      "id": "wpn_sr_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sr_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sr_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sr_01_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shot_sup_outdoor"
+        "hook": "wpn_sr_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -6473,15 +5478,15 @@
       "files": []
     },
     {
-      "id": "wpn_sr_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_sr_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_sr_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sr_01_shot_sup_hall"
+        "hook": "wpn_sr_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -6493,7 +5498,7 @@
       "category": "Оружие",
       "weapon": "wpn_sr_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sr_01_mechanism"
@@ -6743,38 +5748,8 @@
       "files": []
     },
     {
-      "id": "wpn_sr_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sr_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sr_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sr_02",
       "action": "shot_room",
@@ -6788,15 +5763,15 @@
       "files": []
     },
     {
-      "id": "wpn_sr_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sr_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sr_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sr_02_shot_hall"
+        "hook": "wpn_sr_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -6808,7 +5783,7 @@
       "category": "Оружие",
       "weapon": "wpn_sr_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sr_02_mechanism"
@@ -7043,53 +6018,8 @@
       "files": []
     },
     {
-      "id": "wpn_sg_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sg_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sg_01",
       "action": "shot_room",
@@ -7103,30 +6033,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sg_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_01_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_01_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_01",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_01_shot_sup_outdoor"
+        "hook": "wpn_sg_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7148,15 +6063,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_01_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_sg_01_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_01",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_01_shot_sup_hall"
+        "hook": "wpn_sg_01_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7168,7 +6083,7 @@
       "category": "Оружие",
       "weapon": "wpn_sg_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sg_01_mechanism"
@@ -7358,53 +6273,8 @@
       "files": []
     },
     {
-      "id": "wpn_sg_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sg_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sg_02",
       "action": "shot_room",
@@ -7418,30 +6288,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sg_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shot_sup_outdoor"
+        "hook": "wpn_sg_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7463,15 +6318,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_sg_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_02_shot_sup_hall"
+        "hook": "wpn_sg_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7483,7 +6338,7 @@
       "category": "Оружие",
       "weapon": "wpn_sg_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sg_02_mechanism"
@@ -7718,53 +6573,8 @@
       "files": []
     },
     {
-      "id": "wpn_sg_03_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_sg_03_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sg_03",
       "action": "shot_room",
@@ -7778,30 +6588,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_03_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sg_03_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_03",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_03_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sg_03_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shot_sup_outdoor"
+        "hook": "wpn_sg_03_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7823,15 +6618,15 @@
       "files": []
     },
     {
-      "id": "wpn_sg_03_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_sg_03_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_sg_03",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sg_03_shot_sup_hall"
+        "hook": "wpn_sg_03_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -7843,7 +6638,7 @@
       "category": "Оружие",
       "weapon": "wpn_sg_03",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sg_03_mechanism"
@@ -8048,38 +6843,8 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_lmg_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_lmg_01",
       "action": "shot_room",
@@ -8093,15 +6858,15 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_lmg_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_lmg_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_lmg_01_shot_hall"
+        "hook": "wpn_lmg_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -8113,7 +6878,7 @@
       "category": "Оружие",
       "weapon": "wpn_lmg_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_lmg_01_mechanism"
@@ -8363,53 +7128,8 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_02_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_lmg_02_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_lmg_02",
       "action": "shot_room",
@@ -8423,30 +7143,15 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_02_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_lmg_02_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_lmg_02",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_lmg_02_shot_hall"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_lmg_02_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_02",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_02_shot_sup_outdoor"
+        "hook": "wpn_lmg_02_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -8468,15 +7173,15 @@
       "files": []
     },
     {
-      "id": "wpn_lmg_02_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_lmg_02_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_lmg_02",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_lmg_02_shot_sup_hall"
+        "hook": "wpn_lmg_02_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -8488,7 +7193,7 @@
       "category": "Оружие",
       "weapon": "wpn_lmg_02",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_lmg_02_mechanism"
@@ -8738,38 +7443,8 @@
       "files": []
     },
     {
-      "id": "signal_launcher_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "signal_launcher_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "signal_launcher_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "signal_launcher",
       "action": "shot_room",
@@ -8783,15 +7458,15 @@
       "files": []
     },
     {
-      "id": "signal_launcher_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "signal_launcher_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "signal_launcher",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "signal_launcher_shot_hall"
+        "hook": "signal_launcher_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -8803,7 +7478,7 @@
       "category": "Оружие",
       "weapon": "signal_launcher",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "signal_launcher_mechanism"
@@ -8993,53 +7668,8 @@
       "files": []
     },
     {
-      "id": "wpn_ar_09_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shot_suppressed",
-      "name": "Выстрел с глушителем",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shot_suppressed",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shot_sup"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_ar_09_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_ar_09",
       "action": "shot_room",
@@ -9050,37 +7680,28 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_shot_room_01.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_ar_09_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_ar_09_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_09",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_09_shot_hall"
+        "hook": "wpn_ar_09_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_ar_09_shot_sup_outdoor",
-      "name": "С глушителем на улице",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shot_sup_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shot_sup_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_shot_outdoor_03.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_09_shot_sup_room",
@@ -9095,22 +7716,28 @@
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_shot_sup_room_01.wav"
+      ],
+      "enabled": true
     },
     {
-      "id": "wpn_ar_09_shot_sup_hall",
-      "name": "С глушителем в большом помещении",
+      "id": "wpn_ar_09_shot_sup_outdoor",
+      "name": "С глушителем на улице",
       "category": "Оружие",
       "weapon": "wpn_ar_09",
-      "action": "shot_sup_hall",
+      "action": "shot_sup_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_ar_09_shot_sup_hall"
+        "hook": "wpn_ar_09_shot_sup_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_shot_sup_outdoor_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_09_mechanism",
@@ -9118,7 +7745,7 @@
       "category": "Оружие",
       "weapon": "wpn_ar_09",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_ar_09_mechanism"
@@ -9140,7 +7767,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_dry_fire_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_09_jam",
@@ -9155,7 +7785,10 @@
       },
       "type": "one",
       "profile": "reload",
-      "files": []
+      "files": [
+        "sonora/wpn_ar_09_jam_01.wav"
+      ],
+      "enabled": true
     },
     {
       "id": "wpn_ar_09_clear_jam",
@@ -9909,19 +8542,12 @@
       "type": "one",
       "profile": "step_stone",
       "files": [
-        "steps/stone_01.ogg",
-        "steps/stone_02.ogg",
-        "steps/stone_03.ogg",
-        "steps/stone_04.ogg",
-        "steps/stone_05.ogg",
-        "steps/stone_06.ogg",
-        "steps/stone_07.ogg",
-        "steps/stone_08.ogg",
-        "steps/stone_09.ogg",
-        "steps/stone_10.ogg",
-        "steps/stone_11.ogg",
-        "steps/stone_12.ogg"
+        "sonora/step_tile_01.wav",
+        "sonora/step_tile_02.wav",
+        "sonora/step_tile_03.wav",
+        "sonora/step_tile_04.wav"
       ],
+      "enabled": true,
       "custom": true
     },
     {
@@ -9936,19 +8562,13 @@
       "type": "one",
       "profile": "step_stone_run",
       "files": [
-        "steps/stone_run_01.ogg",
-        "steps/stone_run_02.ogg",
-        "steps/stone_run_03.ogg",
-        "steps/stone_run_04.ogg",
-        "steps/stone_run_05.ogg",
-        "steps/stone_run_06.ogg",
-        "steps/stone_run_07.ogg",
-        "steps/stone_run_08.ogg",
-        "steps/stone_run_09.ogg",
-        "steps/stone_run_10.ogg",
-        "steps/stone_run_11.ogg",
-        "steps/stone_run_12.ogg"
-      ]
+        "sonora/step_tile_run_01.wav",
+        "sonora/step_tile_run_02.wav",
+        "sonora/step_tile_run_03.wav",
+        "sonora/step_tile_run_04.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_carpet",
@@ -9961,7 +8581,16 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": []
+      "files": [
+        "sonora/step_carpet_18.wav",
+        "sonora/step_carpet_19.wav",
+        "sonora/step_carpet_20.wav",
+        "sonora/step_carpet_21.wav",
+        "sonora/step_carpet_22.wav",
+        "sonora/step_carpet_23.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_wood",
@@ -9974,7 +8603,14 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": []
+      "files": [
+        "sonora/step_wood_01.wav",
+        "sonora/step_wood_02.wav",
+        "sonora/step_wood_03.wav",
+        "sonora/step_wood_04.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_metal",
@@ -9987,8 +8623,14 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": [],
-      "custom": true
+      "files": [
+        "sonora/step_metal_01.wav",
+        "sonora/step_metal_02.wav",
+        "sonora/step_metal_03.wav",
+        "sonora/step_metal_04.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_asphalt",
@@ -10002,20 +8644,14 @@
       "type": "one",
       "profile": "step_stone",
       "files": [
-        "steps/dirt_01.ogg",
-        "steps/dirt_02.ogg",
-        "steps/dirt_03.ogg",
-        "steps/dirt_04.ogg",
-        "steps/dirt_05.ogg",
-        "steps/dirt_06.ogg",
-        "steps/dirt_07.ogg",
-        "steps/dirt_08.ogg",
-        "steps/dirt_09.ogg",
-        "steps/dirt_10.ogg",
-        "steps/dirt_11.ogg",
-        "steps/dirt_12.ogg"
+        "sonora/step_asphalt_01.wav",
+        "sonora/step_asphalt_02.wav",
+        "sonora/step_asphalt_03.wav",
+        "sonora/step_asphalt_04.wav",
+        "sonora/step_asphalt_05.wav"
       ],
-      "custom": true
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_gravel",
@@ -10028,7 +8664,17 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": []
+      "files": [
+        "sonora/step_gravel_01.wav",
+        "sonora/step_gravel_02.wav",
+        "sonora/step_gravel_03.wav",
+        "sonora/step_gravel_04.wav",
+        "sonora/step_gravel_05.wav",
+        "sonora/step_gravel_06.wav",
+        "sonora/step_gravel_07.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_grass",
@@ -10041,7 +8687,14 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": []
+      "files": [
+        "sonora/step_grass_01.wav",
+        "sonora/step_grass_02.wav",
+        "sonora/step_grass_03.wav",
+        "sonora/step_grass_04.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_water",
@@ -10055,8 +8708,15 @@
       "type": "one",
       "profile": "step_stone",
       "files": [
-        "steps/water_01.wav"
+        "sonora/step_water_01.wav",
+        "sonora/step_water_02.wav",
+        "sonora/step_water_03.wav",
+        "sonora/step_water_04.wav",
+        "sonora/step_water_05.wav",
+        "sonora/step_water_06.wav",
+        "sonora/step_water_07.wav"
       ],
+      "enabled": true,
       "custom": true
     },
     {
@@ -10070,7 +8730,26 @@
       },
       "type": "one",
       "profile": "step_stone",
-      "files": []
+      "files": [
+        "sonora/step_glass_09.wav",
+        "sonora/step_glass_10.wav",
+        "sonora/step_glass_11.wav",
+        "sonora/step_glass_12.wav",
+        "sonora/step_glass_13.wav",
+        "sonora/step_glass_14.wav",
+        "sonora/step_glass_15.wav",
+        "sonora/step_glass_16.wav",
+        "sonora/step_glass_17.wav",
+        "sonora/step_glass_18.wav",
+        "sonora/step_glass_19.wav",
+        "sonora/step_glass_20.wav",
+        "sonora/step_glass_21.wav",
+        "sonora/step_glass_22.wav",
+        "sonora/step_glass_23.wav",
+        "sonora/step_glass_24.wav"
+      ],
+      "custom": true,
+      "enabled": true
     },
     {
       "id": "step_trash",
@@ -11219,18 +9898,44 @@
       "files": []
     },
     {
+      "id": "sound_ee772fba257045188308fe8273e79483",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_stone",
+      "binding": {
+        "type": "action",
+        "hook": "ladder_step"
+      },
+      "files": [
+        "sonora/sound_ee772fba257045188308fe8273e79483_01.wav",
+        "sonora/sound_ee772fba257045188308fe8273e79483_02.wav",
+        "sonora/sound_ee772fba257045188308fe8273e79483_03.wav",
+        "sonora/sound_ee772fba257045188308fe8273e79483_04.wav"
+      ],
+      "name": "Шаг по вертикальной лестнице",
+      "custom": true,
+      "enabled": true,
+      "group": "Поверхности под ногами"
+    },
+    {
       "id": "step_concrete",
       "binding": {
         "type": "action",
         "hook": "step_concrete"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/step_concrete_01.wav",
+        "sonora/step_concrete_02.wav",
+        "sonora/step_concrete_03.wav",
+        "sonora/step_concrete_04.wav"
+      ],
       "name": "Шаг по бетону и асфальту",
       "category": "Шаги и движение",
       "profile": "step_stone",
       "custom": true,
-      "group": "Поверхности под ногами"
+      "group": "Поверхности под ногами",
+      "enabled": true
     },
     {
       "id": "step_sand",
@@ -11239,12 +9944,18 @@
         "hook": "step_sand"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/step_sand_01.wav",
+        "sonora/step_sand_02.wav",
+        "sonora/step_sand_03.wav",
+        "sonora/step_sand_04.wav"
+      ],
       "name": "Шаг по песку",
       "category": "Шаги и движение",
       "profile": "step_stone",
       "custom": true,
-      "group": "Поверхности под ногами"
+      "group": "Поверхности под ногами",
+      "enabled": true
     },
     {
       "id": "shell_concrete",
@@ -11253,12 +9964,25 @@
         "hook": "shell_concrete"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_concrete_01.wav",
+        "sonora/shell_concrete_02.wav",
+        "sonora/shell_concrete_03.wav",
+        "sonora/shell_concrete_04.wav",
+        "sonora/shell_concrete_05.wav",
+        "sonora/shell_concrete_06.wav",
+        "sonora/shell_concrete_07.wav",
+        "sonora/shell_concrete_08.wav",
+        "sonora/shell_concrete_09.wav",
+        "sonora/shell_concrete_10.wav",
+        "sonora/shell_concrete_11.wav"
+      ],
       "name": "Падение гильзы — бетон и асфальт",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_water",
@@ -11267,12 +9991,18 @@
         "hook": "shell_water"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_water_01.wav",
+        "sonora/shell_water_02.wav",
+        "sonora/shell_water_03.wav",
+        "sonora/shell_water_04.wav"
+      ],
       "name": "Падение гильзы — вода",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_gravel",
@@ -11281,12 +10011,18 @@
         "hook": "shell_gravel"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_gravel_01.wav",
+        "sonora/shell_gravel_02.wav",
+        "sonora/shell_gravel_03.wav",
+        "sonora/shell_gravel_04.wav"
+      ],
       "name": "Падение гильзы — гравий",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_wood",
@@ -11295,12 +10031,22 @@
         "hook": "shell_wood"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_wood_01.wav",
+        "sonora/shell_wood_02.wav",
+        "sonora/shell_wood_03.wav",
+        "sonora/shell_wood_04.wav",
+        "sonora/shell_wood_05.wav",
+        "sonora/shell_wood_06.wav",
+        "sonora/shell_wood_07.wav",
+        "sonora/shell_wood_08.wav"
+      ],
       "name": "Падение гильзы — дерево",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_carpet",
@@ -11309,12 +10055,18 @@
         "hook": "shell_carpet"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_carpet_01.wav",
+        "sonora/shell_carpet_02.wav",
+        "sonora/shell_carpet_03.wav",
+        "sonora/shell_carpet_04.wav"
+      ],
       "name": "Падение гильзы — ковёр",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_metal",
@@ -11323,12 +10075,22 @@
         "hook": "shell_metal"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_metal_01.wav",
+        "sonora/shell_metal_02.wav",
+        "sonora/shell_metal_03.wav",
+        "sonora/shell_metal_04.wav",
+        "sonora/shell_metal_05.wav",
+        "sonora/shell_metal_06.wav",
+        "sonora/shell_metal_07.wav",
+        "sonora/shell_metal_08.wav"
+      ],
       "name": "Падение гильзы — металл",
       "category": "Гильзы",
       "profile": "shell_metal",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_sand",
@@ -11337,12 +10099,16 @@
         "hook": "shell_sand"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_sand_01.wav",
+        "sonora/shell_sand_02.wav"
+      ],
       "name": "Падение гильзы — песок",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "shell_tile",
@@ -11351,1726 +10117,146 @@
         "hook": "shell_tile"
       },
       "type": "one",
-      "files": [],
+      "files": [
+        "sonora/shell_tile_01.wav",
+        "sonora/shell_tile_02.wav",
+        "sonora/shell_tile_03.wav",
+        "sonora/shell_tile_04.wav",
+        "sonora/shell_tile_05.wav",
+        "sonora/shell_tile_06.wav",
+        "sonora/shell_tile_07.wav",
+        "sonora/shell_tile_08.wav"
+      ],
       "name": "Падение гильзы — плитка",
       "category": "Гильзы",
       "profile": "shell_hard",
       "custom": true,
-      "group": "Поверхности"
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_concrete",
-      "group": "Гильза",
+      "id": "shell_12_concrete",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_concrete"
+        "hook": "shell_12_concrete"
       },
       "type": "one",
-      "profile": "shell_concrete",
       "files": [],
-      "surface": "concrete"
+      "name": "Падение гильзы — бетон и асфальт",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_water",
-      "group": "Гильза",
+      "id": "shell_12_water",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_water"
+        "hook": "shell_12_water"
       },
       "type": "one",
-      "profile": "shell_water",
       "files": [],
-      "surface": "water"
+      "name": "Падение гильзы — вода",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_gravel",
-      "group": "Гильза",
+      "id": "shell_12_gravel",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_gravel"
+        "hook": "shell_12_gravel"
       },
       "type": "one",
-      "profile": "shell_gravel",
       "files": [],
-      "surface": "gravel"
+      "name": "Падение гильзы — гравий",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_wood",
-      "group": "Гильза",
+      "id": "shell_12_wood",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_wood"
+        "hook": "shell_12_wood"
       },
       "type": "one",
-      "profile": "shell_wood",
       "files": [],
-      "surface": "wood"
+      "name": "Падение гильзы — дерево",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_carpet",
-      "group": "Гильза",
+      "id": "shell_12_carpet",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_carpet"
+        "hook": "shell_12_carpet"
       },
       "type": "one",
-      "profile": "shell_carpet",
       "files": [],
-      "surface": "carpet"
+      "name": "Падение гильзы — ковёр",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_sand",
-      "group": "Гильза",
+      "id": "shell_12_metal",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_sand"
+        "hook": "shell_12_metal"
       },
       "type": "one",
-      "profile": "shell_sand",
       "files": [],
-      "surface": "sand"
+      "name": "Падение гильзы — металл",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_metal",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_01_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_tile",
-      "group": "Гильза",
+      "id": "shell_12_sand",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_01_shell_tile"
+        "hook": "shell_12_sand"
       },
       "type": "one",
-      "profile": "shell_tile",
       "files": [],
-      "surface": "tile"
+      "name": "Падение гильзы — песок",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
-      "id": "wpn_hg_02_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_concrete",
-      "group": "Гильза",
+      "id": "shell_12_tile",
       "binding": {
         "type": "action",
-        "hook": "wpn_hg_02_shell_concrete"
+        "hook": "shell_12_tile"
       },
       "type": "one",
-      "profile": "shell_concrete",
       "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_hg_02_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_hg_02_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_hg_02_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_hg_02_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_hg_02_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_hg_02_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_smg_03_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_smg_03_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_smg_03_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_smg_03_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_smg_03_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_smg_03_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_smg_03_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_smg_04_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_smg_04_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_smg_04_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_smg_04_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_smg_04_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_smg_04_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_smg_04_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_smg_05_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_smg_05_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_smg_05_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_smg_05_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_smg_05_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_smg_05_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_smg_05_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_ar_01_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_ar_01_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_ar_01_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_ar_01_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_ar_01_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_ar_01_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_ar_01_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_sp_02_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_sp_02_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_sp_02_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_sp_02_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_sp_02_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_sp_02_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_sp_02_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_ar_05_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_ar_05_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_ar_05_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_ar_05_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_ar_05_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_ar_05_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_ar_05_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_dmr_01_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_dmr_01_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_dmr_01_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_dmr_01_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_dmr_01_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_dmr_01_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_dmr_01_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_sr_01_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_sr_01_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_sr_01_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_sr_01_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_sr_01_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_sr_01_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_sr_01_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_sg_02_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_sg_02_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_sg_02_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_sg_02_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_sg_02_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_sg_02_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_sg_02_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_sg_03_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_sg_03_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_sg_03_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_sg_03_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_sg_03_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_sg_03_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_sg_03_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_lmg_01_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_lmg_01_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_lmg_01_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_lmg_01_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_lmg_01_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_lmg_01_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_lmg_01_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "signal_launcher_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "signal_launcher_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "signal_launcher_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "signal_launcher_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "signal_launcher_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "signal_launcher_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "signal_launcher_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_ar_09_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_ar_09_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_ar_09_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_ar_09_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_ar_09_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_ar_09_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_ar_09_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_sr_03_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_sr_03_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
+      "name": "Падение гильзы — плитка",
+      "category": "Гильзы 12-го калибра",
+      "profile": "shell_hard",
+      "custom": true,
+      "group": "Поверхности",
+      "enabled": true
     },
     {
       "id": "wpn_sr_03_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_sr_03",
       "action": "shot_room",
@@ -13084,15 +10270,15 @@
       "files": []
     },
     {
-      "id": "wpn_sr_03_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_sr_03_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_sr_03",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_sr_03_shot_hall"
+        "hook": "wpn_sr_03_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -13104,7 +10290,7 @@
       "category": "Оружие",
       "weapon": "wpn_sr_03",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_sr_03_mechanism"
@@ -13309,150 +10495,8 @@
       "files": []
     },
     {
-      "id": "wpn_sr_03_shell_concrete",
-      "name": "Гильза — бетон и асфальт",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_concrete",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_concrete"
-      },
-      "type": "one",
-      "profile": "shell_concrete",
-      "files": [],
-      "surface": "concrete"
-    },
-    {
-      "id": "wpn_sr_03_shell_water",
-      "name": "Гильза — вода",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_water",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_water"
-      },
-      "type": "one",
-      "profile": "shell_water",
-      "files": [],
-      "surface": "water"
-    },
-    {
-      "id": "wpn_sr_03_shell_gravel",
-      "name": "Гильза — гравий",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_gravel",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_gravel"
-      },
-      "type": "one",
-      "profile": "shell_gravel",
-      "files": [],
-      "surface": "gravel"
-    },
-    {
-      "id": "wpn_sr_03_shell_wood",
-      "name": "Гильза — дерево",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_wood",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_wood"
-      },
-      "type": "one",
-      "profile": "shell_wood",
-      "files": [],
-      "surface": "wood"
-    },
-    {
-      "id": "wpn_sr_03_shell_carpet",
-      "name": "Гильза — ковёр",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_carpet",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_carpet"
-      },
-      "type": "one",
-      "profile": "shell_carpet",
-      "files": [],
-      "surface": "carpet"
-    },
-    {
-      "id": "wpn_sr_03_shell_sand",
-      "name": "Гильза — песок",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_sand",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_sand"
-      },
-      "type": "one",
-      "profile": "shell_sand",
-      "files": [],
-      "surface": "sand"
-    },
-    {
-      "id": "wpn_sr_03_shell_tile",
-      "name": "Гильза — плитка",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_tile",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_tile"
-      },
-      "type": "one",
-      "profile": "shell_tile",
-      "files": [],
-      "surface": "tile"
-    },
-    {
-      "id": "wpn_mp_01_shot",
-      "name": "Выстрел — основной",
-      "category": "Оружие",
-      "weapon": "wpn_mp_01",
-      "action": "shot",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_mp_01_shot"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
-      "id": "wpn_mp_01_shot_outdoor",
-      "name": "Выстрел на улице",
-      "category": "Оружие",
-      "weapon": "wpn_mp_01",
-      "action": "shot_outdoor",
-      "group": "Выстрел",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_mp_01_shot_outdoor"
-      },
-      "type": "one",
-      "profile": "shot_pistol",
-      "files": []
-    },
-    {
       "id": "wpn_mp_01_shot_room",
-      "name": "Выстрел в небольшом помещении",
+      "name": "Без глушителя в помещении",
       "category": "Оружие",
       "weapon": "wpn_mp_01",
       "action": "shot_room",
@@ -13466,15 +10510,15 @@
       "files": []
     },
     {
-      "id": "wpn_mp_01_shot_hall",
-      "name": "Выстрел в большом помещении",
+      "id": "wpn_mp_01_shot_outdoor",
+      "name": "Без глушителя на улице",
       "category": "Оружие",
       "weapon": "wpn_mp_01",
-      "action": "shot_hall",
+      "action": "shot_outdoor",
       "group": "Выстрел",
       "binding": {
         "type": "action",
-        "hook": "wpn_mp_01_shot_hall"
+        "hook": "wpn_mp_01_shot_outdoor"
       },
       "type": "one",
       "profile": "shot_pistol",
@@ -13486,7 +10530,7 @@
       "category": "Оружие",
       "weapon": "wpn_mp_01",
       "action": "mechanism",
-      "group": "Выстрел",
+      "group": "Обращение с оружием",
       "binding": {
         "type": "action",
         "hook": "wpn_mp_01_mechanism"
@@ -13776,13 +10820,16 @@
         "hook": "ambient_prospekt"
       },
       "type": "loop",
-      "files": [],
+      "files": [
+        "sonora/ambient_prospekt_01.wav"
+      ],
       "name": "Окружение — Проспект",
       "category": "Окружение карт",
       "profile": "ambient",
       "custom": true,
       "map_scene": "res://scenes/levels/prospekt.tscn",
-      "group": "Фоновая петля карты"
+      "group": "Фоновая петля карты",
+      "enabled": true
     },
     {
       "id": "ambient_hideout",
@@ -13798,262 +10845,6 @@
       "custom": true,
       "map_scene": "res://scenes/levels/hideout.tscn",
       "group": "Фоновая петля карты"
-    },
-    {
-      "id": "wpn_hg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_hg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_hg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_hg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_hg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_smg_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_smg_04_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_04",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_04_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_smg_05_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_smg_05",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_smg_05_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_ar_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_sp_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sp_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sp_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_ar_05_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_05",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_05_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_dmr_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_dmr_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_dmr_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_sr_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sr_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_sg_02_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sg_02",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_02_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_sg_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sg_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sg_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_lmg_01_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_lmg_01",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_lmg_01_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "signal_launcher_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "signal_launcher",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "signal_launcher_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_ar_09_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_ar_09",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_ar_09_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
-    },
-    {
-      "id": "wpn_sr_03_shell_metal",
-      "name": "Гильза — металл",
-      "category": "Оружие",
-      "weapon": "wpn_sr_03",
-      "action": "shell_metal",
-      "group": "Гильза",
-      "binding": {
-        "type": "action",
-        "hook": "wpn_sr_03_shell_metal"
-      },
-      "type": "one",
-      "profile": "shell_metal",
-      "files": [],
-      "surface": "metal"
     }
   ]
 }

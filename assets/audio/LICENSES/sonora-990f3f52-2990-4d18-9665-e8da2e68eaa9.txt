@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_metal — Шаг по металлу
+Файлы: sonora/step_metal_01.wav, sonora/step_metal_02.wav, sonora/step_metal_03.wav, sonora/step_metal_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 2.wav, 3.wav, 4.wav, 1.wav
+
+

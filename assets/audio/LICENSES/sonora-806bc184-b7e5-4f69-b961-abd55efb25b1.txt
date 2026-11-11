@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_ar_01_shot_suppressed — Выстрел с глушителем
+Файлы: sonora/wpn_ar_01_shot_suppressed_01.wav, sonora/wpn_ar_01_shot_suppressed_02.wav, sonora/wpn_ar_01_shot_suppressed_03.wav, sonora/wpn_ar_01_shot_suppressed_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: Верас 54 выстрел с глушителем.wav, Верас 54 выстрел с глушителем2.wav, Верас 54 выстрел с глушителем3.wav, Верас 54 выстрел с глушителем4.wav
+
+

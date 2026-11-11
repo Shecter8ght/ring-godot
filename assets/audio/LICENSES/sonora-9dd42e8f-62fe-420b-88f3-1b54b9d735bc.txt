@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shell_water — Гильза — вода
+Файлы: sonora/wpn_hg_01_shell_water_01.wav, sonora/wpn_hg_01_shell_water_02.wav, sonora/wpn_hg_01_shell_water_03.wav, sonora/wpn_hg_01_shell_water_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav
+
+

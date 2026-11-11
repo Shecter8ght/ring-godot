@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_ar_01_shot_sup_outdoor — С глушителем на улице
+Файлы: sonora/wpn_ar_01_shot_sup_outdoor_02.wav, sonora/wpn_ar_01_shot_sup_outdoor_03.wav, sonora/wpn_ar_01_shot_sup_outdoor_04.wav, sonora/wpn_ar_01_shot_sup_outdoor_05.wav, sonora/wpn_ar_01_shot_sup_outdoor_06.wav, sonora/wpn_ar_01_shot_sup_outdoor_07.wav, sonora/wpn_ar_01_shot_sup_outdoor_08.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav
+
+

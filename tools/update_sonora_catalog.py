@@ -46,6 +46,7 @@ CASINGS = [
 def applies(slot, w):
     condition = slot.get('condition', 'all')
     return {
+        'not_integrally_suppressed': not w.get('integral', {}).get('suppressed', False),
         'suppressible': bool(w.get('integral', {}).get('suppressed')) or 'muzzle' in w.get('mounts', {}),
         'detachable_mag': 'internal_mag' not in w,
         'internal_mag': 'internal_mag' in w,
@@ -92,18 +93,13 @@ def main():
     for e in events:
         if e['binding'].get('hook') == 'step_stone_run':
             e.update(name='Бег по плитке', group='Бег — отдельная запись')
-    # Replace unassigned legacy casing slots with the eight requested surfaces.
-    old_shells = {'shell_hard', 'shell_soft', 'shell_roll', 'shell_metal'}
-    for e in events:
-        if e.get('weapon') and e.get('action') in old_shells and not e.get('surface') and e.get('files'):
-            raise ValueError(f"Assigned legacy casing sound needs migration: {e['id']}")
-    events[:] = [e for e in events if not (e.get('weapon') and e.get('action') in old_shells and not e.get('surface'))]
-    slots['slots'][:] = [s for s in slots['slots'] if s.get('group') != 'Гильза']
-    for suffix, label, _surfaces in CASINGS:
-        hook = 'shell_' + suffix
-        slots['slots'].append(dict(id=hook, name='Гильза — ' + label, file=hook, wired=True, condition='ejects_case', group='Гильза', surface=suffix))
-        event(hook, 'Падение гильзы — ' + label, 'Гильзы', profile='shell_metal' if suffix == 'metal' else 'shell_hard', group='Поверхности')
-        action(hook, 'Падение гильзы — ' + label, 'Гильзы', profile='shell_metal' if suffix == 'metal' else 'shell_hard')
+    for prefix, category in [('shell_', 'Гильзы'), ('shell_12_', 'Гильзы 12-го калибра')]:
+        for suffix, label, _surfaces in CASINGS:
+            hook = prefix + suffix
+            name = 'Падение гильзы — ' + label
+            profile = 'shell_metal' if suffix == 'metal' else 'shell_hard'
+            event(hook, name, category, profile=profile, group='Поверхности')
+            action(hook, name, category, profile=profile)
     existing_ids = {e['id'] for e in events}
     for wid, item in read('weapons.json')['weapons'].items():
         for s in slots['slots']:
@@ -114,8 +110,7 @@ def main():
                 if s.get('surface'):
                     next(e for e in events if e['id'] == eid)['surface'] = s['surface']
                 continue
-            hook = wid + '_' + ('shot_sup' if s['id'] == 'shot_suppressed' else s['id'])
-            e = dict(id=eid, name=s['name'], category='Оружие', weapon=wid, action=s['id'], group=s['group'], binding=dict(type='action', hook=hook), type='one', profile='shot_pistol' if s['id'].startswith('shot') else s['id'], files=[])
+            e = dict(id=eid, name=s['name'], category='Оружие', weapon=wid, action=s['id'], group=s['group'], binding=dict(type='action', hook=eid), type='one', profile='shot_pistol' if s['id'].startswith('shot') else s['id'], files=[])
             if s.get('surface'):
                 e['surface'] = s['surface']
             events.append(e)

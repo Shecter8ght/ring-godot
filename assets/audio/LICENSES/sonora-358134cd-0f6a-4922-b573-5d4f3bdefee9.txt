@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_sp_02_ads_lower — Опустить оружие
+Файлы: sonora/wpn_sp_02_ads_lower_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav
+
+

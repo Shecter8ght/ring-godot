@@ -3,7 +3,7 @@
 
 Зависимостей Python нет. PCM-WAV читается стандартной библиотекой; OGG, MP3 и
 нестандартный WAV декодируются через ffmpeg. Результат всегда PCM WAV 16-bit.
-Последняя строка stdout — JSON для tools/sound_bench.gd.
+Последняя строка stdout — JSON с результатом нарезки.
 """
 
 from __future__ import annotations

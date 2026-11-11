@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shell_wood — Гильза — дерево
+Файлы: sonora/wpn_hg_01_shell_wood_01.wav, sonora/wpn_hg_01_shell_wood_02.wav, sonora/wpn_hg_01_shell_wood_03.wav, sonora/wpn_hg_01_shell_wood_04.wav, sonora/wpn_hg_01_shell_wood_05.wav, sonora/wpn_hg_01_shell_wood_06.wav, sonora/wpn_hg_01_shell_wood_07.wav, sonora/wpn_hg_01_shell_wood_08.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav, 8.wav
+
+

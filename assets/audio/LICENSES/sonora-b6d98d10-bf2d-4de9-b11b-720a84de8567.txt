@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_wood — Шаги: дерево
+Файлы: sonora/step_wood_01.wav, sonora/step_wood_02.wav, sonora/step_wood_03.wav, sonora/step_wood_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 1.wav, 2.wav
+
+

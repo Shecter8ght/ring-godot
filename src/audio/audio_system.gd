@@ -127,14 +127,12 @@ func reload_events() -> void:
 		_ambient.play()
 
 func resolve_event(hook: String, place: String = "") -> String:
-	var actual: String = hook
-	if _is_weapon_shot(hook) and place != "":
-		var specific: String = String(_bindings.get(hook + "_" + place, ""))
-		if not (_samples.get(specific, []) as Array).is_empty():
-			return specific
-	if _events.has(actual):
-		return actual
-	return String(_bindings.get(actual, ""))
+	if _is_weapon_shot(hook):
+		var suffix: String = "_room" if place in [AcousticPlace.ROOM, AcousticPlace.HALL] else "_outdoor"
+		return String(_bindings.get(hook + suffix, ""))
+	if _events.has(hook):
+		return hook
+	return String(_bindings.get(hook, ""))
 
 ## Назначена ли действию запись (иначе play() молчит): у «Осоки» без записи звучит процедурная заглушка.
 func has_sound(hook: String) -> bool:
@@ -212,16 +210,16 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 		_track_burst(pos, [player])
 
 func _is_weapon_shot(hook: String) -> bool:
-	var id: String = String(_bindings.get(hook, hook))
-	var event: Dictionary = _events.get(id, {}) as Dictionary
-	return String(event.get("weapon", "")) != "" and String(event.get("action", "")) in ["shot", "shot_suppressed"]
+	return (hook.ends_with("_shot") or hook.ends_with("_shot_sup")) \
+		and (_bindings.has(hook + "_room") or _bindings.has(hook + "_outdoor"))
 
 func _kind_spec(hook: String) -> Dictionary:
+	if _is_weapon_shot(hook):
+		return Balance.SONORA_AUDIO.shot
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
 	var profile: String = String(event.get("profile", ""))
-	if String(event.get("action", "")).begins_with("shell_") or String(event.get("id", "")).begins_with("shell_"):
-		var shell_profile: String = "shell_metal" if String(event.get("action", event.get("id", ""))) == "shell_metal" else "shell_hard"
-		var spec: Dictionary = (Balance.AUDIO_EVENT_PROFILES[shell_profile] as Dictionary).duplicate()
+	if profile in ["shell_hard", "shell_metal"]:
+		var spec: Dictionary = (Balance.AUDIO_EVENT_PROFILES[profile] as Dictionary).duplicate()
 		spec.db = float(spec.db) + float(Balance.SHELL_DROP.db)
 		return spec
 	if profile.begins_with("osoka_"):
@@ -244,6 +242,8 @@ func _configure_recorded_player(player: AudioStreamPlayer3D) -> void:
 	player.max_db = minf(player.max_db, float(Balance.SONORA_AUDIO.max_db))
 
 func _bus_for(hook: String) -> StringName:
+	if _is_weapon_shot(hook):
+		return &"Shots"
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
 	if event.has("map_scene") or String(event.get("profile", "")) == "ambient":
 		return &"Ambient"
@@ -699,8 +699,8 @@ func _layer_recording(layer: String, key: String, pos: Vector3, ai: bool) -> Aud
 	return null if tracks.is_empty() else _pick_from(tracks, key)
 
 
-## Гильза упала рядом со стрелком (from — его ноги, right — вправо от него): звук по полу под ней,
-## на твёрдом иногда ещё катится. Физической гильзы нет, только звук. Записей нет — молчит.
+## Гильза падает рядом со стрелком (from — его ноги, right — вправо от него).
+## Запись выбирается по поверхности и калибру оружия.
 
 
 func shell_drop(from: Vector3, right: Vector3, extra_db: float = 0.0, weapon_id: String = "") -> void:
@@ -715,7 +715,6 @@ func shell_drop(from: Vector3, right: Vector3, extra_db: float = 0.0, weapon_id:
 
 
 func _shell_land(land: Vector3, extra_db: float, weapon_id: String = "") -> void:
-	var cfg: Dictionary = Balance.SHELL_DROP
 	var surf := _surface_under(land)
 	if WaterBody.depth_at(land) > 0.0:
 		surf = "water"
@@ -777,9 +776,13 @@ func step_catalog() -> Array[Dictionary]:
 
 
 func shell_hook(surface: String, weapon_id: String = "") -> String:
+	var weapon: Dictionary = WeaponDb.weapon(weapon_id)
+	if weapon.get("class") == "SPECIAL":
+		return ""
 	var hook: String = String(_surface_shells.get(surface, "shell_concrete"))
-	var own: String = weapon_id + "_" + hook
-	return own if weapon_id != "" and has_sound(own) else hook
+	if weapon.get("caliber") == "12x76":
+		return "shell_12_" + hook.trim_prefix("shell_")
+	return hook
 
 
 ## Под навесом асфальт сухой, как в шейдере покрытия; погода проверяется у шагающего, не у слушателя.

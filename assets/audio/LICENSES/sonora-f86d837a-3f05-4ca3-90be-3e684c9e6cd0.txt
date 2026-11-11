@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_water — Шаг по луже
+Файлы: sonora/step_water_01.wav, sonora/step_water_02.wav, sonora/step_water_03.wav, sonora/step_water_04.wav, sonora/step_water_05.wav, sonora/step_water_06.wav, sonora/step_water_07.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav, 5.wav, 6.wav, 7.wav
+
+

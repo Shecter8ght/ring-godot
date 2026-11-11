@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_grass — Шаги: трава и листья
+Файлы: sonora/step_grass_01.wav, sonora/step_grass_02.wav, sonora/step_grass_03.wav, sonora/step_grass_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav
+
+

@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: sound_d9afcc31ccff41659f867c2e89c328eb — Шаг: гравий
+Файлы: sonora/sound_d9afcc31ccff41659f867c2e89c328eb_01.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: по гравию.mp3
+
+

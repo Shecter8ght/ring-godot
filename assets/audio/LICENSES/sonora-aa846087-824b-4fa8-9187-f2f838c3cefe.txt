@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: shell_water — Падение гильзы — вода
+Файлы: sonora/shell_water_01.wav, sonora/shell_water_02.wav, sonora/shell_water_03.wav, sonora/shell_water_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 1.wav, 2.wav
+
+

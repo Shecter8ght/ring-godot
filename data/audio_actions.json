@@ -1170,6 +1170,70 @@
       "supportsObject": false
     },
     {
+      "hook": "shell_12_concrete",
+      "name": "Падение гильзы — бетон и асфальт",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_water",
+      "name": "Падение гильзы — вода",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_gravel",
+      "name": "Падение гильзы — гравий",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_wood",
+      "name": "Падение гильзы — дерево",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_carpet",
+      "name": "Падение гильзы — ковёр",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_metal",
+      "name": "Падение гильзы — металл",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_metal",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_sand",
+      "name": "Падение гильзы — песок",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
+      "hook": "shell_12_tile",
+      "name": "Падение гильзы — плитка",
+      "category": "Гильзы 12-го калибра",
+      "type": "one",
+      "profile": "shell_hard",
+      "supportsObject": false
+    },
+    {
       "hook": "osoka_launch",
       "name": "Пуск — вышибной заряд",
       "category": "Осока",

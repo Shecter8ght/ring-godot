@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: step_sand — Шаг по песку
+Файлы: sonora/step_sand_01.wav, sonora/step_sand_02.wav, sonora/step_sand_03.wav, sonora/step_sand_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 3.wav, 4.wav, 1.wav, 2.wav
+
+

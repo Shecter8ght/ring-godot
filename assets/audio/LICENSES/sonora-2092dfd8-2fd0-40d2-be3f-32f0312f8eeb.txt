@@ -1,0 +1,7 @@
+Sonora Studio
+Событие: wpn_hg_01_shell_gravel — Гильза — гравий
+Файлы: sonora/wpn_hg_01_shell_gravel_01.wav, sonora/wpn_hg_01_shell_gravel_02.wav, sonora/wpn_hg_01_shell_gravel_03.wav, sonora/wpn_hg_01_shell_gravel_04.wav
+Лицензия: Собственный звук / ИИ
+Оригиналы: 1.wav, 2.wav, 3.wav, 4.wav
+
+
