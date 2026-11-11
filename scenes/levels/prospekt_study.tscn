@@ -84639,7 +84639,7 @@ order = 4336
 [node name="fire_truck 0001" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=2037448214]
 transform = Transform3D(-0.034899462, 0, 0.99939084, 0, 1, 0, -0.99939084, 0, -0.034899462, -91, 0, -28.31)
 script = ExtResource("5_iugf6")
-item = ["fire_truck", -91.0, -28.31, 92.0]
+item = ["m:PV_fire_tanker", -91.0, -28.31, 92.0]
 base = Transform3D(-0.034899462, 0, 0.99939084, 0, 1, 0, -0.99939084, 0, -0.034899462, -91, 0, -28.31)
 order = 435
 

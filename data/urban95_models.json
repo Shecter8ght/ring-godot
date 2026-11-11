@@ -6709,6 +6709,49 @@
     0,
     0
    ]
+  },
+  "PV_fire_tanker": {
+   "id": "PV_fire_tanker",
+   "name": "Пожарная автоцистерна, брошенная",
+   "file": "res://assets/models/prospekt_vehicles/PV_fire_tanker.gltf",
+   "triangles": 151889,
+   "materials": 5,
+   "aabb": {
+    "center": [
+     0.0,
+     1.792,
+     -0.3507
+    ],
+    "size": [
+     3.1678,
+     3.6157,
+     7.4958
+    ]
+   },
+   "root_offset": [
+    0,
+    0,
+    0
+   ],
+   "cell": 24.0,
+   "lod_fade": false,
+   "lods": [
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_fire_tanker.gltf",
+     "end": 40.0,
+     "triangles": 151889
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_fire_tanker_lod1.gltf",
+     "end": 110.0,
+     "triangles": 45358
+    },
+    {
+     "file": "res://assets/models/prospekt_vehicles/PV_fire_tanker_lod2.gltf",
+     "end": 520.0,
+     "triangles": 17763
+    }
+   ]
   }
  }
 }

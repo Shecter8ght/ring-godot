@@ -842,6 +842,22 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   Файл шрифта в игру не входит: `_asset_src/fonts/DejaVuSans-Bold.ttf` + `license.txt` (из matplotlib системного Python).
   Названия фирм вымышленные, гербов и эмблем нет.
 
+## «Проспект» · пожарная автоцистерна PV_fire_tanker (брошенная)
+- Модель — своя (`tools/fire_truck`: форма sand3d + генератор кузовов «Проспекта», игровые уровни `game_lod.py`),
+  исходники — `E:/Models Blender/VEHICLES/Пожарная_АЦ` (asset-state.md, finish-spec.json). Отделка и износ — Substance
+  Painter (процедурные ресурсы и генераторы полки Painter, в игру — только запечёнными картами), карты износа запечены
+  по развёртке high-poly и уложены в атласы `tools/fire_truck/game_atlas.py`.
+- Фототекстуры (все CC0 1.0): Poly Haven — poly_wool_herringbone (обивка), rust_coarse_01 (ржавчина), brown_mud_dry
+  (засохшая грязь), dry_decay_leaves (прелая листва); ambientCG — Fabric034 (войлок потолка), SurfaceImperfections015
+  (пыль), SurfaceImperfections010 (подтёки), Smear006 (разводы), Scratches003 (царапины), Leaking001 (потёки с кромок),
+  LeafSet012, LeafSet021, LeafSet028 (листья); ShareTextures — brushed-metal-1 (шлифованный алюминий); TextureCan —
+  metal_0055 (рисунок пятен ржавчины); Wikimedia Commons — «Bird poop next to turtle poop» (CC0, Hamedjavan; пятно помёта).
+  Сырьё с license.txt — `_asset_src/fire_truck_tex/` (каталог `00_catalog.csv`).
+- Отпечатки ладоней — маски владельца (`Маски_АЛЬФА/02_Отпечатки_ладоней`, свои).
+- Надписи ливреи, граффити («ЖУК», «ВОЛНА», «тихо», «КОТ 23») и надписи пальцем — вымышленные, шрифты **DejaVu Sans
+  Bold / Oblique / Bold Oblique** (© Bitstream, изменения DejaVu — public domain; лицензия Bitstream Vera Fonts), запечены
+  в карты; эмблем МЧС и настоящих названий нет.
+
 ## ДОЗОР · рабочее состояние фонарей и крепежа
 
 - Игровые карты ДОЗОР 2K/1K запечены с принятого high-poly/Painter; источники и лицензии сохранены.
