@@ -14,6 +14,7 @@ prospekt_vershina_plan.py), модули при импорте ничего не
   remove.nodes   ["Имя узла здания", …]                               узлы сцены по имени (поиск по всему дереву)
   add.<список плана>   записи как у генератора: surfaces, slabs, walls, boxes, columns, stairs, ramps, beams, lamps,
                        signs, ground_holes, walk_holes
+  add.buildings  узлы зданий-объёмов {id, parent, at: [x, z], footprint: [w, d], floors, story_height, label, kind}
   add.items      записи наполнения [набор или «m:модель», x, z, поворот°, масштаб, подъём, оттенок, крен°, модель]
 Повторный запуск apply убирает узлы с тем же meta patch_stage и ставит заново; убранное «remove» не возвращается.
 
@@ -34,6 +35,7 @@ import prospekt_north_side_plan as N  # noqa: E402  (при импорте ни�
 OUT = ROOT / "data" / "blockouts"
 SNAPSHOT_PATH = "data/blockouts/prospekt_snapshot.json"
 BASE_REV = "b4dd4fdf"          # снимок плана до этапа 1 (коммит «Проспект»: снимок плана после переноса «Зерна» v13)
+BASE_REV_2 = "31286a76"        # снимок плана после этапа 1 — основа этапа 2 (тылы)
 
 PLAN_LISTS = ("surfaces", "slabs", "walls", "boxes", "columns", "stairs", "ramps", "beams", "lamps", "signs",
               "ground_holes", "walk_holes")
@@ -41,8 +43,10 @@ PLAN_LISTS = ("surfaces", "slabs", "walls", "boxes", "columns", "stairs", "ramps
 
 # ------------------------------------------------------------------ патч и помощники (как в build_prospekt.py)
 class Patch:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, base_rev: str = BASE_REV) -> None:
         self.name = name
+        self.base_rev = base_rev
+        self.add_buildings: list = []
         self.remove: dict = {"items": [], "pieces": [], "nodes": []}
         self.add: dict = {k: [] for k in PLAN_LISTS}
         self.add["items"] = []
@@ -53,7 +57,7 @@ class Patch:
     def base(self) -> dict:
         if self._base is None:
             try:
-                raw = subprocess.run(["git", "show", f"{BASE_REV}:{SNAPSHOT_PATH}"], cwd=ROOT, check=True,
+                raw = subprocess.run(["git", "show", f"{self.base_rev}:{SNAPSHOT_PATH}"], cwd=ROOT, check=True,
                                      capture_output=True).stdout
                 self._base = json.loads(raw.decode("utf-8"))
             except Exception:
@@ -65,7 +69,7 @@ class Patch:
         for it in self.base()["filler"]["items"]:
             if it[0] == kit and abs(it[1] - x) <= tol and abs(it[2] - z) <= tol:
                 return list(it)
-        raise KeyError(f"нет вещи {kit} у ({x}; {z}) в снимке {BASE_REV}")
+        raise KeyError(f"нет вещи {kit} у ({x}; {z}) в снимке {self.base_rev}")
 
     # --- вещи
     def drop_items(self, kits: list[str], rect: list[float]) -> int:
@@ -174,8 +178,10 @@ class Patch:
 
     def save(self) -> Path:
         path = OUT / f"prospekt_patch_{self.name}.json"
-        data = {"stage": self.name, "base_rev": BASE_REV, "remove": self.remove,
-                "add": {k: v for k, v in self.add.items() if v}}
+        add = {k: v for k, v in self.add.items() if v}
+        if self.add_buildings:
+            add["buildings"] = self.add_buildings
+        data = {"stage": self.name, "base_rev": self.base_rev, "remove": self.remove, "add": add}
         # перевод строки — LF (рабочая копия проекта — CRLF через autocrlf, но JSON данных пишем как есть)
         path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
         return path
@@ -319,7 +325,172 @@ def stage_1_street() -> Patch:
     return p
 
 
-STAGES = {"1_street": stage_1_street}
+# ------------------------------------------------------------------ этап 2: тылы (лист 5, поз. 3–6, 16–18)
+SLOT_W = 2.5                        # ширина места
+MARK_W, MARK_H = 0.1, 0.02          # разметка мест: как в паркинге −1 (полоса 0,1 × 0,02)
+LOT_T = 0.05                        # толщина покрытия стоянки
+CAR_JITTER_X, CAR_JITTER_Z, CAR_JITTER_YAW = 0.12, 0.2, 6.0   # «брошенная» стоянка: лёгкий разброс; 2,5 − 2·0,12 > 2,2 м между центрами
+FILL = 0.6                          # заполнение рядов
+
+
+def _slots(x0: float, x1: float) -> list[float]:
+    """Центры мест по оси X на отрезке x0…x1 (целое число мест по 2,5 м от x0)."""
+    n = int((x1 - x0) / SLOT_W + 1e-6)
+    return [x0 + SLOT_W * (i + 0.5) for i in range(n)]
+
+
+def _marks(p: "Patch", x0: float, x1: float, zc: float, depth: float = 4.9) -> int:
+    """Поперечные линии разметки мест на отрезке x0…x1 (по оси Z — от zc − depth/2 до zc + depth/2)."""
+    n = int((x1 - x0) / SLOT_W + 1e-6)
+    for i in range(n + 1):
+        p.box(x0 + SLOT_W * i, LOT_T + MARK_H / 2.0, zc, MARK_W, MARK_H, depth, "stripe", 0.0, False)
+    return n + 1
+
+
+def stage_2_backs() -> Patch:
+    import random
+    rng = random.Random(20261111)
+    p = Patch("2_backs", BASE_REV_2)
+    items = p.base()["filler"]["items"]
+    svc0, svc1 = N.SERVICE                     # −66.5, −59.3
+    rows = N.LOT_ROWS                          # [(−71.8, −66.5), (−84.9, −79.6)]
+    row_z = [(a + b) / 2.0 for a, b in rows]   # центры рядов
+    aisle_z = (rows[0][0] + rows[1][1]) / 2.0  # ось проезда между рядами: −75.7
+    lot_zs = (-86.3, svc0)                     # покрытие стоянок −86.3…−66.5 (северный край прежний)
+
+    # --- 3. въезд во двор: проезжая часть и тротуары вместо drive_e / drive_w
+    p.remove["pieces"].append({"list": "surfaces", "id": "drive_e", "rect": [-114.0, -153.0, -108.0, -46.0]})
+    p.remove["pieces"].append({"list": "surfaces", "id": "drive_w", "rect": [-122.0, -116.0, -113.0, -46.0]})
+    d0, d1 = N.DRIVE
+    walk_t = 0.08
+    p.surface("drive_road", "road", d0, -152.8, d1, -46.95, 0.0, 0.08)
+    p.surface("drive_walk_w", "walk", d0 - 3.0, -113.3, d0, -46.95, 0.0, walk_t)
+    p.surface("drive_walk_e", "walk", d1, -113.3, d1 + 4.2, -46.95, 0.0, walk_t)
+    # шлагбаум поперёк проезда (стойка у западной кромки, стрела на восток, масштаб 1,3 = ширина проезда) и будка у тротуара
+    bar_z = -62.6
+    p.put("barrier_arm", d0 + 0.25, bar_z, 90.0, 1.3)
+    p.put("booth", d0 - 1.5, bar_z, 0.0)
+    n_bol = p.drop_items(["m:U02_04"], [-121.0, -33.5, -111.0, -32.3])
+    p.log.append(f"въезд: столбиков этапа 1 на кромке убрано {n_bol}")
+    # трансформаторная у (−120; −131,3) стояла на кромке проезда — на запад от проезда
+    p.move_item("ktp", -120.0, -131.3, -123.8, -131.3)
+
+    # --- 1. служебный проезд и стоянка: покрытия
+    p.remove["pieces"].append({"list": "surfaces", "id": "lot_w", "rect": [-197.0, -87.0, -121.0, -61.0]})
+    p.remove["pieces"].append({"list": "surfaces", "id": "lot_e", "rect": [-109.0, -87.0, -45.0, -61.0]})
+    lots = N.LOTS_X                            # [(−196, −123), (−108, −46)]
+    for name, (x0, x1) in zip(("w", "e"), lots):
+        p.surface(f"lot_{name}", "parking", x0, lot_zs[0], x1, lot_zs[1], 0.0, LOT_T)
+        p.surface(f"service_{name}", "road", x0, svc0, x1, svc1, 0.0, LOT_T)
+    n_marks = 0
+    slot_xs: list[list[float]] = [[], []]      # центры мест по рядам (оба участка)
+    for (x0, x1) in lots:
+        for r, zc in enumerate(row_z):
+            n_marks += _marks(p, x0, x1, zc)
+            slot_xs[r] += _slots(x0, x1)
+    p.log.append(f"разметка стоянок: линий {n_marks}, мест {len(slot_xs[0])} + {len(slot_xs[1])}")
+
+    # --- 2. машины стоянок — по местам двух рядов (кит m:U14_01: машины на поверхности; «car*» с подъёмом −7,3 — паркинг −1, не трогаем)
+    rect = [-197.0, -90.0, -45.0, -58.5]
+    cars = [list(it) for it in items if it[0] == "m:U14_01" and rect[0] <= it[1] <= rect[2] and rect[1] <= it[2] <= rect[3]]
+    p.drop_items(["m:U14_01"], rect)
+    models = [c[8] for c in cars]
+    by_row: list[list[list]] = [[c for c in cars if c[2] > -75.0], [c for c in cars if c[2] <= -75.0]]
+    target = [int(round(len(slot_xs[r]) * FILL)) for r in range(2)]
+    taken: list[set[int]] = [set(), set()]
+    final: list[tuple] = []
+    for r in range(2):
+        for c in sorted(by_row[r], key=lambda c: c[1]):
+            # ближайшее свободное место к прежнему X
+            order = sorted((i for i in range(len(slot_xs[r])) if i not in taken[r]), key=lambda i: abs(slot_xs[r][i] - c[1]))
+            taken[r].add(order[0])
+            final.append((r, order[0], c[8], False))
+        while len(taken[r]) < target[r]:
+            i = rng.randrange(len(slot_xs[r]))
+            if i in taken[r]:
+                continue
+            taken[r].add(i)
+            final.append((r, i, rng.choice(models), True))
+    n_old = sum(1 for f in final if not f[3])
+    for r, i, model, new in final:
+        x = slot_xs[r][i] + rng.uniform(-CAR_JITTER_X, CAR_JITTER_X)
+        z = row_z[r] + rng.uniform(-CAR_JITTER_Z, CAR_JITTER_Z)
+        yaw = (0.0 if r == 0 else 180.0) + rng.uniform(-CAR_JITTER_YAW, CAR_JITTER_YAW)
+        p.put("m:U14_01", x, z, yaw, 1.0, 0.0, -1, 0.0, model)
+    all_slots = len(slot_xs[0]) + len(slot_xs[1])
+    p.log.append(f"машины стоянок: было {len(cars)}, переставлено {n_old}, добавлено {len(final) - n_old}, итого {len(final)} "
+                 f"из {all_slots} мест ({100 * len(final) // all_slots} %)")
+
+    # фонари, кадки, лежачие, вехи и знаки стоянок — на ось проезда между рядами
+    moved = 0
+    for kit in ("m:U12_03", "m:U02_02", "m:U06_01", "m:U07_04", "m:U03_03"):
+        for it in items:
+            if it[0] == kit and -197 <= it[1] <= -45 and -80 <= it[2] <= -68:
+                p.move_item(kit, it[1], it[2], it[1], aisle_z)
+                moved += 1
+    p.log.append(f"вещей стоянок на ось проезда {moved}")
+
+    # контейнерные площадки: по два бака у северной кромки проезда, рядом мусор у двух из них
+    for bx in (-185.0, -150.0, -100.0, -66.0):
+        for dx in (-1.75, 1.75):
+            p.put("m:R02", bx + dx, -65.2, 0.0)
+    p.put("trash_pile", -181.0, -64.3, 40.0, 0.8)
+    p.put("trash_pile", -96.0, -64.3, 200.0, 0.8)
+
+    # --- 4. вывески первых этажей «Панорамы» на южных фасадах
+    names = [("продукты", "салон красоты"), ("стоматология", "ремонт обуви"), ("зоотовары", "пункт выдачи"), ("нотариус", "химчистка")]
+    low_ac = [it[1] for it in items if it[0] == "ac_unit" and -200 <= it[1] <= -40 and abs(it[2] + 87.1) < 0.2 and it[5] < 6.0]
+    face_z = round(N.PAN_Z[1] + 0.4, 2)                   # −86.9
+    for (x0, x1, _), pair in zip(N.PANORAMA, names):
+        picks: list[float] = []
+        for target_x in (x0 + 7.5, x1 - 7.5):
+            cand = sorted((x0 + 4.0 + 0.5 * k for k in range(int((x1 - x0 - 8.0) / 0.5) + 1)), key=lambda x: abs(x - target_x))
+            for x in cand:
+                if all(abs(x - a) > 2.8 for a in low_ac) and all(abs(x - q) > 10.0 for q in picks):
+                    picks.append(x)
+                    break
+        for x, text in zip(picks, pair):
+            p.add["signs"].append({"at": [round(x, 2), 3.6, face_z], "size": 36.0, "text": text})
+    p.log.append(f"вывесок {len(p.add['signs'])}")
+
+    # --- 5. дворовый проезд до Банковского переулка (съезд через тротуар переулка X 17,5…21)
+    yz0, yz1 = N.YARD_ROAD
+    p.surface("yard_road_e", "road", -42.0, yz0, 17.5, yz1, 0.0, 0.08)
+    p.surface("yard_road_e2", "road", 17.5, yz0, 21.0, -149.8, 0.0, 0.08)
+    p.surface("yard_cross", "road", 17.5, -149.8, 21.0, yz1, 0.0, 0.17)
+    p.move_item("m:R02", 19.1, -146.8, 19.1, -136.6)
+    p.move_item("tree_birch", 18.9, -146.0, 18.9, -133.0)
+
+    # --- 6. служебная стоянка за банком
+    bx0, bx1, bz0, bz1 = -40.0, -8.0, -143.0, -103.0
+    p.surface("bank_lot", "parking", bx0, bz0, bx1, bz1, 0.0, LOT_T)
+    bank_rows = [(-143.0, -137.7, 0.0), (-124.6, -119.3, 180.0), (-119.3, -114.0, 0.0)]
+    bank_slots: list[tuple[float, float, float]] = []
+    nm = 0
+    for a, b, yaw in bank_rows:
+        zc = (a + b) / 2.0
+        nm += _marks(p, bx0, bx1, zc)
+        for x in _slots(bx0, bx1):
+            bank_slots.append((x, zc, yaw))
+    pool = list(dict.fromkeys(models))
+    for (x, zc, yaw) in rng.sample(bank_slots, 9):
+        p.put("m:U14_01", x + rng.uniform(-CAR_JITTER_X, CAR_JITTER_X), zc + rng.uniform(-CAR_JITTER_Z, CAR_JITTER_Z),
+              yaw + rng.uniform(-CAR_JITTER_YAW, CAR_JITTER_YAW), 1.0, 0.0, -1, 0.0, rng.choice(pool))
+    p.log.append(f"стоянка за банком: линий {nm}, мест {len(bank_slots)}, машин 9")
+    p.move_item("container20", -28.0, -137.3, -11.0, -132.5, 90.0)
+    p.move_item("trash_pile", -30.0, -121.3, -38.6, -105.4)
+    p.move_item("bags", -28.8, -120.5, -37.4, -104.6)
+
+    # --- 7. ЦТП с котельной и три трубы; грузовик — на служебную стоянку
+    p.add_buildings.append({"id": "CTP", "parent": "East", "at": [5.5, -129.0], "footprint": [19.0, 14.0], "floors": 1,
+                            "story_height": 6.0, "label": "ЦТП и котельная квартала (закрыто)", "kind": "mass"})
+    for x in (9.0, 11.5, 14.0):
+        p.box(x, 9.0, -119.5, 1.4, 18.0, 1.4, "rust", 0.0, True)
+    p.move_item("truck", 2.0, -122.3, -18.0, -108.5)
+    return p
+
+
+STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs}
 
 
 def main() -> None:

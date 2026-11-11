@@ -63,7 +63,7 @@ var _item_index: Dictionary = {}
 var _item_order: int = 1000000
 var _piece_order: int = 1000000
 var _stats: Dictionary = {"убрано прежних узлов этапа": 0, "убрано вещей": 0, "убрано кусков": 0, "убрано узлов": 0,
-	"добавлено кусков": 0, "добавлено вещей": 0}
+	"добавлено кусков": 0, "добавлено вещей": 0, "добавлено зданий": 0}
 
 
 func _ready() -> void:
@@ -113,6 +113,8 @@ func _ready() -> void:
 			_add_piece(list_name, e)
 	for raw: Array in add.get("items", []):
 		_add_item(raw)
+	for b: Dictionary in add.get("buildings", []):
+		_add_building(b)
 
 	var packed: PackedScene = PackedScene.new()
 	var err: int = packed.pack(_root)
@@ -162,10 +164,21 @@ func _remove_pieces(rule: Dictionary) -> void:
 			continue
 		if rule.has("id") and String(d.get("id", "")) != String(rule.id):
 			continue
-		var c: Vector3 = piece.global_transform.origin
+		var c: Vector3 = _world_origin(piece)
 		if c.x >= float(r[0]) and c.z >= float(r[1]) and c.x <= float(r[2]) and c.z <= float(r[3]):
 			_drop(piece)
 			_stats["убрано кусков"] += 1
+
+
+## Положение узла в мире, пока сцена не в дереве (global_transform тут не работает): цепочка transform до корня.
+func _world_origin(n: Node3D) -> Vector3:
+	var xf: Transform3D = n.transform
+	var p: Node = n.get_parent()
+	while p != null and p != _root.get_parent():
+		if p is Node3D:
+			xf = (p as Node3D).transform * xf
+		p = p.get_parent()
+	return xf.origin
 
 
 func _add_item(raw: Array) -> void:
@@ -189,6 +202,35 @@ func _add_item(raw: Array) -> void:
 	top.add_child(spot)
 	spot.owner = _root
 	_stats["добавлено вещей"] += 1
+
+
+## Здание-объём (study_building.gd) в области сцены: {id, parent, at: [x, z], footprint: [w, d], floors, story_height, label, kind}.
+## Как у соседних узлов-объёмов: группа mall_study_snap, meta height_m / enterable / loot_count. Прежний узел с тем же именем
+## (от прошлого запуска этого этапа) уже убран по метке этапа.
+func _add_building(b: Dictionary) -> void:
+	var parent: Node = _root.get_node_or_null(NodePath(String(b.get("parent", "East"))))
+	if parent == null:
+		push_warning("prospekt_apply_patch: нет области «%s» для здания %s" % [b.get("parent"), b.get("id")])
+		return
+	var node: Node3D = Node3D.new()
+	node.name = String(b.id)
+	node.set_script(load("res://src/blockout/study_building.gd"))
+	var fp: Array = b.footprint
+	node.set("kind", String(b.get("kind", "mass")))
+	node.set("footprint", Vector2(float(fp[0]), float(fp[1])))
+	node.set("floors", int(b.get("floors", 1)))
+	node.set("story_height", float(b.get("story_height", 3.0)))
+	node.set("label", String(b.get("label", "")))
+	var at: Array = b.at
+	node.transform = Transform3D(Basis.IDENTITY, Vector3(float(at[0]), 0.0, float(at[1])))
+	node.add_to_group("mall_study_snap", true)
+	node.set_meta("height_m", int(b.get("floors", 1)) * float(b.get("story_height", 3.0)))
+	node.set_meta("enterable", false)
+	node.set_meta("loot_count", 0)
+	node.set_meta(META, _stage)
+	parent.add_child(node)
+	node.owner = _root
+	_stats["добавлено зданий"] += 1
 
 
 func _folder_of(kit: String) -> String:
