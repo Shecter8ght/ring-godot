@@ -1073,7 +1073,7 @@ order = 1000002
 pick_size = Vector3(3.5, 0.17, 6)
 metadata/patch_stage = "4_wash"
 
-[node name="Тротуар bank_plaza_walk этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=473571612]
+[node name="Тротуар bank_plaza_walk этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=2059380538]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 0.075, -49.625)
 script = ExtResource("4_u54l0")
 list = "surfaces"
@@ -1341,22 +1341,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.6, -0.42, -91.8)
 order = 9
 pick_size = Vector3(168.8, 0.04, 55)
-
-[node name="Пол bank_f1 0001" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1187624453]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, -0.2, -79.3)
-script = ExtResource("4_u54l0")
-list = "slabs"
-data = {
-"holes": [[-14.8, -92.5, -6.6, -90.1]],
-"id": "bank_f1",
-"mat": "walk",
-"rect": [-38.0, -93.3, -4.0, -65.3],
-"t": 0.4,
-"y_top": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, -0.2, -79.3)
-order = 10
-pick_size = Vector3(34, 0.4, 28)
 
 [node name="Перекрытие bank_f2 0001" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=160129950]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 4.35, -78.3)
@@ -1809,7 +1793,7 @@ order = 1000004
 pick_size = Vector3(6, 0.2, 6)
 metadata/patch_stage = "4_wash"
 
-[node name="Перекрытие annex_roof этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=1444810375]
+[node name="Перекрытие annex_roof этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=780186552]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 4.05, -86.8)
 script = ExtResource("4_u54l0")
 list = "slabs"
@@ -1825,6 +1809,22 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 4.05, -86.8)
 order = 1000001
 pick_size = Vector3(6.4, 0.3, 13)
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Пол bank_f1 этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Плиты" unique_id=851490649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, -0.2, -79.3)
+script = ExtResource("4_u54l0")
+list = "slabs"
+data = {
+"holes": [[-14.8, -92.5, -6.6, -90.1], [-6.6, -78.2, -4.8, -72.3]],
+"id": "bank_f1",
+"mat": "walk",
+"rect": [-38.0, -93.3, -4.0, -65.3],
+"t": 0.4,
+"y_top": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, -0.2, -79.3)
+pick_size = Vector3(34, 0.4, 28)
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Стены" type="Node3D" parent="Landscape/Улицы" unique_id=1660921852]
 
@@ -2042,7 +2042,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.35, 4.675, 128.5)
 order = 1178
 pick_size = Vector3(0.1, 1, 1.9)
 
-[node name="Стена этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1496119337]
+[node name="Стена этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=26009914]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 5.5, -77.95)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2057,7 +2057,7 @@ order = 1000007
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1230805389]
+[node name="Стена этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=958211791]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 6.15, -79.25)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2072,7 +2072,7 @@ order = 1000008
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 3" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=666882665]
+[node name="Стена этап 5a_bank_site 3" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1637871593]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 6.8, -80.55)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2087,7 +2087,7 @@ order = 1000009
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 4" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=454610843]
+[node name="Стена этап 5a_bank_site 4" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1944682465]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 7.45, -81.85)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2102,7 +2102,7 @@ order = 1000010
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 5" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=2101968479]
+[node name="Стена этап 5a_bank_site 5" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1124969144]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 8.1, -83.15)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2117,7 +2117,7 @@ order = 1000011
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 6" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=701189275]
+[node name="Стена этап 5a_bank_site 6" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=253908039]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 8.75, -84.45)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2132,7 +2132,7 @@ order = 1000012
 pick_size = Vector3(0.15, 1.3, 1.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 7" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1377137060]
+[node name="Стена этап 5a_bank_site 7" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1693855144]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.675, 8.9, -86.8)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -2147,7 +2147,7 @@ order = 1000013
 pick_size = Vector3(0.15, 1, 3.4)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 8" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=1336323178]
+[node name="Стена этап 5a_bank_site 8" type="Node3D" parent="Landscape/Улицы/Стены/Сталь" unique_id=2146480793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.375, 8.9, -88.575)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -4684,384 +4684,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58.9, -3.85, -116.65)
 order = 219
 pick_size = Vector3(0.2, 6.9, 5.3)
 
-[node name="Стена 0181" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1622453264]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.35, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.0, -65.425, -34.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.35, 2.1, -65.3)
-order = 220
-pick_size = Vector3(3.3, 4.2, 0.25)
-
-[node name="Стена 0182" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1994493992]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-34.7, -65.425, -32.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.5, 3.9, -65.3)
-order = 221
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0183" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1599026905]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-34.7, -65.425, -32.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.5, 0.2, -65.3)
-order = 222
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0184" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=207226309]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-32.3, -65.425, -31.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 2.1, -65.3)
-order = 223
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0185" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1843334614]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-31.7, -65.425, -29.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 3.9, -65.3)
-order = 224
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0186" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=737952496]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-31.7, -65.425, -29.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 0.2, -65.3)
-order = 225
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0187" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1344023890]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-29.3, -65.425, -28.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 2.1, -65.3)
-order = 226
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0188" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1256528972]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-28.7, -65.425, -26.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 3.9, -65.3)
-order = 227
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0189" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1949651469]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-28.7, -65.425, -26.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.2, -65.3)
-order = 228
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0190" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=767485182]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-26.3, -65.425, -25.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.1, -65.3)
-order = 229
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0191" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1097324155]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-25.7, -65.425, -23.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 3.9, -65.3)
-order = 230
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0192" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1058461068]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-25.7, -65.425, -23.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 0.2, -65.3)
-order = 231
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0193" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1773160014]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-23.3, -65.425, -22.2, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 2.1, -65.3)
-order = 232
-pick_size = Vector3(1.1, 4.2, 0.25)
-
-[node name="Стена 0194" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=662960379]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-22.2, -65.425, -19.8, -65.175],
-"y0": 2.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -65.3)
-order = 233
-pick_size = Vector3(2.4, 1.6, 0.25)
-
-[node name="Стена 0195" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1030814020]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.25, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-19.8, -65.425, -16.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.25, 2.1, -65.3)
-order = 234
-pick_size = Vector3(3.1, 4.2, 0.25)
-
-[node name="Стена 0196" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1322959061]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-16.7, -65.425, -14.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3.9, -65.3)
-order = 235
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0197" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1173484070]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-16.7, -65.425, -14.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.2, -65.3)
-order = 236
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0198" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1294177397]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-14.3, -65.425, -13.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.1, -65.3)
-order = 237
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0199" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=317513202]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-13.7, -65.425, -11.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 3.9, -65.3)
-order = 238
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0200" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=241565465]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-13.7, -65.425, -11.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.2, -65.3)
-order = 239
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0201" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=430591704]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-11.3, -65.425, -10.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -65.3)
-order = 240
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0202" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2102543239]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.7, -65.425, -8.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 3.9, -65.3)
-order = 241
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0203" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1741943798]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.7, -65.425, -8.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0.2, -65.3)
-order = 242
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0204" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1110172327]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-8.3, -65.425, -7.7, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.1, -65.3)
-order = 243
-pick_size = Vector3(0.6, 4.2, 0.25)
-
-[node name="Стена 0205" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=982501137]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.9, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-7.7, -65.425, -5.3, -65.175],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.9, -65.3)
-order = 244
-pick_size = Vector3(2.4, 0.6, 0.25)
-
-[node name="Стена 0206" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1626000657]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.2, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-7.7, -65.425, -5.3, -65.175],
-"y0": 0.0,
-"y1": 0.4
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.2, -65.3)
-order = 245
-pick_size = Vector3(2.4, 0.4, 0.25)
-
-[node name="Стена 0207" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=158869152]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.65, 2.1, -65.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-5.3, -65.425, -4.0, -65.175],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.65, 2.1, -65.3)
-order = 246
-pick_size = Vector3(1.3, 4.2, 0.25)
-
 [node name="Стена 0208" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=337943609]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.3, 2.1, -93.3)
 script = ExtResource("4_u54l0")
@@ -5103,608 +4725,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.7, 2.1, -93.3)
 order = 249
 pick_size = Vector3(15.4, 4.2, 0.25)
-
-[node name="Стена 0211" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1658452063]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -92.7)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -93.3, -37.875, -92.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -92.7)
-order = 250
-pick_size = Vector3(0.25, 4.2, 1.2)
-
-[node name="Стена 0212" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1945752787]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -91.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -92.1, -37.875, -90.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -91.3)
-order = 251
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0213" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1326860448]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -91.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -92.1, -37.875, -90.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -91.3)
-order = 252
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0214" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1978006968]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -89.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -90.5, -37.875, -88.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -89.3)
-order = 253
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0215" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=559574435]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -87.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -88.1, -37.875, -86.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -87.3)
-order = 254
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0216" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=884217308]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -87.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -88.1, -37.875, -86.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -87.3)
-order = 255
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0217" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1014272630]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -85.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -86.5, -37.875, -84.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -85.3)
-order = 256
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0218" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2058120226]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -84.1, -37.875, -82.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -83.3)
-order = 257
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0219" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=149575051]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -84.1, -37.875, -82.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -83.3)
-order = 258
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0220" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=449618606]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -81.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -82.5, -37.875, -80.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -81.3)
-order = 259
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0221" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1918505992]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -79.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -80.1, -37.875, -78.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -79.3)
-order = 260
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0222" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1965140672]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -79.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -80.1, -37.875, -78.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -79.3)
-order = 261
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0223" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1119335273]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -77.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -78.5, -37.875, -76.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -77.3)
-order = 262
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0224" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2031678810]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -75.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -76.1, -37.875, -74.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -75.3)
-order = 263
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0225" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1850693838]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -75.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -76.1, -37.875, -74.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -75.3)
-order = 264
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0226" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1163345258]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -73.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -74.5, -37.875, -72.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -73.3)
-order = 265
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0227" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1845852705]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -71.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -72.1, -37.875, -70.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -71.3)
-order = 266
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0228" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1960185561]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -71.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -72.1, -37.875, -70.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -71.3)
-order = 267
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0229" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=578464157]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -69.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -70.5, -37.875, -68.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -69.3)
-order = 268
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0230" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=58906843]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -67.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -68.1, -37.875, -66.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -67.3)
-order = 269
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0231" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=403723499]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -67.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -68.1, -37.875, -66.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -67.3)
-order = 270
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0232" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1321555777]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -65.9)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-38.125, -66.5, -37.875, -65.3],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -65.9)
-order = 271
-pick_size = Vector3(0.25, 4.2, 1.2)
-
-[node name="Стена 0233" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=264384943]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -92.7)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -93.3, -3.875, -92.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -92.7)
-order = 272
-pick_size = Vector3(0.25, 4.2, 1.2)
-
-[node name="Стена 0234" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=84112586]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -91.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -92.1, -3.875, -90.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -91.3)
-order = 273
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0235" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=856591318]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -91.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -92.1, -3.875, -90.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -91.3)
-order = 274
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0236" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1397604757]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -89.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -90.5, -3.875, -88.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -89.3)
-order = 275
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0237" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=113029621]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -87.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -88.1, -3.875, -86.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -87.3)
-order = 276
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0238" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=730312221]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -87.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -88.1, -3.875, -86.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -87.3)
-order = 277
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0239" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=843250419]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -85.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -86.5, -3.875, -84.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -85.3)
-order = 278
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0240" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1310851952]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -84.1, -3.875, -82.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -83.3)
-order = 279
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0241" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=629919798]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -84.1, -3.875, -82.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -83.3)
-order = 280
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0242" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=991760578]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -81.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -82.5, -3.875, -80.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -81.3)
-order = 281
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0243" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1688655406]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -79.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -80.1, -3.875, -78.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -79.3)
-order = 282
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0244" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1608633671]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -79.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -80.1, -3.875, -78.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -79.3)
-order = 283
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0245" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=984549454]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -77.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -78.5, -3.875, -76.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -77.3)
-order = 284
-pick_size = Vector3(0.25, 4.2, 2.4)
-
-[node name="Стена 0246" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=243255238]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -75.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -76.1, -3.875, -74.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -75.3)
-order = 285
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0247" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1597291496]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -75.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -76.1, -3.875, -74.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -75.3)
-order = 286
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0248" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=506738411]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -73.2)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -74.5, -3.875, -71.9],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -73.2)
-order = 287
-pick_size = Vector3(0.25, 4.2, 2.6)
-
-[node name="Стена 0249" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=940817380]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.31, -71.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -71.9, -3.875, -70.7],
-"y0": 2.42,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.31, -71.3)
-order = 288
-pick_size = Vector3(0.25, 1.78, 1.2)
-
-[node name="Стена 0250" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1527906653]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -69.4)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -70.7, -3.875, -68.1],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -69.4)
-order = 289
-pick_size = Vector3(0.25, 4.2, 2.6)
-
-[node name="Стена 0251" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1995473169]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -67.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -68.1, -3.875, -66.5],
-"y0": 3.6,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -67.3)
-order = 290
-pick_size = Vector3(0.25, 0.6, 1.6)
-
-[node name="Стена 0252" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=117158177]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -67.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -68.1, -3.875, -66.5],
-"y0": 0.0,
-"y1": 2.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -67.3)
-order = 291
-pick_size = Vector3(0.25, 2.2, 1.6)
-
-[node name="Стена 0253" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1411805854]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -65.9)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-4.125, -66.5, -3.875, -65.3],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -65.9)
-order = 292
-pick_size = Vector3(0.25, 4.2, 1.2)
 
 [node name="Стена 0254" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=606067210]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.6425, 2.1, -89.1)
@@ -5859,174 +4879,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.4075, 2.1, -89.9)
 order = 303
 pick_size = Vector3(0.815, 4.2, 0.2)
-
-[node name="Стена 0265" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1465694111]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.25, 2.1, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-24.0, -83.36, -20.5, -83.24],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.25, 2.1, -83.3)
-order = 304
-pick_size = Vector3(3.5, 4.2, 0.12)
-
-[node name="Стена 0266" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1905843046]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.2, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-20.5, -83.36, -19.5, -83.24],
-"y0": 2.2,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.2, -83.3)
-order = 305
-pick_size = Vector3(1, 2, 0.12)
-
-[node name="Стена 0267" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1443190151]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.75, 2.1, -83.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-19.5, -83.36, -16.0, -83.24],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.75, 2.1, -83.3)
-order = 306
-pick_size = Vector3(3.5, 4.2, 0.12)
-
-[node name="Стена 0268" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=788225588]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -86.2)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-24.06, -89.1, -23.94, -83.3],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -86.2)
-order = 307
-pick_size = Vector3(0.12, 4.2, 5.8)
-
-[node name="Стена 0269" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1879935588]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 2.1, -86.2)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-16.06, -89.1, -15.94, -83.3],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 2.1, -86.2)
-order = 308
-pick_size = Vector3(0.12, 4.2, 5.8)
-
-[node name="Стена 0270" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1815193572]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.7925, 2.1, -81.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.0, -81.36, -7.585, -81.24],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.7925, 2.1, -81.3)
-order = 309
-pick_size = Vector3(2.415, 4.2, 0.12)
-
-[node name="Стена 0271" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=974779098]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 3.31, -81.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-7.585, -81.36, -6.415, -81.24],
-"y0": 2.42,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 3.31, -81.3)
-order = 310
-pick_size = Vector3(1.17, 1.78, 0.12)
-
-[node name="Стена 0272" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1649386198]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2075, 2.1, -81.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-6.415, -81.36, -4.0, -81.24],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2075, 2.1, -81.3)
-order = 311
-pick_size = Vector3(2.415, 4.2, 0.12)
-
-[node name="Стена 0273" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1392787687]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.1, -79.0925)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.06, -81.3, -9.94, -76.885],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.1, -79.0925)
-order = 312
-pick_size = Vector3(0.12, 4.2, 4.415)
-
-[node name="Стена 0274" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1429176123]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.31, -76.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.06, -76.885, -9.94, -75.715],
-"y0": 2.42,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.31, -76.3)
-order = 313
-pick_size = Vector3(0.12, 1.78, 1.17)
-
-[node name="Стена 0275" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=298060687]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.1, -73.5075)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.06, -75.715, -9.94, -71.3],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 2.1, -73.5075)
-order = 314
-pick_size = Vector3(0.12, 4.2, 4.415)
-
-[node name="Стена 0276" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1925865080]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -71.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-10.0, -71.36, -4.0, -71.24],
-"y0": 0.0,
-"y1": 4.2
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.1, -71.3)
-order = 315
-pick_size = Vector3(6, 4.2, 0.12)
 
 [node name="Стена 0277" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=59160522]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.3, 6.6, -61.3)
@@ -8030,20 +6882,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2075, 6.6, -83.3)
 order = 458
 pick_size = Vector3(6.415, 4.2, 0.15)
 
-[node name="Стена 0420" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1773520245]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4, 6.6, -75.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-40.0, -75.375, -30.8, -75.225],
-"y0": 4.5,
-"y1": 8.7
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4, 6.6, -75.3)
-order = 459
-pick_size = Vector3(9.2, 4.2, 0.15)
-
 [node name="Стена 0421" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=419895196]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 7.81, -75.3)
 script = ExtResource("4_u54l0")
@@ -9178,48 +8016,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -89.3)
 order = 540
 pick_size = Vector3(0.25, 3.55, 1)
 
-[node name="Стена 0502" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=442756156]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.525, -87.8)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-40.125, -88.8, -39.875, -86.8],
-"y0": 11.1,
-"y1": 11.95
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.525, -87.8)
-order = 541
-pick_size = Vector3(0.25, 0.85, 2)
-
-[node name="Стена 0503" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2095612751]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 8.85, -87.8)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-40.125, -88.8, -39.875, -86.8],
-"y0": 8.4,
-"y1": 9.3
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 8.85, -87.8)
-order = 542
-pick_size = Vector3(0.25, 0.9, 2)
-
-[node name="Стена 0504" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1162888316]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -86.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-40.125, -86.8, -39.875, -85.8],
-"y0": 8.4,
-"y1": 11.95
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -86.3)
-order = 543
-pick_size = Vector3(0.25, 3.55, 1)
-
 [node name="Стена 0505" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=939065592]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.525, -84.8)
 script = ExtResource("4_u54l0")
@@ -10186,20 +8982,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 10.175, -89.3)
 order = 612
 pick_size = Vector3(0.15, 3.55, 12)
 
-[node name="Стена 0574" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1258272019]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 10.175, -68.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-14.075, -75.3, -13.925, -61.3],
-"y0": 8.4,
-"y1": 11.95
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 10.175, -68.3)
-order = 613
-pick_size = Vector3(0.15, 3.55, 14)
-
 [node name="Стена 0575" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1852296869]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.6, 13.6, -89.1)
 script = ExtResource("4_u54l0")
@@ -10507,48 +9289,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, -1.8, -79.3)
 order = 647
 pick_size = Vector3(17, 2.8, 0.2)
-
-[node name="Стена 0597" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=970676431]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -1.8, -76.5925)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-12.075, -79.3, -11.925, -73.885],
-"y0": -3.2,
-"y1": -0.3999999999999999
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -1.8, -76.5925)
-order = 648
-pick_size = Vector3(0.15, 2.8, 5.415)
-
-[node name="Стена 0598" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1259189732]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -0.59, -73.3)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-12.075, -73.885, -11.925, -72.715],
-"y0": -0.7800000000000002,
-"y1": -0.3999999999999999
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -0.59, -73.3)
-order = 649
-pick_size = Vector3(0.15, 0.38, 1.17)
-
-[node name="Стена 0599" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=136460053]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -1.8, -69.0075)
-script = ExtResource("4_u54l0")
-list = "walls"
-data = {
-"mat": "wall",
-"rect": [-12.075, -72.715, -11.925, -65.3],
-"y0": -3.2,
-"y1": -0.3999999999999999
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -1.8, -69.0075)
-order = 650
-pick_size = Vector3(0.15, 2.8, 7.415)
 
 [node name="Стена 0630" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1801001764]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -124.1, 2.12, 214)
@@ -18200,7 +16940,7 @@ order = 1000056
 pick_size = Vector3(0.2, 0.4, 26)
 metadata/patch_stage = "4_wash"
 
-[node name="Стена этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1747404224]
+[node name="Стена этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=541473004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3, 1.95, -80.425)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -18215,7 +16955,7 @@ order = 1000002
 pick_size = Vector3(1.4, 3.9, 0.25)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=737155994]
+[node name="Стена этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=955479308]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 3.55, -80.425)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -18230,7 +16970,7 @@ order = 1000003
 pick_size = Vector3(3.6, 0.7, 0.25)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 3" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=737160215]
+[node name="Стена этап 5a_bank_site 3" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1484243422]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 1.95, -80.425)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -18245,7 +16985,7 @@ order = 1000004
 pick_size = Vector3(1.4, 3.9, 0.25)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 4" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=208880148]
+[node name="Стена этап 5a_bank_site 4" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1759924189]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 1.95, -93.175)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -18260,7 +17000,7 @@ order = 1000005
 pick_size = Vector3(6.4, 3.9, 0.25)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стена этап 5a_bank_site 5" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=239480026]
+[node name="Стена этап 5a_bank_site 5" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=297108427]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.275, 1.95, -86.8)
 script = ExtResource("4_u54l0")
 list = "walls"
@@ -18274,6 +17014,2406 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.275, 1.95, -86.8)
 order = 1000006
 pick_size = Vector3(0.25, 3.9, 13)
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Стена этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2144616821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.9, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.0, -65.425, -33.8, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.9, 2.1, -65.3)
+order = 1000001
+pick_size = Vector3(4.2, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 2" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=892926904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 3.3075, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-33.8, -65.425, -32.2, -65.175],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 3.3075, -65.3)
+order = 1000002
+pick_size = Vector3(1.6, 1.785, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 3" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=76273063]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.45, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-32.2, -65.425, -28.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.45, 2.1, -65.3)
+order = 1000003
+pick_size = Vector3(3.5, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 4" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2135926707]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.7, -65.425, -26.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 3.9, -65.3)
+order = 1000004
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 5" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=450687883]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.7, -65.425, -26.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.2, -65.3)
+order = 1000005
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 6" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1785540863]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-26.3, -65.425, -25.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.1, -65.3)
+order = 1000006
+pick_size = Vector3(0.6, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 7" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=128449174]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-25.7, -65.425, -23.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 3.9, -65.3)
+order = 1000007
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 8" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=758125823]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-25.7, -65.425, -23.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.5, 0.2, -65.3)
+order = 1000008
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 9" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1198687845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-23.3, -65.425, -22.2, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 2.1, -65.3)
+order = 1000009
+pick_size = Vector3(1.1, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 10" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1383809860]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-22.2, -65.425, -19.8, -65.175],
+"y0": 2.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -65.3)
+order = 1000010
+pick_size = Vector3(2.4, 1.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 11" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=578776945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.25, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-19.8, -65.425, -16.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.25, 2.1, -65.3)
+order = 1000011
+pick_size = Vector3(3.1, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 12" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1497169478]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-16.7, -65.425, -14.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3.9, -65.3)
+order = 1000012
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 13" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1552616797]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-16.7, -65.425, -14.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.2, -65.3)
+order = 1000013
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 14" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=462597357]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-14.3, -65.425, -13.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.1, -65.3)
+order = 1000014
+pick_size = Vector3(0.6, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 15" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1047046487]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-13.7, -65.425, -11.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 3.9, -65.3)
+order = 1000015
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 16" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=355490887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-13.7, -65.425, -11.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.2, -65.3)
+order = 1000016
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 17" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1244591203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.3, -65.425, -10.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -65.3)
+order = 1000017
+pick_size = Vector3(0.6, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 18" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1287410205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-10.7, -65.425, -8.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 3.9, -65.3)
+order = 1000018
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 19" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=597211405]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-10.7, -65.425, -8.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0.2, -65.3)
+order = 1000019
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 20" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1791746045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-8.3, -65.425, -7.7, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.1, -65.3)
+order = 1000020
+pick_size = Vector3(0.6, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 21" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=455935378]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.9, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-7.7, -65.425, -5.3, -65.175],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.9, -65.3)
+order = 1000021
+pick_size = Vector3(2.4, 0.6, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 22" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=952399256]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.2, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-7.7, -65.425, -5.3, -65.175],
+"y0": 0.0,
+"y1": 0.4
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.2, -65.3)
+order = 1000022
+pick_size = Vector3(2.4, 0.4, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 23" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=275553468]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.65, 2.1, -65.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-5.3, -65.425, -4.0, -65.175],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.65, 2.1, -65.3)
+order = 1000023
+pick_size = Vector3(1.3, 4.2, 0.25)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 24" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1243186952]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -89.4425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -93.3, -3.875, -85.585],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -89.4425)
+order = 1000024
+pick_size = Vector3(0.25, 4.2, 7.715)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 25" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1687050109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.3075, -85)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -85.585, -3.875, -84.415],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.3075, -85)
+order = 1000025
+pick_size = Vector3(0.25, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 26" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=270599992]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -82.2575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -84.415, -3.875, -80.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -82.2575)
+order = 1000026
+pick_size = Vector3(0.25, 4.2, 4.315)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 27" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1415806543]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -79.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -80.1, -3.875, -78.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -79.3)
+order = 1000027
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 28" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=492319598]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -79.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -80.1, -3.875, -78.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -79.3)
+order = 1000028
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 29" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1718242884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -77.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -78.5, -3.875, -76.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -77.3)
+order = 1000029
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 30" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=565342118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -76.1, -3.875, -74.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -75.3)
+order = 1000030
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 31" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2053193787]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -76.1, -3.875, -74.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -75.3)
+order = 1000031
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 32" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2022590132]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -73.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -74.5, -3.875, -72.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -73.3)
+order = 1000032
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 33" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=857236011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -72.1, -3.875, -70.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -71.3)
+order = 1000033
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 34" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=605958422]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -72.1, -3.875, -70.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -71.3)
+order = 1000034
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 35" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1979237644]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -69.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -70.5, -3.875, -68.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -69.3)
+order = 1000035
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 36" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1810535294]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -67.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -68.1, -3.875, -66.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.9, -67.3)
+order = 1000036
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 37" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=196818461]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -67.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -68.1, -3.875, -66.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.1, -67.3)
+order = 1000037
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 38" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=138434165]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -65.9)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-4.125, -66.5, -3.875, -65.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.1, -65.9)
+order = 1000038
+pick_size = Vector3(0.25, 4.2, 1.2)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 39" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1887104288]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -92.5425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -93.3, -37.875, -91.785],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -92.5425)
+order = 1000039
+pick_size = Vector3(0.25, 4.2, 1.515)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 40" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2037862497]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.3075, -91.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -91.785, -37.875, -90.615],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.3075, -91.2)
+order = 1000040
+pick_size = Vector3(0.25, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 41" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=773624589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -89.3575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -90.615, -37.875, -88.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -89.3575)
+order = 1000041
+pick_size = Vector3(0.25, 4.2, 2.515)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 42" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1959885857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -87.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -88.1, -37.875, -86.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -87.3)
+order = 1000042
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 43" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=138840821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -87.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -88.1, -37.875, -86.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -87.3)
+order = 1000043
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 44" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=793551813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -85.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -86.5, -37.875, -84.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -85.3)
+order = 1000044
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 45" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1249167271]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -84.1, -37.875, -82.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -83.3)
+order = 1000045
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 46" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1533763551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -84.1, -37.875, -82.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -83.3)
+order = 1000046
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 47" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=596826908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -81.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -82.5, -37.875, -80.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -81.3)
+order = 1000047
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 48" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1800789545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -79.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -80.1, -37.875, -78.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -79.3)
+order = 1000048
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 49" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1782858572]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -79.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -80.1, -37.875, -78.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -79.3)
+order = 1000049
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 50" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1579390606]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -77.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -78.5, -37.875, -76.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -77.3)
+order = 1000050
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 51" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=593549363]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -76.1, -37.875, -74.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -75.3)
+order = 1000051
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 52" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1429051328]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -76.1, -37.875, -74.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -75.3)
+order = 1000052
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 53" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=194035485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -73.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -74.5, -37.875, -72.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -73.3)
+order = 1000053
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 54" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1509278493]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -72.1, -37.875, -70.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -71.3)
+order = 1000054
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 55" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=893266036]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -72.1, -37.875, -70.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -71.3)
+order = 1000055
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 56" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=412241966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -69.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -70.5, -37.875, -68.1],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -69.3)
+order = 1000056
+pick_size = Vector3(0.25, 4.2, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 57" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1752034373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -67.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -68.1, -37.875, -66.5],
+"y0": 3.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 3.9, -67.3)
+order = 1000057
+pick_size = Vector3(0.25, 0.6, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 58" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=384943729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -67.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -68.1, -37.875, -66.5],
+"y0": 0.0,
+"y1": 2.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 1.1, -67.3)
+order = 1000058
+pick_size = Vector3(0.25, 2.2, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 59" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1021766445]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -65.9)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.125, -66.5, -37.875, -65.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 2.1, -65.9)
+order = 1000059
+pick_size = Vector3(0.25, 4.2, 1.2)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 60" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1483751210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.4375, 2.1, -78.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-37.875, -78.375, -31.0, -78.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.4375, 2.1, -78.3)
+order = 1000060
+pick_size = Vector3(6.875, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 61" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1822818047]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.0625, 2.1, -78.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.0, -78.375, -4.125, -78.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.0625, 2.1, -78.3)
+order = 1000061
+pick_size = Vector3(13.875, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 62" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=958139266]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.9375, 2.1, -70.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-37.875, -70.375, -28.0, -70.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.9375, 2.1, -70.3)
+order = 1000062
+pick_size = Vector3(9.875, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 63" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=120736125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5625, 2.1, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.0, -71.375, -4.125, -71.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5625, 2.1, -71.3)
+order = 1000063
+pick_size = Vector3(6.875, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 64" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1954096997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.85, 2.1, -68.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-23.5, -68.375, -22.2, -68.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.85, 2.1, -68.3)
+order = 1000064
+pick_size = Vector3(1.3, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 65" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1999210452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -68.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-22.2, -68.375, -19.8, -68.225],
+"y0": 2.6,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.4, -68.3)
+order = 1000065
+pick_size = Vector3(2.4, 1.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 66" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=341451401]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.15, 2.1, -68.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-19.8, -68.375, -18.5, -68.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.15, 2.1, -68.3)
+order = 1000066
+pick_size = Vector3(1.3, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 67" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1050932516]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.5, 2.1, -66.8625)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-23.575, -68.3, -23.425, -65.425],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.5, 2.1, -66.8625)
+order = 1000067
+pick_size = Vector3(0.15, 4.2, 2.875)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 68" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1499611177]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 2.1, -66.8625)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.575, -68.3, -18.425, -65.425],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 2.1, -66.8625)
+order = 1000068
+pick_size = Vector3(0.15, 4.2, 2.875)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 69" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=318349984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.35, 2.1, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.0, -75.375, -16.7, -75.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.35, 2.1, -75.3)
+order = 1000069
+pick_size = Vector3(1.3, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 70" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=317429205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2, 3.3075, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-16.7, -75.375, -15.7, -75.225],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2, 3.3075, -75.3)
+order = 1000070
+pick_size = Vector3(1, 1.785, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 71" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1736168975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 2.1, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-15.7, -75.375, -13.3, -75.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 2.1, -75.3)
+order = 1000071
+pick_size = Vector3(2.4, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 72" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1573760084]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 3.3075, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-13.3, -75.375, -12.3, -75.225],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8, 3.3075, -75.3)
+order = 1000072
+pick_size = Vector3(1, 1.785, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 73" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1773157314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.65, 2.1, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-12.3, -75.375, -11.0, -75.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.65, 2.1, -75.3)
+order = 1000073
+pick_size = Vector3(1.3, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 74" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1570173919]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 2.1, -76.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-14.575, -78.3, -14.425, -75.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 2.1, -76.8)
+order = 1000074
+pick_size = Vector3(0.15, 4.2, 3)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 75" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1741511351]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 2.1, -76.4425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-31.075, -78.3, -30.925, -74.585],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 2.1, -76.4425)
+order = 1000075
+pick_size = Vector3(0.15, 4.2, 3.715)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 76" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1206911932]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 3.3075, -74)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-31.075, -74.585, -30.925, -73.415],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 3.3075, -74)
+order = 1000076
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 77" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=780270851]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 2.1, -71.8575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-31.075, -73.415, -30.925, -70.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 2.1, -71.8575)
+order = 1000077
+pick_size = Vector3(0.15, 4.2, 3.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 78" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=760186777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2.1, -69.3425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.075, -70.3, -27.925, -68.38499999999999],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2.1, -69.3425)
+order = 1000078
+pick_size = Vector3(0.15, 4.2, 1.915)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 79" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2041341062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3.3075, -67.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.075, -68.38499999999999, -27.925, -67.215],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3.3075, -67.8)
+order = 1000079
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 80" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=880749867]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2.1, -66.32)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.075, -67.215, -27.925, -65.425],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 2.1, -66.32)
+order = 1000080
+pick_size = Vector3(0.15, 4.2, 1.79)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 81" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2015813190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.7925, 2.1, -84)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.0, -84.075, -21.585, -83.925],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.7925, 2.1, -84)
+order = 1000081
+pick_size = Vector3(2.415, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 82" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1375797561]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.3075, -84)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-21.585, -84.075, -20.415, -83.925],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.3075, -84)
+order = 1000082
+pick_size = Vector3(1.17, 1.785, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 83" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1513938767]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.1425, 2.1, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-20.5, -83.375, -19.785, -83.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.1425, 2.1, -83.3)
+order = 1000083
+pick_size = Vector3(0.715, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 84" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=754577102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 3.3075, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-19.785, -83.375, -18.615, -83.225],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 3.3075, -83.3)
+order = 1000084
+pick_size = Vector3(1.17, 1.785, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 85" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=55177647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8075, 2.1, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.615, -83.375, -11.0, -83.225],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8075, 2.1, -83.3)
+order = 1000085
+pick_size = Vector3(7.615, 4.2, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 86" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1892901272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -85.2425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.075, -89.1, -23.925, -81.38499999999999],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -85.2425)
+order = 1000086
+pick_size = Vector3(0.15, 4.2, 7.715)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 87" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=869709429]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 3.3075, -80.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.075, -81.38499999999999, -23.925, -80.215],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 3.3075, -80.8)
+order = 1000087
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 88" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1191637957]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -79.2575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.075, -80.215, -23.925, -78.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2.1, -79.2575)
+order = 1000088
+pick_size = Vector3(0.15, 4.2, 1.915)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 89" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1264969061]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 2.1, -86.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-20.575, -89.1, -20.425, -83.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 2.1, -86.2)
+order = 1000089
+pick_size = Vector3(0.15, 4.2, 5.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 90" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=860316433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 2.1, -82.3425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.075, -83.3, -17.925, -81.38499999999999],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 2.1, -82.3425)
+order = 1000090
+pick_size = Vector3(0.15, 4.2, 1.915)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 91" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=294284396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 3.3075, -80.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.075, -81.38499999999999, -17.925, -80.215],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 3.3075, -80.8)
+order = 1000091
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 92" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1788902122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 2.1, -77.7575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.075, -80.215, -17.925, -75.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 2.1, -77.7575)
+order = 1000092
+pick_size = Vector3(0.15, 4.2, 4.915)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 93" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1878676575]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -88.4425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -89.8, -10.925, -87.085],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -88.4425)
+order = 1000093
+pick_size = Vector3(0.15, 4.2, 2.715)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 94" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1665256547]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -86.5)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -87.085, -10.925, -85.915],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -86.5)
+order = 1000094
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 95" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1180391972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -83.75)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -85.915, -10.925, -81.585],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -83.75)
+order = 1000095
+pick_size = Vector3(0.15, 4.2, 4.33)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 96" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1833307975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -81)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -81.585, -10.925, -80.415],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -81)
+order = 1000096
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 97" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=186532382]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -79.3575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -80.415, -10.925, -78.3],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -79.3575)
+order = 1000097
+pick_size = Vector3(0.15, 4.2, 2.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 98" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=631612254]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -76.95)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -78.3, -10.925, -75.6],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -76.95)
+order = 1000098
+pick_size = Vector3(0.15, 4.2, 2.7)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 99" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2002410061]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -74.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -75.6, -10.925, -74.0],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -74.8)
+order = 1000099
+pick_size = Vector3(0.15, 1.785, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 100" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=244995619]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -71.4425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -74.0, -10.925, -68.88499999999999],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -71.4425)
+order = 1000100
+pick_size = Vector3(0.15, 4.2, 5.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 101" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1491282587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -68.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -68.88499999999999, -10.925, -67.715],
+"y0": 2.415,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 3.3075, -68.3)
+order = 1000101
+pick_size = Vector3(0.15, 1.785, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 102" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1624942654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -66.57)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -67.715, -10.925, -65.425],
+"y0": 0.0,
+"y1": 4.2
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2.1, -66.57)
+order = 1000102
+pick_size = Vector3(0.15, 4.2, 2.29)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 103" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1805909625]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -79.1925)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -79.3, -10.925, -79.085],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -79.1925)
+order = 1000103
+pick_size = Vector3(0.15, 2.8, 0.215)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 104" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=558218065]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -0.5925, -78.5)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -79.085, -10.925, -77.915],
+"y0": -0.7850000000000001,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -0.5925, -78.5)
+order = 1000104
+pick_size = Vector3(0.15, 0.385, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 105" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1096466607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -73.25)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -77.915, -10.925, -68.585],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -73.25)
+order = 1000105
+pick_size = Vector3(0.15, 2.8, 9.33)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 106" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=809095756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -0.5925, -68)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -68.585, -10.925, -67.415],
+"y0": -0.7850000000000001,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -0.5925, -68)
+order = 1000106
+pick_size = Vector3(0.15, 0.385, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 107" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1093312801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -66.3575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -67.415, -10.925, -65.3],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -1.8, -66.3575)
+order = 1000107
+pick_size = Vector3(0.15, 2.8, 2.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 108" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=336974479]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -1.8, -71.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.0, -71.375, -4.0, -71.225],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -1.8, -71.3)
+order = 1000108
+pick_size = Vector3(7, 2.8, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 109" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=302190488]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -1.8, -87.6925)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-14.075, -89.8, -13.925, -85.585],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -1.8, -87.6925)
+order = 1000109
+pick_size = Vector3(0.15, 2.8, 4.215)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 110" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=561020866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -0.5925, -85)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-14.075, -85.585, -13.925, -84.415],
+"y0": -0.7850000000000001,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -0.5925, -85)
+order = 1000110
+pick_size = Vector3(0.15, 0.385, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 111" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1914792023]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -1.8, -81.8575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-14.075, -84.415, -13.925, -79.3],
+"y0": -3.2,
+"y1": -0.3999999999999999
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, -1.8, -81.8575)
+order = 1000111
+pick_size = Vector3(0.15, 2.8, 5.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 112" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=251887029]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.1875, 6.3, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.875, -83.375, -36.5, -83.225],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.1875, 6.3, -83.3)
+order = 1000112
+pick_size = Vector3(3.375, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 113" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1407702692]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 7.5075, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-36.5, -83.375, -35.5, -83.225],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 7.5075, -83.3)
+order = 1000113
+pick_size = Vector3(1, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 114" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1814841495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.75, 6.3, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-35.5, -83.375, -28.0, -83.225],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.75, 6.3, -83.3)
+order = 1000114
+pick_size = Vector3(7.5, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 115" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1110011936]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6.3, -86.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.075, -89.1, -27.925, -83.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6.3, -86.2)
+order = 1000115
+pick_size = Vector3(0.15, 3.6, 5.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 116" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1180355514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -87.8)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-34.075, -89.1, -33.925, -86.5],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -87.8)
+order = 1000116
+pick_size = Vector3(0.15, 3.6, 2.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 117" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=600151275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 7.5075, -86)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-34.075, -86.5, -33.925, -85.5],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 7.5075, -86)
+order = 1000117
+pick_size = Vector3(0.15, 1.185, 1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 118" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=986912932]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -84.4)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-34.075, -85.5, -33.925, -83.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -84.4)
+order = 1000118
+pick_size = Vector3(0.15, 3.6, 2.2)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 119" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=688817509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.8125, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.875, -80.775, -39.75, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.8125, 6.3, -80.7)
+order = 1000119
+pick_size = Vector3(0.125, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 120" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1959511747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.75, -80.775, -38.75, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 7.5075, -80.7)
+order = 1000120
+pick_size = Vector3(1, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 121" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=283004259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.875, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.75, -80.775, -37.0, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.875, 6.3, -80.7)
+order = 1000121
+pick_size = Vector3(1.75, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 122" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=562458401]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.5, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-37.0, -80.775, -36.0, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.5, 7.5075, -80.7)
+order = 1000122
+pick_size = Vector3(1, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 123" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1380113201]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.7925, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-36.0, -80.775, -29.585, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.7925, 6.3, -80.7)
+order = 1000123
+pick_size = Vector3(6.415, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 124" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=770955106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-29.585, -80.775, -28.415, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 7.5075, -80.7)
+order = 1000124
+pick_size = Vector3(1.17, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 125" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=210653300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.415, -80.775, -21.585, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 6.3, -80.7)
+order = 1000125
+pick_size = Vector3(6.83, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 126" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=961033338]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-21.585, -80.775, -20.415, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 7.5075, -80.7)
+order = 1000126
+pick_size = Vector3(1.17, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 127" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1583127656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.75, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-20.415, -80.775, -15.085, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.75, 6.3, -80.7)
+order = 1000127
+pick_size = Vector3(5.33, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 128" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1679813052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-15.085, -80.775, -13.915, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 7.5075, -80.7)
+order = 1000128
+pick_size = Vector3(1.17, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 129" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=84809522]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-13.915, -80.775, -7.085, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 6.3, -80.7)
+order = 1000129
+pick_size = Vector3(6.83, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 130" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=193318172]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 7.5075, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-7.085, -80.775, -5.915, -80.625],
+"y0": 6.915,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 7.5075, -80.7)
+order = 1000130
+pick_size = Vector3(1.17, 1.185, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 131" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=840999842]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.02, 6.3, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-5.915, -80.775, -2.125, -80.625],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.02, 6.3, -80.7)
+order = 1000131
+pick_size = Vector3(3.79, 3.6, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 132" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1269840300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 6.3, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.575, -80.7, -38.425, -75.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 6.3, -78)
+order = 1000132
+pick_size = Vector3(0.15, 3.6, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 133" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=932031656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-34.075, -80.7, -33.925, -75.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 6.3, -78)
+order = 1000133
+pick_size = Vector3(0.15, 3.6, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 134" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2117358778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 6.3, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.075, -80.7, -23.925, -75.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 6.3, -78)
+order = 1000134
+pick_size = Vector3(0.15, 3.6, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 135" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2000182580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 6.3, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-18.075, -80.7, -17.925, -75.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 6.3, -78)
+order = 1000135
+pick_size = Vector3(0.15, 3.6, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 136" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1041584887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 6.3, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-11.075, -80.7, -10.925, -75.3],
+"y0": 4.5,
+"y1": 8.1
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 6.3, -78)
+order = 1000136
+pick_size = Vector3(0.15, 3.6, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 137" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1853248550]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.8125, 10.175, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.875, -83.375, -39.75, -83.225],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.8125, 10.175, -83.3)
+order = 1000137
+pick_size = Vector3(0.125, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 138" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=556923921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 11.3825, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.75, -83.375, -38.75, -83.225],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 11.3825, -83.3)
+order = 1000138
+pick_size = Vector3(1, 1.135, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 139" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=688584921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.775, 10.175, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.75, -83.375, -36.8, -83.225],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.775, 10.175, -83.3)
+order = 1000139
+pick_size = Vector3(1.95, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 140" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=971149822]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3, 11.3825, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-36.8, -83.375, -35.8, -83.225],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3, 11.3825, -83.3)
+order = 1000140
+pick_size = Vector3(1, 1.135, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 141" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1319656167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.9, 10.175, -83.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-35.8, -83.375, -28.0, -83.225],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.9, 10.175, -83.3)
+order = 1000141
+pick_size = Vector3(7.8, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 142" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=216993303]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 10.175, -86.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-28.075, -89.1, -27.925, -83.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 10.175, -86.2)
+order = 1000142
+pick_size = Vector3(0.15, 3.55, 5.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 143" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=35778318]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 10.175, -86.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-34.075, -89.1, -33.925, -83.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 10.175, -86.2)
+order = 1000143
+pick_size = Vector3(0.15, 3.55, 5.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 144" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=741225347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3375, 10.175, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-39.875, -80.775, -32.8, -80.625],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3375, 10.175, -80.7)
+order = 1000144
+pick_size = Vector3(7.075, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 145" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1881791417]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 11.3825, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-32.8, -80.775, -31.2, -80.625],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 11.3825, -80.7)
+order = 1000145
+pick_size = Vector3(1.6, 1.135, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 146" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=38606754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.1425, 10.175, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-31.2, -80.775, -19.085, -80.625],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.1425, 10.175, -80.7)
+order = 1000146
+pick_size = Vector3(12.115, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 147" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=338148717]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 11.3825, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-19.085, -80.775, -17.915, -80.625],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5, 11.3825, -80.7)
+order = 1000147
+pick_size = Vector3(1.17, 1.135, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 148" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1355582099]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 10.175, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-17.915, -80.775, -8.085, -80.625],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 10.175, -80.7)
+order = 1000148
+pick_size = Vector3(9.83, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 149" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=302843200]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 11.3825, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-8.085, -80.775, -6.915, -80.625],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 11.3825, -80.7)
+order = 1000149
+pick_size = Vector3(1.17, 1.135, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 150" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1973977676]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.52, 10.175, -80.7)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-6.915, -80.775, -2.125, -80.625],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.52, 10.175, -80.7)
+order = 1000150
+pick_size = Vector3(4.79, 3.55, 0.15)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 151" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=275440002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 10.175, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-24.075, -80.7, -23.925, -75.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 10.175, -78)
+order = 1000151
+pick_size = Vector3(0.15, 3.55, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 152" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1043628366]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 10.175, -78)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-13.075, -80.7, -12.925, -75.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 10.175, -78)
+order = 1000152
+pick_size = Vector3(0.15, 3.55, 5.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 153" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=989380144]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 10.175, -86.2)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.575, -89.1, -38.425, -83.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 10.175, -86.2)
+order = 1000153
+pick_size = Vector3(0.15, 3.55, 5.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 154" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=2131472697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.65, 6.6, -75.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-38.5, -75.38, -30.8, -75.22],
+"y0": 4.5,
+"y1": 8.7
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.65, 6.6, -75.3)
+order = 1000154
+pick_size = Vector3(7.7, 4.2, 0.16)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 155" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1013563292]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 10.175, -68.3)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-22.075, -75.3, -21.925, -61.3],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 10.175, -68.3)
+order = 1000155
+pick_size = Vector3(0.15, 3.55, 14)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 156" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1801899277]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.525, -88)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-40.12, -88.8, -39.88, -87.2],
+"y0": 11.1,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.525, -88)
+order = 1000156
+pick_size = Vector3(0.24, 0.85, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 157" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1228757265]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 8.85, -88)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-40.12, -88.8, -39.88, -87.2],
+"y0": 8.4,
+"y1": 9.3
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 8.85, -88)
+order = 1000157
+pick_size = Vector3(0.24, 0.9, 1.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 158" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=988344469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -87.1425)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-40.12, -87.2, -39.88, -87.085],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -87.1425)
+order = 1000158
+pick_size = Vector3(0.24, 3.55, 0.115)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 159" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1254392913]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.3825, -86.5)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-40.12, -87.085, -39.88, -85.915],
+"y0": 10.815,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 11.3825, -86.5)
+order = 1000159
+pick_size = Vector3(0.24, 1.135, 1.17)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Стена этап 5b_bank_plan 160" type="Node3D" parent="Landscape/Улицы/Стены/Простые" unique_id=1763536559]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -85.8575)
+script = ExtResource("4_u54l0")
+list = "walls"
+data = {
+"mat": "wall",
+"rect": [-40.12, -85.915, -39.88, -85.8],
+"y0": 8.4,
+"y1": 11.95
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10.175, -85.8575)
+order = 1000160
+pick_size = Vector3(0.24, 3.55, 0.115)
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Бетон" type="Node3D" parent="Landscape/Улицы/Стены" unique_id=2010477403]
 
@@ -44852,7 +45992,7 @@ order = 1000014
 pick_size = Vector3(15, 1.2, 1.5)
 metadata/patch_stage = "3_frontline"
 
-[node name="Коробка этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1314660669]
+[node name="Коробка этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=983875585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.4, 1.3, -50.9)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -44868,7 +46008,7 @@ order = 1000015
 pick_size = Vector3(1.2, 2.6, 0.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Коробка этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1127807150]
+[node name="Коробка этап 5a_bank_site 2" type="Node3D" parent="Landscape/Улицы/Коробки/Бетон" unique_id=1914844057]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.4, 8.28, -86.8)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -46521,51 +47661,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.4, -6.2, -82.5)
 order = 1411
 pick_size = Vector3(0.94, 0.2, 0.94)
 
-[node name="Коробка 0110" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=1564659566]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 1.25, -79)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-33.0, 1.25, -79.0],
-"mat": "dark",
-"size": [1.6, 0.5, 0.04],
-"solid": false,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 1.25, -79)
-order = 1747
-pick_size = Vector3(1.6, 0.5, 0.04)
-
-[node name="Коробка 0111" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=1451395790]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 1.25, -79)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-23.0, 1.25, -79.0],
-"mat": "dark",
-"size": [1.6, 0.5, 0.04],
-"solid": false,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 1.25, -79)
-order = 1749
-pick_size = Vector3(1.6, 0.5, 0.04)
-
-[node name="Коробка 0112" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=997677756]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.25, -79)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-18.0, 1.25, -79.0],
-"mat": "dark",
-"size": [1.6, 0.5, 0.04],
-"solid": false,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.25, -79)
-order = 1751
-pick_size = Vector3(1.6, 0.5, 0.04)
-
 [node name="Коробка 0113" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=2110847114]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 1.1, -92.9)
 script = ExtResource("4_u54l0")
@@ -47136,6 +48231,86 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0.8, 244.08)
 order = 2067
 pick_size = Vector3(1.5, 1.5, 0.06)
 
+[node name="Коробка этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=1526684051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.5, 1.25, -78)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-29.5, 1.25, -78.0],
+"mat": "dark",
+"size": [1.2, 0.5, 0.04],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.5, 1.25, -78)
+order = 1000163
+pick_size = Vector3(1.2, 0.5, 0.04)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 2" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=1195644803]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 1.25, -78)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-22.5, 1.25, -78.0],
+"mat": "dark",
+"size": [1.2, 0.5, 0.04],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 1.25, -78)
+order = 1000164
+pick_size = Vector3(1.2, 0.5, 0.04)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 3" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=1578303722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 1.25, -78)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-19.2, 1.25, -78.0],
+"mat": "dark",
+"size": [1.2, 0.5, 0.04],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 1.25, -78)
+order = 1000165
+pick_size = Vector3(1.2, 0.5, 0.04)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 4" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=328082809]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 5.4, -77.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-23.0, 5.4, -77.5],
+"mat": "dark",
+"size": [0.8, 1.8, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 5.4, -77.5)
+order = 1000193
+pick_size = Vector3(0.8, 1.8, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 5" type="Node3D" parent="Landscape/Улицы/Коробки/Тёмное" unique_id=986699769]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 5.4, -77.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-19.2, 5.4, -77.5],
+"mat": "dark",
+"size": [0.8, 1.8, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2, 5.4, -77.5)
+order = 1000194
+pick_size = Vector3(0.8, 1.8, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
 [node name="Сталь" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1974410820]
 
 [node name="Коробка 0002" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=753455175]
@@ -47437,36 +48612,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42.7, 1.7, -120.8)
 order = 1140
 pick_size = Vector3(0.3, 3.4, 0.3)
-
-[node name="Коробка 0022" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1576240272]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.2, 0.75, -67.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-37.2, 0.75, -67.3],
-"mat": "steel",
-"size": [0.7, 1.5, 0.7],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.2, 0.75, -67.3)
-order = 1756
-pick_size = Vector3(0.7, 1.5, 0.7)
-
-[node name="Коробка 0023" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=389418325]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0.75, -69.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-36.0, 0.75, -69.3],
-"mat": "steel",
-"size": [0.7, 1.5, 0.7],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0.75, -69.3)
-order = 1757
-pick_size = Vector3(0.7, 1.5, 0.7)
 
 [node name="Коробка 0024" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1021440082]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.5, 5.6, -89.3)
@@ -49279,7 +50424,7 @@ order = 1000071
 pick_size = Vector3(0.2, 3.2, 0.2)
 metadata/patch_stage = "4_wash"
 
-[node name="Коробка этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1416189793]
+[node name="Коробка этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1420122008]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.2, -97.2)
 script = ExtResource("4_u54l0")
 list = "boxes"
@@ -49294,6 +50439,150 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.2, -97.2)
 order = 1000017
 pick_size = Vector3(6, 2.4, 2.4)
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Коробка этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1409448167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7, 0.5, -75.25)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-6.7, 0.5, -75.25],
+"mat": "steel",
+"size": [0.1, 1.0, 5.9],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7, 0.5, -75.25)
+order = 1000166
+pick_size = Vector3(0.1, 1, 5.9)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 2" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=126776618]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3, 0.75, -69.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-36.3, 0.75, -69.75],
+"mat": "steel",
+"size": [0.7, 1.5, 0.7],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36.3, 0.75, -69.75)
+order = 1000167
+pick_size = Vector3(0.7, 1.5, 0.7)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 3" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1444046349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.6, 0.75, -69.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-34.6, 0.75, -69.75],
+"mat": "steel",
+"size": [0.7, 1.5, 0.7],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.6, 0.75, -69.75)
+order = 1000168
+pick_size = Vector3(0.7, 1.5, 0.7)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 4" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=59168934]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.8, 0.75, -69.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-30.8, 0.75, -69.75],
+"mat": "steel",
+"size": [0.7, 1.5, 0.7],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.8, 0.75, -69.75)
+order = 1000169
+pick_size = Vector3(0.7, 1.5, 0.7)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 5" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1788568498]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.9, -78.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-8.0, 0.9, -78.9],
+"mat": "steel",
+"size": [3.0, 1.8, 0.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.9, -78.9)
+order = 1000183
+pick_size = Vector3(3, 1.8, 0.5)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 6" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1032625073]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -2.2, -89.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-12.0, -2.2, -89.3],
+"mat": "steel",
+"size": [0.6, 2.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, -2.2, -89.3)
+order = 1000185
+pick_size = Vector3(0.6, 2, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 7" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=685919063]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, -2.2, -89.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-9.5, -2.2, -89.3],
+"mat": "steel",
+"size": [0.6, 2.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, -2.2, -89.3)
+order = 1000186
+pick_size = Vector3(0.6, 2, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 8" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=1797058317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, -2.2, -89.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-7.0, -2.2, -89.3],
+"mat": "steel",
+"size": [0.6, 2.0, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, -2.2, -89.3)
+order = 1000187
+pick_size = Vector3(0.6, 2, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 9" type="Node3D" parent="Landscape/Улицы/Коробки/Сталь" unique_id=401206620]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 5.15, -77.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-14.5, 5.15, -77.5],
+"mat": "steel",
+"size": [0.8, 1.3, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 5.15, -77.5)
+order = 1000195
+pick_size = Vector3(0.8, 1.3, 0.8)
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Цветное" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1994079742]
 
@@ -49372,141 +50661,6 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -104.5, 4.555, -53.8)
 order = 1123
 pick_size = Vector3(1.4, 0.75, 0.8)
 
-[node name="Коробка 0006" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=832220880]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.75, 0.55, -79.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-25.75, 0.55, -79.3],
-"mat": "accent",
-"size": [20.5, 1.1, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.75, 0.55, -79.3)
-order = 1745
-pick_size = Vector3(20.5, 1.1, 0.8)
-
-[node name="Коробка 0007" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1738982654]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.55, -79.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-12.0, 0.55, -79.3],
-"mat": "accent",
-"size": [3.6, 1.1, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.55, -79.3)
-order = 1746
-pick_size = Vector3(3.6, 1.1, 0.8)
-
-[node name="Коробка 0008" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1002532239]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0.38, -81.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-33.0, 0.38, -81.8],
-"mat": "accent",
-"size": [1.4, 0.75, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 0.38, -81.8)
-order = 1748
-pick_size = Vector3(1.4, 0.75, 0.8)
-
-[node name="Коробка 0009" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=919875392]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 0.38, -81.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-23.0, 0.38, -81.8],
-"mat": "accent",
-"size": [1.4, 0.75, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 0.38, -81.8)
-order = 1750
-pick_size = Vector3(1.4, 0.75, 0.8)
-
-[node name="Коробка 0010" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1900763258]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.38, -81.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-18.0, 0.38, -81.8],
-"mat": "accent",
-"size": [1.4, 0.75, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.38, -81.8)
-order = 1752
-pick_size = Vector3(1.4, 0.75, 0.8)
-
-[node name="Коробка 0011" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=959483385]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.23, -72.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-34.0, 0.23, -72.8],
-"mat": "accent",
-"size": [2.6, 0.45, 0.6],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.23, -72.8)
-order = 1753
-pick_size = Vector3(2.6, 0.45, 0.6)
-
-[node name="Коробка 0012" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=600853713]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.23, -72.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-30.0, 0.23, -72.8],
-"mat": "accent",
-"size": [2.6, 0.45, 0.6],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0.23, -72.8)
-order = 1754
-pick_size = Vector3(2.6, 0.45, 0.6)
-
-[node name="Коробка 0013" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1781204886]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0.23, -72.8)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-26.0, 0.23, -72.8],
-"mat": "accent",
-"size": [2.6, 0.45, 0.6],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0.23, -72.8)
-order = 1755
-pick_size = Vector3(2.6, 0.45, 0.6)
-
-[node name="Коробка 0014" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=799283634]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.38, -86.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-20.0, 0.38, -86.3],
-"mat": "accent",
-"size": [1.6, 0.75, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.38, -86.3)
-order = 1758
-pick_size = Vector3(1.6, 0.75, 0.8)
-
 [node name="Коробка 0015" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1436081505]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0.38, -91.8)
 script = ExtResource("4_u54l0")
@@ -49521,21 +50675,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0.38, -91.8)
 order = 1759
 pick_size = Vector3(3, 0.75, 0.8)
-
-[node name="Коробка 0016" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1396984921]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.38, -76.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-7.0, 0.38, -76.3],
-"mat": "accent",
-"size": [1.8, 0.75, 0.9],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.38, -76.3)
-order = 1761
-pick_size = Vector3(1.8, 0.75, 0.9)
 
 [node name="Коробка 0017" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1031322932]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 4.88, -72.3)
@@ -49851,51 +50990,6 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 8.78, -89.3)
 order = 1785
 pick_size = Vector3(2.4, 0.75, 1.1)
-
-[node name="Коробка 0038" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1977293510]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 8.78, -68.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-22.0, 8.78, -68.3],
-"mat": "accent",
-"size": [8.0, 0.75, 2.4],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 8.78, -68.3)
-order = 1789
-pick_size = Vector3(8, 0.75, 2.4)
-
-[node name="Коробка 0039" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=630315515]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -2.82, -73.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-8.0, -2.82, -73.3],
-"mat": "accent",
-"size": [4.0, 0.75, 1.4],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, -2.82, -73.3)
-order = 1797
-pick_size = Vector3(4, 0.75, 1.4)
-
-[node name="Коробка 0040" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=2073613691]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, -2.82, -85.3)
-script = ExtResource("4_u54l0")
-list = "boxes"
-data = {
-"at": [-19.0, -2.82, -85.3],
-"mat": "accent",
-"size": [2.0, 0.75, 0.8],
-"solid": true,
-"yaw": 0.0
-}
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, -2.82, -85.3)
-order = 1798
-pick_size = Vector3(2, 0.75, 0.8)
 
 [node name="Коробка 0042" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=445216654]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -137, 0.95, 69)
@@ -50803,6 +51897,358 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.5, -60.4)
 order = 1000074
 pick_size = Vector3(1.2, 9, 0.4)
 metadata/patch_stage = "4_wash"
+
+[node name="Коробка этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=104157349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.543, 0.55, -78.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-28.543, 0.55, -78.3],
+"mat": "accent",
+"size": [4.915, 1.1, 0.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.543, 0.55, -78.3)
+order = 1000161
+pick_size = Vector3(4.915, 1.1, 0.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 2" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1609116980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.457, 0.55, -78.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-21.457, 0.55, -78.3],
+"mat": "accent",
+"size": [6.915, 1.1, 0.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.457, 0.55, -78.3)
+order = 1000162
+pick_size = Vector3(6.915, 1.1, 0.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 3" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=410506035]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.5, 0.38, -75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-34.5, 0.38, -75.0],
+"mat": "accent",
+"size": [1.8, 0.75, 0.9],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.5, 0.38, -75)
+order = 1000170
+pick_size = Vector3(1.8, 0.75, 0.9)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 4" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=749746644]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27, 0.23, -72.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-27.0, 0.23, -72.5],
+"mat": "accent",
+"size": [2.6, 0.45, 0.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27, 0.23, -72.5)
+order = 1000171
+pick_size = Vector3(2.6, 0.45, 0.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 5" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1224046548]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.23, -72.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-15.5, 0.23, -72.5],
+"mat": "accent",
+"size": [0.6, 0.45, 2.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.23, -72.5)
+order = 1000172
+pick_size = Vector3(0.6, 0.45, 2.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 6" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1767758741]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.23, -70)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-15.5, 0.23, -70.0],
+"mat": "accent",
+"size": [0.6, 0.45, 2.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 0.23, -70)
+order = 1000173
+pick_size = Vector3(0.6, 0.45, 2.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 7" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1930113974]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.38, -68.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-7.5, 0.38, -68.3],
+"mat": "accent",
+"size": [2.4, 0.75, 1.0],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 0.38, -68.3)
+order = 1000174
+pick_size = Vector3(2.4, 0.75, 1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 8" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=750092939]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3, 0.38, -77.2)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-10.3, 0.38, -77.2],
+"mat": "accent",
+"size": [1.0, 0.75, 0.6],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3, 0.38, -77.2)
+order = 1000175
+pick_size = Vector3(1, 0.75, 0.6)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 9" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=994958471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 0.38, -82.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-35.5, 0.38, -82.5],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 0.38, -82.5)
+order = 1000176
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 10" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=329321733]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.38, -82.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-31.5, 0.38, -82.5],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.38, -82.5)
+order = 1000177
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 11" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=432787724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 0.38, -86)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-35.5, 0.38, -86.0],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 0.38, -86)
+order = 1000178
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 12" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1125556392]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.38, -86)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-31.5, 0.38, -86.0],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.5, 0.38, -86)
+order = 1000179
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 13" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1863551826]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0.38, -86)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-16.5, 0.38, -86.0],
+"mat": "accent",
+"size": [2.0, 0.75, 1.0],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0.38, -86)
+order = 1000180
+pick_size = Vector3(2, 0.75, 1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 14" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1262551394]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0.38, -79.4)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-14.5, 0.38, -79.4],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0.38, -79.4)
+order = 1000181
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 15" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=592485342]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.38, -83.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-8.0, 0.38, -83.5],
+"mat": "accent",
+"size": [3.0, 0.75, 1.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.38, -83.5)
+order = 1000182
+pick_size = Vector3(3, 0.75, 1.2)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 16" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=854154787]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, -2.82, -86.5)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-18.0, -2.82, -86.5],
+"mat": "accent",
+"size": [2.0, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, -2.82, -86.5)
+order = 1000184
+pick_size = Vector3(2, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 17" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1223819694]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -2.82, -68.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-7.5, -2.82, -68.3],
+"mat": "accent",
+"size": [3.0, 0.75, 1.0],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, -2.82, -68.3)
+order = 1000188
+pick_size = Vector3(3, 0.75, 1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 18" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=612620986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 8.78, -68.3)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-12.0, 8.78, -68.3],
+"mat": "accent",
+"size": [8.0, 0.75, 2.4],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 8.78, -68.3)
+order = 1000189
+pick_size = Vector3(8, 0.75, 2.4)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 19" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=782942356]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 8.78, -68)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-31.0, 8.78, -68.0],
+"mat": "accent",
+"size": [2.4, 0.75, 1.1],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31, 8.78, -68)
+order = 1000190
+pick_size = Vector3(2.4, 0.75, 1.1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 20" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1438385302]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 8.78, -77.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-37.0, 8.78, -77.9],
+"mat": "accent",
+"size": [1.8, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 8.78, -77.9)
+order = 1000191
+pick_size = Vector3(1.8, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 21" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=1842605870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.5, 4.88, -77.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-26.5, 4.88, -77.9],
+"mat": "accent",
+"size": [1.6, 0.75, 0.8],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.5, 4.88, -77.9)
+order = 1000192
+pick_size = Vector3(1.6, 0.75, 0.8)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="Коробка этап 5b_bank_plan 22" type="Node3D" parent="Landscape/Улицы/Коробки/Цветное" unique_id=168684824]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 4.88, -77.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-3.6, 4.88, -77.9],
+"mat": "accent",
+"size": [1.5, 0.75, 0.9],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 4.88, -77.9)
+order = 1000196
+pick_size = Vector3(1.5, 0.75, 0.9)
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Плиты" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=2092116448]
 
@@ -54258,7 +55704,7 @@ order = 100
 pick_size = Vector3(7.98, 2.75, 3.5999985)
 pick_center = Vector3(0, 0.47499996, 0)
 
-[node name="Лестница этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=1124516545]
+[node name="Лестница этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=1451862987]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -41.6, 6.45, -81.2)
 script = ExtResource("4_u54l0")
 list = "stairs"
@@ -54273,6 +55719,22 @@ base = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -41.6, 6.45, -81.2)
 order = 1000018
 pick_size = Vector3(1.6, 4.0999994, 7.7999954)
 metadata/patch_stage = "5a_bank_site"
+
+[node name="Лестница этап 5b_bank_plan 1" type="Node3D" parent="Landscape/Улицы/Лестницы" unique_id=467892578]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, -1.6, -75.15)
+script = ExtResource("4_u54l0")
+list = "stairs"
+data = {
+"count": 19.0,
+"from": [-5.7, 0.0, -72.3],
+"mat": "concrete",
+"to": [-5.7, -3.2, -78.0],
+"width": 1.6
+}
+base = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -5.7, -1.6, -75.15)
+order = 1000197
+pick_size = Vector3(1.6, 3.4, 5.699997)
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Пандусы" type="Node3D" parent="Landscape/Улицы" unique_id=430344969]
 
@@ -64890,7 +66352,7 @@ order = 1000077
 pick_size = Vector3(0.64285713, 0.64285713, 0.64285713)
 metadata/patch_stage = "4_wash"
 
-[node name="Надпись «банк «Капитал»» этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=461616244]
+[node name="Надпись «банк «Капитал»» этап 5a_bank_site 1" type="Node3D" parent="Landscape/Улицы/Надписи" unique_id=754271789]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.4, 2, -50.6)
 script = ExtResource("4_u54l0")
 list = "signs"
@@ -69402,41 +70864,6 @@ script = ExtResource("5_iugf6")
 item = ["car_open", -100.0, -90.7, 75.0, 1.0, -7.3, 2.0, 0.0, "PV_suv_open"]
 base = Transform3D(0.25881907, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, 0.25881907, -100, -7.3, -90.7)
 order = 993
-
-[node name="Стальной тротуарный столбик 0162" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1057138549]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27, 0, -75.3)
-script = ExtResource("5_iugf6")
-item = ["bollard", -27.0, -75.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27, 0, -75.3)
-order = 1087
-
-[node name="Стальной тротуарный столбик 0163" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=669038719]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.4, 0, -75.3)
-script = ExtResource("5_iugf6")
-item = ["bollard", -25.4, -75.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.4, 0, -75.3)
-order = 1088
-
-[node name="Стальной тротуарный столбик 0164" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1247023516]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.8, 0, -75.3)
-script = ExtResource("5_iugf6")
-item = ["bollard", -23.8, -75.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.8, 0, -75.3)
-order = 1089
-
-[node name="Стальной тротуарный столбик 0165" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=229699700]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.2, 0, -75.3)
-script = ExtResource("5_iugf6")
-item = ["bollard", -22.2, -75.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.2, 0, -75.3)
-order = 1090
-
-[node name="Стальной тротуарный столбик 0166" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1506759791]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.6, 0, -75.3)
-script = ExtResource("5_iugf6")
-item = ["bollard", -20.6, -75.3, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.6, 0, -75.3)
-order = 1091
 
 [node name="Низкое укрытие из мешков 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1460219479]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -20, 12.3, -62.8)
@@ -79416,7 +80843,7 @@ item = ["container20", 10.05, -111.2, 90.0, 1.0, 0.0, -1.0, 0.0, "PC03_C20_BLUE"
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.05, 0, -111.2)
 metadata/patch_stage = "4_wash"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1757938152]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=909814840]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.6, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -22.6, -52.8, 0.0]
@@ -79424,7 +80851,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.6, 0, -52.8)
 order = 1000006
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1683023763]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=463313250]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.2, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -24.2, -52.8, 0.0]
@@ -79432,7 +80859,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.2, 0, -52.8)
 order = 1000007
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1212984500]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=755755404]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.8, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -25.8, -52.8, 0.0]
@@ -79440,7 +80867,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.8, 0, -52.8)
 order = 1000008
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=644404371]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1113054467]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.4, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -27.4, -52.8, 0.0]
@@ -79448,7 +80875,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.4, 0, -52.8)
 order = 1000009
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=599963309]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=546712623]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -29.0, -52.8, 0.0]
@@ -79456,7 +80883,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 0, -52.8)
 order = 1000010
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1659001979]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1976350399]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.6, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -30.6, -52.8, 0.0]
@@ -79464,7 +80891,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.6, 0, -52.8)
 order = 1000011
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1861466567]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1720750818]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.2, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -32.2, -52.8, 0.0]
@@ -79472,7 +80899,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.2, 0, -52.8)
 order = 1000012
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1638211556]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1221242343]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.8, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -33.8, -52.8, 0.0]
@@ -79480,7 +80907,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.8, 0, -52.8)
 order = 1000013
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=450000215]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1948087795]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -35.4, -52.8, 0.0]
@@ -79488,7 +80915,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.4, 0, -52.8)
 order = 1000014
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=880246263]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1190979222]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -37.0, -52.8, 0.0]
@@ -79496,7 +80923,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37, 0, -52.8)
 order = 1000015
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1251913077]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=874125154]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.6, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -38.6, -52.8, 0.0]
@@ -79504,7 +80931,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.6, 0, -52.8)
 order = 1000016
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 12" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=158054569]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 12" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=542117030]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.4, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -19.4, -52.8, 0.0]
@@ -79512,7 +80939,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.4, 0, -52.8)
 order = 1000017
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 13" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1129399918]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 13" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=502199701]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.8, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -17.8, -52.8, 0.0]
@@ -79520,7 +80947,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.8, 0, -52.8)
 order = 1000018
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 14" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1877312811]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 14" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=567467134]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -16.2, -52.8, 0.0]
@@ -79528,7 +80955,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2, 0, -52.8)
 order = 1000019
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 15" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1318868144]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 15" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=202733679]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.6, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -14.6, -52.8, 0.0]
@@ -79536,7 +80963,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.6, 0, -52.8)
 order = 1000020
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 16" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=475475402]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 16" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1792963077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -13.0, -52.8, 0.0]
@@ -79544,7 +80971,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -52.8)
 order = 1000021
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 17" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=968211702]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 17" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1168233415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.4, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -11.4, -52.8, 0.0]
@@ -79552,7 +80979,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.4, 0, -52.8)
 order = 1000022
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 18" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=641681016]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 18" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=518976311]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.8, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -9.8, -52.8, 0.0]
@@ -79560,7 +80987,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.8, 0, -52.8)
 order = 1000023
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 19" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2124819767]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 19" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=761408041]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -8.2, -52.8, 0.0]
@@ -79568,7 +80995,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 0, -52.8)
 order = 1000024
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 20" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=913055080]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 20" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=108502501]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -6.6, -52.8, 0.0]
@@ -79576,7 +81003,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0, -52.8)
 order = 1000025
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 21" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2030753563]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 21" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=28151709]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -5.0, -52.8, 0.0]
@@ -79584,7 +81011,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -52.8)
 order = 1000026
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Стальной тротуарный столбик этап 5a_bank_site 22" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2139067414]
+[node name="Стальной тротуарный столбик этап 5a_bank_site 22" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=991771881]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 0, -52.8)
 script = ExtResource("5_iugf6")
 item = ["bollard", -3.4, -52.8, 0.0]
@@ -79592,7 +81019,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 0, -52.8)
 order = 1000027
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Большой мусорный бункер этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1511043710]
+[node name="Большой мусорный бункер этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1712059385]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, -97.6)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -35.0, -97.6, 0.0]
@@ -79600,7 +81027,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, -97.6)
 order = 1000028
 metadata/patch_stage = "5a_bank_site"
 
-[node name="Большой мусорный бункер этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1587318388]
+[node name="Большой мусорный бункер этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=809589442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.4, 0, -97.6)
 script = ExtResource("5_iugf6")
 item = ["m:R02", -32.4, -97.6, 0.0]
@@ -80011,13 +81438,6 @@ script = ExtResource("5_iugf6")
 item = ["deposit_wall", -20.4, -74.3, 90.0, 1.0, -3.2]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -20.4, -3.2, -74.3)
 order = 1102
-
-[node name="deposit_wall 0007" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1214509865]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, -3.2, -67.9)
-script = ExtResource("5_iugf6")
-item = ["deposit_wall", -16.5, -67.9, 180.0, 1.0, -3.2]
-base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, -3.2, -67.9)
-order = 1103
 
 [node name="Решётка 0015" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1966502768]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 5.75, 0, -52.3)
@@ -81675,14 +83095,14 @@ item = ["barrier_arm", -119.75, -62.6, 90.0, 1.3, 0.0]
 base = Transform3D(-5.6824803e-08, 0, 1.3, 0, 1.3, 0, -1.3, 0, -5.6824803e-08, -119.75, 0, -62.6)
 metadata/patch_stage = "2_backs"
 
-[node name="bar_fence этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=2012535839]
+[node name="bar_fence этап 5a_bank_site 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1494529584]
 transform = Transform3D(-1.13649605e-08, 0, 0.26, 0, 0.26, 0, -0.26, 0, -1.13649605e-08, -42.675, 0, -61.3)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -42.675, -61.3, 90.0, 0.26, 0.0]
 base = Transform3D(-1.13649605e-08, 0, 0.26, 0, 0.26, 0, -0.26, 0, -1.13649605e-08, -42.675, 0, -61.3)
 metadata/patch_stage = "5a_bank_site"
 
-[node name="bar_fence этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=173489866]
+[node name="bar_fence этап 5a_bank_site 2" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=2118221717]
 transform = Transform3D(-1.4861872e-08, 0, 0.34, 0, 0.34, 0, -0.34, 0, -1.4861872e-08, -40.425, 0, -61.3)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -40.425, -61.3, 90.0, 0.34, 0.0]
@@ -81690,7 +83110,7 @@ base = Transform3D(-1.4861872e-08, 0, 0.34, 0, 0.34, 0, -0.34, 0, -1.4861872e-08
 order = 1000001
 metadata/patch_stage = "5a_bank_site"
 
-[node name="bar_fence этап 5a_bank_site 3" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1294526591]
+[node name="bar_fence этап 5a_bank_site 3" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=94145209]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -60.05)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -2.0, -60.05, 0.0]
@@ -81698,7 +83118,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -60.05)
 order = 1000002
 metadata/patch_stage = "5a_bank_site"
 
-[node name="bar_fence этап 5a_bank_site 4" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1589572285]
+[node name="bar_fence этап 5a_bank_site 4" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=562322345]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -57.55)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -2.0, -57.55, 0.0]
@@ -81706,7 +83126,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -57.55)
 order = 1000003
 metadata/patch_stage = "5a_bank_site"
 
-[node name="bar_fence этап 5a_bank_site 5" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=2072882929]
+[node name="bar_fence этап 5a_bank_site 5" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1177579840]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -55.05)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -2.0, -55.05, 0.0]
@@ -81714,13 +83134,28 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -55.05)
 order = 1000004
 metadata/patch_stage = "5a_bank_site"
 
-[node name="bar_fence этап 5a_bank_site 6" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1337382410]
+[node name="bar_fence этап 5a_bank_site 6" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1346829049]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -52.55)
 script = ExtResource("5_iugf6")
 item = ["bar_fence", -2.0, -52.55, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -52.55)
 order = 1000005
 metadata/patch_stage = "5a_bank_site"
+
+[node name="deposit_wall этап 5b_bank_plan 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=431670887]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, -3.2, -66.1)
+script = ExtResource("5_iugf6")
+item = ["deposit_wall", -16.5, -66.1, 180.0, 1.0, -3.2]
+base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, -3.2, -66.1)
+metadata/patch_stage = "5b_bank_plan"
+
+[node name="deposit_wall этап 5b_bank_plan 2" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=55854755]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11.7, -3.2, -72.8)
+script = ExtResource("5_iugf6")
+item = ["deposit_wall", -11.7, -72.8, 90.0, 1.0, -3.2]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11.7, -3.2, -72.8)
+order = 1000001
+metadata/patch_stage = "5b_bank_plan"
 
 [node name="Мусор" type="Node3D" parent="Filler/Наполнение" unique_id=251171048]
 
