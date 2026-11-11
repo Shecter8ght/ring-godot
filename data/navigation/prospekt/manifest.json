@@ -4,7 +4,7 @@
 		"res://data/sectors/prospekt.json": "a5d971a6f8449d6e972939d8eba0f32778450eaa89d86288aadc00243891411e",
 		"res://data/urban95_models.json": "e10d94f1b530aaa94275ccc246875ba1ae04fbc031b7242555aca02cee062bf1",
 		"res://scenes/levels/prospekt.tscn": "590cbcb33a10a16ad66684223251ed0214fafeb4639c4508c2dfb1cbacdf96bc",
-		"res://scenes/levels/prospekt_study.tscn": "bc1349050832f40111a53398ec56cc0edd1e78394923d413f3998bf977853d10",
+		"res://scenes/levels/prospekt_study.tscn": "611dee0a2ae57063195bcdf74cf8b41441202edc08c2791dbfc6235046c7ffb0",
 		"res://scenes/world/blockout_building.tscn": "4d5823be4c902423849a120a4b2ea600aebcd4797798c02fa19959c2edb6c6c2",
 		"res://scenes/world/blockout_opening.tscn": "47c4f60328b27e4ebff086a4ba97debb41a7d9f378efb56549cfadfce053d748",
 		"res://scenes/world/urban_props.tscn": "d68194396c0594d605766966eaa288651e96702599d41dfec5c54d9226fa1b42",

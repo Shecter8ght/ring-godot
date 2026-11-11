@@ -4,12 +4,42 @@
 [ext_resource type="PackedScene" path="res://assets/models/props/zerno/zerno_room.glb" id="2"]
 [ext_resource type="PackedScene" path="res://assets/models/props/zerno/floor_game.glb" id="3"]
 [ext_resource type="PackedScene" path="res://assets/models/props/zerno/facade_sign.glb" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/loot_container.tscn" id="5"]
 
 [node name="Zerno" type="Node3D"]
 script = ExtResource("1")
+metadata/loot_count = 4
 
 [node name="Model" parent="." instance=ExtResource("2")]
 
 [node name="CeramicFloor" parent="." instance=ExtResource("3")]
 
 [node name="FacadeSign" parent="." instance=ExtResource("4")]
+
+[node name="Gameplay" type="Node3D" parent="."]
+
+[node name="Loot_0" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(3.10, 0.8, -4.17)
+display_name = "Стеллаж"
+table = "register"
+search_s = 1.5
+require_line_of_sight = true
+
+[node name="Loot_1" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(4.98, 0.8, -4.10)
+display_name = "Стеллаж"
+table = "register"
+search_s = 1.5
+require_line_of_sight = true
+
+[node name="Loot_2" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(2.19, 0.95, 4.15)
+display_name = "Касса"
+table = "register"
+require_line_of_sight = true
+
+[node name="Loot_3" parent="Gameplay" instance=ExtResource("5")]
+position = Vector3(5.24, 0.7, 4.21)
+display_name = "Коробки"
+table = "register"
+require_line_of_sight = true

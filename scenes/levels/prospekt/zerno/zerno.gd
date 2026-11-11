@@ -125,10 +125,12 @@ func _ready() -> void:
 	_reflection("Washroom reflections", Vector3(-6.25, 1.47, -3.99), Vector3(3.07, 2.83, 2.55))
 	_reflection("Storefront reflections", Vector3(-1.15, 1.7, 2.17), Vector3(11.55, 3.4, 6.1))
 	_setup_daylight()
+	_install_glass()
 
 
-func install_glass(level: Node3D, at: Transform3D) -> GlassPanes:
+func _install_glass() -> void:
 	# GlassPanes uses world transforms for ray hits, shards and navigation links.
+	var at := global_transform
 	var specs: Array = []
 	for i in range(PANES.size()):
 		var limits: Vector4 = PANES[i]
@@ -147,8 +149,9 @@ func install_glass(level: Node3D, at: Transform3D) -> GlassPanes:
 	window.roughness = .24
 	window.metallic_specular = .17
 	(glass.get_node("GlassMesh") as MultiMeshInstance3D).material_override = window
-	level.add_child(glass)
-	return glass
+	glass.top_level = true
+	add_child(glass)
+	glass.global_transform = Transform3D.IDENTITY
 
 
 func _door(spec: Array) -> void:

@@ -1,8 +1,7 @@
 extends Node
 ## Actual Prospekt raid lighting, collision and player controller in an isolated profile.
 
-const REVIEW := preload("res://tools/zerno_review/prospekt.tscn")
-const BASELINE := preload("res://scenes/levels/prospekt.tscn")
+const PROSPEKT := preload("res://scenes/levels/prospekt.tscn")
 const LOCATION := Vector3(-184, 0, -53.8)
 const VIEWS := [
 	["01_street", Vector3(-4.28,1.67,10.34), Vector3(-.78,2.36,5.37)],
@@ -32,7 +31,6 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	var check := "--check" in args
 	var shots := "--shots" in args
-	var baseline := "--baseline" in args
 	var weather := "overcast" if "--overcast" in args else "clear"
 	Profile.use_file("user://profile_zerno_review.json", true)
 	Profile.ensure()
@@ -48,11 +46,10 @@ func _ready() -> void:
 	RaidConditions.from_host = {"time": "day", "weather": weather, "power": "off"}
 	get_tree().node_added.connect(_quiet_marauders)
 	await get_tree().process_frame
-	_level = (BASELINE if baseline else REVIEW).instantiate() as Node3D
+	_level = PROSPEKT.instantiate() as Node3D
 	get_tree().root.add_child(_level)
 	get_tree().current_scene = _level
-	if not baseline:
-		_cafe = _level.get_node("World/West/Coffee") as Node3D
+	_cafe = _level.get_node("World/West/Coffee") as Node3D
 	if not await _wait_for_player():
 		get_tree().quit(2)
 		return
@@ -65,7 +62,7 @@ func _ready() -> void:
 		await _check()
 		get_tree().quit(0 if _failures.is_empty() else 3)
 	elif shots:
-		await _capture(rig, weather, baseline)
+		await _capture(rig, weather)
 		get_tree().quit(0 if _failures.is_empty() else 4)
 	else:
 		_move_player(LOCATION + Vector3(-1.22,.055,8.3))
@@ -113,10 +110,13 @@ func _ray(a: Vector3, b: Vector3, mask: int) -> Dictionary:
 
 func _check() -> void:
 	var doors: Dictionary = _cafe.get("leaves")
-	var glass := _level.get_node("ZernoGlazing") as GlassPanes
+	var glass := _cafe.get_node("ZernoGlazing") as GlassPanes
 	_assert(doors.size() == 5, "five authored door leaves")
-	_assert(Prologue.current != null, "actual prologue attached to test raid")
+	_assert(Prologue.current != null, "actual prologue attached to Prospekt")
 	_assert(glass.panes.size() == 8 and glass.panes[5].broken, "seven glass panes and the authored broken bay")
+	var containers := _cafe.get_node("Gameplay").get_children()
+	_assert(containers.size() == 4 and containers.all(func(c: Node) -> bool:
+		return c is LootContainer and (c as LootContainer).table == "register"), "four original raid loot spots")
 	var pane_ray := _ray(Vector3(2.93,1.48,6), Vector3(2.93,1.48,4.85), Hitscan.LAYER_GLASS)
 	var pane := GlassPanes.pane_of(pane_ray)
 	_assert(pane.size() == 2 and pane[0] == glass and pane[1] == 6, "storefront bullet addresses the right pane")
@@ -138,6 +138,10 @@ func _check() -> void:
 		"washroom": [Vector2(-4.08,-.81),Vector2(-4.17,-2.16),Vector2(-5.88,-2.22),Vector2(-5.88,-3.73)],
 		"stock exit through service corridor": [Vector2(5.85,-.75),Vector2(5.94,-3),Vector2(6.02,-4.85),
 			Vector2(6.02,-6.75),Vector2(6,-12),Vector2(6,-15.15)],
+		"checkout aisle": [Vector2(2.35,.8),Vector2(2.35,4.15)],
+		"hall shelf": [Vector2(3.12,-1.0),Vector2(3.12,-4.17)],
+		"stock shelf": [Vector2(5.75,0),Vector2(5.24,-3.3),Vector2(4.98,-4.10)],
+		"stock boxes": [Vector2(5.75,0),Vector2(5.24,2.0),Vector2(5.24,4.21)],
 	}
 	for label: String in routes:
 		_assert(_route_clear(routes[label]), label)
@@ -177,7 +181,7 @@ func _route_clear(points: Array) -> bool:
 	return passed
 
 
-func _capture(rig: CameraRig, weather: String, baseline: bool) -> void:
+func _capture(rig: CameraRig, weather: String) -> void:
 	for node: Node in get_tree().root.find_children("*", "CanvasLayer", true, false):
 		if node.name != "LensLayer":
 			(node as CanvasLayer).hide()
@@ -185,6 +189,7 @@ func _capture(rig: CameraRig, weather: String, baseline: bool) -> void:
 		(label as Label3D).hide()
 	_player.set_physics_process(false)
 	CameraRig.first_person_mode = true
+	await RenderingServer.frame_post_draw
 	Engine.max_fps = 0
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	var rid := get_viewport().get_viewport_rid()
@@ -198,29 +203,28 @@ func _capture(rig: CameraRig, weather: String, baseline: bool) -> void:
 	if shadows and is_instance_valid(DayCycle.current):
 		DayCycle.current.set_hour(11.3)
 		DayCycle.current.set_process(false)
+	var doors: Dictionary = _cafe.get("leaves")
 	for view: Array in SHADOW_VIEWS if shadows else VIEWS:
-		if baseline and view[0] not in ["01_street","02_hall","05_stockroom"]:
-			continue
-		if not baseline:
-			var doors: Dictionary = _cafe.get("leaves")
-			var open_for_view: Array = {
-				"02_hall": ["StreetDoor"], "04_washroom": ["WashroomDoor"], "05_stockroom": ["StockDoor"],
-				"07_exit": ["StockRearDoor", "DeliveryDoor"],
-				"08_washroom_door": ["WashroomDoor"], "11_utility_side": ["StockDoor"],
-				"12_exit_closed": ["StockRearDoor"],
-			}.get(view[0], [])
-			for name: String in open_for_view:
-				var d: Door = doors[name]
-				if not d.is_open:
-					d.toggle(d.global_position + Vector3(0,0,1))
+		var open_for_view: Array = {
+			"02_hall": ["StreetDoor"], "04_washroom": ["WashroomDoor"], "05_stockroom": ["StockDoor"],
+			"07_exit": ["StockRearDoor", "DeliveryDoor"],
+			"08_washroom_door": ["WashroomDoor"], "11_utility_side": ["StockDoor"],
+			"12_exit_closed": ["StockRearDoor"],
+		}.get(view[0], [])
+		for name: String in open_for_view:
+			var d: Door = doors[name]
+			if not d.is_open:
+				d.toggle(d.global_position + Vector3(0,0,1))
 		var at: Vector3 = view[1]
 		var direction: Vector3 = view[2] - at
 		_move_player(LOCATION + at - Vector3.UP * float(Balance.ADS_EYE.stand))
-		rig._look_yaw = atan2(direction.x, direction.z)
+		var yaw := atan2(direction.x, direction.z)
+		_player.face(yaw)
+		rig._look_yaw = yaw
 		rig._look_pitch = atan2(direction.y, Vector2(direction.x, direction.z).length())
 		for i in range(168):
 			await RenderingServer.frame_post_draw
-		var path := out.path_join(("%s_%s_%s.png") % ["base" if baseline else "v13", weather, view[0]])
+		var path := out.path_join("v13_%s_%s.png" % [weather, view[0]])
 		var err := get_viewport().get_texture().get_image().save_png(path)
 		_assert(err == OK, "screenshot " + path)
 		if view[0] in ["01_street","02_hall","05_stockroom"]:
@@ -235,7 +239,7 @@ func _capture(rig: CameraRig, weather: String, baseline: bool) -> void:
 			results.append({"view": view[0], "median_frame_ms": timings[59], "p95_frame_ms": timings[113],
 				"visible_triangles": RenderingServer.viewport_get_render_info(rid, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE,
 					RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)})
-	var report := out.path_join(("base_" if baseline else "v13_") + weather + ".json")
+	var report := out.path_join("v13_" + weather + ".json")
 	var file := FileAccess.open(report, FileAccess.WRITE)
 	file.store_string(JSON.stringify({"gpu": RenderingServer.get_video_adapter_name(),
 		"size": str(get_viewport().get_visible_rect().size), "results": results}, "  "))

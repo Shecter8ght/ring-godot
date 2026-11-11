@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://dggdgk70ftwlf" path="res://src/blockout/flat_section.gd" id="flats"]
 [ext_resource type="Script" uid="uid://1ebhit2ekis0" path="res://src/blockout/prospekt_landscape.gd" id="land"]
 [ext_resource type="Script" uid="uid://dmteuigsn5ko5" path="res://src/blockout/prospekt_study_level.gd" id="launch"]
+[ext_resource type="PackedScene" path="res://scenes/levels/prospekt/zerno/zerno.tscn" id="zerno"]
 
 [node name="ProspektStudy" type="Node3D" unique_id=446296185]
 script = ExtResource("launch")
@@ -63291,7 +63292,7 @@ base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.35, 0, -48.22)
 order = 551
 
 [node name="Рекламный световой пилон 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1287352538]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184, 0, -47)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -186.3, 0, -47)
 script = ExtResource("5_iugf6")
 item = ["m:U03_01", -184.0, -47.0, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184, 0, -47)
@@ -63368,7 +63369,7 @@ base = Transform3D(0.9979156, 0, 0.06453231, 0, 1, 0, -0.06453231, 0, 0.9979156,
 order = 562
 
 [node name="Седан, двери открыты 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=522667514]
-transform = Transform3D(-0.9983418, 0, -0.05756398, 0, 1, 0, 0.05756398, 0, -0.9983418, -179.96, 0, -64.3)
+transform = Transform3D(-0.9983418, 0, -0.05756398, 0, 1, 0, 0.05756398, 0, -0.9983418, -174.35, 0, -64.3)
 script = ExtResource("5_iugf6")
 item = ["m:U14_01", -179.96, -64.3, 183.3, 1.0, 0.0, -1, 0.0, "PV_sedan_open"]
 base = Transform3D(-0.9983418, 0, -0.05756398, 0, 1, 0, 0.05756398, 0, -0.9983418, -179.96, 0, -64.3)
@@ -91004,21 +91005,10 @@ metadata/loot_count = 0
 
 [node name="West" type="Node3D" parent="." unique_id=1942065519]
 
-[node name="Coffee" type="Node3D" parent="West" unique_id=905340245 groups=["mall_study_snap"]]
+[node name="Coffee" parent="West" unique_id=905340245 groups=["mall_study_snap"] instance=ExtResource("zerno")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184, 0, -53.8)
-script = ExtResource("build")
-kind = "hall"
-footprint = Vector2(16, 11)
-floors = 1
-story_height = 4.0
-label = "кофейня «Зерно»"
-interior = "shop"
-loot_theme = "register"
-loot_density = 0.6
-entry_door = 1.2
 metadata/height_m = 4.0
 metadata/enterable = true
-metadata/loot_count = 0
 
 [node name="Flowers" type="Node3D" parent="West" unique_id=2122577735 groups=["mall_study_snap"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168, 0, -53.8)
