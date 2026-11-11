@@ -1,13 +1,13 @@
-[gd_scene format=3 uid="uid://cfcoetxx4cnyu"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://dhoykxvmim11s" path="res://src/blockout/plan_piece.gd" id="4_u54l0"]
-[ext_resource type="Script" uid="uid://be5e4lyfic0qs" path="res://src/blockout/prop_spot.gd" id="5_iugf6"]
-[ext_resource type="Script" uid="uid://bp83j6lla822k" path="res://src/blockout/study_building.gd" id="build"]
-[ext_resource type="Environment" uid="uid://ekhwhgs8v36r" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
-[ext_resource type="Script" uid="uid://udta3enn66hu" path="res://src/blockout/mall_filler.gd" id="fill"]
-[ext_resource type="Script" uid="uid://dggdgk70ftwlf" path="res://src/blockout/flat_section.gd" id="flats"]
-[ext_resource type="Script" uid="uid://1ebhit2ekis0" path="res://src/blockout/prospekt_landscape.gd" id="land"]
-[ext_resource type="Script" uid="uid://dmteuigsn5ko5" path="res://src/blockout/prospekt_study_level.gd" id="launch"]
+[ext_resource type="Script" path="res://src/blockout/plan_piece.gd" id="4_u54l0"]
+[ext_resource type="Script" path="res://src/blockout/prop_spot.gd" id="5_iugf6"]
+[ext_resource type="Script" path="res://src/blockout/study_building.gd" id="build"]
+[ext_resource type="Environment" path="res://scenes/levels/prospekt/prospekt_environment.tres" id="env"]
+[ext_resource type="Script" path="res://src/blockout/mall_filler.gd" id="fill"]
+[ext_resource type="Script" path="res://src/blockout/flat_section.gd" id="flats"]
+[ext_resource type="Script" path="res://src/blockout/prospekt_landscape.gd" id="land"]
+[ext_resource type="Script" path="res://src/blockout/prospekt_study_level.gd" id="launch"]
 [ext_resource type="PackedScene" path="res://scenes/levels/prospekt/zerno/zerno.tscn" id="zerno"]
 
 [node name="ProspektStudy" type="Node3D" unique_id=446296185]
@@ -847,6 +847,69 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.5, 0.05, -34.15)
 order = 53
 pick_size = Vector3(35, 0.1, 6.3)
+
+[node name="Тротуар walk_s1 этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=409776247]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "walk_s1",
+"mat": "walk",
+"rect": [-162.0, -35.15, -148.0, -32.65],
+"t": 0.15,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 0.075, -33.9)
+pick_size = Vector3(14, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Тротуар walk_s2 этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=725691840]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "walk_s2",
+"mat": "walk",
+"rect": [-136.0, -35.15, -104.0, -32.65],
+"t": 0.15,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0.075, -33.9)
+order = 1000001
+pick_size = Vector3(32, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Тротуар walk_s3 этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=1971297323]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "walk_s3",
+"mat": "walk",
+"rect": [-19.0, -35.15, -17.0, -32.65],
+"t": 0.15,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.075, -33.9)
+order = 1000002
+pick_size = Vector3(2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Тротуар walk_s4 этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Покрытия" unique_id=996657346]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "surfaces"
+data = {
+"id": "walk_s4",
+"mat": "walk",
+"rect": [-3.5, -35.15, 0.0, -32.65],
+"t": 0.15,
+"y": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 0.075, -33.9)
+order = 1000003
+pick_size = Vector3(3.5, 0.15, 2.5)
+metadata/patch_stage = "1_street"
 
 [node name="Вырезы в земле" type="Node3D" parent="Landscape/Улицы" unique_id=2038579997]
 
@@ -19069,6 +19132,182 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.9, 0.075, -103.9)
 order = 2072
 pick_size = Vector3(0.2, 0.15, 91.8)
+
+[node name="Бордюр этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=583390592]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 0.075, -32.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-155.0, 0.075, -32.75],
+"mat": "stripe",
+"size": [14.0, 0.15, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 0.075, -32.75)
+order = 1000004
+pick_size = Vector3(14, 0.15, 0.2)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 2" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1702931651]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -161.9, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-161.9, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -161.9, 0.075, -33.9)
+order = 1000005
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 3" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1480675817]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.1, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-148.1, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.1, 0.075, -33.9)
+order = 1000006
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 4" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1502830834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0.075, -32.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-120.0, 0.075, -32.75],
+"mat": "stripe",
+"size": [32.0, 0.15, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0.075, -32.75)
+order = 1000007
+pick_size = Vector3(32, 0.15, 0.2)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 5" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1150209390]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.9, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-135.9, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.9, 0.075, -33.9)
+order = 1000008
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 6" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1110047355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -104.1, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-104.1, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -104.1, 0.075, -33.9)
+order = 1000009
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 7" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=1292581578]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.075, -32.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-18.0, 0.075, -32.75],
+"mat": "stripe",
+"size": [2.0, 0.15, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.075, -32.75)
+order = 1000010
+pick_size = Vector3(2, 0.15, 0.2)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 8" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=203233775]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.9, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-18.9, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.9, 0.075, -33.9)
+order = 1000011
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 9" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=734666442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.1, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-17.1, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.1, 0.075, -33.9)
+order = 1000012
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 10" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=100878050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 0.075, -32.75)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-1.75, 0.075, -32.75],
+"mat": "stripe",
+"size": [3.5, 0.15, 0.2],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 0.075, -32.75)
+order = 1000013
+pick_size = Vector3(3.5, 0.15, 0.2)
+metadata/patch_stage = "1_street"
+
+[node name="Бордюр этап 1_street 11" type="Node3D" parent="Landscape/Улицы/Коробки/Бордюры" unique_id=2043384685]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 0.075, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-3.4, 0.075, -33.9],
+"mat": "stripe",
+"size": [0.2, 0.15, 2.5],
+"solid": true,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 0.075, -33.9)
+order = 1000014
+pick_size = Vector3(0.2, 0.15, 2.5)
+metadata/patch_stage = "1_street"
 
 [node name="Асфальт" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=1395564980]
 
@@ -39297,6 +39536,150 @@ data = {
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.13, 166)
 order = 2002
 pick_size = Vector3(22, 0.01, 0.1)
+
+[node name="Полоса этап 1_street 1" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=153167365]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.6, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-147.6, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -147.6, 0.085, -33.9)
+order = 1000015
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 2" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=881911978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136.4, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-136.4, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136.4, 0.085, -33.9)
+order = 1000016
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 3" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=976907514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.5, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-102.5, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.5, 0.085, -33.9)
+order = 1000017
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 4" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=808636112]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.6, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-95.6, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.6, 0.085, -33.9)
+order = 1000018
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 5" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=2071947636]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88.7, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-88.7, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88.7, 0.085, -33.9)
+order = 1000019
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 6" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1273546576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.8, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-81.8, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -81.8, 0.085, -33.9)
+order = 1000020
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 7" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1214184686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -74.9, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-74.9, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -74.9, 0.085, -33.9)
+order = 1000021
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 8" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1568378495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-12.5, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 0.085, -33.9)
+order = 1000022
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
+
+[node name="Полоса этап 1_street 9" type="Node3D" parent="Landscape/Улицы/Коробки/Разметка" unique_id=1271956189]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.085, -33.9)
+script = ExtResource("4_u54l0")
+list = "boxes"
+data = {
+"at": [-4.0, 0.085, -33.9],
+"mat": "stripe",
+"size": [0.15, 0.02, 2.2],
+"solid": false,
+"yaw": 0.0
+}
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.085, -33.9)
+order = 1000023
+pick_size = Vector3(0.15, 0.02, 2.2)
+metadata/patch_stage = "1_street"
 
 [node name="Кафель перехода" type="Node3D" parent="Landscape/Улицы/Коробки" unique_id=2013309379]
 
@@ -60162,41 +60545,6 @@ metadata/stats = {
 
 [node name="Модели города" type="Node3D" parent="Filler/Наполнение" unique_id=1142217110]
 
-[node name="Уличный светофор на гнутой опоре 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2084230145]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -130, 0, -36.14)
-script = ExtResource("5_iugf6")
-item = ["m:U15_02", -130.0, -36.14, 180.0]
-base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -130, 0, -36.14)
-order = 1
-
-[node name="Знак перехода в защитной рамке 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=688732132]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -132.5, 0, -37.46)
-script = ExtResource("5_iugf6")
-item = ["m:U06_02", -132.5, -37.46, 180.0]
-base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -132.5, 0, -37.46)
-order = 2
-
-[node name="Плита тактильного покрытия 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1675211652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126.6, 0, -37.13)
-script = ExtResource("5_iugf6")
-item = ["m:U05_05", -126.6, -37.13, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126.6, 0, -37.13)
-order = 3
-
-[node name="Плита тактильного покрытия 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1808817663]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0, -37.13)
-script = ExtResource("5_iugf6")
-item = ["m:U05_05", -126.0, -37.13, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0, -37.13)
-order = 4
-
-[node name="Плита тактильного покрытия 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=762181727]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.4, 0, -37.13)
-script = ExtResource("5_iugf6")
-item = ["m:U05_05", -125.4, -37.13, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.4, 0, -37.13)
-order = 5
-
 [node name="Уличный светофор на гнутой опоре 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=354651232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122, 0, 4.84)
 script = ExtResource("5_iugf6")
@@ -60428,62 +60776,6 @@ item = ["tree_birch", -167.0, -44.31, 69.9, 1.0012660190797995, 0.0, -1, 0.0, "P
 base = Transform3D(0.34409478, 0, 0.9402831, 0, 1.001266, 0, -0.9402831, 0, 0.34409478, -167, 0, -44.31)
 order = 94
 
-[node name="Берёза повислая, взрослая, 16 м 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=860721230]
-transform = Transform3D(0.86158395, 0, 0.5595192, 0, 1.0273211, 0, -0.5595192, 0, 0.86158395, -139, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -139.0, -44.31, 33.0, 1.0273210942717117, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(0.86158395, 0, 0.5595192, 0, 1.0273211, 0, -0.5595192, 0, 0.86158395, -139, 0, -44.31)
-order = 95
-
-[node name="Берёза повислая, взрослая, 16 м 0004" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=408205281]
-transform = Transform3D(0.58765364, 0, 0.82386005, 0, 1.0119694, 0, -0.82386005, 0, 0.58765364, -97, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -97.0, -44.31, 54.5, 1.011969406791117, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(0.58765364, 0, 0.82386005, 0, 1.0119694, 0, -0.82386005, 0, 0.58765364, -97, 0, -44.31)
-order = 96
-
-[node name="Берёза повислая, взрослая, 16 м 0005" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=839771519]
-transform = Transform3D(-0.16464275, 0, -1.0165361, 0, 1.0297829, 0, 1.0165361, 0, -0.16464275, -83, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -83.0, -44.31, 260.8, 1.0297828346774989, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(-0.16464275, 0, -1.0165361, 0, 1.0297829, 0, 1.0165361, 0, -0.16464275, -83, 0, -44.31)
-order = 97
-
-[node name="Берёза повислая, взрослая, 16 м 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=787480504]
-transform = Transform3D(0.8322181, 0, -0.06403566, 0, 0.8346781, 0, 0.06403566, 0, 0.8322181, -55, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -55.0, -44.31, 355.6, 0.8346781284246676, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(0.8322181, 0, -0.06403566, 0, 0.8346781, 0, 0.06403566, 0, 0.8322181, -55, 0, -44.31)
-order = 98
-
-[node name="Берёза повислая, взрослая, 16 м 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2066338451]
-transform = Transform3D(-1.081291, 0, -0.11555679, 0, 1.0874482, 0, 0.11555679, 0, -1.081291, -41, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -41.0, -44.31, 186.1, 1.0874482508554535, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(-1.081291, 0, -0.11555679, 0, 1.0874482, 0, 0.11555679, 0, -1.081291, -41, 0, -44.31)
-order = 99
-
-[node name="Берёза повислая, взрослая, 16 м 0008" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=710856783]
-transform = Transform3D(-0.06347626, 0, -0.93110096, 0, 0.93326217, 0, 0.93110096, 0, -0.06347626, -27, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -27.0, -44.31, 266.1, 0.9332621902566832, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(-0.06347626, 0, -0.93110096, 0, 0.93326217, 0, 0.93110096, 0, -0.06347626, -27, 0, -44.31)
-order = 100
-
-[node name="Берёза повислая, взрослая, 16 м 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=416261410]
-transform = Transform3D(-0.36605495, 0, 1.0223516, 0, 1.0859094, 0, -1.0223516, 0, -0.36605495, -13, 0, -44.31)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", -13.0, -44.31, 109.7, 1.0859093680868952, 0.0, -1, 0.0, "P_birch_a"]
-base = Transform3D(-0.36605495, 0, 1.0223516, 0, 1.0859094, 0, -1.0223516, 0, -0.36605495, -13, 0, -44.31)
-order = 101
-
-[node name="Берёза повислая, двуствольная, 14 м 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=669060114]
-transform = Transform3D(0.88498634, 0, 0.52337945, 0, 1.0281668, 0, -0.52337945, 0, 0.88498634, 1.81, 0, -44.3)
-script = ExtResource("5_iugf6")
-item = ["tree_birch", 1.81, -44.3, 30.6, 1.0281667841685758, 0.0, -1, 0.0, "P_birch_b"]
-base = Transform3D(0.88498634, 0, 0.52337945, 0, 1.0281668, 0, -0.52337945, 0, 0.88498634, 1.81, 0, -44.3)
-order = 102
-
 [node name="Берёза повислая, двуствольная, 14 м 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2066646196]
 transform = Transform3D(0.46889427, 0, -0.70574266, 0, 0.8473102, 0, 0.70574266, 0, 0.46889427, 26.75, 0, -40.64)
 script = ExtResource("5_iugf6")
@@ -60651,174 +60943,6 @@ script = ExtResource("5_iugf6")
 item = ["m:U02_04", -165.5, -35.89, 90.0]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -165.5, 0, -35.89)
 order = 126
-
-[node name="Стальной тротуарный столбик 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=109254569]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -149, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -149.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -149, 0, -35.89)
-order = 127
-
-[node name="Стальной тротуарный столбик 0008" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=157732008]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -143.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -143.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -143.5, 0, -35.89)
-order = 128
-
-[node name="Стальной тротуарный столбик 0009" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=654837244]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -138, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -138.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -138, 0, -35.89)
-order = 129
-
-[node name="Стальной тротуарный столбик 0010" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1623231063]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -132.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -132.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -132.5, 0, -35.89)
-order = 130
-
-[node name="Стальной тротуарный столбик 0011" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1833668097]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -105.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105, 0, -35.89)
-order = 131
-
-[node name="Стальной тротуарный столбик 0012" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=385791296]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -99.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -99.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -99.5, 0, -35.89)
-order = 132
-
-[node name="Стальной тротуарный столбик 0013" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=635364659]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -94.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -35.89)
-order = 133
-
-[node name="Стальной тротуарный столбик 0014" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1072203421]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -88.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -88.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -88.5, 0, -35.89)
-order = 134
-
-[node name="Стальной тротуарный столбик 0015" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=317368446]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -83.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -83, 0, -35.89)
-order = 135
-
-[node name="Стальной тротуарный столбик 0016" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=818296971]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -77.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -77.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -77.5, 0, -35.89)
-order = 136
-
-[node name="Стальной тротуарный столбик 0017" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=623472816]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -72, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -72.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -72, 0, -35.89)
-order = 137
-
-[node name="Стальной тротуарный столбик 0018" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=170679761]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -66.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -66.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -66.5, 0, -35.89)
-order = 138
-
-[node name="Стальной тротуарный столбик 0019" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1623787316]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -61, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -61.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -61, 0, -35.89)
-order = 139
-
-[node name="Стальной тротуарный столбик 0020" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1780256213]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -55.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -55.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -55.5, 0, -35.89)
-order = 140
-
-[node name="Стальной тротуарный столбик 0021" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1358915021]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -50.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -35.89)
-order = 141
-
-[node name="Стальной тротуарный столбик 0022" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1749363274]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -44.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -44.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -44.5, 0, -35.89)
-order = 142
-
-[node name="Стальной тротуарный столбик 0023" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2106639742]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -39.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -35.89)
-order = 143
-
-[node name="Стальной тротуарный столбик 0024" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2032464644]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -33.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -33.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -33.5, 0, -35.89)
-order = 144
-
-[node name="Стальной тротуарный столбик 0025" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2056101409]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -28, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -28.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -28, 0, -35.89)
-order = 145
-
-[node name="Стальной тротуарный столбик 0026" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1370007729]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -22.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -22.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -22.5, 0, -35.89)
-order = 146
-
-[node name="Стальной тротуарный столбик 0027" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1812815461]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -17.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17, 0, -35.89)
-order = 147
-
-[node name="Стальной тротуарный столбик 0028" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1550533680]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -11.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -11.5, 0, -35.89)
-order = 148
-
-[node name="Стальной тротуарный столбик 0029" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=719305846]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -6.0, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, 0, -35.89)
-order = 149
-
-[node name="Стальной тротуарный столбик 0030" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1197763385]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.5, 0, -35.89)
-script = ExtResource("5_iugf6")
-item = ["m:U02_04", -0.5, -35.89, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -0.5, 0, -35.89)
-order = 150
 
 [node name="Стальной тротуарный столбик 0031" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1962802221]
 transform = Transform3D(0.09063255, 0, 0.9958844, 0, 1, 0, -0.9958844, 0, 0.09063255, 8.26, 0, -35.52)
@@ -61246,34 +61370,6 @@ script = ExtResource("5_iugf6")
 item = ["m:U05_04", -172.0, -41.67, 90.0]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -172, 0, -41.67)
 order = 211
-
-[node name="Гранёная урна с боковой дверцей 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=241001050]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -146, 0, -41.67)
-script = ExtResource("5_iugf6")
-item = ["m:U02_05", -146.0, -41.67, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -146, 0, -41.67)
-order = 212
-
-[node name="Цилиндрическая реечная урна 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1582341752]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -41.67)
-script = ExtResource("5_iugf6")
-item = ["m:U05_04", -94.0, -41.67, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -41.67)
-order = 213
-
-[node name="Гранёная урна с боковой дверцей 0002" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1265203277]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -42, 0, -41.67)
-script = ExtResource("5_iugf6")
-item = ["m:U02_05", -42.0, -41.67, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -42, 0, -41.67)
-order = 214
-
-[node name="Цилиндрическая реечная урна 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1859026546]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16, 0, -41.67)
-script = ExtResource("5_iugf6")
-item = ["m:U05_04", -16.0, -41.67, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16, 0, -41.67)
-order = 215
 
 [node name="Гранёная урна с боковой дверцей 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1681702786]
 transform = Transform3D(0.18051912, 0, 0.98357147, 0, 1, 0, -0.98357147, 0, 0.18051912, 17.49, 0, -40.08)
@@ -62605,13 +62701,6 @@ item = ["minibus", -58.8, -1.34, 88.0, 1.0, 0.0, 9.0, 0.0, "PV_gazel_open"]
 base = Transform3D(0.034899496, 0, 0.99939084, 0, 1, 0, -0.99939084, 0, 0.034899496, -58.8, 0, -1.34)
 order = 424
 
-[node name="Трансформаторная подстанция киоскового типа · За 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1355081170]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -15.65)
-script = ExtResource("5_iugf6")
-item = ["ktp", -96.0, -15.65, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -15.65)
-order = 438
-
 [node name="Рекламный щит на двух стойках 0001" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=710562521]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -100, 0, -15.65)
 script = ExtResource("5_iugf6")
@@ -63473,13 +63562,6 @@ item = ["m:U14_01", -144.86, -83.3, 0.9, 1.0, 0.0, -1, 0.0, "PV_wagon_open"]
 base = Transform3D(0.9998766, 0, 0.015707318, 0, 1, 0, -0.015707318, 0, 0.9998766, -144.86, 0, -83.3)
 order = 577
 
-[node name="Седан, двери открыты 0003" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1328383555]
-transform = Transform3D(-0.99897057, 0, 0.045363024, 0, 1, 0, -0.045363024, 0, -0.99897057, -134.33, 0, -64.3)
-script = ExtResource("5_iugf6")
-item = ["m:U14_01", -134.33, -64.3, 177.4, 1.0, 0.0, -1, 0.0, "PV_sedan_open"]
-base = Transform3D(-0.99897057, 0, 0.045363024, 0, 1, 0, -0.045363024, 0, -0.99897057, -134.33, 0, -64.3)
-order = 578
-
 [node name="Брошенный хэтчбек с открытым багажником 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1808739370]
 transform = Transform3D(0.99871933, 0, 0.05059294, 0, 1, 0, -0.05059294, 0, 0.99871933, -134.33, 0, -83.3)
 script = ExtResource("5_iugf6")
@@ -63563,13 +63645,6 @@ script = ExtResource("5_iugf6")
 item = ["m:U14_01", -82.94, -64.3, 181.8, 1.0, 0.0, -1, 0.0, "PV_hatch_wreck"]
 base = Transform3D(-0.99950653, 0, -0.031410858, 0, 1, 0, 0.031410858, 0, -0.99950653, -82.94, 0, -64.3)
 order = 590
-
-[node name="Хэтчбек, двери открыты 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2005567547]
-transform = Transform3D(-0.9975641, 0, 0.06975647, 0, 1, 0, -0.06975647, 0, -0.9975641, -79.43, 0, -64.3)
-script = ExtResource("5_iugf6")
-item = ["m:U14_01", -79.43, -64.3, 176.0, 1.0, 0.0, -1, 0.0, "PV_hatch_open"]
-base = Transform3D(-0.9975641, 0, 0.06975647, 0, 1, 0, -0.06975647, 0, -0.9975641, -79.43, 0, -64.3)
-order = 591
 
 [node name="Брошенный хэтчбек с открытым багажником 0011" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1836845660]
 transform = Transform3D(-0.9999863, 0, -0.0052359737, 0, 1, 0, 0.0052359737, 0, -0.9999863, -75.92, 0, -64.3)
@@ -65299,13 +65374,6 @@ script = ExtResource("5_iugf6")
 item = ["car_open", -86.23, -66.89, 1.6, 1.0, -7.3, 0.0, 0.0, "PV_suv_open"]
 base = Transform3D(0.9996101, 0, 0.02792164, 0, 1, 0, -0.02792164, 0, 0.9996101, -86.23, -7.3, -66.89)
 order = 973
-
-[node name="Универсал, сгоревший 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1202072834]
-transform = Transform3D(0.99871933, 0, 0.05059294, 0, 1, 0, -0.05059294, 0, 0.99871933, -80.12, -7.3, -66.58)
-script = ExtResource("5_iugf6")
-item = ["car_wreck", -80.12, -66.58, 2.9, 1.0, -7.3, 6.0, 0.0, "PV_wagon_burnt"]
-base = Transform3D(0.99871933, 0, 0.05059294, 0, 1, 0, -0.05059294, 0, 0.99871933, -80.12, -7.3, -66.58)
-order = 975
 
 [node name="Внедорожник, двери открыты 0045" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1032858715]
 transform = Transform3D(0.9874138, 0, -0.15815806, 0, 1, 0, 0.15815806, 0, 0.9874138, -74.57, -7.3, -66.47)
@@ -69184,27 +69252,6 @@ script = ExtResource("5_iugf6")
 item = ["m:U01_04", -111.53, 5.34, 51.9]
 base = Transform3D(0.6170359, 0, 0.78693503, 0, 1, 0, -0.78693503, 0, 0.6170359, -111.53, 0, 5.34)
 order = 3476
-
-[node name="Полый дорожный конус 0016" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=552577283]
-transform = Transform3D(0.8589599, 0, 0.5120429, 0, 1, 0, -0.5120429, 0, 0.8589599, -47.2, 0, -37.79)
-script = ExtResource("5_iugf6")
-item = ["m:U01_04", -47.2, -37.79, 30.8]
-base = Transform3D(0.8589599, 0, 0.5120429, 0, 1, 0, -0.5120429, 0, 0.8589599, -47.2, 0, -37.79)
-order = 3477
-
-[node name="Полый дорожный конус 0017" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=487786685]
-transform = Transform3D(0.048849694, 0, -0.9988061, 0, 1, 0, 0.9988061, 0, 0.048849694, -47.58, 0, -40.45)
-script = ExtResource("5_iugf6")
-item = ["m:U01_04", -47.58, -40.45, 272.8]
-base = Transform3D(0.048849694, 0, -0.9988061, 0, 1, 0, 0.9988061, 0, 0.048849694, -47.58, 0, -40.45)
-order = 3478
-
-[node name="Полый дорожный конус 0018" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1977403051]
-transform = Transform3D(-0.9578225, 0, -0.28736043, 0, 1, 0, 0.28736043, 0, -0.9578225, -47.62, 0, -39.08)
-script = ExtResource("5_iugf6")
-item = ["m:U01_04", -47.62, -39.08, 196.7]
-base = Transform3D(-0.9578225, 0, -0.28736043, 0, 1, 0, 0.28736043, 0, -0.9578225, -47.62, 0, -39.08)
-order = 3479
 
 [node name="Полый дорожный конус 0019" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=855937550]
 transform = Transform3D(0.14953531, 0, 0.98875636, 0, 1, 0, -0.98875636, 0, 0.14953531, 94.99, 0, 130.51)
@@ -73658,27 +73705,6 @@ item = ["kiosk", 94.35, 178.0, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.35, 0, 178)
 order = 4240
 
-[node name="Кофейный киоск с роллетой 0042" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2072816685]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -45.35)
-script = ExtResource("5_iugf6")
-item = ["kiosk", -50.0, -45.35, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -45.35)
-order = 4241
-
-[node name="Кофейный киоск с роллетой 0043" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=539049063]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -42.35)
-script = ExtResource("5_iugf6")
-item = ["kiosk", -50.0, -42.35, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -42.35)
-order = 4242
-
-[node name="Кофейный киоск с роллетой 0044" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=569023124]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -39.35)
-script = ExtResource("5_iugf6")
-item = ["kiosk", -50.0, -39.35, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -50, 0, -39.35)
-order = 4243
-
 [node name="Кофейный киоск с роллетой 0045" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1252397824]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -80, 0, 14.05)
 script = ExtResource("5_iugf6")
@@ -73889,13 +73915,6 @@ item = ["van", -172.0, -33.9, -89.9, 1.0, 0.0, 9.0, 0.0, "PV_van_open"]
 base = Transform3D(0.0017452986, 0, -0.99999845, 0, 1, 0, 0.99999845, 0, 0.0017452986, -172, 0, -33.9)
 order = 4278
 
-[node name="ГАЗель-фургон, целый 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=216221620]
-transform = Transform3D(-0.034899462, 0, -0.99939084, 0, 1, 0, 0.99939084, 0, -0.034899462, -40, 0, -33.9)
-script = ExtResource("5_iugf6")
-item = ["van", -40.0, -33.9, -92.0, 1.0, 0.0, 6.0, 0.0, "PV_van"]
-base = Transform3D(-0.034899462, 0, -0.99939084, 0, 1, 0, 0.99939084, 0, -0.034899462, -40, 0, -33.9)
-order = 4280
-
 [node name="ГАЗель-фургон, двери открыты 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=670366146]
 transform = Transform3D(-0.041875675, 0, 0.99912286, 0, 1, 0, -0.99912286, 0, -0.041875675, -140, 0, 2.6)
 script = ExtResource("5_iugf6")
@@ -73909,13 +73928,6 @@ script = ExtResource("5_iugf6")
 item = ["van", -26.0, 2.6, 92.8, 1.0, 0.0, 9.0, 0.0, "PV_van"]
 base = Transform3D(-0.048849728, 0, 0.9988061, 0, 1, 0, -0.9988061, 0, -0.048849728, -26, 0, 2.6)
 order = 4283
-
-[node name="Трансформаторная подстанция киоскового типа · За 0006" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1554554974]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170, 0, -15.65)
-script = ExtResource("5_iugf6")
-item = ["ktp", -170.0, -15.65, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170, 0, -15.65)
-order = 4284
 
 [node name="Трансформаторная подстанция киоскового типа · За 0007" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1305111492]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 70.65, 0, 118)
@@ -74414,14 +74426,326 @@ item = ["district_fence", 190.8, 55.95, 180.0]
 base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 190.8, 0, 55.95)
 order = 4370
 
-[node name="Столбы и фонари" type="Node3D" parent="Filler/Наполнение" unique_id=1963609857]
-
-[node name="signal_arm 0001" type="Node3D" parent="Filler/Наполнение/Столбы и фонари" unique_id=1102274181]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -132.5, 0, -37.13)
+[node name="Стальной тротуарный столбик этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=342745220]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -161, 0, -32.9)
 script = ExtResource("5_iugf6")
-item = ["signal_arm", -132.5, -37.13, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -132.5, 0, -37.13)
-order = 15
+item = ["m:U02_04", -161.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -161, 0, -32.9)
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1193301540]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -158.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -158.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -158.5, 0, -32.9)
+order = 1000001
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1242545915]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -156, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -156.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -156, 0, -32.9)
+order = 1000002
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1671760725]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -153.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -153.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -153.5, 0, -32.9)
+order = 1000003
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2140333126]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -151, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -151.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -151, 0, -32.9)
+order = 1000004
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 6" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=125258570]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -148.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -148.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -148.5, 0, -32.9)
+order = 1000005
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 7" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1263899003]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -135, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -135.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -135, 0, -32.9)
+order = 1000006
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 8" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1427436379]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -132.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -132.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -132.5, 0, -32.9)
+order = 1000007
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 9" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=239963243]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -120, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -120.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -120, 0, -32.9)
+order = 1000008
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 10" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=61311528]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -117.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -117.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -117.5, 0, -32.9)
+order = 1000009
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 11" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1319768676]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -115, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -115.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -115, 0, -32.9)
+order = 1000010
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 12" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1050482510]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -112.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -112.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -112.5, 0, -32.9)
+order = 1000011
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 13" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=909767545]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -110, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -110.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -110, 0, -32.9)
+order = 1000012
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 14" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=368604909]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -107.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -107.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -107.5, 0, -32.9)
+order = 1000013
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 15" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=374969344]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -105.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -105, 0, -32.9)
+order = 1000014
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 16" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=435767264]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -18.0, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, -32.9)
+order = 1000015
+metadata/patch_stage = "1_street"
+
+[node name="Стальной тротуарный столбик этап 1_street 17" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=373833305]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.5, 0, -32.9)
+script = ExtResource("5_iugf6")
+item = ["m:U02_04", -2.5, -32.9, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.5, 0, -32.9)
+order = 1000016
+metadata/patch_stage = "1_street"
+
+[node name="ГАЗель-фургон, целый этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2113838340]
+transform = Transform3D(-0.034899462, 0, -0.99939084, 0, 1, 0, 0.99939084, 0, -0.034899462, -10, 0, -33.9)
+script = ExtResource("5_iugf6")
+item = ["van", -10.0, -33.9, -92.0, 1.0, 0.0, 6.0, 0.0, "PV_van"]
+base = Transform3D(-0.034899462, 0, -0.99939084, 0, 1, 0, 0.99939084, 0, -0.034899462, -10, 0, -33.9)
+order = 1000017
+metadata/patch_stage = "1_street"
+
+[node name="Автобус 12 м, целый этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=778176556]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 0, -33.9)
+script = ExtResource("5_iugf6")
+item = ["bus_city", -45.0, -33.9, 90.0, 1.0, 0.0, 8.0, 0.0, "PV_bus12"]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -45, 0, -33.9)
+order = 1000019
+metadata/patch_stage = "1_street"
+
+[node name="Берёза повислая, взрослая, 16 м этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=253762656]
+transform = Transform3D(0.86158395, 0, 0.5595192, 0, 1.0273211, 0, -0.5595192, 0, 0.86158395, -146, 0, -38.4)
+script = ExtResource("5_iugf6")
+item = ["tree_birch", -146.0, -38.4, 33.0, 1.0273210942717117, 0.0, -1.0, 0.0, "P_birch_a"]
+base = Transform3D(0.86158395, 0, 0.5595192, 0, 1.0273211, 0, -0.5595192, 0, 0.86158395, -146, 0, -38.4)
+order = 1000020
+metadata/patch_stage = "1_street"
+
+[node name="Берёза повислая, взрослая, 16 м этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=601488443]
+transform = Transform3D(0.58765364, 0, 0.82386005, 0, 1.0119694, 0, -0.82386005, 0, 0.58765364, -100, 0, -38.4)
+script = ExtResource("5_iugf6")
+item = ["tree_birch", -100.0, -38.4, 54.5, 1.011969406791117, 0.0, -1.0, 0.0, "P_birch_a"]
+base = Transform3D(0.58765364, 0, 0.82386005, 0, 1.0119694, 0, -0.82386005, 0, 0.58765364, -100, 0, -38.4)
+order = 1000021
+metadata/patch_stage = "1_street"
+
+[node name="Берёза повислая, взрослая, 16 м этап 1_street 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=203288939]
+transform = Transform3D(-0.16467746, 0, -1.0167503, 0, 1.03, 0, 1.0167503, 0, -0.16467746, -86, 0, -38.4)
+script = ExtResource("5_iugf6")
+item = ["tree_birch", -86.0, -38.4, 260.8, 1.03, 0.0, -1.0, 0.0, "P_birch_a"]
+base = Transform3D(-0.16467746, 0, -1.0167503, 0, 1.03, 0, 1.0167503, 0, -0.16467746, -86, 0, -38.4)
+order = 1000022
+metadata/patch_stage = "1_street"
+
+[node name="Берёза повислая, взрослая, 16 м этап 1_street 4" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=485224396]
+transform = Transform3D(0.8322181, 0, -0.06403566, 0, 0.8346781, 0, 0.06403566, 0, 0.8322181, -72, 0, -38.4)
+script = ExtResource("5_iugf6")
+item = ["tree_birch", -72.0, -38.4, 355.6, 0.8346781284246676, 0.0, -1.0, 0.0, "P_birch_a"]
+base = Transform3D(0.8322181, 0, -0.06403566, 0, 0.8346781, 0, 0.06403566, 0, 0.8322181, -72, 0, -38.4)
+order = 1000023
+metadata/patch_stage = "1_street"
+
+[node name="Берёза повислая, взрослая, 16 м этап 1_street 5" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=201528943]
+transform = Transform3D(-1.081291, 0, -0.11555679, 0, 1.0874482, 0, 0.11555679, 0, -1.081291, -10, 0, -38.4)
+script = ExtResource("5_iugf6")
+item = ["tree_birch", -10.0, -38.4, 186.1, 1.0874482508554535, 0.0, -1.0, 0.0, "P_birch_a"]
+base = Transform3D(-1.081291, 0, -0.11555679, 0, 1.0874482, 0, 0.11555679, 0, -1.081291, -10, 0, -38.4)
+order = 1000024
+metadata/patch_stage = "1_street"
+
+[node name="Остановочный павильон · Целый этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=774648280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -39)
+script = ExtResource("5_iugf6")
+item = ["bus_stop", -45.0, -39.0, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, -39)
+order = 1000025
+metadata/patch_stage = "1_street"
+
+[node name="Скамья на гнутой металлической раме этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=2137929237]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0, -38.7)
+script = ExtResource("5_iugf6")
+item = ["bench", -39.0, -38.7, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0, -38.7)
+order = 1000026
+metadata/patch_stage = "1_street"
+
+[node name="Кофейный киоск с роллетой этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=828948771]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 0, -42.9)
+script = ExtResource("5_iugf6")
+item = ["kiosk", -41.0, -42.9, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 0, -42.9)
+order = 1000027
+metadata/patch_stage = "1_street"
+
+[node name="Кофейный киоск с роллетой этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=588927031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.6, 0, -42.9)
+script = ExtResource("5_iugf6")
+item = ["kiosk", -37.6, -42.9, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.6, 0, -42.9)
+order = 1000028
+metadata/patch_stage = "1_street"
+
+[node name="Кофейный киоск с роллетой этап 1_street 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1086603806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.2, 0, -42.9)
+script = ExtResource("5_iugf6")
+item = ["kiosk", -34.2, -42.9, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.2, 0, -42.9)
+order = 1000029
+metadata/patch_stage = "1_street"
+
+[node name="Трансформаторная подстанция киоскового т этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=723452314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0, -64.7)
+script = ExtResource("5_iugf6")
+item = ["ktp", -80.0, -64.7, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0, -64.7)
+order = 1000030
+metadata/patch_stage = "1_street"
+
+[node name="Трансформаторная подстанция киоскового т этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=185155778]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -134, 0, -64.7)
+script = ExtResource("5_iugf6")
+item = ["ktp", -134.0, -64.7, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -134, 0, -64.7)
+order = 1000031
+metadata/patch_stage = "1_street"
+
+[node name="Гранёная урна с боковой дверцей этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=570511392]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -146, 0, -37.7)
+script = ExtResource("5_iugf6")
+item = ["m:U02_05", -146.0, -37.7, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -146, 0, -37.7)
+order = 1000032
+metadata/patch_stage = "1_street"
+
+[node name="Цилиндрическая реечная урна этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=619023055]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -37.7)
+script = ExtResource("5_iugf6")
+item = ["m:U05_04", -94.0, -37.7, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -94, 0, -37.7)
+order = 1000033
+metadata/patch_stage = "1_street"
+
+[node name="Гранёная урна с боковой дверцей этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=122332793]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -37, 0, -38.6)
+script = ExtResource("5_iugf6")
+item = ["m:U02_05", -37.0, -38.6, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -37, 0, -38.6)
+order = 1000034
+metadata/patch_stage = "1_street"
+
+[node name="Цилиндрическая реечная урна этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=554366858]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16, 0, -37.7)
+script = ExtResource("5_iugf6")
+item = ["m:U05_04", -16.0, -37.7, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -16, 0, -37.7)
+order = 1000035
+metadata/patch_stage = "1_street"
+
+[node name="Уличный светофор на гнутой опоре этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1549272979]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -130, 0, -33.64)
+script = ExtResource("5_iugf6")
+item = ["m:U15_02", -130.0, -33.64, 180.0]
+base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -130, 0, -33.64)
+order = 1000037
+metadata/patch_stage = "1_street"
+
+[node name="Знак перехода в защитной рамке этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=510181712]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -132.5, 0, -34.96)
+script = ExtResource("5_iugf6")
+item = ["m:U06_02", -132.5, -34.96, 180.0]
+base = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -132.5, 0, -34.96)
+order = 1000038
+metadata/patch_stage = "1_street"
+
+[node name="Плита тактильного покрытия этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=1060480682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126.6, 0, -34.63)
+script = ExtResource("5_iugf6")
+item = ["m:U05_05", -126.6, -34.63, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126.6, 0, -34.63)
+order = 1000040
+metadata/patch_stage = "1_street"
+
+[node name="Плита тактильного покрытия этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=961621388]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0, -34.63)
+script = ExtResource("5_iugf6")
+item = ["m:U05_05", -126.0, -34.63, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 0, -34.63)
+order = 1000041
+metadata/patch_stage = "1_street"
+
+[node name="Плита тактильного покрытия этап 1_street 3" type="Node3D" parent="Filler/Наполнение/Модели города" unique_id=880877899]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.4, 0, -34.63)
+script = ExtResource("5_iugf6")
+item = ["m:U05_05", -125.4, -34.63, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.4, 0, -34.63)
+order = 1000042
+metadata/patch_stage = "1_street"
+
+[node name="Столбы и фонари" type="Node3D" parent="Filler/Наполнение" unique_id=1963609857]
 
 [node name="signal_arm 0002" type="Node3D" parent="Filler/Наполнение/Столбы и фонари" unique_id=325687696]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -119.5, 0, 5.83)
@@ -74647,14 +74971,15 @@ item = ["flagpole", 125.3, 163.0, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125.3, 0, 163)
 order = 1963
 
-[node name="Заборы и ограждения" type="Node3D" parent="Filler/Наполнение" unique_id=848739444]
-
-[node name="half_sphere 0001" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1301080146]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.4, 0, -35.98)
+[node name="Сигнал этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Столбы и фонари" unique_id=1093197682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -132.5, 0, -34.63)
 script = ExtResource("5_iugf6")
-item = ["half_sphere", -131.4, -35.98, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.4, 0, -35.98)
-order = 19
+item = ["signal_arm", -132.5, -34.63, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -132.5, 0, -34.63)
+order = 1000039
+metadata/patch_stage = "1_street"
+
+[node name="Заборы и ограждения" type="Node3D" parent="Filler/Наполнение" unique_id=848739444]
 
 [node name="half_sphere 0002" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=799870376]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.4, 0, 4.68)
@@ -74677,13 +75002,6 @@ item = ["half_sphere", 90.98, 143.6, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.98, 0, 143.6)
 order = 22
 
-[node name="half_sphere 0005" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1211555703]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.2, 0, -35.98)
-script = ExtResource("5_iugf6")
-item = ["half_sphere", -129.2, -35.98, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.2, 0, -35.98)
-order = 23
-
 [node name="half_sphere 0006" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=842744246]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.2, 0, 4.68)
 script = ExtResource("5_iugf6")
@@ -74705,13 +75023,6 @@ item = ["half_sphere", 90.98, 146.8, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.98, 0, 146.8)
 order = 26
 
-[node name="half_sphere 0009" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=694452643]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122.8, 0, -35.98)
-script = ExtResource("5_iugf6")
-item = ["half_sphere", -122.8, -35.98, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122.8, 0, -35.98)
-order = 27
-
 [node name="half_sphere 0010" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=71959810]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122.8, 0, 4.68)
 script = ExtResource("5_iugf6")
@@ -74732,13 +75043,6 @@ script = ExtResource("5_iugf6")
 item = ["half_sphere", 90.98, 153.2, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.98, 0, 153.2)
 order = 30
-
-[node name="half_sphere 0013" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1017358265]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, -35.98)
-script = ExtResource("5_iugf6")
-item = ["half_sphere", -118.6, -35.98, 0.0]
-base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, -35.98)
-order = 31
 
 [node name="half_sphere 0014" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=746702970]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, 4.68)
@@ -76594,6 +76898,38 @@ script = ExtResource("5_iugf6")
 item = ["sandbag_post", 136.8, 33.0, -90.0]
 base = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 136.8, 0, 33)
 order = 4335
+
+[node name="Полусфера этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=891041137]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.4, 0, -33.48)
+script = ExtResource("5_iugf6")
+item = ["half_sphere", -131.4, -33.48, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -131.4, 0, -33.48)
+order = 1000043
+metadata/patch_stage = "1_street"
+
+[node name="Полусфера этап 1_street 2" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1414861900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.2, 0, -33.48)
+script = ExtResource("5_iugf6")
+item = ["half_sphere", -129.2, -33.48, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -129.2, 0, -33.48)
+order = 1000044
+metadata/patch_stage = "1_street"
+
+[node name="Полусфера этап 1_street 3" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1106635783]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122.8, 0, -33.48)
+script = ExtResource("5_iugf6")
+item = ["half_sphere", -122.8, -33.48, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -122.8, 0, -33.48)
+order = 1000045
+metadata/patch_stage = "1_street"
+
+[node name="Полусфера этап 1_street 4" type="Node3D" parent="Filler/Наполнение/Заборы и ограждения" unique_id=1198225058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, -33.48)
+script = ExtResource("5_iugf6")
+item = ["half_sphere", -118.6, -33.48, 0.0]
+base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118.6, 0, -33.48)
+order = 1000046
+metadata/patch_stage = "1_street"
 
 [node name="Мусор" type="Node3D" parent="Filler/Наполнение" unique_id=251171048]
 
@@ -84124,13 +84460,6 @@ item = ["ad_column", -170.0, -43.32, 90.0]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -170, 0, -43.32)
 order = 234
 
-[node name="ad_column 0002" type="Node3D" parent="Filler/Наполнение/Киоски, лавки, площадки" unique_id=1297331652]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -80, 0, -43.32)
-script = ExtResource("5_iugf6")
-item = ["ad_column", -80.0, -43.32, 90.0]
-base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -80, 0, -43.32)
-order = 235
-
 [node name="ad_column 0003" type="Node3D" parent="Filler/Наполнение/Киоски, лавки, площадки" unique_id=582242656]
 transform = Transform3D(0.18051912, 0, 0.98357147, 0, 1, 0, -0.98357147, 0, 0.18051912, 17.78, 0, -41.7)
 script = ExtResource("5_iugf6")
@@ -84635,6 +84964,14 @@ item = ["booth", 137.3, 46.0, 0.0]
 base = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 137.3, 0, 46)
 order = 4336
 
+[node name="Афишная тумба этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Киоски, лавки, площадки" unique_id=1020991617]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -81.5, 0, -37.7)
+script = ExtResource("5_iugf6")
+item = ["ad_column", -81.5, -37.7, 90.0]
+base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -81.5, 0, -37.7)
+order = 1000036
+metadata/patch_stage = "1_street"
+
 [node name="Машины и техника" type="Node3D" parent="Filler/Наполнение" unique_id=2142079305]
 
 [node name="fire_truck 0001" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=2037448214]
@@ -85092,13 +85429,6 @@ item = ["truck", 88.9, 136.0, 180.9, 1.0, 0.0, 6.0]
 base = Transform3D(-0.9998766, 0, -0.01570741, 0, 1, 0, 0.01570741, 0, -0.9998766, 88.9, 0, 136)
 order = 4276
 
-[node name="Грузовик 0021" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=1713131326]
-transform = Transform3D(-0.036643688, 0, -0.9993284, 0, 1, 0, 0.9993284, 0, -0.036643688, -98, 0, -33.9)
-script = ExtResource("5_iugf6")
-item = ["truck", -98.0, -33.9, -92.1, 1.0, 0.0, 2.0]
-base = Transform3D(-0.036643688, 0, -0.9993284, 0, 1, 0, 0.9993284, 0, -0.036643688, -98, 0, -33.9)
-order = 4279
-
 [node name="Грузовик 0022" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=660096862]
 transform = Transform3D(-0.0401318, 0, 0.9991944, 0, 1, 0, -0.9991944, 0, -0.0401318, -66, 0, 2.6)
 script = ExtResource("5_iugf6")
@@ -85147,6 +85477,14 @@ script = ExtResource("5_iugf6")
 item = ["trailer", 134.95, 28.0, 90.0]
 base = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 134.95, 0, 28)
 order = 4328
+
+[node name="Грузовик этап 1_street 1" type="Node3D" parent="Filler/Наполнение/Машины и техника" unique_id=1993567863]
+transform = Transform3D(-0.036643688, 0, -0.9993284, 0, 1, 0, 0.9993284, 0, -0.036643688, -99.05, 0, -33.9)
+script = ExtResource("5_iugf6")
+item = ["truck", -99.05, -33.9, -92.1, 1.0, 0.0, 2.0]
+base = Transform3D(-0.036643688, 0, -0.9993284, 0, 1, 0, 0.9993284, 0, -0.036643688, -99.05, 0, -33.9)
+order = 1000018
+metadata/patch_stage = "1_street"
 
 [node name="Гаражи, контейнеры, будки" type="Node3D" parent="Filler/Наполнение" unique_id=900652861]
 
@@ -91246,7 +91584,7 @@ footprint = Vector2(64, 16)
 floors = 9
 story_height = 3.1
 label = "недострой ЖК, 9 эт."
-metadata/height_m = 27.900000000000002
+metadata/height_m = 27.9
 metadata/enterable = true
 metadata/loot_count = 0
 
@@ -91364,7 +91702,7 @@ floors = 58
 story_height = 3.3
 label = "ЖК «Вершина», башня 2 — 58 этажей"
 metadata/lift = 9.3
-metadata/height_m = 191.39999999999998
+metadata/height_m = 191.4
 metadata/enterable = false
 metadata/loot_count = 0
 

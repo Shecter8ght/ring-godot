@@ -449,6 +449,10 @@ python -X utf8 tools/prospekt_vershina_plan.py                 # «Проспе�
 python -X utf8 tools/prospekt_north_side_plan.py              # «Проспект», северная сторона проспекта: чертежи предложения — квартал, развёртка
                                                               # и карманы, банк «Капитал» по этажам, автомойка «Блеск» → docs/design/prospekt_north_*.png;
                                                               # в сцену не внесено (docs/design/prospekt_map.md §22)
+python -X utf8 tools/prospekt_patch.py <этап>                    # «Проспект», перенос чертежей этапами (docs/tasks/prospekt_north_vershina_build.md): патч этапа
+                                                              # (1_street …) из словарей чертежей → data/blockouts/prospekt_patch_<этап>.json: remove (вещи, куски улиц, узлы) и add
+tools/godot.cmd --headless res://tools/prospekt_apply_patch.tscn -- <этап> # применить патч к scenes/levels/prospekt_study.tscn: убрать и добавить узлы (PlanPiece, PropSpot),
+                                                              # у добавленных meta patch_stage; повтор того же этапа — без дубликатов; копию сцены сделать до первого запуска
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
