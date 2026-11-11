@@ -26,13 +26,13 @@ const DAYLIGHT := [
 const ROOM_BOUNCE := [
 	["Washroom ambient bounce", Vector3(-6.10, 1.65, -3.94), 4.25, .20, "WashroomDoor",
 		["WashroomShell", "WashroomProps", "Mirror", "WashroomDoor"]],
-	["Bin bounce", Vector3(-7.05, .36, -3.73), 1.15, .16, "WashroomDoor",
+	["Bin bounce", Vector3(-7.02, .24, -4.21), .82, .25, "WashroomDoor",
 		["WashroomProps"]],
 	["Bar ambient bounce", Vector3(2.86, 1.19, .75), 4.40, .64, "",
 		["Bar", "FridgeMilk", "FridgePastry"]],
 	["Utility ambient bounce", Vector3(6.04, 2.22, 2.34), 4.80, .37, "StockDoor",
 		["Room", "StockWalls", "StockProps", "StockPrint", "StockDoor", "UtilityCabinetDoor", "TileSurface_3"]],
-	["Passage ambient bounce", Vector3(6.0, 1.30, -10.88), 8.40, .26, "StockRearDoor",
+	["Passage ambient bounce", Vector3(6.0, 1.30, -10.88), 8.40, .17, "StockRearDoor",
 		["Corridor", "DeliveryDoor", "Corridor roof", "Corridor end west", "Corridor end east", "Corridor exit lintel"]],
 ]
 
