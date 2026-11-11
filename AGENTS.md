@@ -5,6 +5,8 @@
 
 **Начать с:** `docs/OWNER_NOTES.md` (решения и предпочтения владельца, как с ним работать), конец
 `docs/STATUS.md` (что сделано последним), `docs/BACKLOG.md` (что ждёт; помеченное «СЛЕДУЮЩЕЕ» — первым).
+Порядок работ до демоверсии — `data/roadmap.json` (в игре: Esc → «Дорожная карта»); закончил работу из списка —
+поставь ей статус там же.
 
 ## Производственные ограничения сюжета (владелец, 2026-10-16)
 
@@ -796,6 +798,10 @@ tools/godot.cmd --headless res://tools/engraver_head_test.tscn # головка 
 tools/godot.cmd --headless res://tools/trade_net_test.tscn -- host # + «-- client» через 3 с (порт 17793): обмен вещами в убежище и в рейде — отмена, обмен, рюкзак напарника виден, разошлись — отмена
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/workbench_repair_test.tscn # верстак, ремонт: изношенное плашками без прокрутки, починить одно и всё разом, нет денег — кнопки выключены; снимок workbench_repair
 tools/godot.cmd --headless res://tools/hideout_keys_test.tscn # клавиши под окном убежища: открыт торговец или набирают текст — персонаж не ходит и не приседает
+tools/godot.cmd --headless res://tools/roadmap_test.tscn    # дорожная карта до демоверсии (Esc → «Дорожная карта», то же в главном меню; RoadmapWindow,
+                                                              # RoadmapData): список работ data/roadmap.json читается без ошибок, счёт «сделано / всего» по разделам и этапам,
+                                                              # отметка из игры пишется в этот же файл и не затирает ручные правки, фильтр «только не сделанное», «отложено»;
+                                                              # с окном (--windowed --resolution 1600x900) — снимки roadmap_*
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/tv_light_shots.tscn # свет от телевизора ночью без генератора: видно мебель и дальнюю стену; снимки tv_light_*
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_rigs.py # разгрузки rig_*: модели (-- --preview <папка> — превью); затем --import и icon_bake -- rig_belt rig_chest rig_assault rig_heavy
 tools/godot.cmd --headless res://tools/holster_test.tscn    # оружие убирается клавишей своего слота и достаётся ею же, бег быстрее; с открытым рюкзаком в рейде персонаж стоит

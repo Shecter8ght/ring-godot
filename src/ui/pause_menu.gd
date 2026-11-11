@@ -114,6 +114,7 @@ func _ready() -> void:
 	_main.add_child(_button("Управление", func() -> void: _show_side(_controls)))
 	_main.add_child(_button("Настройки", func() -> void: _show_side(_settings)))
 	_main.add_child(_button("Звуковой стенд", open_audio_bench))
+	_main.add_child(_button("Дорожная карта", open_roadmap))
 	_main.add_child(_button("Читы", open_cheats))
 	_leave = _button("Покинуть рейд", _on_leave)
 	_main.add_child(_leave)
@@ -152,6 +153,12 @@ func open_audio_bench() -> void:
 			return
 	var bench: CanvasLayer = (load("res://src/ui/audio_bench.gd") as Script).new() as CanvasLayer
 	get_tree().root.add_child(bench)
+
+
+## Дорожная карта до демоверсии: список работ со счётом (RoadmapWindow, data/roadmap.json).
+## Меню под окном остаётся открытым: закрыл окно — вернулся в меню.
+func open_roadmap() -> void:
+	RoadmapWindow.open_in(get_tree())
 
 
 func _fill_controls() -> void:

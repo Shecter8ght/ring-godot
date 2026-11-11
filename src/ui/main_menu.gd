@@ -71,6 +71,7 @@ func _build() -> void:
 	left.add_child(_big("Собрание (кооп)", _show_coop))
 	left.add_child(_big("Настройки", func() -> void: Pause.open_settings()))
 	left.add_child(_big("Стенды", _show_labs))
+	left.add_child(_big("Дорожная карта", func() -> void: RoadmapWindow.open_in(get_tree())))
 	left.add_child(_big("Выход", func() -> void: get_tree().quit()))
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
