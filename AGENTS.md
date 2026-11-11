@@ -406,6 +406,13 @@ tools/prospekt_study.cmd                                      # прогулка
                                                               # не пройти; -- shots — снимки docs/screens/prospekt/ (PROSPEKT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр,
                                                               # несколько — через «;», или имена готовых кадров); PROSPEKT_LIGHT=all_variants -- shots — стенд света
                                                               # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png
+tools/paving_probe.cmd                                        # стенд покрытий «Проспекта» по фото владельца (docs/design/prospekt_paving.md): три куска
+                                                              # улицы А / Б / В — газон, бордюры ГОСТ 6665, тротуар, дорога с зеброй, площадь у вокзала; детская
+                                                              # и корт; F2 — время, F3 — погода, F5–F8 — куски; -- shots — снимки docs/screens/paving_probe
+                                                              # (PAVING_ONLY, PAVING_PLAIN=1 — без шейдеров покрытий, замер их стоимости); шейдер — StreetPaving;
+                                                              # люки и решётка ливнёвки — python -X utf8 tools/gen_street_iron_textures.py
+tools/godot.cmd --headless res://tools/prospekt_surfaces_test.tscn # «Проспект»: из чего поверхности для шагов, гильз и попаданий (Surfaces) —
+                                                              # 14 точек: асфальт, плитка, газоны, крошка, корт, грунт стройки, паркинг, фонтан, бордюр, люк, решётка
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
@@ -675,12 +682,22 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/smg03_shots.tscn # 
 #   с рулями и стабилизаторами на шарнирах; отчёт osoka.json; линия прицела — по +Z модели, труба выше неё на 6,6°) → --import →
 #   python -X utf8 tools/osoka/game_imports.py → --import; данные — python -X utf8 tools/osoka/game_data.py (calibers.zr36, ammo.msl_zr36,
 #   models.osoka, weapons.wpn_mp_01, хват osoka); у Михалыча — каталог 5 (tools/gen_trader_catalogs.py)
+# Тепловизор ПН-36Т «ПОЛЫНЬ» (optic_polyn_01, по мотивам 1ПН97) в игру: "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup
+#   --python-exit-code 1 --python tools/osoka/sight_export.py [-- <папка карт>] (игровая сетка Тепловизор/work/thermal_game_uv_v01.blend +
+#   карты «Тепловизор_износ_этап2_v1_карты» → assets/models/attachments/polyn: polyn.gltf — Body, наглазник BodyEyecup, рычажок
+#   BodyLever и крышка объектива BodyCap своими узлами с осями, Body_LOD1; отчёт polyn.json — в осях «Осоки», начало — точка
+#   крепления) → --import → python -X utf8 tools/osoka/game_imports.py → --import; данные — тот же tools/osoka/game_data.py
+#   (attachments.optic_polyn_01, сокет optic_primary «Осоки» — интерфейс OSOKA_PN, fold_sights); экран окуляра — CameraRig
+#   (_update_display), тепловой канал — src/combat/ThermalView, знаки — OsokaHud, числа — Balance.THERMAL_SIGHT
 tools/osoka_range.cmd                                         # стенд «Осоки» на карте «Плотина» (мир tools/heli_study.tscn, как у dam_play):
                                                               # по маршруту задания летает учебный вертолёт (HeliTarget, процедурный звук винтов),
                                                               # игрок во дворе лесопилки; ПКМ — головка ищет, держать цель в кольце мушки — захват
                                                               # (ровный писк, зелёная метка), ЛКМ — пуск, R — новая труба;
                                                               # --headless res://tools/osoka_range.tscn -- check — захват, пуск, попадание, падение,
                                                               # без захвата пуска нет, сбить осветительную ракету; -- shots (с окном) — снимки osoka_*
+                                                              # на «Осоке» — тепловизор «ПОЛЫНЬ» (-- bare — без него): в окуляре кольцо головки,
+                                                              # рамка захвата и дальность, X — канал «ДЕНЬ / ТЕПЛО»; check ещё — прицел на модели,
+                                                              # прицельные сложены, тёплый вертолёт только в тепловом канале; OSOKA_TAG — приставка снимков
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b --factory-startup --python-exit-code 1 --python tools/smg03/render_street.py -- <папка> [кадр,…] [ширина высота выборки] [сцена.blend]
                                                               # ИЗЛОМ-45, рендеры на улице: в статике, затвор на задержке, приклад сложен,
                                                               # очередь (вспышка, гильзы), на асфальте; позы — tools/smg03/render_poses.py
@@ -714,7 +731,6 @@ python tools/import_weapon_model.py glock17_gen5            # Glock 17 Gen5 из
 tools/godot.cmd --headless res://tools/glock_test.tscn        # Glock: детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # Glock: хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
 tools/godot.cmd --headless res://tools/export_weapon_refs.tscn -- "out=<папка>" # все стволы игры (и ГРАНЬ-15 с обвесами под левую руку) в GLB — образцы для хватов в Blender
-tools/godot.cmd res://tools/mods_gallery.tscn                # витрина обвесов: сбоку, 3/4, крупные планы, вид из глаза
 tools/godot.cmd --headless res://tools/build_test.tscn       # сборка деревом (WeaponBuild): старый угловой → кронштейн, пазы 20 мм, «занято»/«закроет прицел», кронштейн снимается с прицелом, линии прицелов
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # снимки сборок: кронштейн 45° справа/слева, проставка, поворотный; docs/screens/build_*.png
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/thumb_shots.tscn # миниатюры экземпляров в сетке рюкзака (сборка, вынутый магазин, магазин на 60); docs/screens/thumb_*.png
@@ -784,17 +800,13 @@ tools/godot.cmd res://tools/vault_test.tscn                # перелезан�
 tools/godot.cmd --headless res://tools/climb_test.tscn     # залезть наверх (Climb: машина, ящик, край; тонкое — по-прежнему через) и вертикальная
                                                               # лестница (Ladder): схватиться, вверх, шаг на крышу, вниз, спрыгнуть; мародёр по лестнице; с окном — снимки climb_*
 tools/godot.cmd res://tools/info_shots.tscn                # снимки окна описания предмета (info_*; ствол 47 % и прицел 30 % — состояние процентом) и прицела гранаты (nade_aim)
-tools/godot.cmd res://tools/hideout_move_probe.tscn          # скорость в убежище: шаг / бег (с оружием, от первого лица)
-tools/godot.cmd res://tools/sound_bench.tscn               # стенд звуков: одна страница — сворачиваемые разделы (оружие → классы → стволы, общие наборы;
-                                                              # разделы каталога → подгруппы → карточки событий); справа событие: слушать в разных местах /
-                                                              # вдали / за стеной / очередью, назначить запись проекта нескольким событиям, снять запасной
-                                                              # набор или синтез (data/sound_active.json); «Входящие» — файлы из _sound_try/ → assets/audio.
-                                                              # Снимок: -- capture:res://_sound_try/b.png select:<id> open:all
-tools/godot.cmd --headless res://tools/sound_bench_test.tscn # стенд звуков: каталог покрывает всё, что зовёт игра; страница и карточки; назначения и снятие
-                                                              # (и в Audio); новые файлы, отбор, перенос, CREDITS, воспроизведение
+# Звукового стенда нет (удалён по решению владельца 2026-10-21). Звуки оружия: владелец прописывает список (docs/weapon_sounds.md),
+# агент сверяет его с кодом (подключены ли механики) и сам следит за полнотой списка — см. docs/OWNER_NOTES.md, «Звук».
+tools/godot.cmd --windowed --resolution 640x360 res://tools/weapon_sounds_test.tscn # звуки оружия от механики: гильза по полу под ней (плитка / металл / мягкое, катится на твёрдом),
+                                                              # у задержки два звука (затвор назад и вперёд), без записей — тишина; без окна Godot после ошибки скрипта висит
 python tools/sound_catalog_md.py                               # список всех звуков для чтения: docs/sound_catalog.md
 python -X utf8 tools/prepare_firearm_layers.py [--only ключ,ключ] # выстрелы CC0-библиотеки (_asset_src/sound_libraries) слоями дистанции:
-                                                              # свой, вблизи, средняя, вдали, очень далеко → кандидаты стенда _sound_try/Выстрелы_CC0_дистанции
+                                                              # свой, вблизи, средняя, вдали, очень далеко → кандидаты в _sound_try/Выстрелы_CC0_дистанции
 tools/godot.cmd --headless res://tools/shot_layers_test.tscn  # слои дистанции выстрела: какой слой на каком расстоянии, переход без провала громкости,
                                                               # свой выстрел — своего набора, очередь внахлёст с пределом, шина «Выстрелы» с потолком
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/npc_kit/<этап>.py [-- render]
@@ -845,8 +857,8 @@ src/combat/    weapon_models.gd (процедурное оружие; в рук�
                weapon_stats.gd (характеристики с обвесами — одно место расчёта), grenade.gd, ragdoll.gd, target.gd (мишени),
                health.gd, hitscan.gd (выстрел лучом + разброс), tracer.gd, surfaces.gd (из чего
                поверхность в точке попадания), impact_fx.gd (частицы, декали, звук удара)
-src/audio/     audio_system.gd — явные назначения data/audio_events.json; пустое действие молчит.
-               Стенд Sonora 1.3, действия моделей — data/weapon_sound_slots.json; семейств и синтеза нет.
+src/audio/     audio_system.gd — только явные назначения data/audio_events.json; пустое действие молчит.
+               Стенд — Sonora Studio 1.3, действия моделей — data/weapon_sound_slots.json; общих семейств и синтеза нет.
                Постэффекты Godot запрещены решением владельца 2026-10-21: обработка в готовой записи; в игре — выбор и 3D-громкость.
 src/world/     сборка сектора из данных, коллизии, навигация, шум/зрение
 src/net/       network.gd (autoload `Net` — host/join, `Net.is_networked()`), lobby.gd
@@ -931,7 +943,8 @@ docs/          STATUS.md (что сделано / что дальше), реше
 5. **Сцены-ноды.** Каждая сущность — своя сцена с понятным деревом узлов, чтобы её можно было
    открыть в редакторе и поправить руками. Не прятать всё в один скрипт-монолит.
 6. **Ассеты.** Из интернета — **только текстуры** (CC0 / CC-BY); **все модели — свои, в Blender, в стиле реализма**
-   (решение владельца 2026-10-24; прежние импортированные модели пропсов ждут его решения о замене). Текстуры — CC0 / CC-BY
+   (решение владельца 2026-10-24; прежние импортированные модели пропсов ждут его решения о замене). Исключение —
+   растительность Poly Haven (CC0: трава, бурьян, цветы, кусты, деревья) — можно (владелец 2026-11-07). Текстуры — CC0 / CC-BY
    (или собственные). Материалы, генераторы, кисти и альфы для Substance Painter — ещё Substance 3D Community
    Assets (Adobe Community Assets License 1.1, решение владельца 2026-10-26): в игру — только запечённым
    результатом, источник — в `assets/CREDITS.md`, сырьё — в `_asset_src/<id>/` с license.txt; сами файлы не
@@ -948,6 +961,9 @@ docs/          STATUS.md (что сделано / что дальше), реше
    (если были); сохранять предоставленные уведомления об авторских правах и лицензии. Всё это фиксировать
    в `assets/CREDITS.md`; атрибуция должна быть доступна игроку в поставке игры, а не только в репозитории.
    Для внешних ассетов должен быть процедурный запасной вариант — проект обязан запускаться
+   без `assets/models` и `assets/textures`.
+7. **Нет `any`-стиля.** Типизированный GDScript: аннотации у всех переменных, аргументов, возвратов.
+8. **Комментарии — по-русски, о смысле, не о синтаксисе.** Имена — по-английски.
 9. **Масштаб (решение владельца 2026-10-24, стенд `tools/scale_probe.tscn`, набор E).** Предметы, которые человек
    берёт и трогает, — 1:1: оружие, руки, NPC, машины, мебель, ларьки, прилавки, ступени, бордюры, знаки. **Проходы и
    помещения — × 1,3 по ширине и × 1,15 по высоте** от реальных: дверные проёмы (0,9 × 2,1 → 1,17 × 2,42), ширина
@@ -985,5 +1001,5 @@ docs/          STATUS.md (что сделано / что дальше), реше
 - После каждой законченной задачи — `git push`. Бинарники идут через LFS автоматически (`.gitattributes`).
 - Конфликт в `.tscn`/`.tres` решает тот, кто пришёл вторым: перечитать сцену, применить свои
   изменения заново, не сливать текстом вслепую.
-- Папки `референсы/`, `_asset_src/` и `_sound_try/` (звуки на пробу для стенда) никогда не коммитятся.
+- Папки `референсы/`, `_asset_src/` и `_sound_try/` (звуки на пробу) никогда не коммитятся.
 - Агент дописывает в `docs/STATUS.md`, что сделал и что осталось — это единственный общий журнал.

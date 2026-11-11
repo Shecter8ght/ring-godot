@@ -1,0 +1,94 @@
+{
+  "source": "E:/Models Blender/ENVIRONMENT/RING_Dorm_Items/картинки/ПРОМТЫ.md",
+  "generator": "built-in image_gen",
+  "destination": "E:/Models Blender/ENVIRONMENT/RING_Dorm_Items/картинки",
+  "notes": [
+    "Initially saved in game root; moved to the source prompts folder at the user's request.",
+    "Real textbook publishers replaced with fictional imprints to follow the source's no-real-brands constraint."
+  ],
+  "images": [
+    {
+      "filename": "plakat_tb.png",
+      "prompt": "Create one game prop printable texture, plakat_tb.png. Soviet occupational safety poster of the 1970s, flat lithographic illustration, limited red black ochre white palette. Worker in overalls and hard hat withdraws his hand from a switch on an electrical panel. Large Cyrillic headline at top exactly «НЕ ВКЛЮЧАТЬ! РАБОТАЮТ ЛЮДИ». Small footer «Плакат по технике безопасности № 14». Portrait 2:3. Entire frame is the flat poster artwork, straight on, full bleed, no margins, no frame, no wall, no mockup, no perspective. Pristine newly printed condition, no dirt, wear, folds or distress. No real brands, logos or recognizable people."
+    },
+    {
+      "filename": "plakat_pozhar.png",
+      "prompt": "Portrait 2:3 Soviet fire-safety poster of the 1970s, flat lithographic printing with red yellow black palette. Electric hotplate with a forgotten kettle and tongues of flame, hand pulls the plug from a socket. Large exact Cyrillic slogan «УХОДЯ — ВЫКЛЮЧИ ЭЛЕКТРОПРИБОРЫ!» and footer «Пожарная безопасность в общежитии».\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "plakat_go.png",
+      "prompt": "Portrait 2:3 Soviet civil defense poster of the 1980s, flat lithographic green black red palette. Four numbered square illustrations 1–4 showing a person putting on an unbranded GP-5 style gas mask. Exact headline «ГРАЖДАНСКАЯ ОБОРОНА — ДЕЛО КАЖДОГО». Captions under four squares respectively «Задержи дыхание», «Открой глаза», «Надень маску», «Сделай выдох». Illustrations of equipment and steps as period fictional game set dressing.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "plakat_gruppa.png",
+      "prompt": "Portrait 2:3 concert poster of a fictional Russian rock band «СУХАЯ ГРОЗА», late 1990s style: high contrast photograph of FOUR musicians on stage backlit, faces unrecognizable in shadow. Large Cyrillic band name «СУХАЯ ГРОЗА», lower concert details «ДК «Строитель» · 14 ноября · 19:00».\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture.",
+      "correction_prompt": "Change ONLY typography ink finish. Preserve exact existing composition, photograph, colors and all Cyrillic wording. Make every printed letter and number clean and solid, with no mottling, holes, scratches, speckled distress or worn printing. Main band title СУХАЯ ГРОЗА can keep its energetic brush-shaped outlines, but interior of each brush-shaped letter must be fully solid cream or red, pristine newly printed ink. Bottom concert detail letters also solid clean cream. No folds, stains or wear. Portrait 2:3 flat full bleed."
+    },
+    {
+      "filename": "plakat_film.png",
+      "prompt": "Portrait 2:3 poster for fictional Russian thriller «ПОСЛЕДНИЙ ЭТАЖ». Silhouette of a person in a dark dormitory corridor with one illuminated ceiling lamp. Large Cyrillic title «ПОСЛЕДНИЙ ЭТАЖ», small bottom line «скоро в кино». No real actors or studios. Cinematic suspense.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture.",
+      "correction_prompt": "Change ONLY the ink finish of the title lettering ПОСЛЕДНИЙ ЭТАЖ. Keep its exact spelling, size and placement, but make all letter interiors solid clean white/cream, with no scratches, distress, stains, texture holes or worn printing. Preserve entire photographic dormitory corridor scene, silhouette, lighting, layout and bottom text СКОРО В КИНО unchanged. This is a pristine newly printed film poster. Portrait 2:3 flat full bleed."
+    },
+    {
+      "filename": "vyrezka_1.png",
+      "prompt": "Portrait A4 aspect ratio 1:1.41, flat printed page of a fictional Russian magazine «ИЗОБРЕТАТЕЛЬ». Large photograph of a motorcycle with sidecar in front of a forest, editorial columns of Russian text below and alongside, text may be small. Unbranded motorcycle, convincing magazine layout.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "vyrezka_2.png",
+      "prompt": "Portrait A4 aspect ratio 1:1.41, single flat page from a fictional Russian magazine. Large photograph of a mountain lake in the Altai with a camping tent on shore, exact Cyrillic headline «ЛЕТО НА АЛТАЕ» and editorial columns of small Russian text. Pristine rectangular printed page artwork with no torn edges.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "kalendar_foto.png",
+      "prompt": "Landscape 3:2 natural photorealistic calendar photograph, autumn birch forest beside a river, soft evening sunlight, golden leaves, realistic calm river reflections. No text or calendar grid.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "tablica_fizika.png",
+      "prompt": "Portrait 7:10 Soviet university physics educational chart. Exact large Cyrillic title «ЗАКОНЫ ОТРАЖЕНИЯ И ПРЕЛОМЛЕНИЯ СВЕТА». Rigorous clean diagrams of incident/reflected/refracted light rays, prism and lenses, sensible formulae θi=θr and n₁ sin θ₁=n₂ sin θ₂. Blue red yellow filled diagrams on pristine white background, strict academic typography. Flat printed diagram, not a photograph of paper.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture.",
+      "correction_prompt": "Make a minimal precise correction ONLY in the TOP LEFT diagram labeled ЗАКОНЫ ОТРАЖЕНИЯ СВЕТА. The reflected ray on the RIGHT side of the normal, labeled Отражённый луч, has the wrong arrow direction. Reverse that right ray's arrow so it travels FROM the mirror contact point upward and right AWAY FROM the mirror. Erase the existing downward-left arrowhead on this right-hand red ray and place a single arrowhead near its upper-right end pointing UP AND RIGHT. The left incident ray remains pointing down and right toward the mirror. Preserve all text, layout, lines, formulae, colors, and every other panel exactly. Flat portrait 7:10."
+    },
+    {
+      "filename": "chertezh.png",
+      "prompt": "Landscape A1 aspect ratio 1.41:1 engineering drawing of a pinion shaft in THREE aligned orthographic views with dimensions, sectional cut and diagonal hatching, fine black technical linework on pure white like fresh plotter printing. INCLUDE technical drafting border and bottom-right title block in GOST style as part of the drawing artwork, no external picture frame. Exact title «Вал-шестерня», drawing number «ДП 151001.012.00.00».\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "kartina_1.png",
+      "prompt": "Portrait 4:5 oil landscape painting in the tradition of nineteenth-century Russian realist painters: pine forest on a high riverbank, summer morning, mist above the river. Skilled realistic oil brushwork, natural colors. Painting fills the canvas without physical frame or signature.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "kartina_2.png",
+      "prompt": "Portrait 4:5 oil landscape painting in the tradition of the Peredvizhniki: winter village, wooden log cottages under snow, a sleigh track leading into the village, sunset. Skilled realistic brushwork, cold snow and warm sunset light. Painting only, no frame or signature.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "kartina_3.png",
+      "prompt": "Portrait 4:5 realistic oil still-life painting: flowering lilac branches in a simple glass jar on a windowsill, courtyard beyond the window, warm light. Skilled painterly detail and visible oil brushwork, no signature, no frame.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "uchebnik_1.png",
+      "prompt": "Portrait 7:10 FRONT COVER ONLY of a Soviet university hardcover textbook from 1986. Flat dark navy-blue design with white typography and a small engineering diagram of a beam on supports. Exact Cyrillic text: author «В. Г. Пашков», large title «СОПРОТИВЛЕНИЕ МАТЕРИАЛОВ», fictional publishing imprint at bottom «УЧЁНЫЙ МИР · 1986». No book spine, no book thickness, no perspective.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "uchebnik_2.png",
+      "prompt": "Portrait 7:10 FRONT COVER ONLY of a Soviet/Russian university hardcover textbook from 1991. Restrained burgundy cover with gold foil typography. Exact Cyrillic text author «Н. С. Ермолин», large title «ВЫСШАЯ МАТЕМАТИКА», separate «Том 2», fictional publisher and year at bottom «ФОРМУЛА · 1991». No spine or thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "uchebnik_3.png",
+      "prompt": "Portrait 7:10 FRONT COVER ONLY of a Soviet university hardcover textbook from 1979. Grey-green restrained cover, diagram of intersecting planes. Exact Cyrillic text author «А. И. Крылова», large title «НАЧЕРТАТЕЛЬНАЯ ГЕОМЕТРИЯ», fictional publishing imprint and year at bottom «УЧЕБНЫЙ ГОРИЗОНТ · 1979». No spine or thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "uchebnik_4.png",
+      "prompt": "Portrait 7:10 FRONT COVER ONLY of a Russian university hardcover textbook from 2003. Restrained modern white cover with a blue stripe and a photograph of gears. Exact Cyrillic text author «С. М. Тарасов», large title «ТЕОРЕТИЧЕСКАЯ МЕХАНИКА», fictional publishing imprint and year at bottom «УЧЁНЫЙ МИР · 2003». No spine or thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "tetrad_1.png",
+      "prompt": "Portrait aspect ratio 170:205 FRONT COVER ONLY of a Russian 12-sheet school exercise notebook. Light green paper color, leaf motif along the edges, front rectangular printed label containing exact Cyrillic text «ТЕТРАДЬ» and blank ruled writing fields «по __________», «ученика __________». Decorative border is part of the printed design. No spine or book thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "tetrad_2.png",
+      "prompt": "Portrait aspect ratio 170:205 FRONT COVER ONLY of a Russian school exercise notebook. Blue cover color with a silhouette illustration of a sailboat, printed rectangular writing label with Cyrillic text «ТЕТРАДЬ», «по __________», «ученика __________» and blank ruled writing lines. No spine or book thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    },
+    {
+      "filename": "tetrad_obshchaya.png",
+      "prompt": "Portrait aspect ratio 165:205 FRONT COVER ONLY of a Russian 48-sheet exercise notebook. Dark navy blue clothlike paper cover texture, large exact Cyrillic title «ОБЩАЯ ТЕТРАДЬ», bottom text «48 листов · клетка». Restrained practical design. No spine or thickness, flat artwork.\nOnly one flat full-bleed artwork filling the entire frame, straight on, no margins, physical frame, wall or mockup. Pristine NEW condition with no aging, dirt, damage, folds or distressed paper. No real companies, brands, logos, recognizable people, or watermark. This is a game prop texture."
+    }
+  ]
+}

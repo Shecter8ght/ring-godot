@@ -45,6 +45,13 @@
 - `assets/textures/worn_asphalt/` — Worn Asphalt, Amal Kumar, CC0 1.0, https://polyhaven.com/a/worn_asphalt — асфальт двора
 - `assets/textures/worn_corrugated_iron/` — Worn Corrugated Iron, Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_corrugated_iron — обшивка балконов, навесы
 - `assets/textures/worn_tile_floor/` — Worn Tile Floor, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/worn_tile_floor — пол торгового зала
+- `assets/textures/pavement_04/` — Pavement 04, Jan Burghardt, CC0 1.0, https://polyhaven.com/a/pavement_04 — «Проспект»: серый тротуарный кирпичик ложком (тротуары, фотоскан)
+- `assets/textures/herringbone_pavement_03/` — Herringbone Pavement 03, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/herringbone_pavement_03 — «Проспект»: тёмная обветренная ёлочка (площадь у вокзала, фотоскан)
+- `assets/textures/aerial_asphalt_01/` — Aerial Asphalt 01, Rob Tuytel, CC0 1.0, https://polyhaven.com/a/aerial_asphalt_01 — «Проспект»: асфальт проспекта — трещины на 30 м без повтора (крупный слой)
+- `assets/textures/clean_asphalt/` — Clean Asphalt, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/clean_asphalt — «Проспект»: зерно асфальта вблизи (мелкий слой) и основа покрытия корта
+- `assets/textures/road_damaged/` — Road Damaged, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/road_damaged — «Проспект»: разбитый асфальт с выбоинами (дворы, проезды)
+- `assets/textures/rubberized_track/` — Rubberized Track, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/rubberized_track — «Проспект»: резиновая крошка детской площадки
+- `assets/textures/asphalt_track/` — Asphalt Track, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/asphalt_track — «Проспект»: зерно асфальта дороги вблизи — чёткие камешки без трещин (мелкий слой)
 
 ## Общежитие · материалы v03 (assets/textures/dorm_v3)
 
@@ -106,6 +113,12 @@
   шрифтами Windows (Bahnschrift, Arial, Segoe Print). Ящик для номеров — `assets/shelter/models/PH_PlasticCrate.glb`
   (Poly Haven, CC0 — см. раздел убежища).
 
+## Люки и решётка ливнёвки «Проспекта» (assets/textures/street_iron)
+
+- Собственные текстуры `tools/gen_street_iron_textures.py` (без внешних картинок): чугунный люк ГОСТ 3634-61 1968 года
+  по фото владельца, полимерный люк без марки, решётка дождеприёмника. Надписи — шрифт DejaVu Sans Bold (лицензия
+  Bitstream Vera, свободная; `_asset_src/fonts`).
+
 ## Оружие · ВЕРАС-54 (assets/models/weapons/veras54)
 
 - Модель, риг, текстуры (состояние 100) и руки FPS — собственные ассеты владельца проекта
@@ -145,7 +158,7 @@
 - `assets/textures/ring_vehicles/` — Rubber Tiles, Amal Kumar, CC0 1.0, https://polyhaven.com/a/rubber_tiles
 - `assets/textures/ring_vehicles/` — Denim Fabric 06, Greg Zaal (фото), Rico Cilliers (обработка), CC0 1.0, https://polyhaven.com/a/denim_fabric_06
 
-## Звук — отобрано на стенде (tools/sound_bench)
+## Звук — отобранные записи
 
 | Источник, лицензия | Исходный файл | Куда — звук |
 |---|---|---|
@@ -160,6 +173,11 @@
 | Stable audio · Сгенерировано владельцем проекта · собственный звук | сухой спуск 2_part_02.wav | guns/hg_02_dry_02.wav — Glock 17 Gen5 — Сухой спуск |
 | stable audio · Сгенерировано владельцем проекта · собственный звук | asphalt after rain.wav | steps/water_01.wav — Шаг по луже |
 | Stable audio · Сгенерировано владельцем проекта · собственный звук | выстрел.wav | guns/hg_01_shot_01.wav — ПМ — Выстрел вблизи |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 01_выстрел в помещении_правильный.wav | guns/hg_01_shot_room_01.wav — ПМ — Выстрел в небольшом помещении |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 02_выстрел в помещении_правильный2.wav | guns/hg_01_shot_room_02.wav — ПМ — Выстрел в небольшом помещении |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 03_выстрел в помещении_правильный3.wav | guns/hg_01_shot_room_03.wav — ПМ — Выстрел в небольшом помещении |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 04_выстрел в помещении_правильный4.wav | guns/hg_01_shot_room_04.wav — ПМ — Выстрел в небольшом помещении |
+| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 05_выстрел в помещении_правильный5.wav | guns/hg_01_shot_room_05.wav — ПМ — Выстрел в небольшом помещении |
 
 <!-- PM_MODEL_START -->
 | Free Firearm Sound Library — Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney · CC0 1.0 | A_5_01.wav | guns/mag_out_01.wav — Магазин отстёгнут |
@@ -221,6 +239,13 @@
   Сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
 - Учебный вертолёт стенда (`src/world/heli_target.gd`) — примитивы Godot; звуки винтов, пуска, двигателя ракеты и писк
   головки — процедурные (`src/combat/proc_sound.gd`), записей нет.
+- Тепловизор ПН-36Т «ПОЛЫНЬ» `assets/models/attachments/polyn/` (`polyn.gltf`, карты `polyn_100_*`) — собственная модель
+  по мотивам 1ПН97 «Маугли-2М» (Blender, форма v03, игровая сетка v01), отделка в Substance Painter (этап 1 v1, износ
+  этап 2 v1; ресурсы полки Painter — только запечённым результатом); игровые файлы — `tools/osoka/sight_export.py`,
+  исходники — `E:/Models Blender/WEAPONS/Верба — модель/Тепловизор/`, `_asset_src/osoka_polyn/`. Название и маркировка
+  вымышленные; надписи — шрифт DejaVu Sans Bold (лицензия — в разделе ливрей «Проспекта»). Рисунок отпечатков и
+  разводов — фото-маски CC0 1.0 ambientCG (https://ambientcg.com, лицензия https://docs.ambientcg.com/license/) —
+  Fingerprints003, Fingerprints005, Fingerprints007, Smear004, Smear006; сырьё — та же папка `Маски_АЛЬФА`.
 
 <!-- VSS_OPTICS_START -->
 ## Отдельная оптика ВСС
@@ -272,6 +297,23 @@
   (tools/build_zone01_foliage_textures.py, tools/build_zone01.py).
 - Фототекстуры поверхностей и фасадов — Poly Haven, CC0 (список выше, раздел текстур).
 
+## Санаторий · земля (assets/terrain/sanatorium_*)
+
+Массивы слоёв земли «Санатория» (tools/fetch_sanatorium_ground.py → tools/build_sanatorium_ground.py): фотосканы 4K,
+CC0 1.0. Изменения: цвет и нормаль сложены в массив слоёв 4K, AO, шероховатость и высота (растянута по уровням) —
+в один файл 2K. Сырьё и лицензии — `_asset_src/textures/<id>/`.
+
+- Grass004 — ambientCG (Lennart Demes), CC0 1.0, https://ambientcg.com/view?id=Grass004 — газон
+- Ground037 — ambientCG (Lennart Demes), CC0 1.0, https://ambientcg.com/view?id=Ground037 — вытоптанный газон
+- Forest Ground 03 — Rob Tuytel, CC0 1.0, https://polyhaven.com/a/forrest_ground_03 — хвойная подстилка
+- Forest Leaves 02 — Rob Tuytel, CC0 1.0, https://polyhaven.com/a/forest_leaves_02 — мох с сором
+- Forest Ground 04 — Rob Tuytel, Rico Cilliers, CC0 1.0, https://polyhaven.com/a/forest_ground_04 — грунт тропы
+- Lichen Rock — Rico Cilliers, CC0 1.0, https://polyhaven.com/a/lichen_rock — гранит с лишайником
+- Gravel Floor 02 — Jenelle van Heerden, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/gravel_floor_02 — щебень
+- Sand 03 — Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/sand_03 — песок пляжа
+
+Покрытия дорог и дорожек — наборы «Проспекта» (StreetPaving, список выше); трава — растительность Poly Haven зоны 1.
+
 ## Зона 1 · модели Sketchfab (CC-BY 4.0, assets/zone01/models/sf_*.glb)
 
 Скачаны владельцем, перевод в игру — tools/import_sketchfab.py (масштаб, упрощение, срез земли). Полный список библиотеки — docs/assets_sketchfab.md.
@@ -308,7 +350,6 @@
 - Лист — скан ambientCG LeafSet024 (CC0, https://ambientcg.com/view?id=LeafSet024), переформован в
   берёзовый лист (tools/build_birch_textures.py); береста — собственная процедурная текстура.
 - Тёмный низ ствола — ambientCG Bark001 (CC0, https://ambientcg.com/view?id=Bark001), assets/textures/bark001.
-
 ## Небо (assets/sky)
 
 - `assets/sky/qwantani_night_puresky.hdr` — Qwantani Night (Pure Sky), Greg Zaal, Jarod Guest, CC0 1.0, https://polyhaven.com/a/qwantani_night_puresky — ночное небо со звёздами (фон)
@@ -561,17 +602,26 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
   [Описание и проверки](../docs/assets/npc_m02_appearance.md); исходные карты не изменены,
   настройки поверхности остаются нативными слоями UCUPaint.
 
-## Sonora 1.3 — сохранённые комнатные выстрелы ПМ
 
-Записи Stable Audio, сгенерированные владельцем проекта; собственные звуки.
+<!-- Sonora Studio 20fadd7d-9d9d-4553-a308-be51b31b4bb8 -->
+Звук «Пистолет компактный 9×18 — выстрел»: `assets/audio/guns/hg01_01.wav`, `assets/audio/guns/hg01_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
 
-| Источник | Оригинал | Файл |
-|---|---|---|
-| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 01_выстрел в помещении_правильный.wav | guns/hg_01_shot_room_01.wav — ПМ — Выстрел в небольшом помещении |
-| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 02_выстрел в помещении_правильный2.wav | guns/hg_01_shot_room_02.wav — ПМ — Выстрел в небольшом помещении |
-| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 03_выстрел в помещении_правильный3.wav | guns/hg_01_shot_room_03.wav — ПМ — Выстрел в небольшом помещении |
-| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 04_выстрел в помещении_правильный4.wav | guns/hg_01_shot_room_04.wav — ПМ — Выстрел в небольшом помещении |
-| Stable Audio · Сгенерировано владельцем проекта · собственный звук | 05_выстрел в помещении_правильный5.wav | guns/hg_01_shot_room_05.wav — ПМ — Выстрел в небольшом помещении |
+
+<!-- Sonora Studio b270a99a-5ee3-4a25-bbaa-b50b5e0e23e4 -->
+Звук «ПМ — Выстрел — основной»: `assets/audio/guns/hg_01_shot_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 4311c6d8-c249-4b8b-8c7e-aebc9d761c52 -->
+Звук «ПМ — Выстрел с глушителем»: `assets/audio/guns/hg_01_shot_sup_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c1b697e6-5033-487c-bd1d-ccb24d7ca8c0 -->
+Звук «ПМ — Выстрел с глушителем»: `assets/audio/guns/hg_01_shot_sup_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio a5bb1a75-0589-4458-8b53-72ec4c80281a -->
+Звук «ПМ — Выстрел на улице»: `assets/audio/guns/hg_01_shot_outdoor_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
 
 <!-- Sonora Studio 5ced87c9-36e0-4648-afd5-5b6d49047df0 -->
 Звук «Выстрел — основной»: `assets/audio/sonora/wpn_hg_01_shot_01.wav`. Собственный звук / ИИ; источник: Восстановлен утверждённый импорт 2026-10-21T17-41-12-828Z_4fb7890b. Добавлен через Sonora Studio.
@@ -584,6 +634,54 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 <!-- Sonora Studio 1280ca56-2fdd-4f3f-985a-b5eaa46a2435 -->
 Звук «Выстрел на улице»: `assets/audio/sonora/wpn_hg_01_shot_outdoor_01.wav`. Собственный звук / ИИ; источник: Восстановлен утверждённый импорт 2026-10-21T18-57-38-242Z_ca268429. Добавлен через Sonora Studio.
 
+
+<!-- Sonora Studio 6b6c80ba-1fb4-46e5-8dd1-508cb0882faf -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_hg_01_shot_room_01.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 042cac78-4a69-4072-9f26-12f67b9de49e -->
+Звук «Выстрел в большом помещении»: `assets/audio/sonora/wpn_hg_01_shot_hall_01.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 1a427b22-bdfb-4527-8b59-2322b159f6f1 -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_01.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e53241b7-e2c2-4fdd-ba0f-c1d69aaaaf0c -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_hg_01_shot_sup_room_01.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 16b98b63-0031-4cea-a52d-0685fd839236 -->
+Звук «С глушителем в большом помещении»: `assets/audio/sonora/wpn_hg_01_shot_sup_hall_01.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_04.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_05.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 0d833944-b3db-45ea-b21c-0bdf1cdb004d -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_hg_01_shot_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_04.wav`, `assets/audio/sonora/wpn_hg_01_shot_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 960c8a03-b608-4986-9ecf-d107072d3486 -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_hg_01_shot_outdoor_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 1ee97045-ca9e-4b5a-a0f7-979c40c4ef93 -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_hg_01_shot_room_04.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_08.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_09.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_10.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e235f0b1-dd75-4299-afd9-1be8f2533ee9 -->
+Звук «Выстрел в большом помещении»: `assets/audio/sonora/wpn_hg_01_shot_hall_04.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_08.wav`, `assets/audio/sonora/wpn_hg_01_shot_hall_09.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 846b2a39-20fe-4a51-b6f4-80a715ad0c61 -->
+Звук «Выстрел с глушителем»: `assets/audio/sonora/wpn_hg_01_shot_suppressed_02.wav`, `assets/audio/sonora/wpn_hg_01_shot_suppressed_03.wav`, `assets/audio/sonora/wpn_hg_01_shot_suppressed_04.wav`, `assets/audio/sonora/wpn_hg_01_shot_suppressed_05.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 6a4d2ebe-6821-4860-a720-03606c27a6ef -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_hg_01_shot_sup_room_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 967d2556-b788-492e-ab22-ecb9d86af453 -->
+Звук «С глушителем в большом помещении»: `assets/audio/sonora/wpn_hg_01_shot_sup_hall_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_08.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_09.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_hall_10.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
 <!-- METKA4_GAME_20261022 -->
 ### ВЕЙР «МЕТКА-4» — 2026-10-22
 
@@ -595,6 +693,30 @@ FPS с руками и патронами — 21 396. Скрипты: `tools/pre
 Источники масок и их производных сохранены в библиотечных `sources.md`,
 `Проверки/Текстуры_v03/mask-sources.json`, `dust-detail.json`.
 Студийная HDRI Poly Haven в игру не экспортируется. Подробности — `docs/assets/metka4_game.md`.
+
+
+<!-- Sonora Studio f9fddef0-2f9a-44e3-81be-c5a5dde0c543 -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_ar_01_shot_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c741f9d5-a3e5-447f-b31f-cf2b365cca80 -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_ar_01_shot_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_04.wav`, `assets/audio/sonora/wpn_ar_01_shot_05.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 2ec9d433-33e1-472d-a9bf-fbef8a5ed73c -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_ar_01_shot_room_01.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 86e09e52-a4eb-430f-a034-fcc09e61db09 -->
+Звук «Выстрел с глушителем»: `assets/audio/sonora/wpn_ar_01_shot_suppressed_01.wav`, `assets/audio/sonora/wpn_ar_01_shot_suppressed_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_suppressed_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_suppressed_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 6b09da44-9061-4c2d-89bc-e1da19428071 -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_ar_01_shot_sup_room_01.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 2fedf984-7720-422d-b64a-97345de3e818 -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
 
 ## Urban 95 — городские модели «Проспекта» (`assets/models/urban95`)
 
@@ -634,6 +756,70 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
 - Сетки окуляра `pso_vss/pso_vss_reticle.png` (ПСО-1) и `scope_4x32/scope_4x32_reticle.png` — нарисованы скриптом
   `tools/vss_m_v8/reticles.py` для проекта RING; цифры — штриховой шрифт Hershey из OpenCV (общественное достояние).
 
+
+<!-- Sonora Studio 0bd77499-a4ce-400a-ad48-1fca68e90f30 -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_sp_02_shot_01.wav`, `assets/audio/sonora/wpn_sp_02_shot_02.wav`, `assets/audio/sonora/wpn_sp_02_shot_03.wav`, `assets/audio/sonora/wpn_sp_02_shot_04.wav`, `assets/audio/sonora/wpn_sp_02_shot_05.wav`, `assets/audio/sonora/wpn_sp_02_shot_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 13334686-7be9-4c38-a6a9-b4a5de3f639b -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_sp_02_shot_outdoor_01.wav`, `assets/audio/sonora/wpn_sp_02_shot_outdoor_02.wav`, `assets/audio/sonora/wpn_sp_02_shot_outdoor_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 26a30a77-d682-406f-a9ef-33caaef65a55 -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_sp_02_shot_outdoor_04.wav`, `assets/audio/sonora/wpn_sp_02_shot_outdoor_05.wav`, `assets/audio/sonora/wpn_sp_02_shot_outdoor_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio ccac5b76-6c2a-45a1-bb91-110a562c71b5 -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_sp_02_shot_sup_outdoor_01.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_outdoor_02.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_outdoor_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 4df4d16a-d91b-42f3-ab46-79c5d2fb1b18 -->
+Звук «Выстрел с глушителем»: `assets/audio/sonora/wpn_sp_02_shot_suppressed_01.wav`, `assets/audio/sonora/wpn_sp_02_shot_suppressed_02.wav`, `assets/audio/sonora/wpn_sp_02_shot_suppressed_03.wav`, `assets/audio/sonora/wpn_sp_02_shot_suppressed_04.wav`, `assets/audio/sonora/wpn_sp_02_shot_suppressed_05.wav`, `assets/audio/sonora/wpn_sp_02_shot_suppressed_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio a69bcb13-a3c8-4f3e-938c-c601890e0c1e -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_sp_02_shot_sup_room_01.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_room_02.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_room_03.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_room_04.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_room_05.wav`, `assets/audio/sonora/wpn_sp_02_shot_sup_room_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 95e43d76-cc44-421f-9a3b-3af1d142837f -->
+Звук «Магазин вынуть»: `assets/audio/sonora/wpn_sp_02_mag_out_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 89158949-c71f-45d9-9508-0bf353aba47f -->
+Звук «Магазин вставить»: `assets/audio/sonora/wpn_sp_02_mag_in_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 97c2827a-a6b4-4ae3-b7c1-5d6f64973d8f -->
+Звук «Перезарядка целиком»: `assets/audio/sonora/wpn_sp_02_reload_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e1272740-cd14-4b97-ba00-7788abd83fa7 -->
+Звук «Задержка / осечка»: `assets/audio/sonora/wpn_sp_02_jam_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio a7b88805-ffb0-4ede-9872-63d73246eb61 -->
+Звук «Сухой спуск»: `assets/audio/sonora/wpn_sp_02_dry_fire_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 40d96f44-6651-464d-b673-94e089e1f143 -->
+Звук «Поднять оружие»: `assets/audio/sonora/wpn_sp_02_ads_raise_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 8943bd32-351b-4656-a3b9-909e52f114d3 -->
+Звук «Опустить оружие»: `assets/audio/sonora/wpn_sp_02_ads_lower_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 89cf01e8-9cfd-4d27-ac41-8180f4382c07 -->
+Звук «Шаг: мокрый асфальт с лужами»: `assets/audio/sonora/step_asphalt_wet_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio efb97417-b69c-47ca-a69f-e95cff5dd0cb -->
+Звук «Шаг: мокрый асфальт с лужами»: `assets/audio/sonora/step_asphalt_wet_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 3bf63f4d-ab69-45bf-880b-b8d7294607b9 -->
+Звук «Шаг: гравий»: `assets/audio/sonora/sound_d9afcc31ccff41659f867c2e89c328eb_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
 ## Зона 1 · клёны и тополя (`assets/zone01/trees`)
 
 - Клён остролистный, клён ясенелистный, тополь берлинский — собственные модели проекта (генератор `tools/zone01_trees/` на
@@ -670,6 +856,54 @@ blue_metal_plate, rubber_tiles, rusty_metal_02 (https://polyhaven.com), плюс
   заводские материалы, маркировка и принятые исходники сохранены.
 
 
+<!-- Sonora Studio 68105731-0b3c-4edf-9cfb-8ebdb69cb66f -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_ar_09_shot_outdoor_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 41122187-b7d8-4df4-8279-c50f0f036b9e -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_ar_09_shot_outdoor_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio b0b8981e-fd3a-4480-8451-54a7104ec85d -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_ar_09_shot_outdoor_03.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e86bad6c-12fe-4acd-a8ae-bac5bc48a661 -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_ar_09_shot_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio a820cdae-73e8-40f6-813a-19aae7f52bfc -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_ar_09_shot_room_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 544dfaca-cb76-42fe-983c-1eb90c767e9d -->
+Звук «Выстрел в большом помещении»: `assets/audio/sonora/wpn_ar_09_shot_hall_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 516aa0f7-8a1d-46df-b7b9-450009d38382 -->
+Звук «Сухой спуск»: `assets/audio/sonora/wpn_ar_09_dry_fire_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c374060a-e73b-4442-8ff9-99d38f77a2d0 -->
+Звук «Задержка / осечка»: `assets/audio/sonora/wpn_ar_09_jam_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 883fded9-1844-4463-9e3c-b6d3af70d3c0 -->
+Звук «Выстрел с глушителем»: `assets/audio/sonora/wpn_ar_09_shot_suppressed_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e1ea7085-d367-4d9f-a058-b8cc409c73d4 -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_ar_09_shot_sup_outdoor_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 491ea35a-4765-4c09-9977-269eccba8b94 -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_ar_09_shot_sup_room_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio bf330033-cec2-4f47-b5aa-0e954824623c -->
+Звук «С глушителем в большом помещении»: `assets/audio/sonora/wpn_ar_09_shot_sup_hall_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
 ## Личный смартфон RING · 2026-11-04
 
 Собственные геометрия, процедурная графитовая отделка и интерфейс: tools/quest_phone/,
@@ -678,3 +912,207 @@ src/ui/phone_screen.gd. Пропорции по официальным спец�
 текстуры. Карты 2K запечены с принятого UCUPaint-исходника; стекло Godot — собственный
 Fresnel-шейдер. HDRI студии Blender упакован только в исходный .blend для просмотра,
 в игровой GLB/карты не входит. Руки — существующий ассет проекта, новая модель рук не добавлена.
+
+
+<!-- Sonora Studio 68e84ebe-eb3f-402f-a004-9c0c8fedde30 -->
+Звук «Выстрел — основной»: `assets/audio/sonora/wpn_smg_03_shot_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 158f7532-44a2-4234-8004-d218838dc04f -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_smg_03_shot_outdoor_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 81842ea6-7f14-4d3d-8ed5-c2e5e12f3035 -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_smg_03_shot_room_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c66162b3-d425-4b60-94c1-d2a0ec0383f6 -->
+Звук «Выстрел в большом помещении»: `assets/audio/sonora/wpn_smg_03_shot_hall_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 7aadd39c-a6ef-4f7f-8aca-19ae0713b35a -->
+Звук «Шаг по луже»: `assets/audio/sonora/step_water_01.wav`, `assets/audio/sonora/step_water_02.wav`, `assets/audio/sonora/step_water_03.wav`, `assets/audio/sonora/step_water_04.wav`, `assets/audio/sonora/step_water_05.wav`, `assets/audio/sonora/step_water_06.wav`, `assets/audio/sonora/step_water_07.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 961214b2-78d9-4979-a7d4-33bd8e5f0be9 -->
+Звук «Шаги: асфальт»: `assets/audio/sonora/step_tile_01.wav`, `assets/audio/sonora/step_tile_02.wav`, `assets/audio/sonora/step_tile_03.wav`, `assets/audio/sonora/step_tile_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 51873fb1-a29f-4c3f-b57c-c2576716d38a -->
+Звук «Поднимание и спуск по вертикальной лестнице»: `assets/audio/sonora/sound_ee772fba257045188308fe8273e79483_01.wav`, `assets/audio/sonora/sound_ee772fba257045188308fe8273e79483_02.wav`, `assets/audio/sonora/sound_ee772fba257045188308fe8273e79483_03.wav`, `assets/audio/sonora/sound_ee772fba257045188308fe8273e79483_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio df991577-cc40-4a5c-9658-bc044efca698 -->
+Звук «Шаги: гравий и камушки»: `assets/audio/sonora/step_gravel_01.wav`, `assets/audio/sonora/step_gravel_02.wav`, `assets/audio/sonora/step_gravel_03.wav`, `assets/audio/sonora/step_gravel_04.wav`, `assets/audio/sonora/step_gravel_05.wav`, `assets/audio/sonora/step_gravel_06.wav`, `assets/audio/sonora/step_gravel_07.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 997c648c-ee07-4cea-9d4b-9e2ff0cb48f2 -->
+Звук «Шаги: грунт»: `assets/audio/sonora/step_carpet_01.wav`, `assets/audio/sonora/step_carpet_02.wav`, `assets/audio/sonora/step_carpet_03.wav`, `assets/audio/sonora/step_carpet_04.wav`, `assets/audio/sonora/step_carpet_05.wav`, `assets/audio/sonora/step_carpet_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 7696c439-15dd-445a-9589-64958f3da922 -->
+Звук «Шаги: грунт»: `assets/audio/sonora/step_carpet_07.wav`, `assets/audio/sonora/step_carpet_08.wav`, `assets/audio/sonora/step_carpet_09.wav`, `assets/audio/sonora/step_carpet_10.wav`, `assets/audio/sonora/step_carpet_11.wav`, `assets/audio/sonora/step_carpet_12.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c8e55f35-ba03-419d-9093-4ecc05b3ce00 -->
+Звук «Шаги: грунт»: `assets/audio/sonora/step_carpet_13.wav`, `assets/audio/sonora/step_carpet_14.wav`, `assets/audio/sonora/step_carpet_15.wav`, `assets/audio/sonora/step_carpet_16.wav`, `assets/audio/sonora/step_carpet_17.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 82a9f4c8-9634-4cb4-9fcc-9aae9302d725 -->
+Звук «Шаги: дерево»: `assets/audio/sonora/step_wood_01.wav`, `assets/audio/sonora/step_wood_02.wav`, `assets/audio/sonora/step_wood_03.wav`, `assets/audio/sonora/step_wood_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio add20896-3139-4a0a-b4da-151b46c1e9c7 -->
+Звук «Шаги: плитка»: `assets/audio/sonora/step_tile_run_01.wav`, `assets/audio/sonora/step_tile_run_02.wav`, `assets/audio/sonora/step_tile_run_03.wav`, `assets/audio/sonora/step_tile_run_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 0c00805b-4e02-492d-a821-3eedda1c1abd -->
+Звук «Шаги: трава и листья»: `assets/audio/sonora/step_grass_01.wav`, `assets/audio/sonora/step_grass_02.wav`, `assets/audio/sonora/step_grass_03.wav`, `assets/audio/sonora/step_grass_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 0979fadb-194f-4951-9555-2c2aeb889fc4 -->
+Звук «Шаги: стекло»: `assets/audio/sonora/step_glass_01.wav`, `assets/audio/sonora/step_glass_02.wav`, `assets/audio/sonora/step_glass_03.wav`, `assets/audio/sonora/step_glass_04.wav`, `assets/audio/sonora/step_glass_05.wav`, `assets/audio/sonora/step_glass_06.wav`, `assets/audio/sonora/step_glass_07.wav`, `assets/audio/sonora/step_glass_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 777073b3-758a-473a-a112-037b4d889bc7 -->
+Звук «Шаг по бетону и асфальту»: `assets/audio/sonora/step_concrete_01.wav`, `assets/audio/sonora/step_concrete_02.wav`, `assets/audio/sonora/step_concrete_03.wav`, `assets/audio/sonora/step_concrete_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 4344d0b5-f473-4cd1-a275-bc01f83e9198 -->
+Звук «Шаг по песку»: `assets/audio/sonora/step_sand_01.wav`, `assets/audio/sonora/step_sand_02.wav`, `assets/audio/sonora/step_sand_03.wav`, `assets/audio/sonora/step_sand_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 5cec0ac1-ff06-473e-bfb8-d815d3144ffa -->
+Звук «Окружение — Проспект»: `assets/audio/sonora/ambient_prospekt_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 08cf1965-f04a-439e-955b-93b04b904e93 -->
+Звук «Падение гильзы — бетон и асфальт»: `assets/audio/sonora/shell_concrete_01.wav`, `assets/audio/sonora/shell_concrete_02.wav`, `assets/audio/sonora/shell_concrete_03.wav`, `assets/audio/sonora/shell_concrete_04.wav`, `assets/audio/sonora/shell_concrete_05.wav`, `assets/audio/sonora/shell_concrete_06.wav`, `assets/audio/sonora/shell_concrete_07.wav`, `assets/audio/sonora/shell_concrete_08.wav`, `assets/audio/sonora/shell_concrete_09.wav`, `assets/audio/sonora/shell_concrete_10.wav`, `assets/audio/sonora/shell_concrete_11.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 8ae724e8-9809-48df-9a1f-953570fcaa3d -->
+Звук «Падение гильзы — вода»: `assets/audio/sonora/shell_water_01.wav`, `assets/audio/sonora/shell_water_02.wav`, `assets/audio/sonora/shell_water_03.wav`, `assets/audio/sonora/shell_water_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio f76b35a5-c023-42a1-9d71-3fef22be9481 -->
+Звук «Падение гильзы — гравий»: `assets/audio/sonora/shell_gravel_01.wav`, `assets/audio/sonora/shell_gravel_02.wav`, `assets/audio/sonora/shell_gravel_03.wav`, `assets/audio/sonora/shell_gravel_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 75c62867-64ec-4bcb-8def-838aaf72c663 -->
+Звук «Падение гильзы — дерево»: `assets/audio/sonora/shell_wood_01.wav`, `assets/audio/sonora/shell_wood_02.wav`, `assets/audio/sonora/shell_wood_03.wav`, `assets/audio/sonora/shell_wood_04.wav`, `assets/audio/sonora/shell_wood_05.wav`, `assets/audio/sonora/shell_wood_06.wav`, `assets/audio/sonora/shell_wood_07.wav`, `assets/audio/sonora/shell_wood_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 00c67d46-64b4-4620-9103-399f6889f9f6 -->
+Звук «Падение гильзы — ковёр»: `assets/audio/sonora/shell_carpet_01.wav`, `assets/audio/sonora/shell_carpet_02.wav`, `assets/audio/sonora/shell_carpet_03.wav`, `assets/audio/sonora/shell_carpet_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio f6746758-15f3-4e52-ae77-03f180a1a017 -->
+Звук «Падение гильзы — металл»: `assets/audio/sonora/shell_metal_01.wav`, `assets/audio/sonora/shell_metal_02.wav`, `assets/audio/sonora/shell_metal_03.wav`, `assets/audio/sonora/shell_metal_04.wav`, `assets/audio/sonora/shell_metal_05.wav`, `assets/audio/sonora/shell_metal_06.wav`, `assets/audio/sonora/shell_metal_07.wav`, `assets/audio/sonora/shell_metal_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 72c6a3e9-7efe-48cf-9c29-8f1a94c8bfc2 -->
+Звук «Падение гильзы — песок»: `assets/audio/sonora/shell_sand_01.wav`, `assets/audio/sonora/shell_sand_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 1803e0f0-6f3c-4019-bca5-86bf30b3bb0c -->
+Звук «Падение гильзы — плитка»: `assets/audio/sonora/shell_tile_01.wav`, `assets/audio/sonora/shell_tile_02.wav`, `assets/audio/sonora/shell_tile_03.wav`, `assets/audio/sonora/shell_tile_04.wav`, `assets/audio/sonora/shell_tile_05.wav`, `assets/audio/sonora/shell_tile_06.wav`, `assets/audio/sonora/shell_tile_07.wav`, `assets/audio/sonora/shell_tile_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e06329ac-08fa-404a-aee9-230e9db6f9ef -->
+Звук «Шаг по металлу»: `assets/audio/sonora/step_metal_01.wav`, `assets/audio/sonora/step_metal_02.wav`, `assets/audio/sonora/step_metal_03.wav`, `assets/audio/sonora/step_metal_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio d7cf2961-e286-4c6c-b50f-839f0cf65045 -->
+Звук «Шаг по ковру»: `assets/audio/sonora/step_carpet_18.wav`, `assets/audio/sonora/step_carpet_19.wav`, `assets/audio/sonora/step_carpet_20.wav`, `assets/audio/sonora/step_carpet_21.wav`, `assets/audio/sonora/step_carpet_22.wav`, `assets/audio/sonora/step_carpet_23.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio b0e61ebc-f347-44b9-83c6-2d9bf6b256d1 -->
+Звук «Шаг по грунту»: `assets/audio/sonora/step_asphalt_01.wav`, `assets/audio/sonora/step_asphalt_02.wav`, `assets/audio/sonora/step_asphalt_03.wav`, `assets/audio/sonora/step_asphalt_04.wav`, `assets/audio/sonora/step_asphalt_05.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e731498b-1dfd-4c9b-8766-78bcb8d32ebf -->
+Звук «Выстрел на улице»: `assets/audio/sonora/wpn_hg_01_shot_outdoor_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_08.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_09.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_10.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_11.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_12.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_13.wav`, `assets/audio/sonora/wpn_hg_01_shot_outdoor_14.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio f961a1e8-d7f9-4eae-a03f-dd5d7ad81239 -->
+Звук «Выстрел в небольшом помещении»: `assets/audio/sonora/wpn_hg_01_shot_room_11.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_12.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_13.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_14.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_15.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_16.wav`, `assets/audio/sonora/wpn_hg_01_shot_room_17.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 6ee9da1c-b689-4dbe-ad8e-8427b8b4b13f -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_05.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_06.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_07.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_08.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_09.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_outdoor_10.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio fcb8ebd9-8283-49a9-be6f-5413d4a72714 -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_hg_01_shot_sup_room_09.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_10.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_11.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_12.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_13.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_14.wav`, `assets/audio/sonora/wpn_hg_01_shot_sup_room_15.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio b06535e6-bfa8-4a4b-9799-8b4c5debbc77 -->
+Звук «Гильза — бетон и асфальт»: `assets/audio/sonora/wpn_hg_01_shell_concrete_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_04.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_05.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_06.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_07.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_08.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_09.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_10.wav`, `assets/audio/sonora/wpn_hg_01_shell_concrete_11.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 1012f2a9-4867-42ef-a222-4d2c2276c96c -->
+Звук «Гильза — вода»: `assets/audio/sonora/wpn_hg_01_shell_water_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_water_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_water_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_water_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 33b95743-4ec7-421f-8371-7e62e4412645 -->
+Звук «Гильза — гравий»: `assets/audio/sonora/wpn_hg_01_shell_gravel_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_gravel_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_gravel_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_gravel_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 0490d6a8-6370-4819-b709-fa873ae9049f -->
+Звук «Гильза — дерево»: `assets/audio/sonora/wpn_hg_01_shell_wood_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_04.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_05.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_06.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_07.wav`, `assets/audio/sonora/wpn_hg_01_shell_wood_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio c7394265-223a-4f83-9789-d174b6cf786e -->
+Звук «Гильза — ковёр»: `assets/audio/sonora/wpn_hg_01_shell_carpet_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_carpet_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_carpet_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_carpet_04.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio e6477e32-0185-4fd6-95d9-179504077ff2 -->
+Звук «Гильза — песок»: `assets/audio/sonora/wpn_hg_01_shell_sand_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_sand_02.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 423b01fe-d366-4496-aae1-8f9fbf16ec83 -->
+Звук «Гильза — плитка»: `assets/audio/sonora/wpn_hg_01_shell_tile_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_04.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_05.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_06.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_07.wav`, `assets/audio/sonora/wpn_hg_01_shell_tile_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 5e35a45a-3646-48c0-b3dd-f01ec455a5b4 -->
+Звук «Гильза — металл»: `assets/audio/sonora/wpn_hg_01_shell_metal_01.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_02.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_03.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_04.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_05.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_06.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_07.wav`, `assets/audio/sonora/wpn_hg_01_shell_metal_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 4f9feb82-44a8-489f-98f0-5cbc41429e83 -->
+Звук «Сухой спуск»: `assets/audio/sonora/wpn_hg_01_dry_fire_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 6acdc922-f26d-4ee8-9f96-2dae5d295cdc -->
+Звук «Задержка / осечка»: `assets/audio/sonora/wpn_hg_01_jam_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio da8623d8-bafd-47f9-aef8-3aaf55d7e7c3 -->
+Звук «Без глушителя в помещении»: `assets/audio/sonora/wpn_ar_01_shot_room_05.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_06.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_07.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_08.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_09.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_10.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 31297d03-edf8-40a0-958d-e875d401833c -->
+Звук «Без глушителя в помещении»: `assets/audio/sonora/wpn_ar_01_shot_room_11.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_12.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_13.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_14.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_15.wav`, `assets/audio/sonora/wpn_ar_01_shot_room_16.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 00912760-83c9-4b06-9768-3c45edac1a26 -->
+Звук «Без глушителя на улице»: `assets/audio/sonora/wpn_ar_01_shot_outdoor_01.wav`, `assets/audio/sonora/wpn_ar_01_shot_outdoor_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_outdoor_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_outdoor_04.wav`, `assets/audio/sonora/wpn_ar_01_shot_outdoor_05.wav`, `assets/audio/sonora/wpn_ar_01_shot_outdoor_06.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio 7e81e2cd-f90a-4aae-b2b5-91483bcf7ef4 -->
+Звук «С глушителем в помещении»: `assets/audio/sonora/wpn_ar_01_shot_sup_room_05.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_06.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_07.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_08.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_room_09.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio a5eb9c49-9cdc-45f3-913f-68929381535b -->
+Звук «С глушителем на улице»: `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_02.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_03.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_04.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_05.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_06.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_07.wav`, `assets/audio/sonora/wpn_ar_01_shot_sup_outdoor_08.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio dfce43d0-a78d-4434-a4b0-5e3668a9d401 -->
+Звук «Сухой спуск»: `assets/audio/sonora/wpn_ar_01_dry_fire_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio dd7f2e58-1f5d-49ea-a881-4312e349922f -->
+Звук «Задержка / осечка»: `assets/audio/sonora/wpn_ar_01_jam_01.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+
+<!-- Sonora Studio ca218ccb-9d4c-4ec8-874a-98429622b9fa -->
+Звук «Шаг по стеклу»: `assets/audio/sonora/step_glass_09.wav`, `assets/audio/sonora/step_glass_10.wav`, `assets/audio/sonora/step_glass_11.wav`, `assets/audio/sonora/step_glass_12.wav`, `assets/audio/sonora/step_glass_13.wav`, `assets/audio/sonora/step_glass_14.wav`, `assets/audio/sonora/step_glass_15.wav`, `assets/audio/sonora/step_glass_16.wav`, `assets/audio/sonora/step_glass_17.wav`, `assets/audio/sonora/step_glass_18.wav`, `assets/audio/sonora/step_glass_19.wav`, `assets/audio/sonora/step_glass_20.wav`, `assets/audio/sonora/step_glass_21.wav`, `assets/audio/sonora/step_glass_22.wav`, `assets/audio/sonora/step_glass_23.wav`, `assets/audio/sonora/step_glass_24.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
