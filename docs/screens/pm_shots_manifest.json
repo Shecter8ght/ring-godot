@@ -3,9 +3,9 @@
 		{
 			"action": "",
 			"ads": false,
-			"arm_length_error_m": 0.000000149011611938477,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -13,7 +13,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_fp_hip.png",
-			"grip_error_m": 0.0,
+			"grip_error_m": 0.0000000381728675336035,
 			"progress": 0.0,
 			"resolution": [
 				1280,
@@ -25,9 +25,9 @@
 		{
 			"action": "",
 			"ads": true,
-			"arm_length_error_m": 0.0000000894069671630859,
+			"arm_length_error_m": 0.0000000298023223876953,
 			"asset_lod": 0,
-			"camera_fov": 62.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -35,7 +35,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_ads.png",
-			"grip_error_m": 0.0000000421468477895814,
+			"grip_error_m": 0.0000000309445837842759,
 			"progress": 0.0,
 			"resolution": [
 				1280,
@@ -47,9 +47,9 @@
 		{
 			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.0214182436466217,
+			"arm_length_error_m": 0.0000000298023223876953,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -57,7 +57,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_reload_partial_mag_out.png",
-			"grip_error_m": 0.0000000411893132934438,
+			"grip_error_m": 0.0000000268634501310316,
 			"progress": 0.298,
 			"resolution": [
 				1280,
@@ -69,9 +69,9 @@
 		{
 			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.0214182436466217,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -79,7 +79,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_reload_partial_mag_in.png",
-			"grip_error_m": 0.0000000411893132934438,
+			"grip_error_m": 0.0000000307195300308649,
 			"progress": 0.65,
 			"resolution": [
 				1280,
@@ -91,9 +91,9 @@
 		{
 			"action": "",
 			"ads": false,
-			"arm_length_error_m": 0.000000149011611938477,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -101,7 +101,7 @@
 			],
 			"empty": true,
 			"file": "res://docs/screens/pm_empty_locked.png",
-			"grip_error_m": 0.0,
+			"grip_error_m": 0.0000000381728675336035,
 			"progress": 0.0,
 			"resolution": [
 				1280,
@@ -113,9 +113,9 @@
 		{
 			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.028767928481102,
+			"arm_length_error_m": 0.0000000298023223876953,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -123,7 +123,7 @@
 			],
 			"empty": true,
 			"file": "res://docs/screens/pm_reload_empty_charge.png",
-			"grip_error_m": 0.0000000542410454329456,
+			"grip_error_m": 0.0000000268634501310316,
 			"progress": 0.88,
 			"resolution": [
 				1280,
@@ -135,9 +135,9 @@
 		{
 			"action": "suppressor",
 			"ads": false,
-			"arm_length_error_m": 0.0000000745058059692383,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -145,7 +145,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_suppressor_turning.png",
-			"grip_error_m": 0.0000000318288932987798,
+			"grip_error_m": 0.0000000372529029846191,
 			"progress": 0.54,
 			"resolution": [
 				1280,
@@ -157,9 +157,9 @@
 		{
 			"action": "",
 			"ads": false,
-			"arm_length_error_m": 0.000000149011611938477,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
-			"camera_fov": 74.0,
+			"camera_fov": 58.7155075073242,
 			"camera_position": [
 				0.0,
 				0.0,
@@ -167,7 +167,7 @@
 			],
 			"empty": false,
 			"file": "res://docs/screens/pm_suppressor_mounted.png",
-			"grip_error_m": 0.0,
+			"grip_error_m": 0.0000000381728675336035,
 			"progress": 0.0,
 			"resolution": [
 				1280,
@@ -180,9 +180,9 @@
 			"asset_lod": 0,
 			"camera_fov": 30.0,
 			"camera_position": [
-				-0.449817508459091,
-				0.0488645471632481,
-				0.0503253005445004
+				-0.449237704277039,
+				0.047713577747345,
+				0.0566172190010548
 			],
 			"file": "res://docs/screens/pm_model_side.png",
 			"resolution": [
@@ -196,9 +196,9 @@
 			"asset_lod": 0,
 			"camera_fov": 30.0,
 			"camera_position": [
-				0.0651824846863747,
-				0.0488645471632481,
-				0.490325301885605
+				0.0657622665166855,
+				0.047713577747345,
+				0.49661722779274
 			],
 			"file": "res://docs/screens/pm_model_front.png",
 			"resolution": [
@@ -212,9 +212,9 @@
 			"asset_lod": 0,
 			"camera_fov": 30.0,
 			"camera_position": [
-				-0.0348175093531609,
-				0.0488645471632481,
-				-0.349674701690674
+				-0.03423772752285,
+				0.047713577747345,
+				-0.343382775783539
 			],
 			"file": "res://docs/screens/pm_model_back.png",
 			"resolution": [
@@ -228,9 +228,9 @@
 			"asset_lod": 0,
 			"camera_fov": 30.0,
 			"camera_position": [
-				-0.0698175132274628,
-				-0.366135448217392,
-				-0.08821751922369
+				-0.0692377313971519,
+				-0.367286413908005,
+				-0.0809894055128098
 			],
 			"file": "res://docs/screens/pm_model_bottom_open.png",
 			"resolution": [
@@ -241,16 +241,16 @@
 			"view": "asset_diagnostic"
 		},
 		{
-			"arm_length_error_m": 0.000000149011611938477,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
 			"camera_fov": 34.0,
 			"camera_position": [
-				0.407999992370605,
-				-0.158000007271767,
-				-0.156000018119812
+				0.328000009059906,
+				-0.107999995350838,
+				-0.236000001430511
 			],
 			"file": "res://docs/screens/pm_hand_right.png",
-			"grip_error_m": 0.0,
+			"grip_error_m": 0.0000000381728675336035,
 			"resolution": [
 				1280,
 				720
@@ -259,16 +259,16 @@
 			"view": "hand_diagnostic"
 		},
 		{
-			"arm_length_error_m": 0.000000149011611938477,
+			"arm_length_error_m": 0.000000044703483581543,
 			"asset_lod": 0,
 			"camera_fov": 34.0,
 			"camera_position": [
-				-0.075999990105629,
-				-0.163000002503395,
-				-0.15200001001358
+				-0.15599998831749,
+				-0.113000005483627,
+				-0.23199999332428
 			],
 			"file": "res://docs/screens/pm_hand_left.png",
-			"grip_error_m": 0.0,
+			"grip_error_m": 0.0000000381728675336035,
 			"resolution": [
 				1280,
 				720

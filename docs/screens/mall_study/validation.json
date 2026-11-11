@@ -384,7 +384,7 @@
 		"Условные серые формы и цвета; нет итоговых PBR-ассетов",
 		"Скорости без выносливости, снаряжения и перегруза"
 	],
-	"mesh_batches": 736,
-	"mesh_triangles_excluding_multimesh": 1182746,
+	"mesh_batches": 733,
+	"mesh_triangles_excluding_multimesh": 1145382,
 	"scene": "res://scenes/levels/mall_study.tscn"
 }
