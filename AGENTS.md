@@ -443,6 +443,9 @@ tools/godot.cmd --headless res://tools/prospekt_surfaces_test.tscn # «Прос�
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
                                                               # (по снимку сцены: сначала prospekt_study -- snapshot)
+python -X utf8 tools/prospekt_vershina_plan.py                 # «Проспект», район высоток: чертежи предложения по переделке ЖК «Вершина»
+                                                              # (генплан, первый этаж стилобата, развёртка, разрез) → docs/design/prospekt_vershina_*.png;
+                                                              # расстановка — словари в скрипте, в сцену не внесена (docs/design/prospekt_map.md §21)
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
