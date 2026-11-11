@@ -115,6 +115,7 @@ tools/godot.cmd --headless res://tools/carry_test.tscn       # стойка «н
                                                               # бегом всегда наискосок, огонь поднимает и стреляет (клик не теряется), ПКМ — и обратно, лёжа и перезарядка
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/carry_shots.tscn # снимки стойки: от бедра и наискосок у стволов песочницы → docs/screens/carry_*;
                                                               # подбор позы: CARRY_VARIANTS="yaw=35 pitch=22 back=0.15 sy=0.04;…" CARRY_ONLY=wpn_sg_02
+BAKE_MAPS.cmd                                                 # после ручных правок «Пригорода» и «Проспекта»: навигация ботов, точки укрытия, карты плана рейда
 tools/godot.cmd --headless res://tools/zone01_ld_test.tscn   # Пригород, левел-дизайн: в каждом зале с интерьером есть лут и до всех мест лута можно дойти,
                                                               # места заказа «Вернуть машину», путь от появлений к выходам, серверная под ключом, голые отрезки улиц
 python -X utf8 tools/zone01_ld_plan.py                         # схема левел-дизайна Пригорода (маршруты, горячие точки, интерьеры, укрытия, посты) → docs/design/zone01_level_design.png
@@ -400,12 +401,36 @@ tools/heli_study.cmd                                          # карта «П�
 tools/dam_play.cmd                                            # «Плотина» с настоящим игроком, оружием и ботами (как dorm_play): в полёте расставить ботов (ЛКМ / ПКМ,
                                                               # 1–6 — кого, R — что делает, N / B — места, G — игрок сюда), Enter — в тело игрока; навигация ботов печётся
                                                               # кусками 128 м вокруг игрока и ботов; --headless res://tools/dam_play.tscn -- check, с окном -- shots
+tools/sanatorium_study.cmd                                    # карта «Санаторий» (docs/design/sanatorium_map.md), серый блокаут по принятым планам: прогулка
+                                                              # (M — схема участка v13, 1–9/0 и N/B — места, F — полёт); с 2026-11-08 правится руками в редакторе
+                                                              # (scenes/levels/sanatorium_study.tscn + scenes/levels/sanatorium/*, кисть земли — docs/level_editing.md);
+                                                              # генератор — только в папку: SANATORIUM_OUT=<папка> python -X utf8 tools/build_sanatorium.py (план с метками
+                                                              # групп; разовый перенос в сцены сделал tools/sanatorium_to_scenes.tscn — повторно не запускать: сотрёт правки);
+                                                              # --headless --fixed-fps 60 res://tools/sanatorium_study.tscn -- verify — пешком все 623 помещения, лестницы,
+                                                              # каскад, тропы, дороги, ось КПП → маяк, ~45 с (SANATORIUM_ROUTES=id,… — выборочно, SANATORIUM_TRACE=1 —
+                                                              # точки хода); с окном -- shots — docs/screens/sanatorium (SANATORIUM_SHOTS=имя,…; SANATORIUM_TIME, _WEATHER)
+                                                              # --windowed --resolution 1920x1080 --disable-vsync … -- perf — кадры по видам и местам → perf.txt, perf.json;
+                                                              # --headless … -- snapshot — снимок сцены в прежнем формате → data/blockouts/sanatorium_snapshot*.json (для обзора);
+                                                              # обзор: python -X utf8 tools/sanatorium_ld_plan.py — лучи на высоте глаз, доля длиннее 90 м по зонам →
+                                                              # docs/design/sanatorium_sightlines.png, docs/screens/sanatorium/sightlines.json
+                                                              # (--breaks 90 — места групп елей против длинного обзора → docs/design/data/sanatorium_view_breaks.json,
+                                                              # ставить их теперь руками — деревьями TreeSpot; после — снимок и замер заново)
+python -X utf8 tools/fetch_sanatorium_ground.py                 # земля «Санатория»: восемь грунтов 4K (CC0 ambientCG, Poly Haven) → _asset_src/textures/<id>
+python -X utf8 tools/build_sanatorium_ground.py                 # массивы слоёв земли → assets/terrain/sanatorium_{albedo,normal,arm}.jpg; затем --import
+                                                              # (маски и трава — «Кисть земли» в редакторе; шейдеры src/world/sanatorium_ground, sanatorium_lake)
+tools/godot.cmd --headless res://tools/blockout_edit_test.tscn # «Санаторий», правка руками: скрытое глазком в игре не существует (ни стен, ни помещений
+                                                              # в проверке), валун ×2 — коллизия ×2, повёрнутая беседка, марш шире — в склейке шире
+tools/sanatorium_play.cmd                                     # «Санаторий» с настоящим игроком, оружием и ботами (как dam_play): расстановка в полёте, Enter — в тело;
+                                                              # --headless res://tools/sanatorium_play.tscn -- check, с окном -- shots — docs/screens/sanatorium/play_*
 tools/prospekt_study.cmd                                      # прогулка по блокауту «Проспекта»: M — план, 1–9/0 — места, N/B, F — полёт;
                                                               # --headless res://tools/prospekt_study.tscn -- verify — здания, места лута, уровни, 16 мест, 7 маршрутов пешком (пролог
                                                               # до тоннеля, заходы → выходы, паркинг −1, банк до крыши, подкоп в хранилище), открытые куски ≤ 30 м, кордон
                                                               # не пройти; -- shots — снимки docs/screens/prospekt/ (PROSPEKT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z — свой кадр,
                                                               # несколько — через «;», или имена готовых кадров); PROSPEKT_LIGHT=all_variants -- shots — стенд света
-                                                              # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png
+                                                              # (tools/prospekt_light_variants.gd): умолчания, черты освещения EFT по одной и вместе → <вариант>__<кадр>.png;
+                                                              # -- snapshot — план по узлам сцены (улицы, вещи, постройки) → data/blockouts/prospekt_snapshot.json
+tools/godot.cmd --headless res://tools/plan_piece_test.tscn  # улицы «Проспекта» узлами (PlanPiece): сдвиг, поворот 90° и 30° (стена → коробка), растяжение,
+                                                              # глазок, копия, разворот пандуса, подъём лестницы, покрытие с вырезами — в плане и в физике
 tools/paving_probe.cmd                                        # стенд покрытий «Проспекта» по фото владельца (docs/design/prospekt_paving.md): три куска
                                                               # улицы А / Б / В — газон, бордюры ГОСТ 6665, тротуар, дорога с зеброй, площадь у вокзала; детская
                                                               # и корт; F2 — время, F3 — погода, F5–F8 — куски; -- shots — снимки docs/screens/paving_probe
@@ -415,6 +440,7 @@ tools/godot.cmd --headless res://tools/prospekt_surfaces_test.tscn # «Прос�
                                                               # 14 точек: асфальт, плитка, газоны, крошка, корт, грунт стройки, паркинг, фонтан, бордюр, люк, решётка
 python -X utf8 tools/prospekt_ld_plan.py                       # «Проспект», левел-дизайн: схема (маршруты, лут, появления, выходы) и замер обзора на высоте глаз —
                                                               # лучи длиннее 90 м красным → docs/design/prospekt_level_design.png, docs/screens/prospekt/sightlines.json
+                                                              # (по снимку сцены: сначала prospekt_study -- snapshot)
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
@@ -460,6 +486,10 @@ bash tools/prospekt_vehicles/wheels_cars.sh [класс …]          # колё
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_vehicles_perf.tscn [-- off | lod | lodcmp] # кадры в секунду у транспорта «Проспекта»
                                                               # (паркинг −1, стоянки, поворот, сверху); off — пачки машин скрыты; lod — одна машина с 4…80 м → docs/screens/prospekt_vehicles/lod_*;
                                                               # lodcmp — LOD0 / LOD1 / LOD2 варианта рядом с 8…60 м → lodcmp_*
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/fire_truck/build.py -- <выход.blend>
+                                                              # пожарная автоцистерна (по мотивам АЦ на КамАЗ-43253) в sand3d (_asset_src/sand3d, v1.6.3):
+                                                              # high-poly форма, коллекции «Целая» / «Отсеки открыты»; размеры — tools/fire_truck/spec.py;
+                                                              # проверка — audit.py -- <отчёт.json>, виды — shots.py -- <папка> [виды] [closed|open] (blender --background <файл>)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_plants/<этап>.py -- [вид …] [preview]
                                                               # растения «Проспекта» (берёза, липа, тополь, сирень, изгородь): build_forms (форма) → python -X utf8
                                                               # tools/prospekt_plants/textures.py (листья, гладкая кора) → build_pbr (UCUPaint) → game.py -- atlas|meshes|preview
@@ -876,6 +906,29 @@ docs/          STATUS.md (что сделано / что дальше), реше
 1. **Баланс — только в `src/core/balance.gd`.** Никаких магических чисел в других скриптах.
 2. **Карта — данные + сцена.** Кольцо (помещения, проёмы) — `data/sectors/*.json`, собирается
    `SectorBuilder`; в редакторе видно превью (скрипты @tool), в .tscn оно не сохраняется.
+   **Карты, переведённые в правку руками** (решение владельца 2026-11-08: «перевести в формат, чтобы я мог
+   редактировать их вручную из editor»; план — `docs/design/editable_levels.md`, памятка — `docs/level_editing.md`):
+   **сцена — источник правды, генератор её не перезаписывает.** Сейчас это «Санаторий», «Пригород» и «Проспект».
+   «Проспект»: здания — узлы `prospekt_study.tscn` (были), 4 370 вещей наполнения — узлы `PropSpot` в `Filler/Наполнение`
+   (план `filler.from_nodes`: `MallLandscape._items_from_nodes` собирает их в `plan.filler.items`, у вещей «вперемешку»
+   модель закреплена девятым полем); улицы — 4 348 узлов `PlanPiece` в `Landscape/Улицы` (покрытия, вырезы, плиты,
+   стены, коробки, колонны, лестницы, пандусы, балки, фонари, надписи; план `lists_from_nodes`: `MallLandscape.
+   _pieces_from_nodes` собирает списки по узлам в прежнем порядке, в редакторе после правки — пересборка сама); места
+   лута — данными (ящики — узлы `prospekt.tscn`); щелчок по кускам, вещам, деревьям — гизмо плагина
+   `addons/ring_level_tools/pick_gizmo.gd`; схеме `prospekt_ld_plan.py` — снимок `prospekt_study -- snapshot`; генераторы
+   `build_prospekt.py` / `build_prospekt_raid.py` — только с `PROSPEKT_OVERWRITE=1` (или `PROSPEKT_OUT` — в свою папку).
+   «Пригород»: дома,
+   машины, укрытия, мусор и так далее — узлы сцен `scenes/levels/zone01*` (были и раньше), деревья — узлы `TreeSpot`
+   в `World/Vegetation/Деревья` (у россыпей деревьев `from_nodes`), кусты и лесной мусор — данные (кисть
+   «Растительность»); генераторы зоны 1 (`build_zone01*.py`, `author_zone01_nw.py`, `author_loose_loot`) — только
+   с `ZONE01_OVERWRITE=1`; после правок — `BAKE_MAPS.cmd` (навигация, укрытия, карта плана рейда). «Санаторий»: постройки — сцены
+   `scenes/levels/sanatorium/buildings`, куски участка — `…/site`, беседки, машины, валуны, стройплощадки и деревья
+   участка (`TreeSpot`) — узлы сцены уровня; коробки — `CSGBox3D` (материал — файл `…/materials/<ключ>.tres`, имя
+   файла = ключ палитры), марши — `BlockoutStair`, покрытия — `MeshInstance3D` с meta `blockout_mat`, проверки пешком —
+   `BlockoutChecks` внутри построек (едут вместе с ними). В игре всё склеивает `BlockoutMerge` — один меш на материал
+   и простые коллизии, как было у генератора. Земля — «Кисть земли» (`addons/ring_level_tools`): маски грунта, трава,
+   высоты — прямо в `data/terrain/*`. Генератор такой карты пишет только в отдельную папку (`SANATORIUM_OUT`):
+   заготовки новых построек. Остальные карты переводятся по одной; до перевода у них — как ниже.
    Всё, что вне кольца, — узлы сцены уровня, их двигают руками: постройки
    (`scenes/world/blockout_building.tscn`, вид/размеры/этажи в инспекторе; двери и ворота —
    дочерние `blockout_opening.tscn`, режут ближайшую стену), точки появления (`spawn_point.tscn`)
