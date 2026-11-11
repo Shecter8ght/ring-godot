@@ -164,10 +164,51 @@ func _remove_pieces(rule: Dictionary) -> void:
 			continue
 		if rule.has("id") and String(d.get("id", "")) != String(rule.id):
 			continue
+		if rule.has("inside") or rule.has("ymin") or rule.has("keep"):
+			if not _extended_match(d, rule):
+				continue
+			_drop(piece)
+			_stats["убрано кусков"] += 1
+			continue
 		var c: Vector3 = _world_origin(piece)
 		if c.x >= float(r[0]) and c.z >= float(r[1]) and c.x <= float(r[2]) and c.z <= float(r[3]):
 			_drop(piece)
 			_stats["убрано кусков"] += 1
+
+
+## Расширенный отбор кусков (этап 5): "inside" [x0, z0, x1, z1] — габарит куска целиком внутри; "ymin"/"ymax" — высоты
+## куска (стена: y0…y1, коробка: низ…верх) внутри диапазона; "keep" — список [x0, z0, x1, z1, y0, y1], которые оставить.
+## Габарит — из данных куска (стена: rect; коробка: at ± size / 2; плита: rect); допуск 3 см.
+func _extended_match(d: Dictionary, rule: Dictionary) -> bool:
+	var box: Array = []
+	var lo: float = 0.0
+	var hi: float = 0.0
+	if d.has("rect"):
+		box = (d.rect as Array).duplicate()
+		lo = float(d.get("y0", d.get("y_top", 0.0)))
+		hi = float(d.get("y1", d.get("y_top", 0.0)))
+	elif d.has("at") and d.has("size"):
+		var a: Array = d.at
+		var s: Array = d.size
+		box = [float(a[0]) - float(s[0]) * 0.5, float(a[2]) - float(s[2]) * 0.5, float(a[0]) + float(s[0]) * 0.5, float(a[2]) + float(s[2]) * 0.5]
+		lo = float(a[1]) - float(s[1]) * 0.5
+		hi = float(a[1]) + float(s[1]) * 0.5
+	else:
+		return false
+	var tol: float = 0.03
+	if rule.has("inside"):
+		var ins: Array = rule.inside
+		if float(box[0]) < float(ins[0]) - tol or float(box[1]) < float(ins[1]) - tol or float(box[2]) > float(ins[2]) + tol or float(box[3]) > float(ins[3]) + tol:
+			return false
+	if rule.has("ymin") and lo < float(rule.ymin) - tol:
+		return false
+	if rule.has("ymax") and hi > float(rule.ymax) + tol:
+		return false
+	for k: Array in rule.get("keep", []):
+		if absf(float(box[0]) - float(k[0])) < tol and absf(float(box[1]) - float(k[1])) < tol and absf(float(box[2]) - float(k[2])) < tol \
+				and absf(float(box[3]) - float(k[3])) < tol and (k.size() < 6 or (absf(lo - float(k[4])) < tol and absf(hi - float(k[5])) < tol)):
+			return false
+	return true
 
 
 ## Положение узла в мире, пока сцена не в дереве (global_transform тут не работает): цепочка transform до корня.

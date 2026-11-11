@@ -623,8 +623,77 @@ def plan_data_4() -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+# ------------------------------------------------------------------ этап 5a: банк «Капитал», участок
+BASE_REV_5 = "ab71787a"           # коммит этапа 4 — основа этапа 5
+BANK_UX0, BANK_UX1, BANK_UZ0, BANK_UZ1 = N.BU   # -40…-2, -95.3…-61.3
+
+
+def _fence(p: "Patch", axis: str, c: float, a0: float, a1: float, gaps=()) -> int:
+    """Секции bar_fence как у fence_line генератора: шаг 2,5 м, первая в a0 + 1,25."""
+    n = 0
+    a = a0 + 1.25
+    while a < a1:
+        if all(abs(a - g[0]) > g[1] * 0.5 + 1.2 for g in gaps):
+            if axis == "x":
+                p.put("bar_fence", a, c, 90.0)
+            else:
+                p.put("bar_fence", c, a, 0.0)
+            n += 1
+        a += 2.5
+    return n
+
+
+def stage_5a_bank_site() -> Patch:
+    p = Patch("5a_bank_site", BASE_REV_5)
+    # --- 1. забор: убрать южную линию западнее X −2 и западную южнее Z −61,3
+    p.log.append("забора убрано: юг %d, запад %d" % (p.drop_items(["bar_fence"], [-44.0, -52.6, -2.05, -52.0]),
+                                                    p.drop_items(["bar_fence"], [-43.2, -61.3, -42.8, -52.0])))
+    # возврат по Z −61,3 от X −43 до −40 с калиткой 1,5 м у X −41,6: две короткие секции по сторонам разрыва (масштаб по длине)
+    gate0, gate1 = -41.6 - 0.75, -41.6 + 0.75
+    for a, b in ((-43.0, gate0), (gate1, -40.0)):
+        p.put("bar_fence", (a + b) / 2.0, -61.3, 90.0, round((b - a) / 2.5, 3))
+    n_east = _fence(p, "z", -2.0, -61.3, -52.3)
+    p.log.append(f"забора добавлено: возврат Z −61,3 (2 секции с калиткой), возврат X −2 ({n_east} секций)")
+    # --- 2. площадь: столбики по Z −52,8 с разрывом 3,2 м против входа (X −21), покрытие до тротуара, стела
+    n_bol = 0
+    for sign in (-1.0, 1.0):
+        x = -21.0 + sign * 1.6
+        while -40.0 - 0.01 <= x <= -2.0 + 0.01:
+            p.put("bollard", x, -52.8, 0.0)
+            n_bol += 1
+            x += sign * 1.6
+    p.log.append(f"столбиков {n_bol}")
+    p.surface("bank_plaza_walk", "walk", -43.0, -52.3, 6.0, -46.95, 0.0, 0.15)
+    p.box(-8.4, 1.3, -50.9, 1.2, 2.6, 0.3, "concrete")
+    p.add["signs"].append({"at": [-8.4, 2.0, -50.6], "size": 30.0, "text": "банк «Капитал»"})
+    # --- 3. бокс инкассации: стены 4,2, плита крыши, ворота 3,6 × 3,2 в южной стене (центр X −0,8)
+    ax0, ax1, az0, az1 = N.ANNEX
+    T = 0.25
+    h = 4.2 - 0.3
+    p.wall_x(az1 - T / 2, ax0, ax1, 0.0, h, [(-0.8, 3.6, 3.2)], T, "wall")        # южная с воротами
+    p.wall_x(az0 + T / 2, ax0, ax1, 0.0, h, (), T, "wall")                        # северная
+    p.wall_z(ax1 - T / 2, az0, az1, 0.0, h, (), T, "wall")                        # восточная
+    p.slab("annex_roof", [ax0, az0, ax1, az1], 4.2, 0.3, "slab")
+    # --- 4. наружная лестница: второй марш на север от площадки 2-го этажа до площадки 3-го
+    p.remove["pieces"].append({"list": "walls", "rect": [-43.0, -78.0, -39.0, -77.0], "inside": [-42.8, -77.4, -39.9, -77.1],
+                               "ymin": 4.4, "ymax": 5.6})
+    p.stair((-41.6, 4.5, -77.3), (-41.6, 8.4, -85.1), 1.6, "concrete")
+    p.box(-41.4, 8.28, -86.8, 2.6, 0.24, 3.4, "concrete")
+    for k in range(6):                                                           # ступенчатое ограждение марша с запада
+        za, zb = -77.3 - 1.3 * k, -77.3 - 1.3 * (k + 1)
+        y_lo = 4.5 + 3.9 * (k + 1) / 6.0 - 0.3
+        p.wall(-42.75, zb, -42.6, za, y_lo, y_lo + 1.3, "steel")
+    p.wall(-42.75, -88.5, -42.6, -85.1, 8.4, 9.4, "steel")                       # площадка 3-го этажа: запад и север
+    p.wall(-42.75, -88.65, -40.0, -88.5, 8.4, 9.4, "steel")
+    # --- 5. задний двор: ДГУ и два бака
+    p.box(-9.0, 1.2, -97.2, 6.0, 2.4, 2.4, "steel")
+    p.put("m:R02", -35.0, -97.6, 0.0)
+    p.put("m:R02", -32.4, -97.6, 0.0)
+    return p
+
+
 STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
-          "4_wash": stage_4_wash}
+          "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site}
 
 
 def main() -> None:
