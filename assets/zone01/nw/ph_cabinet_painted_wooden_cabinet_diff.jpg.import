@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bc5onux7h1ao8"
-path="res://.godot/imported/ph_cabinet_painted_wooden_cabinet_diff.jpg-1de9d40347ec084c5eee4d2167ec1ee8.ctex"
+path.s3tc="res://.godot/imported/ph_cabinet_painted_wooden_cabinet_diff.jpg-1de9d40347ec084c5eee4d2167ec1ee8.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d209f82a8c00105e19f8c2ca751fd8e6"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/zone01/nw/ph_cabinet_painted_wooden_cabinet_diff.jpg"
-dest_files=["res://.godot/imported/ph_cabinet_painted_wooden_cabinet_diff.jpg-1de9d40347ec084c5eee4d2167ec1ee8.ctex"]
+dest_files=["res://.godot/imported/ph_cabinet_painted_wooden_cabinet_diff.jpg-1de9d40347ec084c5eee4d2167ec1ee8.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

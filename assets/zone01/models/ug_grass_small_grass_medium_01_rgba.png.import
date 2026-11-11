@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d0dfu8ru5p3y6"
-path="res://.godot/imported/ug_grass_small_grass_medium_01_rgba.png-1fafc27b2cd8316834ab2766d6f8807f.ctex"
+path.s3tc="res://.godot/imported/ug_grass_small_grass_medium_01_rgba.png-1fafc27b2cd8316834ab2766d6f8807f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9ced82c427445c98c522a280f467731c"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/zone01/models/ug_grass_small_grass_medium_01_rgba.png"
-dest_files=["res://.godot/imported/ug_grass_small_grass_medium_01_rgba.png-1fafc27b2cd8316834ab2766d6f8807f.ctex"]
+dest_files=["res://.godot/imported/ug_grass_small_grass_medium_01_rgba.png-1fafc27b2cd8316834ab2766d6f8807f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

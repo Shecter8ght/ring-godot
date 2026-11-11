@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d174fon5f0rgu"
-path="res://.godot/imported/ug_weed_b_weed_plant_02_rgba.png-7344bfaa044c00bf06ed80e02f1a8567.ctex"
+path.s3tc="res://.godot/imported/ug_weed_b_weed_plant_02_rgba.png-7344bfaa044c00bf06ed80e02f1a8567.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ac4ece52665f8e3ecbebf2dbf3e23dba"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/zone01/models/ug_weed_b_weed_plant_02_rgba.png"
-dest_files=["res://.godot/imported/ug_weed_b_weed_plant_02_rgba.png-7344bfaa044c00bf06ed80e02f1a8567.ctex"]
+dest_files=["res://.godot/imported/ug_weed_b_weed_plant_02_rgba.png-7344bfaa044c00bf06ed80e02f1a8567.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
