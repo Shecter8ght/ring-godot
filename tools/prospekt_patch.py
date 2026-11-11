@@ -1280,10 +1280,38 @@ def plan_data_6b(loot: list) -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+# ------------------------------------------------------------------ этап 7: мелкие правки блокаута перед рейдом
+BASE_REV_7 = "3e9eab05"          # коммит этапа 6b
+
+
+def stage_7_finish() -> Patch:
+    """Ступенька у банка и карман К1 у «Зерна». Правка 5a не переприменяется (повторный прогон 5a вернул бы то,
+    что убрал 5b); ступенька убирается точечно: покрытие площади банка тоньше (0,06, как bank_yard) и клин
+    до тротуара проспекта (0,15) на последнем метре."""
+    p = Patch("7_finish", BASE_REV_7)
+    # --- Б.1. площадь банка: то же покрытие, но 0,06 — стык с двором bank_yard без ступеньки
+    p.remove["pieces"].append({"list": "surfaces", "rect": [-50.0, -60.0, 10.0, -40.0], "id": "bank_plaza_walk"})
+    p.surface("bank_plaza_walk", "walk", -43.0, -52.3, 6.0, -46.95, 0.0, 0.06)
+    # на Z −47,95…−46,95 пол поднимается с 0,06 до 0,15: ровно под тротуар проспекта (walk_wn, X ≤ 0), без ступеньки
+    p.add["ramps"].append({"mat": "walk", "x0": -43.0, "x1": 0.0, "y0": 0.06, "y1": 0.15, "z0": -47.95, "z1": -46.95})
+    p.log.append("площадь банка: 0,06 + клин до 0,15 на Z −47,95…−46,95")
+    # --- Б.2. карман К1 (X −192…−166): столбики прочь, разметка трёх мест, X −166…−162 — тротуар с бордюром
+    p.log.append("столбиков убрано %d" % p.drop_items(["m:U02_04"], [-192.0, -36.5, -162.0, -35.3]))
+    for lx in (-189.25, -182.35, -175.45, -168.55):            # три места по 6,9 м; фургон у X −172 — в среднем
+        p.box(lx, 0.085, POCKET_Z, 0.15, 0.02, NEW_EDGE - CURB_Z - 0.3, "stripe", 0.0, False)
+    p.surface("walk_s0", "walk", -166.0, CURB_Z, -162.0, NEW_EDGE, 0.0, WALK_T)
+    p.box(-164.0, CURB_H / 2.0, NEW_EDGE - CURB_W / 2.0, 4.0, CURB_H, CURB_W, "stripe", 0.0, True)       # бордюр по кромке
+    p.box(-166.0 + CURB_W / 2.0, CURB_H / 2.0, POCKET_Z, CURB_W, CURB_H, NEW_EDGE - CURB_Z, "stripe", 0.0, True)   # торец у кармана
+    # западный торец прежнего тротуара (X −161,9) теперь поперёк прохода — убрать, стык без щели
+    p.remove["pieces"].append({"list": "boxes", "rect": [-162.05, -34.1, -161.75, -33.7], "mat": "stripe"})
+    return p
+
+
+
 STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
-          "6b_vershina_ground": stage_6b_vershina_ground}
+          "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
 
 
 def main() -> None:
