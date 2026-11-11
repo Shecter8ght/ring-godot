@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/props/zerno/zerno_room.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/props/zerno/floor_game.glb" id="3"]
+[ext_resource type="PackedScene" path="res://assets/models/props/zerno/facade_sign.glb" id="4"]
+
+[node name="Zerno" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Model" parent="." instance=ExtResource("2")]
+
+[node name="CeramicFloor" parent="." instance=ExtResource("3")]
+
+[node name="FacadeSign" parent="." instance=ExtResource("4")]

@@ -1,0 +1,702 @@
+{
+  "source": "Zerno_Building_v13.blend",
+  "source_sha256": "e002ebb5ca80247a7ef94962e1e71f2436000396968943a415ba679a459202f1",
+  "source_parts": 1688,
+  "groups": {
+    "WallWest": {
+      "vertices": 112,
+      "triangles": 216
+    },
+    "Room": {
+      "vertices": 3256,
+      "triangles": 6276
+    },
+    "WallEast": {
+      "vertices": 112,
+      "triangles": 216
+    },
+    "WallRear": {
+      "vertices": 2369,
+      "triangles": 4722
+    },
+    "WindowGlass": {
+      "vertices": 392,
+      "triangles": 756
+    },
+    "StreetDoor": {
+      "vertices": 560,
+      "triangles": 1080
+    },
+    "StreetDoorGlass": {
+      "vertices": 56,
+      "triangles": 108
+    },
+    "StockDoor": {
+      "vertices": 448,
+      "triangles": 864
+    },
+    "Bar": {
+      "vertices": 58772,
+      "triangles": 114092
+    },
+    "LabelGraphics": {
+      "vertices": 392,
+      "triangles": 756
+    },
+    "Hall": {
+      "vertices": 68854,
+      "triangles": 134442
+    },
+    "FridgeMilk": {
+      "vertices": 280,
+      "triangles": 540
+    },
+    "FridgeMilkGlass": {
+      "vertices": 112,
+      "triangles": 216
+    },
+    "FridgePastry": {
+      "vertices": 280,
+      "triangles": 540
+    },
+    "FridgePastryGlass": {
+      "vertices": 112,
+      "triangles": 216
+    },
+    "Ceiling": {
+      "vertices": 40636,
+      "triangles": 72978
+    },
+    "Fragments": {
+      "vertices": 2820,
+      "triangles": 4700
+    },
+    "BottleGlass": {
+      "vertices": 6566,
+      "triangles": 13116
+    },
+    "FurnitureWood": {
+      "vertices": 10508,
+      "triangles": 20884
+    },
+    "BrokenWindowGlass": {
+      "vertices": 508,
+      "triangles": 1000
+    },
+    "Brick": {
+      "vertices": 9464,
+      "triangles": 18252
+    },
+    "WashroomShell": {
+      "vertices": 13472,
+      "triangles": 25968
+    },
+    "WashroomProps": {
+      "vertices": 6602,
+      "triangles": 12240
+    },
+    "Mirror": {
+      "vertices": 432,
+      "triangles": 860
+    },
+    "StockProps": {
+      "vertices": 28480,
+      "triangles": 55656
+    },
+    "StockWalls": {
+      "vertices": 448,
+      "triangles": 864
+    },
+    "StockRearDoor": {
+      "vertices": 1504,
+      "triangles": 2916
+    },
+    "StockPrint": {
+      "vertices": 160,
+      "triangles": 288
+    },
+    "UtilityCabinetDoor": {
+      "vertices": 224,
+      "triangles": 432
+    },
+    "MenuGraphics": {
+      "vertices": 168,
+      "triangles": 324
+    },
+    "CaseGlass": {
+      "vertices": 418,
+      "triangles": 824
+    },
+    "Corridor": {
+      "vertices": 672,
+      "triangles": 1296
+    },
+    "DeliveryDoor": {
+      "vertices": 504,
+      "triangles": 972
+    },
+    "WashroomDoor": {
+      "vertices": 504,
+      "triangles": 972
+    }
+  },
+  "baked": [
+    "WallWest",
+    "Room",
+    "WallEast",
+    "WallRear",
+    "StreetDoor",
+    "StockDoor",
+    "Bar",
+    "LabelGraphics",
+    "Hall",
+    "FridgeMilk",
+    "FridgePastry",
+    "Ceiling",
+    "FurnitureWood",
+    "Brick",
+    "WashroomShell",
+    "WashroomProps",
+    "Mirror",
+    "StockProps",
+    "StockWalls",
+    "StockRearDoor",
+    "StockPrint",
+    "UtilityCabinetDoor",
+    "MenuGraphics",
+    "Corridor",
+    "DeliveryDoor",
+    "WashroomDoor"
+  ],
+  "game_floor": {
+    "triangles": 44460
+  },
+  "round_details": {
+    "Chair back": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back frame": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.001": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.002": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.004": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.005": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.006": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.007": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.008": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.009": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back frame.010": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Chair back.001": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.002": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.004": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.005": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.006": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.007": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.008": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.009": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair back.010": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.001": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.002": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.004": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.005": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.006": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.007": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.008": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.009": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Chair seat.010": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Grinder base": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Grinder hopper": {
+      "base_vertices_before": 72,
+      "base_vertices_after": 144,
+      "round_vertices_added": 72,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Grinder hopper lid": {
+      "base_vertices_before": 72,
+      "base_vertices_after": 144,
+      "round_vertices_added": 72,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.001": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.002": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.004": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.005": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.006": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Table top.007": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Банка · пустая стеклянная тара": {
+      "base_vertices_before": 576,
+      "base_vertices_after": 1152,
+      "round_vertices_added": 576,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Банка · сохранившееся дно и стенка": {
+      "base_vertices_before": 172,
+      "base_vertices_after": 258,
+      "round_vertices_added": 86,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Банка · сохранившееся дно и стенка.001": {
+      "base_vertices_before": 172,
+      "base_vertices_after": 258,
+      "round_vertices_added": 86,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Банка · толстое стеклянное дно": {
+      "base_vertices_before": 172,
+      "base_vertices_after": 344,
+      "round_vertices_added": 172,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Банка · толстое стеклянное дно.001": {
+      "base_vertices_before": 172,
+      "base_vertices_after": 344,
+      "round_vertices_added": 172,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Боковые стальные щёки": {
+      "base_vertices_before": 16,
+      "base_vertices_after": 16,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Верхний кожух": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Задний кожух": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Зерно · подвес · стальной плафон": {
+      "base_vertices_before": 619,
+      "base_vertices_after": 1015,
+      "round_vertices_added": 396,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Зерно · подвес · стальной плафон.001": {
+      "base_vertices_before": 616,
+      "base_vertices_after": 1232,
+      "round_vertices_added": 616,
+      "bevel_modifiers": 1,
+      "smoothed_profile": false
+    },
+    "Кашпо · сухой субстрат": {
+      "base_vertices_before": 220,
+      "base_vertices_after": 440,
+      "round_vertices_added": 220,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Кашпо · сухой субстрат.001": {
+      "base_vertices_before": 220,
+      "base_vertices_after": 440,
+      "round_vertices_added": 220,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Кашпо · сухой субстрат.002": {
+      "base_vertices_before": 220,
+      "base_vertices_after": 440,
+      "round_vertices_added": 220,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Кашпо · тонкая кромка и стенка": {
+      "base_vertices_before": 540,
+      "base_vertices_after": 1080,
+      "round_vertices_added": 540,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Кашпо · тонкая кромка и стенка.001": {
+      "base_vertices_before": 540,
+      "base_vertices_after": 1010,
+      "round_vertices_added": 470,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Кашпо · тонкая кромка и стенка.002": {
+      "base_vertices_before": 540,
+      "base_vertices_after": 1080,
+      "round_vertices_added": 540,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Нижняя рама": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Старая чашка на полке": {
+      "base_vertices_before": 130,
+      "base_vertices_after": 260,
+      "round_vertices_added": 130,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Столик · дубовая столешница": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Столик · дубовая столешница.001": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Стул · верх спинки": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Стул · верх спинки.001": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Стул · расколотое сиденье": {
+      "base_vertices_before": 18,
+      "base_vertices_after": 18,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Стул · расколотое сиденье.001": {
+      "base_vertices_before": 18,
+      "base_vertices_after": 18,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Фасад управления": {
+      "base_vertices_before": 8,
+      "base_vertices_after": 8,
+      "round_vertices_added": 0,
+      "bevel_modifiers": 1,
+      "smoothed_profile": true
+    },
+    "Чашка на подогреве": {
+      "base_vertices_before": 196,
+      "base_vertices_after": 336,
+      "round_vertices_added": 140,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Чашка на подогреве.001": {
+      "base_vertices_before": 196,
+      "base_vertices_after": 336,
+      "round_vertices_added": 140,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Чашка на подогреве.002": {
+      "base_vertices_before": 196,
+      "base_vertices_after": 336,
+      "round_vertices_added": 140,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    },
+    "Чашка на подогреве.003": {
+      "base_vertices_before": 196,
+      "base_vertices_after": 336,
+      "round_vertices_added": 140,
+      "bevel_modifiers": 0,
+      "smoothed_profile": false
+    }
+  },
+  "door_pivots": {
+    "DeliveryDoor": [
+      5.4629998207092285,
+      14.359999656677246,
+      0.0
+    ],
+    "StockDoor": [
+      3.943000078201294,
+      -0.5189999938011169,
+      0.0
+    ],
+    "WashroomDoor": [
+      -6.38700008392334,
+      2.640000104904175,
+      0.0
+    ],
+    "StockRearDoor": [
+      5.4629998207092285,
+      5.385000228881836,
+      0.0
+    ],
+    "FridgeMilk": [
+      3.181999921798706,
+      -3.036750078201294,
+      0.46700000762939453
+    ],
+    "FridgePastry": [
+      3.2230000495910645,
+      -2.5142500400543213,
+      0.46700000762939453
+    ],
+    "StreetDoor": [
+      -0.5189999938011169,
+      -5.348999977111816,
+      0.0
+    ],
+    "UtilityCabinetDoor": [
+      7.010000228881836,
+      1.194000005722046,
+      0.09799999743700027
+    ]
+  },
+  "preview_coords": "Blender metres, converted to Godot as x,z,-y"
+}
