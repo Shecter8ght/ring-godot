@@ -446,6 +446,9 @@ python -X utf8 tools/prospekt_ld_plan.py                       # «Проспе�
 python -X utf8 tools/prospekt_vershina_plan.py                 # «Проспект», район высоток: чертежи предложения по переделке ЖК «Вершина»
                                                               # (генплан, первый этаж стилобата, развёртка, разрез) → docs/design/prospekt_vershina_*.png;
                                                               # расстановка — словари в скрипте, в сцену не внесена (docs/design/prospekt_map.md §21)
+python -X utf8 tools/prospekt_north_side_plan.py              # «Проспект», северная сторона проспекта: чертежи предложения — квартал, развёртка
+                                                              # и карманы, банк «Капитал» по этажам, автомойка «Блеск» → docs/design/prospekt_north_*.png;
+                                                              # в сцену не внесено (docs/design/prospekt_map.md §22)
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn
                                                               # (заходы, выходы, посты — кордон ЧВК, патрули, гнёзда, подход, места лута), своё освещение
 tools/godot.cmd --headless res://tools/bake_prospekt_nav.tscn  # перепечь кэш навигации data/navigation/prospekt после правки блокаута
