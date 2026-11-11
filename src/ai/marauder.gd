@@ -2615,12 +2615,14 @@ func _shot_fx(from: Vector3, sound: String, flash: float, mechanism_sound: Strin
 	Audio.play(sound, from, extra_db)
 	if mechanism_sound != "":
 		Audio.play(mechanism_sound, from, extra_db - 5.0)
+	var firing_weapon: String = sound.get_slice("_shot", 0)
 	if cycle_sound != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
 			if is_inside_tree():
-				Audio.play(cycle_sound, global_position))
+				Audio.play(cycle_sound, global_position)
+				Audio.shell_drop(global_position, global_basis.x, 0.0, firing_weapon))
 	else:
-		Audio.shell_drop(global_position, global_basis.x, 0.0, sound.get_slice("_shot", 0))
+		Audio.shell_drop(global_position, global_basis.x, 0.0, firing_weapon)
 
 
 @rpc("authority", "call_remote", "unreliable_ordered")

@@ -398,13 +398,34 @@ func run_command(cmd: String) -> String:
 	elif a.size() >= 1 and a[0] == "lightning":
 		# небо: молния сейчас (только у себя) — с каналом до земли или только в тучах
 		out = _dev_lightning(a.size() > 1 and a[1] == "cloud")
+	elif a.size() >= 1 and a[0] == "place":
+		# где игра считает стрелка: улица / помещение / большое помещение (хвост выстрела) и по каким цифрам
+		out = _dev_place()
 	elif a.size() >= 1 and a[0] == "help":
-		out = "god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · lightning [cloud] — молния сейчас (расчётное небо, тучи): с каналом до земли или только в тучах · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
+		out = "place — какое место игра видит у тебя для хвоста выстрела: улица / помещение / большое помещение, и по каким цифрам · god — бессмертие вкл/выкл · fly — полёт · speed 3 — скорость ×3 · unlock — открыть всё: товар Михалыча, верстак, модули убежища, гравировка · shoploot — лут в продаже у Михалыча · upgrade workbench 2 — уровень модуля без затрат (в убежище) · event outage|generator|drop|pmc — событие рейда сейчас · lightning [cloud] — молния сейчас (расчётное небо, тучи): с каналом до земли или только в тучах · quest start missing_anton · quest stage missing_anton 3 · quest completeObjective · quest reset missing_anton · quest list
 " + ArsenalDev.HELP
 	else:
 		out = "неизвестно: " + cmd + " (help)"
 	Settings.changed.emit()
 	return out
+
+
+## Место выстрела там, где стоит свой персонаж (ствол на высоте груди): имя, цифры лучей и пороги Balance.SHOT_PLACE.
+func _dev_place() -> String:
+	var me: Player = null
+	for n in get_tree().get_nodes_in_group("players"):
+		var pl := n as Player
+		if pl != null and pl.is_local():
+			me = pl
+	if me == null:
+		return "нет своего персонажа"
+	const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
+	var cfg: Dictionary = Balance.SHOT_PLACE
+	var m: Dictionary = AcousticPlace.measure(me.get_world_3d(), me.global_position + Vector3.UP * 1.4)
+	var names := {"outdoor": "улица", "room": "помещение", "hall": "большое помещение"}
+	var up_text := "неба ничто не закрывает" if float(m.up) < 0.0 else "потолок над стволом %.1f м (граница зала %.1f)" % [float(m.up), float(cfg.hall_up_m)]
+	return "место выстрела: %s · %s · косых лучей в потолок %d из 4 (нужно %d) · стены, медиана %.1f м (граница помещения %.1f)" % [
+		names.get(String(m.place), m.place), up_text, int(m.covered), int(cfg.side_hits_min), float(m.median), float(cfg.room_median_m)]
 
 
 ## Для плейтеста: поднять модуль своего профиля без денег, деталей и доверия.

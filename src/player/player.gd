@@ -22,6 +22,9 @@ var stance: Stance = Stance.STAND
 var aiming: bool = false
 ## Головка самонаведения ПЗРК «Осока» (только у своего игрока; OsokaSeeker): захват цели, писк, метка.
 var osoka: OsokaSeeker = OsokaSeeker.new()
+## Канал тепловизора на «Осоке» (ПН-36Т «ПОЛЫНЬ», attach.thermal): true — тепловой, false — дневной; X — переключатель
+## (toggle_sight_channel). Свой у игрока, не в записи ствола: новый рейд — снова тепловой.
+var sight_thermal: bool = true
 ## Прицел от первого лица включён — ставит CameraRig.
 var ads: bool = false
 ## Наклон (Q/E) от первого лица: -1 — влево, 1 — вправо; синхронизируется (AI видит высунувшегося).
@@ -105,6 +108,7 @@ var _reload_fast: bool = false
 ## Подсказка «магазин из рюкзака — дольше» — один раз за рейд.
 var _rig_hint_shown: bool = false
 var _reload_age: float = 0.0
+var _reload_audio = preload("res://src/audio/reload_audio.gd").new()
 ## Липучка подсумка: через сколько секунд от начала перезарядки звучит (−1 — нет: магазин не из подсумка
 ## или уже прозвучала). Balance.POUCH_VELCRO.
 var _velcro_at: float = -1.0
@@ -1619,6 +1623,8 @@ func _combat(delta: float) -> void:
 		_toggle_tac("laser")
 	if Input.is_action_just_pressed("toggle_sight"):
 		_toggle_sight()
+	if InputMap.has_action("fire_mode") and Input.is_action_just_pressed("fire_mode") and not ui_blocked() and bool(spec().get("thermal", false)):
+		toggle_sight_channel()
 	# пристрелка: в прицеле стрелки — щелчки барабанчиков
 	if aiming and ads and not ui_blocked():
 		for z: Array in [["zero_up", 0, 1], ["zero_down", 0, -1], ["zero_left", -1, 0], ["zero_right", 1, 0]]:
@@ -1642,6 +1648,8 @@ func _combat(delta: float) -> void:
 			_velcro_at = -1.0
 			_play_velcro()
 		reload_timer -= delta
+		if _reload_kind != "clear":
+			_play_reload_marks(spec)
 		if _reload_kind == "clear" and not _clear_released and reload_timer <= float(Balance.WEAPON_WEAR.clear_sec) * (1.0 - float(Balance.WEAPON_WEAR.clear_release_at)):
 			_clear_released = true
 			_play_weapon_sound(spec, "clear_jam_release", -4.0)
@@ -1810,11 +1818,19 @@ func _start_reload(spec: Dictionary) -> void:
 		_weapon_action("reload", _reload_empty, reload_timer)
 	if _weapon_rig:
 		return
+	var clip_start: float = 0.0
+	if _reload_insert and _camera_rig is CameraRig:
+		clip_start = (_camera_rig as CameraRig).reload_swap_fraction(_reload_empty)
+	_reload_audio.start(weapon_id, _reload_audio.mode(_reload_empty), reload_timer, _reload_insert, clip_start)
+	if not _reload_audio.marks.is_empty():
+		_play_reload_marks(spec)
+		return
 	Audio.play(String(spec.reload_sound), global_position)
 	if _weapon_sound(spec, "breech_open") != "":
 		_play_weapon_sound(spec, "breech_open", -4.0)
 	elif _weapon_sound(spec, "mag_out") != "":
 		_play_weapon_sound(spec, "mag_out", -4.0)
+		_reload_audio.mark_played("mag_out")
 	else:
 		_play_weapon_sound(spec, "round_insert", -4.0)
 
@@ -1831,6 +1847,7 @@ func _try_fast_reload() -> void:
 		return
 	_reload_fast = true
 	reload_timer = maxf(0.2, (reload_timer + _reload_age) * float(cfg.time_k) - _reload_age)
+	_reload_audio.switch_to(weapon_id, _reload_audio.mode(_reload_empty, true), reload_timer, _reload_age)
 	# быстрая: сначала берут новый магазин из подсумка (им же выбивают старый) — липучка сразу
 	if _velcro_at >= 0.0:
 		_velcro_at = -1.0
@@ -1943,6 +1960,9 @@ func _finish_reload(spec: Dictionary) -> void:
 
 
 func _finish_reload_sounds(specification: Dictionary) -> void:
+	if not _reload_audio.marks.is_empty():
+		_reload_audio.clear()
+		return
 	if _weapon_sound(specification, "breech_close") != "":
 		_play_weapon_sound(specification, "breech_close", -4.0)
 		return
@@ -1950,11 +1970,21 @@ func _finish_reload_sounds(specification: Dictionary) -> void:
 	_play_weapon_sound(specification, "charge", -5.0)
 
 
+func _play_reload_marks(specification: Dictionary) -> void:
+	for slot: String in _reload_audio.due(reload_timer):
+		var hook: String = _weapon_sound(specification, slot)
+		var stream: AudioStream = _reload_audio.recording(_reload_audio.marks[slot])
+		Audio.play(hook, global_position, _reload_audio.gain(slot), 0.0, null, stream)
+
+
 ## Только единственный риг модели на теле озвучивает действие — модель перед камерой молчит.
 func _rig_sound(slot: String) -> void:
 	if not health.alive or weapon_id == "":
 		return
-	_play_weapon_sound(spec() if is_local() else WeaponStats.compute({"id": weapon_id, "mods": weapon_mods}), slot, float(Balance.PM_ACTION.sound_db))
+	var specification: Dictionary = spec() if is_local() else WeaponStats.compute({"id": weapon_id, "mods": weapon_mods})
+	var recording: AudioStream = _weapon_rig.reload_recording(slot) if is_instance_valid(_weapon_rig) else null
+	Audio.play(_weapon_sound(specification, slot), global_position, float(Balance.PM_ACTION.sound_db),
+		0.0, null, recording)
 
 
 ## Одно событие приводит обе модели к одинаковой фазе; у чужого игрока работает тот же WeaponRig.
@@ -2032,6 +2062,7 @@ func cancel_weapon_action() -> void:
 	_cancel_grenade_prepare()
 	var had_action: bool = not _pm_action.is_empty() or reload_timer > 0.0 or (_weapon_rig and _weapon_rig.is_busy())
 	_pm_action.clear()
+	_reload_audio.clear()
 	reload_timer = 0.0
 	_reload_hold = -1.0
 	_reload_fast = false
@@ -2263,6 +2294,14 @@ func toggle_sight() -> void:
 		Audio.play("sight_switch", global_position, -16.0)
 	else:
 		_toggle_sight()
+
+
+## X с тепловизором на оружии: рычажок переключателя «ДЕНЬ / ТЕПЛО» — экран окуляра гаснет на миг и показывает
+## другой канал (CameraRig._update_display); звук — действие sight_channel модели, без записи — тишина.
+func toggle_sight_channel() -> void:
+	sight_thermal = not sight_thermal
+	_play_weapon_sound(spec(), "sight_channel", -6.0)
+	_say("Тепловизор: %s" % ("ТЕПЛО — тепловой канал" if sight_thermal else "ДЕНЬ — дневной канал"))
 
 
 func _toggle_sight() -> void:
@@ -2898,14 +2937,15 @@ func _shot_fx(muzzle: Vector3, sound: String, db: float, flash: float, cycle_sou
 	Audio.play(sound, muzzle, db)
 	if mechanism_sound != "":
 		Audio.play(mechanism_sound, muzzle, db - 5.0)
-	# помпа/затвор — щелчок после выстрела
+	var firing_weapon: String = sound.get_slice("_shot", 0) if sound != "" else weapon_id
+	# У помпы и болтовки гильза вылетает при передёргивании.
 	if cycle_sound != "":
 		get_tree().create_timer(0.35).timeout.connect(func() -> void:
 			if is_inside_tree():
-				Audio.play(cycle_sound, global_position))
+				Audio.play(cycle_sound, global_position)
+				Audio.shell_drop(global_position, _side_dir(), 0.0, firing_weapon))
 	else:
-		# самозарядное: гильза вылетает на каждом выстреле (у помпы и болтовки — на цикле, звука гильзы там пока нет)
-		Audio.shell_drop(global_position, _side_dir(), 0.0, weapon_id)
+		Audio.shell_drop(global_position, _side_dir(), 0.0, firing_weapon)
 
 
 ## Вправо от стрелка (по телу) — куда вылетает гильза.

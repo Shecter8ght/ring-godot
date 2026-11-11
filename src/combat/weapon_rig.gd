@@ -6,6 +6,8 @@ extends Node3D
 signal sound_event(slot: String)
 signal action_finished(action: String)
 
+const ReloadAudio := preload("res://src/audio/reload_audio.gd")
+
 const PART_NAMES: Array[String] = ["Frame", "Slide", "Barrel", "Trigger", "Hammer", "Latch", "FiringPin", "SlideStop", "Safety", "MagCatch", "Magazine", "Suppressor"]
 ## Курок, предохранитель и глушитель есть не у каждого пистолета (у Glock их нет) — они необязательны:
 ## без них риг просто не двигает эти детали, а глушитель ставится процедурным обвесом.
@@ -38,6 +40,7 @@ var _elapsed: float = 0.0
 var _duration: float = 0.0
 var _weight: float = 0.0
 var _events: Array[Dictionary] = []
+var _reload_sound_marks: Dictionary = {}
 
 
 static func find_on(root: Node3D) -> WeaponRig:
@@ -204,6 +207,13 @@ func play_reload(empty: bool, duration: float) -> void:
 	cancel_action()
 	_empty_reload = empty
 	_begin("reload", duration)
+	_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(empty))
+	if not _reload_sound_marks.is_empty():
+		for slot: String in _reload_sound_marks:
+			if bool(_reload_sound_marks[slot].get("enabled", true)):
+				_queue_sound(slot, float(_reload_sound_marks[slot].at))
+		_apply_pose()
+		return
 	var phases: Dictionary = _config.get("reload", {})
 	if String(_config.get("mechanism", "")) == "break_action":
 		_queue_sound("breech_open", float(phases.get("open_start", 0.1)))
@@ -217,6 +227,10 @@ func play_reload(empty: bool, duration: float) -> void:
 	if empty:
 		_queue_sound("charge", float(phases.get("charge", 1.0)))
 	_apply_pose()
+
+
+func reload_recording(slot: String) -> AudioStream:
+	return ReloadAudio.recording(_reload_sound_marks.get(slot, {})) if action == "reload" else null
 
 
 func finish_reload(rounds: int) -> void:
@@ -241,6 +255,7 @@ func cancel_action() -> void:
 	_elapsed = 0.0
 	_duration = 0.0
 	_events.clear()
+	_reload_sound_marks.clear()
 	set_process(false)
 	_apply_pose()
 

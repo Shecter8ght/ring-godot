@@ -10,5 +10,91 @@
   "watch",
   "wet_rooms"
  ],
- "lights": []
+ "lights": [
+  {
+   "id": "Floor1_lantern_1",
+   "note": "поставил владелец в прогулке",
+   "kind": "lantern",
+   "section": "Floor1",
+   "at": [
+    1.31,
+    1.38,
+    4.42
+   ],
+   "yaw": 104
+  },
+  {
+   "id": "Floor1_candles_1",
+   "note": "поставил владелец в прогулке",
+   "kind": "candles",
+   "section": "Floor1",
+   "at": [
+    3.43,
+    1.36,
+    -6.35
+   ],
+   "yaw": -48
+  },
+  {
+   "id": "Floor1_chem_yellow_1",
+   "note": "поставил владелец в прогулке",
+   "kind": "chem_yellow",
+   "section": "Floor1",
+   "at": [
+    38.57,
+    0.48,
+    0.7
+   ],
+   "yaw": 109
+  },
+  {
+   "id": "Floor1_chem_yellow_2",
+   "note": "поставил владелец в прогулке",
+   "kind": "chem_yellow",
+   "section": "Floor1",
+   "at": [
+    39.76,
+    0.48,
+    -1.17
+   ],
+   "yaw": 63
+  },
+  {
+   "id": "Floor1_candles_2",
+   "note": "поставил владелец в прогулке",
+   "kind": "candles",
+   "section": "Floor1",
+   "at": [
+    20.8,
+    1.33,
+    8.74
+   ],
+   "yaw": -159
+  },
+  {
+   "id": "Floor1_flashlight_1",
+   "note": "поставил владелец в прогулке",
+   "kind": "flashlight",
+   "section": "Floor1",
+   "at": [
+    25.85,
+    1.03,
+    4.92
+   ],
+   "yaw": 32,
+   "charge": 0.6
+  },
+  {
+   "id": "Floor1_lantern_2",
+   "note": "поставил владелец в прогулке",
+   "kind": "lantern",
+   "section": "Floor1",
+   "at": [
+    26.18,
+    1.33,
+    -8.79
+   ],
+   "yaw": 73
+  }
+ ]
 }

@@ -53,5 +53,4 @@ volumetric_fog_anisotropy = 0.6
 volumetric_fog_length = 140.0
 volumetric_fog_sky_affect = 0.0
 adjustment_enabled = true
-adjustment_contrast = 1.0
 adjustment_saturation = 1.1

@@ -461,6 +461,24 @@ func update(pl: Player, delta: float) -> void:
 		shown = _rounds_after if after_swap else _rounds_before
 	# какой магазин виден: в перезарядке до подмены — старый, после — новый; иначе — тот, что в оружии
 	var showing: String = (_reload_new if after_swap else _reload_old) if _clip != "" and _swap_frame >= 0 else pl.weapon_mag
+	_insert_hide = maxf(0.0, _insert_hide - delta) if reloading else 0.0
+	_show_magazines(showing, shown, (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0)
+	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
+	if _jam_case:
+		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
+		_jam_case.visible = jammed or clear_clip
+	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
+	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and _clip == "" and not jammed
+	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip, held)
+	_selector_pose(pl)
+	_inspect_turn(pl, delta)
+	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
+	_support_hand(_grip_w)
+	_apply_hand_grip(delta)
+	_scale_hands()
+
+
+func _show_magazines(showing: String, shown: int, mag_in: bool) -> void:
 	var look: Dictionary = _mag_looks.get(showing, {}) if showing not in ["", "*"] else {}
 	var rounds: Array[Node3D] = _rounds
 	if not look.is_empty():
@@ -472,11 +490,9 @@ func update(pl: Player, delta: float) -> void:
 	if look.has("follower"):
 		var table: Array[Transform3D] = look.table
 		(look.follower as Node3D).transform = table[clampi(shown, 0, table.size() - 1)]
-	_insert_hide = maxf(0.0, _insert_hide - delta) if reloading else 0.0
 	if _insert_hide > 0.0:
 		for round_node: Node3D in rounds:
 			round_node.visible = false
-	var mag_in: bool = (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0
 	for part: Node3D in _mag_parts:
 		part.visible = mag_in
 	for std: Node3D in _std_mag_nodes:
@@ -498,20 +514,41 @@ func update(pl: Player, delta: float) -> void:
 			var old_rounds: Array[Node3D] = other.rounds
 			for i in range(old_rounds.size()):
 				old_rounds[i].visible = i < _rounds_before
-	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
-	if _jam_case:
-		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
-		_jam_case.visible = jammed or clear_clip
-	# штатный подаватель — таблица на 30 (у магазина со своей моделью он скрыт, его подаватель — выше)
-	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
-	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and _clip == "" and not jammed
-	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip, held)
-	_selector_pose(pl)
-	_inspect_turn(pl, delta)
-	_grip_w = move_toward(_grip_w, 0.0 if is_busy() or is_nan(_grip_z) else 1.0, delta / BLEND_IN)
-	_support_hand(_grip_w)
-	_apply_hand_grip(delta)
+
+
+## Стенд читает тот же клип, хват и подмену магазина на произвольном кадре.
+func preview_reload(role: String, fraction: float, mag: String) -> void:
+	_hand_pose.restore()
+	_restore_arm()
+	_mag_set = _set_of(mag)
+	var clip: String = _clip_name(role)
+	if clip.is_empty() or not _anim.has_animation(clip):
+		return
+	if _clip != clip or String(_anim.current_animation) != clip:
+		_play(clip, 0.0)
+	var length: float = _anim.get_animation(clip).length
+	_anim.seek(minf(fraction * length, length - 0.00001), true)
+	if String(config.get("mechanism", "")) == "break_action":
+		_signal_old_type = "flare"
+		_signal_has_old = true
+		_show_signal_rounds(true, "flare", "flare", role != "reload_empty", true)
+	else:
+		_reload_old = mag
+		_rounds_after = _capacity_of(mag)
+		_rounds_before = 0 if role.ends_with("empty") else maxi(1, _rounds_after / 2)
+		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
+		_fast = role.begins_with("reload_fast")
+		var frame: float = _anim.current_animation_position * float(config.get("fps", 30))
+		var shown: int = _rounds_after if _swap_frame >= 0 and frame >= _swap_frame else _rounds_before
+		_show_magazines(mag, shown, true)
+		_pose_overrides(clampi(shown, 0, 30), 0.0)
+	_apply_hand_grip(0.0)
 	_scale_hands()
+
+
+func reload_frame_count(role: String) -> int:
+	var clip: String = _clip_name(role)
+	return roundi(_anim.get_animation(clip).length * float(config.get("fps", 30))) if _anim.has_animation(clip) else 0
 
 
 ## Размер кистей (Balance.FPS_HAND_SCALE) — последним, поверх клипа и подгонки хвата; поза до него
@@ -600,6 +637,11 @@ func _update_signal(pl: Player, delta: float) -> void:
 	_anim.advance(delta)
 	if not reloading and (_clip == "" or not _anim.is_playing()) and String(_anim.current_animation) != resting:
 		_play(resting, BLEND_OUT)
+	_show_signal_rounds(reloading, pl.weapon_signal_ammo, pl.signal_reload_ammo, pl.ammo > 0,
+		not reloading and pl.ammo <= 0 and bool(pl.weapon_entry().get("signal_spent", false)))
+
+
+func _show_signal_rounds(reloading: bool, chamber_type: String, next_type: String, loaded: bool, spent: bool) -> void:
 	var f: float = 1.0 + _anim.current_animation_position * float(config.get("fps", 30))
 	if _signal_left_arm:
 		var assisting: bool = false
@@ -612,13 +654,13 @@ func _update_signal(pl: Player, delta: float) -> void:
 	for name: String in _signal_props:
 		var old: bool = name.begins_with("Old")
 		var green: bool = name.ends_with("Green")
-		var type: String = (_signal_old_type if old else pl.signal_reload_ammo) if reloading else pl.weapon_signal_ammo
+		var type: String = (_signal_old_type if old else next_type) if reloading else chamber_type
 		var window: Array = old_window if old else new_window
 		var shown: bool = reloading and f >= float(window[0]) and f <= float(window[1])
 		if reloading:
 			shown = shown and (not old or _signal_has_old)
 		else:
-			shown = pl.ammo == 0 and bool(pl.weapon_entry().get("signal_spent", false)) if old else pl.ammo > 0
+			shown = not loaded and spent if old else loaded
 		(_signal_props[name] as Node3D).visible = shown and green == (type == "supply_signal")
 
 

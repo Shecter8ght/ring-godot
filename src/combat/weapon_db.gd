@@ -133,7 +133,7 @@ static func weapon_sound_events(id: String = "") -> Array[Dictionary]:
 			var event: Dictionary = slot.duplicate(true)
 			var action: String = String(slot.id)
 			event.id = wid + "_" + action
-			event.kind = wid + "_" + ("shot_sup" if action == "shot_suppressed" else action) if bool(slot.get("wired", false)) else ""
+			event.kind = wid + "_" + action if bool(slot.get("wired", false)) else ""
 			event.weapon = wid
 			event.slot = action
 			event.name = String(item.get("name", wid)) + " — " + String(slot.name)
@@ -178,6 +178,8 @@ static func _sound_slot_applies(slot: Dictionary, w: Dictionary) -> bool:
 			return String(w.get("class", "")) != "SPECIAL"
 		"rig_suppressor":
 			return (w.get("rig", {}) as Dictionary).has("suppressor") and (w.get("mounts", {}) as Dictionary).has("muzzle")
+		"not_integrally_suppressed":
+			return not bool((w.get("integral", {}) as Dictionary).get("suppressed", false))
 		"suppressible":
 			return bool((w.get("integral", {}) as Dictionary).get("suppressed", false)) or (w.get("mounts", {}) as Dictionary).has("muzzle")
 		"detachable_mag":
