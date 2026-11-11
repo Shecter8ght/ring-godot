@@ -1075,9 +1075,215 @@ def plan_data_6a() -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+# ------------------------------------------------------------------ этап 6b: «Вершина», первый этаж стилобата
+BASE_REV_6B = "b7fff468"          # коммит этапа 6a
+WALL_H = 5.7                      # наружные стены и перегородки первого этажа (потолок — низ плиты верхних этажей, 5,54)
+EXT_T, INT_T = 0.25, 0.15
+ANT_Y, ANT_T = 3.0, 0.3           # антресоль вестибюля: верх плиты +3,0, толщина 0,3
+ANT_UNDER = ANT_Y - ANT_T         # стены под плитой — 0…2,7
+STAIR_L1 = {"x": 69.9, "z_from": -76.5, "z_to": -81.8, "w": 1.6}
+ANT_HOLE = (69.1, -81.8, 70.7, -76.3)
+CASE_W = 3.0                      # ширина витрины первого этажа
+
+
+def _room_of(x: float, z: float) -> str:
+    """Подпись помещения первого этажа по точке (для подписи места лута)."""
+    for label, x0, x1, z0, z1, _ in V.ROOMS:
+        if x0 <= x <= x1 and z0 <= z <= z1:
+            return label.split("\n")[0].strip()
+    return ""
+
+
+def stage_6b_vershina_ground() -> Patch:
+    p = Patch("6b_vershina_ground", BASE_REV_6B)
+    sx0, sx1, sz0, sz1 = V.WING_S
+    wx0, wx1, wz0, wz1 = V.WING_W
+    px0, px1 = V.PASSAGE[0], V.PASSAGE[1]
+    az = V.ARCADE_Z
+    D = D_H
+    # --- 1. временные опоры 6a — прочь (колонны галереи остаются: у них другой материал)
+    for r in ([wx0 - 0.1, wz0 - 0.1, wx1 + 0.1, wz1 + 0.1], [sx0 - 0.1, sz0 - 0.1, sx1 + 0.1, sz1 + 0.1]):     # два крыла (не кафе двора рядом)
+        p.remove["pieces"].append({"list": "boxes", "rect": r, "inside": r, "ymin": -0.1, "ymax": 6.1, "mat": TEMP_SUPPORT_MAT})
+    # пол первого этажа крыла вдоль площади (галерея, залы, пассаж); двор крыла вдоль БЦ уже покрыт `vershina_yard`
+    p.surface("vershina_floor_s", "walk", sx0, sz0, sx1, sz1, 0.0, 0.08)
+
+    # --- 2. наружные стены крыла вдоль площади
+    south_gaps_a = [(53.8, 1.6, D), (70.6, 5.0, 2.6), (95.8, 1.6, D)]
+    south_gaps_a += Patch.windows(49.3, 62.2, 4.2, CASE_W, 0.4, 3.6, [(53.8, 1.6)])
+    south_gaps_a += Patch.windows(62.2, 87.4, 4.2, CASE_W, 0.4, 5.2, [(70.6, 5.0)])       # витражи вестибюля в два света
+    south_gaps_a += Patch.windows(87.4, 100.4, 4.2, CASE_W, 0.4, 3.6, [(95.8, 1.6)])
+    south_gaps_b = [(121.0, 1.6, D)] + Patch.windows(108.4, 127.3, 4.2, CASE_W, 0.4, 3.6, [(121.0, 1.6)])
+    p.wall_x(az, sx0, px0, 0.0, WALL_H, south_gaps_a, EXT_T, "wall")
+    p.wall_x(az, px1, sx1, 0.0, WALL_H, south_gaps_b, EXT_T, "wall")
+    north_a = [(74.2, 1.4, D), (96.0, 1.17, D)]
+    p.wall_x(sz0, sx0, px0, 0.0, WALL_H, north_a, EXT_T, "wall")
+    p.wall_x(sz0, px1, sx1, 0.0, WALL_H, (), EXT_T, "wall")
+    p.wall_z(sx0, wz0, az, 0.0, WALL_H, (), EXT_T, "wall")                                   # западная, глухая (БЦ 13), на оба крыла
+    p.wall_z(sx1, sz0, az, 0.0, WALL_H, [(-70.5, 2.0, 3.6, 1.0), (-66.0, 2.0, 3.6, 1.0)], EXT_T, "wall")   # восточная: два окна
+    # пассаж: боковые стены со служебными дверями, торцов нет
+    p.wall_z(px0, sz0, az, 0.0, WALL_H, [(-70.0, 1.17, D)], INT_T, "wall")
+    p.wall_z(px1, sz0, az, 0.0, WALL_H, [(-70.0, 1.17, D)], INT_T, "wall")
+
+    # --- 3. перегородки крыла вдоль площади (полная высота)
+    p.wall_z(55.8, sz0, -75.3, 0.0, WALL_H, (), INT_T, "wall")                               # кабинет | архив
+    p.wall_z(62.2, sz0, az, 0.0, WALL_H, (), INT_T, "wall")                                  # офис продаж, кабинет | вестибюль, пост
+    p.wall_z(87.4, sz0, az, 0.0, WALL_H, (), INT_T, "wall")                                  # почта, вестибюль | склад, винотека
+    p.wall_z(118.0, sz0, -75.3, 0.0, WALL_H, (), INT_T, "wall")                              # мастерская | сейфовая
+    p.wall_x(-75.3, sx0, 62.2, 0.0, WALL_H, [(52.5, 1.17, D), (59.0, 1.17, D)], INT_T, "wall")   # кабинет, архив | офис продаж
+    p.wall_x(-76.3, 87.4, px0, 0.0, WALL_H, [(93.9, 1.17, D)], INT_T, "wall")                # склад | зал винотеки
+    p.wall_x(-75.3, px1, sx1, 0.0, WALL_H, [(113.0, 1.17, D), (122.6, 1.17, D)], INT_T, "wall")   # мастерская, сейфовая | салон
+    # задний ряд вестибюля — под антресолью (0…2,7) и над ней (3,0…5,7)
+    for x in (67.4, 72.4, 75.0, 81.4):
+        p.wall_z(x, sz0, -75.3, 0.0, ANT_UNDER, (), INT_T, "wall")
+        p.wall_z(x, sz0, -75.3, ANT_Y, WALL_H - ANT_Y, (), INT_T, "wall")
+    p.wall_x(-75.3, 62.2, 87.4, 0.0, ANT_UNDER, [(64.8, 1.17, D), (69.9, 2.4, D), (74.2, 1.4, D), (84.4, 1.17, D)], INT_T, "wall")
+    p.wall_x(-75.3, 62.2, 87.4, ANT_Y, WALL_H - ANT_Y, [(64.8, 1.17, D), (68.25, 1.5, 2.6), (73.7, 1.17, D), (84.4, 1.17, D)], INT_T, "wall")
+    for k in range(4):                                                                       # дверцы лифтов на стене к залу (глухая шахта)
+        p.box(75.9 + 1.6 * k, 1.1, -75.2, 1.1, 2.2, 0.04, "dark", 0.0, False)
+    # антресоль: плита с вырезом под марш Л1, ограждения выреза и балкона
+    p.slab("vershina_antresol", [62.2, sz0, 87.4, -72.3], ANT_Y, ANT_T, "slab", [list(ANT_HOLE)])
+    p.stair((STAIR_L1["x"], 0.0, STAIR_L1["z_from"]), (STAIR_L1["x"], ANT_Y, STAIR_L1["z_to"]), STAIR_L1["w"], "concrete")
+    hx0, hz0, hx1, hz1 = ANT_HOLE
+    p.box(hx0 - 0.04, ANT_Y + 0.5, (hz0 + hz1) / 2.0, 0.08, 1.0, hz1 - hz0, "steel")          # западная сторона выреза
+    p.box(hx1 + 0.04, ANT_Y + 0.5, (hz0 + hz1) / 2.0, 0.08, 1.0, hz1 - hz0, "steel")          # восточная
+    p.box((hx0 + hx1) / 2.0, ANT_Y + 0.5, hz1 + 0.04, hx1 - hx0 + 0.16, 1.0, 0.08, "steel")   # южная
+    p.box(74.8, ANT_Y + 0.5, -72.3, 25.2, 1.0, 0.08, "steel")                                  # балкон: ограждение по краю Z −72,3
+
+    # --- 4. крыло вдоль БЦ (фитнес-клуб)
+    fit_east = [(-100.3, 2.4, 2.6)] + Patch.windows(wz0, sz0, 4.0, 1.6, 1.0, 3.6, [(-100.3, 2.4)])
+    p.wall_z(wx1, wz0, sz0, 0.0, WALL_H, fit_east, EXT_T, "wall")                            # окна к двору, вход со двора
+    p.wall_x(wz0, wx0, wx1, 0.0, WALL_H, Patch.windows(wx0, wx1, 4.5, 1.6, 1.4, 3.6), EXT_T, "wall")
+    p.wall_z(63.3, wz0, sz0, 0.0, WALL_H, [(-112.3, 1.17, D), (-100.3, 1.6, D), (-89.3, 1.17, D)], INT_T, "wall")
+    p.wall_x(-95.3, 63.3, wx1, 0.0, WALL_H, [(68.3, 1.17, D)], INT_T, "wall")
+    p.wall_x(-105.3, 63.3, wx1, 0.0, WALL_H, [(68.3, 1.17, D)], INT_T, "wall")
+
+    # --- 5. мебель коробками
+    def b(x, z, sx, sy, sz, mat="accent", y0=0.0):
+        p.box(x, y0 + sy / 2.0, z, sx, sy, sz, mat)
+    # вестибюль: стойка, диваны, три турникета с проходами 1,3 м у двери на Л1
+    b(79.0, -68.0, 5.0, 1.1, 0.8)
+    for x in (65.3, 79.5, 84.2):
+        b(x, -65.2, 2.4, 0.45, 0.9)
+    for x in (68.2, 69.9, 71.6):
+        b(x, -74.2, 0.4, 1.0, 1.0, "steel")
+    b(66.9, -79.5, 0.7, 0.75, 1.6)                                                           # стол поста охраны
+    b(84.4, -82.8, 4.0, 1.8, 0.4, "steel")                                                   # почтовые ящики
+    # офис продаж: макет, столы; кабинет, архив
+    b(58.0, -69.5, 3.6, 1.0, 2.2)
+    b(52.5, -80.0, 1.6, 0.75, 0.8)
+    b(59.0, -82.8, 5.0, 2.0, 0.5, "steel")
+    # винотека и склад
+    for x in (89.6, 91.9):
+        b(x, -69.5, 0.5, 2.0, 6.0, "wood")
+    b(97.5, -68.0, 3.0, 1.0, 0.8)
+    b(88.8, -80.0, 0.6, 1.8, 5.0, "steel")
+    b(98.5, -81.5, 2.4, 1.8, 0.6, "steel")
+    # ювелирный: витрины, мастерская, сейфы
+    b(112.4, -67.5, 4.0, 1.1, 0.9, "dark")
+    b(117.5, -73.5, 3.0, 1.1, 0.9, "dark")
+    b(116.0, -81.8, 3.0, 0.8, 0.9)
+    b(125.0, -82.6, 0.9, 1.8, 0.8, "steel")
+    b(126.2, -82.6, 0.9, 1.8, 0.8, "steel")
+    # фитнес: тренажёры двумя колонками, стойка с гантелями, ресепшен, шкафчики и скамьи раздевалок
+    for k in range(8):
+        for x in (51.2, 55.4):
+            b(x, -116.5 + 4.0 * k, 0.8, 1.3, 1.8, "dark")
+    b(60.5, -84.4, 2.0, 1.0, 0.6, "steel")
+    b(71.0, -103.3, 2.4, 1.1, 0.8)
+    b(68.5, -83.2, 5.0, 1.8, 0.5, "steel")
+    b(68.5, -85.2, 4.0, 0.45, 0.5)
+    b(68.5, -118.9, 6.0, 1.8, 0.5, "steel")
+    b(68.5, -117.0, 4.0, 0.45, 0.5)
+
+    # --- 6. места лута (данные плана): вид → (kind, tier), подпись по комнате; точки сдвигаются от стен и мебели
+    kinds = {"b": [("crate", "common"), ("cabinet", "common")], "m": [("med", "med")], "v": [("safe", "good"), ("crate", "good")], "w": [("weapon", "weapon")]}
+    blocks: list[tuple] = []
+    for w in p.add["walls"]:
+        r = w["rect"]
+        if w["y0"] < 1.6 and w["y1"] > 0.3:
+            blocks.append((r[0] - 0.4, r[1] - 0.4, r[2] + 0.4, r[3] + 0.4))
+    for bx in p.add["boxes"]:
+        if bx["solid"] and bx["at"][1] - bx["size"][1] / 2.0 < 1.6 and bx["size"][1] > 0.6:
+            a, s = bx["at"], bx["size"]
+            blocks.append((a[0] - s[0] / 2.0 - 0.4, a[2] - s[2] / 2.0 - 0.4, a[0] + s[0] / 2.0 + 0.4, a[2] + s[2] / 2.0 + 0.4))
+    blocks.append((ANT_HOLE[0] - 0.4, STAIR_L1["z_to"] - 0.4, ANT_HOLE[2] + 0.4, STAIR_L1["z_from"] + 0.6))           # марш Л1
+
+    def free(x: float, z: float) -> bool:
+        return not any(r[0] < x < r[2] and r[1] < z < r[3] for r in blocks)
+
+    def settle(x: float, z: float) -> tuple[float, float]:
+        if free(x, z):
+            return x, z
+        for rr in [i * 0.1 for i in range(2, 21)]:
+            for k in range(16):
+                a = math.radians(k * 22.5)
+                nx, nz = x + rr * math.cos(a), z + rr * math.sin(a)
+                if free(nx, nz) and _room_of(nx, nz) == _room_of(x, z):
+                    return round(nx, 2), round(nz, 2)
+        raise SystemExit(f"лут ({x}; {z}) некуда сдвинуть")
+
+    loot: list = []
+    moved = 0
+    for i, (x, z, k) in enumerate(V.LOOT):
+        nx, nz = settle(x, z)
+        moved += (nx, nz) != (x, z)
+        room = _room_of(nx, nz)
+        kind, tier = kinds[k][i % len(kinds[k])]
+        if k == "b" and room in ("Фитнес-клуб", "раздевалка М", "раздевалка Ж", "кабинет", "архив", "почта", "пост"):
+            kind, tier = ("cabinet", "common")
+        loot.append(([nx, 0.08, nz], kind, tier, f"Вершина, {room}: " + {"b": "бытовое", "m": "аптечка", "v": "ценное", "w": "оружейный шкаф"}[k]))
+    p.log.append(f"мест лута в стилобате {len(loot)} (сдвинуто от стен и мебели {moved})")
+    for x, z, k in V.LOOT_YARD:
+        if abs(x - 93.3) < 0.01 and abs(z + 120.5) < 0.01:
+            continue                                                                         # схрон у КТП уже есть
+        if V.PAVILION[0] < x < V.PAVILION[1] and V.PAVILION[2] < z < V.PAVILION[3]:
+            if (x, z) == (124.0, -98.0):
+                x, z = 124.6, -99.4                                                          # из угла ящиков склада кафе
+            where, y = "кафе двора", 0.0
+        else:
+            where, y = "двор", 0.08 if x < 147.3 else 0.0
+        kind, tier = kinds[k][0]
+        loot.append(([x, y, z], kind, tier, f"Вершина, {where}: " + {"b": "бытовое", "m": "аптечка", "v": "ценное", "w": "оружие"}[k]))
+    p.loot6b = loot
+    return p
+
+
+ROUTE_PASSAGE = [[181.3, -135.3], [183.0, -107.3], [144.0, -107.3], [130.0, -91.0], [104.4, -88.0], [104.4, -70.0], [104.4, -52.0],
+                 [104.4, -70.0], [104.4, -88.0], [74.2, -87.0], [74.2, -80.0], [74.2, -72.6], [70.75, -72.6], [70.75, -75.0],
+                 [69.9, -77.0], [69.9, -81.2], [69.9, -82.6], [68.2, -81.6], [68.25, -76.0], [68.25, -73.8], [68.25, -76.0],
+                 [68.2, -81.6], [69.9, -82.4], [69.9, -77.0], [70.75, -75.0], [70.75, -72.6], [70.6, -66.0], [70.6, -60.0], [70.6, -52.0]]
+ROUTE_PASSAGE_LABEL = "заход за Вершиной → двор → пассаж → площадь, назад → вестибюль → Л1 → антресоль → главный вход → площадь"
+
+
+def plan_data_6b(loot: list) -> None:
+    import re
+    path = ROOT / "data" / "blockouts" / "prospekt.json"
+    text = path.read_text(encoding="utf-8")
+    add = ""
+    for at, kind, tier, note in loot:
+        if note in text and ('"at": [%s, %s, %s]' % (_num(at[0]), _num(at[1]), _num(at[2]))) in text:
+            continue
+        add += (',\n  {\n   "at": [%s, %s, %s],\n   "kind": "%s",\n   "tier": "%s",\n   "note": "%s",\n   "yaw": 0.0\n  }'
+                % (_num(at[0]), _num(at[1]), _num(at[2]), kind, tier, note))
+    if add:
+        i = text.index('"loot": [')
+        j = text.index("\n ],", i)
+        text = text[:j].rstrip("\n") + add + text[j:]
+    # маршрут проверки: после vershina_to_north (если уже есть — заменить)
+    text = re.sub(r'  \{\n   "id": "vershina_passage",.*?\n  \},\n', "", text, count=1, flags=re.S)
+    body = ",\n".join("    [%s, %s]" % (_num(a), _num(b)) for a, b in ROUTE_PASSAGE)
+    entry = '  {\n   "id": "vershina_passage",\n   "label": "%s",\n   "max_open_m": 0.0,\n   "points": [\n%s\n   ]\n  },\n' % (ROUTE_PASSAGE_LABEL, body)
+    m = re.search(r'  \{\n   "id": "vershina_to_north",.*?\n  \},\n', text, flags=re.S)
+    if not m:
+        raise SystemExit("нет маршрута vershina_to_north")
+    text = text[:m.end()] + entry + text[m.end():]
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
 STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
-          "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site}
+          "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
+          "6b_vershina_ground": stage_6b_vershina_ground}
 
 
 def main() -> None:
@@ -1093,6 +1299,8 @@ def main() -> None:
             plan_data_5b()
         if name == "6a_vershina_site":
             plan_data_6a()
+        if name == "6b_vershina_ground":
+            plan_data_6b(p.loot6b)
         print(f"{path}: убрать вещей {len(p.remove['items'])} правил, кусков {len(p.remove['pieces'])}, узлов {len(p.remove['nodes'])}; "
               + ", ".join(f"{k} {len(v)}" for k, v in p.add.items() if v))
         for line_ in p.log:
