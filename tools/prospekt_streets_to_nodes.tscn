@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/prospekt_streets_to_nodes.gd" id="1"]
+
+[node name="ProspektStreetsToNodes" type="Node"]
+script = ExtResource("1")

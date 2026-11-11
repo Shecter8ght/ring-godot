@@ -1,0 +1,258 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/fence_green.tres" id="1_mwgfp"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/fence.tres" id="2_8vpht"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/white.tres" id="3_vv31y"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/eurocube.tres" id="4_02ye7"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/brick.tres" id="5_dkji1"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/struct.tres" id="6_51hur"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/metal.tres" id="7_rhnrw"]
+[ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec32_rubber_red_0.tres" id="8_pe2ob"]
+[ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec32_rubber_green_0.tres" id="9_buga2"]
+[ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec32_rubber_blue_0.tres" id="10_48w7q"]
+[ext_resource type="ArrayMesh" path="res://scenes/levels/sanatorium/meshes/sec32_court_0.tres" id="11_i5ve3"]
+
+[node name="Детская площадка, корты, хоздвор" type="Node3D" unique_id=1655297355]
+metadata/group = "sec32"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1656992722]
+
+[node name="fence_green_0000" type="CSGBox3D" parent="Коробки" unique_id=1150965582]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 0.5999985, 183)
+use_collision = true
+size = Vector3(60, 1.2, 0.1)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_green_0001" type="CSGBox3D" parent="Коробки" unique_id=1039930183]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.5999985, 171)
+use_collision = true
+size = Vector3(0.1, 1.2, 24)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_green_0002" type="CSGBox3D" parent="Коробки" unique_id=790325573]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0.5999985, 143)
+use_collision = true
+size = Vector3(0.1, 1.2, 28)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_green_0003" type="CSGBox3D" parent="Коробки" unique_id=140090256]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 0.5999985, 129)
+use_collision = true
+size = Vector3(60, 1.2, 0.1)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_green_0004" type="CSGBox3D" parent="Коробки" unique_id=1658243913]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73, 0.5999985, 171)
+use_collision = true
+size = Vector3(0.1, 1.2, 24)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_green_0005" type="CSGBox3D" parent="Коробки" unique_id=62047218]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73, 0.5999985, 143)
+use_collision = true
+size = Vector3(0.1, 1.2, 28)
+material = ExtResource("1_mwgfp")
+
+[node name="fence_0006" type="CSGBox3D" parent="Коробки" unique_id=1843337206]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 4.5999985, -19)
+use_collision = true
+size = Vector3(44, 3, 0.08)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0007" type="CSGBox3D" parent="Коробки" unique_id=782392664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67, 4.5999985, -43)
+use_collision = true
+size = Vector3(0.08, 3, 48)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0008" type="CSGBox3D" parent="Коробки" unique_id=313082219]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 4.5999985, -67)
+use_collision = true
+size = Vector3(44, 3, 0.08)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0009" type="CSGBox3D" parent="Коробки" unique_id=7824281]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.5999985, -30.5)
+use_collision = true
+size = Vector3(0.08, 3, 23)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0010" type="CSGBox3D" parent="Коробки" unique_id=730969385]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 4.5999985, -55.699997)
+use_collision = true
+size = Vector3(0.08, 3, 22.6)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0011" type="CSGBox3D" parent="Коробки" unique_id=1993720304]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 4.5999985, -43)
+use_collision = true
+size = Vector3(0.08, 3, 48)
+material = ExtResource("2_8vpht")
+
+[node name="white_0012" type="CSGBox3D" parent="Коробки" unique_id=306092870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 4.049999, -31)
+size = Vector3(21, 0.1, 0.06)
+material = ExtResource("3_vv31y")
+
+[node name="white_0013" type="CSGBox3D" parent="Коробки" unique_id=721640549]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 4.049999, -55)
+size = Vector3(21, 0.1, 0.06)
+material = ExtResource("3_vv31y")
+
+[node name="white_0014" type="CSGBox3D" parent="Коробки" unique_id=1904777423]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 5.465, -43)
+size = Vector3(21, 0.13, 0.06)
+material = ExtResource("3_vv31y")
+
+[node name="fence_0015" type="CSGBox3D" parent="Коробки" unique_id=680728996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 4.75, -123)
+use_collision = true
+size = Vector3(52, 2.5, 0.24)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0016" type="CSGBox3D" parent="Коробки" unique_id=388782283]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, 4.75, -153)
+use_collision = true
+size = Vector3(0.24, 2.5, 60)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0017" type="CSGBox3D" parent="Коробки" unique_id=1219180989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 4.75, -183)
+use_collision = true
+size = Vector3(52, 2.5, 0.24)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0018" type="CSGBox3D" parent="Коробки" unique_id=1182282377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 4.75, -141.25)
+use_collision = true
+size = Vector3(0.24, 2.5, 36.5)
+material = ExtResource("2_8vpht")
+
+[node name="fence_0019" type="CSGBox3D" parent="Коробки" unique_id=1742701118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 4.75, -174.75)
+use_collision = true
+size = Vector3(0.24, 2.5, 16.5)
+material = ExtResource("2_8vpht")
+
+[node name="eurocube_0020" type="CSGBox3D" parent="Коробки" unique_id=528735837]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 4.3999977, -142)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = ExtResource("4_02ye7")
+
+[node name="eurocube_0021" type="CSGBox3D" parent="Коробки" unique_id=1847053250]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 4.3999977, -143)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = ExtResource("4_02ye7")
+
+[node name="eurocube_0022" type="CSGBox3D" parent="Коробки" unique_id=421471617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4.3999977, -164)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = ExtResource("4_02ye7")
+
+[node name="eurocube_0023" type="CSGBox3D" parent="Коробки" unique_id=984111872]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 4.3999977, -159)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = ExtResource("4_02ye7")
+
+[node name="eurocube_0024" type="CSGBox3D" parent="Коробки" unique_id=1832586371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 4.3999977, -181)
+use_collision = true
+size = Vector3(1.2, 1.2, 1.2)
+material = ExtResource("4_02ye7")
+
+[node name="Цилиндры" type="Node3D" parent="." unique_id=108366239]
+
+[node name="brick_0025" type="CSGCylinder3D" parent="Цилиндры" unique_id=2031094732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 18.8, -153)
+use_collision = true
+radius = 1.3
+height = 30.0
+sides = 16
+material = ExtResource("5_dkji1")
+
+[node name="struct_0026" type="CSGCylinder3D" parent="Цилиндры" unique_id=239111887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 14.799999, -171)
+use_collision = true
+radius = 2.0
+height = 14.0
+sides = 16
+material = ExtResource("6_51hur")
+
+[node name="metal_0027" type="CSGCylinder3D" parent="Цилиндры" unique_id=1934184002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 24.55, -171)
+use_collision = true
+radius = 4.2
+height = 5.5
+sides = 20
+material = ExtResource("7_rhnrw")
+
+[node name="Покрытия" type="Node3D" parent="." unique_id=1175364548]
+
+[node name="rubber_red" type="MeshInstance3D" parent="Покрытия" unique_id=176133668]
+cast_shadow = 0
+mesh = ExtResource("8_pe2ob")
+metadata/blockout_mat = "rubber_red"
+metadata/solid = false
+
+[node name="rubber_green" type="MeshInstance3D" parent="Покрытия" unique_id=171252325]
+cast_shadow = 0
+mesh = ExtResource("9_buga2")
+metadata/blockout_mat = "rubber_green"
+metadata/solid = false
+
+[node name="rubber_blue" type="MeshInstance3D" parent="Покрытия" unique_id=204979480]
+cast_shadow = 0
+mesh = ExtResource("10_48w7q")
+metadata/blockout_mat = "rubber_blue"
+metadata/solid = false
+
+[node name="court" type="MeshInstance3D" parent="Покрытия" unique_id=1162925050]
+cast_shadow = 0
+mesh = ExtResource("11_i5ve3")
+metadata/blockout_mat = "court"
+metadata/solid = false
+
+[node name="Подписи" type="Node3D" parent="." unique_id=119187333]
+
+[node name="Детская площадка" type="Label3D" parent="Подписи" unique_id=797697312]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43, 7, 156)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Детская площадка"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Корты и волейбол" type="Label3D" parent="Подписи" unique_id=46872726]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 8.099998, -43)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.06
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Корты и волейбол"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="труба котельной" type="Label3D" parent="Подписи" unique_id=1482491534]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 36.8, -153)
+visibility_range_begin = 3.0
+visibility_range_end = 90.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.014
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "труба котельной"
+font_size = 48
+outline_size = 10
+metadata/kind = "object"

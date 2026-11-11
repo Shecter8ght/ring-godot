@@ -1,0 +1,118 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/facade.tres" id="1_vsu2u"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_btlts"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/plinth.tres" id="3_7ns6t"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="4_kt6rg"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="5_8kdnl"]
+
+[node name="Эллинг" type="Node3D" unique_id=1201452037]
+metadata/group = "eling"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1228781212]
+
+[node name="facade_0000" type="CSGBox3D" parent="Коробки" unique_id=736187431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.9, 9)
+use_collision = true
+size = Vector3(18.4, 6, 0.4)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0001" type="CSGBox3D" parent="Коробки" unique_id=631038718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.9, -9)
+use_collision = true
+size = Vector3(18.4, 6, 0.4)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0002" type="CSGBox3D" parent="Коробки" unique_id=239930594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 6.9, 7.100006)
+use_collision = true
+size = Vector3(0.4, 6, 4.2)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0003" type="CSGBox3D" parent="Коробки" unique_id=163400813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 6.9, -7.100006)
+use_collision = true
+size = Vector3(0.4, 6, 4.2)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0004" type="CSGBox3D" parent="Коробки" unique_id=420330242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 6.9, 5.600006)
+use_collision = true
+size = Vector3(0.4, 6, 7.2)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0005" type="CSGBox3D" parent="Коробки" unique_id=1803679194]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 6.9, -5.350006)
+use_collision = true
+size = Vector3(0.4, 6, 7.7)
+material = ExtResource("1_vsu2u")
+
+[node name="facade_0006" type="CSGBox3D" parent="Коробки" unique_id=277142300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 8.3, 0.25)
+use_collision = true
+size = Vector3(0.4, 3.2, 3.5)
+material = ExtResource("1_vsu2u")
+
+[node name="floor_0007" type="CSGBox3D" parent="Коробки" unique_id=581810781]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0)
+use_collision = true
+size = Vector3(18, 0.3, 18)
+material = ExtResource("2_btlts")
+
+[node name="plinth_0008" type="CSGBox3D" parent="Коробки" unique_id=876693334]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+use_collision = true
+size = Vector3(18, 3.6, 18)
+material = ExtResource("3_7ns6t")
+
+[node name="roof_0009" type="CSGBox3D" parent="Коробки" unique_id=400204527]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.075, 0)
+use_collision = true
+size = Vector3(18.2, 0.35, 18.2)
+material = ExtResource("4_kt6rg")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=2098990095]
+
+[node name="Эллинг" type="Label3D" parent="Подписи" unique_id=638066814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Эллинг"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Эллинг2" type="Label3D" parent="Подписи" unique_id=54855419]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.4, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Эллинг"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=843172183]
+script = ExtResource("5_8kdnl")
+rooms = [{
+"at": [0.0, 3.9, 0.0],
+"building": "Эллинг",
+"floor": 1.0,
+"name": "Эллинг",
+"uid": "eling/1/R"
+}]
+routes = [{
+"building": "eling",
+"checks": [[3, "eling/1/R", 3.9]],
+"id": "tour_eling",
+"kind": "tour",
+"label": "Эллинг: все помещения",
+"points": [[10.8, 3.87, 0.25], [9.0, 3.9, 0.25], [8.25, 3.9, 0.25], [0.0, 3.9, 0.0]]
+}]

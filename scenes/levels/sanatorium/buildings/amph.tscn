@@ -1,0 +1,753 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/stair.tres" id="1_olxts"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/slab.tres" id="2_02181"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/rail.tres" id="3_wyvq8"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/struct.tres" id="4_ymto6"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/partition.tres" id="5_obvce"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="6_nytam"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="7_b3g32"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/parapet.tres" id="8_dbnw3"]
+[ext_resource type="Script" path="res://src/blockout/blockout_stair.gd" id="9_bj2nm"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="10_cj5i4"]
+
+[node name="Амфитеатр — под сценой и кулисы" type="Node3D" unique_id=1534363052]
+metadata/group = "amph"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=1231743629]
+
+[node name="stair_0000" type="CSGBox3D" parent="Коробки" unique_id=747932879]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 1.5249996, -15.389999)
+use_collision = true
+size = Vector3(8, 2.55, 1.22)
+material = ExtResource("1_olxts")
+
+[node name="slab_0001" type="CSGBox3D" parent="Коробки" unique_id=256118046]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 5.1499977, -10.699997)
+use_collision = true
+size = Vector3(8, 0.3, 1.4)
+material = ExtResource("2_02181")
+
+[node name="rail_0002" type="CSGBox3D" parent="Коробки" unique_id=745012637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4000015, 5.8499985, -11.399994)
+use_collision = true
+size = Vector3(4, 1.1, 0.08)
+material = ExtResource("3_wyvq8")
+
+[node name="rail_0003" type="CSGBox3D" parent="Коробки" unique_id=1307565347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 3.3499985, -13.089996)
+use_collision = true
+size = Vector3(0.12, 6.1, 3.38)
+material = ExtResource("3_wyvq8")
+
+[node name="stair_0004" type="CSGBox3D" parent="Коробки" unique_id=1352238427]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 1.5249996, 15.389999)
+use_collision = true
+size = Vector3(8, 2.55, 1.22)
+material = ExtResource("1_olxts")
+
+[node name="slab_0005" type="CSGBox3D" parent="Коробки" unique_id=199213952]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 5.1499977, 10.699997)
+use_collision = true
+size = Vector3(8, 0.3, 1.4)
+material = ExtResource("2_02181")
+
+[node name="rail_0006" type="CSGBox3D" parent="Коробки" unique_id=113514784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4000015, 5.8499985, 11.399994)
+use_collision = true
+size = Vector3(4, 1.1, 0.08)
+material = ExtResource("3_wyvq8")
+
+[node name="rail_0007" type="CSGBox3D" parent="Коробки" unique_id=2129876444]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 3.3499985, 13.089996)
+use_collision = true
+size = Vector3(0.12, 6.1, 3.38)
+material = ExtResource("3_wyvq8")
+
+[node name="stair_0008" type="CSGBox3D" parent="Коробки" unique_id=267479905]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3499985, 4.549999, 0)
+use_collision = true
+size = Vector3(1, 1.5, 12.6)
+material = ExtResource("1_olxts")
+
+[node name="struct_0009" type="CSGBox3D" parent="Коробки" unique_id=2117032565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4000015, 2.7999992, 16)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0010" type="CSGBox3D" parent="Коробки" unique_id=1504344430]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4000015, 2.7999992, -16)
+use_collision = true
+size = Vector3(12.5, 5, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0011" type="CSGBox3D" parent="Коробки" unique_id=1056539305]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.400002, 2.7999992, 8.725006)
+use_collision = true
+size = Vector3(0.5, 5, 15.05)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0012" type="CSGBox3D" parent="Коробки" unique_id=848890005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.400002, 2.7999992, -8.725006)
+use_collision = true
+size = Vector3(0.5, 5, 15.05)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0013" type="CSGBox3D" parent="Коробки" unique_id=1721848777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.400002, 4.199999, 0)
+use_collision = true
+size = Vector3(0.5, 2.2, 2.4)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0014" type="CSGBox3D" parent="Коробки" unique_id=1130069463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, 13.735001)
+use_collision = true
+size = Vector3(0.3, 5, 4.83)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0015" type="CSGBox3D" parent="Коробки" unique_id=2097027404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, 9.367996)
+use_collision = true
+size = Vector3(0.3, 5, 1.565)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0016" type="CSGBox3D" parent="Коробки" unique_id=258971674]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, 5.5)
+use_collision = true
+size = Vector3(0.3, 5, 3.83)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0017" type="CSGBox3D" parent="Коробки" unique_id=156669134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, 0)
+use_collision = true
+size = Vector3(0.3, 5, 4.83)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0018" type="CSGBox3D" parent="Коробки" unique_id=8998150]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, -5.5)
+use_collision = true
+size = Vector3(0.3, 5, 3.83)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0019" type="CSGBox3D" parent="Коробки" unique_id=191027112]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, -9.367996)
+use_collision = true
+size = Vector3(0.3, 5, 1.565)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0020" type="CSGBox3D" parent="Коробки" unique_id=905986830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 2.7999992, -13.735001)
+use_collision = true
+size = Vector3(0.3, 5, 4.83)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0021" type="CSGBox3D" parent="Коробки" unique_id=1232114004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, 8)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0022" type="CSGBox3D" parent="Коробки" unique_id=2084473066]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, 3)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0023" type="CSGBox3D" parent="Коробки" unique_id=1814772408]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, -3)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0024" type="CSGBox3D" parent="Коробки" unique_id=670158953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, -8)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0025" type="CSGBox3D" parent="Коробки" unique_id=1773784051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, -10.735001)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0026" type="CSGBox3D" parent="Коробки" unique_id=103648631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 4.0099983, 10.735001)
+use_collision = true
+size = Vector3(0.3, 2.58, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0027" type="CSGBox3D" parent="Коробки" unique_id=1050101515]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2679977, 2.7999992, 10)
+use_collision = true
+size = Vector3(6.565, 5, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0028" type="CSGBox3D" parent="Коробки" unique_id=2012165380]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4679947, 2.7999992, 10)
+use_collision = true
+size = Vector3(0.565, 5, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0029" type="CSGBox3D" parent="Коробки" unique_id=413921225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5999985, 2.7999992, 10)
+use_collision = true
+size = Vector3(4.5, 5, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0030" type="CSGBox3D" parent="Коробки" unique_id=1221550201]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999985, 4.0099983, 10)
+use_collision = true
+size = Vector3(1.17, 2.58, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="partition_0031" type="CSGBox3D" parent="Коробки" unique_id=198453848]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.7999992, 6)
+use_collision = true
+size = Vector3(6.15, 5, 0.15)
+material = ExtResource("5_obvce")
+
+[node name="partition_0032" type="CSGBox3D" parent="Коробки" unique_id=1251120795]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 2.7999992, 0)
+use_collision = true
+size = Vector3(0.15, 5, 20.15)
+material = ExtResource("5_obvce")
+
+[node name="partition_0033" type="CSGBox3D" parent="Коробки" unique_id=1410827402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.7999992, 0)
+use_collision = true
+size = Vector3(6.15, 5, 0.15)
+material = ExtResource("5_obvce")
+
+[node name="partition_0034" type="CSGBox3D" parent="Коробки" unique_id=135185045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.7999992, -6)
+use_collision = true
+size = Vector3(6.15, 5, 0.15)
+material = ExtResource("5_obvce")
+
+[node name="struct_0035" type="CSGBox3D" parent="Коробки" unique_id=1898760258]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2679977, 2.7999992, -10)
+use_collision = true
+size = Vector3(6.565, 5, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0036" type="CSGBox3D" parent="Коробки" unique_id=86840181]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4679947, 2.7999992, -10)
+use_collision = true
+size = Vector3(0.565, 5, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0037" type="CSGBox3D" parent="Коробки" unique_id=730785919]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5999985, 2.7999992, -10)
+use_collision = true
+size = Vector3(4.5, 5, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0038" type="CSGBox3D" parent="Коробки" unique_id=226915705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999985, 4.0099983, -10)
+use_collision = true
+size = Vector3(1.17, 2.58, 0.3)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0039" type="CSGBox3D" parent="Коробки" unique_id=1312475845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5999985, 2.7999992, 0)
+use_collision = true
+size = Vector3(0.5, 5, 20.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0040" type="CSGBox3D" parent="Коробки" unique_id=1620142654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 2.7999992, 13)
+use_collision = true
+size = Vector3(0.5, 5, 6.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0041" type="CSGBox3D" parent="Коробки" unique_id=1609631222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 2.7999992, -13)
+use_collision = true
+size = Vector3(0.5, 5, 6.5)
+material = ExtResource("4_ymto6")
+
+[node name="floor_0042" type="CSGBox3D" parent="Коробки" unique_id=2116345103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.4000015, 0.14999962, 0)
+use_collision = true
+size = Vector3(4, 0.3, 32)
+material = ExtResource("6_nytam")
+
+[node name="roof_0043" type="CSGBox3D" parent="Коробки" unique_id=320213326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.4000015, 5.4749985, 0)
+use_collision = true
+size = Vector3(4.2, 0.35, 32.2)
+material = ExtResource("7_b3g32")
+
+[node name="floor_0044" type="CSGBox3D" parent="Коробки" unique_id=1064215615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 0.14999962, 8)
+use_collision = true
+size = Vector3(6, 0.3, 4)
+material = ExtResource("6_nytam")
+
+[node name="floor_0045" type="CSGBox3D" parent="Коробки" unique_id=1606460969]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 0.14999962, 3)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+material = ExtResource("6_nytam")
+
+[node name="floor_0046" type="CSGBox3D" parent="Коробки" unique_id=609575533]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 0.14999962, -3)
+use_collision = true
+size = Vector3(6, 0.3, 6)
+material = ExtResource("6_nytam")
+
+[node name="floor_0047" type="CSGBox3D" parent="Коробки" unique_id=1919830884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 0.14999962, -8)
+use_collision = true
+size = Vector3(6, 0.3, 4)
+material = ExtResource("6_nytam")
+
+[node name="floor_0048" type="CSGBox3D" parent="Коробки" unique_id=1294023966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5999985, 0.14999962, 0)
+use_collision = true
+size = Vector3(6, 0.3, 20)
+material = ExtResource("6_nytam")
+
+[node name="floor_0049" type="CSGBox3D" parent="Коробки" unique_id=1645139625]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 0.14999962, -13)
+use_collision = true
+size = Vector3(8, 0.3, 6)
+material = ExtResource("6_nytam")
+
+[node name="floor_0050" type="CSGBox3D" parent="Коробки" unique_id=281637171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 0.14999962, 13)
+use_collision = true
+size = Vector3(8, 0.3, 6)
+material = ExtResource("6_nytam")
+
+[node name="struct_0051" type="CSGBox3D" parent="Коробки" unique_id=1757260268]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5250015, 7.0999985, 10)
+use_collision = true
+size = Vector3(2.25, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0052" type="CSGBox3D" parent="Коробки" unique_id=2029206586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7249985, 7.0999985, 10)
+use_collision = true
+size = Vector3(2.25, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="parapet_0053" type="CSGBox3D" parent="Коробки" unique_id=1594416074]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5999985, 5.8499985, 10)
+use_collision = true
+size = Vector3(4, 1.1, 0.25)
+material = ExtResource("8_dbnw3")
+
+[node name="struct_0054" type="CSGBox3D" parent="Коробки" unique_id=17558713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5250015, 7.0999985, -10)
+use_collision = true
+size = Vector3(2.25, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0055" type="CSGBox3D" parent="Коробки" unique_id=818423866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7249985, 7.0999985, -10)
+use_collision = true
+size = Vector3(2.25, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="parapet_0056" type="CSGBox3D" parent="Коробки" unique_id=1302315018]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5999985, 5.8499985, -10)
+use_collision = true
+size = Vector3(4, 1.1, 0.25)
+material = ExtResource("8_dbnw3")
+
+[node name="struct_0057" type="CSGBox3D" parent="Коробки" unique_id=1742688542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 7.0999985, 13)
+use_collision = true
+size = Vector3(0.5, 3.6, 6.5)
+material = ExtResource("4_ymto6")
+
+[node name="parapet_0058" type="CSGBox3D" parent="Коробки" unique_id=1430243787]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 5.8499985, 0)
+use_collision = true
+size = Vector3(0.25, 1.1, 20)
+material = ExtResource("8_dbnw3")
+
+[node name="struct_0059" type="CSGBox3D" parent="Коробки" unique_id=393383274]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4000015, 7.0999985, -13)
+use_collision = true
+size = Vector3(0.5, 3.6, 6.5)
+material = ExtResource("4_ymto6")
+
+[node name="parapet_0060" type="CSGBox3D" parent="Коробки" unique_id=822713136]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5999985, 5.8499985, 8)
+use_collision = true
+size = Vector3(0.25, 1.1, 4)
+material = ExtResource("8_dbnw3")
+
+[node name="parapet_0061" type="CSGBox3D" parent="Коробки" unique_id=883895820]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5999985, 5.8499985, -8)
+use_collision = true
+size = Vector3(0.25, 1.1, 4)
+material = ExtResource("8_dbnw3")
+
+[node name="struct_0062" type="CSGBox3D" parent="Коробки" unique_id=2032629608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 7.0999985, -16)
+use_collision = true
+size = Vector3(8.5, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0063" type="CSGBox3D" parent="Коробки" unique_id=626758239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 7.0999985, 13.785004)
+use_collision = true
+size = Vector3(0.5, 3.6, 4.93)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0064" type="CSGBox3D" parent="Коробки" unique_id=1156315315]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 7.0999985, 9.949997)
+use_collision = true
+size = Vector3(0.5, 3.6, 0.4)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0065" type="CSGBox3D" parent="Коробки" unique_id=455623274]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 7.0999985, -9.949997)
+use_collision = true
+size = Vector3(0.5, 3.6, 0.4)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0066" type="CSGBox3D" parent="Коробки" unique_id=1471988013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 7.0999985, -13.785004)
+use_collision = true
+size = Vector3(0.5, 3.6, 4.93)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0067" type="CSGBox3D" parent="Коробки" unique_id=651717705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 8.309998, -10.735001)
+use_collision = true
+size = Vector3(0.5, 1.18, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0068" type="CSGBox3D" parent="Коробки" unique_id=644115478]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5999985, 8.309998, 10.735001)
+use_collision = true
+size = Vector3(0.5, 1.18, 1.17)
+material = ExtResource("4_ymto6")
+
+[node name="struct_0069" type="CSGBox3D" parent="Коробки" unique_id=15928564]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 7.0999985, 16)
+use_collision = true
+size = Vector3(8.5, 3.6, 0.5)
+material = ExtResource("4_ymto6")
+
+[node name="slab_0070" type="CSGBox3D" parent="Коробки" unique_id=1054641763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 5.1499977, 0)
+use_collision = true
+size = Vector3(12, 0.3, 20)
+material = ExtResource("2_02181")
+
+[node name="slab_0071" type="CSGBox3D" parent="Коробки" unique_id=277246167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 5.1499977, -10.699997)
+use_collision = true
+size = Vector3(8, 0.3, 1.4)
+material = ExtResource("2_02181")
+
+[node name="roof_0072" type="CSGBox3D" parent="Коробки" unique_id=1943665246]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 9.075001, -13)
+use_collision = true
+size = Vector3(8.2, 0.35, 6.2)
+material = ExtResource("7_b3g32")
+
+[node name="slab_0073" type="CSGBox3D" parent="Коробки" unique_id=482085714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 5.1499977, 10.699997)
+use_collision = true
+size = Vector3(8, 0.3, 1.4)
+material = ExtResource("2_02181")
+
+[node name="roof_0074" type="CSGBox3D" parent="Коробки" unique_id=1071471049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4000015, 9.075001, 13)
+use_collision = true
+size = Vector3(8.2, 0.35, 6.2)
+material = ExtResource("7_b3g32")
+
+[node name="Лестницы" type="Node3D" parent="." unique_id=1925716657]
+
+[node name="Марш_075" type="Node3D" parent="Лестницы" unique_id=535913617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4000015, 0.29999924, -11.399994)
+script = ExtResource("9_bj2nm")
+run = 3.380005
+rise = 2.5
+width = 3.92
+steps = 14
+material = ExtResource("1_olxts")
+
+[node name="Марш_076" type="Node3D" parent="Лестницы" unique_id=1829363951]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0.5999985, 2.7999992, -14.779999)
+script = ExtResource("9_bj2nm")
+run = 3.380005
+rise = 2.5
+width = 3.92
+steps = 14
+solid_bottom = -2.5500000000000007
+material = ExtResource("1_olxts")
+
+[node name="Марш_077" type="Node3D" parent="Лестницы" unique_id=1201974085]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -3.4000015, 0.29999924, 11.399994)
+script = ExtResource("9_bj2nm")
+run = 3.380005
+rise = 2.5
+width = 3.92
+steps = 14
+material = ExtResource("1_olxts")
+
+[node name="Марш_078" type="Node3D" parent="Лестницы" unique_id=608316376]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 2.7999992, 14.779999)
+script = ExtResource("9_bj2nm")
+run = 3.380005
+rise = 2.5
+width = 3.92
+steps = 14
+solid_bottom = -2.5500000000000007
+material = ExtResource("1_olxts")
+
+[node name="Марш_079" type="Node3D" parent="Лестницы" unique_id=1100840403]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 9.349998, 4.299999, 0)
+script = ExtResource("9_bj2nm")
+run = 1.5
+rise = 1.0
+width = 12.6
+steps = 6
+solid_bottom = -0.5
+material = ExtResource("1_olxts")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=42542805]
+
+[node name="Коридор за сценой, выход к тропе" type="Label3D" parent="Подписи" unique_id=448165986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.4000015, 2.3999996, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Коридор за сценой, выход к тропе"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Щитовая, свет и звук" type="Label3D" parent="Подписи" unique_id=1075562332]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.3999996, 8)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Щитовая, свет и звук"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Гримёрка" type="Label3D" parent="Подписи" unique_id=1972360385]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.3999996, 3)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Гримёрка"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Гримёрка2" type="Label3D" parent="Подписи" unique_id=1698938305]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.3999996, -3)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Гримёрка"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Санузел" type="Label3D" parent="Подписи" unique_id=1706455214]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4000015, 2.3999996, -8)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Санузел"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Склад декораций и аппаратуры" type="Label3D" parent="Подписи" unique_id=1620269865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5999985, 2.3999996, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Склад декораций и аппаратуры"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Кулисы север, лестница на сцену" type="Label3D" parent="Подписи" unique_id=2097208887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 2.3999996, -10.699997)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Кулисы север, лестница на сцену"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Кулисы юг, лестница на сцену" type="Label3D" parent="Подписи" unique_id=1236100284]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 2.3999996, 10.699997)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Кулисы юг, лестница на сцену"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Сцена, +1,0 над оркестрой" type="Label3D" parent="Подписи" unique_id=1244805252]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 7.3999977, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Сцена, +1,0 над оркестрой"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Кулисы север, лестница на сцену2" type="Label3D" parent="Подписи" unique_id=1211949048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 7.3999977, -10.699997)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Кулисы север, лестница на сцену"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Кулисы юг, лестница на сцену2" type="Label3D" parent="Подписи" unique_id=568262200]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 7.3999977, 10.699997)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Кулисы юг, лестница на сцену"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Амфитеатр — под сценой и кулисы" type="Label3D" parent="Подписи" unique_id=1196358514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5999985, 11.399998, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Амфитеатр: под сценой и кулисы"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1881776686]
+script = ExtResource("10_cj5i4")
+rooms = [{
+"at": [-7.4, 0.3, 0.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Коридор за сценой, выход к тропе",
+"uid": "amph/-1/BCR"
+}, {
+"at": [-2.4, 0.3, 8.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Щитовая, свет и звук",
+"uid": "amph/-1/BTC"
+}, {
+"at": [-2.4, 0.3, 3.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Гримёрка",
+"uid": "amph/-1/BG1"
+}, {
+"at": [-2.4, 0.3, -3.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Гримёрка",
+"uid": "amph/-1/BG2"
+}, {
+"at": [-2.4, 0.3, -8.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Санузел",
+"uid": "amph/-1/BWC"
+}, {
+"at": [3.6, 0.3, 0.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Склад декораций и аппаратуры",
+"uid": "amph/-1/BST"
+}, {
+"at": [0.6, 0.3, -10.700000000000001],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Кулисы север, лестница на сцену",
+"uid": "amph/-1/KUL1"
+}, {
+"at": [0.6, 0.3, 10.700000000000001],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": -1.0,
+"name": "Кулисы юг, лестница на сцену",
+"uid": "amph/-1/KUL2"
+}, {
+"at": [0.6, 5.3, 0.0],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": 0.0,
+"name": "Сцена, +1,0 над оркестрой",
+"uid": "amph/0/STG"
+}, {
+"at": [0.6, 5.3, -10.700000000000001],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": 0.0,
+"name": "Кулисы север, лестница на сцену",
+"uid": "amph/0/KUL1"
+}, {
+"at": [0.6, 5.3, 10.700000000000001],
+"building": "Амфитеатр: под сценой и кулисы",
+"floor": 0.0,
+"name": "Кулисы юг, лестница на сцену",
+"uid": "amph/0/KUL2"
+}]
+routes = [{
+"building": "amph",
+"checks": [[3, "amph/-1/BCR", 0.3], [7, "amph/-1/BTC", 0.3], [15, "amph/-1/BG1", 0.3], [23, "amph/-1/BG2", 0.3], [31, "amph/-1/BWC", 0.3], [39, "amph/-1/KUL1", 0.3], [43, "amph/-1/BST", 0.3], [47, "amph/-1/KUL2", 0.3], [56, "amph/0/KUL2", 5.3], [60, "amph/0/STG", 5.3], [64, "amph/0/KUL1", 5.3]],
+"id": "tour_amph",
+"kind": "tour",
+"label": "Амфитеатр: под сценой и кулисы: все помещения",
+"points": [[-11.200000000000001, 0.27, 0.0], [-9.4, 0.3, 0.0], [-8.65, 0.3, 0.0], [-7.4, 0.3, 0.0], [-6.15, 0.3, 8.0], [-5.4, 0.3, 8.0], [-4.65, 0.3, 8.0], [-2.4, 0.3, 8.0], [-4.65, 0.3, 8.0], [-5.4, 0.3, 8.0], [-6.15, 0.3, 8.0], [-7.4, 0.3, 0.0], [-6.15, 0.3, 3.0], [-5.4, 0.3, 3.0], [-4.65, 0.3, 3.0], [-2.4, 0.3, 3.0], [-4.65, 0.3, 3.0], [-5.4, 0.3, 3.0], [-6.15, 0.3, 3.0], [-7.4, 0.3, 0.0], [-6.15, 0.3, -3.0], [-5.4, 0.3, -3.0], [-4.65, 0.3, -3.0], [-2.4, 0.3, -3.0], [-4.65, 0.3, -3.0], [-5.4, 0.3, -3.0], [-6.15, 0.3, -3.0], [-7.4, 0.3, 0.0], [-6.15, 0.3, -8.0], [-5.4, 0.3, -8.0], [-4.65, 0.3, -8.0], [-2.4, 0.3, -8.0], [-4.65, 0.3, -8.0], [-5.4, 0.3, -8.0], [-6.15, 0.3, -8.0], [-7.4, 0.3, 0.0], [-6.15, 0.3, -10.735], [-5.4, 0.3, -10.735], [-4.65, 0.3, -10.735], [0.6, 0.3, -10.700000000000001], [1.6, 0.3, -10.75], [1.6, 0.3, -10.0], [1.6, 0.3, -9.25], [3.6, 0.3, 0.0], [1.6, 0.3, 9.25], [1.6, 0.3, 10.0], [1.6, 0.3, 10.75], [0.6, 0.3, 10.700000000000001], [-3.4, 0.3, 10.700000000000001], [-3.4, 0.47900000000000004, 11.75], [-3.4, 2.711, 14.48], [-3.4, 2.8000000000000003, 15.39], [0.6, 2.8000000000000003, 15.39], [0.6, 2.8890000000000002, 14.48], [0.6, 5.121, 11.75], [0.6, 5.3, 10.700000000000001], [0.6, 5.3, 10.700000000000001], [-1.4000000000000001, 5.3, 10.75], [-1.4000000000000001, 5.3, 10.0], [-1.4000000000000001, 5.3, 9.25], [0.6, 5.3, 0.0], [-1.4000000000000001, 5.3, -9.25], [-1.4000000000000001, 5.3, -10.0], [-1.4000000000000001, 5.3, -10.75], [0.6, 5.3, -10.700000000000001], [-1.4000000000000001, 5.3, -10.75], [-1.4000000000000001, 5.3, -10.0], [-1.4000000000000001, 5.3, -9.25], [0.6, 5.3, 0.0], [-1.4000000000000001, 5.3, 9.25], [-1.4000000000000001, 5.3, 10.0], [-1.4000000000000001, 5.3, 10.75], [0.6, 5.3, 10.700000000000001], [0.6, 5.3, 10.700000000000001], [0.6, 5.121, 11.75], [0.6, 2.8890000000000002, 14.48], [0.6, 2.8000000000000003, 15.39], [-3.4, 2.8000000000000003, 15.39], [-3.4, 2.711, 14.48], [-3.4, 0.47900000000000004, 11.75], [-3.4, 0.3, 10.700000000000001], [0.6, 0.3, 10.700000000000001], [1.6, 0.3, 10.75], [1.6, 0.3, 10.0], [1.6, 0.3, 9.25], [3.6, 0.3, 0.0], [1.6, 0.3, -9.25], [1.6, 0.3, -10.0], [1.6, 0.3, -10.75], [0.6, 0.3, -10.700000000000001], [-4.65, 0.3, -10.735], [-5.4, 0.3, -10.735], [-6.15, 0.3, -10.735], [-7.4, 0.3, 0.0]]
+}]

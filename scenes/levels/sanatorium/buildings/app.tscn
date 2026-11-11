@@ -1,0 +1,105 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/facade.tres" id="1_r05kb"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/floor.tres" id="2_434uw"]
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/roof.tres" id="3_y10l2"]
+[ext_resource type="Script" path="res://src/blockout/blockout_checks.gd" id="4_oh0fh"]
+
+[node name="Аппаратная" type="Node3D" unique_id=96372235]
+metadata/group = "app"
+
+[node name="Коробки" type="Node3D" parent="." unique_id=701892121]
+
+[node name="facade_0000" type="CSGBox3D" parent="Коробки" unique_id=1059492727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7999992, 2)
+use_collision = true
+size = Vector3(4.4, 3, 0.4)
+material = ExtResource("1_r05kb")
+
+[node name="facade_0001" type="CSGBox3D" parent="Коробки" unique_id=325342637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7999992, -2)
+use_collision = true
+size = Vector3(4.4, 3, 0.4)
+material = ExtResource("1_r05kb")
+
+[node name="facade_0002" type="CSGBox3D" parent="Коробки" unique_id=1170455312]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.7999992, 0)
+use_collision = true
+size = Vector3(0.4, 3, 4.4)
+material = ExtResource("1_r05kb")
+
+[node name="facade_0003" type="CSGBox3D" parent="Коробки" unique_id=299459857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.7999992, 1.3919983)
+use_collision = true
+size = Vector3(0.4, 3, 1.615)
+material = ExtResource("1_r05kb")
+
+[node name="facade_0004" type="CSGBox3D" parent="Коробки" unique_id=390551952]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.7999992, -1.3919983)
+use_collision = true
+size = Vector3(0.4, 3, 1.615)
+material = ExtResource("1_r05kb")
+
+[node name="facade_0005" type="CSGBox3D" parent="Коробки" unique_id=1319874732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.0099983, 0)
+use_collision = true
+size = Vector3(0.4, 0.58, 1.17)
+material = ExtResource("1_r05kb")
+
+[node name="floor_0006" type="CSGBox3D" parent="Коробки" unique_id=1148379783]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14999771, 0)
+use_collision = true
+size = Vector3(4, 0.3, 4)
+material = ExtResource("2_434uw")
+
+[node name="roof_0007" type="CSGBox3D" parent="Коробки" unique_id=1921774262]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4749985, 0)
+use_collision = true
+size = Vector3(4.2, 0.35, 4.2)
+material = ExtResource("3_y10l2")
+
+[node name="Подписи" type="Node3D" parent="." unique_id=404440340]
+
+[node name="Аппаратная на верхнем променаде" type="Label3D" parent="Подписи" unique_id=83082436]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3999977, 0)
+visibility_range_begin = 1.2
+visibility_range_end = 22.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.0036
+billboard = 1
+modulate = Color(0.92, 0.95, 1, 1)
+text = "Аппаратная на верхнем променаде"
+font_size = 48
+outline_size = 10
+metadata/kind = "room"
+
+[node name="Аппаратная" type="Label3D" parent="Подписи" unique_id=1954163701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.799999, 0)
+visibility_range_begin = 45.0
+visibility_range_end = 650.0
+visibility_range_end_margin = 4.0
+pixel_size = 0.072
+billboard = 1
+modulate = Color(0.97, 0.96, 0.9, 1)
+text = "Аппаратная"
+font_size = 48
+outline_size = 10
+metadata/kind = "building"
+
+[node name="Проверки" type="Node3D" parent="." unique_id=1224269136]
+script = ExtResource("4_oh0fh")
+rooms = [{
+"at": [0.0, 0.3, 0.0],
+"building": "Аппаратная",
+"floor": 0.0,
+"name": "Аппаратная на верхнем променаде",
+"uid": "app/0/APP"
+}]
+routes = [{
+"building": "app",
+"checks": [[3, "app/0/APP", 0.3]],
+"id": "tour_app",
+"kind": "tour",
+"label": "Аппаратная: все помещения",
+"points": [[3.8000000000000003, 0.27, 0.0], [2.0, 0.3, 0.0], [1.25, 0.3, 0.0], [0.0, 0.3, 0.0]]
+}]

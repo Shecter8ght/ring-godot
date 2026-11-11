@@ -1549,8 +1549,21 @@ def write_definition(h: np.ndarray) -> None:
     print(f"zone01: площадь {area:.0f} м2, высоты {h.min():.1f}..{h.max():.1f} м, дорог {len(ROADS)}")
 
 
+def ensure_overwrite_allowed(what: str) -> None:
+    """С 2026-11-08 «Пригород» правится руками в редакторе (решение владельца, docs/level_editing.md): сцены
+    scenes/levels/zone01*, карта высот, маска и деревья-узлы — источник правды. Генератор перезаписал бы ручные правки,
+    поэтому без ZONE01_OVERWRITE=1 он не запускается (только если владелец сам решил собрать карту заново)."""
+    import os
+    import sys
+    if os.environ.get('ZONE01_OVERWRITE') != '1':
+        print(f'{what}: «Пригород» правится руками в редакторе (docs/level_editing.md) — запуск перезаписал бы ручные '
+              'правки сцен и земли. Если карту правда нужно собрать заново и правки не нужны: ZONE01_OVERWRITE=1.')
+        sys.exit(1)
+
+
 def main() -> None:
     global H
+    ensure_overwrite_allowed('tools/build_zone01.py')
     OUT.mkdir(parents=True, exist_ok=True)
     H = build_heights()
     (ROOT / "data/terrain").mkdir(parents=True, exist_ok=True)

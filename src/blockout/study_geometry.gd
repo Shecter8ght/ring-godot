@@ -11,6 +11,9 @@ var parent: Node3D
 var body: StaticBody3D
 var streams: Dictionary = {}
 var palette: Dictionary = {}
+## Из чего поверхность по ключу материала (Surfaces: шаги, попадания): у коллизии коробки и лестницы — meta "surface".
+## Пусто — без меток, как раньше.
+var surface_of: Dictionary = {}
 var unit_vertices: PackedVector3Array
 var unit_normals: PackedVector3Array
 var unit_indices: PackedInt32Array
@@ -54,6 +57,27 @@ func box(at: Vector3, size: Vector3, key: String, solid: bool = true, yaw: float
 		cs.shape = shape
 		cs.position = at
 		cs.rotation.y = yaw
+		if surface_of.has(key):
+			cs.set_meta("surface", surface_of[key])
+		body.add_child(cs)
+
+## Коробка с любым поворотом (узел сцены, правленный руками: повёрнут, наклонён, отражён): rot — поворот без масштаба,
+## size — размер с учётом масштаба узла. across — ось «поперёк» для расстояний до рёбер (у box — 2, у beam — 0).
+func box_basis(at: Vector3, rot: Basis, size: Vector3, key: String, solid: bool = true, across: int = 2) -> void:
+	var st: SurfaceTool = stream(key)
+	for index: int in unit_indices:
+		_edges(st, unit_vertices[index], unit_normals[index], size, across)
+		st.set_normal(rot * unit_normals[index])
+		st.add_vertex(at + rot * (unit_vertices[index] * size))
+	triangles += 12
+	if solid:
+		var shape: BoxShape3D = BoxShape3D.new()
+		shape.size = size
+		var cs: CollisionShape3D = CollisionShape3D.new()
+		cs.shape = shape
+		cs.transform = Transform3D(rot, at)
+		if surface_of.has(key):
+			cs.set_meta("surface", surface_of[key])
 		body.add_child(cs)
 
 func tri(a: Vector3, b: Vector3, c: Vector3, key: String) -> void:
@@ -134,6 +158,8 @@ func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: Stri
 	shape.points = points
 	var cs: CollisionShape3D = CollisionShape3D.new()
 	cs.shape = shape
+	if surface_of.has(key):
+		cs.set_meta("surface", surface_of[key])
 	body.add_child(cs)
 
 func collision_box(at: Vector3, size: Vector3) -> void:

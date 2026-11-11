@@ -247,7 +247,7 @@ static func _pivot(part: Node3D, xf: Transform3D) -> Node3D:
 ## Основной прицел над проставкой: его линия, окуляр и вынос глаза — в осях модели.
 static func _primary_from_pivot(root: Node3D, pivot: Node3D, line_point: Vector3) -> void:
 	root.set_meta("sight_h", line_point.y)
-	for flag: StringName in [&"scoped", &"ocular_r", &"lumar_reticle", &"reticle_tex", &"reticle_illum"]:
+	for flag: StringName in [&"scoped", &"ocular_r", &"lumar_reticle", &"reticle_tex", &"reticle_illum", &"thermal"]:
 		if pivot.has_meta(flag):
 			root.set_meta(flag, pivot.get_meta(flag))
 	if pivot.has_meta("ocular"):
@@ -436,6 +436,17 @@ static func _model_part(root: Node3D, m: Dictionary, a: Dictionary) -> bool:
 			root.set_meta("reticle_tex", String(spec.reticle))
 		if bool(spec.get("illum", false)):
 			root.set_meta("reticle_illum", true)
+	if a.has("thermal"):
+		# тепловизор (ПН-36Т на «Осоке»): окуляр — экран на два канала (CameraRig._update_display); рычажок
+		# переключателя и крышка объектива — узлы с осью (в покое «ВЫКЛ» и закрыта), их ведёт камера в руках
+		root.set_meta("thermal", a.thermal)
+		if spec.has("hip_shift"):
+			root.set_meta("hip_shift", WeaponGrips.vector(spec.hip_shift as Array))
+		for key: String in ["lever", "cap"]:
+			var turn: Dictionary = spec.get(key, {})
+			var node: Node3D = model.find_child(String(turn.get("node", "")), true, false) as Node3D if not turn.is_empty() else null
+			if node:
+				node.set_meta("sight_" + key, turn)
 	if spec.has("length_m"):
 		# дульная насадка: штатный тормоз снят, срез — на её торце
 		if bool(m.get("replace", false)):

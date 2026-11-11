@@ -362,6 +362,7 @@ def integrate():
 
 
 def main():
+    z1.ensure_overwrite_allowed('tools/author_zone01_nw.py')
     # куски стоят на своей прежней земле в прежних координатах (вырезки data/terrain/zone01_ready);
     # в зоне 1 их сцены ставятся со сдвигом / поворотом (tools/build_zone01.py, READY)
     z1.ground=z1.ready_crop_ground

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Левел-дизайн карты «Проспект»: схема и замер обзора по плану data/blockouts/prospekt.json.
+"""Левел-дизайн карты «Проспект»: схема и замер обзора по снимку сцены data/blockouts/prospekt_snapshot.json (карта
+правится руками — улицы, вещи и постройки узлами; снимок в формате плана пишет
+tools/godot.cmd --headless res://tools/prospekt_study.tscn -- snapshot).
 
     python -X utf8 tools/prospekt_ld_plan.py            → docs/design/prospekt_level_design.png + docs/screens/prospekt/sightlines.json
 
@@ -18,7 +20,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-PLAN = ROOT / "data" / "blockouts" / "prospekt.json"
+PLAN = ROOT / "data" / "blockouts" / "prospekt_snapshot.json"
 OUT_PNG = ROOT / "docs" / "design" / "prospekt_level_design.png"
 OUT_JSON = ROOT / "docs" / "screens" / "prospekt" / "sightlines.json"
 
@@ -43,6 +45,7 @@ VIEW_KITS = {
     "bush_big": (2.2, 2.0), "roller": (1.7, 3.6), "ktp": (2.5, 2.0), "outhouse": (1.1, 1.2), "monument": (2.2, 2.2),
     "shed": (3.0, 4.0), "ruin_l": (0.45, 7.0), "ruin_i": (0.45, 5.0), "rack_high": (1.1, 8.0), "deposit_wall": (3.0, 0.5),
     "tractor": (1.5, 3.0), "reel": (1.2, 2.0), "cart_row": (0.0, 0.0), "billboard_fallen": (0.0, 0.0),
+    "bus_over": (3.0, 12.0),
 }
 TIER_COLORS = {"common": (200, 180, 138), "med": (79, 174, 99), "good": (227, 178, 60), "weapon": (196, 73, 59), "quest": (61, 111, 181)}
 ROUTE_COLORS = [(64, 140, 220), (230, 140, 40), (150, 90, 200), (40, 170, 160), (120, 120, 120), (210, 80, 140), (100, 160, 60)]
@@ -257,6 +260,8 @@ def draw(plan: dict, footprints: list, sl: dict) -> None:
 
 
 def main() -> None:
+    if not PLAN.exists():
+        raise SystemExit("нет снимка сцены: сначала tools/godot.cmd --headless res://tools/prospekt_study.tscn -- snapshot")
     plan = json.loads(PLAN.read_text(encoding="utf-8"))
     g, footprints = build(plan)
     sl = sightlines(plan, g, footprints)

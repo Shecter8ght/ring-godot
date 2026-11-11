@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "car_c"
+cull_mode = 2
+albedo_color = Color(0.18431373, 0.23921569, 0.29803923, 1)
+metallic = 0.3
+roughness = 0.5

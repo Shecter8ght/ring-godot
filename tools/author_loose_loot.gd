@@ -6,6 +6,12 @@ const LOOSE: PackedScene = preload("res://scenes/world/loose_loot.tscn")
 
 
 func _ready() -> void:
+	# с 2026-11-08 «Пригород» правится руками (docs/level_editing.md): слой находок zone01_loose_loot.tscn — тоже,
+	# перезапись стёрла бы ручные правки
+	if OS.get_environment("ZONE01_OVERWRITE") != "1":
+		print("author_loose_loot: «Пригород» правится руками — слой находок не перезаписываю (ZONE01_OVERWRITE=1 — всё же)")
+		get_tree().quit(1)
+		return
 	Profile.use_file("user://author_loose_loot.json", true)
 	await _author("zone01", "res://scenes/levels/zone01_mall.tscn")
 	get_tree().quit(0)

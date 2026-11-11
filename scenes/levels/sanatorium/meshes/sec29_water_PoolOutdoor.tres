@@ -1,0 +1,14 @@
+[gd_resource type="ArrayMesh" format=4]
+
+[ext_resource type="Material" path="res://scenes/levels/sanatorium/materials/water_pool.tres" id="1_q7hmj"]
+
+[resource]
+_surfaces = [{
+"aabb": AABB(-13, 17.55, 11, 20, 1e-05, 12.5),
+"format": 34359738375,
+"material": ExtResource("1_q7hmj"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AABQwWZmjEEAALxBAABQwWZmjEEAADBBAADgQGZmjEEAADBBAADgQGZmjEEAADBBAADgQGZmjEEAALxBAABQwWZmjEEAALxB/3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
+}]

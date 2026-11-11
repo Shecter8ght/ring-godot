@@ -1,0 +1,477 @@
+{
+	"adapter": "NVIDIA GeForce RTX 5070 Ti",
+	"points": [
+		{
+			"draws": 243,
+			"eye": false,
+			"fps": 269.2,
+			"gpu_ms": 3.43,
+			"id": "00_overview",
+			"low1_ms": 3.92,
+			"ms": 3.71,
+			"tris": 533181
+		},
+		{
+			"draws": 480,
+			"eye": false,
+			"fps": 261.2,
+			"gpu_ms": 3.55,
+			"id": "00_from_lake",
+			"low1_ms": 4.04,
+			"ms": 3.83,
+			"tris": 1280187
+		},
+		{
+			"draws": 567,
+			"eye": true,
+			"fps": 277.1,
+			"gpu_ms": 3.33,
+			"id": "00_terrace_dam",
+			"low1_ms": 3.75,
+			"ms": 3.61,
+			"tris": 1766314
+		},
+		{
+			"draws": 844,
+			"eye": true,
+			"fps": 216.1,
+			"gpu_ms": 4.35,
+			"id": "00_cascade_below",
+			"low1_ms": 4.82,
+			"ms": 4.63,
+			"tris": 2199190
+		},
+		{
+			"draws": 640,
+			"eye": true,
+			"fps": 274.7,
+			"gpu_ms": 3.36,
+			"id": "00_cascade_gallery",
+			"low1_ms": 3.83,
+			"ms": 3.64,
+			"tris": 1724879
+		},
+		{
+			"draws": 623,
+			"eye": true,
+			"fps": 313.2,
+			"gpu_ms": 2.91,
+			"id": "00_mole_lighthouse",
+			"low1_ms": 3.46,
+			"ms": 3.19,
+			"tris": 1593417
+		},
+		{
+			"draws": 641,
+			"eye": true,
+			"fps": 160.0,
+			"gpu_ms": 5.93,
+			"id": "00_s_courtyard",
+			"low1_ms": 6.54,
+			"ms": 6.25,
+			"tris": 2471439
+		},
+		{
+			"draws": 928,
+			"eye": true,
+			"fps": 202.6,
+			"gpu_ms": 4.63,
+			"id": "00_s_unit_living",
+			"low1_ms": 5.15,
+			"ms": 4.94,
+			"tris": 2493560
+		},
+		{
+			"draws": 950,
+			"eye": true,
+			"fps": 202.7,
+			"gpu_ms": 4.65,
+			"id": "00_s_unit_bedroom",
+			"low1_ms": 5.16,
+			"ms": 4.93,
+			"tris": 2506687
+		},
+		{
+			"draws": 681,
+			"eye": true,
+			"fps": 197.7,
+			"gpu_ms": 4.76,
+			"id": "00_s_parking",
+			"low1_ms": 5.23,
+			"ms": 5.06,
+			"tris": 1950951
+		},
+		{
+			"draws": 710,
+			"eye": true,
+			"fps": 195.6,
+			"gpu_ms": 4.82,
+			"id": "00_amph_promenade",
+			"low1_ms": 5.43,
+			"ms": 5.11,
+			"tris": 2191457
+		},
+		{
+			"draws": 781,
+			"eye": true,
+			"fps": 200.6,
+			"gpu_ms": 4.69,
+			"id": "00_lobby",
+			"low1_ms": 5.17,
+			"ms": 4.99,
+			"tris": 2449839
+		},
+		{
+			"draws": 506,
+			"eye": true,
+			"fps": 268.5,
+			"gpu_ms": 3.44,
+			"id": "00_pool",
+			"low1_ms": 3.93,
+			"ms": 3.72,
+			"tris": 1751448
+		},
+		{
+			"draws": 956,
+			"eye": true,
+			"fps": 189.0,
+			"gpu_ms": 4.99,
+			"id": "00_pool_rock",
+			"low1_ms": 5.41,
+			"ms": 5.29,
+			"tris": 2421404
+		},
+		{
+			"draws": 817,
+			"eye": true,
+			"fps": 185.0,
+			"gpu_ms": 5.11,
+			"id": "00_cottages",
+			"low1_ms": 5.68,
+			"ms": 5.4,
+			"tris": 2252577
+		},
+		{
+			"draws": 743,
+			"eye": true,
+			"fps": 206.2,
+			"gpu_ms": 4.56,
+			"id": "00_construction",
+			"low1_ms": 5.04,
+			"ms": 4.85,
+			"tris": 1815512
+		},
+		{
+			"draws": 855,
+			"eye": true,
+			"fps": 165.0,
+			"gpu_ms": 5.75,
+			"id": "00_main_circle",
+			"low1_ms": 6.49,
+			"ms": 6.06,
+			"tris": 2501767
+		},
+		{
+			"draws": 750,
+			"eye": true,
+			"fps": 145.7,
+			"gpu_ms": 6.56,
+			"id": "00_trail",
+			"low1_ms": 7.14,
+			"ms": 6.87,
+			"tris": 2543589
+		},
+		{
+			"draws": 708,
+			"eye": true,
+			"fps": 142.7,
+			"gpu_ms": 6.72,
+			"id": "00_trail_spring",
+			"low1_ms": 7.23,
+			"ms": 7.01,
+			"tris": 1761002
+		},
+		{
+			"draws": 856,
+			"eye": true,
+			"fps": 157.8,
+			"gpu_ms": 6.05,
+			"id": "00_ground_lawn",
+			"low1_ms": 6.73,
+			"ms": 6.34,
+			"tris": 2427986
+		},
+		{
+			"draws": 807,
+			"eye": true,
+			"fps": 172.1,
+			"gpu_ms": 5.52,
+			"id": "00_ground_down",
+			"low1_ms": 6.11,
+			"ms": 5.81,
+			"tris": 2377106
+		},
+		{
+			"draws": 404,
+			"eye": true,
+			"fps": 252.6,
+			"gpu_ms": 3.67,
+			"id": "00_ground_beach",
+			"low1_ms": 4.09,
+			"ms": 3.96,
+			"tris": 1149821
+		},
+		{
+			"draws": 234,
+			"eye": true,
+			"fps": 255.8,
+			"gpu_ms": 3.62,
+			"id": "00_ground_shore",
+			"low1_ms": 4.12,
+			"ms": 3.91,
+			"tris": 878489
+		},
+		{
+			"draws": 676,
+			"eye": true,
+			"fps": 170.1,
+			"gpu_ms": 5.59,
+			"id": "00_ground_slope",
+			"low1_ms": 6.07,
+			"ms": 5.88,
+			"tris": 2261846
+		},
+		{
+			"draws": 861,
+			"eye": true,
+			"fps": 242.1,
+			"gpu_ms": 3.84,
+			"id": "place_01",
+			"low1_ms": 4.34,
+			"ms": 4.13,
+			"tris": 2185088
+		},
+		{
+			"draws": 586,
+			"eye": true,
+			"fps": 237.1,
+			"gpu_ms": 3.91,
+			"id": "place_02",
+			"low1_ms": 4.39,
+			"ms": 4.22,
+			"tris": 1857237
+		},
+		{
+			"draws": 815,
+			"eye": true,
+			"fps": 274.1,
+			"gpu_ms": 3.35,
+			"id": "place_03",
+			"low1_ms": 3.85,
+			"ms": 3.65,
+			"tris": 2018185
+		},
+		{
+			"draws": 717,
+			"eye": true,
+			"fps": 218.2,
+			"gpu_ms": 4.3,
+			"id": "place_04",
+			"low1_ms": 5.51,
+			"ms": 4.58,
+			"tris": 1808802
+		},
+		{
+			"draws": 717,
+			"eye": true,
+			"fps": 197.0,
+			"gpu_ms": 4.78,
+			"id": "place_05",
+			"low1_ms": 5.39,
+			"ms": 5.08,
+			"tris": 1888583
+		},
+		{
+			"draws": 537,
+			"eye": true,
+			"fps": 227.1,
+			"gpu_ms": 4.11,
+			"id": "place_06",
+			"low1_ms": 4.81,
+			"ms": 4.4,
+			"tris": 2094514
+		},
+		{
+			"draws": 650,
+			"eye": true,
+			"fps": 151.4,
+			"gpu_ms": 6.31,
+			"id": "place_07",
+			"low1_ms": 6.84,
+			"ms": 6.6,
+			"tris": 2470588
+		},
+		{
+			"draws": 787,
+			"eye": true,
+			"fps": 189.8,
+			"gpu_ms": 4.99,
+			"id": "place_08",
+			"low1_ms": 5.53,
+			"ms": 5.27,
+			"tris": 1880542
+		},
+		{
+			"draws": 731,
+			"eye": true,
+			"fps": 149.4,
+			"gpu_ms": 6.4,
+			"id": "place_09",
+			"low1_ms": 7.21,
+			"ms": 6.69,
+			"tris": 2559042
+		},
+		{
+			"draws": 904,
+			"eye": true,
+			"fps": 132.8,
+			"gpu_ms": 7.23,
+			"id": "place_10",
+			"low1_ms": 8.0,
+			"ms": 7.53,
+			"tris": 2818532
+		},
+		{
+			"draws": 650,
+			"eye": true,
+			"fps": 199.0,
+			"gpu_ms": 4.7,
+			"id": "place_11",
+			"low1_ms": 5.56,
+			"ms": 5.02,
+			"tris": 1824323
+		},
+		{
+			"draws": 617,
+			"eye": true,
+			"fps": 247.5,
+			"gpu_ms": 3.75,
+			"id": "place_12",
+			"low1_ms": 4.46,
+			"ms": 4.04,
+			"tris": 1456080
+		},
+		{
+			"draws": 775,
+			"eye": true,
+			"fps": 178.4,
+			"gpu_ms": 5.31,
+			"id": "place_13",
+			"low1_ms": 6.08,
+			"ms": 5.61,
+			"tris": 2072923
+		},
+		{
+			"draws": 686,
+			"eye": true,
+			"fps": 230.3,
+			"gpu_ms": 4.05,
+			"id": "place_14",
+			"low1_ms": 4.83,
+			"ms": 4.34,
+			"tris": 2177528
+		},
+		{
+			"draws": 772,
+			"eye": true,
+			"fps": 181.8,
+			"gpu_ms": 5.21,
+			"id": "place_15",
+			"low1_ms": 6.04,
+			"ms": 5.5,
+			"tris": 2056586
+		},
+		{
+			"draws": 368,
+			"eye": true,
+			"fps": 356.8,
+			"gpu_ms": 2.52,
+			"id": "place_16",
+			"low1_ms": 3.23,
+			"ms": 2.8,
+			"tris": 1510667
+		},
+		{
+			"draws": 695,
+			"eye": true,
+			"fps": 151.5,
+			"gpu_ms": 6.3,
+			"id": "place_17",
+			"low1_ms": 7.05,
+			"ms": 6.6,
+			"tris": 2077922
+		},
+		{
+			"draws": 237,
+			"eye": true,
+			"fps": 341.6,
+			"gpu_ms": 2.64,
+			"id": "place_20",
+			"low1_ms": 3.4,
+			"ms": 2.93,
+			"tris": 1174025
+		},
+		{
+			"draws": 225,
+			"eye": true,
+			"fps": 333.7,
+			"gpu_ms": 2.71,
+			"id": "place_21",
+			"low1_ms": 3.5,
+			"ms": 3.0,
+			"tris": 1089685
+		},
+		{
+			"draws": 235,
+			"eye": true,
+			"fps": 346.2,
+			"gpu_ms": 2.6,
+			"id": "place_22",
+			"low1_ms": 3.27,
+			"ms": 2.89,
+			"tris": 1148351
+		},
+		{
+			"draws": 920,
+			"eye": true,
+			"fps": 186.8,
+			"gpu_ms": 5.03,
+			"id": "place_23",
+			"low1_ms": 5.93,
+			"ms": 5.35,
+			"tris": 2223633
+		}
+	],
+	"quality": "high",
+	"size": [
+		1920,
+		1080
+	],
+	"summary": {
+		"fps_mean": 203.1,
+		"ms_mean": 4.92,
+		"points": 43,
+		"worst": {
+			"draws": 904,
+			"eye": true,
+			"fps": 132.8,
+			"gpu_ms": 7.23,
+			"id": "place_10",
+			"low1_ms": 8.0,
+			"ms": 7.53,
+			"tris": 2818532
+		}
+	},
+	"time": "day",
+	"weather": "clear"
+}

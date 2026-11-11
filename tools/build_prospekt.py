@@ -27,6 +27,11 @@
 Замечания 2026-10-25 (редакция 6): железная дорога — шесть путей с опорами и проводами контактной сети; в городе —
 столбы с проводами; въезд в паркинг был у самых домов — два спуска в углах двора, подальше от подъездов.
 
+Проспект вдвое шире (владелец 2026-11-07, вариант Б «магистраль», docs/design/prospekt_map.md §20): код ниже пишет карту
+в прежних координатах, а в конце tools/prospekt_widen.py переносит план на расширенный проспект; то, что зависит от
+нового профиля, пишется сразу в новых координатах (mark() … raw()). PROSPEKT_WIDEN=now — прежняя карта,
+PROSPEKT_OUT=<папка> — план и сцена в свою папку (варианты на схему, карта не меняется).
+
 Координаты игровые: x — восток, z — юг (север = −z). Проспект: западное плечо по z = 0 от кордона (x = −210)
 до x = 0, поворот направо радиусом 55 вокруг (0, 55), южное плечо по x = 55 от z = 55 до тупика у z = 275.
 Масштаб — правило 9 AGENTS.md: предметы 1:1, ширина проходов и помещений × 1,3 (WK), высоты жилья × 1,15 (HK).
@@ -39,13 +44,25 @@ import random
 import re
 from pathlib import Path
 
-import prospekt_light as LIGHT
+import os
 
 import prospekt_light as LIGHT
+import prospekt_widen as WIDEN
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_JSON = ROOT / "data" / "blockouts" / "prospekt.json"
 OUT_SCENE = ROOT / "scenes" / "levels" / "prospekt_study.tscn"
+# PROSPEKT_OUT — своя папка для плана и сцены (варианты расширения проспекта на схему, не трогая карту)
+PREVIEW_DIR = os.environ.get("PROSPEKT_OUT", "")
+# с 2026-11-08 карта правится руками (решение владельца): в проект — только по PROSPEKT_OVERWRITE=1
+if not PREVIEW_DIR and os.environ.get("PROSPEKT_OVERWRITE") != "1":
+    print("tools/build_prospekt.py: «Проспект» правится руками в редакторе (docs/level_editing.md): запуск перезаписал бы ручные правки сцен и наполнения. Заготовки — в свою папку: PROSPEKT_OUT=<папка>; собрать карту заново поверх правок — только если владелец решил: PROSPEKT_OVERWRITE=1.")
+    raise SystemExit(1)
+if PREVIEW_DIR:
+    OUT_JSON = Path(PREVIEW_DIR) / "prospekt.json"
+    OUT_SCENE = Path(PREVIEW_DIR) / "prospekt_study.tscn"
+# id() записей плана, написанных сразу в координатах расширенного проспекта (прочее переносит WIDEN.warp_plan)
+RAW_IDS: set[int] = set()
 
 WK = 1.3
 HK = 1.15
@@ -473,6 +490,72 @@ def loot(x: float, y: float, z: float, kind: str, tier: str = "common", note: st
                          "yaw": round(yaw, 1)})
 
 
+# ------------------------------------------------------------------ расширенный проспект: новые координаты
+# Владелец 2026-11-07: «сам проспект надо в 2 раза расширять» — выбран вариант Б «магистраль» (tools/prospekt_widen.py):
+# 4 + 4 полосы, разделительная 6 м, парковочные карманы 2,5 м, тротуары 11,8 м. Карта пишется в прежних координатах и
+# в конце переносится (WIDEN.warp_plan); то, что зависит от нового профиля (разметка полос, зебры, плиты кордона, машины
+# в карманах, застройка новых полос земли), пишется сразу в новых координатах — между mark() и raw().
+ZA, XSN, CRN = WIDEN.ZA_NEW, WIDEN.XS_NEW, WIDEN.CR_NEW          # оси плеч и радиус оси поворота
+RHN, EDGEN, MEDN, FN = WIDEN.RH_NEW, WIDEN.EDGE_NEW, WIDEN.MED_NEW, WIDEN.F_NEW
+rng2 = random.Random(1107)                                      # своё зерно: прежние случайные расстановки не сдвигаются
+RAW_KEEP: list = []                                             # держит записи живыми, чтобы id() не переиспользовались
+
+
+def _lists() -> dict[str, list]:
+    out = {k: v for k, v in plan.items() if isinstance(v, list)}
+    out.update({"filler." + k: v for k, v in FI.items() if isinstance(v, list)})
+    return out
+
+
+def mark() -> dict[str, int]:
+    return {k: len(v) for k, v in _lists().items()}
+
+
+def raw(snap: dict[str, int]) -> None:
+    """Записи плана после snap — уже в координатах расширенного проспекта: перенос их не трогает."""
+    for k, v in _lists().items():
+        for e in v[snap.get(k, 0):]:
+            RAW_IDS.add(id(e))
+            RAW_KEEP.append(e)
+
+
+def n_curve_point(phi: float, d: float) -> tuple[float, float]:
+    r = CRN + d
+    return CX + r * math.sin(phi), CZ - r * math.cos(phi)
+
+
+def n_along(step: float, d: float, s0: float = 0.0, skip=None, curve: bool = True):
+    """Как along(), но по оси расширенного проспекта; curve=False — только прямые плечи."""
+    out = []
+    L1, Lc, L2 = 0.0 - XW, CRN * math.pi * 0.5, ZS_END - CZ
+    s = s0
+    while s < L1 + Lc + L2:
+        if s < L1:
+            x, z, h = XW + s, ZA - d, 90.0
+        elif s < L1 + Lc:
+            phi = (s - L1) / CRN
+            x, z = n_curve_point(phi, d)
+            h = 90.0 - math.degrees(phi)
+            if not curve:
+                s += step
+                continue
+        else:
+            x, z, h = XSN + d, CZ + (s - L1 - Lc), 0.0
+        if skip is None or not skip(x, z):
+            out.append((x, z, h))
+        s += step
+    return out
+
+
+def n_curve_strip(d0: float, d1: float, mat: str, t: float, y: float = 0.0, n: int = 36, solid: bool = False) -> None:
+    dm, width = (d0 + d1) * 0.5, abs(d1 - d0)
+    for i in range(n):
+        a0, a1 = (math.pi * 0.5) * i / n, (math.pi * 0.5) * (i + 1) / n
+        am = (a0 + a1) * 0.5
+        x, z = n_curve_point(am, dm)
+        box(x, y + t * 0.5, z, (CRN + max(d0, d1)) * (a1 - a0) * 1.04 + 0.05, t, width, mat, -math.degrees(am), solid)
+
+
 # ================================================================== проспект
 # западное плечо
 surface("road_w", "road", XW, -RH, 0.0, RH)
@@ -495,18 +578,34 @@ surface("walk_se", "walk", XS + RH, CZ, XS + F, ZS_END, 0.0, 0.15)
 surface("walk_sw", "walk", XS - F, CZ, XS - RH, ZS_END, 0.0, 0.15)
 box(XS + RH - 0.1, 0.075, (CZ + ZS_END) * 0.5, 0.2, 0.15, ZS_END - CZ, "stripe")
 box(XS - RH + 0.1, 0.075, (CZ + ZS_END) * 0.5, 0.2, 0.15, ZS_END - CZ, "stripe")
-# разметка — пунктир полос по всей оси
-for (x, z, h) in along(4.0, 5.0, 8.0):
-    box(x, 0.085, z, 0.15, 0.02, 2.0, "stripe", h, False)
-for (x, z, h) in along(4.0, -5.0, 8.0):
-    box(x, 0.085, z, 0.15, 0.02, 2.0, "stripe", h, False)
+# разметка — пунктир между полосами по всей оси (сразу по новому профилю: 4 + 4 полосы), краевая линия у карманов
+_snap = mark()
+for k in range(1, WIDEN.LANES):
+    for side in (1.0, -1.0):
+        for (x, z, h) in n_along(4.0, side * (MEDN + WIDEN.LANE * k), 8.0):
+            box(x, 0.085, z, 0.15, 0.02, 2.0, "stripe", h, False)
+if WIDEN.POCKET > 0.0:
+    for side in (1.0, -1.0):
+        box((XW + 0.0) * 0.5, 0.085, ZA - side * EDGEN, -XW, 0.02, 0.15, "stripe", 0.0, False)
+        box(XSN + side * EDGEN, 0.085, (CZ + ZS_END) * 0.5, 0.15, 0.02, ZS_END - CZ, "stripe", 0.0, False)
+        n_curve_strip(side * EDGEN - 0.075, side * EDGEN + 0.075, "stripe", 0.02, 0.075)
+raw(_snap)
 
 # переходы: зебра у проезда во двор (запад) и на южном плече; светофоры, знаки, тактильная плитка
 CROSS_W = -126.0
 CROSS_S = 150.0
-for i in range(8):
-    box(CROSS_W, 0.085, -RH + 1.1 + i * 2.2, 5.0, 0.02, 1.1, "stripe", 0.0, False)
-    box(XS - RH + 1.1 + i * 2.2, 0.085, CROSS_S, 1.1, 0.02, 5.0, "stripe", 0.0, False)
+# зебры — через всю ширину нового проспекта (с карманами), в разделительной под ними разрыв газона
+_snap = mark()
+for i in range(max(1, round(2.0 * RHN / 2.2))):
+    off = -RHN + 1.1 + i * 2.2
+    box(CROSS_W, 0.085, ZA + off, 5.0, 0.02, 1.1, "stripe", 0.0, False)
+    box(XSN + off, 0.085, CROSS_S, 1.1, 0.02, 5.0, "stripe", 0.0, False)
+raw(_snap)
+for srf in plan["surfaces"]:
+    if srf["id"] == "median_w":
+        srf["holes"] = [[CROSS_W - 3.0, -MED, CROSS_W + 3.0, MED]]
+    elif srf["id"] == "median_s":
+        srf["holes"] = [[XS - MED, CROSS_S - 3.0, XS + MED, CROSS_S + 3.0]]
 for (x, z, yaw) in [(CROSS_W - 4.0, -RH - 0.6, 180.0), (CROSS_W + 4.0, RH + 0.6, 0.0)]:
     u("U15_02_traffic_light", x, z, yaw)
     u("U06_02_crossing_sign", x + (-2.5 if yaw == 180 else 2.5), z + (-0.8 if yaw == 180 else 0.8), yaw)
@@ -532,28 +631,46 @@ TZN, TZS = -15.0, 15.0
 TUN = 9.5
 STAIR_Z = 11.0
 plan["ground_holes"].append([TX0, TZN, TX1, TZS])
-plan["slabs"].append({"id": "tunnel_floor", "rect": [TX0, TZN, TX1, TZS], "y_top": TUNNEL_Y, "t": 0.3, "mat": "concrete", "holes": []})
-plan["slabs"].append({"id": "tunnel_roof", "rect": [TX0 - 0.4, -TUN, TX1 + 0.4, TUN], "y_top": -0.1, "t": 0.4, "mat": "concrete", "holes": []})
-wall(TX0 - 0.4, TZN, TX0, TZS, TUNNEL_Y, 0.0, "concrete")
-wall(TX1, TZN, TX1 + 0.4, TZS, TUNNEL_Y, 0.0, "concrete")
-wall(TX0, TZN - 0.4, TX1, TZN, TUNNEL_Y, 0.0, "concrete")
-wall(TX0, TZS, TX1, TZS + 0.4, TUNNEL_Y, 0.0, "concrete")
+# отделка как в городском переходе (владелец 2026-11-08: «красиво и реалистично оформим подземный переход»): пол —
+# гранитные плиты, стены — кафель с тёмным цоколем и полосой, потолок — подвесной; свет, витрины, указатели, поручни
+# и пандус лестниц — ProspektLandscape._tunnel (по плитам tunnel_floor / tunnel_roof)
+plan["slabs"].append({"id": "tunnel_floor", "rect": [TX0, TZN, TX1, TZS], "y_top": TUNNEL_Y, "t": 0.3, "mat": "tunnel_floor", "holes": []})
+plan["slabs"].append({"id": "tunnel_roof", "rect": [TX0 - 0.4, -TUN, TX1 + 0.4, TUN], "y_top": -0.1, "t": 0.4, "mat": "tunnel_ceiling", "holes": []})
+wall(TX0 - 0.4, TZN, TX0, TZS, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX1, TZN, TX1 + 0.4, TZS, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX0, TZN - 0.4, TX1, TZN, TUNNEL_Y, 0.0, "tunnel_tile")
+wall(TX0, TZS, TX1, TZS + 0.4, TUNNEL_Y, 0.0, "tunnel_tile")
 for sgn in (-1.0, 1.0):
     zc = sgn * (STAIR_Z + 2.0)
     plan["stairs"].append({"from": [TX1, 0.15, zc], "to": [TX0 + 1.5, TUNNEL_Y, zc], "width": 3.8, "count": 20, "mat": "concrete"})
-    box((TX0 + 1.5 + TX1) * 0.5, -1.3, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 4.6, 0.2, "steel")
+    box((TX0 + 1.5 + TX1) * 0.5, -1.8, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 3.6, 0.2, "tunnel_tile")
+    box((TX0 + 1.5 + TX1) * 0.5, 0.5, sgn * STAIR_Z, TX1 - (TX0 + 1.5), 1.0, 0.2, "concrete")
     box((TX0 + TX1) * 0.5, 0.5, sgn * (TZS + 0.2), TX1 - TX0 + 0.8, 1.0, 0.4, "concrete")
     box((TX0 - 0.4 + TX0 + 1.5) * 0.5, 0.5, sgn * STAIR_Z, 1.9, 1.0, 0.2, "concrete")
+    # парапет и по западному краю проёма лестницы: на широком тротуаре к нему подходят и с запада (от кофейни)
+    box(TX0 - 0.2, 0.5, sgn * (STAIR_Z + TZS) * 0.5, 0.4, 1.0, TZS - STAIR_Z + 0.2, "concrete")
     u("U03_04_handrail_slope", (TX0 + 1.5 + TX1) * 0.5, sgn * (STAIR_Z + 0.25), 90.0 if sgn > 0 else -90.0)
     sign("подземный переход", TX1 + 1.5, 2.6, sgn * 13.0, 40)
     u("U10_03_wayfinding", TX1 + 2.0, sgn * 10.6, 90.0)
 for z in (-5.0, 0.0, 5.0):
     put("kiosk", TX0 + 1.6, z, 90.0, 0.9, TUNNEL_Y, -1, 0.0, True)
-u("U18_03_industrial_light", (TX0 + TX1) * 0.5, -4.0, 0.0, 1.0, -0.6)
-u("U18_03_industrial_light", (TX0 + TX1) * 0.5, 4.0, 0.0, 1.0, -0.6)
-plan["lamps"].append([(TX0 + TX1) * 0.5, -0.9, 0.0, 0.5, 8.0])
+# свет перехода — ряды светильников в подвесном потолке (почти все мёртвые) и дневной свет с лестниц:
+# ProspektLandscape._tunnel; ламп плана и промышленных светильников здесь нет
 plan["walk_holes"] = [[TX0, TZN, TX1, -STAIR_Z], [TX0, STAIR_Z, TX1, TZS]]
 FI["stories"].append({"label": "тело под брезентом у ларька в переходе", "at": [TX1 - 1.5, 3.0], "height": 1.5})
+# два года без людей: бумаги, бутылки и банки по полу, стекло у разбитой витрины, угол с коробками и мешками (тут
+# ночевали), лужа под протечкой, пыль
+rng_t = random.Random(808)
+for _ in range(26):
+    put(rng_t.choice(["paper", "paper", "paper_ball", "bottle", "can"]), rng_t.uniform(TX0 + 0.5, TX1 - 0.5),
+        rng_t.uniform(TZN + 1.0, TZS - 1.0), rng_t.uniform(0, 360), 1.0, TUNNEL_Y)
+for k in range(4):
+    put("glass_shards", TX1 - 0.9 - rng_t.uniform(0.0, 0.8), -6.2 + k * 0.5, rng_t.uniform(0, 360), rng_t.uniform(0.9, 1.3), TUNNEL_Y)
+put("boxes", TX1 - 0.6, -8.6, 10.0, 1.0, TUNNEL_Y)
+put("bags", TX1 - 0.7, -7.9, 70.0, 1.0, TUNNEL_Y)
+put("trash_pile", TX1 - 0.9, 8.8, 30.0, 0.8, TUNNEL_Y)
+put("puddle", (TX0 + TX1) * 0.5 + 0.8, 2.5, 0.0, 2.4, TUNNEL_Y)
+put("dust", (TX0 + TX1) * 0.5, -3.0, 0.0, 1.0, TUNNEL_Y)
 
 # ------------------------------------------------------------------ уличная мебель вдоль всей оси
 BUSY = [[TX0 - 2.0, -16.0, TX1 + 2.0, 16.0],                 # переход
@@ -658,8 +775,13 @@ FI["stories"].append({"label": "дорожные работы: каток и с�
 put("flatbed", XS - 5.6, 118.0, 2.0, 1.0, 0.0, 9, 0.0, True)       # бортовая у «24 часа»
 
 # ================================================================== кордон (запад)
-for i in range(14):
-    put("po2", XC, -17.5 + 1.25 + i * 2.5, 0.0)
+# плиты — через всю ширину нового проспекта, от забора до забора (заборы вдоль z ±17,5 переносятся вместе с кварталами)
+_snap = mark()
+_c0, _c1 = WIDEN.warp(XC, -17.5)[1], WIDEN.warp(XC, 17.5)[1]
+_cn = math.ceil((_c1 - _c0) / 2.5 - 1e-6)
+for i in range(_cn):
+    put("po2", XC, _c0 + (_c1 - _c0) * (i + 0.5) / _cn, 0.0)
+raw(_snap)
 box(XC, 1.3, 0.0, 0.3, 2.6, 8.4, "steel")
 u("U07_02_barrier_arm", XC + 1.5, 5.5, -90.0)
 for (x, z) in [(-204, -6.5), (-200, 4.0), (-196, -3.0)]:
@@ -864,7 +986,7 @@ for srf in plan["surfaces"]:
         srf["holes"] = [[RW[0] - 0.3, RAMP_TOP, RW[1] + 0.3, PIT[1] - 0.4], [RE[0] - 0.3, RAMP_TOP, RE[1] + 0.3, PIT[1] - 0.4]]
 slab("lot_slab", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], 0.0, 0.4, "walk")
 plan["ground_holes"].append([PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4])
-slab("pit_floor", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], PIT_Y, 0.4, "concrete")
+slab("pit_floor", [PIT[0] - 0.4, PIT[1] - 0.4, PIT[2] + 0.4, PIT[3] + 0.4], PIT_Y, 0.4, "pit_floor")       # бетон с пропилами (StreetPaving)
 wall(PIT[0] - 0.4, PIT[1] - 0.4, PIT[0], PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
 wall(PIT[2], PIT[1] - 0.4, PIT[2] + 0.4, TUNNEL_Z[0], PIT_Y, -0.4, "concrete")
 wall(PIT[2], TUNNEL_Z[1], PIT[2] + 0.4, PIT[3] + 0.4, PIT_Y, -0.4, "concrete")
@@ -882,17 +1004,20 @@ BEAM_Y = -0.4 - PIT_BEAM * 0.5
 COL_X = [X_ROW0 + k * BAY for k in range(int((X_ROW1 - X_ROW0) / BAY) + 1)]
 slab("pit_ceiling", [PIT[0], PIT[1], PIT[2], PIT[3]], -0.4, 0.04, "concrete")
 for cx in COL_X:
-    box(cx, BEAM_Y, (PIT[1] + PIT[3]) * 0.5, 0.6, PIT_BEAM, PIT[3] - PIT[1], "slab", 0.0, False)
+    box(cx, BEAM_Y, (PIT[1] + PIT[3]) * 0.5, 0.6, PIT_BEAM, PIT[3] - PIT[1], "concrete", 0.0, False)
     for cz in COL_Z:
-        box(cx, -0.4 - PIT_BEAM - 0.2, cz, 2.2, 0.4, 2.2, "slab", 0.0, False)
+        box(cx, -0.4 - PIT_BEAM - 0.2, cz, 2.2, 0.4, 2.2, "concrete", 0.0, False)
         for k in range(6):
-            box(cx, PIT_Y + 0.1 + k * 0.2, cz, 0.94, 0.2, 0.94, "accent" if k % 2 == 0 else "dark", 0.0, False)
+            box(cx, PIT_Y + 0.1 + k * 0.2, cz, 0.94, 0.2, 0.94, "hazard_yellow" if k % 2 == 0 else "dark", 0.0, False)
 for cz in COL_Z:
-    box((X_ROW0 + X_ROW1) * 0.5, BEAM_Y, cz, X_ROW1 - X_ROW0, PIT_BEAM, 0.6, "slab", 0.0, False)
+    box((X_ROW0 + X_ROW1) * 0.5, BEAM_Y, cz, X_ROW1 - X_ROW0, PIT_BEAM, 0.6, "concrete", 0.0, False)
 for (a0, a1) in AISLES:
     box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.3, a1 - 0.9, X_ROW1 - X_ROW0, 0.5, 1.2, "wall", 0.0, False)
 for (row, z0, z1, _yaw) in ROWS:
-    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.12, (z0 + z1) * 0.5, X_ROW1 - X_ROW0, 0.14, 0.14, "rust", 0.0, False)
+    box((X_ROW0 + X_ROW1) * 0.5, -0.4 - PIT_BEAM - 0.12, (z0 + z1) * 0.5, X_ROW1 - X_ROW0, 0.14, 0.14, "pipe_red", 0.0, False)
+# кабельные лотки вдоль продольных стен под балками (как в зале D стенда)
+for tz in (PIT[1] + 0.65, PIT[3] - 0.65):
+    box((PIT[0] + PIT[2]) * 0.5, -0.4 - PIT_BEAM - 0.25, tz, PIT[2] - PIT[0] - 1.0, 0.08, 0.45, "tray", 0.0, False)
 
 
 def stall_free(x: float, row: str) -> bool:
@@ -951,6 +1076,7 @@ for (row, z0, z1, _yaw) in ROWS:
     sign("ряд " + row, PIT[2] - 4.0, PIT_Y + 4.0, (z0 + z1) * 0.5, 30)
 for x in ((RW[0] + RW[1]) * 0.5, (RE[0] + RE[1]) * 0.5):
     sign("выезд ↑", x, PIT_Y + 4.0, RAMP_BOT + 2.0, 34)
+    box(x, PIT_Y + 4.0, RAMP_BOT + 2.15, 1.6, 0.4, 0.12, "exit_sign", 0.0, False)          # зелёный указатель выезда
 # техпомещения в торцах ряда A: насосная и электрощитовая (закрыты)
 for (x0, x1, title) in [(X_ROW0, X_ROW0 + 12.0, "насосная"), (X_ROW1 - 12.0, X_ROW1, "электрощитовая")]:
     wall(x0, ROWS[0][2] - 0.2, x1, ROWS[0][2], PIT_Y, -0.4, "wall")
@@ -1838,8 +1964,10 @@ def raised_lawn(x0: float, z0: float, x1: float, z1: float, trees: int, bushes: 
 for k in range(5):
     put("stall", -46.0 + k * 3.3, 101.0, 180.0, 1.0, 0.0, -1, 0.0, True)
 loot(-42.0, 0.0, 100.0, "register", "common", "рынок в сквере: касса палатки")
+# сухой фонтан (фото владельца 05, площадь у вокзала): бортик в бежевой плитке, дно — облезлая голубая краска
 for (x0, z0, x1, z1) in [(-16.5, 101.0, -7.5, 101.3), (-16.5, 106.7, -7.5, 107.0), (-16.5, 101.0, -16.2, 107.0), (-7.8, 101.0, -7.5, 107.0)]:
-    wall(x0, z0, x1, z1, 0.0, 0.6, "concrete")                                 # сухой фонтан
+    wall(x0, z0, x1, z1, 0.0, 0.6, "fountain_tile")
+surface("fountain_floor", "fountain_floor", -16.2, 101.3, -7.8, 106.7, 0.0, 0.12)
 put("puddle", -12.0, 104.0, 0.0, 3.0)
 raised_lawn(-22.0, 112.0, -4.0, 138.0, 3, 5, "w")
 raised_lawn(2.0, 108.0, 22.0, 128.0, 3, 4, "s")
@@ -2531,7 +2659,7 @@ plan["probe_routes"] = [
     {"id": "prologue", "label": "пролог: кордон → кофейня → переход → «Ярус» → склад → разгрузка → сквер → вагоны → тоннель",
      "max_open_m": 30.0,
      "points": [[-200, 0], [-193, -4], [-193, -9.2], [-188, -9.2], [-184, -12], [-184, -16], [-184, -21], [-184, -16], [-184, -12], [-166, -12],
-                [-150, -10], [-150, -13], [-152.5, -13], [-158.6, -13], [-158.6, -9.5], [-156, -8], [-156, 0], [-156, 8], [-158.6, 9.5], [-158.6, 13],
+                [-162.5, -10], [-150, -10], [-150, -13], [-152.5, -13], [-158.6, -13], [-158.6, -9.5], [-156, -8], [-156, 0], [-156, 8], [-158.6, 9.5], [-158.6, 13],
                 [-152.5, 13], [-149, 13], [-146, 17], [-130, 18], [-112, 18], [-108, 26], [-108, 46], [-108, 52], [-108, 64],
                 [-108, 78], [-108, 80.6], [-122, 80.6], [-122, 84.5], [sm_cx, 84.5], [sm_cx, 90], [sm_cx, 95.5], [-66, 96.5], [-60, 97.5],
                 [-55, 100], [-55, 112], [-52, 140], [-30, 146], [-10, 146], [10, 146], [11, 182], [36, 186], [37, 222],
@@ -2575,18 +2703,277 @@ plan["probe_routes"] = [
 plan["checks"] = {"pit": [-156.0, -42.0], "pit_y": PIT_Y, "yard": [-156.0, -42.0], "tunnel": [-156.0, 0.0],
                   "cordon": {"from": [-203.0, 0.5], "to": [-226.0, 0.5], "stop_x": XC - 0.6}}
 
+# ================================================================== расширенный проспект: карманы, разделительная, новая земля
+# Всё ниже — сразу в новых координатах (raw). Укрытия на широкой дороге (правила плотности: открытый кусок ≤ 30 м,
+# укрытия через 6–12 м): машины в парковочных карманах, деревья и кадки на разделительной. Новая земля между
+# отъехавшими блоками (швы tools/prospekt_widen.py): на севере — переулок с бизнес-центром между банком и «Вершиной»,
+# на востоке — автопарк ЧВК у лагеря эвакуации; забор района и город за ним — через швы без дыр.
+KEEP_CLEAR_RAW: list[tuple[float, float, float, float]] = []
+SMALL_KITS = LITTER | {"bottle", "can", "bags", "puddle", "tape", "track_3m", "ac_unit", "cone", "tires", "trash_pile"}
+if WIDEN.ACTIVE:
+    _snap = mark()
+    # препятствия: где уже что-то стоит (прежнее — в новых координатах), клетка 4 м
+    _occ: dict[tuple[int, int], list[tuple[float, float]]] = {}
+
+    def _occupy(x: float, z: float) -> None:
+        _occ.setdefault((int(math.floor(x / 4.0)), int(math.floor(z / 4.0))), []).append((x, z))
+
+    def _free(x: float, z: float, rx: float, rz: float) -> bool:
+        for i in range(int(math.floor((x - rx) / 4.0)) - 1, int(math.floor((x + rx) / 4.0)) + 2):
+            for j in range(int(math.floor((z - rz) / 4.0)) - 1, int(math.floor((z + rz) / 4.0)) + 2):
+                for (ox, oz) in _occ.get((i, j), []):
+                    if abs(ox - x) < rx and abs(oz - z) < rz:
+                        return False
+        return True
+
+    for it in FI["items"]:
+        if it[0] not in SMALL_KITS:
+            _occupy(*WIDEN.warp(it[1], it[2]))
+    for bx in plan["boxes"]:
+        if bx["mat"] != "stripe" and bx["size"][1] > 0.1 and bx["at"][1] < 3.0:
+            _occupy(*WIDEN.warp(bx["at"][0], bx["at"][2]))
+    for st in plan["stairs"]:
+        for p in (st["from"], st["to"]):
+            _occupy(*WIDEN.warp(p[0], p[2]))
+
+    # ---- машины в карманах: прямые плечи, по обе стороны; не у зебр, перехода, въезда во двор, кордона и тоннеля
+    POCKET_C = EDGEN + WIDEN.POCKET * 0.5
+    CAR_KITS = [("car", 0.66), ("car_open", 0.08), ("car_wreck", 0.1), ("taxi", 0.06), ("van", 0.1)]
+
+    def _car(x: float, z: float, yaw: float) -> None:
+        r = rng2.random()
+        kit = CAR_KITS[-1][0]
+        for (k, w) in CAR_KITS:
+            if r < w:
+                kit = k
+                break
+            r -= w
+        tint = rng2.choice(CAR_TINTS) if kit in ("car", "car_open", "car_wreck") else -1
+        if kit == "car_wreck":
+            tint = 1 if rng2.random() < 0.4 else tint
+        put(kit, x, z, yaw, 1.0, 0.0, tint, 0.0, True)
+        _occupy(x, z)
+        if kit == "car_open":
+            a = math.radians(yaw)
+            loot(x - math.sin(a) * 2.7, 0.0, z - math.cos(a) * 2.7, "car", "common", "машина в кармане: багажник")
+
+    for side in (1.0, -1.0):
+        zc = ZA - side * POCKET_C
+        x = -186.0 + (0.0 if side > 0 else 3.0)
+        while x < -12.0:
+            skip = abs(x - CROSS_W) < 12.0 or -165.0 < x < -147.0 or (side > 0 and -118.0 < x < -103.0)
+            if not skip and rng2.random() < 0.55 and _free(x, zc, 3.4, 2.0):
+                _car(x + rng2.uniform(-0.4, 0.4), zc + rng2.uniform(-0.25, 0.25), (-90.0 if side > 0 else 90.0) + rng2.uniform(-4, 4))
+            x += 6.0
+        xc = XSN + side * POCKET_C
+        z = 66.0 + (0.0 if side > 0 else 3.0)
+        while z < 236.0:
+            if abs(z - CROSS_S) >= 12.0 and rng2.random() < 0.55 and _free(xc, z, 2.0, 3.4):
+                _car(xc + rng2.uniform(-0.25, 0.25), z + rng2.uniform(-0.4, 0.4), (180.0 if side > 0 else 0.0) + rng2.uniform(-4, 4))
+            z += 6.0
+
+    # ---- разделительная 6 м: липы между фонарями, кадки — низкие укрытия посреди дороги
+    def _median_busy(x: float, z: float) -> bool:
+        return (x > CX and z > 234.0) or busy(*_unwarp_hint(x, z))   # у тоннеля разделительной нет — подъезд к порталу
+
+    def _unwarp_hint(x: float, z: float) -> tuple[float, float]:
+        """Прежняя точка оси для проверки «занятых» мест (переход, зебры, кордон, тупик) — по продольной координате."""
+        if x <= CX:
+            return x, 0.0
+        if z >= CZ:
+            return XS, z
+        return x, z
+
+    for (x, z, h) in n_along(30.0, 0.0, 37.0, _median_busy, curve=False):
+        if _free(x, z, 2.5, 2.5):
+            put("tree_round", x, z, rng2.uniform(0, 360), rng2.uniform(0.85, 1.1))
+            _occupy(x, z)
+    for (x, z, h) in n_along(45.0, 0.0, 52.0, _median_busy, curve=False):
+        for dd in (-1.6, 1.6):
+            a = math.radians(h)
+            px, pz = x + math.cos(a) * dd, z - math.sin(a) * dd
+            if _free(px, pz, 1.5, 1.5):
+                u("U02_02_planter", px, pz, h, 1.0, 0.0, True)
+                _occupy(px, pz)
+
+    # ---- перебивки обзора на широкой дороге (владелец 2026-10-24, п. 7: «каждые 50–90 м»): прежние стояли под 17 м
+    # проезжей части — теперь их вдвое больше поперёк, вразбежку: фильтр ЧВК через все полосы, автобусы и грузовики
+    # в полосах, контейнеры, ларьки на тротуарах у бордюра
+    def _view(kit: str, x: float, z: float, yaw: float, tint: int = -1, rx: float = 2.5, rz: float = 2.5) -> None:
+        if _free(x, z, rx, rz):
+            put(kit, x, z, yaw, 1.0, 0.0, tint, 0.0, True)
+            _occupy(x, z)
+
+    # фильтр ЧВК (прежние 40- и 20-футовый у x −106 перенеслись на северные полосы и южный край): ещё два, на 4,5 м
+    # западнее — проходы между контейнерами узкие, по тротуарам свободно
+    put("container40", -110.5, ZA - 15.3, 0.0, 1.0, 0.0, -1, 0.0, True)
+    put("container20", -110.5, ZA + 6.6, 0.0, 1.0, 0.0, -1, 0.0, True)
+    loot(-112.5, 0.0, ZA - 9.0, "body", "common", "фильтр ЧВК: тело между контейнерами")
+    for (kit, x, dz, yaw, tint) in [("bus_city", -27.0, -10.5, 75.0, 8), ("truck", -52.0, 11.5, 100.0, 2), ("van", -176.0, 13.5, 80.0, 9),
+                                    ("truck", -131.0, -11.0, 84.0, 6), ("minibus", -88.0, 14.0, 96.0, 9)]:
+        _view(kit, x, ZA + dz, yaw, tint)
+    for (x, side) in [(-170.0, 1.0), (-140.0, 1.0), (-62.0, 1.0), (-22.0, 1.0), (-182.0, -1.0), (-100.0, -1.0), (-56.0, -1.0), (-14.0, -1.0)]:
+        _view("kiosk", x, ZA - side * (RHN + 3.0), 180.0 if side > 0 else 0.0)
+    # поворот: автобус и грузовик на внутренних полосах, контейнеры на разделительной, фургон на внешних, ларьки
+    for (kit, phi, d, dyaw, tint) in [("bus_city", 0.95, -10.0, 25.0, 9), ("truck", 0.55, -9.0, -30.0, 4), ("van", 1.35, 10.0, 40.0, 6),
+                                      ("container20", 1.18, 0.0, 0.0, -1), ("kiosk", 0.8, -(RHN + 3.0), 180.0, -1),
+                                      ("kiosk", 0.3, RHN + 3.0, 0.0, -1), ("truck", 0.2, 11.0, 15.0, 11)]:
+        x, z = n_curve_point(phi, d)
+        _view(kit, x, z, 90.0 - math.degrees(phi) + dyaw, tint)
+    # южное плечо
+    for (kit, d, z, yaw, tint) in [("bus_city", -9.0, 92.0, 25.0, 8), ("container40", 9.0, 192.0, 80.0, -1), ("truck", 10.0, 72.0, 170.0, 2),
+                                   ("truck", -8.0, 220.0, 10.0, 11), ("van", -12.0, 140.0, 4.0, 6), ("container20", -10.0, 205.0, 95.0, -1)]:
+        _view(kit, XSN + d, z, yaw, tint)
+    for (d, z) in [(-(RHN + 3.0), 80.0), (-(RHN + 3.0), 175.0), (RHN + 3.0, 110.0), (RHN + 3.0, 160.0), (RHN + 3.0, 215.0)]:
+        _view("kiosk", XSN + d, z, 90.0)
+    # ларёчные ряды поперёк тротуаров (три ларька встык, проход 2,6–2,8 м): на одном и том же тротуаре проход то у
+    # бордюра, то у фасада — взгляд вдоль тротуара упирается в ряд, а идти можно всегда
+    def _kiosk_row(arm: str, along_c: float, side: float, from_curb: bool) -> None:
+        for k in range(3):
+            dd = RHN + 1.6 + k * 3.0 if from_curb else FN - 1.6 - k * 3.0
+            if arm == "w":
+                x, z, yaw = along_c, ZA - side * dd, 90.0
+            elif arm == "c":                                          # в повороте along_c — угол phi
+                (x, z), yaw = n_curve_point(along_c, side * dd), 90.0 - math.degrees(along_c)
+            else:
+                x, z, yaw = XSN + side * dd, along_c, 0.0
+            put("kiosk", x, z, yaw, 1.0, 0.0, -1, 0.0, True)
+            _occupy(x, z)
+        if arm == "w":
+            loot(along_c + 2.2, 0.0, ZA - side * (RHN + 4.6 if from_curb else FN - 4.6), "register", "common", "ларёк: касса")
+
+    for (arm, c, side, curb) in [("s", 118.0, -1.0, False), ("s", 196.0, -1.0, True), ("s", 100.0, 1.0, True), ("s", 178.0, 1.0, False),
+                                 ("w", -50.0, 1.0, False), ("w", -80.0, -1.0, False), ("w", -175.0, -1.0, True),
+                                 ("s", 132.0, -1.0, True), ("s", 225.0, 1.0, True), ("c", 0.45, -1.0, True), ("c", 1.15, 1.0, False),
+                                 ("c", 1.05, -1.0, False)]:
+        _kiosk_row(arm, c, side, curb)
+    # площадь «Вершины» стала шире на 31 м: колонна эвакуации — автобусы, грузовики, контейнеры поста — поперёк
+    # длинных линий с поворота на восток и северо-восток
+    for (kit, x, z, yaw, tint) in [("container40", 100.0, -2.0, 0.0, -1), ("bus_city", 112.0, 11.0, 160.0, 8), ("truck", 92.0, -21.0, 70.0, -1),
+                                   ("bus_city", 78.0, -33.0, 95.0, 9), ("truck", 118.0, -24.0, 5.0, 11), ("container20", 104.0, 27.0, 90.0, -1),
+                                   ("kiosk", 58.0, -40.0, 0.0, -1), ("truck", 40.0, -52.0, 85.0, -1)]:
+        _view(kit, x, z, yaw, tint)
+    loot(97.6, 0.0, -2.0, "crate", "common", "колонна эвакуации: вещи у контейнера")
+    # фургоны и грузовики в карманах — взгляд вдоль кармана (легковые его не закрывают) рвётся через 50–80 м
+    def _pocket_view(kit: str, arm: str, side: float, c: float) -> None:
+        for dc in (0.0, 3.0, -3.0, 6.0, -6.0, 9.0, -9.0):
+            if arm == "w":
+                x, z, yaw = c + dc, ZA - side * POCKET_C, (-90.0 if side > 0 else 90.0)
+            else:
+                x, z, yaw = XSN + side * POCKET_C, c + dc, (180.0 if side > 0 else 0.0)
+            if _free(x, z, 2.6 if arm == "w" else 1.6, 1.6 if arm == "w" else 2.6):
+                put(kit, x, z, yaw + rng2.uniform(-3, 3), 1.0, 0.0, rng2.choice([2, 6, 9, 11]), 0.0, True)
+                _occupy(x, z)
+                return
+
+    for (kit, arm, side, c) in [("van", "s", -1.0, 104.0), ("truck", "s", -1.0, 168.0), ("van", "s", -1.0, 222.0),
+                                ("van", "s", 1.0, 84.0), ("truck", "s", 1.0, 136.0), ("van", "s", 1.0, 206.0),
+                                ("van", "w", 1.0, -172.0), ("truck", "w", 1.0, -92.0), ("van", "w", 1.0, -40.0),
+                                ("van", "w", -1.0, -140.0), ("truck", "w", -1.0, -66.0), ("van", "w", -1.0, -26.0)]:
+        _pocket_view(kit, arm, side, c)
+    # трансформаторные будки на разделительной (как прежняя у рекламного щита) — посреди дороги ещё одна перебивка
+    for (x, z, yaw) in [(-45.0, ZA, 0.0), (-170.0, ZA, 0.0), (XSN, 118.0, 90.0), (XSN, 196.0, 90.0), (*n_curve_point(0.62, 0.0), 0.0)]:
+        _view("ktp", x, z, yaw, -1, 1.8, 1.8)
+
+    # ---- шов на севере: переулок между автомойкой банка и стилобатом «Вершины», бизнес-центр на углу
+    SX0, SX1 = WIDEN.SEAM_X, WIDEN.SEAM_X + WIDEN.S
+    ZN_FENCE = YARD_Z0 + 0.5 - WIDEN.S                               # забор района на севере
+    LANE_X0, LANE_X1 = SX0 + 3.5, SX0 + 12.5                         # проезжая часть переулка 9 м (2 × 3,5 × 1,3)
+    LANE_Z0, LANE_Z1 = ZN_FENCE + 5.0, -58.0
+    surface("seam_lane", "road", LANE_X0, LANE_Z0, LANE_X1, LANE_Z1)
+    surface("seam_walk_w", "walk", SX0, LANE_Z0, LANE_X0, LANE_Z1, 0.0, 0.15)
+    surface("seam_walk_e", "walk", LANE_X1, LANE_Z0, LANE_X1 + 3.5, LANE_Z1, 0.0, 0.15)
+    box(LANE_X0 + 0.1, 0.075, (LANE_Z0 + LANE_Z1) * 0.5, 0.2, 0.15, LANE_Z1 - LANE_Z0, "stripe")
+    box(LANE_X1 - 0.1, 0.075, (LANE_Z0 + LANE_Z1) * 0.5, 0.2, 0.15, LANE_Z1 - LANE_Z0, "stripe")
+    BC13 = (LANE_X1 + 4.0, SX1 + 0.5, -110.0, -61.0)                 # x0, x1, z0, z1 — вплотную к стилобату
+    flats("BC_Prospekt13", "БЦ «Проспект, 13» — 9 этажей (закрыт)", ((BC13[0] + BC13[1]) * 0.5, (BC13[2] + BC13[3]) * 0.5), 9, 0,
+          0.0, (BC13[1] - BC13[0], BC13[3] - BC13[2]), 3.6, False, True, 0.0, "East", 0.0)
+    revolving_entrance((BC13[0] + BC13[1]) * 0.5, BC13[3], 0.0)
+    sign("БЦ «Проспект, 13» · вход", (BC13[0] + BC13[1]) * 0.5, 5.0, BC13[3] + 0.4, 40)
+    KEEP_CLEAR_RAW.append(((BC13[0] + BC13[1]) * 0.5 - 6.0, BC13[3], (BC13[0] + BC13[1]) * 0.5 + 6.0, BC13[3] + 5.0))
+    sign("Банковский переулок", SX0 + 1.0, 3.2, LANE_Z1 - 1.0, 38)
+    for z in range(int(LANE_Z1) - 6, int(LANE_Z0) + 4, -6):           # машины вдоль восточной обочины; у z ≈ −130 проход
+        if -137.0 < z < -123.0 or rng2.random() > 0.55:
+            continue
+        _car(LANE_X1 - 1.6 + rng2.uniform(-0.2, 0.2), z + rng2.uniform(-0.4, 0.4), (0.0 if rng2.random() < 0.5 else 180.0) + rng2.uniform(-4, 4))
+    for z in range(int(LANE_Z1) - 10, int(LANE_Z0), -24):
+        u("U12_03_single_light", LANE_X1 + 2.4, z, -90.0)
+    for z in range(int(LANE_Z1) - 4, int(LANE_Z0), -14):
+        if not (-137.0 < z < -123.0):
+            put("tree_birch", SX0 + 1.4, z, rng2.uniform(0, 360), rng2.uniform(0.8, 1.05))
+    for k in range(3):
+        u("R02_dumpster", SX0 + 1.6, LANE_Z0 + 3.0 + k * 3.4, 90.0, 1.0, 0.0, True)
+    for k in range(4):                                               # гаражи в тупике переулка
+        put("garage", LANE_X1 + 5.5 + k * 3.4, ZN_FENCE + 4.5, 180.0, 1.0, 0.0, -1, 0.0, True)
+    put("kiosk", SX0 + 2.0, LANE_Z1 + 2.5, 90.0, 1.0, 0.0, -1, 0.0, True)
+    put("container20", LANE_X0 + 1.6, -118.0, 0.0, 1.0, 0.0, -1, 0.0, True)     # контейнер под строительный мусор
+    put("van", LANE_X0 + 2.4, -86.0, 176.0, 1.0, 0.0, 9, 0.0, True)
+    for k in range(4):
+        u("U02_04_bollard", LANE_X0 + 1.0 + k * 2.3, LANE_Z1 + 0.6, 0.0)
+    loot(LANE_X1 + 7.0, 0.0, ZN_FENCE + 7.5, "crate", "common", "гаражи переулка")
+    loot(SX0 + 2.6, 0.0, LANE_Z0 + 6.0, "loose", "common", "у баков в переулке")
+    FI["stories"].append({"label": "Банковский переулок: БЦ «Проспект, 13», гаражи в тупике", "at": [LANE_X0 + 4.0, -95.0], "height": 4.0})
+
+    # ---- шов на востоке: автопарк ЧВК у лагеря эвакуации, проезд с проспекта
+    EZ0, EZ1 = CZ - WIDEN.S, CZ                                       # 23,7 … 55
+    EX0 = XSN + FN                                                    # восточный край тротуара проспекта
+    EX1 = 110.0 + WIDEN.S                                             # прежний край поля эвакуации (x 110 → 141,3)
+    surface("seam_drive", "road", EX0, 36.0, EX1, 44.0)
+    surface("seam_motorpool_n", "parking", EX0 + 2.0, EZ0 - 5.0, EX1, 36.0, 0.0, 0.05)
+    surface("seam_motorpool_s", "parking", EX0 + 2.0, 44.0, EX1, 59.0, 0.0, 0.05)
+    for k in range(4):                                               # грузовики рядом — перебивка обзора вдоль проезда
+        put("truck", EX0 + 8.0 + k * 7.5, 51.5, 180.0 + rng2.uniform(-5, 5), 1.0, 0.0, -1, 0.0, True)
+    put("armored_truck", EX0 + 12.0, 28.5, 90.0, 1.0, 0.0, -1, 0.0, True)
+    for (x, z, yaw, dy) in [(EX0 + 25.0, 27.0, 0.0, 0.0), (EX0 + 25.2, 27.1, 1.5, 2.62)]:
+        put("container20", x, z, yaw, 1.0, dy, -1, 0.0, dy == 0.0)
+    put("trailer", EX0 + 33.0, 28.0, 90.0, 1.0, 0.0, -1, 0.0, True)
+    # пост на въезде в лагерь: блоки с проездом, мешки, будка, шлагбаум
+    for k in range(3):
+        put("jersey_rw", EX1 - 1.5, 30.0 + k * 1.3, 0.0, 1.0, 0.0, -1, 0.0, True)
+        put("jersey_rw", EX1 - 1.5, 46.5 + k * 1.3, 0.0, 1.0, 0.0, -1, 0.0, True)
+    put("sandbag_post", EX1 - 4.5, 33.0, -90.0, 1.0, 0.0, -1, 0.0, True)
+    put("booth", EX1 - 4.0, 46.0, 0.0, 1.0, 0.0, -1, 0.0, True)
+    u("U07_02_barrier_arm", EX1 - 1.0, 36.5, 0.0)
+    sign("лагерь эвакуации · въезд по пропускам", EX1 - 2.0, 3.6, 34.5, 38)
+    for (x, sc) in [(EX1 + 11.0, 1.0), (EX1 + 25.0, 1.0), (EX1 + 39.0, 1.15)]:   # лагерь вырос — ещё три палатки
+        put("army_tent", x, 41.0, 90.0, sc, 0.0, -1, 0.0, True)
+    for k in range(4):
+        put("barrel", EX1 + 4.0 + (k % 2) * 0.7, 52.0 + (k // 2) * 0.7, 0.0)
+    loot(EX0 + 12.0, 0.0, 31.6, "car", "weapon", "бронемашина ЧВК в автопарке")
+    loot(EX1 + 25.0, 0.0, 43.0, "crate", "common", "палатка лагеря: вещи")
+    FI["stories"].append({"label": "автопарк ЧВК у въезда в лагерь", "at": [EX0 + 20.0, 40.0], "height": 4.0})
+
+    # ---- площадь «Вершины» стала шире: покрытие между поворотом и стилобатом
+    surface("plaza_v3", "walk", 65.0, -37.3, 91.3, -12.0, 0.0, 0.1)
+    surface("plaza_v4", "walk", 30.0, -37.3, 65.0, -31.0, 0.0, 0.1)
+
+    # ---- забор района через швы и город за ними
+    for k in range(13):
+        put("district_fence", 18.25 + k * 2.5, ZN_FENCE, fence_yaw("x", 1.0), 1.0, 0.0, -1, 0.0, False)
+        put("district_fence", 159.5 + WIDEN.S, 25.95 + k * 2.5, fence_yaw("z", -1.0), 1.0, 0.0, -1, 0.0, False)
+    building("Outside_City_N5", "", ((SX0 + SX1) * 0.5, ZN_FENCE - 20.0), (26.0, 16.0), "mass", 9, 3.0, 0.0, 0.0, "", "", 0.0, "Outside")
+    building("Outside_City_E4", "", (190.0 + WIDEN.S + 22.0, (EZ0 + EZ1) * 0.5), (16.0, 26.0), "mass", 12, 3.0, 0.0, 0.0, "", "", 0.0,
+             "Outside")
+    raw(_snap)
+
 FI["models_index"] = "res://data/urban95_models.json"
-# свободные площадки перед входами: всё, кроме бумажного мусора и самих входов (U08_*), — прочь (и укрытия ИИ там же)
+FI["kit_models"] = {k: {"model": m, "yaw": y} for k, (m, y) in KIT_MODELS.items() if m in MODEL_IDS}
+FI["models_nosolid"] = MODELS_NOSOLID
+FI["models_poles"] = MODELS_POLES
+plan["buildings_count"] = len(B)
+# расширенный проспект (владелец 2026-11-07): внешняя сторона отъезжает, полосы поперёк — до новой ширины
+WIDEN.warp_plan(plan, RAW_IDS)
+# свободные площадки перед входами: всё, кроме бумажного мусора и самих входов (U08_*), — прочь (и укрытия ИИ там же);
+# прежние площадки — перенесённые, новые — как есть
+KEEP_CLEAR = [tuple(WIDEN.warp_rect(list(r))) for r in KEEP_CLEAR] + KEEP_CLEAR_RAW
+
+
 def _clear(x: float, z: float) -> bool:
     return any(r[0] <= x <= r[2] and r[1] <= z <= r[3] for r in KEEP_CLEAR)
 
 
 FI["items"] = [it for it in FI["items"] if it[0] in LITTER or str(it[0]).startswith("m:U08_") or not _clear(it[1], it[2])]
 FI["cover"] = [c for c in FI["cover"] if not _clear(c[0], c[1])]
-FI["kit_models"] = {k: {"model": m, "yaw": y} for k, (m, y) in KIT_MODELS.items() if m in MODEL_IDS}
-FI["models_nosolid"] = MODELS_NOSOLID
-FI["models_poles"] = MODELS_POLES
-plan["buildings_count"] = len(B)
 plan["items_count"] = len(FI["items"])
 
 # ================================================================== запись
@@ -2606,8 +2993,10 @@ def tf(b: dict) -> str:
 
 # окружение — одно на блокаут и рейд
 ENV_FILE = ROOT / "scenes" / "levels" / "prospekt" / "prospekt_environment.tres"
-ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
-ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
+if not PREVIEW_DIR:
+    ENV_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ENV_FILE.write_text(LIGHT.ENV_TRES, encoding="utf-8", newline="\n")
+OUT_SCENE.parent.mkdir(parents=True, exist_ok=True)
 scene = [
     '[gd_scene format=3]',
     '[ext_resource type="Script" path="res://src/blockout/prospekt_landscape.gd" id="land"]',
@@ -2647,5 +3036,5 @@ for region in regions:
         scene.extend(lines)
 OUT_SCENE.write_text("\n\n".join(scene) + "\n", encoding="utf-8", newline="\n")
 print(json.dumps({"buildings": len(B), "items": len(FI["items"]), "cover": len(FI["cover"]),
-                  "routes": len(plan["probe_routes"]), "json": str(OUT_JSON.relative_to(ROOT)), "scene": str(OUT_SCENE.relative_to(ROOT))},
+                  "routes": len(plan["probe_routes"]), "json": str(OUT_JSON), "scene": str(OUT_SCENE)},
                  ensure_ascii=False))

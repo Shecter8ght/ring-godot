@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "fence"
+cull_mode = 2
+albedo_color = Color(0.36862746, 0.39607844, 0.3764706, 1)
+roughness = 0.9

@@ -1,3 +1,4 @@
+@tool
 extends "res://src/world/district_terrain.gd"
 ## Рельеф серого стенда «Вертолёт» (tools/heli_study.gd): карта высот, шейдер и текстуры — как у DistrictTerrain,
 ## но горы видно на 2–3 км, поэтому у каждой плитки три ступени детализации: вблизи — шаг карты, дальше — ×4 и ×16.
@@ -16,6 +17,8 @@ const HELI_SHADER: Shader = preload("res://src/blockout/heli_terrain.gdshader")
 ## Прямоугольник мира, где у плиток есть коллизия.
 @export var collision_rect: Rect2 = Rect2()
 
+var _mask_file: String = ""
+
 ## Сколько плиток собрано по ступеням (для отчёта стенда).
 var built: Dictionary = {"lod0": 0, "lod1": 0, "lod2": 0, "ground": 0}
 
@@ -32,13 +35,15 @@ func _build() -> void:
 	root.name = "_Generated"
 	add_child(root)
 	var material: ShaderMaterial = ShaderMaterial.new()
-	material.shader = HELI_SHADER
+	material.shader = _surface_shader()
 	var textures: Dictionary = terrain.get("textures", {}) as Dictionary
 	for key: String in ["albedo_array", "normal_array", "arm_array", "noise"]:
 		var path: String = String(textures.get(key, ""))
 		if ResourceLoader.exists(path):
 			material.set_shader_parameter(key, load(path))
 	var splat_file: String = String(terrain.get("splat_file", ""))
+	_mask_file = splat_file
+	_mask_texture = null
 	_splat_path = ""
 	_splat = null
 	if splat_file != "":
@@ -46,6 +51,7 @@ func _build() -> void:
 		if image:
 			_splat = image
 			material.set_shader_parameter("splat", ImageTexture.create_from_image(image))
+	_extra_textures(material, terrain)
 	material.set_shader_parameter("splat_origin", _origin)
 	material.set_shader_parameter("splat_size", Vector2(float(_cols - 1), float(_rows - 1)) * _step)
 	material.set_shader_parameter("layer_tile", PackedFloat32Array(terrain.get("layer_tiles", [3.0, 3.0, 2.5, 3.0, 4.0, 2.0])))
@@ -56,23 +62,77 @@ func _build() -> void:
 	while tz < _rows - 1:
 		var tx: int = 0
 		while tx < _cols - 1:
+			_heli_tile(root, material, tx, tz)
+			tx += tile_cells
+		tz += tile_cells
+
+
+## Плитка (tx, tz — первая клетка): ступени детализации и коллизия.
+func _heli_tile(root: Node3D, material: ShaderMaterial, tx: int, tz: int) -> void:
+	var w: int = mini(tile_cells, _cols - 1 - tx)
+	var d: int = mini(tile_cells, _rows - 1 - tz)
+	var rect: Rect2 = Rect2(_origin.x + float(tx) * _step, _origin.y + float(tz) * _step, float(w) * _step, float(d) * _step)
+	var detailed: bool = detail_rect.intersects(rect)
+	if detailed:
+		_lod_tile(root, material, tx, tz, w, d, 1, 0.0, lod_ranges.x, 6.0, true)
+		built.lod0 += 1
+	# средняя ступень: от конца подробной (или с нуля, если её у плитки нет) до начала грубой
+	_lod_tile(root, material, tx, tz, w, d, 4, lod_ranges.x if detailed else 0.0, lod_ranges.y, 18.0, true)
+	built.lod1 += 1
+	_lod_tile(root, material, tx, tz, w, d, 16, lod_ranges.y, 0.0, 60.0, false)
+	built.lod2 += 1
+	if collision_rect.intersects(rect):
+		_ground(root, tx, tz, w, d)
+		built.ground += 1
+
+
+## Кисть земли: маска — PNG без импорта (splat_file), шейдер берёт её текстурой из картинки.
+func brush_masks() -> Array[Image]:
+	var out: Array[Image] = []
+	if _splat != null:
+		out.append(_splat)
+	return out
+
+
+func brush_mask_paths() -> PackedStringArray:
+	return PackedStringArray([_mask_file])
+
+
+## Пересобрать плитки, которые задевает прямоугольник мира (после правки высот кистью); нормали
+## грубых ступеней берут соседей на 16 клеток — запас на столько же.
+func rebuild_area(area: Rect2) -> void:
+	var root: Node3D = get_node_or_null("_Generated") as Node3D
+	if root == null or _material == null:
+		_build()
+		return
+	var grown: Rect2 = area.grow(16.0 * _step)
+	var tz: int = 0
+	while tz < _rows - 1:
+		var tx: int = 0
+		while tx < _cols - 1:
 			var w: int = mini(tile_cells, _cols - 1 - tx)
 			var d: int = mini(tile_cells, _rows - 1 - tz)
 			var rect: Rect2 = Rect2(_origin.x + float(tx) * _step, _origin.y + float(tz) * _step, float(w) * _step, float(d) * _step)
-			var detailed: bool = detail_rect.intersects(rect)
-			if detailed:
-				_lod_tile(root, material, tx, tz, w, d, 1, 0.0, lod_ranges.x, 6.0, true)
-				built.lod0 += 1
-			# средняя ступень: от конца подробной (или с нуля, если её у плитки нет) до начала грубой
-			_lod_tile(root, material, tx, tz, w, d, 4, lod_ranges.x if detailed else 0.0, lod_ranges.y, 18.0, true)
-			built.lod1 += 1
-			_lod_tile(root, material, tx, tz, w, d, 16, lod_ranges.y, 0.0, 60.0, false)
-			built.lod2 += 1
-			if collision_rect.intersects(rect):
-				_ground(root, tx, tz, w, d)
-				built.ground += 1
+			if rect.intersects(grown):
+				for n: String in ["Terrain_%d_%d_s1" % [tx, tz], "Terrain_%d_%d_s4" % [tx, tz], "Terrain_%d_%d_s16" % [tx, tz],
+						"Ground_%d_%d" % [tx, tz]]:
+					var old: Node = root.get_node_or_null(n)
+					if old:
+						root.remove_child(old)
+						old.free()
+				_heli_tile(root, _material, tx, tz)
 			tx += tile_cells
 		tz += tile_cells
+
+
+## Шейдер поверхности; наследник ставит свой (земля «Санатория» — восемь грунтов 4K).
+func _surface_shader() -> Shader:
+	return HELI_SHADER
+
+
+## Добавочные карты наследника (вторая маска, яркость слоёв) — после основной маски.
+func _extra_textures(_material: ShaderMaterial, _terrain: Dictionary) -> void:
+	pass
 
 
 func _lod_tile(root: Node3D, material: ShaderMaterial, x0: int, z0: int, w: int, d: int, step: int,
