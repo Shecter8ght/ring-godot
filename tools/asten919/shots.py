@@ -1,7 +1,9 @@
 # АСТЕН-919: проверочные виды в глине (Workbench, ортография) из собранного .blend.
 #   blender --background <файл.blend> --python tools/asten919/shots.py -- <папка> [вид,…] [--res 1800] [--pose имя]
 #       [--hide имя,…] [--show коллекция,…] [--tag приставка]
-# Позы: slide_back (затвор на задержке), mag_out (магазин вынут), trigger, catch, lock (можно несколько через запятую). Свой вид: «имя:x:y:z:куда_x:куда_y:куда_z:ширина_мм».
+# Позы: slide_back (затвор на задержке), mag_out (магазин вынут), trigger, catch, lock (можно несколько через запятую).
+# Свой вид: «имя:x:y:z:куда_x:куда_y:куда_z:ширина_мм»; с девятым полем «pNN» — камера с перспективой, объектив NN мм
+# (ширина тогда только задаёт формат кадра): вид глазами стрелка вдоль прицельной линии и т. п.
 import math
 import os
 import sys
@@ -93,12 +95,17 @@ def main():
     for n in todo:
         if ":" in n:
             q = n.split(":")
-            views[q[0]] = (tuple(map(float, q[1:4])), tuple(map(float, q[4:7])), float(q[7])); n = q[0]
-        loc, tgt, w = views[n]
+            lens = float(q[8][1:]) if len(q) > 8 and q[8].startswith("p") else 0.0
+            views[q[0]] = (tuple(map(float, q[1:4])), tuple(map(float, q[4:7])), float(q[7]), lens); n = q[0]
+        loc, tgt, w = views[n][:3]
+        lens = views[n][3] if len(views[n]) > 3 else 0.0
         co.location = Vector(loc) * MM
         d = Vector(tgt) - Vector(loc)
         co.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
+        cam.type = "PERSP" if lens > 0 else "ORTHO"
         cam.ortho_scale = w * MM
+        if lens > 0:
+            cam.lens = lens; cam.sensor_width = 36.0
         sc.render.resolution_x = res
         sc.render.resolution_y = int(res * (0.62 if w >= 150 else 0.75))
         sc.render.filepath = os.path.join(out, tag + n + (("_" + pose.replace(",", "_")) if pose else "") + ".png")
