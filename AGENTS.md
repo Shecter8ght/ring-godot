@@ -779,6 +779,14 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
                                                               # пересечения деталей в позах — python -X utf8 tools/asten919/check_overlaps.py <папка полей>;
                                                               # контур рамки со снимка — trace_photo.py, наложение вида на снимок — compare.py; выдача и описание —
                                                               # E:/Models Blender/WEAPONS/АСТЕН-919 (asset-state.md)
+# АСТЕН-919, текстуры этап 1: blender --background <АСТЕН-919_геометрия_v03.blend> --factory-startup --python-exit-code 1 --python
+#   tools/asten919/tex_uv.py [-- out.blend набор,набор] (развёртка high-poly по наборам tex_sets.py: Smart UV → Minimum Stretch →
+#   укладка asset_kit.uv; ~20 мин; картинка раскладки — python -X utf8 tools/asten919/tex_uv_view.py <набор>_tris.npz <png>) → на файле
+#   развёртки: tex_geo_dump.py -- <папка geo> Magazine_Body Rear_Sight Front_Sight → python -X utf8 tools/asten919/tex_marks.py (маски в
+#   развёртку: белая обводка целика и точка мушки, цифры окошек магазина) → sp_export.py -- <ASTEN919_sp.fbx> → Painter:
+#   python -X utf8 tools/asten919/sp_run.py start; -c "print(sp_asten.create())" / "…bake()" / "…stack()" / "…export(<папка>)" (метки
+#   _project_ready / _bake_done / _stack_done / _export_done.txt — sp_run.py wait <метка>; отделки — finish-spec.json в папке модели,
+#   слот без выбора строится по кандидату) → tex_review.py -- apply <карты> <файл просмотра.blend> | shots <папка> [samples]
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
