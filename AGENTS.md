@@ -828,6 +828,14 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   asten919_mag.gltf, отчёт asten919.json) → --import → python -X utf8 tools/asten919/game_imports.py → --import; данные —
 #   python -X utf8 tools/asten919/game_data.py (название, модель, ход механики; id, характеристики и хваты прежние); иконки —
 #   icon_bake -- wpn_hg_02 mag_919_17
+# АСТЕН-919, клипы рук от первого лица (ключевые кадры; хваты правит владелец): python -X utf8 tools/asten919/clips/hand_sdf.py
+#   (поля расстояний пистолета 0,4 мм: static / slide / mag / trigger / whole → _asset_src/asten919/anim/sdf — ими меряется
+#   касание перчатки) → blender -b --factory-startup --python tools/asten919/clips/rig.py (мастер рук v14 + игровая сетка на
+#   костях ASTEN919_WeaponRig) → blender -b <ASTEN919_Rig_v01.blend> --python tools/asten919/clips/poses.py -- <позы.blend>
+#   (черновые позы-хваты действием ASTEN919_Poses: кадры 1…61) → blender -b <позы.blend> --python
+#   tools/asten919/clips/build_clips.py -- <E:/Models Blender/WEAPONS/АСТЕН-919/АСТЕН-919_руки_клипы_v01.blend> (клипы
+#   действиями ASTEN919_<Клип> и подряд на дорожке NLA; движение — таблицы в скрипте, пальцы и места кистей — из поз);
+#   после правки поз владельцем — tools\asten919\clips\rebuild.cmd; кадры для своей проверки — stills.py
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

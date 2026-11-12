@@ -28,8 +28,9 @@ ROOT = HERE.parents[2]
 sys.path.insert(0, str(HERE))
 from sdf_grid import Grid  # noqa: E402
 
-ARGS = sys.argv[sys.argv.index("--") + 1:]
-STAGE, OUT = ARGS[0], Path(ARGS[1])
+ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+STAGE = ARGS[0] if ARGS else "right"
+OUT = Path(ARGS[1]) if len(ARGS) > 1 else None
 PM = json.loads((ROOT / "_asset_src/asten919/anim/pm_grip.json").read_text(encoding="utf-8"))
 ACTION = "ASTEN919_Grip_v01"
 log = lambda *a: print("ASTEN_GRIP", *a, flush=True)  # noqa: E731
@@ -44,6 +45,8 @@ AWI = AW.inverted()
 TW = root.matrix_world.copy()                 # исходник (м) → мир
 TWI = TW.inverted()
 WHOLE = Grid.load("whole")
+SURFS = [WHOLE]            # с чем меряется касание кожи (подменяется: магазин, затвор)
+EXTRA = None               # кожа другой кисти (исходник, мм) — левая ложится поверх правой
 
 # ---- опорные места (исходник пистолета, м)
 GRIP_UP = Vector((math.sin(math.radians(22.0)), 0.0, math.cos(math.radians(22.0))))
@@ -103,17 +106,20 @@ class Skin:
         m = np.array(TWI)
         return (p @ m[:3, :3].T + m[:3, 3]) * 1000.0
 
-    def pen2(self, names, tol):
-        """Сумма квадратов проникновения кожи костей глубже tol, мм² — гладкая мера для подбора."""
-        out = 0.0
-        for n in names:
-            if n in self.local and len(self.local[n]):
-                out += float((np.maximum(0.0, -WHOLE.dist(self.src_mm(n)) - tol) ** 2).sum())
-        return out
+    def dist(self, pts_mm):
+        """Расстояние точек (исходник, мм) до поверхностей SURFS и до чужой кожи EXTRA (другая кисть), мм."""
+        d = None
+        for g in SURFS:
+            v = g.dist(pts_mm)
+            d = v if d is None else np.minimum(d, v)
+        if EXTRA is not None and len(EXTRA) and len(pts_mm):
+            e = np.sqrt(((pts_mm[:, None, :] - EXTRA[None, :, :]) ** 2).sum(-1)).min(axis=1) - 2.0
+            d = np.minimum(d, e)
+        return d
 
     def depth(self, names):
         """Наименьшее расстояние кожи костей до пистолета, мм (< 0 — внутри)."""
-        d = [WHOLE.dist(self.src_mm(n)).min() for n in names if n in self.local and len(self.local[n])]
+        d = [self.dist(self.src_mm(n)).min() for n in names if n in self.local and len(self.local[n])]
         return float(min(d)) if d else 99.0
 
 
@@ -694,4 +700,5 @@ def main():
     log("сохранено", OUT, "глубже всего, мм: кадр 1", w1, "кадр 11", w2)
 
 
-main()
+if __name__ == "__main__":
+    main()
