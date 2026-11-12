@@ -1255,6 +1255,10 @@ func weapon_action(action: String, flag: bool = false, duration: float = 0.0, ro
 			_viewmodel_rig.play_shot(rounds)
 		"reload":
 			_viewmodel_rig.play_reload(flag, duration)
+		"mag_out":
+			_viewmodel_rig.play_reload(false, duration, "out")
+		"mag_in":
+			_viewmodel_rig.play_reload(flag, duration, "in")
 		"finish_reload":
 			_viewmodel_rig.finish_reload(rounds)
 		"suppressor":

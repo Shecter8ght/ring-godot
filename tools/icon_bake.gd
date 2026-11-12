@@ -33,7 +33,10 @@ func _ready() -> void:
 func _bake(id: String) -> void:
 	var cells := ItemDb.size(id)
 	var vp := SubViewport.new()
-	vp.size = Vector2i(cells.x * PX, cells.y * PX)
+	# подробные значки (Balance.ICON_DETAIL): крупный мастер, снятый с запасом и уменьшенный фильтром Ланцоша
+	var detail: int = int(Balance.ICON_DETAIL.get(id, 1))
+	var master := Vector2i(cells.x * PX, cells.y * PX) * detail
+	vp.size = master * (Balance.ICON_DETAIL_SUPERSAMPLE if detail > 1 else 1)
 	vp.transparent_bg = true
 	vp.own_world_3d = true
 	vp.msaa_3d = Viewport.MSAA_8X
@@ -57,9 +60,7 @@ func _bake(id: String) -> void:
 	vp.add_child(cam)
 	var aabb := _aabb(model)
 	var c := aabb.get_center()
-	var dir := Vector3(-1.0, 0.1, 0.0).normalized() if side else Vector3(0.75, 0.95, 1.0).normalized()
-	if id == Metka4Model.ID:
-		dir = Vector3(-0.7, 1.2, 1.0).normalized()
+	var dir := ItemStudio.view_dir(id, side)
 	if id == DozorGear.MOUNT:
 		dir = Vector3(-0.8, 0.5, 1.0).normalized()
 	cam.look_at_from_position(c + dir * 3.0, c, Vector3.UP)
@@ -76,10 +77,17 @@ func _bake(id: String) -> void:
 	cam.size = maxf(ext.y, ext.x / aspect) * 1.08
 	var mid := (lo + hi) * 0.5
 	cam.global_position = cam.global_transform * Vector3(mid.x, mid.y, 0.0)
+	if detail > 1:
+		# подробный значок — точно по вершинам: предмет занимает клетку целиком
+		ItemStudio.fit_exact(cam, model, aspect, Balance.ICON_DETAIL_MARGIN)
 	cam.current = true
 	for i in range(4):
 		await get_tree().process_frame
 	var img := vp.get_texture().get_image()
+	if detail > 1:
+		img.convert(Image.FORMAT_RGBA8)
+		img.fix_alpha_edges()
+		img.resize(master.x, master.y, Image.INTERPOLATE_LANCZOS)
 	img.save_png(ProjectSettings.globalize_path("%s/%s.png" % [OUT, id]))
 	vp.queue_free()
 	await get_tree().process_frame

@@ -127,7 +127,12 @@ func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> 
 	var id: String = String(entry.id)
 	var cells: Vector2i = ItemDb.size(id)
 	var vp := SubViewport.new()
-	vp.size = frame if frame.x > 0 and frame.y > 0 else Vector2i(cells.x * PX, cells.y * PX)
+	# подробные предметы (Balance.ICON_DETAIL): миниатюра в клетках — во столько раз подробнее, и любой их снимок
+	# делается с запасом и показывается пересчитанным под размер на экране (ItemIcons.sized)
+	var detail: int = int(Balance.ICON_DETAIL.get(id, 1))
+	var card: bool = frame.x > 0 and frame.y > 0
+	var master: Vector2i = frame if card else Vector2i(cells.x * PX, cells.y * PX) * detail
+	vp.size = master * (Balance.ICON_DETAIL_SUPERSAMPLE if detail > 1 else 1)
 	vp.transparent_bg = true
 	vp.own_world_3d = true
 	vp.msaa_3d = Viewport.MSAA_8X
@@ -151,9 +156,7 @@ func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> 
 	var aabb: AABB = _aabb(model)
 	var c: Vector3 = aabb.get_center()
 	# как у печёных иконок: оружие и обвес — сбоку, дулом вправо, остальное — на три четверти сверху
-	var dir := Vector3(-1.0, 0.1, 0.0).normalized()
-	if not weapon and String(ItemDb.item(id).get("cat", "")) != "mod":
-		dir = Vector3(-0.7, 1.2, 1.0).normalized() if id == Metka4Model.ID else Vector3(0.75, 0.95, 1.0).normalized()
+	var dir: Vector3 = ItemStudio.view_dir(id, weapon or String(ItemDb.item(id).get("cat", "")) == "mod")
 	cam.look_at_from_position(c + dir * 3.0, c, Vector3.UP)
 	# вписать с запасом 8 %, как у печёных иконок
 	var inv: Transform3D = cam.global_transform.affine_inverse()
@@ -168,6 +171,9 @@ func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> 
 	cam.size = maxf(ext.y, ext.x / aspect) * 1.08
 	var mid: Vector3 = (lo + hi) * 0.5
 	cam.global_position = cam.global_transform * Vector3(mid.x, mid.y, 0.0)
+	if detail > 1:
+		# подробный предмет — точно по вершинам, как у его печёного значка
+		ItemStudio.fit_exact(cam, model, aspect, Balance.ICON_DETAIL_MARGIN)
 	cam.current = true
 	for i in range(3):
 		await get_tree().process_frame
@@ -179,7 +185,17 @@ func _shoot(key: String, entry: Dictionary, frame: Vector2i = Vector2i.ZERO) -> 
 	if _cache.size() >= CACHE:
 		_cache.clear()
 	# пустой кадр (у предмета нет модели) — не снимок: окно нарисует печёную иконку
-	_cache[key] = ImageTexture.create_from_image(img) if img.get_used_rect().has_area() else null
+	var shot: ImageTexture = null
+	if img.get_used_rect().has_area():
+		if detail > 1 and not card:
+			# миниатюра в клетках: запас съёмки сразу сводится к размеру мастера (карточка витрины хранится крупной)
+			img.convert(Image.FORMAT_RGBA8)
+			img.fix_alpha_edges()
+			img.resize(master.x, master.y, Image.INTERPOLATE_LANCZOS)
+		shot = ImageTexture.create_from_image(img)
+		if detail > 1:
+			shot.set_meta(ItemIcons.META_DETAIL, true)
+	_cache[key] = shot
 	for ref: WeakRef in _waiting.get(key, []):
 		var canvas: CanvasItem = ref.get_ref() as CanvasItem
 		if canvas:

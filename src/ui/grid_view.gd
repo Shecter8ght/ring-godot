@@ -172,6 +172,13 @@ func _draw() -> void:
 			draw_rect(Rect2(r.position + Vector2(3, r.size.y - 6), Vector2((r.size.x - 6) * k, 3)), Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.3, 0.2), 1.0 - k))
 		if it.has("mods") and not (it.mods as Dictionary).is_empty():
 			draw_string(_font, r.position + Vector2(4, r.size.y - 5), "+%d" % (it.mods as Dictionary).size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, LightUi.BLUE if lt else Color(0.6, 0.85, 1.0))
+		# оружие с вынутым магазином: по картинке (у пистолета пропадает одна пятка) не понять — метка в углу
+		if it.get("mag") is Dictionary and WeaponDb.is_weapon(String(it.id)) and WeaponMods.mag_state(it) == "":
+			var no_mag := "БЕЗ МАГ"
+			var no_mag_w := _font.get_string_size(no_mag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+			var no_mag_at := Vector2(maxf(r.position.x + 3.0, r.end.x - no_mag_w - 4.0), r.end.y - 8.0)
+			draw_string_outline(_font, no_mag_at, no_mag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 10, 3, halo if lt else Color(0, 0, 0, 0.8))
+			draw_string(_font, no_mag_at, no_mag, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6, 10, LightUi.tone(Color(1.0, 0.55, 0.4)) if lt else Color(1.0, 0.6, 0.45))
 		if it.get("op") is Dictionary:
 			_draw_op(r, it, it.op as Dictionary)
 		elif it.has("rounds"):
@@ -278,7 +285,9 @@ func _get_drag_data(at: Vector2) -> Variant:
 	var tex := ItemIcons.entry_icon(items[i])
 	if tex:
 		var tr := TextureRect.new()
-		tr.texture = tex
+		# подробный значок — пересчитанным под размер клеток, а не сжатым на лету
+		var fit := Vector2(tex.get_size()) * minf(p.size.x / tex.get_width(), p.size.y / tex.get_height())
+		tr.texture = ItemIcons.sized(tex, Vector2i((fit * ItemIcons.screen_scale(self)).round()))
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		tr.set_anchors_preset(Control.PRESET_FULL_RECT)

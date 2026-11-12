@@ -1163,7 +1163,9 @@ static func _label(entry: Dictionary) -> String:
 	if WeaponDb.is_weapon(id):
 		t += " · %d%%" % int(entry.get("dur", 100))
 		var mag: Dictionary = entry.get("mag", {}) if entry.get("mag") is Dictionary else {}
-		if not mag.is_empty():
+		if not mag.is_empty() and WeaponMods.mag_state(entry) == "":
+			t += " · без магазина"
+		elif not mag.is_empty():
 			t += " · маг. %d" % WeaponDb.capacity(entry)
 		if not (entry.get("mods", {}) as Dictionary).is_empty():
 			t += " · обвес: %d" % (entry.mods as Dictionary).size()

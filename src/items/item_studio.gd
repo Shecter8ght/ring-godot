@@ -47,3 +47,41 @@ static func setup(vp: SubViewport) -> void:
 	fill.rotation_degrees = Vector3(12, 40, 0)
 	fill.light_energy = 0.35
 	vp.add_child(fill)
+
+
+## Откуда снимать предмет — направление от центра модели к камере: оружие и обвесы (side) — сбоку, дулом вправо,
+## остальное — на три четверти сверху; свой ракурс — у отдельных предметов (Balance.ICON_VIEW, «Метка-4»).
+static func view_dir(id: String, side: bool) -> Vector3:
+	if Balance.ICON_VIEW.has(id):
+		return (Balance.ICON_VIEW[id] as Vector3).normalized()
+	if id == Metka4Model.ID:
+		return Vector3(-0.7, 1.2, 1.0).normalized()
+	return Vector3(-1.0, 0.1, 0.0).normalized() if side else Vector3(0.75, 0.95, 1.0).normalized()
+
+
+## Вписать модель в кадр ортокамеры точно по вершинам (габарит-коробка в наклонном ракурсе даёт лишние поля —
+## предмет выходит мелким): cam уже смотрит на модель, aspect — ширина кадра к высоте, margin — запас (1.04 — 4 %).
+## Скрытая деталь магазина считается тоже — размер ствола в клетке не прыгает, когда магазин вынут. false — сеток нет.
+static func fit_exact(cam: Camera3D, model: Node3D, aspect: float, margin: float) -> bool:
+	var inv: Transform3D = cam.global_transform.affine_inverse()
+	var lo := Vector3(INF, INF, INF)
+	var hi := -lo
+	for n: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null or String(mi.name).begins_with("Laser"):
+			continue
+		var hidden_mag: bool = not mi.visible and String(mi.get_meta("part", "")) == "mag"
+		if not mi.is_visible_in_tree() and not hidden_mag:
+			continue
+		var to_cam: Transform3D = inv * mi.global_transform
+		for v: Vector3 in mi.mesh.get_faces():
+			var p: Vector3 = to_cam * v
+			lo = lo.min(p)
+			hi = hi.max(p)
+	if lo.x > hi.x:
+		return false
+	var ext: Vector3 = hi - lo
+	cam.size = maxf(ext.y, ext.x / aspect) * margin
+	var mid: Vector3 = (lo + hi) * 0.5
+	cam.global_position = cam.global_transform * Vector3(mid.x, mid.y, 0.0)
+	return true

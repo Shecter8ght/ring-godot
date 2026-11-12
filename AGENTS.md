@@ -829,6 +829,13 @@ python tools/import_weapon_model.py pm_highpoly_v5          # проверенн
 python tools/import_weapon_model.py glock17_gen5            # прежний Glock 17 Gen5 (в игре заменён АСТЕН-919; из его файла — модели ремонтных деталей): дерево, PBR, размеры, бюджеты, CREDITS
 tools/godot.cmd --headless res://tools/glock_test.tscn        # АСТЕН-919 (wpn_hg_02): детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом, гайка резьбы прячется под глушителем
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # АСТЕН-919 (wpn_hg_02): хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
+tools/godot.cmd --windowed --resolution 1920x1080 res://tools/icon_detail_shots.tscn # подробные значки (Balance.ICON_DETAIL — пистолет АСТЕН-919 и обойма):
+                                                              # мастер 384 точки на клетку, показ пересчитан под размер на экране (ItemIcons.sized); сетка рюкзака,
+                                                              # слот, карточки торговца, строка конструктора, метка «БЕЗ МАГ» → docs/screens/icon_detail*.png;
+                                                              # перепечь: res://tools/icon_bake.tscn -- wpn_hg_02 mag_919_17 (с окном), затем --import
+tools/godot.cmd --headless res://tools/hand_mag_test.tscn    # обойма оружия в руках из окна рюкзака (Balance.HAND_MAG; пистолеты с ригом — ПМ, АСТЕН-919):
+                                                              # «Вынуть обойму» — руки вынимают, предмет в рюкзак по окончании движения; магазин на оружие — вставить
+                                                              # (пустая шахта, с досылом на задержке) или перезарядка этим магазином; отмена, руки заняты, полный рюкзак
 tools/godot.cmd --headless res://tools/export_weapon_refs.tscn -- "out=<папка>" # все стволы игры (и ГРАНЬ-15 с обвесами под левую руку) в GLB — образцы для хватов в Blender
 tools/godot.cmd --headless res://tools/build_test.tscn       # сборка деревом (WeaponBuild): старый угловой → кронштейн, пазы 20 мм, «занято»/«закроет прицел», кронштейн снимается с прицелом, линии прицелов
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # снимки сборок: кронштейн 45° справа/слева, проставка, поворотный; docs/screens/build_*.png

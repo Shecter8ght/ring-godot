@@ -68,6 +68,10 @@ func _ready() -> void:
 	await _fp("ads", true)
 	await _fp("reload_partial_mag_out", false, "reload", mag_out)
 	await _fp("reload_partial_mag_in", false, "reload", mag_in)
+	# обойма из окна рюкзака: «вынуть» (середина и конец — рука уходит без магазина) и «вставить»
+	await _fp("hand_mag_out", false, "reload:out", 0.55)
+	await _fp("hand_mag_out_end", false, "reload:out", 0.9)
+	await _fp("hand_mag_in", false, "reload:in", 0.35)
 	await _fp("empty_locked", false, "", 0.0, true)
 	await _fp("reload_empty_charge", false, "reload", charge, true)
 	await _model("model_side", Vector3(-0.45, 0.035, 0.0))
@@ -156,7 +160,8 @@ func _fp(stage: String, ads: bool, action_name: String = "", progress: float = 0
 	_rig.set_ammo_state(0 if empty else 5)
 	_rig.set_suppressed(suppressed)
 	if action_name != "":
-		_rig.pose_action(action_name, progress, empty)
+		var action_parts: PackedStringArray = action_name.split(":")
+		_rig.pose_action(action_parts[0], progress, empty, action_parts[1] if action_parts.size() > 1 else "")
 	_weapon.rotation.y = PI
 	_weapon.position = Balance.FPS_HIP_POSE + _rig.view_offset()
 	_weapon.basis *= Basis.from_euler(_rig.view_rotation_degrees() * (PI / 180.0))

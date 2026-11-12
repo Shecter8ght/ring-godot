@@ -415,6 +415,50 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	return [String(r[2]), old]
 
 
+## Магазин из сетки role[idx] — в оружие в слоте slot, в руках владельца (хост, по окончании движения рук): сначала —
+## состояние владельца, потом смена (Gear.fit) и досыл, если патронник пуст. Старый магазин — туда же, откуда взят
+## новый (карман, буфер), иначе как у перезарядки: сумка сброса → рюкзак → свободный подсумок. "" — сделано.
+func hand_mag_insert(slot: String, st: Dictionary, role: String, idx: int, mag_id: String) -> String:
+	if not equipment.has(slot) or not _weapon_state_matches(equipment[slot], st):
+		return "Оружие уже изменилось"
+	if not role in ["backpack", "pocket", "buffer", "rig", "dump"]:
+		return "Отсюда магазин в оружие не вставить"
+	apply_weapon_state(slot, st)
+	var eq := equipment.duplicate(true)
+	var bag: Array = items.duplicate(true)
+	var side: Array = pocket.duplicate(true) if role == "pocket" else (buffer.duplicate(true) if role == "buffer" else [])
+	var from: Array = bag if role == "backpack" else (ItemDb.rig_list(eq, role) if role in ["rig", "dump"] else side)
+	if idx < 0 or idx >= from.size() or String((from[idx] as Dictionary).get("id", "")) != mag_id or not (from[idx] as Dictionary).has("rounds"):
+		return "Магазина уже нет на месте"
+	var r: Array = Gear.fit(eq[slot], from[idx], "")
+	if String(r[2]) != "":
+		return "Не встаёт: " + String(r[2])
+	ItemDb.remove_at(from, idx, 1)
+	var fitted: Dictionary = r[0]
+	Gear.chamber_round(fitted)
+	eq[slot] = fitted
+	var old: Dictionary = r[1]
+	if not old.is_empty():
+		for key: String in ["x", "y", "r"]:
+			old.erase(key)
+		var placed: bool = role in ["pocket", "buffer"] and ItemDb.add_to(side, old, grid_of(role)) > 0
+		if not placed and ItemDb.rig_grid(eq, "dump") != Vector2i.ZERO:
+			placed = ItemDb.add_to(ItemDb.rig_list(eq, "dump"), old, ItemDb.rig_grid(eq, "dump")) > 0
+		if not placed:
+			placed = ItemDb.add_to(bag, old, ItemDb.bag_grid(eq)) > 0
+		if not placed and ItemDb.rig_grid(eq, "rig") != Vector2i.ZERO:
+			placed = ItemDb.rig_add(eq, ItemDb.rig_list(eq, "rig"), old) > 0
+		if not placed:
+			return "Некуда положить старый магазин"
+	items = bag
+	if role == "pocket":
+		pocket = side
+	elif role == "buffer":
+		buffer = side
+	equipment = eq
+	return ""
+
+
 ## One cartridge, committed at the end of the hand animation. A live round is
 ## returned before replacing its type; failure leaves both inventories intact.
 func _reload_signal(slot: String, state: Dictionary) -> Array:

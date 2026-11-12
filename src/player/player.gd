@@ -1576,6 +1576,10 @@ func _combat(delta: float) -> void:
 		return
 	fire_timer -= delta
 	fire_mode_switch_t = maxf(0.0, fire_mode_switch_t - delta)
+	# обойма из окна рюкзака: руки вынимают / вставляют её и при открытом окне
+	if not _pm_action.is_empty() and String(_pm_action.kind) in ["mag_out", "mag_in"]:
+		_tick_hand_mag(delta)
+		return
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or ui_blocked():
 		_cancel_grenade_prepare()
@@ -1995,6 +1999,10 @@ func _weapon_action(action: String, flag: bool = false, duration: float = 0.0, r
 				_weapon_rig.play_shot(rounds)
 			"reload":
 				_weapon_rig.play_reload(flag, duration)
+			"mag_out":
+				_weapon_rig.play_reload(false, duration, "out")
+			"mag_in":
+				_weapon_rig.play_reload(flag, duration, "in")
 			"finish_reload":
 				_weapon_rig.finish_reload(rounds)
 			"suppressor":
@@ -2049,6 +2057,79 @@ func toggle_suppressor() -> bool:
 		"state": _ws_state(weapon_slot), "install": not remove, "remaining": duration, "sent": false}
 	_weapon_action("suppressor", not remove, duration)
 	return true
+
+
+## Обойму оружия в слоте slot можно вынимать и вставлять руками прямо из окна рюкзака: оно в руках у своего игрока,
+## со снаряжением, у ствола риг с фазами перезарядки и патронник (пистолеты: ПМ, АСТЕН-919). Остальное оружие — как
+## раньше, без движения рук.
+func hand_mag_ready(slot: String) -> bool:
+	return is_local() and loadout_mode and slot != "" and slot == weapon_slot and weapon_id != "" and not grenade_equipped \
+		and _has_chamber(weapon_id) and not is_signal_launcher() and (WeaponDb.weapon(weapon_id).get("rig", {}) as Dictionary).has("reload") \
+		and not WeaponDb.weapon(weapon_id).has("internal_mag")
+
+
+func _hand_mag_busy() -> bool:
+	return not health.alive or is_downed() or reload_timer > 0.0 or not _pm_action.is_empty()
+
+
+## «Вынуть обойму» у оружия в руках: руки вынимают магазин, по окончании хост кладёт его в рюкзак. "" — начато,
+## иначе — почему нет.
+func hand_mag_eject() -> String:
+	if not hand_mag_ready(weapon_slot):
+		return "Оружие не в руках"
+	if _hand_mag_busy():
+		return "Руки заняты"
+	if mag_out():
+		return "Магазина в оружии нет"
+	if _ws_dirty:
+		_send_ws(weapon_slot)
+	var duration: float = float(spec().reload) * float(Balance.HAND_MAG.out_k)
+	_pm_action_seq += 1
+	_pm_action = {"kind": "mag_out", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
+		"state": _ws_state(weapon_slot), "remaining": duration, "sent": false}
+	mag_inspect = false
+	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
+	_weapon_action("mag_out", false, duration)
+	return ""
+
+
+## Магазин из сетки role[idx] своего инвентаря — в оружие в руках: в пустую шахту — вставить, вместо стоящего —
+## перезарядка этим магазином (старый уходит в рюкзак). Патронник пуст — с досылом. "" — начато, иначе — почему нет.
+func hand_mag_insert(role: String, idx: int) -> String:
+	if not hand_mag_ready(weapon_slot):
+		return "Оружие не в руках"
+	if _hand_mag_busy():
+		return "Руки заняты"
+	var list: Array = inventory.list_of(role)
+	if not role in ["backpack", "pocket", "buffer", "rig", "dump"] or idx < 0 or idx >= list.size():
+		return "Отсюда магазин в оружие не вставить"
+	var item: Dictionary = list[idx]
+	if not item.has("rounds") or not WeaponDb.mag_fits(weapon_id, String(item.id)):
+		return "Магазин не подходит"
+	if _ws_dirty:
+		_send_ws(weapon_slot)
+	var specification: Dictionary = spec()
+	var state: Dictionary = _ws_state(weapon_slot)
+	var swap: bool = not mag_out()
+	# патронов нет ни в стволе, ни в магазине — затвор на задержке: новый магазин досылают
+	var charge: bool = ammo <= 0 and int(item.get("rounds", 0)) > 0
+	var duration: float = float(specification.get("reload_empty", specification.reload)) if charge else float(specification.reload)
+	if not swap:
+		duration *= float(Balance.HAND_MAG.in_k)
+	_pm_action_seq += 1
+	_pm_action = {"kind": "mag_in", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id, "state": state,
+		"role": role, "idx": idx, "mag_id": String(item.id), "remaining": duration, "sent": false}
+	mag_inspect = false
+	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
+	_weapon_action("reload" if swap else "mag_in", charge, duration)
+	return ""
+
+
+## Движение рук с обоймой идёт своим временем (и при открытом рюкзаке); кончилось — перенос предметов у хоста.
+func _tick_hand_mag(delta: float) -> void:
+	_pm_action.remaining = float(_pm_action.remaining) - delta
+	if float(_pm_action.remaining) <= 0.0 and not bool(_pm_action.get("sent", false)):
+		_commit_pm_action()
 
 
 func _tick_suppressor(delta: float) -> void:
@@ -2153,6 +2234,19 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 				Gear.chamber_round(fresh)
 			Gear._bump(fresh)
 			sandbox_weapons[slot] = fresh
+	elif kind == "mag_out":
+		if not loadout_mode or not _has_chamber(wid):
+			return {"error": "Магазин этого оружия так не вынимают"}
+		inventory.apply_weapon_state(slot, state)
+		if not inventory.strip_equipped(slot, "mag"):
+			return {"error": "Некуда положить магазин — освободи место в рюкзаке"}
+	elif kind == "mag_in":
+		if not loadout_mode or not _has_chamber(wid):
+			return {"error": "Магазин в это оружие так не вставляют"}
+		var mag_error: String = inventory.hand_mag_insert(slot, state, String(request.get("role", "")),
+			int(request.get("idx", -1)), String(request.get("mag_id", "")))
+		if mag_error != "":
+			return {"error": mag_error}
 	elif kind == "signal_shot":
 		return _host_signal_shot(slot, base, request)
 	elif kind == "suppressor":
@@ -2231,7 +2325,7 @@ func _accept_pm_result(sequence: int, result: Dictionary) -> void:
 	weapon_mods = (weapon_entry().get("mods", {}) as Dictionary).duplicate(true)
 	if _ws.has(weapon_slot):
 		_ws[weapon_slot].jam = false
-	if action == "reload":
+	if action in ["reload", "mag_out", "mag_in"]:
 		_weapon_action("finish_reload", false, 0.0, ammo)
 	elif action == "signal_shot":
 		# The host broadcasts the accepted visual shot once to all scene peers.

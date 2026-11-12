@@ -25,6 +25,12 @@ var _visual: Node3D
 var _target: Marker3D
 var _arms: Node3D
 var _rounds: Array[Node3D] = []
+## Часть перезарядки, которую показывает действие «reload»: "" — вся, "out" — только вынуть, "in" — только вставить.
+var _reload_part: String = ""
+## Корпус магазина (первая сетка детали Magazine вне патронов): спрятан — магазина в оружии нет.
+var _mag_body: MeshInstance3D
+## Сетки спрятанного магазина, показанные на время «вставить».
+var _mag_revealed: Array[MeshInstance3D] = []
 var _round_rest: Array[bool] = []
 var _ammo: int = 1
 var _capacity: int = 0
@@ -82,6 +88,10 @@ func configure(id: String, weapon: Dictionary, imported: Node3D, lod: int) -> vo
 	if magazine:
 		_mark_part(magazine, "mag")
 		var rounds: Node3D = magazine.find_child("Rounds", true, false) as Node3D
+		for child: Node in magazine.find_children("*", "MeshInstance3D", true, false):
+			if rounds == null or not rounds.is_ancestor_of(child):
+				_mag_body = child as MeshInstance3D
+				break
 		if rounds:
 			for child: Node in rounds.get_children():
 				if child is Node3D:
@@ -207,15 +217,20 @@ func play_shot(rounds_left: int) -> void:
 	_apply_pose()
 
 
-func play_reload(empty: bool, duration: float) -> void:
+## part_only — часть перезарядки (обойма из окна рюкзака): "" — вся, "out" — только вынуть магазин (к концу его нет,
+## рука вернулась), "in" — только вставить в пустую шахту (с досылом, если empty).
+func play_reload(empty: bool, duration: float, part_only: String = "") -> void:
 	cancel_action()
-	_empty_reload = empty
+	_empty_reload = empty and part_only != "out"
+	_reload_part = part_only
+	if part_only == "in":
+		_reveal_magazine()
 	_begin("reload", duration)
-	_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(empty))
+	_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(_empty_reload))
 	if not _reload_sound_marks.is_empty():
 		for slot: String in _reload_sound_marks:
 			if bool(_reload_sound_marks[slot].get("enabled", true)):
-				_queue_sound(slot, float(_reload_sound_marks[slot].at))
+				_queue_reload_sound(slot, float(_reload_sound_marks[slot].at))
 		_apply_pose()
 		return
 	var phases: Dictionary = _config.get("reload", {})
@@ -226,11 +241,56 @@ func play_reload(empty: bool, duration: float) -> void:
 		_queue_sound("charge", float(phases.get("cock_end", 0.93)))
 		_apply_pose()
 		return
-	_queue_sound("mag_out", float(phases.get("mag_out", 0.0)))
-	_queue_sound("mag_in", float(phases.get("mag_in", 1.0)))
-	if empty:
-		_queue_sound("charge", float(phases.get("charge", 1.0)))
+	_queue_reload_sound("mag_out", float(phases.get("mag_out", 0.0)))
+	_queue_reload_sound("mag_in", float(phases.get("mag_in", 1.0)))
+	if _empty_reload:
+		_queue_reload_sound("charge", float(phases.get("charge", 1.0)))
 	_apply_pose()
+
+
+## Звук фазы полной перезарядки — в свою долю показанной части; фаза вне части не звучит.
+func _queue_reload_sound(slot: String, at: float) -> void:
+	var phases: Dictionary = _config.get("reload", {})
+	var hidden_at: float = float(phases.get("mag_hidden", phases.get("mag_out", 0.0)))
+	match _reload_part:
+		"out":
+			if at <= hidden_at and hidden_at > 0.0:
+				_queue_sound(slot, at / hidden_at * float(Balance.HAND_MAG.out_hold))
+		"in":
+			if at >= float(phases.get("mag_new", hidden_at)) and hidden_at < 1.0:
+				_queue_sound(slot, (at - hidden_at) / (1.0 - hidden_at))
+		_:
+			_queue_sound(slot, at)
+
+
+## Доля полной перезарядки, которую показывает действие в момент shown (0…1): у части — свой отрезок.
+func _reload_phase(shown: float) -> float:
+	var phases: Dictionary = _config.get("reload", {})
+	var hidden_at: float = float(phases.get("mag_hidden", phases.get("mag_out", 0.0)))
+	match _reload_part:
+		"out":
+			return hidden_at * _ramp(shown, 0.0, float(Balance.HAND_MAG.out_hold))
+		"in":
+			return lerpf(hidden_at, 1.0, shown)
+	return shown
+
+
+## Магазина на модели нет (оружие собрано с пустой шахтой — WeaponMods.set_magazine спрятал его сетки).
+func _magazine_absent() -> bool:
+	return is_instance_valid(_mag_body) and not _mag_body.visible
+
+
+## На время «вставить»: сетки спрятанного магазина показываются; отмена и конец действия прячут их обратно —
+## модель с пустой шахтой лежит в кэше и должна остаться такой.
+func _reveal_magazine() -> void:
+	var magazine: Node3D = part("Magazine")
+	if magazine == null:
+		return
+	for child: Node in magazine.find_children("*", "MeshInstance3D", true, false):
+		var mesh: MeshInstance3D = child as MeshInstance3D
+		if not mesh.visible and not _rounds.has(mesh):
+			mesh.visible = true
+			_mag_revealed.append(mesh)
 
 
 func reload_recording(slot: String) -> AudioStream:
@@ -256,6 +316,11 @@ func play_suppressor(install: bool, duration: float = -1.0) -> void:
 func cancel_action() -> void:
 	_running = false
 	action = ""
+	_reload_part = ""
+	for mesh: MeshInstance3D in _mag_revealed:
+		if is_instance_valid(mesh):
+			mesh.visible = false
+	_mag_revealed.clear()
 	_elapsed = 0.0
 	_duration = 0.0
 	_events.clear()
@@ -265,10 +330,13 @@ func cancel_action() -> void:
 
 
 ## Детерминированная поза для снимков и тестов; не проигрывает звуки и не меняет инвентарь.
-func pose_action(action_name: String, progress: float, empty: bool = false) -> void:
+func pose_action(action_name: String, progress: float, empty: bool = false, part_only: String = "") -> void:
 	cancel_action()
 	action = action_name
-	_empty_reload = empty
+	_empty_reload = empty and part_only != "out"
+	_reload_part = part_only
+	if part_only == "in":
+		_reveal_magazine()
 	_install = not _suppressed
 	_duration = 1.0
 	_elapsed = clampf(progress, 0.0, 1.0)
@@ -352,7 +420,8 @@ func _apply_pose() -> void:
 	var suppressor: Node3D = part("Suppressor")
 	if suppressor:
 		suppressor.visible = _suppressed
-	_show_rounds(maxi(0, _ammo - _chamber_capacity))
+	# пустая шахта: патронов магазина нет (иначе висели бы в рукояти — видно в окне затвора на задержке)
+	_show_rounds(0 if _magazine_absent() else maxi(0, _ammo - _chamber_capacity))
 	_weight = 0.0
 	if _cocked:
 		_rotate_part("Hammer", _vector(_config.get("hammer_axis", [1, 0, 0])), float(_config.get("hammer_cocked_deg", 0.0)))
@@ -414,8 +483,15 @@ func _pose_shot(progress: float) -> void:
 	_rotate_part("SlideStop", Vector3.RIGHT, float(_config.get("slide_stop_angle_deg", 0.0)) * (recoil if _locked else 0.0))
 
 
-func _pose_reload(progress: float) -> void:
+func _pose_reload(shown: float) -> void:
 	var phases: Dictionary = _config.get("reload", {})
+	# часть перезарядки («вынуть» / «вставить») показывает свой отрезок тех же фаз
+	var progress: float = _reload_phase(shown)
+	var hand_k: float = 1.0
+	if _reload_part == "out":
+		hand_k = 1.0 - _ramp(shown, float(Balance.HAND_MAG.out_hold), 1.0)
+	elif _reload_part == "in":
+		hand_k = _ramp(shown, 0.0, float(Balance.HAND_MAG.in_lead))
 	var out_at: float = float(phases.get("mag_out", 0.0))
 	var hidden_at: float = float(phases.get("mag_hidden", out_at))
 	var new_at: float = float(phases.get("mag_new", hidden_at))
@@ -428,10 +504,10 @@ func _pose_reload(progress: float) -> void:
 		var amount: float = _ramp(progress, catch_at, hidden_at) if progress < new_at else 1.0 - _ramp(progress, new_at, in_at)
 		_move_part("Magazine", extraction * amount)
 		magazine.visible = not (progress >= hidden_at and progress < new_at)
-		if progress >= new_at:
+		if progress >= new_at and not _magazine_absent():
 			_show_rounds(_capacity)
 		var target_at: Transform3D = _relative_transform(magazine, self)
-		_hand_pose(target_at, _hand_offset("magazine"), _ramp(progress, 0.0, out_at) * (1.0 - _ramp(progress, in_at, 1.0)))
+		_hand_pose(target_at, _hand_offset("magazine"), _ramp(progress, 0.0, out_at) * (1.0 - _ramp(progress, in_at, 1.0)) * hand_k)
 	if _empty_reload:
 		var charge_at: float = float(phases.get("charge", 1.0))
 		var charge_end: float = float(phases.get("charge_end", 1.0))

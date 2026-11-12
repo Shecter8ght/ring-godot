@@ -429,6 +429,12 @@ func _build_equipment(me: Player) -> void:
 			if idx >= list.size():
 				return
 			var iid := String(list[idx].id)
+			# магазин на оружие в руках: руки вставляют его (в пустую шахту) или меняют (перезарядка этим магазином)
+			if (list[idx] as Dictionary).has("rounds") and src.role != "loot" and me.hand_mag_ready(ws) and WeaponDb.mag_fits(me.weapon_id, iid):
+				var hand_why: String = me.hand_mag_insert(src.role, idx)
+				if hand_why != "":
+					Raid.current.notify(hand_why)
+				return
 			if not WeaponDb.attachment(iid).is_empty():
 				var mount := WeaponDb.free_mount_for(me.inventory.equipment.get(ws, {}), iid)
 				var why := Profile.mod_block(iid, mount)
@@ -765,7 +771,14 @@ func _slot_menu(me: Player, slot: String, at: Vector2) -> void:
 	for p in Gear.parts(e):
 		var part := String(p[1])
 		names.append(String(p[0]))
-		acts.append(func() -> void: Raid.current.request_strip("equip:" + slot, -1, part))
+		if part == "mag" and me.hand_mag_ready(slot):
+			# оружие в руках: обойму вынимают руками, предмет уйдёт в рюкзак по окончании движения
+			acts.append(func() -> void:
+				var hand_why: String = me.hand_mag_eject()
+				if hand_why != "":
+					Raid.current.notify(hand_why))
+		else:
+			acts.append(func() -> void: Raid.current.request_strip("equip:" + slot, -1, part))
 	_popup(at, names, acts)
 
 
