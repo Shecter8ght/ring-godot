@@ -115,6 +115,8 @@ func _ready() -> void:
 		_add_item(raw)
 	for b: Dictionary in add.get("buildings", []):
 		_add_building(b)
+	for l: Dictionary in add.get("ladders", []):
+		_add_ladder(l)
 
 	var packed: PackedScene = PackedScene.new()
 	var err: int = packed.pack(_root)
@@ -286,6 +288,21 @@ func _add_building(b: Dictionary) -> void:
 	parent.add_child(node, true)
 	node.owner = _root
 	_stats["добавлено зданий"] += 1
+
+
+## Вертикальная лестница (scenes/world/ladder.tscn) в области South: {name, at: [x, y, z], yaw, height}. Низ — на полу,
+## лезут со стороны +Z лицом к −Z; yaw поворачивает вокруг Y. Узел — экземпляр сцены (внутренности в .tscn не пишутся).
+func _add_ladder(l: Dictionary) -> void:
+	var parent: Node3D = _folder(_root.get_node("South") as Node3D, "Лестницы-скобы")
+	var node: Node3D = (load("res://scenes/world/ladder.tscn") as PackedScene).instantiate() as Node3D
+	node.name = String(l.name)
+	node.set("height", float(l.height))
+	var at: Array = l.at
+	node.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(l.get("yaw", 0.0)))), Vector3(float(at[0]), float(at[1]), float(at[2])))
+	node.set_meta(META, _stage)
+	parent.add_child(node, true)
+	node.owner = _root
+	_stats["добавлено лестниц"] = int(_stats.get("добавлено лестниц", 0)) + 1
 
 
 func _folder_of(kit: String) -> String:

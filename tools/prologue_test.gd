@@ -284,13 +284,13 @@ func _to_extraction(no_packet: bool) -> void:
 	_check("дверь в коридор — у тамбура", not door.is_empty() and (door[0] as Node3D).global_position.distance_to(Vector3(-64.3, 0, 51.2)) < 2.0,
 		str((door[0] as Node3D).global_position if not door.is_empty() else Vector3.INF))
 	for p: Vector3 in [Vector3(-96, 0.1, 50), Vector3(-67, 0.1, 50.6), Vector3(-63.2, 0.1, 53), Vector3(-63.2, 0.1, 60), Vector3(-63.2, 0.1, 67),
-			Vector3(-63.2, 0.1, 74), Vector3(-63.2, 0.1, 80.5)]:
+			Vector3(-63.2, 0.1, 74), Vector3(-63.2, 0.1, 80.5), Vector3(-67.0, 0.1, 84.0), Vector3(-68.0, 0.1, 92.0), Vector3(-67.0, 0.1, 100.8)]:
 		await _tp(p)
 		await get_tree().create_timer(0.6).timeout
-	_look_at(Vector3(-63.2, 1.0, 84.0))
+	_look_at(Vector3(-72.0, 1.0, 100.8))
 	await get_tree().create_timer(0.5).timeout
 	await _shot("prologue_corridor")
-	await _tp(Vector3(-63.2, 0.1, 83.4))
+	await _tp(Vector3(-72.5, 0.1, 100.8))
 	await _wait(func() -> bool: return _oid() == "dock", 4.0)
 	_check("вошёл в склад коридором — цель «у ворот рампы»", _oid() == "dock", _oid())
 	_check("в зале тихо: двое не в бою", _hand_ai().all(func(m: Marauder) -> bool: return not m.name.begins_with("Prologue_Hall") or m.state != Marauder.State.COMBAT))
@@ -308,7 +308,7 @@ func _to_extraction(no_packet: bool) -> void:
 	_check("убит — цель «во двор через рампу»", _oid() == "gate", _oid())
 	_check("рация: «Жив? Забери, что у него есть…»", _heard("Жив?"))
 	var gate := get_tree().current_scene.get_node("Gameplay/Yarus_RampGate") as RollGate
-	await _tp(Vector3(-102.0, 0.1, 86.6))
+	await _tp(Vector3(-98.0, 0.1, 116.6))
 	await _frames(3)
 	_check("засов — только изнутри", gate.can_use())
 	gate.request_use()
@@ -321,10 +321,10 @@ func _to_extraction(no_packet: bool) -> void:
 			Raid.current.request_drop_entry("backpack", i)
 		await _frames(4)
 		_check("пакет бросил", not me.inventory.has("tutorial_packet"))
-	await _tp(Vector3(-102.0, 0.1, 92.0))
+	await _tp(Vector3(-98.0, 0.1, 123.0))
 	await _wait(func() -> bool: return _oid() == "calitka", 4.0)
 	_check("во дворе — «через калитку»", _oid() == "calitka", _oid())
-	await _tp(Vector3(-58.5, 0.1, 97.5))
+	await _tp(Vector3(-58.5, 0.1, 128.0))
 	await _wait(func() -> bool: return _oid() == "wagons", 4.0)
 	_check("калитка — «сквером к путям», рация", _oid() == "wagons" and _heard("Иди сквером к путям"))
 	await _tp(Vector3(36.5, 0.2, 205.0))
@@ -422,7 +422,7 @@ func _host() -> void:
 	me.ammo_check_text = "полный"
 	me.ammo_check_t = 2.0
 	await _wait(func() -> bool: return _oid() == "warehouse", 6.0)
-	await _tp(Vector3(-63.2, 0.1, 83.4))
+	await _tp(Vector3(-72.5, 0.1, 100.8))
 	await _wait(func() -> bool: return _oid() == "dock", 6.0)
 	var dock := _ai("Prologue_Dock")
 	while dock and dock.state != Marauder.State.DEAD:
@@ -431,7 +431,7 @@ func _host() -> void:
 	await _wait(func() -> bool: return _oid() == "gate", 6.0)
 	var gate := get_tree().current_scene.get_node("Gameplay/Yarus_RampGate") as RollGate
 	gate._use(1)
-	for p: Vector3 in [Vector3(-102, 0.1, 92), Vector3(-58.5, 0.1, 97.5), Vector3(36.5, 0.2, 205), Vector3(77.19, 0.2, 244)]:
+	for p: Vector3 in [Vector3(-98, 0.1, 123), Vector3(-58.5, 0.1, 128), Vector3(36.5, 0.2, 205), Vector3(77.19, 0.2, 244)]:
 		await _tp(p)
 		await get_tree().create_timer(1.5).timeout
 	_check("кооп: цели до эвакуации пройдены хостом", _oid() == "extract", _oid())

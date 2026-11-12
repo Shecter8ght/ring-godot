@@ -262,7 +262,11 @@ func _verify() -> void:
 		var clear: bool = walker.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 		_check("Безопасная точка: " + String(loc.label), clear and walker.is_on_floor(), {"position": str(walker.global_position)})
 	# подходы: пешеход идёт по физике; открытые куски — по укрытиям наполнения и постройкам
+	# PROSPEKT_ROUTES=id,id — прогнать только эти маршруты (отладка пути); PROSPEKT_TRACE=1 — печатать высоту на каждой точке
+	var only_routes: PackedStringArray = OS.get_environment("PROSPEKT_ROUTES").split(",", false)
 	for route: Dictionary in plan.probe_routes:
+		if not only_routes.is_empty() and not (String(route.id) in only_routes):
+			continue
 		var path: Array[Vector3] = []
 		for p: Array in route.points:
 			path.append(Vector3(float(p[0]), 0.1, float(p[1])))
@@ -355,6 +359,8 @@ func _walk_path(path: Array[Vector3], sprint: bool) -> bool:
 			delta.y = 0.0
 			if delta.length() < 0.25:
 				reached = true
+				if OS.get_environment("PROSPEKT_TRACE") == "1":
+					print("prospekt_study: точка %s, y %.2f" % [str(target), walker.global_position.y])
 				break
 			if delta.length() > previous - 0.001:
 				stalled += 1

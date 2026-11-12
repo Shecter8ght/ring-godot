@@ -1685,7 +1685,16 @@ def plan_data_s2_1b() -> None:
     print("  данные: выходы «Пролом» и «По путям» переехали, маршруты ring_deck и under_ring добавлены")
 
 
-STAGES = {"s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ вторая очередь, этап 2: «Ярус» (tools/prospekt_s2_2.py)
+BASE_REV_S2C = "4c67e071"         # снимок плана после этапа 1б
+
+
+def stage_s2_2_yarus() -> Patch:
+    import prospekt_s2_2 as Y  # noqa: E402
+    return Y.build(Patch("s2_2_yarus", BASE_REV_S2C))
+
+
+STAGES = {"s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1702,6 +1711,9 @@ def main() -> None:
             plan_data_s2_1a()
         if name == "s2_1b_ring":
             plan_data_s2_1b()
+        if name == "s2_2_yarus":
+            import prospekt_s2_2_data as _yd
+            _yd.plan_data()
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":
