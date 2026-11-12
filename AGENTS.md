@@ -377,6 +377,14 @@ python -X utf8 tools/dorm_modules/electrics_wear_zones.py [набор …]  # э
                                                               # assets/models/dorm/electrics (+ electrics.json); --import, python -X utf8 tools/dorm_modules/furniture_imports.py
                                                               # electrics, --import; расстановка — python -X utf8 tools/dorm_modules/electrify.py → data/blockouts/dorm_electrics.json
                                                               # (стенд: src/blockout/dorm_electrics.gd, мигающие — dorm_flicker_light.gd)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Loot_Containers/models/RING_Loot_Containers_v01.blend" --python-exit-code 1 --python tools/loot_containers/lc_uv.py [-- набор …]
+                                                              # контейнеры для лута, партия 1, текстуры этап 1: развёртка на открытом состоянии (закрытое — те же UV), листы оболочек по сторонам
+                                                              # «<объект>__внутри» и т. п., шильдики и наклейки тонкими пластинками → RING_Loot_Containers_uv_v01.blend, _asset_src/loot_containers/sp/<набор>.fbx;
+                                                              # затем python -X utf8 tools/loot_containers/lc_cards.py (новые карточки каталога), lc_spec.py (finish-spec.json из таблицы слотов),
+                                                              # blender -b <uv.blend> --python tools/loot_containers/lc_print_bake.py (карты геометрии .npy), python -X utf8 tools/loot_containers/lc_prints.py (вымышленные
+                                                              # марки, шильдики, шкала лимба, клавиши, кресты — печать слоем), Painter: FINISH_SP_JOBS=_asset_src/loot_containers/sp_jobs, python -X utf8 tools/asset_kit/finish/sp_run.py start;
+                                                              # python -X utf8 tools/loot_containers/lc_sp.py projects|stack [набор …] → _asset_src/loot_containers/maps; просмотр —
+                                                              # blender -b <uv.blend> --python tools/loot_containers/lc_review.py -- <папка карт> <выход.blend> [shots <папка>]; проверка развёртки — lc_check.py
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
