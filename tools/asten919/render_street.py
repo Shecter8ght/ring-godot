@@ -38,6 +38,18 @@ VIEWS = {
     "07_затвор_открыт_справа": ((0.30, -0.86, 0.42), 0.58, 85, Vector((0.0, 0.0, -0.006)), 8.0, SLIDE_BACK),
     "08_рукоять_слева": ((0.18, 0.97, 0.06), 0.36, 85, Vector((-0.045, 0.0, -0.078)), 8.0, {}),
     "09_рукоять_справа": ((0.18, -0.97, 0.06), 0.36, 85, Vector((-0.045, 0.0, -0.078)), 8.0, {}),
+    # магазин вынут из шахты (ползунок mag_out)
+    "10_магазин_слева": ((0.25, 0.95, 0.12), 0.50, 85, Vector((-0.065, 0.0, -0.150)), 8.0, {"mag_out": 1.0}),
+    "11_магазин_справа": ((0.10, -0.98, 0.12), 0.50, 85, Vector((-0.065, 0.0, -0.150)), 8.0, {"mag_out": 1.0}),
+    "12_магазин_сзади": ((-0.95, 0.30, -0.12), 0.50, 85, Vector((-0.070, 0.0, -0.160)), 8.0, {"mag_out": 1.0}),
+    # снизу против неба: в бортах отражается небо — видно блеск засаленных следов
+    # («_sun»: нормаль борта — мягкое солнце встаёт под углом отражения от него к камере)
+    "13_насечки_блик_слева": ((-0.42, 0.88, -0.14), 0.34, 85, Vector((-0.035, 0.0, 0.0)), 8.0, {"_sun": (0, 1, 0)}),
+    "14_насечки_блик_справа": ((-0.42, -0.88, -0.14), 0.34, 85, Vector((-0.035, 0.0, 0.0)), 8.0, {"_sun": (0, -1, 0)}),
+    "15_магазин_блик_слева": ((0.30, 0.90, -0.16), 0.42, 85, Vector((-0.075, 0.0, -0.175)), 8.0,
+                              {"mag_out": 1.0, "_sun": (0, 1, 0)}),
+    "16_магазин_блик_справа": ((0.30, -0.90, -0.16), 0.42, 85, Vector((-0.075, 0.0, -0.175)), 8.0,
+                               {"mag_out": 1.0, "_sun": (0, -1, 0)}),
 }
 
 
@@ -84,6 +96,7 @@ def world():
     az, el = math.radians(SUN_AZ), math.radians(SUN_EL)
     d = Vector((math.cos(az) * math.cos(el), math.sin(az) * math.cos(el), math.sin(el)))
     so.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
+    return so, d
 
 
 def ground():
@@ -130,7 +143,7 @@ def prepare(w, h, samples):
     ammo = bpy.data.collections.get("Ammo")           # отдельный патрон и гильза в кадр не идут
     if ammo is not None:
         ammo.hide_render = True
-    world()
+    sun = world()
     ground()
     S.render.engine = "CYCLES"
     S.cycles.device = "GPU"
@@ -144,6 +157,7 @@ def prepare(w, h, samples):
     S.view_settings.view_transform = "AgX"
     S.view_settings.look = "AgX - Medium High Contrast"
     S.view_settings.exposure = EXPOSURE
+    return sun
 
 
 def pose(values):
@@ -161,7 +175,7 @@ def main():
     w, h, samples = (int(a[2]), int(a[3]), int(a[4])) if len(a) > 4 else (2560, 1440, 160)
     os.makedirs(out, exist_ok=True)
     gpu()
-    prepare(w, h, samples)
+    sun, sun_dir = prepare(w, h, samples)
     S = bpy.context.scene
     cam = S.camera
     cam.data.dof.use_dof = True
@@ -169,6 +183,14 @@ def main():
         if only and name not in only and name.split("_")[0] not in only:
             continue
         pose(values)
+        cdir = Vector(d).normalized()
+        if "_sun" in values:                    # блик: солнце — зеркально камере относительно нормали борта
+            n = Vector(values["_sun"]).normalized()
+            ld = (2.0 * n.dot(cdir) * n - cdir).normalized()
+            ld = (ld + Vector((0.0, 0.0, 0.30))).normalized()      # не точно в зеркало: блик полосой, а не заливкой
+        else:
+            ld = sun_dir
+        sun.rotation_euler = (-ld).to_track_quat("-Z", "Y").to_euler()
         cam.data.lens = lens
         cam.location = at + Vector(d).normalized() * dist
         cam.rotation_euler = (at - cam.location).to_track_quat("-Z", "Y").to_euler()

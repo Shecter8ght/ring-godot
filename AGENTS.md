@@ -799,7 +799,13 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   _project_ready / _bake_done / _stack_done / _export_done.txt — sp_run.py wait <метка>; отделки — finish-spec.json в папке модели,
 #   слот без выбора строится по кандидату) → tex_review.py -- apply <карты> <файл просмотра.blend> | shots <папка> [samples];
 #   рендеры при уличном пасмурном свете — blender -b <файл просмотра.blend> --factory-startup --python tools/asten919/render_street.py
-#   -- <папка> [кадр,кадр] [ширина высота выборки] (стороны, 3/4, затвор закрыт / открыт, рукоять; файл не сохраняется)
+#   -- <папка> [кадр,кадр] [ширина высота выборки] (стороны, 3/4, затвор закрыт / открыт, рукоять, магазин, кадры «на блик»;
+#   файл не сохраняется)
+# АСТЕН-919, этап 2 — износ: blender -b <АСТЕН-919_развёртка_v02.blend> --factory-startup --python tools/asten919/wear_maps.py --
+#   all <_asset_src/asten919/tex/wear_maps> (положение, нормаль, деталь в каждом пикселе развёртки) → python -X utf8
+#   tools/asten919/wear_marks.py [набор …] (места следов в мм + штампы фото-масок владельца E:/Models Blender/Маски_АЛЬФА:
+#   жир, полировка, затёртости, царапины → tex/wear/<набор>_<вид>.png) → Painter: sp_run.py -c "print(sp_asten_wear.build())"
+#   (группа «Этап 2 — износ», метка _wear_done.txt; show(False) — выключить для сравнения) → sp_asten.export → tex_review.py
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

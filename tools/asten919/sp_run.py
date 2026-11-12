@@ -20,7 +20,8 @@ sys.path.insert(0, str(ROOT / "tools" / "asset_kit" / "finish"))
 import sp_run as base  # noqa: E402
 
 base.HEADER += (f"sys.path.insert(0, r'{HERE.as_posix()}') if r'{HERE.as_posix()}' not in sys.path else None\n"
-                "import tex_sets, sp_asten\nimportlib.reload(tex_sets); importlib.reload(sp_asten)\n")
+                "import tex_sets, sp_asten, sp_asten_wear\n"
+                "importlib.reload(tex_sets); importlib.reload(sp_asten); importlib.reload(sp_asten_wear)\n")
 
 if __name__ == "__main__":
     a = sys.argv[1:]

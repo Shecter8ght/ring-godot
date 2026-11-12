@@ -24,7 +24,7 @@ import sp_finish
 import tex_sets as T
 
 SPEC = T.MODEL_DIR + "/finish-spec.json"
-PROJECT = T.WORK + "/sp/ASTEN919_finish_v1.spp"
+PROJECT = T.WORK + "/sp/ASTEN919_v2.spp"      # на развёртке v02; прежний — ASTEN919_finish_v1.spp (развёртка v01)
 FBX = T.WORK + "/sp/ASTEN919_sp.fbx"
 MASKS = T.WORK + "/masks"
 # слот без выбора владельца → отделка-кандидат (см. note слота в finish-spec.json)

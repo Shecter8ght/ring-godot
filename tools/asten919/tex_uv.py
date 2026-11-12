@@ -3,7 +3,8 @@
 # заново по швам (Minimum Stretch; где вышло хуже — остаётся проекция) → длинные ленты (проволока пружин) режутся на
 # куски → укладка модулем проекта asset_kit.uv.layout (ровная плотность набора, отступы по целым пикселям) →
 # независимая проверка растром (asset_kit.uv.verify). Геометрия, нормали из поля, родители и ASTEN919_Controls не
-# меняются.
+# меняются. Скрытые поверхности (hidden_classes: из грани не выйти наружу мимо своей же детали) получают сторону
+# острова tex_sets.HIDDEN_K — видимое выходит плотнее.
 # blender --background <АСТЕН-919_геометрия_v03.blend> --factory-startup --python-exit-code 1 --python tools/asten919/tex_uv.py -- [out.blend] [набор,набор]
 # Повтор отдельных наборов — на уже развёрнутом файле (остальные наборы остаются как есть).
 import json
@@ -122,6 +123,40 @@ def unwrap(um, angle, max_len=None, piece=None):
     return kept, total, sorted(worst, reverse=True)[:6]
 
 
+def hidden_classes(objs):
+    """Классы граней для укладки: скрытая — ни луч по нормали, ни четыре луча под 40° к ней не выходят из своей же
+    детали (стенки шахты и полостей смотрят друг на друга; дно насечек и гравировки — видимое). Только сама деталь:
+    ствол под затвором и магазин в шахте остаются видимыми — их показывают позы."""
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    out = []
+    c40, s40 = math.cos(math.radians(40)), math.sin(math.radians(40))
+    for o in objs:
+        me = o.data
+        bvh = BVHTree.FromPolygons([v.co for v in me.vertices], [tuple(p.vertices) for p in me.polygons])
+        cls = np.full(len(me.polygons), kit_uv.VISIBLE, np.int32)
+        hid = 0
+        for p in me.polygons:
+            n = p.normal
+            c = p.center + n * 2e-5
+            if bvh.ray_cast(c, n, 0.6)[0] is None:
+                continue
+            t = n.orthogonal().normalized()
+            b = n.cross(t)
+            seen = False
+            for d in (t, -t, b, -b):
+                if bvh.ray_cast(c, n * c40 + d * s40, 0.6)[0] is None:
+                    seen = True
+                    break
+            if not seen:
+                cls[p.index] = kit_uv.HIDDEN
+                hid += p.area
+        total = sum(p.area for p in me.polygons)
+        print(f"   {o.name}: скрыто {hid / max(total, 1e-12):.0%} площади")
+        out.append(cls)
+    return out
+
+
 def dump_tris(path, objs):
     """Треугольники развёртки по деталям — для картинки раскладки (tex_uv_view.py, обычный Python)."""
     names, tri, obj = [], [], []
@@ -160,8 +195,13 @@ def main():
         c.hide_viewport = False
     keep = {}                 # исходная видимость: после развёртки возвращается (ствол с резьбой выключен)
 
-    def _show(lc):
+    def _remember(lc):            # сначала запомнить всё дерево: включение родителя включает и детей
         keep[lc.name] = (lc.exclude, lc.hide_viewport)
+        for ch in lc.children:
+            _remember(ch)
+    _remember(bpy.context.view_layer.layer_collection)
+
+    def _show(lc):
         lc.exclude = False
         lc.hide_viewport = False
         for ch in lc.children:
@@ -183,14 +223,16 @@ def main():
                                    0.45 * res / PX_MM_AIM / 1000.0)
         t1 = time.time()
         margin = T.PADDING_PX
-        rep = kit_uv.layout(objs, res, uv=UV, stack=False, margin=margin, group_margin=6,
+        classes = hidden_classes(objs)
+        kit_uv.CLASS_K[kit_uv.HIDDEN] = T.HIDDEN_K
+        rep = kit_uv.layout(objs, res, uv=UV, classes=classes, stack=False, margin=margin, group_margin=6,
                             log=lambda *x: print("  ", *x))
-        ver = kit_uv.verify(objs, res, uv=UV, margin=margin, group_margin=6)
+        ver = kit_uv.verify(objs, res, uv=UV, margin=margin, group_margin=6, classes=classes)
         dump_tris(f"{OUT}/{s}_tris.npz", objs)
         for o in objs:
             o["asten_set"] = s
             o["asten_mat"] = o.material_slots[0].material.name if o.material_slots and o.material_slots[0].material else ""
-        report[s] = dict(res=res, islands=rep["islands"], fill=rep["fill"], px_mm=rep["px_mm"],
+        report[s] = dict(res=res, islands=rep["islands"], fill=rep["fill"], px_mm=rep["px_mm"], hidden_k=T.HIDDEN_K,
                          projection_kept=f"{kept}/{total}", worst_projection=worst, verify=ver,
                          unwrap_sec=round(t1 - t0), sec=round(time.time() - t0))
         print("SET", s, json.dumps(report[s], ensure_ascii=False))
