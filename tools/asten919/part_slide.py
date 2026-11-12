@@ -83,8 +83,8 @@ def slide(h):
         F.sub(both(g), 0.15, bbox=bb(x1 - SERR_W - 0.6, x1 + 0.6, -HW - 1, HW + 1, BOT - 1, 9))
     # вырез под зуб затворной задержки в левом борту
     a, b = STOP_NOTCH_X
-    notch = Poly(fillet_poly([(a, BOT - 2), (a, -8.3), (a + 4.5, -8.3), (b + 6, BOT + 0.05), (b + 6, BOT - 2)], [0, 0.4, 1.5, 0, 0]))
-    F.sub(prism(notch, "XZ", CH_IN - 1, HW + 2), 0.2, bbox=bb(a - 1, b + 7, CH_IN - 1, HW + 1, BOT - 1, -7))
+    notch = Poly(fillet_poly([(a, BOT - 2), (a, STOP_NOTCH_TOP), (a + 5.0, STOP_NOTCH_TOP), (b + 6, BOT + 0.05), (b + 6, BOT - 2)], [0, 0.5, 2.0, 0, 0]))
+    F.sub(prism(notch, "XZ", CH_IN - 1, HW + 2), 0.25, bbox=bb(a - 1, b + 7, CH_IN - 1, HW + 1, BOT - 1, STOP_NOTCH_TOP + 1))
     # маркировка — гравировкой (вымышленная марка, см. asset-state.md): слева знак, название и калибр, справа номер
     engrave(F, sign2(8.4, 0.55), "XZ", (100.3, 0.4), -1, HW, 1, wall=0.2, bbox=bb(94, 107, HW - 1, HW + 1, -5, 6))
     name, wn = text2(MARK_NAME, font_path(), 4.2, track=0.25)
