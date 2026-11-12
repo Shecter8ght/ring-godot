@@ -385,6 +385,9 @@ python -X utf8 tools/dorm_modules/electrics_wear_zones.py [набор …]  # э
                                                               # марки, шильдики, шкала лимба, клавиши, кресты — печать слоем), Painter: FINISH_SP_JOBS=_asset_src/loot_containers/sp_jobs, python -X utf8 tools/asset_kit/finish/sp_run.py start;
                                                               # python -X utf8 tools/loot_containers/lc_sp.py projects|stack [набор …] → _asset_src/loot_containers/maps; просмотр —
                                                               # blender -b <uv.blend> --python tools/loot_containers/lc_review.py -- <папка карт> <выход.blend> [shots <папка>]; проверка развёртки — lc_check.py
+python -X utf8 tools/loot_containers/lc_fetch_materials.py ; blender -b <uv_v01.blend> --python tools/loot_containers/lc2_dump_uv.py -- <json> ; python -X utf8 tools/loot_containers/lc2_struct.py
+                                                              # отделка v02 на фото-основах: загрузка наборов CC0 (ambientCG) → _asset_src/textures, выгрузка развёртки, структурные карты (строчки, валик, точки сварки);
+                                                              # blender -b RING_Loot_Containers_uv_v01.blend --python tools/loot_containers/lc2_review.py -- <finish_v02.blend> [shots <папка> [кадры]] — материалы-узлы и файл просмотра
 python -X utf8 tools/dorm_modules/brick_rects.py [--preview]   # кирпичи без швов со снимка стены (Red Bricks 04) → brick_rects.json в _asset_src: каждый кирпич обломков берёт лицо настоящего
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "<RING_Dorm_Clutter_v01.blend | RING_Dorm_Bags_v01.blend>" --python-exit-code 1 --python tools/dorm_modules/clutter_uv.py
                                                               # мусор, текстуры: развёртка 12 вещей и FBX для Painter; дальше python -X utf8 tools/dorm_modules/clutter_sp.py
