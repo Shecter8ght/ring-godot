@@ -157,11 +157,38 @@ assign(poses_act)
 for ob in (arms, wr):
     ob.animation_data.action_extrapolation = "HOLD"
 con = wr.pose.bones["Magazine_Control"].constraints["В левой кисти"]
+
+
+def con_enable(on):
+    if hasattr(con, "enabled"):
+        con.enabled = on
+    else:
+        con.mute = not on
+
+
+# На кадрах поз магазин стоит на своём месте в пистолете (кадр 41 — вышел из шахты на MAG_DROP) и за кистью не едет:
+# владелец ставит кисть вокруг него. Как магазин лежит в кисти (кость mag.L), сборщик снимает сам с кадра 41.
+for fc in bag_of(poses_act, wr).fcurves:
+    if fc.data_path.endswith('constraints["В левой кисти"].influence'):
+        for kp in fc.keyframe_points:
+            kp.co[1] = 0.0
+            kp.handle_left[1] = kp.handle_right[1] = 0.0
+        fc.update()
+con_enable(False)
 B = {}
 for name, f in POSE_FRAMES.items():
     S.frame_set(f)
     update()
     B[name] = {n: arms.pose.bones[n].matrix_basis.copy() for n in A_BONES}
+    if name == "mag" and "mag.L" in A_BONES:
+        pb = arms.pose.bones["mag.L"]
+        pb.matrix = arms.matrix_world.inverted() @ wr.matrix_world @ wr.pose.bones["Magazine_Control"].matrix
+        update()
+        d = (pb.matrix_basis.translation - B[name]["mag.L"].translation).length * 1000
+        B[name]["mag.L"] = pb.matrix_basis.copy()
+        if d > 0.05:
+            log(f"поза «mag» (кадр {f}): магазин в левой кисти лежит по-новому (сдвиг {d:.1f} мм) — снято с позы кисти")
+con_enable(True)
 
 # Что в какой позе «своё» (остальное в ней — как в хвате, кадр 1): так поправленный хват виден на всех кадрах поз.
 OWN = dict(trigger=set(R_INDEX), pressed=set(R_INDEX), catch=set(R_THUMB), stop=set(R_THUMB), up=set(R_THUMB),
@@ -668,7 +695,8 @@ lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".
           "        и им кончается каждый клип.",
           "    11, 16 — только указательный правой (на спуске; спуск выжат).",
           "    21, 26, 31 — только большой правой (кнопка магазина; рычаг задержки; вверх для осмотра).",
-          "    41 — левая рука с магазином: пальцы, место кисти (ik_hand.L), как лежит магазин (mag.L).",
+          "    41 — левая рука с магазином: пальцы и место кисти. Магазин на этом кадре стоит на месте (вышел из шахты",
+          "         на 55 мм) и за кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
           "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
           "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
           "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
