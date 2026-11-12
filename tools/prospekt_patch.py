@@ -1703,7 +1703,16 @@ def stage_s2_3_station() -> Patch:
     return V3.build(Patch("s2_3_station", BASE_REV_S2D))
 
 
-STAGES = {"s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ вторая очередь, этап 4: малые зоны (tools/prospekt_s2_4.py)
+BASE_REV_S2E = "12e14eb0"         # снимок плана после этапа 3
+
+
+def stage_s2_4_small() -> Patch:
+    import prospekt_s2_4 as V4  # noqa: E402
+    return V4.build(Patch("s2_4_small", BASE_REV_S2E))
+
+
+STAGES = {"s2_4_small": stage_s2_4_small, "s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1726,6 +1735,9 @@ def main() -> None:
         if name == "s2_3_station":
             import prospekt_s2_3_data as _sd
             _sd.plan_data()
+        if name == "s2_4_small":
+            import prospekt_s2_4_data as _d4
+            _d4.plan_data(p)
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":

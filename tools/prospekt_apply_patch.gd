@@ -399,6 +399,10 @@ func _add_piece(list_name: String, e: Variant) -> void:
 	piece.transform = xf
 	piece.base = xf
 	piece.set_meta(META, _stage)
+	# пометки куска (закрытая дверь «под ключ»): запись плана может нести "meta": {имя: значение}
+	if e is Dictionary and (e as Dictionary).has("meta"):
+		for mk: String in ((e as Dictionary).meta as Dictionary):
+			piece.set_meta(mk, ((e as Dictionary).meta as Dictionary)[mk])
 	var key: String = "%d|%s" % [parent.get_instance_id(), title]
 	_counts[key] = int(_counts.get(key, 0)) + 1
 	piece.name = ("%s этап %s %d" % [title, _stage, int(_counts[key])]).validate_node_name()
