@@ -279,7 +279,9 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
     # 4. только крупные мягкие градиенты: пятна мельче детали читаются отпечатками пальцев (AR-15, 30.10)
     gr = f.get("gradients")
     if gr:
-        k = card_k
+        # scale — во сколько раз пятна мельче карточки (overrides модели: у длинной узкой детали пятна карточки
+        # крупнее её самой — затвор АСТЕН-919 выходил однотонным на 4 см)
+        k = card_k * gr.get("scale", 1.0)
         g1 = rel("градиент светлый", above(n), color=(0.75, 0.75, 0.75), cop=gr["color"], rough=-gr["rough"])
         sp_lib.mask_proc(g1, "noise_clouds_1/clouds_1", scale=0.4 * k)
         g2 = rel("градиент тёмный", above(g1), color=(0.25, 0.25, 0.25), cop=gr["color"], rough=gr["rough"])

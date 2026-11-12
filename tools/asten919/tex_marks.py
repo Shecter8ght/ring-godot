@@ -3,7 +3,9 @@
 # Вход — <Деталь>_geo.npz из tex_geo_dump.py. Рисунок задан в плоскости детали в мм (как на чертеже), маска в развёртке
 # получается проекцией: каждый тексель знает своё положение на детали. Выход (ч/б PNG размера набора, белое — знак):
 #   slide_sight_paint.png — белая обводка прорези целика и точка мушки (выбор владельца 2026-11-12, краска без рельефа);
-#   magazine_numbers.png  — цифры 4…17 у окошек счёта на задней стенке магазина (литой рельеф корпуса).
+#   magazine_numbers.png  — цифры 4…17 у окошек счёта на задней стенке магазина (литой рельеф корпуса);
+#   magazine_liner.png    — фаски и стенки окошек счёта: в них виден светлый стальной вкладыш корпуса (ориентир
+#                           владельца 2026-11-12 — светлые кольца вокруг отверстий).
 # Гравировка затвора, казённика, пластины с номером и литые знаки рукояти — в самой сетке (part_slide.py и др.).
 import os
 import sys
@@ -30,8 +32,10 @@ DOT_R = 1.15              # точка мушки
 DOT_Z = TOP + 2.35
 
 # ---------- цифры магазина ----------
-NUM_CAP = 2.1             # высота цифры, мм
-NUM_Y = 7.3               # середина цифры от оси магазина (окошки на ±3,6)
+NUM_CAP = 1.8             # высота цифры, мм
+NUM_Y = 7.4               # середина цифры от оси магазина (окошки на ±3,6)
+NUM_UP = 1.7              # цифра выше середины окошка вдоль оси магазина, мм (как на ориентире владельца)
+HOLE_R = 2.0              # кольцо вкладыша вокруг окошка (отверстие Ø2,8 с фаской 0,3 и поясок 0,3 мм)
 
 
 def raster(geo, res, value, keep):
@@ -93,18 +97,40 @@ def sight_paint(res):
     return Image.fromarray(np.maximum(np.asarray(rear), np.asarray(front)))
 
 
-def numbers_sheet(px_mm=40.0):
-    """Лист задней стенки магазина: по горизонтали — «вправо для смотрящего сзади» (−Y), по вертикали — вдоль оси
-    магазина вверх. Возвращает картинку и функцию (y, a) → значение."""
-    font = ImageFont.truetype(font_path(), int(round(NUM_CAP * px_mm / 0.729)))      # высота прописной DejaVu — 0,729 кегля
-    # окошки: чётные патроны слева для стрелка (+Y), нечётные справа; координата вдоль оси — как в part_magazine
+def holes():
+    """Окошки счёта: [(номер, y, координата вдоль оси магазина)] — чётные слева для стрелка (+Y), как в
+    part_magazine."""
     import part_magazine as M
     rows = []
     for k in range(4, 18):
         _x, _y, z = M.ROUNDS[k - 1]
-        yc = 3.6 if k % 2 == 0 else -3.6
-        ac = SIN * mag_rear_x(z) + COS * z
-        rows.append((k, yc, ac))
+        rows.append((k, 3.6 if k % 2 == 0 else -3.6, SIN * mag_rear_x(z) + COS * z))
+    return rows
+
+
+def magazine_liner(res):
+    rows = holes()
+    yc = np.array([r[1] for r in rows])
+    ac = np.array([r[2] for r in rows])
+
+    def value(p):
+        a = SIN * p[..., 0] + COS * p[..., 2]
+        dr = np.hypot(p[..., 1][..., None] - yc, a[..., None] - ac).min(axis=-1)
+        return smooth(dr - HOLE_R, 0.05)
+
+    def keep(nrm, c):
+        a = SIN * c[:, 0] + COS * c[:, 2]
+        s = COS * (c[:, 0] - MAG_REF[0]) - SIN * (c[:, 2] - MAG_REF[1])
+        dr = np.hypot(c[:, 1][:, None] - yc, a[:, None] - ac).min(axis=1)
+        return (s < -MAG_DEPTH + 2.6) & (dr < HOLE_R + 0.6)
+    return raster(np.load(f"{GEO}/Magazine_Body_geo.npz"), res, value, keep)
+
+
+def numbers_sheet(px_mm=40.0):
+    """Лист задней стенки магазина: по горизонтали — «вправо для смотрящего сзади» (−Y), по вертикали — вдоль оси
+    магазина вверх. Возвращает картинку и функцию (y, a) → значение."""
+    font = ImageFont.truetype(font_path(), int(round(NUM_CAP * px_mm / 0.729)))      # высота прописной DejaVu — 0,729 кегля
+    rows = holes()
     a0 = min(r[2] for r in rows) - 4.0
     a1 = max(r[2] for r in rows) + 4.0
     w, h = int(2 * MAG_HW * px_mm), int((a1 - a0) * px_mm)
@@ -113,7 +139,7 @@ def numbers_sheet(px_mm=40.0):
     for k, yc, ac in rows:
         ny = NUM_Y if yc > 0 else -NUM_Y
         cx = (MAG_HW - ny) * px_mm                 # вправо на листе — −Y
-        cy = (a1 - ac) * px_mm
+        cy = (a1 - ac - NUM_UP) * px_mm
         dr.text((cx, cy), str(k), font=font, fill=255, anchor="mm")
     im = im.filter(ImageFilter.GaussianBlur(0.6))
     arr = np.asarray(im, np.float32) / 255.0
@@ -148,6 +174,9 @@ def main():
     m = magazine_numbers(T.SETS["magazine"][0])
     m.save(f"{OUT}/magazine_numbers.png")
     print("magazine_numbers", np.asarray(m).mean() / 255 * 100, "% атласа")
+    m = magazine_liner(T.SETS["magazine"][0])
+    m.save(f"{OUT}/magazine_liner.png")
+    print("magazine_liner", np.asarray(m).mean() / 255 * 100, "% атласа")
 
 
 main()

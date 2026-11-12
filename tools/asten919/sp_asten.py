@@ -10,6 +10,7 @@
 # Наборы — tex_sets.SETS; слоты отделки — детали из finish-spec.json (маска слоя по имени сетки «<деталь>__sp»).
 # Отделки — карточки каталога теми же функциями и числами (sp_finish.build_set); слот без выбора владельца строится
 # по кандидату CANDIDATES и помечается в отчёте «кандидат» — до решения владельца это проба, не выбор.
+# Правки чисел карточки под эту модель — overrides слота (причина — в его note); список layers заменяется целиком.
 import json
 import os
 
@@ -31,6 +32,8 @@ CANDIDATES = {"slide": "NT-BLK-SAT", "barrel": "NT-BLK-SAT", "steel_small": "PH-
               "magazine": "PL-BLK-SMO", "springs": "SS-BRU", "steel_bare": "NI-PLT-SAT", "bullet": "CU-PRM"}
 # краска прицельных: белая матовая эмаль (обводка целика, точка мушки) — без рельефа
 SIGHT_PAINT = {"color": (0.84, 0.84, 0.82), "rough": 0.55, "metal": 0.0}
+# стальной вкладыш корпуса магазина, видимый в окошках счёта (фаски и стенки отверстий): светлая сталь
+LINER = {"color": (0.70, 0.70, 0.71), "rough": 0.26, "metal": 1.0}
 # цифры у окошек магазина: литой рельеф корпуса, вдавлены
 NUM_DEPTH = 0.06
 _handlers = {}
@@ -77,7 +80,22 @@ def create():
 
 
 def open_project():
-    return sp_finish.open_project(PROJECT)
+    """Открыть проект; метка _project_ready.txt. Обработчик держится сильной ссылкой (слабая терялась — метки не
+    было, хотя проект открывался); если проект уже в работе к концу вызова — метка сразу."""
+    os.environ["OCIO"] = sp_finish.OCIO
+    if P.is_open():
+        if P.file_path().replace("\\", "/").lower() == PROJECT.lower() and P.is_in_edition_state():
+            sp_finish.mark("_project_ready.txt", "OK already open")
+            return "already open"
+        P.close()
+
+    def ready(e):
+        sp_finish.mark("_project_ready.txt", "OK opened")
+    _connect(E.ProjectEditionEntered, ready, "open")
+    P.open(PROJECT)
+    if P.is_open() and P.is_in_edition_state():
+        sp_finish.mark("_project_ready.txt", "OK opened")
+    return "opening"
 
 
 def bake(only=None):
@@ -186,6 +204,16 @@ def magazine_numbers():
     return lay
 
 
+def magazine_liner():
+    """Светлая сталь вкладыша в окошках счёта — слой над отделками магазина, маска magazine_liner.png."""
+    import substance_painter.layerstack as L
+    import sp_lib
+    lay = sp_lib.fill("Вкладыш в окошках — светлая сталь", L.InsertPosition.inside_node(_group("magazine"), L.NodeStack.Substack),
+                      color=LINER["color"], rough=LINER["rough"], metal=LINER["metal"])
+    sp_finish.bitmap_mask(lay, MASKS + "/magazine_liner.png")
+    return lay
+
+
 def stack(only=None):
     """Стеки этапа 1 по наборам; итог — _stack_done.txt (когда Painter досчитает), проект сохраняется."""
     import sp_lib
@@ -209,6 +237,9 @@ def stack(only=None):
         if name == "magazine" and os.path.exists(MASKS + "/magazine_numbers.png"):
             magazine_numbers()
             log.append("magazine: цифры окошек")
+        if name == "magazine" and os.path.exists(MASKS + "/magazine_liner.png"):
+            magazine_liner()
+            log.append("magazine: вкладыш в окошках")
 
     def done():
         P.save()

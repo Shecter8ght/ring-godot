@@ -79,7 +79,7 @@ def studio():
     nt.links.new(mp.outputs["Vector"], env.inputs["Vector"])
     bg_env = nt.nodes.new("ShaderNodeBackground")
     bg_env.label = "Отражения студии (сила)"
-    bg_env.inputs["Strength"].default_value = 0.6
+    bg_env.inputs["Strength"].default_value = 1.0
     nt.links.new(env.outputs["Color"], bg_env.inputs["Color"])
     bg_cam = nt.nodes.new("ShaderNodeBackground")
     bg_cam.label = "Фон за пистолетом"
@@ -106,10 +106,10 @@ def studio():
         return o
 
     # пистолет втрое короче винтовки — источники ближе и слабее (освещённость та же)
-    light("Студия • ключевой (справа спереди сверху)", (0.45, -0.75, 0.70), 0.75, 11, 0.45)
-    light("Студия • заполняющий (слева)", (-0.30, 0.90, 0.20), 0.8, 3.0, 0.55)
-    light("Студия • контровой (сзади сверху)", (-0.60, 0.30, 0.80), 0.7, 8, 0.28)
-    light("Студия • полоса бликов (сверху)", (0.0, -0.35, 1.0), 0.6, 6.5, 0.7, 0.06)
+    light("Студия • ключевой (справа спереди сверху)", (0.45, -0.75, 0.70), 0.75, 16, 0.45)
+    light("Студия • заполняющий (слева)", (-0.30, 0.90, 0.20), 0.8, 7.0, 0.55)
+    light("Студия • контровой (сзади сверху)", (-0.60, 0.30, 0.80), 0.7, 11, 0.28)
+    light("Студия • полоса бликов (сверху)", (0.0, -0.35, 1.0), 0.6, 9.0, 0.7, 0.06)
     cd = bpy.data.cameras.new("Студия • камера")
     cd.lens = 70
     cd.clip_start = 0.005
@@ -179,7 +179,11 @@ VIEWS = {
     "06_органы_слева": ((0.05, 1.0, 0.10), 0.17, 70, Vector((-0.012, 0.0, -0.022))),
     "07_сзади_прицел": ((-1.0, 0.12, 0.18), 0.30, 70, Vector((-0.07, 0.0, 0.0))),
     "08_дуло": ((1.0, -0.35, 0.15), 0.26, 70, Vector((0.11, 0.0, -0.005))),
+    # магазин вынут (ползунок mag_out): задняя стенка с окошками и цифрами, затем сбоку
+    "09_магазин_сзади": ((-1.0, 0.25, -0.25), 0.46, 70, Vector((-0.075, 0.0, -0.165))),
+    "10_магазин_слева": ((0.1, 1.0, 0.0), 0.50, 70, Vector((-0.07, 0.0, -0.165))),
 }
+POSES = {"09_магазин_сзади": {"mag_out": 1.0}, "10_магазин_слева": {"mag_out": 1.0}}
 
 
 def shots(folder, samples=64, only=None):
@@ -190,6 +194,12 @@ def shots(folder, samples=64, only=None):
     for name, (d, dist, lens, at) in VIEWS.items():
         if only and name.split("_")[0] not in only and name not in only:
             continue
+        ctl = bpy.data.objects.get("ASTEN919_Controls")
+        if ctl is not None:
+            for k in ("slide", "stop", "trigger", "trigger_safety", "mag_catch", "slide_lock", "mag_out"):
+                ctl[k] = float(POSES.get(name, {}).get(k, 0.0))
+            ctl.update_tag()
+            bpy.context.view_layer.update()
         cam.data.lens = lens
         cam.location = at + Vector(d).normalized() * dist
         cam.rotation_euler = (at - cam.location).to_track_quat("-Z", "Y").to_euler()

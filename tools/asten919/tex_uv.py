@@ -200,10 +200,10 @@ def main():
             o["asten_mat"] = "Brass"
     with open(f"{OUT}/report{'_' + '_'.join(only) if only else ''}.json", "w", encoding="utf-8", newline="\n") as f:
         json.dump(report, f, ensure_ascii=False, indent=1)
-    def _restore(lc):
+    def _restore(lc):                 # родитель раньше детей: exclude родителя переписывает детей
+        lc.exclude, lc.hide_viewport = keep[lc.name]
         for ch in lc.children:
             _restore(ch)
-        lc.exclude, lc.hide_viewport = keep[lc.name]
     _restore(bpy.context.view_layer.layer_collection)
     bpy.ops.wm.save_as_mainfile(filepath=out, compress=True)
     print("SAVED", out)
