@@ -1721,7 +1721,16 @@ def stage_s2_5a_polish() -> Patch:
     return V5.build(Patch("s2_5a_polish", BASE_REV_S2F))
 
 
-STAGES = {"s2_5a_polish": stage_s2_5a_polish, "s2_4_small": stage_s2_4_small, "s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ «Ярус», редакция 3 (tools/prospekt_s2_6.py, лист 16)
+BASE_REV_S2G = "1b1aa720"         # снимок плана на коммите листа 16 (сцена после этапов 2, 5а, 5б)
+
+
+def stage_s2_6_yarus_r3() -> Patch:
+    import prospekt_s2_6 as V6  # noqa: E402
+    return V6.build(Patch("s2_6_yarus_r3", BASE_REV_S2G))
+
+
+STAGES = {"s2_6_yarus_r3": stage_s2_6_yarus_r3, "s2_5a_polish": stage_s2_5a_polish, "s2_4_small": stage_s2_4_small, "s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1750,6 +1759,9 @@ def main() -> None:
         if name == "s2_5a_polish":
             import prospekt_s2_5a_data as _d5
             _d5.plan_data(p)
+        if name == "s2_6_yarus_r3":
+            import prospekt_s2_6_data as _d6
+            _d6.plan_data(p)
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":

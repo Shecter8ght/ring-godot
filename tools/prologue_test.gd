@@ -235,7 +235,7 @@ func _hall_fight_and_die() -> void:
 	me.health.invulnerable = true
 	var dock := _ai("Prologue_Dock")
 	var dock_home := dock.global_position
-	await _tp(Vector3(-114.0, 0.1, 55.0))
+	await _tp(Vector3(-113.0, 0.1, 64.5))
 	for i in range(3):
 		NoiseBus.emit(me.global_position, 60.0, "shot")
 		await get_tree().create_timer(0.4).timeout

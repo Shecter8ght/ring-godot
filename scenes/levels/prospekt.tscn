@@ -137,7 +137,7 @@ weight = 2
 exclusive = "bank"
 
 [node name="Yarus_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
-position = Vector3(-102, 0.05, 66)
+position = Vector3(-104, 0.05, 72)
 radius = 18
 group_size = Vector2i(2, 4)
 weight = 3
@@ -1339,112 +1339,112 @@ search_s = 2.5
 look = 4
 
 [node name="Loot_128" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-136.1, 0.6, 64)
+position = Vector3(-134, 0.62, 69.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_129" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-136.1, 0.6, 74)
+position = Vector3(-134, 0.62, 76)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_130" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-130.1, 0.6, 64)
+position = Vector3(-128, 0.62, 72.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_131" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-130.1, 0.6, 74)
+position = Vector3(-122, 0.62, 69.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_132" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-124.1, 0.6, 64)
+position = Vector3(-122, 0.62, 76)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_133" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-124.1, 0.6, 74)
+position = Vector3(-116, 0.62, 72.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_134" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-78.1, 0.6, 64)
+position = Vector3(-104, 0.62, 69.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_135" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-78.1, 0.6, 74)
+position = Vector3(-104, 0.62, 76)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_136" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-72.1, 0.6, 64)
+position = Vector3(-98, 0.62, 72.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_137" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-72.1, 0.6, 74)
+position = Vector3(-92, 0.62, 69.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_138" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-84.1, 0.6, 64)
+position = Vector3(-92, 0.62, 76)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_139" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-84.1, 0.6, 74)
+position = Vector3(-86, 0.62, 72.5)
 display_name = "Стеллаж «Яруса»"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_140" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-130, 0.6, 56)
+position = Vector3(-99.8, 0.62, 64.7)
 display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_141" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-125.4, 0.6, 53)
+position = Vector3(-87.2, 0.62, 64.7)
 display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_142" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-77.4, 0.6, 53)
+position = Vector3(-76, 0.62, 60.5)
 display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_143" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-65.4, 0.6, 53)
+position = Vector3(-127, 0.62, 60.5)
 display_name = "Касса"
 table = "register"
 search_s = 2
@@ -1465,7 +1465,7 @@ search_s = 3
 look = 5
 
 [node name="Loot_146" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-140, 0.6, 75)
+position = Vector3(-139.5, 0.62, 56)
 display_name = "Аптечный уголок «Яруса»"
 table = "pharmacy"
 search_s = 2
@@ -1480,7 +1480,7 @@ look = 1
 required_key = "key_yarus_office"
 
 [node name="Loot_148" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-112, 0.6, 60)
+position = Vector3(-121.5, 0.62, 64.8)
 display_name = "Тело мародёра в зале"
 table = "prospekt_body"
 search_s = 4
@@ -2769,49 +2769,49 @@ search_s = 3
 look = 5
 
 [node name="Loot_331" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-122.293, 0.62, 51.293)
+position = Vector3(-137.5, 0.62, 60.3)
 display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_332" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-81, 0.62, 51.5)
+position = Vector3(-80, 0.62, 60.3)
 display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_333" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-116, 0.62, 51.5)
+position = Vector3(-70, 0.62, 60.3)
 display_name = "Касса экспресс"
 table = "register"
 search_s = 2
 look = 0
 
 [node name="Loot_334" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-134, 0.62, 66)
+position = Vector3(-80, 0.62, 69.5)
 display_name = "Стеллаж: бакалея"
 table = "grocery"
 search_s = 1.5
 look = 0
 
 [node name="Loot_335" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-128, 0.62, 74)
+position = Vector3(-80, 0.62, 76)
 display_name = "Стеллаж: бытовая химия"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_336" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-82, 0.62, 64)
+position = Vector3(-74, 0.62, 72.5)
 display_name = "Стеллаж: консервы"
 table = "grocery"
 search_s = 1.5
 look = 0
 
 [node name="Loot_337" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-76, 0.62, 72)
+position = Vector3(-86, 0.62, 69.5)
 display_name = "Стеллаж: товары"
 table = "shelf"
 search_s = 1.5
@@ -2846,35 +2846,35 @@ search_s = 2.5
 look = 4
 
 [node name="Loot_342" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-120.5, 6.6, 53)
+position = Vector3(-136, 6.6, 52.2)
 display_name = "Фуд-корт: стойка"
 table = "grocery"
 search_s = 1.5
 look = 0
 
 [node name="Loot_343" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-95, 6.6, 53)
+position = Vector3(-127, 6.6, 52.2)
 display_name = "Фуд-корт: стойка"
 table = "grocery"
 search_s = 1.5
 look = 0
 
 [node name="Loot_344" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-66, 7.5, 53)
+position = Vector3(-139.5, 6.6, 58)
 display_name = "Кухня: ящик"
 table = "grocery"
 search_s = 3
 look = 5
 
 [node name="Loot_345" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-138, 7.6, 64)
+position = Vector3(-138, 6.6, 68)
 display_name = "«Техно»: коробки"
 table = "electronics"
 search_s = 3
 look = 5
 
 [node name="Loot_346" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-130, 7.6, 72)
+position = Vector3(-132, 6.6, 72.2)
 display_name = "«Техно»: коробки"
 table = "electronics"
 search_s = 3
@@ -2888,14 +2888,14 @@ search_s = 3
 look = 5
 
 [node name="Loot_348" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-80, 6.6, 64)
+position = Vector3(-104, 6.6, 72)
 display_name = "Одежда: стеллаж"
 table = "shelf"
 search_s = 1.5
 look = 0
 
 [node name="Loot_349" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(-70.5, 6.6, 74)
+position = Vector3(-75, 6.6, 53)
 display_name = "Детский мир: корзина"
 table = "shelf"
 search_s = 1.5
@@ -3457,7 +3457,7 @@ position = Vector3(-178.3, 0.1, -53.8)
 position = Vector3(-92, 0.1, 114.5)
 
 [node name="Hall_Cart" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]
-position = Vector3(-122, 0.05, 66)
+position = Vector3(-127, 0.05, 65.5)
 metadata/role = "cart"
 metadata/arch = "gunner"
 
@@ -3468,7 +3468,7 @@ position = Vector3(0, 0, -8.5)
 position = Vector3(0, 0, 10.5)
 
 [node name="Hall_Till" type="Marker3D" parent="Gameplay/Prologue" groups=["prologue_marauders"]]
-position = Vector3(-126.5, 0.05, 53.6)
+position = Vector3(-100.5, 0.05, 66.5)
 metadata/role = "till"
 metadata/arch = "scout"
 metadata/watch = Vector3(-1, 0, 0)
@@ -3488,7 +3488,7 @@ position = Vector3(-21, 0.12, -75.3)
 position = Vector3(-30, -3.2, -77.3)
 
 [node name="AI_Yarus_Hall" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
-position = Vector3(-102, 0.05, 66)
+position = Vector3(-104, 0.05, 72)
 
 [node name="AI_Yarus_Dock" type="Marker3D" parent="Gameplay/AI_Spawns" groups=["ai_spawn_points"]]
 position = Vector3(-100, 0.02, 106)
