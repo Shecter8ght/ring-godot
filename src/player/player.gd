@@ -1502,6 +1502,11 @@ func _update_hand() -> void:
 		_weapon_rig = WeaponRig.find_on(_weapon_model)
 		if _weapon_rig:
 			_weapon_rig.set_ammo_state(weapon_rounds)
+			# модель взята из кэша и помнит свою прежнюю пометку глушителя: сняли глушитель — у наблюдателей (и у
+			# себя после смены оружия) он оставался виден. Пометка — по обвесу, с которым модель показана.
+			if _weapon_rig.has_suppressor_part():
+				var muzzle_mod: String = WeaponDb.mod_id(weapon_mods.get("muzzle", {}))
+				_weapon_rig.set_suppressed(bool((WeaponDb.attachment(muzzle_mod).get("fx", {}) as Dictionary).get("suppressed", false)))
 			if not _weapon_rig.sound_event.is_connected(_rig_sound):
 				_weapon_rig.sound_event.connect(_rig_sound)
 		_weapon_model_id = key

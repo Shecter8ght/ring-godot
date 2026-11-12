@@ -34,12 +34,19 @@ func _ready() -> void:
 		(enemy as Node3D).visible = false
 	_player = get_tree().get_first_node_in_group("players") as Player
 	_camera = get_tree().get_first_node_in_group("camera_rig") as CameraRig
-	_player.global_position = Vector3(100.0, 0.1, -5.0)
+	# VERAS_POS=x,y,z — своя точка, VERAS_POS=spawn — где появился (точка по умолчанию после переделки карты ТЦ стоит
+	# у стены: оружие, упёршееся в стену, игра убирает — WeaponClearance, и в кадре его нет)
+	var where: String = OS.get_environment("VERAS_POS")
+	var where_at: PackedStringArray = where.split(",", false)
+	if where_at.size() == 3:
+		_player.global_position = Vector3(float(where_at[0]), float(where_at[1]), float(where_at[2]))
+	elif where != "spawn":
+		_player.global_position = Vector3(100.0, 0.1, -5.0)
 	_player.health.hp = 100000.0
 	CameraRig.load_settings()
 	CameraRig.first_person_mode = true
 	await get_tree().create_timer(0.5).timeout
-	_camera._look_yaw = -PI * 0.5
+	_camera._look_yaw = deg_to_rad(float(OS.get_environment("VERAS_YAW"))) if OS.get_environment("VERAS_YAW") != "" else -PI * 0.5
 	await _equip({})
 	if not _camera._viewmodel is ViewmodelClips:
 		push_error("veras_shots: в руках не вьюмодель с клипами (нет ассета?)")
@@ -164,7 +171,10 @@ func _eject() -> void:
 		if f > 0.9:
 			_check("«вынуть»: после кадра подмены магазина на оружии не видно", not vm._mag_parts.is_empty() and not vm._mag_parts[0].visible)
 		await _shot("veras_eject_%02d" % int(f * 100))
-	await get_tree().create_timer(total - elapsed + 0.3).timeout
+	await get_tree().create_timer(total - elapsed + 0.35).timeout
+	_check("«вынуть»: движение кончилось — руки на оружии", _player.reload_timer <= 0.0 and vm._clip == "", vm._clip)
+	await _shot("veras_eject_done")
+	await get_tree().create_timer(0.5).timeout
 
 
 ## Магазин вынут: в руках автомат без магазина; R — вставить новый (клип перезарядки с кадра, где новый

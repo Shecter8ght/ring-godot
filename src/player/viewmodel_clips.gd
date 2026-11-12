@@ -487,6 +487,8 @@ func update(pl: Player, delta: float) -> void:
 	# вынутый магазин не возвращается на оружие, пока хост не подтвердил (вид оружия ещё прежний)
 	if _eject and reloading and after_swap:
 		_eject_hide = EJECT_HIDE_SEC
+		# рука с магазином ушла из кадра: клип дальше не идёт (там она несёт новый магазин) — в конце вернётся пустой
+		_anim.speed_scale = 0.0
 	elif not reloading:
 		_eject = false
 		_eject_hide = maxf(0.0, _eject_hide - delta) if pl.weapon_mag == _reload_old else 0.0

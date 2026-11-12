@@ -7,7 +7,8 @@ extends Node3D
 
 const PM_ID: String = "wpn_hg_01"
 const SUP_ID: String = "muzzle_supp_pm_01"
-const CASES: Array[String] = ["reload_partial", "reload_empty", "suppressor_install", "suppressor_remove", "reload_cancel", "suppressor_cancel", "injury_cancel", "last_shot"]
+const CASES: Array[String] = ["reload_partial", "reload_empty", "suppressor_install", "suppressor_remove", "reload_cancel", "suppressor_cancel", "injury_cancel", "last_shot",
+	"hand_mag_out", "hand_mag_in", "hand_mag_swap"]
 
 var _role: String = ""
 var _client_id: int = 0
@@ -153,10 +154,27 @@ func _host() -> void:
 			"suppressor_install", "suppressor_remove":
 				_check(case_name + ": хост подтвердил состояние глушителя", suppressed == (case_name == "suppressor_install"))
 				_check(case_name + ": чужой риг показал накручивание", bool(_seen.get("action_suppressor", false)) and bool(_seen.get("hand_target", false)))
-				_check(case_name + ": видимость чужого глушителя совпадает", rig != null and rig.part("Suppressor").visible == suppressed)
+				_check(case_name + ": видимость чужого глушителя совпадает", rig != null and rig.part("Suppressor").visible == suppressed,
+					"видно %s, риг считает %s, действие «%s», обвес у копии %s" % [str(rig.part("Suppressor").visible), str(rig._suppressed), rig.action, str(person.weapon_mods)] if rig else "рига нет")
 			"reload_cancel", "suppressor_cancel", "injury_cancel":
 				_check(case_name + ": прерывание не меняло вещи хоста", before == JSON.stringify([person.inventory.equipment, person.inventory.items, person.inventory.buffer]))
 				_check(case_name + ": отмена дошла до чужого рига", rig == null or (rig.action == "" and not rig.is_busy()))
+			"hand_mag_out", "hand_mag_in", "hand_mag_swap":
+				# обойма из окна рюкзака: предметы переносит хост по окончании движения рук клиента
+				var spare: Array = []
+				for raw_item: Dictionary in person.inventory.items:
+					if raw_item.has("rounds"):
+						spare.append(int(raw_item.rounds))
+				spare.sort()
+				var standing: Dictionary = equipped.get("mag", {})
+				if case_name == "hand_mag_out":
+					_check("вынуть: у хоста шахта пуста, магазин с остатком в рюкзаке, патрон в стволе", String(standing.get("id", "")) == "" and int(equipped.chamber) == 1 and spare == [3, 8, 8], str(spare))
+				elif case_name == "hand_mag_in":
+					_check("вставить: у хоста магазин на 8 в оружии, патрон в стволе тот же", String(standing.get("id", "")) == "mag_918_8" and int(standing.rounds) == 8 and int(equipped.chamber) == 1 and spare == [8], str(spare))
+				else:
+					_check("сменить: у хоста выбранный магазин в оружии, прежний с остатком в рюкзаке", int(standing.get("rounds", -1)) == 8 and int(equipped.chamber) == 1 and spare == [3, 8], str(spare))
+				_check(case_name + ": чужой WeaponRig показал движение магазина и руки", bool(_seen.get("action_reload", false)) and bool(_seen.get("mag_moved", false)) and bool(_seen.get("hand_target", false)), str(_seen.keys()))
+				_check(case_name + ": у чужого рига действие закончено", rig == null or not rig.is_busy())
 			"last_shot":
 				_check("последний выстрел: расход подтверждён хостом", Gear.total_rounds(equipped) == 0)
 				_check("хост считает износ оружия", is_equal_approx(float(equipped.dur), 100.0 - float(WeaponDb.weapon(PM_ID).stats.wear)))
@@ -237,6 +255,8 @@ func _seed_case(case_name: String) -> void:
 	var entry: Dictionary = _entry(0 if case_name in ["reload_empty", "last_shot"] else 3, 0 if case_name == "reload_empty" else 1, int(previous.get("rev", 0)) + 1)
 	if case_name in ["suppressor_remove", "last_shot"]:
 		entry.mods = {"muzzle": {"id": SUP_ID, "dur": 20.0}}
+	if case_name == "hand_mag_in":
+		entry.mag = {"id": "", "ammo": "ammo_918_pst", "rounds": 0}
 	var items: Array = []
 	ItemDb.add_to(items, WeaponDb.make_mag("mag_918_8", "ammo_918_pst", 8), Balance.BACKPACK_GRID)
 	ItemDb.add_to(items, WeaponDb.make_mag("mag_918_8", "ammo_918_pst", 8), Balance.BACKPACK_GRID)
@@ -297,6 +317,22 @@ func _run_case(case_name: String, revision: int) -> void:
 			await get_tree().create_timer(0.3).timeout
 			_check(case_name + ": смена оружия прервала действие", person._pm_action.is_empty() and person.reload_timer <= 0.0)
 			_check(case_name + ": копия вещей клиента цела", snapshot == JSON.stringify([person.inventory.equipment, person.inventory.items]))
+		"hand_mag_out", "hand_mag_in", "hand_mag_swap":
+			# как из окна рюкзака: «Вынуть обойму» / магазин брошен на оружие в руках
+			person.weapon_mag = WeaponMods.mag_state(person.weapon_entry())
+			var why: String = person.hand_mag_eject() if case_name == "hand_mag_out" else person.hand_mag_insert("backpack", 0)
+			_check(case_name + ": движение рук начато", why == "" and String(person._pm_action.get("kind", "")) == ("mag_out" if case_name == "hand_mag_out" else "mag_in"), why)
+			await get_tree().create_timer(0.3).timeout
+			_check(case_name + ": посреди движения вещи клиента на месте", snapshot == JSON.stringify([person.inventory.equipment, person.inventory.items]))
+			if not await _wait(func() -> bool: return person._pm_action.is_empty(), 10.0):
+				_check(case_name + ": ответ хоста получен", false)
+			await get_tree().create_timer(0.3).timeout
+			var now: Dictionary = person.weapon_entry()
+			var now_mag: Dictionary = now.get("mag", {})
+			if case_name == "hand_mag_out":
+				_check("вынуть: у клиента шахта пуста, в оружии один патрон", String(now_mag.get("id", "")) == "" and person.ammo == 1, "в оружии %d" % person.ammo)
+			else:
+				_check(case_name + ": у клиента в оружии магазин на 8 и патрон в стволе", String(now_mag.get("id", "")) == "mag_918_8" and person.ammo == 9, "в оружии %d" % person.ammo)
 		"injury_cancel":
 			person._start_reload(person.spec())
 			if not await _wait(func() -> bool: return person.health.downed and person._pm_action.is_empty(), 8.0):

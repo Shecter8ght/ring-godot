@@ -606,6 +606,7 @@ tools/godot.cmd --headless res://tools/pm_worn_check.tscn   # ПМ «пошар�
                                                               # (метка, линия прицеливания); с окном (--windowed --resolution 1600x900) — снимки pm_worn_*
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/pm_shots.tscn # ПМ: хват, ADS, фазы перезарядки/глушителя, третье лицо в docs/screens/pm_*.png
 tools/godot.cmd --headless res://tools/pm_net_test.tscn -- host # + та же сцена -- client через 3 с: реальные действия ПМ по ENet (порт 7777; отдельно от coop_raid_test)
+                                                              # в том числе обойма из окна рюкзака: вынуть, вставить, сменить — предметы у хоста, движение рига у наблюдателя
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/asset_kit/uv_check.py -- [veras|mosin|pm] [атлас] [вариант]
                                                               # общий модуль игровой развёртки оружия (tools/asset_kit/uv.py, укладка uv_pack.py) на копиях готовых сеток:
                                                               # заполнение, плотность видимого / у глаза / вдали, отступы проверены растром; слои KitUV* —
@@ -640,6 +641,8 @@ tools/godot.cmd --windowed --resolution 1600x900 res://tools/veras54_mags_vm_sho
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/export_veras54.py -- [viewmodel] [world] [detail] [grips] # ВЕРАС-54: руки+клипы (перезарядки, проверка, задержка, переводчик огня), мировая и подробная (конструктор) — .gltf с общими картами в assets/models/weapons/veras54; grips — наборы клипов под рукоятки ВАРН
 tools/godot.cmd res://tools/veras_shots.tscn                # ВЕРАС-54 от первого лица: бедро, прицел, перезарядки, проверка магазина, мировая модель; рукоятки ВАРН V1/V2 и глушитель
                                                               # задержка «гильза в окне» и её устранение, вид при прочности 100/60/20 (один), прицеливание «с завалом» (СКМ, 45°), кисти крупно, быстрая перезарядка, проверка магазина с удержанием и поворотом кисти; снимки veras_* (VERAS_PART=grips|jam|states|cant|hand|fast|check|firemode)
+                                                              # VERAS_PART=eject — «вынуть магазин» из окна рюкзака (veras_eject_*); VERAS_POS=spawn | x,y,z и VERAS_YAW=град —
+                                                              # точка съёмки: точка по умолчанию (100; 0,1; −5) после переделки карты ТЦ стоит у стены, оружие там убрано
 bash tools/veras54_v13/clips/build_fire_modes.sh              # переводчик огня большим пальцем правой руки (clips/fire_mode_clip.py): АВ→2, 2→ОД, ОД→АВ без рукоятки и под ВАРН V1/V2
                                                               # → «Клипы v13/VERAS54_FireMode_*_v13.blend»; затем export_veras54.py -- viewmodel grips, --import, veras_shots VERAS_PART=firemode
 tools/godot.cmd --headless res://tools/veras_hand_test.tscn # ВЕРАС-54, левая рука с рукоятками (ВАРН V1 и V2, на удлинителе): стоя, на ходу, в прицел и обратно — кости не копят масштаб, кисть у рукоятки
@@ -876,7 +879,6 @@ tools/godot.cmd --headless res://tools/roadmap_test.tscn    # дорожная �
                                                               # отметка из игры пишется в этот же файл и не затирает ручные правки, фильтр «только не сделанное», «отложено»;
                                                               # с окном (--windowed --resolution 1600x900) — снимки roadmap_*
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/tv_light_shots.tscn # свет от телевизора ночью без генератора: видно мебель и дальнюю стену; снимки tv_light_*
-"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_rigs.py # разгрузки rig_*: модели (-- --preview <папка> — превью); затем --import и icon_bake -- rig_belt rig_chest rig_assault rig_heavy
 tools/godot.cmd --headless res://tools/holster_test.tscn    # оружие убирается клавишей своего слота и достаётся ею же, бег быстрее; с открытым рюкзаком в рейде персонаж стоит
 tools/godot.cmd --headless res://tools/slung_test.tscn     # снаряжение и убранное оружие на теле (NpcOutfit, SlungWeapons): игрок на теле мародёра
                                                               # одет по своему снаряжению, длинные — за спиной (два накрест), пистолет и ракетница —
