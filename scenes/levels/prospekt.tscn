@@ -42,8 +42,8 @@ display_name = "За «Вершиной»"
 entry = true
 
 [node name="Entry_2" parent="Gameplay" instance=ExtResource("4")]
-position = Vector3(181.3, 0.08, 236)
-display_name = "Юг, у насыпи"
+position = Vector3(184, 7.68, 260)
+display_name = "Вокзал, платформа"
 entry = true
 
 [node name="Entry_3" parent="Gameplay" instance=ExtResource("4")]
@@ -1901,7 +1901,7 @@ search_s = 6
 look = 1
 
 [node name="Loot_219" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(172.9, 0.6, 157)
+position = Vector3(172.9, 0.6, 121)
 display_name = "Гараж открыт"
 table = "storage"
 search_s = 3
@@ -2345,8 +2345,8 @@ look = 4
 stash = true
 
 [node name="Loot_282" parent="Gameplay/Loot" instance=ExtResource("12")]
-position = Vector3(157.7, 0.6, 161.6)
-display_name = "Под плитой у гаражей корпуса 3"
+position = Vector3(143, 0.6, 198.4)
+display_name = "Под скамьёй на привокзальной площади"
 table = "stash"
 search_s = 2.5
 look = 4

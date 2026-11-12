@@ -1694,7 +1694,16 @@ def stage_s2_2_yarus() -> Patch:
     return Y.build(Patch("s2_2_yarus", BASE_REV_S2C))
 
 
-STAGES = {"s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ вторая очередь, этап 3: вокзал и площадь (tools/prospekt_s2_3.py)
+BASE_REV_S2D = "a6122626"         # снимок плана после этапа 2
+
+
+def stage_s2_3_station() -> Patch:
+    import prospekt_s2_3 as V3  # noqa: E402
+    return V3.build(Patch("s2_3_station", BASE_REV_S2D))
+
+
+STAGES = {"s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1714,6 +1723,9 @@ def main() -> None:
         if name == "s2_2_yarus":
             import prospekt_s2_2_data as _yd
             _yd.plan_data()
+        if name == "s2_3_station":
+            import prospekt_s2_3_data as _sd
+            _sd.plan_data()
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":
