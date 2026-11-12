@@ -8,6 +8,7 @@ extends Node
 ## PROSPEKT_VIEWS=avenue,hall — точки; PROSPEKT_HIDE_LABELS=1 — убрать подписи блокаута;
 ## PROSPEKT_ANGULAR=0 — сравнить с обычной фильтрацией теней без PCSS.
 ## RAID_LIGHT_SCENE=res://… — другая карта; RAID_LIGHT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z;… — её камеры.
+## PROSPEKT_OPEN=Loot_1,Loot_2 — открыть эти контейнеры лута (как после обыска).
 ## RAID_LIGHT_REUSE=1 — переключать условия на одной карте (проверяет и переходы погоды без повторного навмеша).
 
 const SCENE: String = "res://scenes/levels/prospekt.tscn"
@@ -98,6 +99,11 @@ func _ready() -> void:
 		if OS.get_environment("PROSPEKT_HIDE_LABELS") == "1":
 			for label: Node in level.find_children("*", "Label3D", true, false):
 				(label as Label3D).visible = false
+		# PROSPEKT_OPEN=Loot_1,Loot_2 — эти контейнеры обысканы (модель открыта), для снимков «до / после обыска»
+		for open_name: String in OS.get_environment("PROSPEKT_OPEN").split(",", false):
+			var opened_box: LootContainer = level.get_node_or_null("Gameplay/Loot/" + open_name) as LootContainer
+			if opened_box != null:
+				opened_box.rolled = true
 		var marauders: Node = level.get_node_or_null("Marauders")
 		if marauders:
 			for m: Node in marauders.get_children():

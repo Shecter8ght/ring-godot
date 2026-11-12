@@ -1638,6 +1638,27 @@ const LOOT_GRID_W := 6
 ## Выброшенное в рейде в пределах стольких метров от лежащего мешка «Выброшено» — в тот же мешок.
 const DROP_MERGE_M := 3.0
 const LOOT_ROWS := {"NONE": 3, "SAFE": 3, "RACK": 4, "BODY": 4, "BAG": 3, "CRATE": 3}
+## Контейнеры по виду (LootContainer.kind; таблица лута носит то же имя): ряды сетки (ширина — LOOT_GRID_W) и время
+## обыска, с. Модели видов — data/loot_containers.json. Для прежних Look значения выше не менялись.
+const LOOT_KINDS := {
+	"weapon_crate": {"rows": 4, "search": 3.5},
+	"ammo_crate": {"rows": 3, "search": 3.0},
+	"weapon_locker": {"rows": 4, "search": 3.0},
+	"medbag": {"rows": 3, "search": 2.0},
+	"med_cabinet": {"rows": 3, "search": 2.5},
+	"toolbox": {"rows": 3, "search": 2.5},
+	"car_trunk": {"rows": 3, "search": 3.5},
+	"duffel": {"rows": 3, "search": 2.5},
+	"suitcase": {"rows": 3, "search": 2.5},
+	"jacket": {"rows": 2, "search": 1.5},
+	"safe": {"rows": 3, "search": 6.0},
+	"pc_block": {"rows": 3, "search": 3.0},
+	"tech_shelf": {"rows": 3, "search": 2.5},
+	"filing": {"rows": 3, "search": 2.0},
+	"ration_crate": {"rows": 3, "search": 2.5},
+	"carton": {"rows": 3, "search": 2.0},
+	"locker": {"rows": 3, "search": 3.0},
+}
 ## ЛЦУ (LaserSight): докуда видна точка, м; её радиус вблизи и прирост на метр дистанции (чтобы
 ## разглядеть сверху). Цветного отсвета вокруг точки нет.
 const LASER := {"range_m": 150.0, "dot_radius": 0.012, "dot_grow": 0.0012}
@@ -2208,10 +2229,13 @@ const STAIR_NAV := {"on": true, "pad_m": 1.2, "link_offsets": [1.0, 0.6, 0.3], "
 ## Лазерная метка: ресурс головки — единственное ограничение частоты нанесения.
 const ENGRAVING := {"charges": 3, "max_text": 24, "width": 0.065, "pistol_width": 0.045,
 	"fade_begin": 3.0, "fade_length": 5.0, "cache": 32, "head_chance": 0.012,
-	"head_tables": ["electronics", "tools"], "cargo_search_s": 8.0,
+	"head_tables": ["electronics", "tools", "tech_shelf", "pc_block", "toolbox"], "cargo_search_s": 8.0,
+	# шанс головки по таблице вместо head_chance: таблицы по виду контейнера «Проспекта» (места те же, что у electronics / tools)
+	"head_chance_by": {"tech_shelf": 0.016, "pc_block": 0.016, "toolbox": 0.0045},
 	"head_value": 12000, "spent_value": 500, "guards": 3, "guard_radius": 8.0,
-	"parts_loot": {"engraver_frame": {"tables": ["tools"], "chance": 0.025, "value": 8500},
-		"engraver_controller": {"tables": ["electronics"], "chance": 0.025, "value": 6000}}}
+	"parts_loot": {"engraver_frame": {"tables": ["tools", "toolbox"], "chance": 0.025, "by_table": {"toolbox": 0.006}, "value": 8500},
+		"engraver_controller": {"tables": ["electronics", "tech_shelf", "pc_block"], "chance": 0.025,
+			"by_table": {"tech_shelf": 0.03, "pc_block": 0.03}, "value": 6000}}}
 ## Наклейки на оружии (Stickers, решения владельца 2026-10-11): не больше max на стволе; «Счёт» (tally)
 ## получает зарубку за эвакуацию со стволом, до tally_max; сторона наклейки на длинном стволе и на
 ## пистолете, м (× размер по выбору, WeaponMark.SCALES); aspect — ширина к высоте, если не квадрат.
@@ -2327,6 +2351,93 @@ const CIVILIAN_LOOT := {
 		["bench_vice", 0.6, [1, 1]], ["empty_jerrycan", 1, [1, 1]], ["multimeter", 0.35, [1, 1]], ["power_unit", 0.6, [1, 1]],
 		["nothing", 5, [1, 1]]
 	]},
+	# Таблицы по виду контейнера (docs/design/loot_matrix_v2.md §5.1): таблица = вид, «Проспект»
+	"jacket": {"rolls": [1, 2], "entries": [
+		["cigarettes", 3, [1, 2]], ["lighter", 3, [1, 1]], ["phone", 1, [1, 1]], ["cash", 2, [1, 1]], ["headphones", 0.8, [1, 1]],
+		["painkillers", 1, [1, 1]], ["bandage", 0.8, [1, 2]], ["cassette_player", 0.4, [1, 1]], ["nothing", 2.5, [0, 0]]
+	]},
+	"duffel": {"rolls": [1, 2], "entries": [
+		["water", 2, [1, 1]], ["canned", 2, [1, 1]], ["energy_bar", 2, [1, 2]], ["thermos", 1.2, [1, 1]], ["kettle", 0.5, [1, 1]],
+		["cassette_player", 0.9, [1, 1]], ["headphones", 1, [1, 1]], ["powerbank", 1.4, [1, 1]], ["camera", 0.4, [1, 1]],
+		["binoculars", 0.5, [1, 1]], ["bandage", 1.2, [1, 2]], ["painkillers", 0.9, [1, 2]], ["lighter", 1, [1, 1]], ["cigarettes", 0.6, [1, 2]],
+		["phone", 0.5, [1, 1]], ["pouch_pistol", 0.8, [1, 1]], ["pouch_rifle", 0.3, [1, 1]], ["ammo_12_buck", 0.4, [5, 15]],
+		["nothing", 3, [0, 0]]
+	]},
+	"suitcase": {"rolls": [1, 2], "entries": [
+		["watch", 1, [1, 1]], ["perfume", 2, [1, 1]], ["cash", 2, [1, 2]], ["documents", 1.2, [1, 1]], ["phone", 0.6, [1, 1]],
+		["headphones", 1, [1, 1]], ["laptop", 0.25, [1, 1]], ["camera", 0.5, [1, 1]], ["gold_chain", 0.2, [1, 1]], ["cigarettes", 0.6, [1, 2]],
+		["thermos", 0.6, [1, 1]], ["nothing", 2.5, [0, 0]]
+	]},
+	"safe": {"rolls": [1, 2], "entries": [
+		["cash", 5, [1, 4]], ["gold_chain", 0.8, [1, 1]], ["watch", 0.8, [1, 1]], ["documents", 2, [1, 1]], ["desk_lamp", 0.3, [1, 1]],
+		["nothing", 1.5, [0, 0]]
+	]},
+	"medbag": {"rolls": [2, 3], "entries": [
+		["bandage", 6, [1, 3]], ["painkillers", 4, [1, 2]], ["medkit", 1.6, [1, 1]], ["surgical_tape", 0.6, [1, 1]], ["sterile_dressing_kit", 0.5, [1, 1]],
+		["antiseptic_pack", 0.5, [1, 1]], ["hemostatic_pack", 0.3, [1, 1]], ["medical_case", 0.8, [1, 1]], ["nothing", 1, [0, 0]]
+	]},
+	"med_cabinet": {"rolls": [1, 3], "entries": [
+		["suture_kit", 1, [1, 1]], ["scalpel_kit", 0.6, [1, 1]], ["hemostat_kit", 0.6, [1, 1]], ["dental_kit", 0.5, [1, 1]],
+		["orthopedic_kit", 0.4, [1, 1]], ["intubation_kit", 0.4, [1, 1]], ["diagnostic_kit", 0.5, [1, 1]], ["sterile_dressing_kit", 1, [1, 1]],
+		["antibiotics_pack", 0.5, [1, 1]], ["anesthetic_pack", 0.5, [1, 1]], ["insulin_pack", 0.4, [1, 1]], ["antiseptic_pack", 1, [1, 1]],
+		["hemostatic_pack", 0.5, [1, 1]], ["iv_solution_pack", 1, [1, 1]], ["microscope_optical", 0.15, [1, 1]], ["bandage", 3, [1, 3]],
+		["painkillers", 2, [1, 2]], ["medkit", 1, [1, 1]], ["nothing", 1, [0, 0]]
+	]},
+	"toolbox": {"rolls": [1, 2], "entries": [
+		["wires", 2.5, [1, 2]], ["battery", 1, [1, 1]], ["toolset", 0.9, [1, 1]], ["screwdriver", 3, [1, 1]], ["pliers", 2, [1, 1]],
+		["hammer", 2, [1, 1]], ["pipe_wrench", 1.5, [1, 1]], ["oil_tin", 1.5, [1, 1]], ["metal_toolbox", 1, [1, 1]], ["bench_vice", 0.5, [1, 1]],
+		["multimeter", 0.5, [1, 1]], ["junction_box", 1, [1, 1]], ["empty_jerrycan", 1, [1, 1]], ["spray_paint", 1.2, [1, 2]],
+		["stencil_kit", 0.5, [1, 1]], ["ratchet_socket", 0.8, [1, 1]], ["tire_pump", 0.5, [1, 1]], ["weapon_cleaning_kit", 0.4, [1, 1]],
+		["nothing", 3, [0, 0]]
+	]},
+	"car_trunk": {"rolls": [1, 2], "entries": [
+		["empty_jerrycan", 2, [1, 1]], ["oil_tin", 2, [1, 1]], ["auto_lubricant", 1.2, [1, 1]], ["tire_pump", 1, [1, 1]],
+		["ratchet_socket", 0.8, [1, 1]], ["battery", 0.4, [1, 1]], ["wires", 0.8, [1, 2]], ["car_tire", 0.6, [1, 1]], ["car_rim", 0.5, [1, 1]],
+		["brake_service_kit", 0.4, [1, 1]], ["bearing_set", 0.3, [1, 1]], ["timing_kit", 0.2, [1, 1]], ["alternator_rebuild", 0.12, [1, 1]],
+		["car_ecu", 0.1, [1, 1]], ["injector_set", 0.08, [1, 1]], ["thermos", 1, [1, 1]], ["water", 1, [1, 1]], ["medical_case", 0.6, [1, 1]],
+		["cassette_player", 0.6, [1, 1]], ["bandage", 0.6, [1, 2]], ["pouch_pistol", 0.15, [1, 1]], ["nothing", 4, [0, 0]]
+	]},
+	"pc_block": {"rolls": [2, 3], "entries": [
+		["wires", 1.5, [1, 1]], ["battery", 0.6, [1, 1]], ["circuit_board", 1.5, [1, 1]], ["power_unit", 1.5, [1, 1]], ["junction_box", 1, [1, 1]],
+		["multimeter", 0.4, [1, 1]], ["ssd_sata", 0.8, [1, 1]], ["ssd_nvme", 0.8, [1, 1]], ["ram_desktop", 1.2, [1, 1]],
+		["ram_server", 0.5, [1, 1]], ["cpu_desktop", 0.6, [1, 1]], ["cpu_server", 0.1, [1, 1]], ["gpu", 1, [1, 1]], ["gpu_gaming", 0.25, [1, 1]],
+		["gpu_compute", 0.08, [1, 1]], ["motherboard_server", 0.5, [1, 1]], ["cpu_cooling_kit", 0.5, [1, 1]], ["server_drive", 1, [1, 1]],
+		["printer_board", 0.3, [1, 1]], ["printer_head", 0.2, [1, 1]], ["nothing", 2, [0, 0]]
+	]},
+	"tech_shelf": {"rolls": [1, 2], "entries": [
+		["phone", 2, [1, 1]], ["headphones", 3, [1, 1]], ["powerbank", 3, [1, 1]], ["camera", 1, [1, 1]], ["laptop", 1.6, [1, 1]],
+		["laptop_business", 0.3, [1, 1]], ["smartphone_business", 0.8, [1, 1]], ["cctv_dome", 0.4, [1, 1]], ["cctv_bullet", 0.4, [1, 1]],
+		["router_industrial", 0.5, [1, 1]], ["switch_managed", 0.5, [1, 1]], ["photo_camera_pro", 0.1, [1, 1]], ["radio_transceiver", 0.4, [1, 1]],
+		["video_camera", 0.5, [1, 1]], ["cassette_player", 1, [1, 1]], ["wires", 1, [1, 2]], ["nothing", 3, [0, 0]]
+	]},
+	"filing": {"rolls": [1, 2], "entries": [
+		["documents", 2.5, [1, 1]], ["cash", 2, [1, 1]], ["phone", 0.6, [1, 1]], ["powerbank", 1.5, [1, 1]], ["lighter", 2, [1, 1]],
+		["painkillers", 1, [1, 1]], ["desk_lamp", 1, [1, 1]], ["thermos", 1, [1, 1]], ["cassette_player", 0.5, [1, 1]], ["sticker_film", 1.8, [1, 2]],
+		["ink_set", 1.2, [1, 1]], ["stencil_kit", 0.4, [1, 1]], ["printer_body", 0.45, [1, 1]], ["printer_board", 0.15, [1, 1]],
+		["sticker_tally", 0.4, [1, 2]], ["ram_desktop", 0.5, [1, 1]], ["ssd_sata", 0.3, [1, 1]], ["smartphone_business", 0.3, [1, 1]],
+		["laptop_business", 0.12, [1, 1]], ["cpu_desktop", 0.15, [1, 1]], ["cctv_dome", 0.15, [1, 1]], ["nothing", 4, [0, 0]]
+	]},
+	"ration_crate": {"rolls": [1, 2], "entries": [
+		["water", 4, [1, 1]], ["canned", 4, [1, 1]], ["energy_bar", 3, [1, 2]], ["coffee_pack", 0.7, [1, 1]], ["ration_daily", 0.8, [1, 1]],
+		["ration_patrol", 0.8, [1, 1]], ["ration_arctic", 0.5, [1, 1]], ["water_purification", 0.5, [1, 1]], ["cigarettes", 0.6, [1, 2]],
+		["lighter", 0.8, [1, 1]], ["thermos", 0.8, [1, 1]], ["kettle", 0.5, [1, 1]], ["sticker_skull", 0.3, [1, 2]], ["sticker_tally", 0.3, [1, 2]],
+		["sticker_shark", 0.06, [1, 1]], ["nothing", 2, [0, 0]]
+	]},
+	"carton": {"rolls": [1, 2], "entries": [
+		["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 1.2, [1, 2]], ["battery", 0.4, [1, 1]], ["cigarettes", 0.6, [1, 2]],
+		["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.5, [1, 1]], ["empty_jerrycan", 0.5, [1, 1]], ["junction_box", 0.7, [1, 1]],
+		["screwdriver", 1, [1, 1]], ["spray_paint", 0.8, [1, 1]], ["sticker_film", 1, [1, 2]], ["printer_body", 0.3, [1, 1]],
+		["pouch_pistol", 0.4, [1, 1]], ["energy_bar", 1.5, [1, 2]], ["lighter", 1, [1, 1]], ["thermos", 0.8, [1, 1]], ["perfume", 0.4, [1, 1]],
+		["weapon_cleaning_kit", 0.2, [1, 1]], ["suture_kit", 0.2, [1, 1]], ["car_tire", 0.3, [1, 1]], ["pack_12_buck", 0.3, [1, 1]],
+		["ration_patrol", 0.3, [1, 1]], ["nothing", 6, [0, 0]]
+	]},
+	"locker": {"rolls": [1, 3], "entries": [
+		["documents", 1, [1, 1]], ["cash", 1.2, [1, 1]], ["phone", 0.6, [1, 1]], ["watch", 0.5, [1, 1]], ["perfume", 1, [1, 1]],
+		["laptop", 0.25, [1, 1]], ["camera", 0.5, [1, 1]], ["headphones", 1, [1, 1]], ["powerbank", 1, [1, 1]], ["thermos", 0.5, [1, 1]],
+		["wires", 0.6, [1, 1]], ["battery", 0.3, [1, 1]], ["cigarettes", 0.6, [1, 2]], ["painkillers", 0.5, [1, 1]], ["bandage", 0.6, [1, 2]],
+		["canned", 1, [1, 1]], ["pouch_pistol", 0.5, [1, 1]], ["smartphone_business", 0.25, [1, 1]], ["laptop_business", 0.1, [1, 1]],
+		["ssd_nvme", 0.15, [1, 1]], ["nothing", 3, [0, 0]]
+	]}
 }
 ## Свет от экрана телевизора в убежище (живая лампа TvGlow, в запечённый свет не входит): яркость,
 ## дальность и спад; static_k — «помехи» ярче; flicker — доля, на которую картинка «дышит», и как

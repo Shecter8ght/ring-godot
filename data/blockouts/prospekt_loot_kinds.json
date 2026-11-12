@@ -1,0 +1,2982 @@
+{
+ "Loot_0": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "кофейня «Зерно»: шкаф конторы"
+ },
+ "Loot_1": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "кофейня «Зерно»: склад магазина"
+ },
+ "Loot_2": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "кофейня «Зерно»: на столе"
+ },
+ "Loot_3": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "цветы: шкаф конторы"
+ },
+ "Loot_4": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "цветы: склад магазина"
+ },
+ "Loot_5": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "цветы: на столе"
+ },
+ "Loot_6": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "аптека: шкаф конторы"
+ },
+ "Loot_7": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "аптека: склад магазина"
+ },
+ "Loot_8": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "аптека: на столе"
+ },
+ "Loot_9": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "аптека: тайник на крыше"
+ },
+ "Loot_10": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "аптека: рюкзак на крыше"
+ },
+ "Loot_11": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "одежда «Modus»: шкаф конторы"
+ },
+ "Loot_12": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "одежда «Modus»: склад магазина"
+ },
+ "Loot_13": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "одежда «Modus»: на столе"
+ },
+ "Loot_14": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "одежда «Modus»: тайник на крыше"
+ },
+ "Loot_15": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "одежда «Modus»: рюкзак на крыше"
+ },
+ "Loot_16": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "пекарня: шкаф конторы"
+ },
+ "Loot_17": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "пекарня: склад магазина"
+ },
+ "Loot_18": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "пекарня: на столе"
+ },
+ "Loot_19": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "пекарня: тайник на крыше"
+ },
+ "Loot_20": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "пекарня: рюкзак на крыше"
+ },
+ "Loot_21": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "будка охраны паркинга"
+ },
+ "Loot_22": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_23": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_24": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_25": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_26": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_27": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_28": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_29": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_30": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_31": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_32": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_33": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_34": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_35": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_36": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_37": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_38": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_39": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_40": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_41": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_42": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_43": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_44": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_45": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_46": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_47": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_48": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_49": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_50": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_51": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_52": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_53": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_54": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_55": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_56": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_57": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_58": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_59": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_60": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_61": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_62": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_63": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_64": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_65": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_66": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_67": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_68": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_69": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_70": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_71": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_72": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_73": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_74": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_75": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_76": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_77": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_78": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_79": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_80": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_81": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_82": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_83": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_84": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_85": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_86": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_87": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_88": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_89": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_90": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_91": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_92": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_93": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "открытые двери и багажник"
+ },
+ "Loot_94": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "тело ЧВК в проезде 2"
+ },
+ "Loot_95": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "вещи",
+  "was": "storage",
+  "note": "ящики жильцов"
+ },
+ "Loot_96": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "shelf",
+  "note": "инструмент у подкопа"
+ },
+ "Loot_97": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "окно операциониста"
+ },
+ "Loot_98": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "окно операциониста"
+ },
+ "Loot_99": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "окно операциониста"
+ },
+ "Loot_100": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "кассета банкомата"
+ },
+ "Loot_101": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "сейф кассы"
+ },
+ "Loot_102": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "оружейный шкаф охраны"
+ },
+ "Loot_103": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "сейф управляющего"
+ },
+ "Loot_104": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "зал ожидания"
+ },
+ "Loot_105": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело мародёра у входа"
+ },
+ "Loot_106": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "офис 2-го этажа"
+ },
+ "Loot_107": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "архив"
+ },
+ "Loot_108": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "сейф бухгалтерии"
+ },
+ "Loot_109": {
+  "kind": "",
+  "table": "prospekt_director_safe",
+  "why": "особое место",
+  "was": "prospekt_director_safe",
+  "note": "сейф директора (ключ)"
+ },
+ "Loot_110": {
+  "kind": "pc_block",
+  "table": "pc_block",
+  "why": "жёсткие диски",
+  "was": "server_rack",
+  "note": "серверная: жёсткие диски"
+ },
+ "Loot_111": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "зал 3-го этажа"
+ },
+ "Loot_112": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "лёжка на крыше банка"
+ },
+ "Loot_113": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "тайник у кондиционеров"
+ },
+ "Loot_114": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "хранилище: кассеты и слитки"
+ },
+ "Loot_115": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "хранилище: кассеты и слитки"
+ },
+ "Loot_116": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "хранилище: кассеты и слитки"
+ },
+ "Loot_117": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "депозитарные ячейки"
+ },
+ "Loot_118": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "пачки денег",
+  "was": "electronics",
+  "note": "пересчёт: пачки денег"
+ },
+ "Loot_119": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "пост охраны хранилища"
+ },
+ "Loot_120": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело копателя в коридоре"
+ },
+ "Loot_121": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "инкассаторский броневик: мешки с деньгами"
+ },
+ "Loot_122": {
+  "kind": "",
+  "table": "security",
+  "why": "тело",
+  "was": "security",
+  "note": "тело инкассатора"
+ },
+ "Loot_123": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "минимаркет «Весна»: шкаф конторы"
+ },
+ "Loot_124": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "минимаркет «Весна»: склад магазина"
+ },
+ "Loot_125": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "минимаркет «Весна»: на столе"
+ },
+ "Loot_126": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "минимаркет «Весна»: тайник на крыше"
+ },
+ "Loot_127": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "минимаркет «Весна»: рюкзак на крыше"
+ },
+ "Loot_128": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_129": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_130": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_131": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_132": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_133": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_134": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_135": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_136": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_137": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_138": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_139": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "стеллаж «Яруса»"
+ },
+ "Loot_140": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "касса"
+ },
+ "Loot_141": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "касса"
+ },
+ "Loot_142": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "касса"
+ },
+ "Loot_143": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "касса"
+ },
+ "Loot_144": {
+  "kind": "",
+  "table": "prospekt_yarus_staff",
+  "why": "особое место",
+  "was": "prospekt_yarus_staff",
+  "note": "склад «Яруса»"
+ },
+ "Loot_145": {
+  "kind": "",
+  "table": "prospekt_yarus_staff",
+  "why": "особое место",
+  "was": "prospekt_yarus_staff",
+  "note": "склад «Яруса»"
+ },
+ "Loot_146": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "аптечный уголок «Яруса»"
+ },
+ "Loot_147": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "кабинет администратора: сейф"
+ },
+ "Loot_148": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело мародёра в зале"
+ },
+ "Loot_149": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "бытовка прораба"
+ },
+ "Loot_150": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "бытовка: сейф с зарплатой"
+ },
+ "Loot_151": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "инструмент"
+ },
+ "Loot_152": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "лёжка на 5-м этаже каркаса"
+ },
+ "Loot_153": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "тело снайпера ЧВК на 9-м этаже"
+ },
+ "Loot_154": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "кабина самосвала"
+ },
+ "Loot_155": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "у пролома"
+ },
+ "Loot_156": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "котлован: утонувший мародёр"
+ },
+ "Loot_157": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "котлован: ящик с инструментом"
+ },
+ "Loot_158": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "камера хранения: ячейки"
+ },
+ "Loot_159": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "камера хранения: ячейки"
+ },
+ "Loot_160": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "bank",
+  "note": "кассы: сейф с выручкой"
+ },
+ "Loot_161": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "полиция: оружейный шкаф"
+ },
+ "Loot_162": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "полиция: стол дежурного"
+ },
+ "Loot_163": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "вокзальное кафе: касса"
+ },
+ "Loot_164": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "зал ожидания: рюкзак"
+ },
+ "Loot_165": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "зал ожидания: чемодан"
+ },
+ "Loot_166": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "справочная"
+ },
+ "Loot_167": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "кабинет начальника вокзала: сейф"
+ },
+ "Loot_168": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "антресоль: шкаф"
+ },
+ "Loot_169": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "крыша вокзала: тайник"
+ },
+ "Loot_170": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "платформа: тело бойца ЧВК"
+ },
+ "Loot_171": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "платформа: багаж из вагона"
+ },
+ "Loot_172": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "storage",
+  "note": "груз из вагона"
+ },
+ "Loot_173": {
+  "kind": "tech_shelf",
+  "table": "tech_shelf",
+  "why": "техника",
+  "was": "electronics",
+  "note": "ремонт телефонов: телефоны и платы"
+ },
+ "Loot_174": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "кафе «Угол»: касса"
+ },
+ "Loot_175": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "кафе «Угол»: на столе"
+ },
+ "Loot_176": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "табак: касса"
+ },
+ "Loot_177": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "пивная «Разливное»: касса"
+ },
+ "Loot_178": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "пивная «Разливное»: кеги и ящики"
+ },
+ "Loot_179": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "ПВЗ «Посылка»: посылки"
+ },
+ "Loot_180": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "storage",
+  "note": "ПВЗ «Посылка»: посылки"
+ },
+ "Loot_181": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "продукты «Угловой»: полки"
+ },
+ "Loot_182": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "продукты «Угловой»: полки"
+ },
+ "Loot_183": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "продукты «Угловой»: касса"
+ },
+ "Loot_184": {
+  "kind": "",
+  "table": "prospekt_concierge",
+  "why": "особое место",
+  "was": "prospekt_concierge",
+  "note": "вестибюль башни: стойка консьержа"
+ },
+ "Loot_185": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "аптека «Здоровье»: полки"
+ },
+ "Loot_186": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "аптека «Здоровье»: полки"
+ },
+ "Loot_187": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "аптека «Здоровье»: склад рецептурного"
+ },
+ "Loot_188": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "фитнес «Атлет»: шкафчики"
+ },
+ "Loot_189": {
+  "kind": "",
+  "table": "jewelry_safe",
+  "why": "особое место",
+  "was": "jewelry_safe",
+  "note": "ломбард «Золото»: сейф с золотом"
+ },
+ "Loot_190": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "ломбард «Золото»: охотничье ружьё в залоге"
+ },
+ "Loot_191": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "шаурма: касса"
+ },
+ "Loot_192": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "цветы: касса"
+ },
+ "Loot_193": {
+  "kind": "tech_shelf",
+  "table": "tech_shelf",
+  "why": "техника",
+  "was": "electronics",
+  "note": "салон связи: витрина телефонов"
+ },
+ "Loot_194": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "shelf",
+  "note": "парикмахерская «Локон»: касса и инструмент"
+ },
+ "Loot_195": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "крыша подиума: тайник у лёжки на проспект"
+ },
+ "Loot_196": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "крыша подиума: лёжка на южное плечо"
+ },
+ "Loot_197": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "машина жильца во дворе"
+ },
+ "Loot_198": {
+  "kind": "",
+  "table": "pharmacy",
+  "why": "тело",
+  "was": "pharmacy",
+  "note": "тела под простынями: санитары не успели"
+ },
+ "Loot_199": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "палатка в сквере"
+ },
+ "Loot_200": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "рынок в сквере: касса палатки"
+ },
+ "Loot_201": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "кафе «Сквер»: шкаф конторы"
+ },
+ "Loot_202": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "кафе «Сквер»: склад магазина"
+ },
+ "Loot_203": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / касса",
+  "was": "shelf",
+  "note": "кафе «Сквер»: на столе"
+ },
+ "Loot_204": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "кафе «Сквер»: тайник на крыше"
+ },
+ "Loot_205": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "кафе «Сквер»: рюкзак на крыше"
+ },
+ "Loot_206": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "детская площадка: брошенный рюкзак"
+ },
+ "Loot_207": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "открытый гараж"
+ },
+ "Loot_208": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело мародёра под вагоном"
+ },
+ "Loot_209": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "вещи пассажиров вагона"
+ },
+ "Loot_210": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "раздавленный ларёк"
+ },
+ "Loot_211": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "палатка медпункта"
+ },
+ "Loot_212": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "вещи",
+  "was": "storage",
+  "note": "вещи эвакуированных"
+ },
+ "Loot_213": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "чемоданы"
+ },
+ "Loot_214": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "pmc",
+  "note": "оружейка ЧВК"
+ },
+ "Loot_215": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "госпиталь"
+ },
+ "Loot_216": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "склад гуманитарки"
+ },
+ "Loot_217": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "тело бойца ЧВК"
+ },
+ "Loot_218": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "штаб: сейф с документами"
+ },
+ "Loot_219": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "гараж открыт"
+ },
+ "Loot_220": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "контейнер на парковке"
+ },
+ "Loot_221": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "тело ЧВК у въезда в тоннель"
+ },
+ "Loot_222": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "груз из вагона"
+ },
+ "Loot_223": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "пассажирский вагон"
+ },
+ "Loot_224": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "storage",
+  "note": "груз из вагона"
+ },
+ "Loot_225": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "контейнер вскрыт"
+ },
+ "Loot_226": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело мародёра у вагона"
+ },
+ "Loot_227": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "продукты «24 часа»: шкаф конторы"
+ },
+ "Loot_228": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "продукты «24 часа»: склад магазина"
+ },
+ "Loot_229": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "продукты «24 часа»: на столе"
+ },
+ "Loot_230": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "продукты «24 часа»: тайник на крыше"
+ },
+ "Loot_231": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "продукты «24 часа»: рюкзак на крыше"
+ },
+ "Loot_232": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело у контейнера"
+ },
+ "Loot_233": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "багаж автобуса",
+  "was": "home",
+  "note": "автобус: багаж"
+ },
+ "Loot_234": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "pmc",
+  "note": "пост ЧВК у контейнеров",
+  "model": "it_trunk"
+ },
+ "Loot_235": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "фильтр ЧВК: тело у контейнера"
+ },
+ "Loot_236": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "контейнер на разгрузке"
+ },
+ "Loot_237": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "палатка у кордона: аптечка"
+ },
+ "Loot_238": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "чемоданы эвакуации"
+ },
+ "Loot_239": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "скорая: укладка"
+ },
+ "Loot_240": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик с патронами",
+  "was": "pmc",
+  "note": "пост ЧВК: ящик с патронами"
+ },
+ "Loot_241": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "pmc",
+  "note": "БТР ЧВК: десантный отсек",
+  "model": "it_trunk"
+ },
+ "Loot_242": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "остановка: рюкзак"
+ },
+ "Loot_243": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "переход: ларёк"
+ },
+ "Loot_244": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "багаж автобуса",
+  "was": "home",
+  "note": "жёлтый автобус: багаж"
+ },
+ "Loot_245": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка",
+  "was": "home",
+  "note": "перевёрнутый автобус"
+ },
+ "Loot_246": {
+  "kind": "",
+  "table": "prospekt_body",
+  "why": "особое место",
+  "was": "prospekt_body",
+  "note": "тело у перевёрнутого автобуса"
+ },
+ "Loot_247": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "такси: багажник"
+ },
+ "Loot_248": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумки пассажиров",
+  "was": "home",
+  "note": "маршрутка: сумки пассажиров"
+ },
+ "Loot_249": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент в машине",
+  "was": "home",
+  "note": "пожарная: инструмент"
+ },
+ "Loot_250": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "затор: багажник"
+ },
+ "Loot_251": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "затор: на асфальте"
+ },
+ "Loot_252": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "полицейская: дробовик в салоне"
+ },
+ "Loot_253": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "автозак: оружейный ящик"
+ },
+ "Loot_254": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "тело бойца у баррикады"
+ },
+ "Loot_255": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик с патронами",
+  "was": "security",
+  "note": "БТР колонны: ящик с патронами"
+ },
+ "Loot_256": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "оцепление: брошенное"
+ },
+ "Loot_257": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "медпалатка эвакуации"
+ },
+ "Loot_258": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "фудтрак: касса"
+ },
+ "Loot_259": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты",
+  "was": "shelf",
+  "note": "кофейный ларёк"
+ },
+ "Loot_260": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "рюкзак у памятника"
+ },
+ "Loot_261": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "пост ДПС: автомат в машине"
+ },
+ "Loot_262": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "ПАЗ полиции"
+ },
+ "Loot_263": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "самосвал дорожников"
+ },
+ "Loot_264": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "парковка корпуса 3: багажник"
+ },
+ "Loot_265": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "парковка корпуса 3: салон"
+ },
+ "Loot_266": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "ларёк на парковке"
+ },
+ "Loot_267": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "у мусорных баков"
+ },
+ "Loot_268": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "будка охраны «Меридиана»"
+ },
+ "Loot_269": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка",
+  "was": "home",
+  "note": "автобус в тоннеле: багаж"
+ },
+ "Loot_270": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "машина в тоннеле"
+ },
+ "Loot_271": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "у барьеров перед тоннелем"
+ },
+ "Loot_272": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "гараж двора"
+ },
+ "Loot_273": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "мусорная площадка"
+ },
+ "Loot_274": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "гараж дома 7"
+ },
+ "Loot_275": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "фургон у «Яруса»"
+ },
+ "Loot_276": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "внедорожник: коробки"
+ },
+ "Loot_277": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "полицейская у «Яруса»"
+ },
+ "Loot_278": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "фура на разгрузке"
+ },
+ "Loot_279": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "ящики на разгрузке"
+ },
+ "Loot_280": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "схрон: в мусорном баке двора дома 7"
+ },
+ "Loot_281": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "схрон: за щитом КТП у хозяйственного проезда"
+ },
+ "Loot_282": {
+  "kind": "",
+  "table": "stash",
+  "why": "особое место",
+  "was": "stash",
+  "note": "схрон: под скамьёй на привокзальной площади"
+ },
+ "Loot_283": {
+  "kind": "",
+  "table": "pmc",
+  "why": "тело",
+  "was": "pmc",
+  "note": "фильтр ЧВК: тело между контейнерами"
+ },
+ "Loot_284": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "ларёк: касса"
+ },
+ "Loot_285": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "ларёк: касса"
+ },
+ "Loot_286": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "ларёк: касса"
+ },
+ "Loot_287": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "вещи",
+  "was": "storage",
+  "note": "колонна эвакуации: вещи у контейнера"
+ },
+ "Loot_288": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка в машине",
+  "was": "home",
+  "note": "машина в кармане: багажник"
+ },
+ "Loot_289": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "гаражи переулка"
+ },
+ "Loot_290": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "у баков в переулке"
+ },
+ "Loot_291": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "pmc",
+  "note": "бронемашина ЧВК в автопарке",
+  "model": "it_trunk"
+ },
+ "Loot_292": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "вещи",
+  "was": "storage",
+  "note": "палатка лагеря: вещи"
+ },
+ "Loot_293": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "автомойка «Блеск»: касса клиентской"
+ },
+ "Loot_294": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "автомойка «Блеск»: шкафчик бытовки"
+ },
+ "Loot_295": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "автомойка «Блеск»: стеллаж химии"
+ },
+ "Loot_296": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "автомойка «Блеск»: ящик техпомещения"
+ },
+ "Loot_297": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "гараж / инструмент",
+  "was": "storage",
+  "note": "шиномонтаж: ящик у контейнера"
+ },
+ "Loot_298": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, Офис продаж ЖК: бытовое"
+ },
+ "Loot_299": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "Вершина, Офис продаж ЖК: бытовое"
+ },
+ "Loot_300": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "Вершина, кабинет: бытовое"
+ },
+ "Loot_301": {
+  "kind": "pc_block",
+  "table": "pc_block",
+  "why": "архив",
+  "was": "electronics",
+  "note": "Вершина, архив: ценное"
+ },
+ "Loot_302": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, Вестибюль башни А: бытовое"
+ },
+ "Loot_303": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "Вершина, пост: оружейный шкаф"
+ },
+ "Loot_304": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, пост: бытовое"
+ },
+ "Loot_305": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "Вершина, почта: бытовое"
+ },
+ "Loot_306": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "Вершина, почта: бытовое"
+ },
+ "Loot_307": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, Вестибюль башни А: бытовое"
+ },
+ "Loot_308": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, Винотека: бытовое"
+ },
+ "Loot_309": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "Вершина, Винотека: ценное"
+ },
+ "Loot_310": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, склад: бытовое"
+ },
+ "Loot_311": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "Вершина, склад: бытовое"
+ },
+ "Loot_312": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "Вершина, Ювелирный салон: ценное"
+ },
+ "Loot_313": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "electronics",
+  "note": "Вершина, Ювелирный салон: ценное"
+ },
+ "Loot_314": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, Ювелирный салон: бытовое"
+ },
+ "Loot_315": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "мастерская",
+  "was": "office",
+  "note": "Вершина, мастерская: бытовое"
+ },
+ "Loot_316": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "Вершина, сейфовая: ценное"
+ },
+ "Loot_317": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, ресепшен: бытовое"
+ },
+ "Loot_318": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, раздевалка М: бытовое"
+ },
+ "Loot_319": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, раздевалка М: бытовое"
+ },
+ "Loot_320": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, раздевалка Ж: бытовое"
+ },
+ "Loot_321": {
+  "kind": "medbag",
+  "table": "medbag",
+  "why": "медицинская сумка",
+  "was": "pharmacy",
+  "note": "Вершина, раздевалка Ж: аптечка"
+ },
+ "Loot_322": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, Фитнес-клуб: бытовое"
+ },
+ "Loot_323": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "Вершина, Фитнес-клуб: бытовое"
+ },
+ "Loot_324": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, кафе двора: бытовое"
+ },
+ "Loot_325": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, кафе двора: бытовое"
+ },
+ "Loot_326": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "security",
+  "note": "Вершина, кафе двора: оружие"
+ },
+ "Loot_327": {
+  "kind": "safe",
+  "table": "safe",
+  "why": "сейф",
+  "was": "office",
+  "note": "Вершина, кафе двора: ценное"
+ },
+ "Loot_328": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, двор: бытовое"
+ },
+ "Loot_329": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, двор: бытовое"
+ },
+ "Loot_330": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "Вершина, двор: бытовое"
+ },
+ "Loot_331": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "«Ярус», зал: Касса"
+ },
+ "Loot_332": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "«Ярус», зал: Касса"
+ },
+ "Loot_333": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "«Ярус», зал: Касса экспресс"
+ },
+ "Loot_334": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», зал: Стеллаж: бакалея"
+ },
+ "Loot_335": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "«Ярус», зал: Стеллаж: бытовая химия"
+ },
+ "Loot_336": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», зал: Стеллаж: консервы"
+ },
+ "Loot_337": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "«Ярус», зал: Стеллаж: товары"
+ },
+ "Loot_338": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», зал: Мясной цех: ящик"
+ },
+ "Loot_339": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», зал: Холодильная камера"
+ },
+ "Loot_340": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "«Ярус», зал: Приёмка: ящики"
+ },
+ "Loot_341": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "«Ярус», зал: Комната персонала: рюкзак"
+ },
+ "Loot_342": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», второй этаж: Фуд-корт: стойка"
+ },
+ "Loot_343": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», второй этаж: Фуд-корт: стойка"
+ },
+ "Loot_344": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "«Ярус», второй этаж: Кухня: ящик"
+ },
+ "Loot_345": {
+  "kind": "tech_shelf",
+  "table": "tech_shelf",
+  "why": "техника",
+  "was": "electronics",
+  "note": "«Ярус», второй этаж: «Техно»: коробки"
+ },
+ "Loot_346": {
+  "kind": "tech_shelf",
+  "table": "tech_shelf",
+  "why": "техника",
+  "was": "electronics",
+  "note": "«Ярус», второй этаж: «Техно»: коробки"
+ },
+ "Loot_347": {
+  "kind": "tech_shelf",
+  "table": "tech_shelf",
+  "why": "техника",
+  "was": "electronics",
+  "note": "«Ярус», второй этаж: «Техно»: витрина"
+ },
+ "Loot_348": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "«Ярус», второй этаж: Одежда: стеллаж"
+ },
+ "Loot_349": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "«Ярус», второй этаж: Детский мир: корзина"
+ },
+ "Loot_350": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "«Ярус», второй этаж: Бухгалтерия: шкаф"
+ },
+ "Loot_351": {
+  "kind": "",
+  "table": "server_rack",
+  "why": "особое место",
+  "was": "server_rack",
+  "note": "«Ярус», второй этаж: Серверная: стойка"
+ },
+ "Loot_352": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "«Ярус», второй этаж: Охрана: сейф-шкаф"
+ },
+ "Loot_353": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "«Ярус», второй этаж: Счётная: касса"
+ },
+ "Loot_354": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "«Ярус», склад: Склад: паллета"
+ },
+ "Loot_355": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "«Ярус», склад: Склад: паллета"
+ },
+ "Loot_356": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "«Ярус», склад: Склад: стеллаж"
+ },
+ "Loot_357": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "workshop",
+  "note": "«Ярус», склад: Склад: стеллаж"
+ },
+ "Loot_358": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "tools",
+  "note": "«Ярус», склад: Склад: стеллаж"
+ },
+ "Loot_359": {
+  "kind": "pc_block",
+  "table": "pc_block",
+  "why": "диспетчерская",
+  "was": "office",
+  "note": "«Ярус», диспетчерская склада: Диспетчерская: стол"
+ },
+ "Loot_360": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "«Ярус», крыша камер: Площадка на камерах: ящик"
+ },
+ "Loot_361": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка",
+  "was": "home",
+  "note": "«Ярус», крыша склада: Крыша склада: сумка"
+ },
+ "Loot_362": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "вокзал, первый этаж: Окно кассы"
+ },
+ "Loot_363": {
+  "kind": "",
+  "table": "register",
+  "why": "особое место",
+  "was": "register",
+  "note": "вокзал, первый этаж: Окно кассы"
+ },
+ "Loot_364": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "вокзал, первый этаж: Забытый чемодан"
+ },
+ "Loot_365": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "вокзал, первый этаж: Касса: сейф-шкаф"
+ },
+ "Loot_366": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "вокзал, первый этаж: Линейный пункт: сейф-шкаф"
+ },
+ "Loot_367": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "вокзал, первый этаж: Линейный пункт: стол"
+ },
+ "Loot_368": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "вокзал, первый этаж: Буфет: стойка"
+ },
+ "Loot_369": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "чемодан",
+  "was": "home",
+  "note": "вокзал, первый этаж: Зал ожидания: багаж"
+ },
+ "Loot_370": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "вокзал, первый этаж: Зал ожидания: рюкзак"
+ },
+ "Loot_371": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "камера хранения / почта",
+  "was": "home",
+  "note": "вокзал, первый этаж: Камера хранения: чемодан"
+ },
+ "Loot_372": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "камера хранения / почта",
+  "was": "home",
+  "note": "вокзал, первый этаж: Камера хранения: чемодан"
+ },
+ "Loot_373": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "камера хранения",
+  "was": "home",
+  "note": "вокзал, первый этаж: Камера хранения: рюкзак"
+ },
+ "Loot_374": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "storage",
+  "note": "вокзал, первый этаж: Багажное: тюки"
+ },
+ "Loot_375": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "камера хранения / почта",
+  "was": "home",
+  "note": "вокзал, первый этаж: Багажное: чемодан"
+ },
+ "Loot_376": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "вокзал, второй этаж: Кабинет начальника вокзала"
+ },
+ "Loot_377": {
+  "kind": "pc_block",
+  "table": "pc_block",
+  "why": "диспетчерская",
+  "was": "office",
+  "note": "вокзал, второй этаж: Радиоузел: стол"
+ },
+ "Loot_378": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "вокзал, второй этаж: Бухгалтерия: шкаф"
+ },
+ "Loot_379": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "рюкзак",
+  "was": "home",
+  "note": "вокзал, второй этаж: Комната отдыха: рюкзак"
+ },
+ "Loot_380": {
+  "kind": "med_cabinet",
+  "table": "med_cabinet",
+  "why": "медицинский шкаф",
+  "was": "pharmacy",
+  "note": "вокзал, второй этаж: Медпункт: аптечка"
+ },
+ "Loot_381": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка",
+  "was": "home",
+  "note": "вокзал, конкорс: Конкорс: забытая сумка"
+ },
+ "Loot_382": {
+  "kind": "duffel",
+  "table": "duffel",
+  "why": "сумка",
+  "was": "home",
+  "note": "вокзал, платформа: Платформа: сумка на скамье"
+ },
+ "Loot_383": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "вокзал, башня: Площадка башни: ящик"
+ },
+ "Loot_384": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "kiosk",
+  "note": "площадь: Ларёк: витрина"
+ },
+ "Loot_385": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "kiosk",
+  "note": "площадь: Ларёк: витрина"
+ },
+ "Loot_386": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "багаж автобуса",
+  "was": "home",
+  "note": "площадь: Автобус: багажный отсек"
+ },
+ "Loot_387": {
+  "kind": "suitcase",
+  "table": "suitcase",
+  "why": "багаж автобуса",
+  "was": "home",
+  "note": "площадь: Автобус: багажный отсек"
+ },
+ "Loot_388": {
+  "kind": "pc_block",
+  "table": "pc_block",
+  "why": "диспетчерская",
+  "was": "office",
+  "note": "площадь: Автостанция: диспетчерская"
+ },
+ "Loot_389": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "площадь: Такси: багажник"
+ },
+ "Loot_390": {
+  "kind": "weapon_locker",
+  "table": "weapon_locker",
+  "why": "оружейный шкаф",
+  "was": "security",
+  "note": "полиция, первый этаж: Дежурная часть: оружейный шкаф"
+ },
+ "Loot_391": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "полиция, первый этаж: Дежурная часть: стол"
+ },
+ "Loot_392": {
+  "kind": "jacket",
+  "table": "jacket",
+  "why": "бытовое помещение",
+  "was": "office",
+  "note": "полиция, первый этаж: Приём граждан: шкаф"
+ },
+ "Loot_393": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "полиция, второй этаж: Кабинет начальника: шкаф"
+ },
+ "Loot_394": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "полиция, второй этаж: Следователи: шкаф"
+ },
+ "Loot_395": {
+  "kind": "filing",
+  "table": "filing",
+  "why": "стол / шкаф конторы",
+  "was": "office",
+  "note": "полиция, второй этаж: Архив: стеллаж"
+ },
+ "Loot_396": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "полиция, двор: Гараж отдела: машина"
+ },
+ "Loot_397": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "workshop",
+  "note": "под эстакадой, ракушки: Ракушка: инструмент"
+ },
+ "Loot_398": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "покрышки",
+  "was": "tools",
+  "note": "под эстакадой, ракушки: Ракушка: покрышки"
+ },
+ "Loot_399": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "kiosk",
+  "note": "под эстакадой, рынок: Рынок «Под мостом»: прилавок"
+ },
+ "Loot_400": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "kiosk",
+  "note": "под эстакадой, рынок: Рынок «Под мостом»: прилавок"
+ },
+ "Loot_401": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "под эстакадой, рынок: Рынок: контейнер"
+ },
+ "Loot_402": {
+  "kind": "ration_crate",
+  "table": "ration_crate",
+  "why": "продукты, ларьки",
+  "was": "grocery",
+  "note": "под эстакадой, рынок: Рынок: ящики"
+ },
+ "Loot_403": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "склад",
+  "was": "storage",
+  "note": "под эстакадой, рынок: Рынок: поддоны"
+ },
+ "Loot_404": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "tools",
+  "note": "под эстакадой, дорожники: Техника дорожников: ящик"
+ },
+ "Loot_405": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "workshop",
+  "note": "под эстакадой, дорожники: Бытовка дорожников"
+ },
+ "Loot_406": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "под эстакадой, почтовые фургоны: Почтовый фургон"
+ },
+ "Loot_407": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "под эстакадой, почтовые фургоны: Почтовый фургон"
+ },
+ "Loot_408": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "под эстакадой, штрафстоянка: Штрафстоянка: машина"
+ },
+ "Loot_409": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "pmc",
+  "note": "под эстакадой, блокпост ЧВК: Блокпост ЧВК: оружейный ящик",
+  "model": "it_trunk"
+ },
+ "Loot_410": {
+  "kind": "weapon_crate",
+  "table": "weapon_crate",
+  "why": "оружие: ящик / лёжка / машина",
+  "was": "pmc",
+  "note": "под эстакадой, блокпост ЧВК: Блокпост ЧВК: машина",
+  "model": "it_trunk"
+ },
+ "Loot_411": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "полотно эстакады: Багажник машины"
+ },
+ "Loot_412": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "полотно эстакады: Багажник машины"
+ },
+ "Loot_413": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "багажник",
+  "was": "home",
+  "note": "полотно эстакады: Багажник машины"
+ },
+ "Loot_414": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "полотно эстакады: Автобус на остановке: салон"
+ },
+ "Loot_415": {
+  "kind": "ammo_crate",
+  "table": "ammo_crate",
+  "why": "ящик на разгрузке",
+  "was": "storage",
+  "note": "полотно эстакады: Фура: кузов"
+ },
+ "Loot_416": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "workshop",
+  "note": "юго-запад, гаражи: Гараж: верстак"
+ },
+ "Loot_417": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "tools",
+  "note": "юго-запад, гаражи: Гараж: полки"
+ },
+ "Loot_418": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "workshop",
+  "note": "юго-запад, гаражи: Гараж: ящик"
+ },
+ "Loot_419": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "tools",
+  "note": "юго-запад, стройка: Городок строителей: бытовка"
+ },
+ "Loot_420": {
+  "kind": "toolbox",
+  "table": "toolbox",
+  "why": "инструмент",
+  "was": "tools",
+  "note": "юго-запад, стройка: Склад материалов: поддоны"
+ },
+ "Loot_421": {
+  "kind": "car_trunk",
+  "table": "car_trunk",
+  "why": "машина",
+  "was": "home",
+  "note": "юго-запад, почтовый двор: Фургон почты: кузов"
+ },
+ "Loot_422": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "камера хранения / почта",
+  "was": "home",
+  "note": "юго-запад, почтовый двор: Мешки почты"
+ },
+ "Loot_423": {
+  "kind": "locker",
+  "table": "locker",
+  "why": "посылки / груз",
+  "was": "storage",
+  "note": "юго-запад, почтовый двор: Контейнер почты"
+ },
+ "Loot_424": {
+  "kind": "carton",
+  "table": "carton",
+  "why": "стеллаж",
+  "was": "shelf",
+  "note": "сквер, туалет: Туалет: подсобка"
+ }
+}

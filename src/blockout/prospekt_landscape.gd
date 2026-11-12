@@ -900,6 +900,9 @@ const LOOT_TIER: Dictionary = {"common": "loot_common", "med": "loot_med", "good
 
 func _loot(g: RefCounted) -> void:
 	for l: Dictionary in plan.get("loot", []):
+		# на месте стоит настоящая модель контейнера (prospekt_loot_kinds.py --fit, model_ok) — схемный маркер не нужен
+		if bool(l.get("model_ok", false)):
+			continue
 		var at: Array = l.at
 		var size: Vector3 = LOOT_SIZE.get(String(l.kind), Vector3(0.4, 0.4, 0.4)) as Vector3
 		g.box(Vector3(float(at[0]), float(at[1]) + size.y * 0.5, float(at[2])), size,

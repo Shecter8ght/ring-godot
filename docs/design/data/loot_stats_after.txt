@@ -1,0 +1,101 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+таблица | среднее | медиана | p90 | пустых %
+ammo_crate | 12035 | 10260 | 21100 | 0.0
+bank | 16457 | 15000 | 33000 | 13.5
+bank_boss | 56210 | 55000 | 80000 | 0.0
+car_trunk | 3822 | 2200 | 8700 | 12.6
+carton | 1733 | 900 | 3500 | 15.9
+components | 8292 | 3000 | 24000 | 15.6
+cosmetics | 1716 | 3000 | 3000 | 42.8
+dorm_ammo_crate | 5770 | 4860 | 11430 | 5.4
+dorm_trunk | 11528 | 10220 | 21485 | 0.2
+dorm_zip_crate | 5378 | 3600 | 11500 | 9.4
+duffel | 2363 | 1700 | 6000 | 8.6
+electronics | 12977 | 7000 | 30800 | 7.5
+filing | 5940 | 4200 | 14000 | 11.0
+grocery | 2286 | 800 | 7000 | 5.4
+home | 5795 | 2600 | 14500 | 19.7
+jacket | 2662 | 1500 | 6200 | 10.0
+jewelry | 7386 | 10000 | 15000 | 35.9
+jewelry_safe | 84360 | 82000 | 117000 | 0.0
+kiosk | 2764 | 1800 | 6900 | 0.0
+locker | 7818 | 5000 | 18000 | 9.0
+marauder | 5029 | 3450 | 11500 | 3.5
+med_cabinet | 16233 | 13500 | 33000 | 2.3
+medbag | 6251 | 5400 | 10000 | 0.3
+office | 7519 | 3200 | 20700 | 11.0
+pc_block | 30875 | 27800 | 56800 | 0.7
+pharmacy | 5920 | 3100 | 16100 | 6.7
+pmc | 34100 | 27900 | 65330 | 0.0
+prospekt_body | 6365 | 5000 | 13400 | 2.7
+prospekt_concierge | 9849 | 6900 | 22400 | 5.4
+prospekt_director_safe | 21515 | 20000 | 45000 | 11.0
+prospekt_yarus_staff | 3437 | 2100 | 7800 | 11.4
+ration_crate | 2192 | 750 | 6500 | 6.2
+register | 7978 | 5700 | 16400 | 11.8
+resident | 3370 | 1900 | 8500 | 2.6
+safe | 14621 | 15000 | 27000 | 7.9
+security | 18171 | 16000 | 33980 | 0.0
+server_rack | 27379 | 25000 | 50800 | 0.0
+shelf | 1568 | 300 | 6500 | 24.6
+sport | 2329 | 990 | 8500 | 26.1
+stash | 34749 | 32800 | 60000 | 0.0
+storage | 2546 | 1300 | 6600 | 15.3
+suitcase | 7693 | 6500 | 16000 | 11.9
+supply_drop | 175338 | 136340 | 345480 | 0.0
+tech_shelf | 12428 | 9000 | 26000 | 8.0
+toolbox | 3064 | 2200 | 7100 | 7.1
+tools | 4450 | 2800 | 10600 | 7.8
+weapon_crate | 21394 | 16440 | 45355 | 0.0
+weapon_locker | 29575 | 26200 | 53640 | 0.1
+workshop | 4233 | 2200 | 10300 | 12.1
+
+мест Loot_N: 425, ожидаемая стоимость карты: 3257916
+  категория value: 819318 (25.1 %)
+  категория tech: 545711 (16.8 %)
+  категория tools: 515527 (15.8 %)
+  категория med: 266245 (8.2 %)
+  категория ammo: 210155 (6.5 %)
+  категория barter: 174850 (5.4 %)
+  категория weapon: 154646 (4.7 %)
+  категория intel: 154400 (4.7 %)
+  категория armor: 83125 (2.6 %)
+  категория mod: 80922 (2.5 %)
+  категория plate: 79533 (2.4 %)
+  категория throw: 65434 (2.0 %)
+  категория food: 56021 (1.7 %)
+  категория mag: 33106 (1.0 %)
+  категория key: 18917 (0.6 %)
+  за рейд ammo_pcs: 1165.78
+  за рейд bandage: 55.14
+  за рейд battery: 6.20
+  за рейд cash: 125.53
+  за рейд cigarettes: 30.76
+  за рейд diamond_ring: 0.63
+  за рейд documents: 19.30
+  за рейд engraver_controller: 0.31
+  за рейд engraver_frame: 0.15
+  за рейд grenade: 14.54
+  за рейд ink_set: 3.84
+  за рейд keys: 3.50
+  за рейд laptop: 1.54
+  за рейд laser_head: 0.30
+  за рейд lighter: 20.65
+  за рейд mag_loader: 3.09
+  за рейд medkit: 10.78
+  за рейд nvg: 2.22
+  за рейд painkillers: 28.77
+  за рейд phone: 7.29
+  за рейд pouch_pistol: 7.37
+  за рейд pouch_rifle: 3.56
+  за рейд printer_board: 0.69
+  за рейд printer_body: 2.01
+  за рейд printer_head: 0.19
+  за рейд server_drive: 1.09
+  за рейд spray_paint: 5.08
+  за рейд stencil_kit: 1.89
+  за рейд sticker_film: 12.36
+  за рейд toolset: 1.33
+  за рейд wires: 21.52
+  мест по таблицам: ammo_crate 10.0, car_trunk 76.0, carton 47.0, duffel 36.0, filing 35.0, jacket 16.0, jewelry_safe 1.0, locker 16.0, med_cabinet 7.0, medbag 13.0, pc_block 5.0, pharmacy 1.0, pmc 8.0, prospekt_body 8.0, prospekt_concierge 1.0, prospekt_director_safe 1.0, prospekt_yarus_staff 2.0, ration_crate 19.0, register 27.0, safe 20.0, security 1.0, server_rack 1.0, stash 4.0, suitcase 12.0, tech_shelf 5.0, toolbox 23.0, weapon_crate 13.0, weapon_locker 9.0

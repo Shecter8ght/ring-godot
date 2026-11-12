@@ -231,11 +231,11 @@ static func roll(table_id: String, rng: RandomNumberGenerator) -> Array:
 		var valuable: String = valuable_item(table_id, rng)
 		if valuable != "":
 			out.append(make(valuable, 1))
-	if table_id in Balance.ENGRAVING.head_tables and rng.randf() < float(Balance.ENGRAVING.head_chance):
+	if table_id in Balance.ENGRAVING.head_tables and rng.randf() < float((Balance.ENGRAVING.get("head_chance_by", {}) as Dictionary).get(table_id, Balance.ENGRAVING.head_chance)):
 		out.append(make("laser_head", 1))
 	for id: String in Balance.ENGRAVING.parts_loot:
 		var spec: Dictionary = Balance.ENGRAVING.parts_loot[id]
-		if table_id in spec.tables and rng.randf() < float(spec.chance):
+		if table_id in spec.tables and rng.randf() < float((spec.get("by_table", {}) as Dictionary).get(table_id, spec.chance)):
 			out.append(make(id, 1))
 	for e in out:
 		e["fir"] = true

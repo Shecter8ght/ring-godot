@@ -1,0 +1,306 @@
+{
+ "version": 1,
+ "dir": "res://assets/models/dorm/furniture",
+ "index": "res://assets/models/dorm/furniture/furniture.json",
+ "far": 45.0,
+ "models": {
+  "it_ammo": {
+   "open": "it_ammo_open",
+   "variants": [
+    "",
+    "WD-PIN-RAW"
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.0877,
+     0.0047
+    ],
+    "size": [
+     0.6032,
+     0.1754,
+     0.3963
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.2645,
+     -0.0626
+    ],
+    "size": [
+     0.6032,
+     0.5289,
+     0.5308
+    ]
+   }
+  },
+  "it_zip": {
+   "open": "it_zip_open",
+   "variants": [
+    "WD-PIN-RAW",
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.1677,
+     0.0047
+    ],
+    "size": [
+     1.1132,
+     0.3354,
+     0.4463
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.3683,
+     -0.0703
+    ],
+    "size": [
+     1.1132,
+     0.7365,
+     0.5962
+    ]
+   }
+  },
+  "it_trunk": {
+   "open": "it_trunk_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.2025,
+     0.006
+    ],
+    "size": [
+     0.837,
+     0.397,
+     0.484
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.3882,
+     -0.0806
+    ],
+    "size": [
+     0.837,
+     0.7685,
+     0.6573
+    ]
+   }
+  },
+  "it_toolbox": {
+   "open": "it_toolbox_open",
+   "variants": [
+    "EN-TBX-BLU",
+    "EN-TBX-GRY"
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.1625,
+     0.0023
+    ],
+    "size": [
+     0.49,
+     0.317,
+     0.2135
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.1625,
+     0.0
+    ],
+    "size": [
+     0.49,
+     0.317,
+     0.3882
+    ]
+   }
+  },
+  "it_suitcase": {
+   "open": "it_suitcase_open",
+   "variants": [
+    "PL-SHL-BLU",
+    "PL-SHL-SLV"
+   ],
+   "aabb": {
+    "center": [
+     0.0115,
+     0.344,
+     -0.01
+    ],
+    "size": [
+     0.467,
+     0.688,
+     0.256
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.1894,
+     0.0872,
+     0.014
+    ],
+    "size": [
+     0.8688,
+     0.1745,
+     0.688
+    ]
+   }
+  },
+  "it_duffel": {
+   "open": "it_duffel_half",
+   "variants": [
+    "FB-OXF-BLU",
+    "FB-OXF-RED"
+   ],
+   "aabb": {
+    "center": [
+     0.0016,
+     0.1678,
+     0.0937
+    ],
+    "size": [
+     0.7836,
+     0.3891,
+     0.5307
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.024,
+     0.1087,
+     0.0015
+    ],
+    "size": [
+     0.596,
+     0.3412,
+     0.3549
+    ]
+   }
+  },
+  "it_carton": {
+   "open": "it_carton_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.2034,
+     -0.0
+    ],
+    "size": [
+     0.656,
+     0.4559,
+     0.4117
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0131,
+     0.1904,
+     0.0212
+    ],
+    "size": [
+     1.0238,
+     0.4299,
+     0.6579
+    ]
+   }
+  },
+  "it_pc": {
+   "open": "it_pc_opened",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     -0.0036,
+     0.239,
+     -0.0064
+    ],
+    "size": [
+     0.2184,
+     0.478,
+     0.4311
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.063,
+     0.239,
+     -0.0023
+    ],
+    "size": [
+     0.3371,
+     0.478,
+     0.4394
+    ]
+   }
+  }
+ },
+ "kinds": {
+  "weapon_crate": {
+   "model": "it_zip"
+  },
+  "ammo_crate": {
+   "model": "it_ammo"
+  },
+  "weapon_locker": {
+   "model": ""
+  },
+  "medbag": {
+   "model": ""
+  },
+  "med_cabinet": {
+   "model": ""
+  },
+  "toolbox": {
+   "model": "it_toolbox"
+  },
+  "car_trunk": {
+   "model": ""
+  },
+  "duffel": {
+   "model": "it_duffel"
+  },
+  "suitcase": {
+   "model": "it_suitcase"
+  },
+  "jacket": {
+   "model": ""
+  },
+  "safe": {
+   "model": ""
+  },
+  "pc_block": {
+   "model": "it_pc"
+  },
+  "tech_shelf": {
+   "model": ""
+  },
+  "filing": {
+   "model": ""
+  },
+  "ration_crate": {
+   "model": ""
+  },
+  "carton": {
+   "model": "it_carton"
+  },
+  "locker": {
+   "model": "it_trunk"
+  }
+ }
+}

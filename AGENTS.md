@@ -492,9 +492,19 @@ tools/godot.cmd --headless res://tools/prospekt_pop_stats.tscn # «Проспе�
 python -X utf8 tools/prospekt_s2_5b_loot.py cands <файл.json>  # «Проспект», этап 5б: места лута второй очереди (94 ящика, таблицы из data/loot.json) → кандидаты для
                                                               # LOOT_SNAP_IN=<файл> LOOT_SNAP_OUT=<файл> tools/godot.cmd --headless res://tools/prospekt_loot_snap.tscn (пол лучом, ящик не в коллизии,
                                                               # до навигации ≤ 1,6 м, иначе ближайшее свободное) → … apply <подогнанные.json> дописывает Loot_N в сцену и loot плана (один раз)
+python -X utf8 tools/prospekt_loot_kinds.py [--apply | --fit]  # «Проспект», лут по виду контейнера (docs/design/loot_matrix_v2.md §5.1): каждому Loot_N — вид и таблица того же имени
+                                                              # (weapon_crate, ammo_crate, toolbox, duffel, carton, safe …) по подписи места → data/blockouts/prospekt_loot_kinds.json
+                                                              # (правится руками, повторный запуск берёт его; --rules — пересчитать); --apply — kind/table/model_id в узлы сцены и container в план;
+                                                              # --fit — ещё поворот, пол и «не помещается» из prospekt_loot_fit.json (model_off — остаётся бокс; model_ok плана прячет маркер блокаута)
+LOOT_FIT_OUT=data/blockouts/prospekt_loot_fit.json tools/godot.cmd --headless res://tools/prospekt_loot_fit.tscn # подгонка моделей контейнеров по физике карты: пол лучом, спинка к стене, габарит закрытой и открытой модели не в коллизии
+python -X utf8 tools/gen_loot_containers.py                    # каталог моделей контейнеров data/loot_containers.json (габариты — из индекса мебели общежития; вид без модели — model "", подключение правкой данных)
+tools/godot.cmd --headless res://tools/loot_stats.tscn         # замер лута по настоящему ItemDb.roll: по таблице — среднее, медиана, p90, пустые %; по «Проспекту» — ожидаемая стоимость Loot_N (схроны × 4/12),
+                                                              # категории и штуки ключевых вещей за рейд (LOOT_STATS_N=3000, LOOT_STATS_OUT=<json>, LOOT_STATS_MAP=<узел → таблица> — расчёт до внесения в сцену);
+                                                              # числа до / после — docs/design/data/loot_stats_{before,after}.{json,txt}
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/loot_kinds_perf.tscn # «Проспект»: кадры в секунду с моделями контейнеров и без них (склад «Яруса», вокзал, гаражи, паркинг −1, разгрузка)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде глазами игрока (привыкание глаза,
                                                               # «объектив»): день, закат, ночь, пасмурно, дождь с трёх точек → user://prospekt_raid_shots
-                                                              # (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night; PROSPEKT_CLEAN=1 — своей камерой, чистый свет сцены)
+                                                              # (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night; PROSPEKT_CLEAN=1 — своей камерой, чистый свет сцены; PROSPEKT_OPEN=Loot_1,Loot_2 — эти контейнеры лута открыты)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/urban95_export.py -- [ID …]
                                                               # библиотека RING_Urban_95 (retopology_v01, 101 модель) в игру: assets/models/urban95/<ID>.gltf,
                                                               # карты WebP ≤ 2K, индекс с габаритами data/urban95_models.json; на карте их ставит MallFiller (filler.kit_models)

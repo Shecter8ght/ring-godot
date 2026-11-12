@@ -30,7 +30,21 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 		look = v
 		_rebuild()
 
-## Содержимое брошено — ящик обыскан (у всех peer: rolled реплицируется); мебель общежития открывает крышку.
+## Вид контейнера (Balance.LOOT_KINDS, data/loot_containers.json): таблица = вид, сетка и время обыска — по виду,
+## у вида с моделью — модель с закрытым и открытым состоянием. Пусто — прежний облик по look.
+@export var kind: String = "":
+	set(v):
+		kind = v
+		_rebuild()
+## Своя модель из каталога вместо модели вида (стальной сундук у ЧВК и т. п.).
+@export var model_id: String = ""
+## Поворот модели вокруг Y (градусы) и на сколько метров ниже точки узла стоит пол — подгонка по физике карты
+## (tools/prospekt_loot_fit.tscn); model_off — модель здесь не помещается, остаётся бокс.
+@export var model_yaw: float = 0.0
+@export var floor_drop: float = 0.0
+@export var model_off: bool = false
+
+## Содержимое брошено — ящик обыскан (у всех peer: rolled реплицируется); модель контейнера открывает крышку.
 signal opened
 
 ## Содержимое: [{"id", "n", "x", "y", "r"}] — стоит в клетках сетки grid (как рюкзак); rolled —
@@ -60,6 +74,8 @@ var grid: Vector2i = Vector2i.ZERO
 ## трупа летит с высоты груди и падает на пол, кувыркнувшись. Анимация у каждого peer своя.
 var toss_from: Vector3 = Vector3.ZERO
 var toss_duration: float = 0.0
+## Модель вида (закрытая и открытая); null — вид без модели или она здесь не помещается.
+var _model: LootContainerVisual = null
 
 
 ## Вид отдельной находки обновляется и при местном подборе, и при репликации списка.
@@ -68,9 +84,16 @@ func _contents_changed() -> void:
 
 
 func _ready() -> void:
+	# время обыска — по виду (Balance.LOOT_KINDS), значение узла в сцене для видов не действует
+	if kind != "" and Balance.LOOT_KINDS.has(kind):
+		search_s = float(Balance.LOOT_KINDS[kind].search)
 	super._ready()
 	if not Engine.is_editor_hint():
 		add_to_group("loot_containers")
+		# «открыт» — то же, что «брошено»: rolled уже реплицируется всем, отдельной рассылки нет
+		opened.connect(_on_opened)
+		if rolled and _model != null:
+			_model.open(true)
 		if Net.is_networked():
 			var sync := MultiplayerSynchronizer.new()
 			sync.name = "Sync"
@@ -177,6 +200,8 @@ func ensure_grid() -> void:
 ## (ничего не теряется). Одинаково у всех peer (тела и выброшенное раскладываются из данных спавна).
 func place_all() -> void:
 	var rows := int(Balance.LOOT_ROWS.get(String(Look.keys()[look]), 3))
+	if kind != "" and Balance.LOOT_KINDS.has(kind):
+		rows = int(Balance.LOOT_KINDS[kind].rows)
 	var list := items.duplicate(true)
 	while true:
 		var g := Vector2i(Balance.LOOT_GRID_W, rows)
@@ -212,7 +237,20 @@ func take(id: String, n: int) -> int:
 	return 0
 
 
+func _on_opened() -> void:
+	if _model != null and is_instance_valid(_model):
+		_model.open()
+
+
 func _build_visual(parent: Node3D) -> void:
+	_model = null
+	if kind != "" and not model_off:
+		_model = LootContainerVisual.create(kind, model_id, absi(String(name).hash()))
+		if _model != null:
+			_model.position = Vector3(0.0, -floor_drop, 0.0)
+			_model.rotation_degrees = Vector3(0.0, model_yaw, 0.0)
+			parent.add_child(_model)
+			return
 	match look:
 		Look.SAFE:
 			_box(parent, Vector3(0, 0.6, 0), Vector3(0.8, 1.2, 0.7), Color(0.22, 0.24, 0.26))
