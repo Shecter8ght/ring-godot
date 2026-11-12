@@ -146,6 +146,13 @@ static func ensure() -> void:
 		next_conditions = d.get("next_conditions", next_conditions)
 		for i in range(unlocked_stock.size()):
 			unlocked_stock[i] = WeaponDb.canonical(String(unlocked_stock[i]))
+		# убранные из игры предметы (Balance.REMOVED_ITEMS): из сетки и слотов — прочь, деньги — по прежней цене
+		for l in [stash, backpack, pocket]:
+			money += ItemDb.purge_removed(l)
+		for slot in equipment.keys():
+			if equipment[slot] is Dictionary and Balance.REMOVED_ITEMS.has(String((equipment[slot] as Dictionary).get("id", ""))):
+				money += int(Balance.REMOVED_ITEMS[String((equipment[slot] as Dictionary).id)]) * int((equipment[slot] as Dictionary).get("n", 1))
+				equipment.erase(slot)
 		_migrate()
 		# до слота «Рюкзак» у всех был рюкзак на 30 ячеек — выдать его надетым, вещи на местах
 		if not flags.get("bp_slot", false):
@@ -535,7 +542,7 @@ static func _migrate_rigs() -> void:
 	if equipment.has("rig"):
 		var rig: Dictionary = equipment.rig if equipment.rig is Dictionary else {}
 		equipment.erase("rig")
-		var n := int((ItemDb.item(String(rig.get("id", ""))).get("rig", {}) as Dictionary).get("pouches", 0))
+		var n := int(Balance.LEGACY_RIGS.get(String(rig.get("id", "")), 0))
 		var armor: Dictionary = equipment.get("armor", {})
 		for i in range(n):
 			if armor.is_empty() or not ItemDb.attach_pouch(armor, "pouch_rifle"):
@@ -554,8 +561,8 @@ static func _migrate_rigs() -> void:
 		var i := 0
 		while i < l.size():
 			var e: Dictionary = l[i]
-			if ItemDb.item(String(e.get("id", ""))).has("rig"):
-				var n := int((ItemDb.item(String(e.id)).get("rig", {}) as Dictionary).get("pouches", 0))
+			if Balance.LEGACY_RIGS.has(String(e.get("id", ""))):
+				var n := int(Balance.LEGACY_RIGS[String(e.id)])
 				for k in range(n):
 					loose.append(ItemDb.make("pouch_rifle", 1))
 				loose.append_array(ItemDb.detach_pouches(e))

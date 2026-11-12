@@ -61,7 +61,6 @@ OVERRIDES = {
     "muzzle_comp_545_01": 30000, "grip_vertical_01": 20000, "tac_flashlight_01": 15000,
     "nvg": 300000, "mag_loader": 35000,
     "bp_daypack": 12000, "bp_tourist": 35000, "bp_raid": 180000,
-    "rig_belt": 4500, "rig_chest": 20000, "rig_assault": 75000, "rig_heavy": 180000,
     "armor_mid": 20000, "plate_steel": 35000,
     "helmet_mid": 25000, "headset_active": 30000,
     "grenade": 10000,

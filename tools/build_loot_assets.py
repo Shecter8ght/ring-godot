@@ -16,12 +16,12 @@ OUT = ROOT / 'assets/items/models/loot'
 OUT.mkdir(parents=True, exist_ok=True)
 SOURCES = {
     'circuit_board': 'circuit_board', 'pliers': 'pliers', 'screwdriver': 'screwdriver',
-    'measuring_tape': 'measuring_tape_01', 'hammer': 'cross_pein_hammer',
+    'hammer': 'cross_pein_hammer',
     'pipe_wrench': 'pipe_wrench', 'multimeter': 'retro_multimeter', 'oil_tin': 'oil_tin',
     'thermos': 'modified_thermos', 'kettle': 'vintage_electric_kettle',
     'radio_transceiver': 'vintage_radio_transceiver', 'cassette_player': 'cassette_player',
     'video_camera': 'vintage_video_camera', 'binoculars': 'binoculars',
-    'wall_clock': 'wall_clock', 'work_gloves': 'garden_gloves_01', 'clipboard': 'clipboard',
+    'clipboard': 'clipboard',
     'empty_jerrycan': 'metal_jerrycan_green', 'medical_case': 'medical_box',
     'metal_toolbox': 'metal_toolbox', 'bench_vice': 'bench_vice_01',
     'desk_lamp': 'desk_lamp_arm_01', 'junction_box': 'utility_box_01', 'power_unit': 'power_box_01',

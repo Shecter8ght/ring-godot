@@ -16,7 +16,8 @@ func _ready() -> void:
 func _run() -> void:
 	Profile.use_file("user://valuable_loot_test.json", true)
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/items/models/valuable/manifest.json"))
-	check("ровно 100 новых предметов и моделей", Balance.VALUABLE_LOOT_VALUES.size() == 100 and manifest.size() == 100)
+	# 92 после удаления семи видов еды (решение владельца 2026-11-13); число общее у цен и манифеста моделей
+	check("92 ценных предмета, столько же моделей", Balance.VALUABLE_LOOT_VALUES.size() == 92 and manifest.size() == 92)
 	for id: String in Balance.VALUABLE_LOOT_VALUES:
 		var item: Dictionary = ItemDb.item(id)
 		check(id, ItemDb.value(id) > 0 and String(item.desc).length() > 50 and ItemDb.weight(id) > 0 and ResourceLoader.exists(String(item.model)) and ResourceLoader.exists("res://assets/icons/%s.png" % id))
@@ -33,7 +34,7 @@ func _run() -> void:
 			for entry: Dictionary in ItemDb.roll(table, rng):
 				if Balance.VALUABLE_LOOT_VALUES.has(String(entry.id)):
 					reached[entry.id] = true
-	check("все 100 предметов достижимы в обычном луте", reached.size() == 100)
+	check("все 92 предмета достижимы в обычном луте", reached.size() == 92)
 	for pack: String in Balance.LOOT_PACKS:
 		var list: Array = [ItemDb.make(pack, 1)]
 		list[0]["fir"] = true

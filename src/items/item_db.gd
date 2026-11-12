@@ -1252,6 +1252,20 @@ static func canon_entry(e: Dictionary) -> void:
 				canon_entry(inner as Dictionary)
 
 
+## Убранные предметы (Balance.REMOVED_ITEMS) — из списка вон; возвращает деньги, ₽, за них по прежней цене.
+static func purge_removed(list: Array) -> int:
+	var back := 0
+	var i := 0
+	while i < list.size():
+		var e: Variant = list[i]
+		if e is Dictionary and Balance.REMOVED_ITEMS.has(String((e as Dictionary).get("id", ""))):
+			back += int(Balance.REMOVED_ITEMS[String((e as Dictionary).id)]) * int((e as Dictionary).get("n", 1))
+			list.remove_at(i)
+			continue
+		i += 1
+	return back
+
+
 static func canon_list(list: Array) -> void:
 	for e: Variant in list:
 		if e is Dictionary:
@@ -1265,7 +1279,7 @@ static func canon_template(t: Dictionary) -> void:
 	var slots_d: Dictionary = t.get("slots", {})
 	if slots_d.has("rig"):
 		var rig: Dictionary = slots_d.rig if slots_d.rig is Dictionary else {}
-		var n := int((item(String(rig.get("id", ""))).get("rig", {}) as Dictionary).get("pouches", 0))
+		var n := int(Balance.LEGACY_RIGS.get(String(rig.get("id", "")), 0))
 		slots_d.erase("rig")
 		if n > 0 and slots_d.get("armor") is Dictionary and not (slots_d.armor as Dictionary).has("pouches"):
 			var pouches: Array = []
@@ -1282,7 +1296,13 @@ static func canon_template(t: Dictionary) -> void:
 			for g in plates:
 				if (plates as Dictionary)[g] is String:
 					(plates as Dictionary)[g] = WeaponDb.canonical(String((plates as Dictionary)[g]))
+	var kept: Array = []
 	for pair: Variant in t.get("backpack", []):
 		if pair is Array and (pair as Array).size() > 0 and (pair as Array)[0] is String:
 			(pair as Array)[0] = WeaponDb.canonical(String((pair as Array)[0]))
+			if Balance.REMOVED_ITEMS.has(String((pair as Array)[0])):
+				continue
+		kept.append(pair)
+	if t.has("backpack"):
+		t["backpack"] = kept
 

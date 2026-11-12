@@ -93,7 +93,7 @@ func _ready() -> void:
 	CameraRig.first_person_mode = false
 	var safe: LootContainer = _level.get_node("Interactables/JewelrySafe") as LootContainer
 	await _teleport(safe.global_position - safe.global_basis.z * 1.2)
-	_player.inventory.add("keycard_security", 1)
+	_player.inventory.add("key_bank_vault", 1)
 	_player.inventory.add("bandage", 2)
 	await _wait(1.0)
 	_mark("search")

@@ -15,7 +15,7 @@ const STREET_R := 63.0
 ## Рубильник и ключ своего выхода — на пути навигации от выхода вглубь карты, столько метров.
 const FIXTURE_M := 25.0
 const FIXTURE_SWITCH := "rivals_test_power"
-const FIXTURE_KEY := "keycard_security"
+const FIXTURE_KEY := "key_server"
 
 var _fails: int = 0
 var _level: Node

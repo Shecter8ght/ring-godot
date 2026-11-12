@@ -29,16 +29,6 @@
       0.209
     ]
   },
-  "measuring_tape": {
-    "source": "https://polyhaven.com/a/measuring_tape_01",
-    "license": "CC0 1.0",
-    "triangles": 2868,
-    "size": [
-      0.0406,
-      0.0734,
-      0.1694
-    ]
-  },
   "hammer": {
     "source": "https://polyhaven.com/a/cross_pein_hammer",
     "license": "CC0 1.0",
@@ -137,26 +127,6 @@
       0.1669,
       0.0766,
       0.2881
-    ]
-  },
-  "wall_clock": {
-    "source": "https://polyhaven.com/a/wall_clock",
-    "license": "CC0 1.0",
-    "triangles": 3658,
-    "size": [
-      0.3205,
-      0.0472,
-      0.3205
-    ]
-  },
-  "work_gloves": {
-    "source": "https://polyhaven.com/a/garden_gloves_01",
-    "license": "CC0 1.0",
-    "triangles": 6499,
-    "size": [
-      0.2266,
-      0.076,
-      0.299
     ]
   },
   "clipboard": {

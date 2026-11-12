@@ -535,11 +535,6 @@ const TRADER_BUY_PRICES := {
 	"engraver_controller": 7800,
 	"engraver_frame": 11000,
 	"flare": 1800,
-	"food_beans": 2000,
-	"food_milk": 1800,
-	"food_sardines": 2500,
-	"food_tomatoes": 1500,
-	"freeze_dried_meals": 5000,
 	"gold_chain": 20000,
 	"gpu": 33000,
 	"gpu_compute": 120000,
@@ -595,7 +590,6 @@ const TRADER_BUY_PRICES := {
 	"mag_pkm_200": 16000,
 	"mag_s12_20": 20000,
 	"mag_s12_8": 3500,
-	"measuring_tape": 1200,
 	"medical_case": 2100,
 	"medkit": 3000,
 	"metal_toolbox": 3600,
@@ -689,14 +683,12 @@ const TRADER_BUY_PRICES := {
 	"printer_board": 7800,
 	"printer_body": 18000,
 	"printer_head": 9800,
-	"protein_pack": 5400,
 	"radio_transceiver": 18000,
 	"ram_desktop": 9800,
 	"ram_server": 25000,
 	"ratchet_socket": 5900,
 	"ration_arctic": 9500,
 	"ration_daily": 7300,
-	"ration_emergency": 5800,
 	"ration_patrol": 4700,
 	"router_industrial": 28000,
 	"satellite_modem": 62000,
@@ -741,7 +733,6 @@ const TRADER_BUY_PRICES := {
 	"pouch_pistol": 2500,
 	"pouch_big": 7500,
 	"video_camera": 15000,
-	"wall_clock": 2300,
 	"watch": 16000,
 	"water": 340,
 	"water_purification": 6200,
@@ -749,7 +740,6 @@ const TRADER_BUY_PRICES := {
 	"weapon_gauges": 19000,
 	"msl_zr36": 450000,
 	"wires": 1000,
-	"work_gloves": 650,
 	"wpn_ar_01": 180000,
 	"wpn_ar_09": 315000,
 	"wpn_ar_05": 1100000,
@@ -1620,6 +1610,17 @@ const AMMO_CHECK := {"hold_sec": 0.4, "show_sec": 3.0, "turn_deg": [45.0, 18.0],
 ## держать «действие», с; grid — сетка одной половины буфера; в рейде обмен рвётся, если разошлись
 ## дальше break_m.
 const TRADE := {"reach_m": 2.2, "hold_sec": 0.5, "grid": [8, 5], "break_m": 5.0}
+## Убранные предметы (решение владельца 2026-11-13, docs/design/loot_matrix_v2.md §6): записей в data/items.json больше нет.
+## Старое сохранение с ними (тайник, рюкзак, карман, шаблоны) при загрузке очищается (ItemDb.purge_removed): вещь пропадает,
+## а деньги возвращаются по значению ниже — это цена, за которую Михалыч купил бы её до удаления (оценка × TRADER_SELL_MULT).
+const REMOVED_ITEMS := {
+	"key_jewelry": 2750, "keycard_security": 5500, "work_gloves": 275, "clipboard": 330, "measuring_tape": 495,
+	"wall_clock": 990, "food_tomatoes": 715, "food_beans": 990, "food_sardines": 1210, "food_milk": 880,
+	"freeze_dried_meals": 2475, "protein_pack": 2640, "ration_emergency": 2860,
+}
+## Старые разгрузки (предметов больше нет, слота тоже): сколько автоматных подсумков получает владелец старого
+## сохранения вместо разгрузки (Profile._migrate_rigs, ItemDb.canon_template). Предметы в items.json убраны 2026-11-13.
+const LEGACY_RIGS := {"rig_belt": 2, "rig_chest": 4, "rig_assault": 6, "rig_heavy": 8}
 ## Разгрузка (слот снаряжения "rig", предметы с полем rig в data/items.json): подсумки — сетка
 ## «подсумков × rows» только под магазины, сумка сброса — «dump × rows», тоже только магазины.
 ## Перезарядка берёт магазин из подсумков; нет там — из рюкзака, но дольше в backpack_reload_k раз.
@@ -2229,7 +2230,6 @@ const CIVILIAN_LOOT_VALUES := {
 	"circuit_board": 10500,
 	"pliers": 1200,
 	"screwdriver": 700,
-	"measuring_tape": 900,
 	"hammer": 1100,
 	"pipe_wrench": 1900,
 	"multimeter": 7800,
@@ -2240,9 +2240,6 @@ const CIVILIAN_LOOT_VALUES := {
 	"cassette_player": 3200,
 	"video_camera": 11500,
 	"binoculars": 8500,
-	"wall_clock": 1800,
-	"work_gloves": 500,
-	"clipboard": 600,
 	"empty_jerrycan": 2200,
 	"medical_case": 1600,
 	"metal_toolbox": 2800,
@@ -2254,21 +2251,21 @@ const CIVILIAN_LOOT_VALUES := {
 ## Тематические матрицы: [минимум, максимум] бросков, затем [предмет, вес, количество].
 const CIVILIAN_LOOT := {
 	"register": {"rolls": [1, 2], "entries": [
-		["cash", 5, [1, 3]], ["cigarettes", 2, [1, 2]], ["lighter", 1, [1, 1]], ["measuring_tape", 0.3, [1, 1]],
+		["cash", 5, [1, 3]], ["cigarettes", 2, [1, 2]], ["lighter", 1, [1, 1]],
 		["nothing", 2, [0, 0]]
 	]},
 	"shelf": {"rolls": [1, 1], "entries": [
 		["water", 3, [1, 1]], ["energy_bar", 3, [1, 2]], ["lighter", 2, [1, 1]], ["perfume", 1, [1, 1]],
-		["thermos", 1.5, [1, 1]], ["wall_clock", 0.8, [1, 1]], ["work_gloves", 2, [1, 1]], ["kettle", 0.8, [1, 1]],
+		["thermos", 1.5, [1, 1]], ["kettle", 0.8, [1, 1]],
 		["nothing", 5, [0, 0]]
 	]},
 	"grocery": {"rolls": [1, 2], "entries": [
 		["water", 4, [1, 1]], ["canned", 4, [1, 1]], ["energy_bar", 3, [1, 2]], ["cigarettes", 1, [1, 2]],
-		["thermos", 0.8, [1, 1]], ["kettle", 0.5, [1, 1]], ["work_gloves", 0.7, [1, 1]], ["nothing", 2, [0, 0]]
+		["thermos", 0.8, [1, 1]], ["kettle", 0.5, [1, 1]], ["nothing", 2, [0, 0]]
 	]},
 	"pharmacy": {"rolls": [1, 2], "entries": [
 		["bandage", 5, [1, 3]], ["painkillers", 4, [1, 2]], ["medkit", 1, [1, 1]], ["medical_case", 0.8, [1, 1]],
-		["clipboard", 0.7, [1, 1]], ["nothing", 2, [0, 0]]
+		["nothing", 2, [0, 0]]
 	]},
 	"electronics": {"rolls": [1, 2], "entries": [
 		["phone", 3, [1, 1]], ["headphones", 3, [1, 1]], ["powerbank", 3, [1, 1]], ["camera", 1, [1, 1]],
@@ -2278,31 +2275,31 @@ const CIVILIAN_LOOT := {
 	]},
 	"tools": {"rolls": [1, 2], "entries": [
 		["wires", 4, [1, 2]], ["battery", 2, [1, 1]], ["toolset", 1, [1, 1]], ["screwdriver", 3, [1, 1]],
-		["pliers", 2, [1, 1]], ["hammer", 2, [1, 1]], ["pipe_wrench", 1.5, [1, 1]], ["measuring_tape", 2, [1, 1]],
-		["work_gloves", 2, [1, 1]], ["oil_tin", 1.5, [1, 1]], ["metal_toolbox", 1, [1, 1]], ["bench_vice", 0.5, [1, 1]],
+		["pliers", 2, [1, 1]], ["hammer", 2, [1, 1]], ["pipe_wrench", 1.5, [1, 1]],
+		["oil_tin", 1.5, [1, 1]], ["metal_toolbox", 1, [1, 1]], ["bench_vice", 0.5, [1, 1]],
 		["multimeter", 0.4, [1, 1]], ["junction_box", 1, [1, 1]], ["empty_jerrycan", 0.8, [1, 1]], ["nothing", 5, [0, 0]],
 		["spray_paint", 1.2, [1, 2]], ["stencil_kit", 0.5, [1, 1]]
 	]},
 	"storage": {"rolls": [1, 2], "entries": [
 		["water", 3, [1, 1]], ["canned", 3, [1, 1]], ["wires", 2, [1, 2]], ["battery", 1, [1, 1]],
-		["cigarettes", 1, [1, 2]], ["work_gloves", 1.5, [1, 1]], ["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.6, [1, 1]],
+		["cigarettes", 1, [1, 2]], ["oil_tin", 1, [1, 1]], ["metal_toolbox", 0.6, [1, 1]],
 		["empty_jerrycan", 0.6, [1, 1]], ["junction_box", 0.7, [1, 1]], ["screwdriver", 1, [1, 1]], ["nothing", 6, [0, 0]],
 		["spray_paint", 0.8, [1, 1]], ["sticker_film", 0.7, [1, 2]], ["printer_body", 0.12, [1, 1]], ["pouch_pistol", 0.3, [1, 1]]
 	]},
 	"office": {"rolls": [1, 2], "entries": [
 		["documents", 1, [1, 1]], ["cash", 2, [1, 1]], ["phone", 1, [1, 1]], ["powerbank", 2, [1, 1]],
-		["painkillers", 1, [1, 1]], ["lighter", 2, [1, 1]], ["clipboard", 2, [1, 1]], ["desk_lamp", 1, [1, 1]],
-		["wall_clock", 1, [1, 1]], ["thermos", 1, [1, 1]], ["cassette_player", 0.7, [1, 1]], ["nothing", 4, [0, 0]],
+		["painkillers", 1, [1, 1]], ["lighter", 2, [1, 1]], ["desk_lamp", 1, [1, 1]],
+		["thermos", 1, [1, 1]], ["cassette_player", 0.7, [1, 1]], ["nothing", 4, [0, 0]],
 		["sticker_film", 1.2, [1, 2]], ["ink_set", 0.8, [1, 1]], ["stencil_kit", 0.3, [1, 1]], ["printer_body", 0.2, [1, 1]],
 		["printer_board", 0.15, [1, 1]], ["sticker_tally", 0.4, [1, 2]]
 	]},
 	"bank": {"rolls": [1, 2], "entries": [
-		["cash", 5, [2, 5]], ["documents", 2, [1, 1]], ["clipboard", 1, [1, 1]], ["desk_lamp", 0.5, [1, 1]],
+		["cash", 5, [2, 5]], ["documents", 2, [1, 1]], ["desk_lamp", 0.5, [1, 1]],
 		["nothing", 2, [0, 0]]
 	]},
 	"kiosk": {"rolls": [1, 2], "entries": [
 		["cigarettes", 4, [1, 3]], ["lighter", 3, [1, 2]], ["energy_bar", 3, [1, 2]], ["cash", 1, [1, 1]],
-		["thermos", 0.5, [1, 1]], ["cassette_player", 0.4, [1, 1]], ["measuring_tape", 0.5, [1, 1]],
+		["thermos", 0.5, [1, 1]], ["cassette_player", 0.4, [1, 1]],
 		["sticker_skull", 0.5, [1, 2]], ["sticker_tally", 0.5, [1, 2]], ["sticker_shark", 0.12, [1, 1]]
 	]},
 	"server_rack": {"rolls": [1, 2], "entries": [
@@ -2313,11 +2310,11 @@ const CIVILIAN_LOOT := {
 	"sport": {"rolls": [1, 1], "entries": [
 		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
 		["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
-		["work_gloves", 1, [1, 1]], ["nothing", 4, [0, 0]], ["pouch_pistol", 0.6, [1, 1]], ["pouch_rifle", 0.3, [1, 1]]
+		["nothing", 4, [0, 0]], ["pouch_pistol", 0.6, [1, 1]], ["pouch_rifle", 0.3, [1, 1]]
 	]},
 	"home": {"rolls": [1, 2], "entries": [
-		["thermos", 2, [1, 1]], ["kettle", 2, [1, 1]], ["wall_clock", 2, [1, 1]], ["cassette_player", 1.5, [1, 1]],
-		["work_gloves", 1, [1, 1]], ["desk_lamp", 1.5, [1, 1]], ["video_camera", 0.3, [1, 1]], ["binoculars", 0.4, [1, 1]],
+		["thermos", 2, [1, 1]], ["kettle", 2, [1, 1]], ["cassette_player", 1.5, [1, 1]],
+		["desk_lamp", 1.5, [1, 1]], ["video_camera", 0.3, [1, 1]], ["binoculars", 0.4, [1, 1]],
 		["nothing", 4, [1, 1]], ["pouch_pistol", 0.25, [1, 1]]
 	]},
 	"components": {"rolls": [1, 2], "entries": [
@@ -2325,8 +2322,8 @@ const CIVILIAN_LOOT := {
 		["circuit_board", 0.8, [1, 1]], ["multimeter", 0.5, [1, 1]], ["nothing", 5, [1, 1]]
 	]},
 	"workshop": {"rolls": [1, 2], "entries": [
-		["pliers", 2, [1, 1]], ["screwdriver", 3, [1, 1]], ["measuring_tape", 2, [1, 1]], ["hammer", 2, [1, 1]],
-		["pipe_wrench", 1.5, [1, 1]], ["oil_tin", 2, [1, 1]], ["work_gloves", 2, [1, 1]], ["metal_toolbox", 1, [1, 1]],
+		["pliers", 2, [1, 1]], ["screwdriver", 3, [1, 1]], ["hammer", 2, [1, 1]],
+		["pipe_wrench", 1.5, [1, 1]], ["oil_tin", 2, [1, 1]], ["metal_toolbox", 1, [1, 1]],
 		["bench_vice", 0.6, [1, 1]], ["empty_jerrycan", 1, [1, 1]], ["multimeter", 0.35, [1, 1]], ["power_unit", 0.6, [1, 1]],
 		["nothing", 5, [1, 1]]
 	]},
@@ -2417,17 +2414,10 @@ const VALUABLE_LOOT_VALUES := {
 	"timing_kit": 12500,
 	"brake_service_kit": 8500,
 	"bearing_set": 9500,
-	"food_milk": 1600,
-	"food_tomatoes": 1300,
-	"food_beans": 1800,
-	"food_sardines": 2200,
 	"ration_daily": 6500,
 	"ration_patrol": 4200,
 	"ration_arctic": 8500,
-	"ration_emergency": 5200,
-	"freeze_dried_meals": 4500,
 	"coffee_pack": 6500,
-	"protein_pack": 4800,
 	"water_purification": 5500,
 	"pack_918_pst": 1800,
 	"pack_918_ap": 3520,
@@ -3612,22 +3602,6 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"food_milk",
-			1
-		],
-		[
-			"food_tomatoes",
-			1
-		],
-		[
-			"food_beans",
-			1
-		],
-		[
-			"food_sardines",
-			1
-		],
-		[
 			"ration_daily",
 			1
 		],
@@ -3640,19 +3614,7 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"ration_emergency",
-			1
-		],
-		[
-			"freeze_dried_meals",
-			1
-		],
-		[
 			"coffee_pack",
-			1
-		],
-		[
-			"protein_pack",
 			1
 		],
 		[
@@ -4002,22 +3964,6 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"food_milk",
-			1
-		],
-		[
-			"food_tomatoes",
-			1
-		],
-		[
-			"food_beans",
-			1
-		],
-		[
-			"food_sardines",
-			1
-		],
-		[
 			"ration_daily",
 			1
 		],
@@ -4030,19 +3976,7 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"ration_emergency",
-			1
-		],
-		[
-			"freeze_dried_meals",
-			1
-		],
-		[
 			"coffee_pack",
-			1
-		],
-		[
-			"protein_pack",
 			1
 		],
 		[
@@ -4102,22 +4036,6 @@ const VALUABLE_LOOT := {
 	],
 	"grocery": [
 		[
-			"food_milk",
-			1
-		],
-		[
-			"food_tomatoes",
-			1
-		],
-		[
-			"food_beans",
-			1
-		],
-		[
-			"food_sardines",
-			1
-		],
-		[
 			"ration_daily",
 			1
 		],
@@ -4130,19 +4048,7 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"ration_emergency",
-			1
-		],
-		[
-			"freeze_dried_meals",
-			1
-		],
-		[
 			"coffee_pack",
-			1
-		],
-		[
-			"protein_pack",
 			1
 		],
 		[
@@ -4152,22 +4058,6 @@ const VALUABLE_LOOT := {
 	],
 	"kiosk": [
 		[
-			"food_milk",
-			1
-		],
-		[
-			"food_tomatoes",
-			1
-		],
-		[
-			"food_beans",
-			1
-		],
-		[
-			"food_sardines",
-			1
-		],
-		[
 			"ration_daily",
 			1
 		],
@@ -4180,19 +4070,7 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"ration_emergency",
-			1
-		],
-		[
-			"freeze_dried_meals",
-			1
-		],
-		[
 			"coffee_pack",
-			1
-		],
-		[
-			"protein_pack",
 			1
 		],
 		[
@@ -4202,22 +4080,6 @@ const VALUABLE_LOOT := {
 	],
 	"shelf": [
 		[
-			"food_milk",
-			1
-		],
-		[
-			"food_tomatoes",
-			1
-		],
-		[
-			"food_beans",
-			1
-		],
-		[
-			"food_sardines",
-			1
-		],
-		[
 			"ration_daily",
 			1
 		],
@@ -4230,19 +4092,7 @@ const VALUABLE_LOOT := {
 			1
 		],
 		[
-			"ration_emergency",
-			1
-		],
-		[
-			"freeze_dried_meals",
-			1
-		],
-		[
 			"coffee_pack",
-			1
-		],
-		[
-			"protein_pack",
 			1
 		],
 		[

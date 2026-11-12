@@ -564,34 +564,6 @@
     ],
     "print": "BEARINGS"
   },
-  "food_milk": {
-    "source": "long_life_food",
-    "group": "food",
-    "selector": [
-      "long_life_food_milk"
-    ]
-  },
-  "food_tomatoes": {
-    "source": "long_life_food",
-    "group": "food",
-    "selector": [
-      "long_life_food_tomatoes"
-    ]
-  },
-  "food_beans": {
-    "source": "long_life_food",
-    "group": "food",
-    "selector": [
-      "long_life_food_beans"
-    ]
-  },
-  "food_sardines": {
-    "source": "long_life_food",
-    "group": "food",
-    "selector": [
-      "long_life_food_sardines"
-    ]
-  },
   "ration_daily": {
     "source": "cardboard_box_01",
     "group": "food",
@@ -628,46 +600,10 @@
     ],
     "print": "RATION"
   },
-  "ration_emergency": {
-    "source": "cardboard_box_01",
-    "group": "food",
-    "label": "RATION / EMERGENCY",
-    "max_dimension": 0.23,
-    "dimensions": [
-      0.23,
-      0.161,
-      0.0506
-    ],
-    "print": "RATION"
-  },
-  "freeze_dried_meals": {
-    "source": "cardboard_box_01",
-    "group": "food",
-    "label": "FOOD / FREEZE DRIED",
-    "max_dimension": 0.23,
-    "dimensions": [
-      0.23,
-      0.161,
-      0.0506
-    ],
-    "print": "FOOD"
-  },
   "coffee_pack": {
     "source": "cardboard_box_01",
     "group": "food",
     "label": "FOOD / COFFEE",
-    "max_dimension": 0.23,
-    "dimensions": [
-      0.23,
-      0.161,
-      0.0506
-    ],
-    "print": "FOOD"
-  },
-  "protein_pack": {
-    "source": "cardboard_box_01",
-    "group": "food",
-    "label": "FOOD / PROTEIN",
     "max_dimension": 0.23,
     "dimensions": [
       0.23,
@@ -747,18 +683,6 @@
       0.030800000000000004
     ],
     "print": ".45 ACP FMJ"
-  },
-  "pack_57_ap": {
-    "source": "cardboard_box_01",
-    "group": "ammo",
-    "label": "Патроны 5.7×28 бронебойные / 40 ROUNDS",
-    "max_dimension": 0.14,
-    "dimensions": [
-      0.14,
-      0.098,
-      0.030800000000000004
-    ],
-    "print": "5.7×28 бронебойные"
   },
   "pack_921_ap": {
     "source": "cardboard_box_01",

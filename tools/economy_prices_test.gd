@@ -11,7 +11,10 @@ const RETIRED: Array[String] = ["optic_rmr_01", "optic_offset_rd_01", "grip_comp
 	"wpn_lmg_02", "wpn_sr_02", "mag_556_20", "mag_556_30", "mag_556_40", "mag_556_60", "mag_300_30", "mag_57_p90_50",
 	"mag_45_ump25", "mag_45_usp12", "mag_m249_100", "mag_m249_200", "mag_50_m82_10", "ammo_57_std", "ammo_57_ap",
 	"ammo_300_sup", "ammo_300_sub", "ammo_50_ball", "ammo_50_api", "muzzle_supp_556_01", "muzzle_comp_556_01",
-	"muzzle_fh_556_01", "muzzle_supp_57_01", "muzzle_supp_300_01", "pack_57_ap"]
+	"muzzle_fh_556_01", "muzzle_supp_57_01", "muzzle_supp_300_01", "pack_57_ap",
+	# убраны решением владельца 2026-11-13 (loot_matrix_v2.md §6); в снимке v0 ещё стоят
+	"food_beans", "food_milk", "food_sardines", "food_tomatoes", "freeze_dried_meals", "measuring_tape", "protein_pack",
+	"ration_emergency", "wall_clock", "work_gloves", "clipboard", "key_jewelry", "keycard_security"]
 
 
 func _ready() -> void:

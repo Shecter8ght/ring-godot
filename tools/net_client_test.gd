@@ -88,7 +88,7 @@ func _run() -> void:
 	await get_tree().create_timer(0.4).timeout
 	card.request_use()
 	await get_tree().create_timer(0.5).timeout
-	print("[client] карта-ключ в моём рюкзаке: %s" % my_player.inventory.has("keycard_security"))
+	print("[client] карта-ключ в моём рюкзаке: %s" % my_player.inventory.has("key_server"))
 	var bus := _level.get_node("Extractions/Bus") as ExtractionPoint
 	my_player.global_position = bus.global_position + Vector3(0, 0.1, 0)
 	await get_tree().create_timer(bus.channel_s + 2.0).timeout

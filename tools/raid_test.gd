@@ -78,7 +78,7 @@ func _ready() -> void:
 	var card := inst.get_node("Interactables/KeycardSecurity") as KeyPickup
 	await _teleport(card.global_position + Vector3(0.6, 0, 0))
 	await _press("interact")
-	_check("карта-ключ в рюкзаке", _player.inventory.has("keycard_security"), "")
+	_check("карта-ключ в рюкзаке", _player.inventory.has("key_server"), "")
 	# лут: сейф ювелирного (дверь сейфовой заперта — телепорт внутрь), обыск и «взять всё»
 	var safe := inst.get_node("Interactables/JewelrySafe") as LootContainer
 	await _teleport(safe.global_position + safe.global_basis.z * -1.2)

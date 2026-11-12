@@ -12,7 +12,6 @@
 | Материнская плата | 10500 | 5775 | 0.55 | 3×2 | [Poly Haven](https://polyhaven.com/a/circuit_board) |
 | Пассатижи | 1200 | 660 | 0.28 | 1×2 | [Poly Haven](https://polyhaven.com/a/pliers) |
 | Отвёртка | 700 | 385 | 0.12 | 1×2 | [Poly Haven](https://polyhaven.com/a/screwdriver) |
-| Рулетка | 900 | 495 | 0.2 | 1×1 | [Poly Haven](https://polyhaven.com/a/measuring_tape_01) |
 | Слесарный молоток | 1100 | 605 | 0.65 | 1×2 | [Poly Haven](https://polyhaven.com/a/cross_pein_hammer) |
 | Трубный ключ | 1900 | 1045 | 1.1 | 1×3 | [Poly Haven](https://polyhaven.com/a/pipe_wrench) |
 | Стрелочный мультиметр | 7800 | 4290 | 0.9 | 2×2 | [Poly Haven](https://polyhaven.com/a/retro_multimeter) |
@@ -23,9 +22,6 @@
 | Кассетный плеер | 3200 | 1760 | 0.32 | 1×2 | [Poly Haven](https://polyhaven.com/a/cassette_player) |
 | Плёночная кинокамера | 11500 | 6325 | 0.85 | 2×2 | [Poly Haven](https://polyhaven.com/a/vintage_video_camera) |
 | Полевой бинокль | 8500 | 4675 | 0.8 | 2×2 | [Poly Haven](https://polyhaven.com/a/binoculars) |
-| Настенные часы | 1800 | 990 | 0.7 | 2×2 | [Poly Haven](https://polyhaven.com/a/wall_clock) |
-| Рабочие перчатки | 500 | 275 | 0.12 | 2×1 | [Poly Haven](https://polyhaven.com/a/garden_gloves_01) |
-| Канцелярский планшет | 600 | 330 | 0.25 | 2×2 | [Poly Haven](https://polyhaven.com/a/clipboard) |
 | Пустая металлическая канистра | 2200 | 1210 | 3.2 | 3×3 | [Poly Haven](https://polyhaven.com/a/metal_jerrycan_green) |
 | Пустой медицинский футляр | 1600 | 880 | 1.2 | 3×2 | [Poly Haven](https://polyhaven.com/a/medical_box) |
 | Металлический ящик для инструмента | 2800 | 1540 | 2.4 | 3×2 | [Poly Haven](https://polyhaven.com/a/metal_toolbox) |

@@ -747,50 +747,6 @@
     ],
     "packaged": true
   },
-  "food_milk": {
-    "source": "https://polyhaven.com/a/long_life_food",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 116,
-    "size": [
-      0.1001,
-      0.2376,
-      0.0716
-    ],
-    "packaged": false
-  },
-  "food_tomatoes": {
-    "source": "https://polyhaven.com/a/long_life_food",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 1512,
-    "size": [
-      0.1136,
-      0.1186,
-      0.1136
-    ],
-    "packaged": false
-  },
-  "food_beans": {
-    "source": "https://polyhaven.com/a/long_life_food",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 1512,
-    "size": [
-      0.0883,
-      0.1475,
-      0.0881
-    ],
-    "packaged": false
-  },
-  "food_sardines": {
-    "source": "https://polyhaven.com/a/long_life_food",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 1572,
-    "size": [
-      0.1313,
-      0.0275,
-      0.0796
-    ],
-    "packaged": false
-  },
   "ration_daily": {
     "source": "https://polyhaven.com/a/cardboard_box_01",
     "license": "CC0 1.0 — Poly Haven",
@@ -824,40 +780,7 @@
     ],
     "packaged": true
   },
-  "ration_emergency": {
-    "source": "https://polyhaven.com/a/cardboard_box_01",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 6202,
-    "size": [
-      0.23,
-      0.0506,
-      0.161
-    ],
-    "packaged": true
-  },
-  "freeze_dried_meals": {
-    "source": "https://polyhaven.com/a/cardboard_box_01",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 6202,
-    "size": [
-      0.23,
-      0.0506,
-      0.161
-    ],
-    "packaged": true
-  },
   "coffee_pack": {
-    "source": "https://polyhaven.com/a/cardboard_box_01",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 6202,
-    "size": [
-      0.23,
-      0.0506,
-      0.161
-    ],
-    "packaged": true
-  },
-  "protein_pack": {
     "source": "https://polyhaven.com/a/cardboard_box_01",
     "license": "CC0 1.0 — Poly Haven",
     "triangles": 6202,
@@ -924,17 +847,6 @@
     "packaged": true
   },
   "pack_45_fmj": {
-    "source": "https://polyhaven.com/a/cardboard_box_01",
-    "license": "CC0 1.0 — Poly Haven",
-    "triangles": 6202,
-    "size": [
-      0.14,
-      0.0308,
-      0.098
-    ],
-    "packaged": true
-  },
-  "pack_57_ap": {
     "source": "https://polyhaven.com/a/cardboard_box_01",
     "license": "CC0 1.0 — Poly Haven",
     "triangles": 6202,
