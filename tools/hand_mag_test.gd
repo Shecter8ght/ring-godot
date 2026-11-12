@@ -4,6 +4,8 @@ extends Node
 ## магазин на оружие с пустой шахтой — вставить (затвор на задержке — с досылом), на оружие с магазином — перезарядка
 ## этим магазином (старый — в рюкзак); руки заняты — отказ, отмена не трогает вещи, полный рюкзак — магазин остаётся
 ## в оружии. Риг: части перезарядки «вынуть» / «вставить» на модели с магазином и с пустой шахтой, подпись записи.
+## Оружие без рига (ВЕРАС-54): «вынуть» идёт по таймеру перезарядки (вид «eject»), магазин на оружие — перезарядка
+## именно выбранным магазином, а не самым полным, и при открытом рюкзаке.
 ## tools/godot.cmd --headless res://tools/hand_mag_test.tscn
 
 const GUN: String = "wpn_hg_02"
@@ -19,6 +21,9 @@ class StateHost extends Node:
 
 	func request_weapon_state(slot: String, state: Dictionary) -> void:
 		actor.inventory.apply_weapon_state(slot, state)
+
+	func request_reload(slot: String, state: Dictionary) -> void:
+		actor.inventory.reload_slot(slot, state)
 
 
 func _ready() -> void:
@@ -208,4 +213,74 @@ func _player_cases() -> void:
 	_check("полный рюкзак: магазин остался в оружии, вещи целы", _snapshot(actor) == before and actor._pm_action.is_empty())
 	# --- чужой слот и не то оружие
 	_check("магазин не того оружия — отказ", actor.hand_mag_insert("backpack", 999) != "")
+	_rifle_cases(actor)
 	world.queue_free()
+
+
+## Довести перезарядку, начатую из окна рюкзака (кадры игры при открытом окне).
+func _finish_reload(actor: Player) -> void:
+	for i: int in range(400):
+		if actor.reload_timer <= 0.0:
+			return
+		actor._tick_reload(0.05, actor.spec(), false)
+
+
+func _rifle_mags(actor: Player) -> Array:
+	var out: Array = []
+	for it: Dictionary in actor.inventory.items:
+		if it.has("rounds"):
+			out.append(int(it.rounds))
+	out.sort()
+	return out
+
+
+func _rifle_cases(actor: Player) -> void:
+	const RIFLE: String = "wpn_ar_01"
+	const RMAG: String = "mag_545_30"
+	const RAMMO: String = "ammo_545_std"
+	actor.cancel_weapon_action()
+	actor.weapon_id = ""
+	actor.weapon_slot = ""
+	actor._ws.clear()
+	actor._pm_entries.clear()
+	actor._ws_dirty = false
+	actor.inventory.equipment = {"primary": {"id": RIFLE, "n": 1, "dur": 100.0, "rev": 0, "mods": {}, "sight": "primary",
+		"mag": {"id": RMAG, "ammo": RAMMO, "rounds": 12}}}
+	actor.inventory.items = []
+	for n: int in [30, 7]:
+		ItemDb.add_to(actor.inventory.items, WeaponDb.make_mag(RMAG, RAMMO, n), Balance.BACKPACK_GRID)
+	actor._switch("primary", false)
+	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
+	_check("автомат в руках: магазин тоже вынимают руками", actor.hand_mag_ready("primary") and not actor._hand_mag_rig())
+	var before: String = _snapshot(actor)
+	var why: String = actor.hand_mag_eject()
+	_check("автомат «вынуть»: действие по таймеру перезарядки, вещи на месте", why == "" and String(actor._pm_action.get("kind", "")) == "mag_out"
+		and actor.reload_timer > 0.0 and actor._reload_kind == "eject" and _snapshot(actor) == before, why)
+	_finish(actor)
+	var entry: Dictionary = actor.weapon_entry()
+	_check("автомат: магазин в рюкзаке с остатком, шахта пуста", String((entry.mag as Dictionary).id) == "" and _rifle_mags(actor) == [7, 12, 30]
+		and actor.reload_timer <= 0.0 and actor._reload_kind == "", "рюкзак %s" % str(_rifle_mags(actor)))
+	actor.weapon_mag = WeaponMods.mag_state(entry)
+	var at: int = -1
+	for i: int in range(actor.inventory.items.size()):
+		if int((actor.inventory.items[i] as Dictionary).get("rounds", -1)) == 7:
+			at = i
+	why = actor.hand_mag_insert("backpack", at)
+	_check("автомат «вставить»: перезарядка выбранным магазином, идёт при открытом окне", why == "" and actor.reload_timer > 0.0 and actor._reload_ui
+		and actor._reload_insert and actor.reload_next_mag() == "*", why)
+	_finish_reload(actor)
+	entry = actor.weapon_entry()
+	_check("автомат: вставлен выбранный (7), а не самый полный", int((entry.mag as Dictionary).rounds) == 7 and _rifle_mags(actor) == [12, 30],
+		"в оружии %d, рюкзак %s" % [int((entry.mag as Dictionary).rounds), str(_rifle_mags(actor))])
+	actor.weapon_mag = WeaponMods.mag_state(entry)
+	actor.ammo = actor._state_rounds("primary")
+	at = -1
+	for i: int in range(actor.inventory.items.size()):
+		if int((actor.inventory.items[i] as Dictionary).get("rounds", -1)) == 12:
+			at = i
+	why = actor.hand_mag_insert("backpack", at)
+	_check("автомат с магазином: перезарядка выбранным", why == "" and actor.reload_timer > 0.0 and not actor._reload_insert, why)
+	_finish_reload(actor)
+	entry = actor.weapon_entry()
+	_check("автомат: в оружии выбранный (12), прежний (7) вернулся в рюкзак", int((entry.mag as Dictionary).rounds) == 12 and _rifle_mags(actor) == [7, 30]
+		and actor._reload_pick.is_empty(), "в оружии %d, рюкзак %s" % [int((entry.mag as Dictionary).rounds), str(_rifle_mags(actor))])

@@ -70,6 +70,8 @@ func _ready() -> void:
 			await _extender()
 		elif part == "insert":
 			await _insert()
+		elif part == "eject":
+			await _eject()
 		elif part == "firemode":
 			await _fire_mode()
 		print("veras_shots: ошибок ", _failures)
@@ -141,6 +143,28 @@ func _ready() -> void:
 	await _insert()
 	print("veras_shots: ошибок ", _failures)
 	get_tree().quit(1 if _failures else 0)
+
+
+## «Вынуть магазин» из окна рюкзака (Player.hand_mag_eject, вид перезарядки «eject»): клип перезарядки идёт до кадра,
+## где старый магазин скрылся, дальше рука возвращается пустой. Стенд — песочница, поэтому показывается только
+## движение рук (сам перенос предмета — tools/hand_mag_test). VERAS_PART=eject → veras_eject_*.
+func _eject() -> void:
+	await _equip({})
+	var total: float = float(_player.spec().reload) * float(Balance.HAND_MAG.out_k)
+	_player._reload_kind = "eject"
+	_player._reload_slot = _player.weapon_slot
+	_player._reload_empty = false
+	_player._reload_insert = false
+	_player.reload_timer = total
+	var vm := _camera._viewmodel as ViewmodelClips
+	var elapsed: float = 0.0
+	for f: float in [0.2, 0.45, 0.7, 0.92]:
+		await get_tree().create_timer(maxf(0.0, total * f - elapsed)).timeout
+		elapsed = total * f
+		if f > 0.9:
+			_check("«вынуть»: после кадра подмены магазина на оружии не видно", not vm._mag_parts.is_empty() and not vm._mag_parts[0].visible)
+		await _shot("veras_eject_%02d" % int(f * 100))
+	await get_tree().create_timer(total - elapsed + 0.3).timeout
 
 
 ## Магазин вынут: в руках автомат без магазина; R — вставить новый (клип перезарядки с кадра, где новый

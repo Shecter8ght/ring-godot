@@ -82,6 +82,11 @@ var _last_clear: float = 0.0
 ## новый магазин уже в руке; пока руки переходят к этой позе, магазин не виден (иначе он «выезжал»
 ## бы из шахты в ладонь).
 var _insert_hide: float = 0.0
+## «Вынуть магазин» из окна рюкзака (Player._reload_kind "eject"): идёт клип до кадра подмены; после него магазин
+## скрыт, пока вид оружия не сменится на «без магазина» (не дольше EJECT_HIDE_SEC — действие могли отклонить).
+const EJECT_HIDE_SEC: float = 0.6
+var _eject: bool = false
+var _eject_hide: float = 0.0
 ## Старый магазин быстрой перезарядки (корпус и его патроны) и идёт ли сейчас быстрый клип.
 var _spare_parts: Array[Node3D] = []
 var _spare_rounds: Node3D
@@ -379,7 +384,24 @@ func update(pl: Player, delta: float) -> void:
 	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
 	if _clip == "":
 		_mag_set = _set_of(pl.weapon_mag)
-	if reloading and _last_reload <= 0.0:
+	if reloading and _last_reload <= 0.0 and pl._reload_kind == "eject":
+		# «вынуть магазин» из окна рюкзака: клип перезарядки до кадра, где старый магазин скрылся; дальше рука пуста
+		_reload_old = pl.weapon_mag
+		_reload_new = ""
+		_mag_set = _set_of(pl.weapon_mag)
+		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_after = 0
+		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip("reload"), -1))
+		_fast = false
+		_eject = true
+		_eject_hide = 0.0
+		_play(_clip_name("reload"), BLEND_IN, pl.reload_timer)
+		if _clip != "":
+			var eject_length: float = _anim.get_animation(_clip_name("reload")).length
+			var eject_to: float = float(_swap_frame) / float(config.get("fps", 30)) if _swap_frame >= 0 else eject_length * 0.4
+			_anim.speed_scale = eject_to / maxf(pl.reload_timer * float(Balance.HAND_MAG.out_hold), 0.05)
+	elif reloading and _last_reload <= 0.0:
+		_eject = false
 		var empty: bool = pl._reload_empty
 		var role: String = "reload_empty" if empty else "reload"
 		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
@@ -462,7 +484,13 @@ func update(pl: Player, delta: float) -> void:
 	# какой магазин виден: в перезарядке до подмены — старый, после — новый; иначе — тот, что в оружии
 	var showing: String = (_reload_new if after_swap else _reload_old) if _clip != "" and _swap_frame >= 0 else pl.weapon_mag
 	_insert_hide = maxf(0.0, _insert_hide - delta) if reloading else 0.0
-	_show_magazines(showing, shown, (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0)
+	# вынутый магазин не возвращается на оружие, пока хост не подтвердил (вид оружия ещё прежний)
+	if _eject and reloading and after_swap:
+		_eject_hide = EJECT_HIDE_SEC
+	elif not reloading:
+		_eject = false
+		_eject_hide = maxf(0.0, _eject_hide - delta) if pl.weapon_mag == _reload_old else 0.0
+	_show_magazines(showing, shown, (pl.weapon_mag != "" or reloading) and _insert_hide <= 0.0 and _eject_hide <= 0.0)
 	var clear_clip: bool = _clip != "" and _clip == _clip_name("clear")
 	if _jam_case:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип

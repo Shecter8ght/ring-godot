@@ -2286,7 +2286,7 @@ func _update_hud(pl: Player) -> void:
 	if pl.is_jammed():
 		t += "   ЗАДЕРЖКА (%s)" % PauseMenu.key_name("reload")
 	if pl.reload_timer > 0.0:
-		var action: String = "снаряжение магазина патронами…" if pl._reload_kind == "topup" else "перезарядка…"
+		var action: String = "снаряжение магазина патронами…" if pl._reload_kind == "topup" else ("вынимаю магазин…" if pl._reload_kind == "eject" else "перезарядка…")
 		t = "%s   %s" % [String(spec.name), action]
 	elif not pl._pm_action.is_empty() and String(pl._pm_action.kind) == "suppressor":
 		t = "%s   %s глушителя…" % [String(spec.name), "установка" if bool(pl._pm_action.install) else "снятие"]

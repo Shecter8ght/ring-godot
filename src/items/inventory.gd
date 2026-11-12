@@ -387,6 +387,11 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 	apply_weapon_state(slot, st)
 	if not equipment.has(slot):
 		return ["", {}]
+	if st.get("pick") is Dictionary:
+		# магазин выбрал сам игрок (бросил на оружие в окне рюкзака): меняется именно он; старому нет места — под ноги
+		var pick: Dictionary = st.pick
+		var swapped: Array = _mag_swap(slot, String(pick.get("role", "")), int(pick.get("idx", -1)), String(pick.get("id", "")), true)
+		return ["swap" if String(swapped[0]) == "" else "", swapped[1]]
 	var eq := equipment.duplicate(true)
 	var list := items.duplicate(true)
 	var r: Array = []
@@ -421,18 +426,26 @@ func reload_slot(slot: String, st: Dictionary) -> Array:
 func hand_mag_insert(slot: String, st: Dictionary, role: String, idx: int, mag_id: String) -> String:
 	if not equipment.has(slot) or not _weapon_state_matches(equipment[slot], st):
 		return "Оружие уже изменилось"
-	if not role in ["backpack", "pocket", "buffer", "rig", "dump"]:
-		return "Отсюда магазин в оружие не вставить"
 	apply_weapon_state(slot, st)
+	return String(_mag_swap(slot, role, idx, mag_id, false)[0])
+
+
+## Смена магазина оружия в слоте на магазин role[idx] (состояние владельца уже применено): [ошибка, выпавшее].
+## spill_ok — старому магазину нет места: он выпадает (вернётся вторым значением), иначе — отказ без перемен.
+func _mag_swap(slot: String, role: String, idx: int, mag_id: String, spill_ok: bool) -> Array:
+	if not equipment.has(slot):
+		return ["Оружия уже нет", {}]
+	if not role in ["backpack", "pocket", "buffer", "rig", "dump"]:
+		return ["Отсюда магазин в оружие не вставить", {}]
 	var eq := equipment.duplicate(true)
 	var bag: Array = items.duplicate(true)
 	var side: Array = pocket.duplicate(true) if role == "pocket" else (buffer.duplicate(true) if role == "buffer" else [])
 	var from: Array = bag if role == "backpack" else (ItemDb.rig_list(eq, role) if role in ["rig", "dump"] else side)
 	if idx < 0 or idx >= from.size() or String((from[idx] as Dictionary).get("id", "")) != mag_id or not (from[idx] as Dictionary).has("rounds"):
-		return "Магазина уже нет на месте"
+		return ["Магазина уже нет на месте", {}]
 	var r: Array = Gear.fit(eq[slot], from[idx], "")
 	if String(r[2]) != "":
-		return "Не встаёт: " + String(r[2])
+		return ["Не встаёт: " + String(r[2]), {}]
 	ItemDb.remove_at(from, idx, 1)
 	var fitted: Dictionary = r[0]
 	Gear.chamber_round(fitted)
@@ -448,15 +461,17 @@ func hand_mag_insert(slot: String, st: Dictionary, role: String, idx: int, mag_i
 			placed = ItemDb.add_to(bag, old, ItemDb.bag_grid(eq)) > 0
 		if not placed and ItemDb.rig_grid(eq, "rig") != Vector2i.ZERO:
 			placed = ItemDb.rig_add(eq, ItemDb.rig_list(eq, "rig"), old) > 0
-		if not placed:
-			return "Некуда положить старый магазин"
+		if placed:
+			old = {}
+		elif not spill_ok:
+			return ["Некуда положить старый магазин", {}]
 	items = bag
 	if role == "pocket":
 		pocket = side
 	elif role == "buffer":
 		buffer = side
 	equipment = eq
-	return ""
+	return ["", old]
 
 
 ## One cartridge, committed at the end of the hand animation. A live round is

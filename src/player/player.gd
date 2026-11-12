@@ -118,6 +118,10 @@ var _reload_old_mag: Dictionary = {}
 ## Магазин был вынут: перезарядка — только вставить новый (короче: Balance.RELOAD_INSERT.time_k);
 ## быстрой (двойное R) у неё нет — выбивать нечего.
 var _reload_insert: bool = false
+## Перезарядка магазином, который игрок сам бросил на оружие в окне рюкзака ({role, idx, id}); пусто — выбирает хост.
+var _reload_pick: Dictionary = {}
+## Такая перезарядка идёт и при открытом рюкзаке (обычная, начатая клавишей, с открытым окном стоит).
+var _reload_ui: bool = false
 ## Проверка магазина: R ещё держат — магазин перед глазами (вьюмодель ждёт), отпустили — убирает.
 ## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
 var mag_inspect: bool = false
@@ -859,6 +863,9 @@ func mag_out() -> bool:
 func reload_next_mag() -> String:
 	if not loadout_mode or inventory == null or weapon_id == "":
 		return weapon_mag
+	if not _reload_pick.is_empty():
+		var picked: String = WeaponDb.canonical(String(_reload_pick.get("id", "")))
+		return "*" if picked == WeaponDb.default_mag(weapon_id) else picked
 	var e: Dictionary = weapon_entry()
 	var pick: String = Gear.next_mag(e, inventory.list_of("rig"))
 	if pick == "":
@@ -1580,6 +1587,10 @@ func _combat(delta: float) -> void:
 	if not _pm_action.is_empty() and String(_pm_action.kind) in ["mag_out", "mag_in"]:
 		_tick_hand_mag(delta)
 		return
+	if _reload_ui and reload_timer > 0.0:
+		_tick_reload(delta, spec(), false)
+		return
+	_reload_ui = false
 	# открыт рюкзак/обыск — клики идут в кнопки, не в спуск
 	if not combat_enabled or ui_blocked():
 		_cancel_grenade_prepare()
@@ -1644,22 +1655,7 @@ func _combat(delta: float) -> void:
 	if _ws_dirty and _ws_sync_t <= 0.0:
 		_send_ws(weapon_slot)
 	if reload_timer > 0.0:
-		_reload_age += delta
-		# второе быстрое R — быстрая перезарядка: старый магазин на землю
-		if Input.is_action_just_pressed("reload"):
-			_try_fast_reload()
-		if _velcro_at >= 0.0 and _reload_age >= _velcro_at:
-			_velcro_at = -1.0
-			_play_velcro()
-		reload_timer -= delta
-		if _reload_kind != "clear":
-			_play_reload_marks(spec)
-		if _reload_kind == "clear" and not _clear_released and reload_timer <= float(Balance.WEAPON_WEAR.clear_sec) * (1.0 - float(Balance.WEAPON_WEAR.clear_release_at)):
-			_clear_released = true
-			_play_weapon_sound(spec, "clear_jam_release", -4.0)
-			Audio.shell_drop(global_position, _side_dir(), 0.0, weapon_id)
-		if reload_timer <= 0.0:
-			_finish_reload(spec)
+		_tick_reload(delta, spec, true)
 		return
 	ammo_check_t = maxf(0.0, ammo_check_t - delta)
 	# осмотр оружия (I): у ствола со своими клипами рук — клип осмотра; прицел, бег, выстрел, перезарядка — прерывают
@@ -1746,14 +1742,38 @@ func _combat(delta: float) -> void:
 		_fire(spec)
 
 
+## Кадр идущей перезарядки (и устранения задержки): звуки по меткам, липучка подсумка, конец. keys — клавиши
+## слушаются (второе быстрое R); при открытом рюкзаке — нет.
+func _tick_reload(delta: float, spec: Dictionary, keys: bool) -> void:
+	_reload_age += delta
+	# второе быстрое R — быстрая перезарядка: старый магазин на землю
+	if keys and Input.is_action_just_pressed("reload"):
+		_try_fast_reload()
+	if _velcro_at >= 0.0 and _reload_age >= _velcro_at:
+		_velcro_at = -1.0
+		_play_velcro()
+	reload_timer -= delta
+	if _reload_kind != "clear":
+		_play_reload_marks(spec)
+	if _reload_kind == "clear" and not _clear_released and reload_timer <= float(Balance.WEAPON_WEAR.clear_sec) * (1.0 - float(Balance.WEAPON_WEAR.clear_release_at)):
+		_clear_released = true
+		_play_weapon_sound(spec, "clear_jam_release", -4.0)
+		Audio.shell_drop(global_position, _side_dir(), 0.0, weapon_id)
+	if reload_timer <= 0.0:
+		_finish_reload(spec)
+
+
 ## Перезарядка: в снаряжении — смена магазина из рюкзака или досыпка россыпью (делает хост,
-## Inventory.reload_slot); в песочнице — полный магазин.
-func _start_reload(spec: Dictionary) -> void:
+## Inventory.reload_slot); в песочнице — полный магазин. pick — магазин выбрал игрок в окне рюкзака
+## ({role, idx, id}): меняется именно он, и перезарядка идёт при открытом окне.
+func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 	if is_signal_launcher():
 		_start_signal_reload(spec)
 		return
 	if not _pm_action.is_empty() or reload_timer > 0.0 or weapon_id == "":
 		return
+	_reload_pick = pick.duplicate(true)
+	_reload_ui = not pick.is_empty()
 	_reload_kind = "full"
 	_reload_slot = weapon_slot
 	_reload_empty = ammo <= 0
@@ -1774,7 +1794,9 @@ func _start_reload(spec: Dictionary) -> void:
 	if loadout_mode:
 		var e := weapon_entry()
 		# магазин — из подсумков разгрузки или из рюкзака (Inventory.reload_slot берёт в том же порядке)
-		var kind := Gear.reload_kind(e, inventory.list_of("rig") + inventory.items)
+		var kind := "swap" if not _reload_pick.is_empty() else Gear.reload_kind(e, inventory.list_of("rig") + inventory.items)
+		# новый магазин под рукой, в подсумке на броне, а не в рюкзаке за спиной
+		var pouch_mag: bool = String(_reload_pick.role) == "rig" if not _reload_pick.is_empty() else inventory.rig_has_mag(weapon_slot)
 		if kind == "":
 			_say("Нет магазина к оружию" if _reload_insert else "Нечем зарядить: " + WeaponDb.caliber_name(String(spec.caliber)))
 			_reload_insert = false
@@ -1782,12 +1804,14 @@ func _start_reload(spec: Dictionary) -> void:
 		_reload_kind = kind
 		_reload_rev = int(e.get("rev", 0))
 		# новый магазин — из подсумка на броне (тогда звучит липучка), а не из рюкзака
-		from_pouch = kind == "swap" and inventory.rig_has_mag(weapon_slot)
+		from_pouch = kind == "swap" and pouch_mag
 		var standing: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 		if kind == "swap" and String(standing.get("id", "")) != "":
 			_reload_old_mag = {"id": String(standing.id), "rounds": ammo}
 		_reload_wait = 1.5
 		var st := _ws_state(weapon_slot)
+		if not _reload_pick.is_empty():
+			st["pick"] = _reload_pick.duplicate(true)
 		# под сильным стрессом старый магазин выскальзывает на землю (редко)
 		var sc: Dictionary = Balance.STRESS
 		var mag: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
@@ -1806,7 +1830,7 @@ func _start_reload(spec: Dictionary) -> void:
 			t *= Balance.RELOAD_TOPUP_K
 			_say("Заряженных магазинов нет — снаряжаю магазин патронами")
 		# магазин не в подсумке, а в рюкзаке за спиной — доставать дольше
-		elif kind == "swap" and not inventory.rig_has_mag(weapon_slot):
+		elif kind == "swap" and not pouch_mag:
 			t *= float(Balance.RIG.backpack_reload_k)
 			if not _rig_hint_shown and is_local():
 				_rig_hint_shown = true
@@ -1929,6 +1953,7 @@ func _start_clear(spec: Dictionary) -> void:
 
 
 func _finish_reload(spec: Dictionary) -> void:
+	_reload_pick = {}
 	# с пустым магазином и на задержке рукоятку заряжания оттягивают — рама откидывает шторку
 	if _reload_kind == "clear" or _reload_empty:
 		_open_dust_cover(_reload_slot)
@@ -2059,13 +2084,18 @@ func toggle_suppressor() -> bool:
 	return true
 
 
-## Обойму оружия в слоте slot можно вынимать и вставлять руками прямо из окна рюкзака: оно в руках у своего игрока,
-## со снаряжением, у ствола риг с фазами перезарядки и патронник (пистолеты: ПМ, АСТЕН-919). Остальное оружие — как
-## раньше, без движения рук.
+## Магазин оружия в слоте slot можно вынимать и вставлять руками прямо из окна рюкзака: оно в руках у своего игрока,
+## со снаряжением, магазин отъёмный. Пистолеты с ригом и патронником (ПМ, АСТЕН-919) — частями фаз рига
+## (_hand_mag_rig), остальное — по таймеру перезарядки: клипы рук, у кого они есть, звук и подпись.
 func hand_mag_ready(slot: String) -> bool:
+	var weapon: Dictionary = WeaponDb.weapon(weapon_id)
 	return is_local() and loadout_mode and slot != "" and slot == weapon_slot and weapon_id != "" and not grenade_equipped \
-		and _has_chamber(weapon_id) and not is_signal_launcher() and (WeaponDb.weapon(weapon_id).get("rig", {}) as Dictionary).has("reload") \
-		and not WeaponDb.weapon(weapon_id).has("internal_mag")
+		and not is_signal_launcher() and weapon.has("mag_if") and not weapon.has("internal_mag")
+
+
+## Действия с магазином показывает риг модели (части фаз перезарядки), предметы меняются по окончании движения.
+func _hand_mag_rig() -> bool:
+	return _has_chamber(weapon_id) and (WeaponDb.weapon(weapon_id).get("rig", {}) as Dictionary).has("reload")
 
 
 func _hand_mag_busy() -> bool:
@@ -2083,13 +2113,26 @@ func hand_mag_eject() -> String:
 		return "Магазина в оружии нет"
 	if _ws_dirty:
 		_send_ws(weapon_slot)
-	var duration: float = float(spec().reload) * float(Balance.HAND_MAG.out_k)
+	var specification: Dictionary = spec()
+	var duration: float = float(specification.reload) * float(Balance.HAND_MAG.out_k)
+	var by_rig: bool = _hand_mag_rig()
 	_pm_action_seq += 1
 	_pm_action = {"kind": "mag_out", "seq": _pm_action_seq, "slot": weapon_slot, "id": weapon_id,
-		"state": _ws_state(weapon_slot), "remaining": duration, "sent": false}
+		"state": _ws_state(weapon_slot), "remaining": duration, "timer": not by_rig, "sent": false}
 	mag_inspect = false
 	_animation_event("pistol_reload" if String(WeaponDb.weapon(weapon_id).get("class", "")) == "PISTOL" else "rifle_reload")
-	_weapon_action("mag_out", false, duration)
+	if by_rig:
+		_weapon_action("mag_out", false, duration)
+	else:
+		# без рига: руки (клипы) и подпись идут по таймеру перезарядки, вид — «вынуть»
+		_reload_kind = "eject"
+		_reload_slot = weapon_slot
+		_reload_empty = false
+		_reload_insert = false
+		_reload_fast = false
+		_reload_audio.clear()
+		reload_timer = duration
+		_play_weapon_sound(specification, "mag_out", -4.0)
 	return ""
 
 
@@ -2106,9 +2149,13 @@ func hand_mag_insert(role: String, idx: int) -> String:
 	var item: Dictionary = list[idx]
 	if not item.has("rounds") or not WeaponDb.mag_fits(weapon_id, String(item.id)):
 		return "Магазин не подходит"
+	var specification: Dictionary = spec()
+	if not _hand_mag_rig():
+		# без рига: обычная перезарядка выбранным магазином (в пустую шахту — только вставить), идёт при открытом окне
+		_start_reload(specification, {"role": role, "idx": idx, "id": String(item.id)})
+		return "" if reload_timer > 0.0 else "Не получилось начать перезарядку"
 	if _ws_dirty:
 		_send_ws(weapon_slot)
-	var specification: Dictionary = spec()
 	var state: Dictionary = _ws_state(weapon_slot)
 	var swap: bool = not mag_out()
 	# патронов нет ни в стволе, ни в магазине — затвор на задержке: новый магазин досылают
@@ -2128,7 +2175,13 @@ func hand_mag_insert(role: String, idx: int) -> String:
 ## Движение рук с обоймой идёт своим временем (и при открытом рюкзаке); кончилось — перенос предметов у хоста.
 func _tick_hand_mag(delta: float) -> void:
 	_pm_action.remaining = float(_pm_action.remaining) - delta
+	var by_timer: bool = bool(_pm_action.get("timer", false))
+	if by_timer and not bool(_pm_action.get("sent", false)):
+		reload_timer = maxf(0.0, float(_pm_action.remaining))
 	if float(_pm_action.remaining) <= 0.0 and not bool(_pm_action.get("sent", false)):
+		if by_timer:
+			reload_timer = 0.0
+			_reload_kind = ""
 		_commit_pm_action()
 
 
@@ -2148,6 +2201,8 @@ func cancel_weapon_action() -> void:
 	_reload_hold = -1.0
 	_reload_fast = false
 	_reload_insert = false
+	_reload_pick = {}
+	_reload_ui = false
 	mag_inspect = false
 	_reload_kind = ""
 	_reload_slot = ""
@@ -2235,7 +2290,7 @@ func _host_pm_commit(request: Dictionary) -> Dictionary:
 			Gear._bump(fresh)
 			sandbox_weapons[slot] = fresh
 	elif kind == "mag_out":
-		if not loadout_mode or not _has_chamber(wid):
+		if not loadout_mode or WeaponDb.weapon(wid).has("internal_mag") or wid == "signal_launcher":
 			return {"error": "Магазин этого оружия так не вынимают"}
 		inventory.apply_weapon_state(slot, state)
 		if not inventory.strip_equipped(slot, "mag"):
