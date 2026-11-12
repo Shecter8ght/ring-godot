@@ -8,8 +8,13 @@
 # Заказ владельца 2026-11-12: «засаленность, как потным пальцем касаешься и ведёшь по поверхности — градиентный
 # блестящий след» на насечках затвора и на нижней части магазина; на верхней четверти магазина «с рандомом» —
 # потёртости и царапины от вставки в шахту; остальное — на усмотрение, как можно натуральнее.
+# Правки владельца (вторая итерация): затёртости до металла на насечках; следы зуба в вырезе затворной задержки; лёгкие
+# затёртости до металла на кнопке магазина и рычажках разборки; у выбрасывателя — следы вылетающих гильз, подтёки
+# масла и лёгкий блеск; на задних углах затвора — лёгкие, не одинаковые и не резкие затёртости до металла, «как будто
+# просто за срок эксплуатации вытерлось о кобуру, одежду».
 # Выход — <WORK>/wear/<набор>_<вид>.png (8 бит, белое — след): grease (жир: блеск), polish (заполировано контактом),
-# scuff (затёртый полимер), scratch (царапины). Слои по ним — tools/asten919/sp_asten_wear.py.
+# scuff (затёртый полимер), scratch (царапины), bare (покрытие вытерто до металла), brass (латунь гильз), oil (масло).
+# Слои по ним — tools/asten919/sp_asten_wear.py.
 import math
 import os
 import sys
@@ -59,10 +64,19 @@ IMG = {
     "cc_scr_lines2": CC0 + "/ambientCG/Scratches004/Scratches004_2K-PNG_Opacity.png",
     "cc_streaks": CC0 + "/ambientCG/Smear005/Smear005_2K-PNG_Opacity.png",                # продольные мазки
     "wipe": "06_Разводы_и_следы_протирания/Протирание_по_диагонали_01.png",              # пятна протирания
+    "wipe_arc": "06_Разводы_и_следы_протирания/Протирание_дугами_с_грязью_01.png",
+    "worn": "10_Сколы_и_потёртости_покрытия/Потёртости_горизонтальные_01.png",            # потёртости покрытия
+    "oil_threads": "20_Масляные_плёнки_и_смазка/Масло_06_Нити_смазки.png",
+    "oil_mixed": "20_Масляные_плёнки_и_смазка/Масло_10_Смешанный_перенос.png",
+    "oil_spots": "20_Масляные_плёнки_и_смазка/Масло_07_Полупрозрачные_пятна.png",
 }
 _cache = {}
 # жировой след — мазок, а не оттиск: гребни папиллярного рисунка смягчены (σ в пикселях рисунка 1254 px ≈ 0,2 мм)
-SOFT = {"grease": 6.0}
+SOFT = {"grease": 6.0, "bare": 9.0, "oil": 3.0}
+# виды следов, у которых готовая карта ещё размывается в развёртке (σ, пикселей набора): вытертое за годы — без
+# резкой границы
+BLUR = {"bare": 4.0}
+GAIN = {"bare": 2.0}       # после размытия тонкие кромки тускнеют — вернуть силу
 
 
 def img(name, soft=0.0):
@@ -167,10 +181,14 @@ class Set:
         lay[ii] = np.maximum(lay[ii], val.astype(np.float32))
         return int((val > 0.05).sum())
 
-    def tile(self, name, u, v, period, origin=(0.0, 0.0, 0.0)):
+    def edge(self):
+        """Скруглённые кромки и углы по нормали: 0 на плоскости, 1 — нормаль посередине между гранями."""
+        return np.clip((1.0 - np.abs(self.nrm).max(axis=1)) / 0.22, 0.0, 1.0)
+
+    def tile(self, name, u, v, period, origin=(0.0, 0.0, 0.0), soft=0.0):
         """Рисунок name плиткой period мм в плоскости (u, v) — значения во всех пикселях набора."""
         d = self.pos.astype(np.float64) - np.asarray(origin, np.float64)
-        return sample(img(name), (d @ unit(u)) / period % 1.0, (d @ unit(v)) / period % 1.0, wrap=True).astype(np.float32)
+        return sample(img(name, soft), (d @ unit(u)) / period % 1.0, (d @ unit(v)) / period % 1.0, wrap=True).astype(np.float32)
 
     def add(self, kind, values):
         lay = self.layer(kind)
@@ -183,6 +201,13 @@ class Set:
                 lay = np.clip(lay * 1.9, 0.0, 1.0) ** 0.9
             full = np.zeros(self.shape[0] * self.shape[1], np.float32)
             full[self.idx] = np.clip(lay, 0.0, 1.0)
+            if kind in BLUR:               # размытие только по своим пикселям (края островов не темнеют)
+                cov = np.zeros_like(full)
+                cov[self.idx] = 1.0
+                num = ndimage.gaussian_filter(full.reshape(self.shape), BLUR[kind])
+                den = ndimage.gaussian_filter(cov.reshape(self.shape), BLUR[kind])
+                full = (np.where(den > 1e-3, num / np.maximum(den, 1e-3), 0.0) * cov.reshape(self.shape)).ravel()
+                full = np.clip(full * GAIN.get(kind, 1.0), 0.0, 1.0)
             Image.fromarray(np.uint8(full.reshape(self.shape) * 255.0 + 0.5)).save(f"{OUT}/{self.name}_{kind}.png")
             print(f"  {self.name}_{kind}: {100.0 * (lay > 0.08).mean():.2f} % поверхности набора, среднее по следу "
                   f"{float(lay[lay > 0.08].mean()) if (lay > 0.08).any() else 0:.2f}")
@@ -219,7 +244,85 @@ def slide():
     side = np.abs(s.nrm[:, 1]) > 0.75
     pat = np.where(side, s.tile("scr_small", X, Z, 70.0), s.tile("scr_small", X, Y, 70.0, origin=(13.0, 7.0, 0.0)))
     s.add("scratch", w * pat)
+    slide_bare(s)
+    slide_port(s, hw)
+    # где покрытие вытерто до металла, жировая плёнка не должна его прятать
+    s.layers["grease"] *= 1.0 - 0.65 * np.clip(s.layers["bare"] * 2.0, 0.0, 1.0)
     s.save()
+
+
+def slide_bare(s):
+    """Покрытие вытерто до металла — мягко, пятнами, по-разному слева и справа."""
+    hw = SLIDE_HW
+    p, n = s.pos, s.nrm
+    steel = s.part("Slide", "MOS_Cover_Plate")
+    e = s.edge()
+    left = p[:, 1] > 0
+    # пятна потёртости владельца — разные для левого и правого борта и для верха
+    pl = s.tile("worn", X, Z, 64.0, origin=(7.0, 0, 3.0), soft=9.0)
+    pr = s.tile("wipe", X, Z, 71.0, origin=(-19.0, 0, -11.0), soft=9.0)
+    pt = s.tile("wipe_arc", X, Y, 58.0, origin=(5.0, 9.0, 0), soft=9.0)
+    top = n[:, 2] > 0.6
+    patch = np.clip(np.where(top, pt, np.where(left, pl, pr)) * 2.4, 0.0, 1.0)
+
+    # 1) задние насечки: пальцы стирают покрытие на площадках между пазами и на их кромках, сильнее посередине
+    #    высоты и там, где берутся чаще; в пазах покрытие цело
+    u = (SERR_X0 - p[:, 0]) % (SERR_W + SERR_GAP)
+    in_serr = (p[:, 0] < SERR_X0 + 1.2) & (p[:, 0] > SERR_X0 - SERR_N * (SERR_W + SERR_GAP) - 0.8) \
+        & (p[:, 2] < 8.6) & (np.abs(p[:, 1]) > hw - 0.7)
+    land = (u >= SERR_W - 0.15) & (np.abs(p[:, 1]) > hw - 0.14)
+    grab = np.exp(-((p[:, 2] - 1.0) / 8.0) ** 2) * (0.55 + 0.45 * np.exp(-((p[:, 0] + 44.0) / 15.0) ** 2))
+    side_k = np.where(left, 1.0, 0.8)
+    w = np.where(in_serr & steel, np.maximum(0.62 * land, 0.95 * e) * grab * side_k * (0.25 + 0.75 * patch), 0.0)
+    s.add("bare", w)
+
+    # 2) задние углы и кромки затвора: о кобуру и одежду, не одинаково — слева сильнее, сверху слабее, пятнами
+    rear = np.clip(1.0 - (p[:, 0] - SLIDE_X0) / 15.0, 0.0, 1.0) ** 1.4
+    k = np.where(top, 0.55, np.where(left, 1.0, 0.7))
+    corner = np.clip(e * 1.25, 0.0, 1.0)
+    s.add("bare", np.where(steel, np.clip(corner * rear * k * 1.3 * (0.12 + 0.88 * patch), 0.0, 1.0), 0.0))
+    # и чуть — передние углы у дула (кобура)
+    front = np.clip((p[:, 0] - 100.0) / 13.0, 0.0, 1.0)
+    s.add("bare", np.where(steel, corner * front * 0.45 * (0.1 + 0.9 * patch), 0.0))
+
+    # 3) вырез под зуб затворной задержки (левый борт снизу, X 27…51): упорная стенка, потолок у неё и кромка
+    #    выреза — блестящие следы работы зуба; ниже по кромке борта — дорожка, где зуб скользит
+    a, b = STOP_NOTCH_X
+    zone = steel & left & (p[:, 0] > a - 1.2) & (p[:, 0] < b + 6.5) & (p[:, 2] < STOP_NOTCH_TOP + 1.3) & (p[:, 1] > hw - 3.4)
+    wall = np.clip((n[:, 0] - 0.35) / 0.4, 0.0, 1.0) * np.clip(1.0 - (p[:, 0] - a) / 2.2, 0.0, 1.0)
+    roof = np.clip((-n[:, 2] - 0.4) / 0.4, 0.0, 1.0) * np.clip(1.0 - (p[:, 0] - a) / 7.0, 0.0, 1.0) * 0.8
+    track = np.clip((-n[:, 2] - 0.2) / 0.5, 0.0, 1.0) * np.clip((p[:, 0] - a) / 6.0, 0.0, 1.0) * 0.45
+    lip = e * np.clip(1.0 - (p[:, 0] - a) / 12.0, 0.0, 1.0) * 0.85
+    s.add("bare", np.where(zone, np.maximum.reduce([wall, roof, track, lip]) * (0.45 + 0.55 * patch), 0.0))
+    # ободок на борту вокруг выреза: зуб, входя и выходя, обтирает кромку — шире у упорной стенки
+    x, z = p[:, 0], p[:, 2]
+    zb = np.where(x <= a + 5.0, STOP_NOTCH_TOP,
+                  STOP_NOTCH_TOP + (SLIDE_BOT - STOP_NOTCH_TOP) * np.clip((x - a - 5.0) / (b + 1.0 - a), 0.0, 1.0))
+    d = np.where(x >= a, np.maximum(z - zb, 0.0), np.hypot(a - x, np.maximum(z - STOP_NOTCH_TOP, 0.0)))
+    along = np.clip(1.0 - (x - a) / 16.0, 0.3, 1.0)
+    rim = np.clip(1.0 - d / 1.1, 0.0, 1.0) * along
+    flank = steel & left & (p[:, 1] > hw - 0.2) & (x > a - 1.3) & (x < b + 6.0) & (z < STOP_NOTCH_TOP + 1.3)
+    s.add("bare", np.where(flank, rim * 0.8 * (0.4 + 0.6 * patch), 0.0))
+
+
+def slide_port(s, hw):
+    """Правый борт у выбрасывателя: латунные мазки от вылетающих гильз, подтёки масла из паза выбрасывателя и из-под
+    окна, лёгкий масляный блеск вокруг."""
+    st = ("Slide", "Extractor")
+    Rr = dict(n=-Y, up=Z, parts=st)                    # правый борт: «право» рисунка — к дулу (+X)
+    # гильза летит вправо-назад-вверх: мазки за окном над выбрасывателем и на задней кромке окна
+    s.stamp("brass", "rub_fine", (-5.0, -hw, 5.2), size=9, rot=140, strength=0.8, **Rr)
+    s.stamp("brass", "rub_fine", (-10.5, -hw, 7.0), size=7, rot=150, strength=0.6, **Rr)
+    s.stamp("brass", "rub_fine", (-2.0, -hw, 2.8), size=6, rot=125, strength=0.7, **Rr)
+    s.stamp("brass", "rub_fine", (1.2, -hw, 4.0), size=8, rot=160, strength=0.85, **Rr)
+    s.stamp("brass", "rub_short", (-3.0, -7.5, SLIDE_TOP), n=Z, up=-X, size=9, rot=60, strength=0.6, parts=st)
+    # масло: тонкая плёнка вокруг паза выбрасывателя, подтёки вниз от паза и от нижней кромки окна
+    s.stamp("oil", "oil_film", (-9.0, -hw, -0.5), size=19, rot=20, strength=0.32, **Rr)
+    s.stamp("oil", "oil_drag", (-12.5, -hw, -4.6), size=11, rot=-90, strength=0.9, **Rr)
+    s.stamp("oil", "oil_threads", (-3.5, -hw, -5.0), size=9, rot=-80, strength=0.75, **Rr)
+    s.stamp("oil", "oil_drag", (21.0, -hw, -4.0), size=9, rot=-97, strength=0.7, **Rr)
+    # выбрасыватель сам в масле
+    s.stamp("oil", "oil_mixed", (-9.0, -hw, 0.0), size=22, strength=0.6, n=-Y, up=Z, parts=("Extractor",))
 
 
 # -------------------------------------------------------------------------------------------------------- рамка
@@ -236,7 +339,7 @@ def frame():
     s.stamp("polish", "oil_torn", mag_point(-58.0, 8.0, 0.0), n=S, up=A, size=(24, 52), rot=90, strength=0.55, parts=fr,
             depth=12, face=0.1)
     # указательный палец вдоль рамки над скобой (правая сторона) и большой — слева над рукоятью: засаленный след
-    s.stamp("grease", "drag_r2", (5.0, -FRAME_HW, -17.5), n=-Y, up=Z, size=30, rot=4, strength=0.6, parts=fr, depth=5)
+    s.stamp("grease", "drag_r2", (5.0, -FRAME_HW, -17.5), n=-Y, up=Z, size=28, rot=4, strength=0.42, parts=fr, depth=5)
     s.stamp("grease", "rubbed", (-36.0, FRAME_HW, -24.0), n=Y, up=Z, size=25, rot=-20, strength=0.65, parts=fr, depth=6)
     # низ скобы: палец левой руки
     s.stamp("grease", "print_2", (-2.0, 0.0, -58.5), n=-Z, up=X, size=15, strength=0.4, parts=fr, depth=6)
@@ -273,6 +376,25 @@ def parts():
     s.stamp("grease", "print_2", c, n=Y, up=Z, size=12, rot=30, strength=0.7, parts=("Slide_Stop",))
     c = s.centre("Slide_Lock", Y, face=0.6)
     s.stamp("grease", "print_3", c, n=Y, up=Z, size=11, strength=0.5, parts=("Slide_Lock",))
+    # лёгкие затёртости до металла: вершины рифления кнопки магазина и концов защёлки затвора («рычажки разборки»),
+    # верх зуба задержки — пятнами по рисунку следов трения владельца
+    e = s.edge()
+    for part, sides, k in (("Mag_Catch", (1,), 0.40), ("Slide_Lock", (1, -1), 0.40)):
+        m = s.part(part)
+        for sg in sides:
+            ysg = s.pos[:, 1] * sg
+            face = m & (s.nrm[:, 1] * sg > 0.25)
+            if not face.any():
+                continue
+            ymax = float(ysg[face].max())
+            tops = np.clip(1.0 - (ymax - ysg) / 0.3, 0.0, 1.0)            # самые выступающие 0,3 мм — гребни
+            c0 = s.pos[face].mean(axis=0).astype(np.float64)
+            pat = s.tile("rub_broken" if sg > 0 else "rub_torn", X, Z, 17.0, origin=c0 + np.array([3.0, 0, 5.0]), soft=5.0)
+            s.add("bare", np.where(face, np.maximum(tops, 0.6 * e) * k * np.clip(0.15 + pat * 1.9, 0.0, 1.0), 0.0))
+    m = s.part("Slide_Stop")
+    tx0, tx1 = STOP_TOOTH_X
+    tooth = m & (s.pos[:, 0] > tx0 - 0.4) & (s.pos[:, 0] < tx1 + 1.2) & (s.pos[:, 2] > -11.6)
+    s.add("bare", np.where(tooth, np.clip(0.35 + 0.65 * np.maximum(e, np.clip((s.nrm[:, 2] - 0.3) / 0.5, 0, 1)), 0, 1) * 0.45, 0.0))
     s.save()
 
 

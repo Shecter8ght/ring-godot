@@ -39,6 +39,11 @@ SCRATCH = {"rough": 0.20, "color": (0.42, 0.42, 0.42), "cop": 0.75, "height": 0.
 DUST = {"rough": 0.82, "rop": 0.35, "color": (0.47, 0.44, 0.39), "cop": 0.16}
 EDGES = {"rough": -0.08, "color": (0.80, 0.80, 0.80), "cop": 0.20}
 # сталь с покрытием, у которой кромки вытираются о кобуру и руки
+# покрытие вытерто до стали: светлый металл с атласным блеском; латунь гильз — мазок металла; масло — тёмная
+# глянцевая плёнка
+BARE = {"color": (0.60, 0.60, 0.61), "rough": 0.37, "metal": 1.0, "cop": 0.9}
+BRASS = {"color": (0.70, 0.57, 0.36), "rough": 0.38, "metal": 1.0, "cop": 0.5}
+OIL = {"rough": 0.06, "rop": 0.92, "color": (0.50, 0.46, 0.38), "cop": 0.34}
 EDGE_MESHES = {"slide": ["Slide__sp", "MOS_Cover_Plate__sp", "Extractor__sp"],
                "parts": ["Slide_Stop__sp", "Slide_Lock__sp"]}
 DUST_SETS = ("slide", "frame", "parts", "magazine")
@@ -63,7 +68,8 @@ def _new_group(setname):
     return grp
 
 
-def _layer(name, pos, rough=None, rmode=None, rop=1.0, color=None, cmode=L.BlendingMode.Normal, cop=1.0, height=None):
+def _layer(name, pos, rough=None, rmode=None, rop=1.0, color=None, cmode=L.BlendingMode.Normal, cop=1.0, height=None,
+           metal=None):
     """Слой следа: блеск — заменой (rmode Normal), вычитанием (отрицательное число) или прибавкой; цвет — наложением;
     высота — вычитанием (вдавлено)."""
     ch = {}
@@ -73,7 +79,11 @@ def _layer(name, pos, rough=None, rmode=None, rop=1.0, color=None, cmode=L.Blend
         ch["color"] = color
     if height is not None:
         ch["height"] = height
+    if metal is not None:
+        ch["metal"] = metal
     f = fill(name, pos, **ch)
+    if metal is not None:
+        f.set_opacity(cop, CH.Metallic)
     if rough is not None:
         f.set_blending_mode(rmode or (L.BlendingMode.Subtract if rough < 0 else L.BlendingMode.LinearDodge),
                             CH.SpecularRoughness)
@@ -126,12 +136,16 @@ def build_set(name):
         sp_lib.only_meshes(lay, EDGE_MESHES[name])
         last = lay
         log.append("edges")
+    marks("bare", "Затёртости до металла — мягко, за годы (пальцы, кобура, зуб задержки)", rough=BARE["rough"],
+          rmode=L.BlendingMode.Normal, rop=BARE["cop"], color=BARE["color"], cop=BARE["cop"], metal=BARE["metal"])
     marks("polish", "Заполировано контактом (ладонь, ствол о затвор)", rough=POLISH["rough"], color=POLISH["color"],
           cmode=L.BlendingMode.SoftLight, cop=POLISH["cop"])
     marks("scuff", "Затёртости от шахты — матовые пятна трения", rough=SCUFF["rough"], color=SCUFF["color"],
           cmode=L.BlendingMode.LinearDodge, cop=SCUFF["cop"])
     marks("scratch", "Царапины — светлые матовые риски", rough=SCRATCH["rough"], color=SCRATCH["color"],
           cmode=L.BlendingMode.LinearDodge, cop=SCRATCH["cop"], height=SCRATCH["height"])
+    marks("brass", "Латунь — мазки от вылетающих гильз", rough=BRASS["rough"], rmode=L.BlendingMode.Normal,
+          rop=BRASS["cop"], color=BRASS["color"], cop=BRASS["cop"], metal=BRASS["metal"])
     if name in DUST_SETS:
         lay = _layer("Пыль в углублениях", nxt(), rough=DUST["rough"], rmode=L.BlendingMode.Normal, rop=DUST["rop"],
                      color=DUST["color"], cop=DUST["cop"])
@@ -145,6 +159,8 @@ def build_set(name):
         _tile(lv, SPECK_TILE, scene, rot=1.1)
         last = lay
         log.append("dust")
+    marks("oil", "Масло — подтёки и плёнка у выбрасывателя", rough=OIL["rough"], rmode=L.BlendingMode.Normal,
+          rop=OIL["rop"], color=OIL["color"], cmode=L.BlendingMode.Multiply, cop=OIL["cop"])
     marks("grease", "Жир — засаленные следы пальцев (блестящий градиентный след)", rough=GREASE["rough"],
           rmode=L.BlendingMode.Normal, rop=GREASE["rop"], color=GREASE["color"], cmode=L.BlendingMode.LinearDodge,
           cop=GREASE["cop"])
