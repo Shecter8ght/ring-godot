@@ -215,6 +215,22 @@
   `tools/ar15/supp_game.py`, `tools/ar15/supp_pack.py`.
 <!-- AR15_END -->
 
+<!-- ASTEN919_START -->
+## АСТЕН-919 (пистолет wpn_hg_02)
+
+- `assets/models/weapons/asten919/` (пистолет `asten919.gltf`, магазин-предмет `asten919_mag.gltf`, атласы
+  `asten919_<атлас>_100_*`), `assets/icons/wpn_hg_02.png`, `assets/icons/mag_919_17.png` — собственная модель (форма —
+  неявными поверхностями, `tools/asten919`, геометрия v03), отделка в Substance Painter (этап 1 — заводская, износ
+  этап 2 v02; процедурные ресурсы полки Painter — только запечёнными картами), игровая сетка и запечённые карты —
+  `tools/asten919/game_*.py`; исходники — `E:/Models Blender/WEAPONS/АСТЕН-919/`, `_asset_src/asten919/`.
+  Встал на место прежней модели `assets/models/weapons/glock17/` (её файлы остались: из них модели ремонтных деталей).
+- Рисунок износа в запечённых картах: маски владельца (`E:/Models Blender/Маски_АЛЬФА`, свои) и фото-маски CC0 1.0
+  ambientCG (https://ambientcg.com, лицензия https://docs.ambientcg.com/license/) — Scratches001, Scratches004,
+  Smear005; сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
+- Маркировка вымышленная («АСТЕН-919», знак-звезда, номера), гравировкой в сетке; шрифт **DejaVu Sans / Bold**
+  (© Bitstream, изменения DejaVu — public domain; лицензия Bitstream Vera Fonts), файл шрифта в игру не входит.
+<!-- ASTEN919_END -->
+
 <!-- SMG03_START -->
 ## ИЗЛОМ-45 (ПП по мотивам KRISS Vector Gen II)
 
