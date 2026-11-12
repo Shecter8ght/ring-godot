@@ -456,6 +456,8 @@ python -X utf8 tools/prospekt_stage2_plan.py [10 … 15]         # «Просп�
                                                               # (docs/design/prospekt_map.md §25; в сцену не внесено)
 python -X utf8 tools/prospekt_patch.py <этап>                    # «Проспект», перенос чертежей этапами (docs/tasks/prospekt_north_vershina_build.md): патч этапа
                                                               # (1_street …) из словарей чертежей → data/blockouts/prospekt_patch_<этап>.json: remove (вещи, куски улиц, узлы) и add
+                                                              # вторая очередь (docs/tasks/prospekt_stage2_build.md): s2_1a_southwest — граница по X −248, юго-запад, Вокзальная улица,
+                                                              # стройка, гаражи, почтовый двор; этап заодно правит граничные данные, заходы и ящики городка (prospekt.json, sectors, prospekt.tscn)
 tools/godot.cmd --headless res://tools/prospekt_apply_patch.tscn -- <этап> # применить патч к scenes/levels/prospekt_study.tscn: убрать и добавить узлы (PlanPiece, PropSpot),
                                                               # у добавленных meta patch_stage; повтор того же этапа — без дубликатов; копию сцены сделать до первого запуска
 python -X utf8 tools/build_prospekt_raid.py                   # рейдовая карта «Проспект» из плана блокаута: data/sectors/prospekt.json, scenes/levels/prospekt.tscn

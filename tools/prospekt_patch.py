@@ -1308,7 +1308,326 @@ def stage_7_finish() -> Patch:
 
 
 
-STAGES = {"1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ вторая очередь, этап 1а: граница, юго-запад, Вокзальная
+# docs/tasks/prospekt_stage2_build.md, чертежи — tools/prospekt_stage2_plan.py (листы 10, 13, 14), §25 prospekt_map.md
+BASE_REV_S2 = "958a55cc"          # коммит с заданием второй очереди — снимок плана до этапа 1а
+
+V_Z0, V_Z1 = 200.2, 214.0         # Вокзальная улица: тротуар 3 м, проезжая часть 7,8 м, тротуар 3 м
+V_ROAD0, V_ROAD1 = 203.2, 211.0
+V_AXIS = 207.1
+V_X_END = 39.35                   # южное плечо проспекта
+LANE_X = (-60.0, -50.0)           # служебный проезд
+X_FENCE_W = -247.5                # ограждение карты по новой западной границе (граница −248)
+X_FENCE_OLD = -217.5              # прежняя линия западного забора (граница −218); с юго-запада — проходы UNDER_GATES
+EMB_Z0, EMB_Z1, EMB_TOP = 244.0, 258.0, 6.0     # откос насыпи, как у существующей (Z 244…258, верх +6,0)
+
+
+def _emb_dy(z: float) -> float:
+    """Подъём вещи на насыпи: на откосе по линии, на верху — высота насыпи."""
+    if z <= EMB_Z0:
+        return 0.0
+    if z >= EMB_Z1:
+        return EMB_TOP
+    return round(EMB_TOP * (z - EMB_Z0) / (EMB_Z1 - EMB_Z0), 2)
+
+
+def _line(p: "Patch", kit: str, axis: str, c: float, a0: float, a1: float, step: float, gaps=(), dy=None,
+          tint: float = -1.0, yaw: float | None = None) -> int:
+    """Ряд секций вдоль оси: axis "x" — вдоль X на z = c (поворот 90°), "z" — вдоль Z на x = c. Секция с серединой внутри
+    разрыва gaps [(от, до)] не ставится. Возвращает, сколько секций поставлено."""
+    n = 0
+    a = a0 + step / 2.0
+    while a + step / 2.0 <= a1 + 0.01:
+        if not any(g0 < a < g1 for g0, g1 in gaps):
+            x, z = (a, c) if axis == "x" else (c, a)
+            y = yaw if yaw is not None else (90.0 if axis == "x" else 0.0)
+            d = dy(a if axis == "z" else z) if dy else 0.0
+            if tint >= 0.0:
+                p.put(kit, x, z, y, 1.0, d, tint)
+            else:
+                p.put(kit, x, z, y, 1.0, d)
+            n += 1
+        a += step
+    return n
+
+
+def _spans(a0: float, a1: float, cuts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Отрезок a0…a1 без вырезов cuts [(от, до)] — для бордюров и тротуаров с разрывами."""
+    out: list[tuple[float, float]] = []
+    x = a0
+    for c0, c1 in sorted(cuts):
+        if c0 > x:
+            out.append((x, min(c0, a1)))
+        x = max(x, c1)
+    if x < a1:
+        out.append((x, a1))
+    return [s for s in out if s[1] - s[0] > 0.05]
+
+
+def stage_s2_1a_southwest() -> Patch:
+    import prospekt_stage2_plan as S2  # noqa: E402  (при импорте ничего не пишет)
+
+    p = Patch("s2_1a_southwest", BASE_REV_S2)
+    crossings = S2.CROSSINGS_X
+    cross_cuts = [(cx - 3.0, cx + 3.0) for cx in crossings]
+
+    # ---------------------------------------------------------------- 1. прирезка: фоновые здания, старые заборы
+    p.remove["nodes"] += list(S2.REMOVE_OUTSIDE)
+    p.log.append("убрано фоновых зданий: %s" % ", ".join(S2.REMOVE_OUTSIDE))
+    p.log.append("забора убрано: по Z 112 %d, стройка X −152 %d, вокзал X −151,5 %d" % (
+        p.drop_items(["district_fence"], [-217.0, 111.0, -154.0, 112.0]),
+        p.drop_items(["fence"], [-151.6, 139.0, -151.2, 199.0]),
+        p.drop_items(["district_fence"], [-151.6, 200.0, -151.4, 214.0]) + p.drop_items(["district_fence"], [-151.6, 255.0, -151.4, 290.0])
+        + p.drop_items(["district_fence"], [-151.6, 220.0, -151.4, 227.0])))
+    p.drop_items(["fence"], [-151.6, 121.0, -151.2, 127.0])            # ворота гаражного кооператива на восток, в пустырь
+    p.log.append("гаражей стройки убрано (станут кооперативом): %d" % p.drop_items(["garage"], [-171.0, 185.0, -155.0, 187.0]))
+
+    # ---------------------------------------------------------------- 2. граница: ограждения по −248 и по −218
+    n = _line(p, "district_fence", "z", X_FENCE_W, -155.3, 290.0, 2.5, dy=_emb_dy)
+    for k in range(12):                                                                  # север: продолжение прежнего ряда на запад
+        p.put("district_fence", -219.25 - 2.5 * k, -154.8, -90.0)
+        n += 1
+    n += _line(p, "rail_fence", "x", 289.5, -247.5, -152.0, 3.0, dy=lambda a: EMB_TOP, tint=-1.0)   # юг, на насыпи
+    p.log.append(f"ограждение по X −248: {n} секций")
+    gate_z = [(122.0, 128.0, "гаражи"), (167.5, 172.5, "пролом в заборе стройки"), (V_Z0 - 0.3, V_Z1 + 0.1, "Вокзальная"),
+              (233.0, 239.0, "почтовый двор"), (266.0, 274.0, "по путям")]
+    n = _line(p, "district_fence", "z", X_FENCE_OLD, 112.5, 290.0, 2.5, gaps=[(a, b) for a, b, _ in gate_z], dy=_emb_dy)
+    p.log.append(f"забор по X −218 (Z 112…290): {n} секций, проходы: " + "; ".join(f"{a:g}…{b:g} {t}" for a, b, t in gate_z))
+
+    # ---------------------------------------------------------------- 3. насыпь и пути на запад, до новой границы
+    p.add["ramps"].append({"fill": True, "mat": "ground", "x0": -248.0, "x1": -152.0, "y0": 0.0, "y1": EMB_TOP, "z0": EMB_Z0, "z1": EMB_Z1})
+    p.add["walls"].append({"rect": [-248.0, EMB_Z1, -152.0, 290.0], "y0": 0.0, "y1": EMB_TOP, "mat": "ground"})
+    p.add["ramps"].append({"fill": True, "mat": "ground", "x0": -248.0, "x1": -152.0, "y0": EMB_TOP, "y1": 0.0, "z0": 290.0, "z1": 300.0})
+    n = 0
+    for z in (264.6, 268.7, 272.8, 276.9, 281.0, 285.1):
+        x = -153.5
+        while x > -247.0:
+            p.put("track_3m", x, z, 90.0, 1.0, 6.3)
+            x -= 3.0
+            n += 1
+    p.put("m:PC05_CROSSSPAN", -206.0, 274.85, 0.0, 1.0, 6.62)
+    p.log.append(f"насыпь продлена на запад до X −248; рельсов {n} звеньев")
+
+    # ---------------------------------------------------------------- 4. земля: старая площадь убирается, сквер делится улицей
+    for sid, rect in (("station_square", [-151.5, 200.2, -50.0, 214.0]), ("square_c", [-50.0, 108.0, 39.35, 244.0]),
+                      ("grove_lawn", [-50.0, 184.0, 39.35, 244.0])):
+        p.remove["pieces"].append({"list": "surfaces", "rect": rect, "id": sid})
+    p.surface("square_n", "walk", -50.0, 108.0, 39.35, V_Z0, 0.0, 0.1)               # сквер до улицы — то же покрытие, что было
+    p.surface("square_s", "walk", -50.0, V_Z1, 39.35, 244.0, 0.0, 0.1)
+    p.surface("grove_lawn_n", "grass", -50.0, 184.0, 39.35, V_Z0, 0.0, 0.12)
+    p.surface("grove_lawn_s", "grass", -50.0, V_Z1, 39.35, 244.0, 0.0, 0.12)
+
+    # ---------------------------------------------------------------- 5. Вокзальная улица от −248 до южного плеча
+    p.surface("vok_road", "road", -248.0, V_ROAD0, V_X_END, V_ROAD1, 0.0, 0.08)
+    p.surface("vok_walk_n_w", "walk", -248.0, V_Z0, LANE_X[0], V_ROAD0, 0.0, 0.15)
+    p.surface("vok_walk_n_e", "walk", LANE_X[1], V_Z0, V_X_END, V_ROAD0, 0.0, 0.15)
+    p.surface("vok_lane_mouth", "road", LANE_X[0], V_Z0, LANE_X[1], V_ROAD0, 0.0, 0.08)
+    p.surface("vok_walk_s", "walk", -248.0, V_ROAD1, V_X_END, V_Z1, 0.0, 0.15)
+    # служебный проезд до улицы
+    p.surface("service_lane_ext", "road", LANE_X[0], 112.0, LANE_X[1], V_Z0, 0.0, 0.08)
+    # бордюры: северный — по кромке тротуара, южный — тоже со стороны проезжей части; разрывы — переходы и устье проезда
+    north_cuts = cross_cuts + [(LANE_X[0], LANE_X[1])]
+    for a, b in _spans(-248.0, V_X_END, north_cuts):
+        p.box((a + b) / 2.0, CURB_H / 2.0, V_ROAD0 - CURB_W / 2.0, b - a, CURB_H, CURB_W, "stripe", 0.0, True)
+    for a, b in _spans(-248.0, V_X_END, cross_cuts):
+        p.box((a + b) / 2.0, CURB_H / 2.0, V_ROAD1 + CURB_W / 2.0, b - a, CURB_H, CURB_W, "stripe", 0.0, True)
+    for x in (LANE_X[0] - CURB_W / 2.0, LANE_X[1] + CURB_W / 2.0):                    # торцы тротуара у устья проезда
+        p.box(x, CURB_H / 2.0, (V_Z0 + V_ROAD0) / 2.0, CURB_W, CURB_H, V_ROAD0 - V_Z0, "stripe", 0.0, True)
+    # осевая пунктиром и зебры
+    n = 0
+    x = -246.0
+    while x < V_X_END - 2.0:
+        if all(abs(x - cx) > 4.5 for cx in crossings):
+            p.box(x, 0.085, V_AXIS, 3.0, 0.02, 0.15, "stripe", 0.0, False)
+            n += 1
+        x += 6.0
+    for cx in crossings:
+        for i in range(7):
+            p.box(cx, 0.085, V_ROAD0 + 0.4 + 1.1 * i, 4.0, 0.02, 0.55, "stripe", 0.0, False)
+    p.log.append(f"улица: пунктир {n}, зебры {len(crossings)} × 7 полос")
+    # пешеходное ограждение в сквере с обеих сторон, разрывы по 6 м только на переходах
+    n_fence = 0
+    for zc in (V_Z0 + 0.15, V_Z1 - 0.15):
+        n_fence += _line(p, "ped_fence", "x", zc, -49.0, 39.0, 2.0, gaps=cross_cuts)
+    p.log.append(f"ограждение сквера: {n_fence} секций, разрывы X {crossings}")
+    # фонари вдоль северного тротуара западнее сквера (в продолжение прежних)
+    for x in range(-161, -241, -15):
+        p.put("lamp", float(x), 200.8, 0.0)
+    # навес вокзала: опоры были в проезжей части — на южный тротуар
+    for cx in (-124.0, -108.0):
+        p.remove["pieces"].append({"list": "boxes", "rect": [cx - 0.2, 209.2, cx + 0.2, 209.6], "mat": "steel"})
+        p.box(cx, 2.2, 212.8, 0.3, 4.4, 0.3, "steel", 0.0, True)
+    p.put("barrier_arm", -245.5, V_Z0 + 0.8, 0.0)                                      # шлагбаум у границы (его полотно 1б заменит ЧВК)
+    p.log.append("опоры навеса вокзала перенесены на южный тротуар Z 212,8; барьер у X −245,5")
+
+    # ---------------------------------------------------------------- 6. вещи, попавшие на улицу
+    p.drop_item("kiosk", -90.0, 203.5)
+    p.move_item("paz", -78.0, 203.0, -78.0, 209.0, 90.0)
+    p.move_item("police_car", -58.0, 210.8, -58.0, 205.3, 92.0)
+    p.move_item("flowerbed", -128.0, 211.5, -128.0, 212.6)
+    p.move_item("flowerbed", -104.0, 211.5, -104.0, 212.6)
+    p.move_item("bus_stop", -70.0, 209.5, -70.0, 212.7, 180.0)
+    p.move_item("container20", -47.0, 214.0, -47.0, 222.5)
+    p.move_item("tree_round", -47.22, 212.94, -47.2, 217.0)
+    p.move_item("tree_round", -46.85, 206.32, -50.5, 218.2)
+    p.move_item("tree_round", -42.63, 213.09, -42.6, 218.0)
+    p.move_item("bush_big", -42.45, 214.68, -39.5, 217.6)
+    p.move_item("bush_big", -36.59, 208.69, -36.6, 217.2)
+    p.move_item("tree_round", -6.91, 213.67, -6.9, 217.6)
+    p.move_item("tree_round", 24.11, 203.51, 27.5, 196.8)
+    p.move_item("tree_round", 29.52, 213.11, 29.5, 217.6)
+    p.drop_item("m:R02", 26.0, 202.0)
+    p.drop_item("m:R02", 26.0, 205.0)
+
+    # ---------------------------------------------------------------- 7. служебный проезд и восточный забор стройки
+    # проезд свободен: ворота стройки (−62,6; 150) остаются, забор по X −62,6 цел; севернее Z 200 его нет
+    # ---------------------------------------------------------------- 8. стройка: новый контур, пустырь на севере
+    sx0, sx1, sz0, sz1 = S2.SITE_NEW
+    p.surface("site_w", "mud", sx0, sz0, -152.0, 200.0, 0.0, 0.05)
+    n = _line(p, "fence", "x", 138.4, -217.0, -62.6, 3.0, gaps=[(-107.0, -101.0)], tint=3.0)        # северная граница, проход к site_road
+    p.log.append(f"стройка: северный забор Z 138,4 — {n} секций, проход X −107…−101")
+    n = _line(p, "fence", "x", 199.4, -216.5, -152.0, 3.0, tint=3.0)                                  # южный забор, продолжение на запад
+    for x in (-102.5, -99.5, -96.5):
+        p.put("fence", x, 112.6, 90.0, 1.0, 0.0, 3.0)
+    p.drop_items(["fence"], [-124.0, 199.0, -122.0, 199.8])                                           # въезд с Вокзальной: ворота X −128…−122
+    p.drop_items(["fence"], [-127.0, 199.0, -125.0, 199.8])
+    p.log.append(f"стройка: южный забор продлён на {n} секций, въезд X −128…−122, старые ворота у Z 112,6 закрыты")
+    # городок строителей: бытовки в два яруса X −214…−188, Z 142…148, столбики лута переехали с ними
+    for i in range(4):
+        x = -211.5 + 6.4 * i
+        p.put("cabin", x, 145.0, 90.0)
+        if i in (1, 2):
+            p.put("cabin", x, 145.0, 90.0, 1.0, 2.64)
+    for i in range(3):                                                                                 # столовая / прорабская
+        p.put("cabin", -211.5 + 6.4 * i, 156.0, 90.0)
+    for k, (dx, dz) in enumerate(((-203.5, 159.3), (-199.5, 159.8), (-207.0, 160.2))):
+        p.put("cafe_table", dx, dz, 20.0 * k)
+    for k in range(3):
+        p.put("outhouse", -187.0, 142.0 + 1.4 * k, 90.0)
+    p.drop_items(["cabin"], [-146.5, 119.0, -145.5, 134.0])
+    p.drop_items(["outhouse"], [-147.0, 140.0, -146.0, 145.0])
+    # склад материалов X −214…−176, Z 166…182
+    for k in range(3):
+        p.put("rebar", -204.0, 167.3 + 1.4 * k, 90.0)
+    for k in range(2):
+        p.put("pipes", -190.0, 168.0 + 2.0 * k, 90.0)
+    for k in range(3):
+        p.put("slab", -212.0 + 2.6 * k, 176.0, 0.0)
+        p.put("slab", -212.0 + 2.6 * k, 176.0, 0.0, 1.0, 0.18)
+    for ix in range(3):
+        for iz in range(2):
+            p.put("pallets", -201.0 + 2.6 * ix, 174.0 + 2.4 * iz, 6.0 * ix)
+    p.put("reel", -186.0, 178.5, 0.0)
+    p.put("reel", -183.0, 172.5, 90.0)
+    p.put("pile_sand", -180.0, 178.0, 20.0)
+    p.put("pile_dirt", -178.0, 169.5, 60.0)
+    p.put("container20", -212.5, 182.0, 90.0)
+    p.put("barrel", -193.0, 180.0, 0.0)
+    p.put("barrel", -192.2, 180.6, 0.0)
+    # бетонный узел X −174…−158, Z 176…196: два силоса на опорах, бункер, два миксера
+    for k, sx_ in enumerate((-170.0, -164.8)):
+        p.box(sx_, 5.6, 181.0, 3.2, 9.0, 3.2, "concrete")
+        for lx, lz in ((-1.4, -1.4), (1.4, -1.4), (-1.4, 1.4), (1.4, 1.4)):
+            p.box(sx_ + lx, 0.5, 181.0 + lz, 0.3, 1.0, 0.3, "steel")
+        p.box(sx_, 10.6, 181.0, 2.4, 1.2, 2.4, "steel", 0.0, False)
+    p.box(-167.4, 6.8, 181.0, 9.6, 0.25, 4.2, "steel", 0.0, False)                                      # площадка между силосами
+    p.box(-167.4, 0.6, 185.2, 8.4, 1.2, 3.0, "concrete")                                                # приёмный бункер
+    p.put("mixer", -166.0, 190.0, 90.0)
+    p.put("mixer", -166.0, 194.2, 90.0)
+    p.put("pile_sand", -172.0, 177.0, 10.0)
+    p.put("pile_sand", -160.0, 177.0, 60.0)
+    p.put("floodlight", -174.0, 188.0, 90.0)
+    # второй башенный кран — стрела не лежит (этап 2)
+    p.add_buildings.append({"id": "Site_Crane2", "parent": "South", "at": [-152.0, 150.0], "footprint": [6.0, 6.0], "floors": 1,
+                            "story_height": 3.0, "label": "", "kind": "crane"})
+    p.log.append("стройка: городок (4+3 бытовки), склад, бетонный узел, второй кран (-152; 150)")
+
+    # ---------------------------------------------------------------- 9. гаражный кооператив X −216…−154, Z 114…136
+    gx0, gx1, gz0, gz1 = S2.GARAGES
+    p.surface("yard_e_garages", "road", -217.0, 113.0, -151.5, 138.0, 0.0, 0.08)
+    n = 0
+    for row, (zc, yaw) in enumerate(((116.6, 0.0), (133.4, 180.0))):
+        for k in range(12):
+            x = -212.0 + 4.2 * k
+            p.put("garage_open" if (k + 5 * row) % 7 == 3 else "garage", x, zc, yaw)
+            n += 1
+    _line(p, "fence", "x", 112.9, -216.5, -151.5, 3.0, gaps=[(-191.5, -188.5)], tint=3.0)                # северный забор с калиткой во двор дома 7
+    p.put("booth", -214.0, 121.4, 90.0)
+    p.put("barrel", -157.0, 122.0, 0.0)
+    p.put("barrel", -157.8, 122.6, 0.0)
+    p.put("tires", -160.0, 128.4, 20.0)
+    p.put("car_wreck", -156.0, 130.0, 70.0)
+    p.log.append(f"гаражи: {n} боксов в двух рядах, проезд 9 м, забор, ворота на запад (Z 125) и на восток")
+
+    # ---------------------------------------------------------------- 10. почтовый двор X −217…−150, Z 214…244
+    mx0, mx1, mz0, mz1 = S2.MAIL_YARD
+    p.surface("yard_e_mail", "road", -217.0, 214.0, -151.5, 244.0, 0.0, 0.08)
+    n = _line(p, "fence", "x", 214.3, -216.5, -152.0, 3.0, gaps=[(-205.5, -197.5)], tint=3.0)             # ворота на Вокзальную
+    p.log.append(f"почтовый двор: забор вдоль улицы {n} секций, ворота X −204,5…−198,5")
+    for k in range(3):
+        p.put("van", -188.0 + 6.0 * k, 219.0, 0.0)
+    p.put("truck", -167.0, 238.0, 90.0)
+    p.put("container40", -186.0, 241.0, 90.0)
+    p.put("container20", -172.0, 241.0, 90.0)
+    p.put("container20_open", -160.0, 241.0, 90.0)
+    p.box(-205.0, 0.07, 228.0, 3.4, 0.14, 12.0, "slab", 0.0, True)                                       # весовая платформа
+    p.put("booth", -208.5, 224.5, 90.0)
+    for k in range(4):
+        p.put("pallets", -176.0 + 2.6 * (k % 2), 229.0 + 2.4 * (k // 2), 8.0 * k)
+    for k in range(5):
+        p.put("bags", -182.0 + 0.9 * k, 232.0 + 0.5 * (k % 2), 40.0 * k)
+    p.put("cart", -170.0, 224.0, 20.0)
+    p.put("cart", -168.8, 224.6, -10.0)
+    p.put("barrel", -154.5, 241.0, 0.0)
+    p.log.append("почтовый двор: 3 фургона, грузовик, контейнеры, весовая с будкой, паллеты и мешки")
+    return p
+
+
+def plan_data_s2_1a() -> None:
+    """Данные плана и рейда этапа 1а: граница, заходы, места лута городка (сцена prospekt.tscn правится текстом)."""
+    import re
+    import prospekt_stage2_plan as S2
+
+    pts = S2.BOUNDARY_NEW
+    # data/blockouts/prospekt.json и data/sectors/prospekt.json — блок "boundary"
+    for rel, flat in (("data/blockouts/prospekt.json", True), ("data/sectors/prospekt.json", False)):
+        path = ROOT / rel
+        text = open(path, encoding="utf-8", newline="").read()
+        m = re.search(r'"boundary": \[', text)
+        i = m.end() - 1
+        depth = 0
+        for j in range(i, len(text)):
+            depth += (text[j] == "[") - (text[j] == "]")
+            if depth == 0:
+                break
+        if flat:
+            body = '"boundary": [\n' + ",\n".join(f"  [{x:.1f}, {z:.1f}]" for x, z in pts) + "\n ]"
+        else:
+            body = '"boundary": [\n' + ",\n".join(f"  [\n   {x:.1f},\n   {z:.1f}\n  ]" for x, z in pts) + "\n ]"
+        text = text[:m.start()] + body + text[j + 1:]
+        if flat:
+            text = text.replace('"label": "Стройка за «Ярусом»",\n   "at": [-140.0, 192.0]', '"label": "Стройка",\n   "at": [-205.0, 192.0]')
+            text = text.replace('"label": "Вокзал",\n   "at": [-100.0, 205.0]', '"label": "Почтовый двор",\n   "at": [-200.0, 236.0]')
+        open(path, "w", encoding="utf-8", newline="").write(text)
+    # рейдовая сцена: заходы и ящики городка
+    path = ROOT / "scenes/levels/prospekt.tscn"
+    text = open(path, encoding="utf-8", newline="").read()
+    reps = [('position = Vector3(-140, 0.08, 192)\ndisplay_name = "Стройка за «Ярусом»"', 'position = Vector3(-205, 0.08, 192)\ndisplay_name = "Стройка"'),
+            ('position = Vector3(-100, 0.12, 205)\ndisplay_name = "Вокзал"', 'position = Vector3(-200, 0.08, 236)\ndisplay_name = "Почтовый двор"'),
+            ('position = Vector3(-146, 0.6, 117)\ndisplay_name = "Бытовка прораба"', 'position = Vector3(-211.5, 0.6, 142.8)\ndisplay_name = "Бытовка прораба"'),
+            ('position = Vector3(-146, 3.24, 127)\ndisplay_name = "Сейф с зарплатой"', 'position = Vector3(-205.1, 3.24, 145.6)\ndisplay_name = "Сейф с зарплатой"')]
+    for a, b in reps:
+        if a in text:
+            text = text.replace(a, b)
+        elif b not in text:
+            raise SystemExit("prospekt.tscn: нет места для замены: " + a)
+    open(path, "w", encoding="utf-8", newline="").write(text)
+    print("  данные: граница, заходы, ящики городка обновлены")
+
+
+
+
+STAGES = {"s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1321,6 +1640,8 @@ def main() -> None:
             raise SystemExit(f"нет этапа {name}; есть: {', '.join(STAGES)}")
         p = STAGES[name]()
         path = p.save()
+        if name == "s2_1a_southwest":
+            plan_data_s2_1a()
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":
