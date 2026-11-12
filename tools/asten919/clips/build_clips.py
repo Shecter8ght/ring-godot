@@ -11,8 +11,11 @@
               JamCase (гильзы; «выключены» масштабом 0,001); у Magazine_Control ограничение «В левой кисти» (влияние
               0 / 1): магазин держится за кость mag.L левой кисти;
   хват      — пальцы (thumb.*, f_*.*, palm.*) и место кисти на пистолете (ik_hand.R / ik_hand.L в позах): в клипы
-              переносятся из действия ASTEN919_Poses (кадр-поза → набор костей). Поправить хват во всех клипах сразу —
-              поправить позу в ASTEN919_Poses и пересобрать клипы (tools/asten919/clips/rebuild.cmd).
+              переносятся из действия ASTEN919_Poses (кадр-поза → набор костей, словарь OWN; остальное в позе — с кадра 1).
+              Поправить хват во всех клипах сразу — поправить позу в ASTEN919_Poses и пересобрать клипы
+              (tools/asten919/clips/rebuild.cmd). Действие поз — рабочее у обоих ригов (Extrapolation: Nothing, кадры
+              1–61), клипы — дорожкой NLA с кадра 101; ключи владельца, попавшие в постороннее действие, сборщик
+              переносит в позы сам, ключи не на кадрах поз — отбрасывает.
 Каждый клип начинается и кончается позой «ХВАТ» (кадр 1 поз); Fire — с пальцем на спуске.
 
 blender -b "<позы или клипы.blend>" --python-exit-code 1 --python tools/asten919/clips/build_clips.py -- <выход.blend>
@@ -39,6 +42,7 @@ POSE_FRAMES = dict(grip=1, trigger=11, pressed=16, catch=21, stop=26, up=31, mag
 MAG_DROP = 0.055
 SLIDE, TRIGGER, STOP, CATCH = 0.043, 18.0, 6.0, 0.002
 JAM_OPEN = 0.3
+TAIL = 100                                           # технический ключ поз перед первым клипом (копия хвата)
 GAP = 24                                             # кадров между клипами на общей шкале
 log = lambda *a: print("ASTEN_CLIPS", *a, flush=True)  # noqa: E731
 
@@ -54,7 +58,8 @@ FINGER = lambda n: n.split(".")[0] in ("thumb", "palm", "f_index", "f_middle", "
 R_THUMB = [n for n in A_BONES if n.startswith("thumb") and n.endswith(".R")]
 R_INDEX = [n for n in A_BONES if n.startswith("f_index") and n.endswith(".R")]
 L_FING = [n for n in A_BONES if FINGER(n) and n.endswith(".L")]
-L_ARM = ["ik_hand.L", "upper_arm.L"]
+L_ARM = [n for n in A_BONES if n.endswith(".L") and n not in L_FING]     # вся левая рука, кроме пальцев (кисть, цель IK, локоть…)
+L_BODY = [n for n in L_ARM if n not in ("ik_hand.L", "mag.L")]
 
 
 def update():
@@ -83,13 +88,110 @@ for a in list(bpy.data.actions):
     if a.name.startswith(PREFIX) and a.name != POSES:
         bpy.data.actions.remove(a)
 poses_act = bpy.data.actions[POSES]
+POSE_AT = {f: name for name, f in POSE_FRAMES.items()}
+
+
+def bag_of(act, ob):
+    layer = act.layers[0] if act.layers else act.layers.new("Layer")
+    strip = layer.strips[0] if layer.strips else layer.strips.new(type="KEYFRAME")
+    return strip.channelbag(slot_of(act, ob), ensure=True)
+
+
+def absorb(ob):
+    """Ключи владельца, попавшие мимо поз (K без режима правки дорожки заводит действие «…Action» поверх NLA),
+    переносятся в ASTEN919_Poses на свои кадры; само постороннее действие убирается."""
+    ad = ob.animation_data
+    if ad is None:
+        return
+    if ad.use_tweak_mode:
+        ad.use_tweak_mode = False
+    stray = ad.action
+    if stray is None or stray == poses_act or stray.name.startswith(PREFIX):
+        return
+    src = next((b for layer in stray.layers for st in layer.strips for b in [st.channelbag(ad.action_slot)] if b), None) \
+        if ad.action_slot else None
+    moved, lost = set(), set()
+    if src is not None:
+        dst = bag_of(poses_act, ob)
+        for fc in src.fcurves:
+            tgt = dst.fcurves.find(fc.data_path, index=fc.array_index)
+            for kp in fc.keyframe_points:
+                f = round(kp.co[0])
+                if f not in POSE_AT:
+                    lost.add(f)
+                    continue
+                if tgt is None:
+                    tgt = dst.fcurves.new(fc.data_path, index=fc.array_index, group_name=fc.group.name if fc.group else "")
+                tgt.keyframe_points.insert(f, kp.co[1], options={"REPLACE"})
+                moved.add(f)
+            if tgt is not None:
+                tgt.update()
+    log(f"{ob.name}: ключи из постороннего действия «{stray.name}» перенесены в позы, кадры {sorted(moved)}"
+        + (f"; ключи на кадрах {sorted(lost)} — не кадры поз, отброшены" if lost else ""))
+    ad.action = None
+    if stray.users == 0 or not stray.use_fake_user:
+        bpy.data.actions.remove(stray)
+
+
+def drop_off_pose_keys():
+    """В действии поз ключи живут только на кадрах поз: случайные (K на кадре клипа) убираются."""
+    lost = set()
+    for layer in poses_act.layers:
+        for st in layer.strips:
+            for bag in st.channelbags:
+                for fc in bag.fcurves:
+                    for kp in reversed(list(fc.keyframe_points)):
+                        if round(kp.co[0]) not in POSE_AT or abs(kp.co[0] - round(kp.co[0])) > 1e-4:
+                            if round(kp.co[0]) != TAIL:
+                                lost.add(round(kp.co[0], 2))
+                            fc.keyframe_points.remove(kp)
+                    fc.update()
+    if lost:
+        log(f"в позах были ключи не на кадрах поз {sorted(lost)} — убраны (движение правится в таблицах build_clips.py)")
+
+
+for ob in (arms, wr):
+    absorb(ob)
+drop_off_pose_keys()
 assign(poses_act)
+for ob in (arms, wr):
+    ob.animation_data.action_extrapolation = "HOLD"
 con = wr.pose.bones["Magazine_Control"].constraints["В левой кисти"]
 B = {}
 for name, f in POSE_FRAMES.items():
     S.frame_set(f)
     update()
     B[name] = {n: arms.pose.bones[n].matrix_basis.copy() for n in A_BONES}
+
+# Что в какой позе «своё» (остальное в ней — как в хвате, кадр 1): так поправленный хват виден на всех кадрах поз.
+OWN = dict(trigger=set(R_INDEX), pressed=set(R_INDEX), catch=set(R_THUMB), stop=set(R_THUMB), up=set(R_THUMB),
+           mag=set(L_FING) | set(L_ARM) | {"mag.L"}, seat=set(L_FING) | set(L_ARM), pinch=set(L_FING) | set(L_ARM),
+           free=set(L_FING) | set(L_ARM))
+if "mag.L" in A_BONES:                               # как магазин лежит в левой кисти — одна поза на все кадры (кадр 41)
+    for name in B:
+        B[name]["mag.L"] = B["mag"]["mag.L"].copy()
+
+
+def key_pose(pb, frame):
+    pb.keyframe_insert("rotation_quaternion" if pb.rotation_mode == "QUATERNION" else "rotation_euler", frame=frame)
+    pb.keyframe_insert("location", frame=frame)
+    pb.keyframe_insert("scale", frame=frame)
+
+
+changed = {}
+for name, f in POSE_FRAMES.items():
+    for n in A_BONES:
+        want = B[name][n] if (name == "grip" or n in OWN[name]) else B["grip"][n]
+        if name != "grip" and n not in OWN[name]:
+            d = max(abs(a - b) for ra, rb in zip(B[name][n], want) for a, b in zip(ra, rb))
+            if d > 1e-5:
+                changed.setdefault(name, []).append(n)
+            B[name][n] = want.copy()
+        pb = arms.pose.bones[n]
+        pb.matrix_basis = want
+        key_pose(pb, f)
+for name, bones in changed.items():
+    log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): {len(bones)} костей приведены к хвату кадра 1")
 assign(None)
 con.influence = 0.0
 for pb in wr.pose.bones:
@@ -222,7 +324,8 @@ class Clip:
                 update()
                 basis, arm = ikL.matrix_basis.copy(), "mag"
             self.bone("ik_hand.L", frame, basis)
-            self.bone("upper_arm.L", frame, B[arm]["upper_arm.L"])
+            for n in L_BODY:                          # hand.L, upper_arm.L, локоть — как в той же позе владельца
+                self.bone(n, frame, B[arm][n])
         return self
 
     # ---- пистолет
@@ -422,7 +525,7 @@ def mag_check():
     c.part("mag", [(t, 0.0), (t + 4, MAG_DROP), (80, MAG_DROP), (84, 0.048), (87, 0.0)])
     c.hold([(t + 6, 1), (80, 0)])
     c.fingers(L_FING, [(t - 6, "free"), (t + 2, "free"), (t + 6, "mag"), (80, "mag"), (83, "seat"), (90, "seat"), (100, "grip")])
-    eyes = MAG_HAND_W.translation + (EYE + Vector((0.035, -0.31, -0.065)) - MAG_C0)
+    eyes = MAG_HAND_W.translation + (EYE + Vector((0.02, -0.33, -0.125)) - MAG_C0)     # выше — предплечье закрывает кадр
     eyes2 = eyes + Vector((-0.004, 0.006, 0.004))
     c.left([(t - 1, ("mag", MAG_DROP + 0.008)), (t + 5, ("mag", MAG_DROP)), (t + 12, ("mag", 0.128)), (38, ("world", tuple(eyes), (10, -6, 14))),
             (60, ("world", tuple(eyes2), (12, -3, 9))), (68, ("mag", 0.140)), (73, ("mag", 0.122)), (80, ("mag", MAG_DROP)),
@@ -515,11 +618,6 @@ for m in list(S.timeline_markers):
 tracks = {}
 for ob in (arms, wr):
     t = ob.animation_data.nla_tracks.new()
-    t.name = "Позы (хваты) — кадры 1–61"
-    st = t.strips.new(POSES, 1, poses_act)
-    st.action_slot = slot_of(poses_act, ob)
-    st.extrapolation = "HOLD_FORWARD"
-    t = ob.animation_data.nla_tracks.new()
     t.name = "Клипы"
     tracks[ob.name] = t
 for name, f in POSE_FRAMES.items():
@@ -541,6 +639,17 @@ for name, rec in REC.items():
             S.timeline_markers.new(f"{mk}", frame=at + fr - 1)
     at += rec["frames"] + GAP
 S.frame_start, S.frame_end = 1, at - GAP
+# Позы — рабочее действие обоих ригов (не дорожка NLA): ключ на кадре позы (I / K в Pose Mode) пишется прямо в него.
+# Оно действует только на своих кадрах 1–100 (Extrapolation: Nothing), дальше играют клипы дорожки «Клипы».
+poses_act.use_frame_range = False
+for fc in [fc for layer in poses_act.layers for st in layer.strips for bag in st.channelbags for fc in bag.fcurves]:
+    fc.keyframe_points.insert(TAIL, fc.evaluate(1))   # кадры 62–100: рука возвращается в хват, с него начинается первый клип
+    fc.update()
+assign(poses_act)
+for ob in (arms, wr):
+    ob.animation_data.action_extrapolation = "NOTHING"
+    ob.animation_data.action_blend_type = "REPLACE"
+    ob.animation_data.action_influence = 1.0
 S.frame_set(1)
 (ROOT / "_asset_src/asten919/anim/clips.json").write_text(json.dumps(REC, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
 txt = bpy.data.texts.get("АСТЕН-919 — позы и клипы (читать)") or bpy.data.texts.new("АСТЕН-919 — позы и клипы (читать)")
@@ -548,7 +657,21 @@ lines = [__doc__, "", "Клипы (кадр начала на общей шка�
 for name, rec in REC.items():
     lines.append(f"  {rec['timeline_start']:5d}  {name:22s} {rec['frames']:4d} к ({rec['seconds']:.2f} с)  {rec['marks']}")
 lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".join(f"{k_} {v}" for k_, v in POSE_FRAMES.items()),
-          "Править позу: дорожка NLA «Позы» → Tab (режим правки действия), нужный кадр, Pose Mode, ключ I. Потом rebuild.cmd."]
+          "",
+          "КАК ПРАВИТЬ ХВАТ",
+          "  Кадры 1–61 — позы (действие ASTEN919_Poses, оно рабочее: ключ пишется прямо в него). Кадры 101 и дальше —",
+          "  клипы, они собраны скриптом из этих поз; руками их не править — пересборка сотрёт.",
+          "  1. Встать на кадр позы (маркеры «ПОЗА …»), Pose Mode, поставить кости, выделить их (или все), I или K.",
+          "  2. Сохранить файл, запустить tools\\asten919\\clips\\rebuild.cmd (в папке игры), в Blender — File → Revert.",
+          "  Что в какой позе читается:",
+          "     1  ХВАТ — всё: обе руки на пистолете, пальцы, место пистолета в кадре (Weapon_CTRL). С него начинается",
+          "        и им кончается каждый клип.",
+          "    11, 16 — только указательный правой (на спуске; спуск выжат).",
+          "    21, 26, 31 — только большой правой (кнопка магазина; рычаг задержки; вверх для осмотра).",
+          "    41 — левая рука с магазином: пальцы, место кисти (ik_hand.L), как лежит магазин (mag.L).",
+          "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
+          "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
+          "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
 txt.from_string("\n".join(lines))
 OUT.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT), compress=True)
