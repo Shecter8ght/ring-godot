@@ -9,12 +9,13 @@
   12. вокзал: площадь и первый этаж, второй уровень, разрез;
   13. Объездная: поперечник у кордона, продольный профиль, юго-западный угол;
   14. малые зоны: отдел полиции, лагерь эвакуации, сквер с Вокзальной улицей и туалетом, тылы «Зерна»;
-  15. Объездная в геймплее: полоса под эстакадой и открытый участок полотна (решение «низ и верх»).
+  15. Объездная в геймплее: полоса под эстакадой и открытый участок полотна (решение «низ и верх»);
+  16. «Ярус», подъёмы, редакция 2: лестничные клетки с тамбурами и эскалаторы в атриуме.
 
 Числа — словари ниже (координаты сцены, метры; X — восток, Z — юг). Окружение — снимок сцены
 data/blockouts/prospekt_snapshot.json. В сцену ничего не внесено (docs/design/prospekt_map.md §25).
 
-    python -X utf8 tools/prospekt_stage2_plan.py [10 … 15]   # → docs/design/prospekt_s2_<N>_*.png
+    python -X utf8 tools/prospekt_stage2_plan.py [10 … 16]   # → docs/design/prospekt_s2_<N>_*.png
 """
 from __future__ import annotations
 
@@ -201,6 +202,34 @@ ST_DISPATCH = (176.0, 188.0, 146.0, 154.0)
 ST_PARK = (106.0, 128.0, 148.0, 196.0)
 MERIDIAN = (127.3, 175.3, 173.0, 217.0)
 CORPUS3 = (131.3, 157.3, 82.0, 138.0)
+
+# ---------------------------------------------------------------- «Ярус», редакция 2 подъёмов (замечание владельца 2026-11-13)
+# «Лестницы нужно вынести в закрытые от глаз тамбуры и сделать марши меньшими сегментами с промежуточными площадками».
+# Нормы (СП 1.13130.2020, п. 4.4): марш не уже 1,35 м при числе людей на этаже выше первого более 200; в марше 3…16
+# подъёмов; площадка не уже марша; зазор между маршами не менее 75 мм; ограждение 0,9 м. Ступень 150 × 300 (уклон 1:2).
+SW_RISER, SW_TREAD = 0.15, 0.30
+SW_FLIGHT_W = 1.75                      # 1,35 м × 1,3 по правилу масштаба проходов
+SW_LANDING = 1.75
+SW_GAP = 0.2
+SW_FLIGHTS = 4                          # четыре марша по 10 подъёмов: 0 → 1,5 → 3,0 → 4,5 → 6,0
+SW_RISERS = 10
+SW_RUN = (SW_RISERS - 1) * SW_TREAD     # 2,7 м
+# лестничная клетка ЛК-1 (служебная, юго-восток): марши вдоль X; ЛК-2 (эвакуационная, северо-запад): марши вдоль Z
+SW1 = (-68.8, -62.6, 84.0, 87.7)        # внутренний размер 6,2 × 3,7
+SW1_LOBBY = (-74.0, -69.0, 84.0, 87.7)  # тамбур
+SW1_PASS = (-74.0, -62.0, 80.0, 84.0)   # проход к тамбуру из служебной полосы (на втором этаже — коридор от галереи)
+SW1_DOORS_1 = [(-71.5, 84.0, "x", 1.17), (-69.0, 85.85, "z", 1.17), (-63.5, 88.0, "x", 1.35), (-68.0, 80.0, "x", 1.6)]
+SW1_DOORS_2 = [(-71.5, 84.0, "x", 1.17), (-69.0, 85.85, "z", 1.17), (-68.0, 80.0, "x", 1.6)]
+SW2 = (-141.7, -138.0, 48.3, 54.5)      # внутренний размер 3,7 × 6,2
+SW2_LOBBY = (-141.7, -134.3, 54.7, 57.8)
+SW2_STORE = (-137.8, -134.3, 48.3, 54.5)        # электрощитовая / инвентарь
+SW2_DOORS_1 = [(-134.0, 56.2, "z", 1.6), (-139.85, 54.6, "x", 1.17), (-142.0, 53.6, "z", 1.35), (-136.0, 54.6, "x", 1.0)]
+SW2_DOORS_2 = [(-134.0, 56.2, "z", 1.6), (-139.85, 54.6, "x", 1.17), (-136.0, 54.6, "x", 1.0)]
+# эскалаторы «ножницами» в атриуме: (z0, z1, x низа, x верха); уклон 30°, площадки по 2,4 м, борта 1,0 м
+ESC_ANGLE = 30.0
+ESC_LANDING = 2.4
+ESC_PAIR = [(67.2, 68.8, -107.2, -92.0), (69.2, 70.8, -96.8, -112.0)]
+ESC_PYLON = (-102.6, -101.4, 67.6, 70.4)
 
 KIND_FC = {"pub": "#e3f1fb", "staff": "#f3f3ee", "cash": "#fdf0c8", "ctrl": "#f9dcdc", "stair": "#dddddd", "hall": "#ffffff", "shut": "#cfcfcf"}
 
@@ -1204,7 +1233,172 @@ def sheet_ring_play(snap: dict) -> Path:
     return path
 
 
-SHEETS = {"10": sheet_master, "11": sheet_yarus, "12": sheet_station, "13": sheet_ring, "14": sheet_small, "15": sheet_ring_play}
+# ---------------------------------------------------------------- лист 16: подъёмы «Яруса», редакция 2
+
+def sheet_yarus_stairs(snap: dict) -> Path:
+    fig = plt.figure(figsize=(16.54, 11.69), dpi=200)
+    frame(fig, "Лист 16 · «Ярус»: лестницы в закрытых клетках, в атриуме — эскалаторы",
+          "Замечание владельца: открытые лестницы в торговом зале смотрятся чужими. Обычные лестницы уходят в лестничные клетки "
+          "за дверями и тамбурами, марши короткие, с площадками. Красный пунктир — что убирается.")
+    for i, (items, title) in enumerate(((Y_ROOMS_1, "первый этаж · 0,0"), (Y_ROOMS_2, "второй этаж · +6,0"))):
+        ax = fig.add_axes([0.03, 0.50 - i * 0.44, 0.47, 0.38])
+        ax.set_xlim(-146, -58)
+        ax.set_ylim(92, 42)
+        ax.set_aspect("equal")
+        ax.set_title(title, fontsize=9.5, loc="left")
+        ax.tick_params(labelsize=6)
+        ax.grid(True, color="#bbbbbb", lw=0.2, zorder=0)
+        rect(ax, Y_MAIN, fc="#ffffff", ec="#111111", lw=2.0, zorder=4)
+        keep = [r for r in items if r[0] not in ("Л1", "Л2", "лифт") and not (r[1] == -142.0 and r[3] == 48.0 and r[4] == 58.0)]
+        rooms(ax, [(lab if lab else "", a, b, c, d, k) for lab, a, b, c, d, k in keep], fs=5.6, lw=0.9)
+        rect(ax, (-80.0, -74.0, 80.0, 88.0), fc=KIND_FC["shut"], ec="#1f1f1f", lw=0.9, zorder=5)
+        ax.text(-77.0, 84.0, "лифт", fontsize=5.4, ha="center", va="center", zorder=20)
+        if i == 0:
+            ax.text(-102.0, 51.0, "торговый зал", fontsize=6.4, ha="center", va="center", zorder=22)
+            rect(ax, Y_VOID, fc="none", ec="#2b6cb0", lw=0.9, ls=(0, (5, 3)), zorder=21)
+        else:
+            rect(ax, (-116.0, -88.0, 58.0, 80.0), fc="#ffffff", ec="#1f1f1f", lw=0.9, zorder=5)
+            rect(ax, Y_VOID, fc="#dbe8f5", ec="#2b6cb0", lw=1.2, zorder=6)
+            ax.text(-102.0, 59.6, "галерея, ограждение — стекло", fontsize=5.2, ha="center", va="center", zorder=22)
+        # прежние открытые марши
+        for x, zb, zt in Y_ESCALATORS:
+            rect(ax, (x - 0.8, x + 0.8, min(zb, zt), max(zb, zt)), fc="none", ec="#c0392b", lw=0.9, ls=(0, (4, 3)), zorder=30)
+        # эскалаторы
+        for z0, z1, xb, xt in ESC_PAIR:
+            rect(ax, (min(xb, xt), max(xb, xt), z0, z1), fc="#f9dcdc", ec="#b03a2e", lw=1.0, zorder=24)
+            s_ = 1 if xt > xb else -1
+            ax.annotate("", xy=(xt - s_ * 0.8, (z0 + z1) / 2), xytext=(xb + s_ * 0.8, (z0 + z1) / 2),
+                        arrowprops={"arrowstyle": "-|>", "color": "#b03a2e", "lw": 1.0}, zorder=25)
+        rect(ax, ESC_PYLON, fc="#555555", ec="none", zorder=26)
+        ax.text(-102.0, 73.4, "эскалаторы «ножницами»", fontsize=5.4, ha="center", va="center", color="#b03a2e", zorder=26)
+        # ЛК-1
+        rect(ax, SW1_PASS, fc="#ffffff", ec="#1f1f1f", lw=0.9, zorder=6)
+        rect(ax, SW1_LOBBY, fc="#fdf3d0", ec="#1f1f1f", lw=0.9, zorder=7)
+        rect(ax, SW1, fc="#dddddd", ec="#111111", lw=1.4, zorder=7)
+        ax.text(-65.7, 85.85, "ЛК-1", fontsize=5.6, ha="center", va="center", weight="bold", zorder=20)
+        ax.text(-71.5, 85.85, "тамбур", fontsize=4.8, ha="center", va="center", zorder=20)
+        ax.text(-68.0, 82.0, "проход" if i == 0 else "коридор", fontsize=4.8, ha="center", va="center", zorder=20)
+        doors(ax, SW1_DOORS_2 if i else SW1_DOORS_1, t=0.3, lw=0.8)
+        # ЛК-2
+        rect(ax, SW2_LOBBY, fc="#fdf3d0", ec="#1f1f1f", lw=0.9, zorder=7)
+        rect(ax, SW2_STORE, fc=KIND_FC["staff"], ec="#1f1f1f", lw=0.9, zorder=7)
+        rect(ax, SW2, fc="#dddddd", ec="#111111", lw=1.4, zorder=7)
+        ax.text(-139.85, 51.4, "ЛК-2", fontsize=5.6, ha="center", va="center", weight="bold", zorder=20)
+        ax.text(-138.0, 56.25, "тамбур", fontsize=4.8, ha="center", va="center", zorder=20)
+        ax.text(-136.05, 51.4, "щит-\nовая", fontsize=4.4, ha="center", va="center", zorder=20)
+        doors(ax, SW2_DOORS_2 if i else SW2_DOORS_1, t=0.3, lw=0.8)
+        if i == 0:
+            ax.annotate("выход наружу", xy=(-142.0, 53.6), xytext=(-136.5, 61.5), fontsize=5.0, ha="center",
+                        arrowprops={"arrowstyle": "-|>", "color": "#1a7f5a", "lw": 0.7}, zorder=40)
+            ax.annotate("выход в служебный двор", xy=(-63.5, 88.0), xytext=(-68.0, 90.6), fontsize=5.0, ha="center",
+                        arrowprops={"arrowstyle": "-|>", "color": "#1a7f5a", "lw": 0.7}, zorder=40)
+    # ---- лестничная клетка крупно: план
+    ax = fig.add_axes([0.54, 0.60, 0.22, 0.28])
+    L = 2 * SW_LANDING + SW_RUN
+    W = 2 * SW_FLIGHT_W + SW_GAP
+    ax.set_xlim(-3.6, L + 0.8)
+    ax.set_ylim(W + 1.2, -1.4)
+    ax.set_aspect("equal")
+    ax.set_title("лестничная клетка: план (ЛК-1, ЛК-2 — одинаковые)", fontsize=9, loc="left")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.add_patch(Rectangle((-0.25, -0.25), L + 0.5, W + 0.5, fc="#8a8a8a", ec="none"))
+    ax.add_patch(Rectangle((0, 0), L, W, fc="#f4f4f4", ec="none"))
+    for k, y0 in enumerate((0.0, SW_FLIGHT_W + SW_GAP)):
+        ax.add_patch(Rectangle((SW_LANDING, y0), SW_RUN, SW_FLIGHT_W, fc="#e3e3e3", ec="#333333", lw=0.8))
+        for j in range(1, SW_RISERS - 1):
+            x = SW_LANDING + j * SW_TREAD
+            ax.plot([x, x], [y0, y0 + SW_FLIGHT_W], color="#555555", lw=0.4)
+        a, b = (SW_LANDING + 0.2, SW_LANDING + SW_RUN - 0.2) if k == 0 else (SW_LANDING + SW_RUN - 0.2, SW_LANDING + 0.2)
+        ax.annotate("", xy=(b, y0 + SW_FLIGHT_W / 2), xytext=(a, y0 + SW_FLIGHT_W / 2), arrowprops={"arrowstyle": "-|>", "color": "#b03a2e", "lw": 1.0})
+    ax.add_patch(Rectangle((SW_LANDING, SW_FLIGHT_W), SW_RUN, SW_GAP, fc="#ffffff", ec="#333333", lw=0.5))
+    ax.add_patch(Rectangle((-3.2, 0.2), 2.95, W - 0.4, fc="#fdf3d0", ec="#1f1f1f", lw=0.9))
+    ax.text(-1.7, W / 2, "тамбур", fontsize=6, ha="center", va="center", rotation=90)
+    ax.add_patch(Rectangle((-0.3, W / 2 - 0.6), 0.35, 1.17, fc="white", ec="#1a7f5a", lw=1.0, zorder=5))
+    ax.add_patch(Rectangle((-3.3, W / 2 - 0.6), 0.2, 1.17, fc="white", ec="#1a7f5a", lw=1.0, zorder=5))
+    ax.text(SW_LANDING / 2, W / 2, "площадка\nэтажа", fontsize=5.4, ha="center", va="center")
+    ax.text(L - SW_LANDING / 2, W / 2, "площадка\n+1,5 / +4,5\nокно", fontsize=5.4, ha="center", va="center")
+    dim(ax, (SW_LANDING, W + 0.7), (SW_LANDING + SW_RUN, W + 0.7), off=0.0, fs=5.6)
+    dim(ax, (0.0, W + 0.7), (SW_LANDING, W + 0.7), off=0.0, fs=5.6)
+    dim(ax, (L + 0.5, 0.0), (L + 0.5, SW_FLIGHT_W), off=0.0, fs=5.6)
+    dim(ax, (0.0, -0.8), (L, -0.8), off=0.0, fs=5.6)
+    # ---- лестничная клетка: разрез
+    ax = fig.add_axes([0.78, 0.60, 0.21, 0.28])
+    ax.set_xlim(-0.8, L + 0.8)
+    ax.set_ylim(-0.8, 10.2)
+    ax.set_aspect("equal")
+    ax.set_title("разрез: четыре марша по 10 подъёмов", fontsize=9, loc="left")
+    ax.set_xticks([])
+    ax.set_yticks([0, 1.5, 3.0, 4.5, 6.0])
+    ax.tick_params(labelsize=6)
+    ax.grid(True, axis="y", color="#aaaaaa", lw=0.25)
+    ax.add_patch(Rectangle((-0.25, -0.8), 0.25, 11.0, fc="#8a8a8a", ec="none"))
+    ax.add_patch(Rectangle((L, -0.8), 0.25, 11.0, fc="#8a8a8a", ec="none"))
+    ax.add_patch(Rectangle((-0.8, -0.8), L + 1.6, 0.8, fc="#d9d9d9", ec="none"))
+    for k in range(SW_FLIGHTS):
+        y0 = k * 1.5
+        xa, xb = (SW_LANDING, SW_LANDING + SW_RUN) if k % 2 == 0 else (SW_LANDING + SW_RUN, SW_LANDING)
+        pts = [(xa, y0)]
+        for j in range(SW_RISERS):
+            x = xa + (xb - xa) * j / (SW_RISERS - 1) if j < SW_RISERS - 1 else xb
+            pts += [(pts[-1][0], y0 + (j + 1) * SW_RISER), (x if j < SW_RISERS - 1 else xb, y0 + (j + 1) * SW_RISER)]
+        ax.plot([p[0] for p in pts], [p[1] for p in pts], color="#333333", lw=1.0)
+        land_x = (xb, L) if xb > SW_LANDING + 1 else (0.0, xb)
+        ax.add_patch(Rectangle((land_x[0], y0 + 1.5 - 0.18), land_x[1] - land_x[0], 0.18, fc="#555555", ec="none"))
+        ax.plot([xa, xb], [y0 + 0.9, y0 + 1.5 + 0.9], color="#b03a2e", lw=0.8)
+    ax.add_patch(Rectangle((0.0, 6.0 - 0.18), SW_LANDING, 0.18, fc="#555555", ec="none"))
+    ax.add_patch(Rectangle((L, 2.2), 0.25, 1.4, fc="#dbe8f5", ec="#2b6cb0", lw=0.6))
+    ax.add_patch(Rectangle((L, 5.2), 0.25, 1.4, fc="#dbe8f5", ec="#2b6cb0", lw=0.6))
+    figure_man(ax, 0.9)
+    ax.text(L / 2, 8.6, "второй этаж: до +10,6\n(на крышу — люк)", fontsize=5.6, ha="center", va="center")
+    # ---- эскалаторы: вид сбоку
+    ax = fig.add_axes([0.54, 0.36, 0.45, 0.17])
+    ax.set_xlim(-118, -86)
+    ax.set_ylim(-1.2, 11.6)
+    ax.set_aspect("equal")
+    ax.set_title("атриум, вид сбоку (с юга): пара эскалаторов «ножницами», уклон 30°", fontsize=9, loc="left")
+    ax.set_xticks([-112, -107.2, -102, -96.8, -92])
+    ax.set_yticks([0, 6])
+    ax.tick_params(labelsize=6)
+    ax.add_patch(Rectangle((-118, -1.2), 32, 1.2, fc="#d9d9d9", ec="none"))
+    for x0, x1 in ((-118, -112), (-92, -86)):
+        ax.add_patch(Rectangle((x0, 5.7), x1 - x0, 0.3, fc="#555555", ec="none"))
+    ax.add_patch(Rectangle((-112.1, 6.0), 0.1, 1.1, fc="#2b6cb0", ec="none"))
+    ax.add_patch(Rectangle((-92.0, 6.0), 0.1, 1.1, fc="#2b6cb0", ec="none"))
+    ax.add_patch(Rectangle((-118, 10.6), 32, 0.3, fc="#555555", ec="none"))
+    for z0, z1, xb, xt in ESC_PAIR:
+        s_ = 1 if xt > xb else -1
+        lo, hi = xb + s_ * ESC_LANDING, xt - s_ * ESC_LANDING
+        top = [(xb, 0.0), (lo, 0.0), (hi, 6.0), (xt, 6.0)]
+        ax.add_patch(Polygon(top + [(xt, 5.0), (hi + s_ * 0.3, 4.9), (lo + s_ * 1.2, 0.0)], closed=True, fc="#c9ced8", ec="#3f4850", lw=0.8))
+        rail = [(x, y + 1.0) for x, y in top]
+        ax.add_patch(Polygon(top + rail[::-1], closed=True, fc="#e8f1fa", ec="#2b6cb0", lw=0.6, alpha=0.9))
+        ax.plot([p[0] for p in rail], [p[1] for p in rail], color="#111111", lw=1.6)
+    ax.add_patch(Rectangle((ESC_PYLON[0], 0), 1.2, 2.7, fc="#8fa3cf", ec="#1c2f66", lw=0.6))
+    figure_man(ax, -114.5)
+    figure_man(ax, -89.5)
+    notes(fig, 0.54, 0.315, [
+        "Как это устроено в российских торговых центрах и двухэтажных супермаркетах. Покупатели ходят между этажами по эскалаторам "
+        "или траволаторам (под тележки, уклон до 12°) в атриуме и на лифтах. Обычные лестницы — эвакуационные: в закрытых "
+        "лестничных клетках по углам здания, за дверью с табличкой «Выход», с выходом сразу на улицу; покупатель их не видит.",
+        "Нормы (СП 1.13130.2020): марш не уже 1,35 м, если на этаже выше первого больше 200 человек (у нас торговый этаж 3 200 м², "
+        "по 3 м² на человека); в марше от 3 до 16 подъёмов; площадка не уже марша; между маршами зазор от 75 мм; ограждение 0,9 м; "
+        "выход из клетки наружу не уже марша. Клетка с окнами на каждом этаже — тип Л1; в больших центрах — через тамбур-шлюз (Н3).",
+        "Что принято на листе: ступень 150 × 300 мм (уклон 1:2), марш 1,75 м (1,35 м × 1,3 по правилу масштаба проходов), "
+        "четыре марша по 10 подъёмов на этаж 6 м с площадками на +1,5, +3,0, +4,5; клетка 6,2 × 3,7 м в чистоте, тамбур перед ней, "
+        "двери 1,17 м, выход наружу 1,35 м; на площадках окна. В зале и на галерее от лестниц видны только двери.",
+        "Эскалаторы: пара «ножницами» посреди атриума, уклон 30° как у настоящих, площадки по 2,4 м, сплошные борта 1 м с чёрным "
+        "поручнем, глухой корпус, общая опора посередине; выходят на западный и восточный край галереи. Ограждение галереи — стекло.",
+        "То же правило для остальных зданий второй очереди: лестницы крыльев вокзала и отдела полиции уже стоят в шахтах — им добавляются "
+        "двери и короткие марши; открытые стальные лестницы остаются только там, где они уместны: склад, мостки, вышки, пожарные снаружи.",
+    ], 128, fs=6.6)
+    path = OUT / "prospekt_s2_16_yarus_stairs.png"
+    fig.savefig(path)
+    plt.close(fig)
+    return path
+
+
+SHEETS = {"10": sheet_master, "11": sheet_yarus, "12": sheet_station, "13": sheet_ring, "14": sheet_small, "15": sheet_ring_play, "16": sheet_yarus_stairs}
 
 
 def main() -> None:
