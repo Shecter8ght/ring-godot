@@ -223,7 +223,7 @@
   неявными поверхностями, `tools/asten919`, геометрия v03), отделка в Substance Painter (этап 1 — заводская, износ
   этап 2 v02; процедурные ресурсы полки Painter — только запечёнными картами), игровая сетка и запечённые карты —
   `tools/asten919/game_*.py`; исходники — `E:/Models Blender/WEAPONS/АСТЕН-919/`, `_asset_src/asten919/`.
-  Встал на место прежней модели `assets/models/weapons/glock17/` (её файлы остались: из них модели ремонтных деталей).
+  Встал на место прежней модели Glock 17 Gen5 (удалена из игры 2026-11-12); ремонтные детали `part_glock_*` — с этой модели.
 - Рисунок износа в запечённых картах: маски владельца (`E:/Models Blender/Маски_АЛЬФА`, свои) и фото-маски CC0 1.0
   ambientCG (https://ambientcg.com, лицензия https://docs.ambientcg.com/license/) — Scratches001, Scratches004,
   Smear005; сырьё — `E:/Models Blender/Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`.
@@ -287,14 +287,6 @@
 - Винтовка: два атласа basecolor/ORM/OpenGL normal 4096². Остальные предметы: по одному атласу 2048²; стекло прицелов отдельно. ORM: R — локальный AO, G — roughness, B — metallic. Исходники `.kra`/`.blend` и отчёты — `_asset_src/vss_textured/`; `tools/prepare_vss_texturing.py`, `paint_vss_texture_layers.py`, `bake_vss_texture_ao.py`, `merge_vss_texture_ao.py`, `finish_vss_in_krita.ps1`, `apply_vss_krita_textures.py`, `import_vss_textured.py`.
 - Приклад v3 уточнён по замечанию владельца: вогнутый плечевой торец, дерево подогнано к фактической поверхности резинового затыльника. `tools/refine_vss_shoulder_stock.py` / `check_vss_shoulder_stock.py`; прежние модели сохранены, UV/карты обновлены в Krita.
 <!-- VSS_TEXTURES_END -->
-
-<!-- GLOCK17_MODEL_START -->
-## Пистолет Glock 17 Gen5
-
-- `assets/models/weapons/glock17/glock17.glb` — собственная модель владельца проекта, сделана для RING; лицензия — собственная работа. Glock 17 Gen5: рамка, затвор, ствол, спуск, затворная задержка, защёлка, магазин на 17 патронов; покраска владельца (PBR металл/полимер 2048², встроена в glb); два уровня детализации.
-- Источник — `_asset_src/glock17_gen5/` (glb, неизменённая копия .blend, `license.txt`, `export_manifest.json`); проверка и импорт — `tools/import_weapon_model.py glock17_gen5`.
-- Маркировка GLOCK — товарный знак Glock Ges.m.b.H.; оставлена по решению владельца, до выпуска игры решить отдельно (см. `license.txt`).
-<!-- GLOCK17_MODEL_END -->
 
 <!-- SHELTER_REMAKE_START -->
 ## Ремейк убежища — 2026-10-05
@@ -475,7 +467,7 @@ CC0 1.0. Изменения: цвет и нормаль сложены в мас
 - https://polyhaven.com/a/security_camera_02 — CC0 1.0 — Poly Haven.
 - https://polyhaven.com/a/industrial_microscope — CC0 1.0 — Poly Haven.
 - assets\models\weapons\pm\pm.glb — RING: existing approved geometry.
-- assets\models\weapons\glock17\glock17.glb — RING: existing approved geometry.
+- assets\models\weaponssten919sten919.gltf — RING: existing approved geometry.
 - assets\models\weapons\veras54\veras54_detail.glb — RING: existing approved geometry.
 - https://polyhaven.com/a/metal_toolbox — CC0 1.0 — Poly Haven.
 - https://polyhaven.com/a/medical_box — CC0 1.0 — Poly Haven.
