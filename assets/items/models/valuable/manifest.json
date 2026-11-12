@@ -319,57 +319,57 @@
     "packaged": false
   },
   "part_glock_barrel": {
-    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "source": "assets\\models\\weapons\\asten919\\asten919.gltf",
     "license": "RING: existing approved geometry",
-    "triangles": 1318,
+    "triangles": 1500,
     "size": [
-      0.0166,
-      0.0247,
-      0.1389
+      0.0175,
+      0.0267,
+      0.1255
     ],
     "packaged": false
   },
   "part_glock_slide": {
-    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "source": "assets\\models\\weapons\\asten919\\asten919.gltf",
     "license": "RING: existing approved geometry",
-    "triangles": 1302,
+    "triangles": 6199,
     "size": [
-      0.0254,
-      0.0206,
+      0.0255,
+      0.031,
       0.186
     ],
     "packaged": false
   },
   "part_glock_recoil": {
-    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "source": "assets\\models\\weapons\\asten919\\asten919.gltf",
     "license": "RING: existing approved geometry",
-    "triangles": 3080,
+    "triangles": 1460,
     "size": [
-      0.01,
-      0.01,
-      0.1076
+      0.0108,
+      0.0107,
+      0.0884
     ],
     "packaged": false
   },
   "part_glock_trigger": {
-    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "source": "assets\\models\\weapons\\asten919\\asten919.gltf",
     "license": "RING: existing approved geometry",
-    "triangles": 3532,
+    "triangles": 802,
     "size": [
-      0.0168,
-      0.0399,
-      0.0707
+      0.0072,
+      0.0325,
+      0.0199
     ],
     "packaged": false
   },
   "part_glock_extractor": {
-    "source": "assets\\models\\weapons\\glock17\\glock17.glb",
+    "source": "assets\\models\\weapons\\asten919\\asten919.gltf",
     "license": "RING: existing approved geometry",
-    "triangles": 396,
+    "triangles": 444,
     "size": [
-      0.0168,
-      0.0142,
-      0.017
+      0.0258,
+      0.0351,
+      0.1504
     ],
     "packaged": false
   },

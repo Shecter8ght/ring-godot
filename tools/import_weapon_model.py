@@ -1,8 +1,7 @@
 """Импорт собственных моделей оружия в assets/models/weapons через проверенный glb.
 
     python tools/import_weapon_model.py pm_highpoly_v5
-    python tools/import_weapon_model.py glock17_gen5
-    python tools/import_weapon_model.py glock17_gen5 --check   # только проверки, без записи
+    python tools/import_weapon_model.py pm_highpoly_v5 --check   # только проверки, без записи
 
 Исходники и license.txt остаются в _asset_src; модель и встроенные PBR-текстуры
 копируются в assets только после проверки дерева, масштаба и бюджета. Что проверять у
@@ -20,16 +19,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PARTS = ('Frame','Slide','Barrel','Trigger','Hammer','SlideStop','Safety','MagCatch','Magazine','Suppressor')
 MARKERS = ('Muzzle','MuzzleSuppressed','SightFront','SightRear')
-# Glock: ударниковый, без курка и флажка предохранителя; глушитель только процедурный обвес.
-GLOCK_PARTS = ('Frame','Slide','Barrel','Trigger','SlideStop','MagCatch','Magazine')
-GLOCK_ABSENT = ('Hammer','Safety','Suppressor')
-GLOCK_IMAGES = ('glock_metal_base_color','glock_metal_normal','glock_metal_orm',
-                'glock_polymer_base_color','glock_polymer_normal','glock_polymer_orm')
-GLOCK_ROUNDS = 17
-# Санитарное окно габаритов Glock 17 Gen5 с магазином, мм [ширина, высота, длина]
-# (заводские около 34 × 139 × 202): вне окна — сломан масштаб или оси экспорта.
-GLOCK_BOUNDS_MIN_MM = (28.0, 125.0, 190.0)
-GLOCK_BOUNDS_MAX_MM = (37.0, 150.0, 210.0)
 BOUNDS_TOLERANCE_MM = .4
 TRIS_LOD0_MAX = 40000
 TRIS_LOD1_MAX = 5000
@@ -128,7 +117,7 @@ def inspect_pm(doc: dict) -> dict:
 
 
 class Scene:
-    """Мировые матрицы и вершины glb: одна арифметика для всех проверок дерева Glock."""
+    """Мировые матрицы и вершины glb: одна арифметика для проверок дерева модели."""
 
     def __init__(self, doc: dict, binary: bytes) -> None:
         self.doc = doc;self.binary = binary
@@ -219,71 +208,6 @@ def glb_binary(model: Path) -> bytes:
     return data[offset+8:offset+8+binary_length]
 
 
-def inspect_glock(doc: dict, model: Path) -> dict:
-    """Дерево по контракту экспорта Glock 17 Gen5: детали на своих осях, метки на затворе, 17 патронов."""
-    scene = Scene(doc, glb_binary(model))
-    names = scene.names
-    required = (('Glock','Glock_LOD1','Rounds','Rounds_LOD1','Round_01_LOD1') + GLOCK_PARTS + MARKERS
-                + tuple(p + '_LOD1' for p in GLOCK_PARTS))
-    missing = [name for name in required if name not in names]
-    if missing:
-        raise ValueError('Не найдены детали/метки: ' + ', '.join(missing))
-    extra = [name for base in GLOCK_ABSENT for name in (base, base + '_LOD1') if name in names]
-    if extra:
-        raise ValueError('У Glock нет курка, предохранителя и своего глушителя: ' + ', '.join(extra))
-    if doc.get('animations'):
-        raise ValueError('Игровая модель должна иметь покой без демонстрационных actions')
-    for image in doc.get('images', []):
-        if 'bufferView' not in image:
-            raise ValueError('Текстура не встроена в GLB')
-    # Ветки — соседи: вложенный LOD1 рисовался бы вместе с LOD0.
-    if names['Glock_LOD1'] in scene.descendants(names['Glock']) or names['Glock'] in scene.descendants(names['Glock_LOD1']):
-        raise ValueError('Glock и Glock_LOD1 должны быть отдельными ветками')
-    for suffix, root in (('', 'Glock'), ('_LOD1', 'Glock_LOD1')):
-        expected_parents = {'Frame': root, 'Slide': root, 'Barrel': root, 'Magazine': root,
-                            'Trigger': 'Frame' + suffix, 'SlideStop': 'Frame' + suffix,
-                            'MagCatch': 'Frame' + suffix, 'Rounds': 'Magazine' + suffix}
-        for part, parent in expected_parents.items():
-            if scene.parent_name(part + suffix) != parent:
-                raise ValueError(f'{part + suffix} должен быть дочерним {parent}, а не {scene.parent_name(part + suffix)}')
-    slide_branch = set(scene.descendants(names['Slide']))
-    for marker in MARKERS:
-        if names[marker] not in slide_branch:
-            raise ValueError(f'Метка {marker} должна ехать с затвором (внутри Slide)')
-    round_nodes = scene.nodes[names['Rounds']].get('children', [])
-    if [scene.nodes[i].get('name') for i in round_nodes] != [f'Round_{i:02}' for i in range(1, GLOCK_ROUNDS + 1)]:
-        raise ValueError(f'Rounds должен содержать {GLOCK_ROUNDS} отдельных патронов Round_01..Round_{GLOCK_ROUNDS}')
-    low_rounds = [scene.nodes[i].get('name') for i in scene.nodes[names['Rounds_LOD1']].get('children', [])]
-    if not low_rounds or low_rounds != [f'Round_{i:02}_LOD1' for i in range(1, len(low_rounds) + 1)]:
-        raise ValueError('Rounds_LOD1 должен начинаться с Round_01_LOD1 и идти по порядку')
-    # WeaponRig показывает первые N патронов: Round_01 — верхний, последним остаётся в магазине.
-    heights = [scene.world(names[f'Round_{i:02}'])[1][3] for i in range(1, GLOCK_ROUNDS + 1)]
-    if any(a <= b for a, b in zip(heights, heights[1:])):
-        raise ValueError('Патроны должны идти сверху вниз: Round_01 — верхний')
-    position = {name: scene.relative(name, 'Glock') for name in MARKERS + GLOCK_PARTS}
-    if position['Muzzle'][2] <= .1:
-        raise ValueError('Дульная метка должна находиться на срезе ствола, а не в корне')
-    if any(abs(a - b) > .0005 for a, b in zip(position['Muzzle'], position['MuzzleSuppressed'])):
-        raise ValueError('Без своего глушителя MuzzleSuppressed совпадает с Muzzle')
-    if position['SightRear'][2] >= position['SightFront'][2]:
-        raise ValueError('Целик должен быть позади мушки')
-    if min(position['SightFront'][1], position['SightRear'][1]) <= position['Muzzle'][1]:
-        raise ValueError('Линия прицеливания должна быть выше оси канала ствола')
-    if position['Magazine'][1] >= 0:
-        raise ValueError('Магазин должен стоять в рукояти ниже точки хвата')
-    for part in GLOCK_PARTS:
-        low = scene.relative(part + '_LOD1', 'Glock_LOD1')
-        if any(abs(a - b) > .0005 for a, b in zip(low, position[part])):
-            raise ValueError(f'{part}_LOD1 должен стоять на той же оси, что и {part}: {low} ≠ {position[part]}')
-    counts = {'first_person': scene.triangles('Glock'), 'third_person': scene.triangles('Glock_LOD1')}
-    if counts['first_person'] > TRIS_LOD0_MAX or counts['third_person'] > TRIS_LOD1_MAX:
-        raise ValueError('Превышен бюджет треугольников: ' + str(counts))
-    return {'triangles': counts, 'embedded_images': len(doc.get('images', [])), 'nodes': len(scene.nodes),
-            'bounds_mm': [round(v, 3) for v in scene.bounds_mm('Glock')],
-            'positions_m': {name: [round(v, 5) for v in position[name]]
-                            for name in ('Muzzle','SightFront','SightRear','Magazine','Trigger','SlideStop')}}
-
-
 def png_size(payload: bytes) -> tuple[int, int]:
     return struct.unpack_from('>II', payload, 16)
 
@@ -326,45 +250,6 @@ def check_pm(src: Path, model: Path, doc: dict, images: dict[str, bytes]) -> dic
     return facts
 
 
-def check_glock(src: Path, model: Path, doc: dict, images: dict[str, bytes]) -> dict:
-    facts = inspect_glock(doc, model)
-    manifest = json.loads((src / 'export_manifest.json').read_text(encoding='utf-8'))
-    if manifest.get('id') != 'glock17_gen5' or manifest.get('glb') != model.name:
-        raise SystemExit('export_manifest.json описывает другой экспорт')
-    if manifest.get('root', 'Glock') != 'Glock' or manifest.get('lod_root', 'Glock_LOD1') != 'Glock_LOD1':
-        raise SystemExit('Корни в manifest не совпадают с контрактом Glock / Glock_LOD1')
-    # Покраску владельца после экспорта не меняли: иначе glb устарел относительно .blend.
-    # Копия в _asset_src упакована (текстуры внутри .blend) — её хеш другой по построению,
-    # поэтому сверяется только оригинал из папки владельца, когда он есть на этой машине.
-    digest = str(manifest.get('source_sha256', ''))
-    original = Path(str(manifest.get('source_blend', '')))
-    copy = src / str(manifest.get('source_copy', ''))
-    if str(original) not in ('', '.') and original.is_file():
-        actual = hashlib.sha256(original.read_bytes()).hexdigest()
-        if actual != digest:
-            raise SystemExit(f'{original} изменился после экспорта ({actual} ≠ {digest}): переэкспортируйте glb')
-        facts['source_verified'] = str(original)
-    elif manifest.get('source_copy') and copy.is_file():
-        print(f'предупреждение: оригинала {original} нет на этой машине, хеш не сверен; копия — {copy.name}')
-        facts['source_verified'] = ''
-    else:
-        raise SystemExit('Нет ни исходника из manifest, ни его копии в _asset_src')
-    measured = facts['bounds_mm'];declared = [float(v) for v in manifest['bounds_mm']]
-    if any(abs(a-b) > BOUNDS_TOLERANCE_MM for a,b in zip(measured, declared)):
-        raise SystemExit(f'Габариты glb {measured} расходятся с manifest {declared} больше чем на {BOUNDS_TOLERANCE_MM} мм')
-    if any(not lo <= v <= hi for v, lo, hi in zip(measured, GLOCK_BOUNDS_MIN_MM, GLOCK_BOUNDS_MAX_MM)):
-        raise SystemExit(f'Габариты {measured} не похожи на Glock 17: окно {GLOCK_BOUNDS_MIN_MM}–{GLOCK_BOUNDS_MAX_MM}')
-    counts = facts['triangles']
-    if [counts['first_person'], counts['third_person']] != [int(manifest['tris_lod0']), int(manifest['tris_lod1'])]:
-        raise SystemExit(f'Треугольники {counts} не совпадают с manifest {manifest["tris_lod0"]}/{manifest["tris_lod1"]}')
-    # Запечённые PNG рядом необязательны; если лежат — во встроенных те же байты.
-    for name, payload in images.items():
-        baked = src / (name + '.png')
-        if baked.is_file() and hashlib.sha256(payload).digest() != hashlib.sha256(baked.read_bytes()).digest():
-            raise SystemExit(f'Встроенная {name} устарела относительно {baked.name}: перепакуйте изображение')
-    return facts
-
-
 def update_credits(start: str, end: str, body: str) -> None:
     """Меняется только своя секция между метками; остальной файл и его переводы строк — как были."""
     credits = ROOT / 'assets' / 'CREDITS.md'
@@ -386,23 +271,11 @@ PM_CREDITS = '''## Пистолет ПМ
 - `assets/models/weapons/pm/pm.glb` — собственная модель, сделана для RING; владелец — автор проекта. Предоставленный владельцем `PM_Highpoly_v5.blend` сохранён отдельной неизменённой копией в `_asset_src/pm_highpoly_v5/`.
 - Игровая копия, PBR-атласы цвета/ORM/normal и два уровня детализации подготовлены `tools/export_pm_game.py`; импорт — `tools/import_weapon_model.py`. Фото служили референсами формы; их пиксели в игровых текстурах не использованы. Текстуры запечены из собственных процедурных материалов и highpoly-геометрии.'''
 
-GLOCK_CREDITS = '''## Пистолет Glock 17 Gen5
-
-- `assets/models/weapons/glock17/glock17.glb` — собственная модель владельца проекта, сделана для RING; лицензия — собственная работа. Glock 17 Gen5: рамка, затвор, ствол, спуск, затворная задержка, защёлка, магазин на 17 патронов; покраска владельца (PBR металл/полимер 2048², встроена в glb); два уровня детализации.
-- Источник — `_asset_src/glock17_gen5/` (glb, неизменённая копия .blend, `license.txt`, `export_manifest.json`); проверка и импорт — `tools/import_weapon_model.py glock17_gen5`.
-- Маркировка GLOCK — товарный знак Glock Ges.m.b.H.; оставлена по решению владельца, до выпуска игры решить отдельно (см. `license.txt`).'''
-
-# Что проверять и куда класть у каждой модели. ПМ — те же проверки, что при первом импорте.
 SPECS: dict[str, dict] = {
     'pm_highpoly_v5': {
         'glb': 'pm.glb', 'dest': ('pm', 'pm.glb'),
         'images': ('pm_base_color','pm_normal','pm_orm'), 'image_size': 0,
         'check': check_pm, 'credits': ('<!-- PM_MODEL_START -->', '<!-- PM_MODEL_END -->', PM_CREDITS),
-    },
-    'glock17_gen5': {
-        'glb': 'glock17.glb', 'dest': ('glock17', 'glock17.glb'),
-        'images': GLOCK_IMAGES, 'image_size': 2048,
-        'check': check_glock, 'credits': ('<!-- GLOCK17_MODEL_START -->', '<!-- GLOCK17_MODEL_END -->', GLOCK_CREDITS),
     },
 }
 

@@ -717,7 +717,7 @@ def main() -> None:
     mag45 = import_mag("veras54_mags/veras54_mag45_world.gltf", None, "Mag_VERAS54_45")
     drum = import_mag("veras54_mags/veras54_drum60_world.gltf", None, "Mag_VERAS54_Drum60")
     pm = import_mag("pm/pm_mag.gltf", None, "Mag_PM_8")
-    glock = import_mag("glock17/glock17.glb", ("MagBody", "MagFloorplate", "MagFollower", "MagSpring"), "Mag_Glock_17")
+    glock = import_mag("asten919/asten919_mag.gltf", ("Magazine_Mesh", "Follower_Mesh"), "Mag_Glock_17")
     for mg, up in ((mag30, True), (mag45, True), (pm, True), (glock, True)):
         align_mag(mg, up)
     align_mag(drum, False, turn=False)                       # двойной барабан — поперёк подсумка

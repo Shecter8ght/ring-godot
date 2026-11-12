@@ -99,6 +99,34 @@ for item, spec in SPECS.items():
         objects = [o for o in objects if o.name in spec['selector']]
         assert objects, (item, spec['selector'])
     if spec['source'] == 'metal_toolbox': objects = [o for o in objects if 'handle_latch' not in o.name]
+    if spec.get('keep_island') == 'largest':
+        # сетка из нескольких деталей (вкладыши рамки АСТЕН-919): остаётся самая подробная — блок запирания
+        import bmesh
+        for o in objects:
+            o.data = o.data.copy()
+            bm = bmesh.new(); bm.from_mesh(o.data)
+            # связность — по совпадающим вершинам: после импорта glTF сетка разрезана по швам развёртки
+            root = {}
+            def find(k):
+                while root[k] != k:
+                    root[k] = root[root[k]]; k = root[k]
+                return k
+            first = {}
+            for f in bm.faces:
+                root[f.index] = f.index
+            for f in bm.faces:
+                for v in f.verts:
+                    key = (round(v.co.x, 5), round(v.co.y, 5), round(v.co.z, 5))
+                    if key in first:
+                        root[find(f.index)] = find(first[key])
+                    else:
+                        first[key] = f.index
+            groups = {}
+            for f in bm.faces:
+                groups.setdefault(find(f.index), []).append(f)
+            keep = max(groups.values(), key=len)
+            bmesh.ops.delete(bm, geom=[f for g in groups.values() if g is not keep for f in g], context='FACES')
+            bm.to_mesh(o.data); bm.free()
     points = [o.matrix_world @ Vector(v) for o in objects for v in o.bound_box]
     lo = Vector([min(v[i] for v in points) for i in range(3)]); hi = Vector([max(v[i] for v in points) for i in range(3)])
     size = hi - lo

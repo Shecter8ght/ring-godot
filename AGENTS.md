@@ -826,7 +826,6 @@ python tools/trace_flare_gun_claude.py                        # ракетниц
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/texture_flare_gun_claude.py -- build|render|inspect # ракетница Claude: слои UCUPaint на принятой геометрии, превью, проверка стека
 python tools/import_weapon_model.py pm_highpoly_v5          # проверенный ПМ из _asset_src: дерево, PBR, размеры, бюджеты, CREDITS
-python tools/import_weapon_model.py glock17_gen5            # прежний Glock 17 Gen5 (в игре заменён АСТЕН-919; из его файла — модели ремонтных деталей): дерево, PBR, размеры, бюджеты, CREDITS
 tools/godot.cmd --headless res://tools/glock_test.tscn        # АСТЕН-919 (wpn_hg_02): детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом, гайка резьбы прячется под глушителем
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # АСТЕН-919 (wpn_hg_02): хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/icon_detail_shots.tscn # подробные значки (Balance.ICON_DETAIL — пистолет АСТЕН-919 и обойма):

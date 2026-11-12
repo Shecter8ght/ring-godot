@@ -265,42 +265,40 @@
     ]
   },
   "part_glock_barrel": {
-    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "source": "weapon:assets/models/weapons/asten919/asten919.gltf",
     "group": "parts",
     "selector": [
-      "Barrel"
+      "Barrel_Mesh"
     ]
   },
   "part_glock_slide": {
-    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "source": "weapon:assets/models/weapons/asten919/asten919.gltf",
     "group": "parts",
     "selector": [
-      "Slide"
+      "Slide_Mesh"
     ]
   },
   "part_glock_recoil": {
-    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "source": "weapon:assets/models/weapons/asten919/asten919.gltf",
     "group": "parts",
     "selector": [
-      "GuideRod",
-      "RecoilSpring"
+      "RecoilSpring_Mesh"
     ]
   },
   "part_glock_trigger": {
-    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "source": "weapon:assets/models/weapons/asten919/asten919.gltf",
     "group": "parts",
     "selector": [
-      "Trigger",
-      "TriggerBar",
-      "TriggerHousing"
+      "Trigger_Mesh"
     ]
   },
   "part_glock_extractor": {
-    "source": "weapon:assets/models/weapons/glock17/glock17.glb",
+    "source": "weapon:assets/models/weapons/asten919/asten919.gltf",
     "group": "parts",
     "selector": [
-      "LockingBlock"
-    ]
+      "FrameParts_Mesh"
+    ],
+    "keep_island": "largest"
   },
   "part_veras_receiver": {
     "source": "weapon:assets/models/weapons/veras54/veras54_detail.gltf",
