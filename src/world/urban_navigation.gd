@@ -152,6 +152,8 @@ func _prepare() -> void:
 			return
 		await get_tree().physics_frame
 		synchronization_frames += 1
+	# ковры и связки лестниц (Balance.STAIR_NAV): сетка из кэша их не содержит, по крутым маршам без них не пройти
+	await StairNavigation.build(self, map)
 	ready_for_agents.emit()
 
 

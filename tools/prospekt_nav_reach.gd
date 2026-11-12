@@ -61,8 +61,14 @@ func _ready() -> void:
 	while int(level.get("_marauders_spawned")) <= 0 and Time.get_ticks_msec() - t0 < 180000:
 		await get_tree().process_frame
 	var map: RID = (level as Node3D).get_world_3d().navigation_map
-	var a: Vector3 = NavigationServer3D.map_get_closest_point(map, START)
-	print("старт %s → на навигации %s" % [START, a])
+	var begin: Vector3 = START
+	# другая точка старта (разбор: что достижимо с верха марша) — `-- start=x,y,z`
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("start="):
+			var parts: PackedStringArray = arg.substr(6).split(",")
+			begin = Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+	var a: Vector3 = NavigationServer3D.map_get_closest_point(map, begin)
+	print("старт %s → на навигации %s" % [begin, a])
 	var no: int = 0
 	for t: Array in TARGETS:
 		var want := Vector3(float(t[1]), float(t[2]), float(t[3]))

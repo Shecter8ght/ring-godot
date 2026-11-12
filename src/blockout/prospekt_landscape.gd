@@ -752,6 +752,8 @@ func _solid_stairs(g: RefCounted, start: Vector3, finish: Vector3, width: float,
 	cs.shape = shape
 	cs.set_meta("surface", String(SURFACE_BY_MAT.get(key, BOX_SURFACE.get(key, "concrete"))))
 	(g.body as StaticBody3D).add_child(cs)
+	# навигация: марш на сплошном основании тоже ходим (Balance.STAIR_NAV), Geometry.stairs его не регистрирует
+	StairNavigation.register(g.parent as Node3D, start, finish, width)
 
 
 ## Перила марша (см. RAIL_*): линия кромок ступеней идёт от from к to; поручень и ригель — твёрдые (с марша не упасть),

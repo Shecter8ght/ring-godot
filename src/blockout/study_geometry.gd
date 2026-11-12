@@ -161,6 +161,7 @@ func stairs(start: Vector3, finish: Vector3, width: float, count: int, key: Stri
 	if surface_of.has(key):
 		cs.set_meta("surface", surface_of[key])
 	body.add_child(cs)
+	StairNavigation.register(parent, start, finish, width)
 
 func collision_box(at: Vector3, size: Vector3) -> void:
 	var shape: BoxShape3D = BoxShape3D.new()
