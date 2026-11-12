@@ -1,14 +1,15 @@
 extends Node
-## Glock 17 Gen5 из GLB: детали без курка/предохранителя/глушителя, метки, 17 патронов, LOD1,
-## процедурные насадки на срезе модели и запасной процедурный пистолет; ПМ рядом не сломан.
+## АСТЕН-919 (wpn_hg_02, своя модель вместо прежнего Glock 17 Gen5 из GLB): детали без курка/предохранителя/глушителя,
+## метки, 17 патронов, LOD1, гайка резьбы прячется под насадкой, процедурные насадки на срезе модели и запасной
+## процедурный пистолет; ПМ рядом не сломан.
 
 const GLOCK_ID: String = "wpn_hg_02"
 const PM_ID: String = "wpn_hg_01"
 const SUP_ID: String = "muzzle_supp_9_01"
 const MAG_CAPACITY: int = 17
 const EPS: float = 0.0015
-const MUZZLE_AT: Vector3 = Vector3(0.0, 0.0652, 0.1577)
-const SIGHT_H: float = 0.0789
+const MUZZLE_AT: Vector3 = Vector3(0.0, 0.0652, 0.1692)
+const SIGHT_H: float = 0.0803
 var _fails: int = 0
 var _checks: int = 0
 
@@ -76,7 +77,7 @@ func _common(rig: WeaponRig, model: Node3D, label: String, rounds_total: int) ->
 	var trigger_rest: Basis = rig.part("Trigger").basis
 	rig.pose_action("shot", 0.42)
 	var travel: float = slide_rest.z - rig.part("Slide").position.z
-	_check(label + ": затвор откатывается назад на ход", absf(travel - 0.044) < 0.001, str(travel))
+	_check(label + ": затвор откатывается назад на ход", absf(travel - 0.043) < 0.001, str(travel))
 	_check(label + ": спуск поворачивается", not rig.part("Trigger").basis.is_equal_approx(trigger_rest))
 	_check(label + ": дульный срез едет с затвором и не теряется", model.has_meta("muzzle"))
 	rig.cancel_action()
@@ -107,7 +108,7 @@ func _run() -> void:
 	var low: Node3D = WeaponModels.build(GLOCK_ID, {}, 1)
 	add_child(low)
 	var low_rig: WeaponRig = WeaponRig.find_on(low)
-	_check("LOD1: в модели нет деталей LOD0", low.find_child("Glock_LOD1", true, false) != null and low.find_child("TriggerBar", true, false) == null)
+	_check("LOD1: в модели нет деталей LOD0", low.find_child("ASTEN919_LOD1", true, false) != null and low.find_child("Round_02", true, false) == null)
 	_common(low_rig, low, "LOD1", 1)
 	_check("LOD1: бюджет треугольников", _triangles(low) <= 5000, str(_triangles(low)))
 	low.free()
@@ -117,6 +118,8 @@ func _run() -> void:
 	var sup_rig: WeaponRig = WeaponRig.find_on(suppressed)
 	var sup_muzzle: Vector3 = suppressed.get_meta("muzzle", Vector3.ZERO)
 	_check("глушитель 9 мм: срез вынесен вперёд по оси ствола", sup_muzzle.z > MUZZLE_AT.z + 0.1 and absf(sup_muzzle.y - MUZZLE_AT.y) < EPS, str(sup_muzzle))
+	var cap: MeshInstance3D = suppressed.find_child("MuzzleDevice_Mesh", true, false) as MeshInstance3D
+	_check("глушитель 9 мм: гайка резьбы ствола спрятана", cap != null and not cap.visible)
 	if sup_rig:
 		sup_rig.set_suppressed(true)
 		sup_rig.pose_action("shot", 0.42)
@@ -126,7 +129,7 @@ func _run() -> void:
 	# Отсутствующий файл — процедурный пистолет, как требует правило ассетов.
 	var definition: Dictionary = WeaponDb.weapon(GLOCK_ID)
 	var asset_path: String = String(definition.get("asset", ""))
-	definition["asset"] = "res://assets/models/weapons/glock17/absent_for_glock_test.glb"
+	definition["asset"] = "res://assets/models/weapons/asten919/absent_for_glock_test.glb"
 	var fallback: Node3D = WeaponModels.build(GLOCK_ID, {"muzzle": {"id": SUP_ID}})
 	definition["asset"] = asset_path
 	_check("без GLB работает процедурный запасной вариант", fallback != null and fallback.has_meta("muzzle") and WeaponRig.find_on(fallback) == null)

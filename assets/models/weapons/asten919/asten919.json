@@ -1,0 +1,112 @@
+{
+ "schema": "asten919_game",
+ "source": "E:/Models Blender/WEAPONS/АСТЕН-919/АСТЕН-919_износ_этап2_v02.blend",
+ "triangles": {
+  "first_person": 28822,
+  "lod1": 4568,
+  "nodes": {
+   "Frame_Mesh": 9000,
+   "FrameParts_Mesh": 1120,
+   "RecoilSpring_Mesh": 1460,
+   "Slide_Mesh": 7200,
+   "SlideParts_Mesh": 1400,
+   "MosCover_Mesh": 260,
+   "Barrel_Mesh": 1500,
+   "MuzzleDevice_Mesh": 520,
+   "Trigger_Mesh": 802,
+   "SlideStop_Mesh": 520,
+   "SlideLock_Mesh": 360,
+   "MagCatch_Mesh": 460,
+   "Magazine_Mesh": 2736,
+   "Follower_Mesh": 260,
+   "Round_Mesh": 72
+  }
+ },
+ "axes": "+Z дуло, +Y верх, −X правая сторона стрелка; начало — как у прежней модели игры",
+ "origin_source_m": [
+  -0.0437,
+  0.0,
+  -0.0652
+ ],
+ "markers_game_m": {
+  "Muzzle": [
+   0.0,
+   0.0652,
+   0.1692
+  ],
+  "SightFront": [
+   0.0,
+   0.0803,
+   0.1482
+  ],
+  "SightRear": [
+   0.0,
+   0.0803,
+   -0.0206
+  ]
+ },
+ "pivots_game_m": {
+  "Frame": [
+   0.0,
+   0.0652,
+   0.0437
+  ],
+  "Slide": [
+   0.0,
+   0.0652,
+   0.0437
+  ],
+  "Barrel": [
+   0.0,
+   0.0652,
+   0.0437
+  ],
+  "Trigger": [
+   0.0,
+   0.0446,
+   0.0544
+  ],
+  "SlideStop": [
+   0.0,
+   0.0446,
+   0.0544
+  ],
+  "SlideLock": [
+   0.0,
+   0.0474,
+   0.0716
+  ],
+  "MagCatch": [
+   0.0,
+   0.0205,
+   0.0262
+  ],
+  "Magazine": [
+   0.0,
+   0.0202,
+   0.0321
+  ]
+ },
+ "atlases": {
+  "Slide": {
+   "size": 4096,
+   "px_mm": 15.47,
+   "fill": 0.6114
+  },
+  "Frame": {
+   "size": 4096,
+   "px_mm": 14.51,
+   "fill": 0.7131
+  },
+  "Magazine": {
+   "size": 2048,
+   "px_mm": 10.63,
+   "fill": 0.6995
+  }
+ },
+ "materials": [
+  "ASTEN919_Slide",
+  "ASTEN919_Frame",
+  "ASTEN919_Magazine"
+ ]
+}

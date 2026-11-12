@@ -410,7 +410,7 @@ const TRADER_KITS := [
 			"ears": {"id": "headset_passive"},
 			"backpack": {"id": "bp_daypack"}},
 		"backpack": [["ammo_12_buck", 30], ["ammo_12_slug", 10], ["mag_918_8", 2], ["ammo_918_pst", 32], ["bandage", 3], ["medkit", 1], ["water", 1]]},
-	{"name": "Патрульный", "about": "ВЕРАС-54 с коллиматором и Glock, плитоносец со стальными плитами.",
+	{"name": "Патрульный", "about": "ВЕРАС-54 с коллиматором и АСТЕН-919, плитоносец со стальными плитами.",
 		"slots": {
 			"primary": {"id": "wpn_ar_01", "mods": {"optic_primary": "optic_holo_01", "muzzle": "muzzle_comp_545_01", "underbarrel": "grip_vertical_01", "side_right": "mount_dozor_p", "side_right/light": "tac_flashlight_01"}},
 			"sidearm": {"id": "wpn_hg_02"},

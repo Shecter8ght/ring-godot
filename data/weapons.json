@@ -1184,7 +1184,7 @@
    "flavor": "Когда основной ствол опустел, восемь патронов ПМ внезапно становятся очень убедительными."
   },
   "wpn_hg_02": {
-   "name": "Glock 17 Gen5",
+   "name": "АСТЕН-919",
    "cat": "weapon",
    "size": [
     2,
@@ -1200,7 +1200,7 @@
     "POLICE",
     "MILITARY"
    ],
-   "code": "G17",
+   "code": "АСТЕН",
    "desc": "Универсальный полноразмерный пистолет: лёгкий, надёжный и хорошо принимает современный обвес.",
    "weapon": {
     "slot": "sidearm",
@@ -1263,25 +1263,25 @@
     "sound": "shot_hg_02",
     "reload_sound": "reload_pistol",
     "cycle_sound": "",
-    "asset": "res://assets/models/weapons/glock17/glock17.glb",
+    "asset": "res://assets/models/weapons/asten919/asten919.gltf",
     "chamber_capacity": 1,
     "rig": {
      "ads_z": 0.36,
      "shot_duration": 0.065,
-     "slide_travel_m": 0.044,
+     "slide_travel_m": 0.043,
      "shot_peak": 0.42,
-     "trigger_angle_deg": 12.0,
+     "trigger_angle_deg": 18.0,
      "trigger_axis": [
       1,
       0,
       0
      ],
-     "slide_stop_angle_deg": -4.0,
+     "slide_stop_angle_deg": 6.0,
      "mag_catch_angle_deg": 0.0,
      "magazine_out_m": [
       0,
-      -0.115,
-      -0.035
+      -0.102,
+      -0.0412
      ],
      "reload": {
       "catch": 0.08,
@@ -3697,7 +3697,7 @@
    "model": "res://assets/models/weapons/pm/pm_mag.gltf"
   },
   "mag_919_17": {
-   "name": "Магазин Glock 9×19 на 17",
+   "name": "Магазин АСТЕН 9×19 на 17",
    "cat": "mag",
    "size": [
     1,
@@ -3721,10 +3721,11 @@
     "ergo": 0,
     "reliability": 1
    },
-   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться."
+   "flavor": "Компактный и удобный запасной магазин для тех, кто предпочитает чаще менять, чем дольше целиться.",
+   "model": "res://assets/models/weapons/asten919/asten919_mag.gltf"
   },
   "mag_919_33": {
-   "name": "Магазин Glock 9×19 на 33",
+   "name": "Магазин АСТЕН 9×19 на 33",
    "cat": "mag",
    "size": [
     1,

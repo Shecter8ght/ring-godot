@@ -90,6 +90,10 @@ func configure(id: String, weapon: Dictionary, imported: Node3D, lod: int) -> vo
 	var suppressor: Node3D = part("Suppressor")
 	if suppressor:
 		_mark_part(suppressor, "muzzle_device")
+	# Штатная дульная деталь модели (гайка резьбы ствола АСТЕН-919): обвес на резьбу её прячет — как у статичных
+	# моделей (WeaponModels.apply_markers).
+	for cap: Node in imported.find_children("*MuzzleDevice*", "MeshInstance3D", true, false):
+		cap.set_meta("part", "muzzle_device")
 	_target = Marker3D.new()
 	_target.name = "ActionHandTarget"
 	add_child(_target)

@@ -813,14 +813,22 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   tools/asten919/wear_marks.py [набор …] (места следов в мм + штампы фото-масок владельца E:/Models Blender/Маски_АЛЬФА:
 #   жир, полировка, затёртости, царапины → tex/wear/<набор>_<вид>.png) → Painter: sp_run.py -c "print(sp_asten_wear.build())"
 #   (группа «Этап 2 — износ», метка _wear_done.txt; show(False) — выключить для сравнения) → sp_asten.export → tex_review.py
+# АСТЕН-919 (wpn_hg_02 — встал на место прежнего Glock, 2026-11-12) в игру: ASTEN919_PLAIN=1 python -X utf8 tools/asten919/build.py
+#   _asset_src/asten919/plain Frame Slide Front_Sight Serial_Plate --k 1.6 (те же детали без мелкого рельефа — исходник упрощения) →
+#   blender … --background --factory-startup --python-exit-code 1 --python tools/asten919/game_lp.py (сетка ~29 тыс.: подвижное своими
+#   узлами, 17 патронов, развёртка asset_kit; _asset_src/asten919/game/lp) → game_bake.py [-- атлас …] [--cpu] (с high-poly износа v02) →
+#   python -X utf8 tools/asten919/game_pack.py → game_export.py (assets/models/weapons/asten919: asten919.gltf с веткой ASTEN919_LOD1,
+#   asten919_mag.gltf, отчёт asten919.json) → --import → python -X utf8 tools/asten919/game_imports.py → --import; данные —
+#   python -X utf8 tools/asten919/game_data.py (название, модель, ход механики; id, характеристики и хваты прежние); иконки —
+#   icon_bake -- wpn_hg_02 mag_919_17
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/texture_flare_gun_claude.py -- build|render|inspect # ракетница Claude: слои UCUPaint на принятой геометрии, превью, проверка стека
 python tools/import_weapon_model.py pm_highpoly_v5          # проверенный ПМ из _asset_src: дерево, PBR, размеры, бюджеты, CREDITS
-python tools/import_weapon_model.py glock17_gen5            # Glock 17 Gen5 из _asset_src (--check — только проверка): дерево, PBR, размеры, бюджеты, CREDITS
-tools/godot.cmd --headless res://tools/glock_test.tscn        # Glock: детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом
-tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # Glock: хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
+python tools/import_weapon_model.py glock17_gen5            # прежний Glock 17 Gen5 (в игре заменён АСТЕН-919; из его файла — модели ремонтных деталей): дерево, PBR, размеры, бюджеты, CREDITS
+tools/godot.cmd --headless res://tools/glock_test.tscn        # АСТЕН-919 (wpn_hg_02): детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом, гайка резьбы прячется под глушителем
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # АСТЕН-919 (wpn_hg_02): хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
 tools/godot.cmd --headless res://tools/export_weapon_refs.tscn -- "out=<папка>" # все стволы игры (и ГРАНЬ-15 с обвесами под левую руку) в GLB — образцы для хватов в Blender
 tools/godot.cmd --headless res://tools/build_test.tscn       # сборка деревом (WeaponBuild): старый угловой → кронштейн, пазы 20 мм, «занято»/«закроет прицел», кронштейн снимается с прицелом, линии прицелов
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/build_shots.tscn # снимки сборок: кронштейн 45° справа/слева, проставка, поворотный; docs/screens/build_*.png

@@ -4,6 +4,7 @@
 # Запускается обычным Python (numpy, scipy); сетку из поля строит сборщик в Blender (assemble.py, OpenVDB).
 # Единицы — мм. Оси: +X к дулу, +Z вверх, −Y — правая сторона стрелка; начало — зеркало затвора на оси канала.
 # Поле: меньше нуля — внутри тела.
+import os
 import math
 import time
 
@@ -385,6 +386,8 @@ class Field:
 
     def displace(self, fn, bbox=None, slab_n=40):
         """Смещение поверхности: поле уменьшается на fn (плюс — наружу). Для мелкого рельефа (пупырышки, канавки)."""
+        if os.environ.get("ASTEN919_PLAIN"):
+            return                     # без мелкого рельефа: исходник игровой сетки (рельеф уходит в карту нормалей)
         sl = self._win(bbox, 2 * self.h)
         if any(b <= a for a, b in sl):
             return
