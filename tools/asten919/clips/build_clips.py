@@ -176,24 +176,34 @@ for fc in bag_of(poses_act, wr).fcurves:
         fc.update()
 con_enable(False)
 B = {}
+SHORT = {}                                           # позы левой руки, где рука не дотягивается до цели (мм)
 for name, f in POSE_FRAMES.items():
     S.frame_set(f)
     update()
     B[name] = {n: arms.pose.bones[n].matrix_basis.copy() for n in A_BONES}
+    hand, ikt = arms.pose.bones["hand.L"], arms.pose.bones["ik_hand.L"]
+    if name in ("mag", "seat", "pinch"):
+        res = (hand.head - ikt.head).length * 1000
+        if res > 1.0:
+            SHORT[name] = res
     if name == "mag" and "mag.L" in A_BONES:
-        pb = arms.pose.bones["mag.L"]
-        pb.matrix = arms.matrix_world.inverted() @ wr.matrix_world @ wr.pose.bones["Magazine_Control"].matrix
-        update()
-        d = (pb.matrix_basis.translation - B[name]["mag.L"].translation).length * 1000
-        B[name]["mag.L"] = pb.matrix_basis.copy()
+        # кисть берётся на цели IK (в клипах она до неё дотягивается), а не там, где её остановила вытянутая рука
+        reached = hand.matrix.copy()
+        reached.translation = ikt.matrix.translation
+        rel = arms.data.bones["hand.L"].matrix_local.inverted() @ arms.data.bones["mag.L"].matrix_local
+        basis = (reached @ rel).inverted() @ arms.matrix_world.inverted() @ wr.matrix_world @ wr.pose.bones["Magazine_Control"].matrix
+        d = (basis.translation - B[name]["mag.L"].translation).length * 1000
+        B[name]["mag.L"] = basis
         if d > 0.05:
             log(f"поза «mag» (кадр {f}): магазин в левой кисти лежит по-новому (сдвиг {d:.1f} мм) — снято с позы кисти")
 con_enable(True)
 
 # Что в какой позе «своё» (остальное в ней — как в хвате, кадр 1): так поправленный хват виден на всех кадрах поз.
 OWN = dict(trigger=set(R_INDEX), pressed=set(R_INDEX), catch=set(R_THUMB), stop=set(R_THUMB), up=set(R_THUMB),
-           mag=set(L_FING) | set(L_ARM) | {"mag.L"}, seat=set(L_FING) | set(L_ARM), pinch=set(L_FING) | set(L_ARM),
-           free=set(L_FING) | set(L_ARM))
+           mag=set(L_FING) | set(L_ARM) | {"mag.L", "Weapon_CTRL"}, seat=set(L_FING) | set(L_ARM) | {"Weapon_CTRL"},
+           pinch=set(L_FING) | set(L_ARM) | {"Weapon_CTRL"}, free=set(L_FING) | set(L_ARM) | {"Weapon_CTRL"})
+# Weapon_CTRL на кадрах левой руки — только для показа (как удобно ставить кисть): левая кисть — дочерняя пистолета,
+# её место на пистолете от этого не зависит; в клипах пистолет двигают таблицы движения.
 if "mag.L" in A_BONES:                               # как магазин лежит в левой кисти — одна поза на все кадры (кадр 41)
     for name in B:
         B[name]["mag.L"] = B["mag"]["mag.L"].copy()
@@ -267,6 +277,16 @@ MAG_HAND_W = left_rest_world("mag")                  # левая с магаз�
 MAG_C0 = TW @ (Vector((-0.045, 0.0, -0.075)) - U * MAG_DROP)      # середина магазина при этом
 
 
+def gun_basis(roll, pitch, yaw, dx, dy, dz):
+    """Поза пистолета от покоя (крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м) → matrix_basis."""
+    R = (Matrix.Rotation(math.radians(yaw), 4, Vector((0, 0, 1))) @ Matrix.Rotation(math.radians(pitch), 4, Vector((-1, 0, 0)))
+         @ Matrix.Rotation(math.radians(roll), 4, Vector((0, -1, 0))))
+    D = Matrix.Translation(Vector((dx, dy, dz))) @ Matrix.Translation(GRIP_W) @ R @ Matrix.Translation(-GRIP_W)
+    wc.matrix = AWI @ D @ AW @ WC_REST
+    update()
+    return wc.matrix_basis.copy()
+
+
 # ================================================================ ключи
 class Clip:
     def __init__(self, name, end, state=None):
@@ -276,6 +296,7 @@ class Clip:
         assign(self.act)
         self.prev = {}
         self.marks = {}
+        self.left_keys = []
         st = dict(slide=0.0, stop=0.0, trigger=0.0, catch=0.0, mag=0.0, held=0.0)
         st.update(state or {})
         self.state0 = st
@@ -320,18 +341,14 @@ class Clip:
 
     def gun(self, keys):
         """Пистолет с правой кистью: (кадр, крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м)."""
-        for frame, roll, pitch, yaw, dx, dy, dz in keys:
-            R = (Matrix.Rotation(math.radians(yaw), 4, Vector((0, 0, 1))) @ Matrix.Rotation(math.radians(pitch), 4, Vector((-1, 0, 0)))
-                 @ Matrix.Rotation(math.radians(roll), 4, Vector((0, -1, 0))))
-            D = Matrix.Translation(Vector((dx, dy, dz))) @ Matrix.Translation(GRIP_W) @ R @ Matrix.Translation(-GRIP_W)
-            wc.matrix = AWI @ D @ AW @ WC_REST
-            update()
-            self.bone("Weapon_CTRL", frame, wc.matrix_basis.copy())
+        for frame, *pose in keys:
+            self.bone("Weapon_CTRL", frame, gun_basis(*pose))
         return self
 
     def left(self, keys):
         """Левая кисть: (кадр, место): 'grip' | ('mag', вышел_м) | ('seat', вышел_м) | ('pinch', ход 0…1[, сдвиг исходник м])
         — на пистолете (едет с ним); ('world', точка мира, (rx, ry, rz)°) — в мире, поворот от позы «магазин в кисти»."""
+        self.left_keys += [(frame, "grip" if spec == "grip" else spec[0]) for frame, spec in keys]
         for frame, spec in keys:
             if spec == "grip":
                 basis, arm = B["grip"]["ik_hand.L"], "grip"
@@ -414,6 +431,35 @@ class Clip:
             pb.keyframe_insert("location", frame=frame)
             pb.keyframe_insert("rotation_euler", frame=frame)
 
+    def straight_left(self):
+        """Между соседними ключами левой кисти одного вида (магазин в шахте, досылание ладонью, щепоть на затворе)
+        кисть идёт вдоль оси детали: у всех каналов одна и та же форма кривой по времени (ручки Free, одна доля хода),
+        иначе авто-ручки Bezier у каждого канала свои и магазин гуляет в шахте поперёк. У ключа, за которым кисть
+        уходит в свободный полёт ('world'), скорость сохраняется (доля 1/3), у остальных — плавный старт / остановка."""
+        lk = sorted(set(self.left_keys))
+        pairs = []
+        for i in range(len(lk) - 1):
+            (fa, ka), (fb, kb) = lk[i], lk[i + 1]
+            if ka == kb and ka in ("mag", "seat", "pinch"):
+                pairs.append((fa, fb, 1 / 3 if i > 0 and lk[i - 1][1] == "world" else 0.0,
+                              1 / 3 if i + 2 < len(lk) and lk[i + 2][1] == "world" else 0.0))
+        if not pairs:
+            return
+        bones = set(L_BODY) | {"ik_hand.L"}
+        for fc in [fc for layer in self.act.layers for st in layer.strips for bag in st.channelbags for fc in bag.fcurves]:
+            if not fc.data_path.startswith('pose.bones["') or fc.data_path.split('"')[1] not in bones:
+                continue
+            at = {round(kp.co[0]): kp for kp in fc.keyframe_points}
+            for fa, fb, sa, sb in pairs:
+                a, b = at.get(fa), at.get(fb)
+                if a is None or b is None:
+                    continue
+                dv, dt = b.co[1] - a.co[1], (fb - fa) / 3
+                a.handle_right_type = b.handle_left_type = "FREE"
+                a.handle_right = (fa + dt, a.co[1] + dv * sa)
+                b.handle_left = (fb - dt, b.co[1] - dv * sb)
+            fc.update()
+
     def mark(self, **kw):
         self.marks.update(kw)
 
@@ -424,6 +470,7 @@ class Clip:
                 kp.interpolation = "CONSTANT" if step else "BEZIER"
                 kp.handle_left_type = kp.handle_right_type = "AUTO_CLAMPED"
             fc.update()
+        self.straight_left()
         self.act.frame_range = (1, self.end)
         self.act.use_frame_range = True
         # проверка: дотянулись ли руки до целей, не уходит ли левая в рамку
@@ -444,6 +491,18 @@ CANT = (32, 10, 8, 0.030, 0.050, 0.050)              # «немного к ли�
 PRESENT = (56, 17, 10, 0.036, 0.056, 0.062)          # шахта навстречу новому магазину
 POUCH = ((0.17, -0.10, 1.34), (25, 10, -30))         # «подсумок»: слева внизу, за кадром
 POUCH2 = ((0.165, -0.105, 1.345), (27, 12, -28))
+
+if SHORT:                                            # кадры поз левой руки, где рука не дотягивается: пистолет — как в клипе
+    cant = gun_basis(*CANT)                           # до назначения действия: оно пересчитало бы позу при update()
+    assign(poses_act)
+    for name, mm in SHORT.items():
+        wc.matrix_basis = cant
+        key_pose(wc, POSE_FRAMES[name])
+        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): левая рука не дотягивалась на {mm:.0f} мм — пистолет на этом кадре "
+            f"поставлен как в клипе (наклон к лицу); место кисти на пистолете не изменилось")
+    assign(None)
+    wc.matrix_basis = B["grip"]["Weapon_CTRL"]
+    update()
 
 
 def k(frame, pose, **d):
@@ -698,6 +757,7 @@ lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".
           "    41 — левая рука с магазином: пальцы и место кисти. Магазин на этом кадре стоит на месте (вышел из шахты",
           "         на 55 мм) и за кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
           "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
+          "    На кадрах 41–61 пистолет (Weapon_CTRL) можно наклонять как удобно — в клипы это не идёт, кисть едет с ним.",
           "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
           "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
 txt.from_string("\n".join(lines))
