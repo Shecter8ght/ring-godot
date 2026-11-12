@@ -74,7 +74,8 @@ ZONE_NAMES = {
     "other": "остальное",
     "yarus": "ЗОНА «ЯРУС» (исключена)",
 }
-YARUS = (-142.0, 44.0, -62.0, 88.0)
+# корпус «Яруса» готов (редакция 3) — исключения больше нет; прежний прямоугольник X −142…−62, Z 44…88 вынесен за карту
+YARUS = (1.0e9, 1.0e9, 1.0e9 + 1.0, 1.0e9 + 1.0)
 
 
 def zone(x: float, z: float) -> str:
@@ -161,7 +162,8 @@ class Audit:
         self.kit = self.d["filler"]["kit_models"]
         self.nosolid_models = set(self.d["filler"].get("models_nosolid", []))
         self.pole_models = set(self.d["filler"].get("models_poles", []))
-        self.surfaces = self.d["surfaces"]
+        # приствольные лунки (мелкие вставки грунта 1,5 × 1,5 м, id s3_pit_*) — не покрытие улицы: покрытие под деревом остаётся тротуаром
+        self.surfaces = [s for s in self.d["surfaces"] if not str(s.get("id", "")).startswith("s3_pit_")]
         self.srect = np.array([s["rect"] for s in self.surfaces], dtype=float)
         self.smat = [s["mat"] for s in self.surfaces]
         self.road = np.array([s["rect"] for s in self.surfaces if s["mat"] == "road"], dtype=float)
@@ -184,7 +186,11 @@ class Audit:
                                    if w["y1"] >= 2.5 and min(w["rect"][2] - w["rect"][0], w["rect"][3] - w["rect"][1]) >= 0.2],
                                   dtype=float)
         self.facades = np.vstack([self.bld_rects, self.wall_full])
-        self.items = self.d["filler"]["items"]
+        # вещи под землёй (переход, паркинг −1: подъём ≤ −1,0 м) уличными не считаются — сверху у них проезжая часть или газон
+        all_items = self.d["filler"]["items"]
+        # то же для вещей высоко над землёй (полотно эстакады, крыши: подъём ≥ 2,5 м) — улица для них внизу
+        self.items = [it for it in all_items if not (len(it) > 5 and (float(it[5]) <= -1.0 or float(it[5]) >= 2.5))]
+        self.underground_skipped = len(all_items) - len(self.items)
         self.unknown_fp: Counter = Counter()
         self.fp_cache: dict = {}
         self.entrances: list = []
@@ -197,6 +203,21 @@ class Audit:
             if r[0] <= x <= r[2] and r[1] <= z <= r[3]:
                 m = self.smat[i]
         return m
+
+    def outer_dist(self, x: float, z: float, d_road: float) -> float:
+        """Расстояние до внешнего края полотна тротуара по формуле разбора: меньшая сторона покрытия walk минус расстояние до кромки."""
+        wmin = [min(r[2] - r[0], r[3] - r[1]) for k, r in enumerate(self.srect) if self.smat[k] == "walk"
+                and r[0] <= x <= r[2] and r[1] <= z <= r[3] and min(r[2] - r[0], r[3] - r[1]) <= 12.5]
+        return (wmin[0] - d_road) if wmin else 99.0
+
+    def wide_cover(self, x: float, z: float) -> bool:
+        """Покрытие в точке (последнее по списку, как в mat_at) шире 12,5 м по меньшей стороне — площадь, а не тротуар."""
+        hit = None
+        for i in range(len(self.srect)):
+            r = self.srect[i]
+            if r[0] <= x <= r[2] and r[1] <= z <= r[3]:
+                hit = r
+        return hit is not None and min(hit[2] - hit[0], hit[3] - hit[1]) > 12.5
 
     # ----- размеры вещи
     def footprint(self, it: list) -> tuple:
@@ -302,7 +323,8 @@ def collect_entrances(A: Audit) -> tuple:
     # Г. проёмы в стенах первого этажа (план, собранный патчами: банк, мойка, «Вершина» и т. д.)
     n_gap = 0
     lines: dict = defaultdict(list)
-    for w in A.walls_ground:
+    # окно с подоконником (кусок стены 0…0,5 м) — не вход: стены берём от 0,3 м высоты, а не от 0,5
+    for w in [w for w in A.d["walls"] if w["mat"] != "tunnel_tile" and w["y0"] < 0.3 and w["y1"] > 0.3 and w["y0"] > -1.0]:
         r = w["rect"]
         t = min(r[2] - r[0], r[3] - r[1])
         if t < 0.2 or t > 0.45:
@@ -410,8 +432,10 @@ def run(snap: str, outdir: str) -> dict:
         d_fac = rect_dist(A.facades, x, z)
         row = {"i": i, "name": it[0], "x": x, "z": z, "zone": zn, "mat": mat,
                "d_road": round(d_road, 2), "d_facade": round(d_fac, 2)}
-        sidewalk = mat in ("walk", "parking", "slab", "court") and d_road <= 13.0
-        paved_plaza = mat in ("walk", "slab", "court") and d_road > 13.0
+        # тротуар — полоса покрытия шириной до 12,5 м у проезжей части; дерево на широкой мощёной площади (сквер, площадь) — «площадь»
+        wide = A.wide_cover(x, z)
+        sidewalk = mat in ("walk", "parking", "slab", "court") and d_road <= 13.0 and not wide
+        paved_plaza = mat in ("walk", "slab", "court") and not sidewalk
         d_door = min([math.hypot(x - e["x"], z - e["z"]) for e in ents] or [99])
         d_stop = min([math.hypot(x - o[1][0], z - o[1][1]) for o in stop_obbs] or [99])
         d_lamp = min([math.hypot(x - lx, z - lz) for lx, lz in lamp_pts] or [99])
@@ -594,8 +618,8 @@ def run(snap: str, outdir: str) -> dict:
         fl = []
         if mat == "road":
             fl.append("на проезжей части")
-        sidewalk = mat == "walk" and d_road <= 13.0
-        if sidewalk and d_road > 3.0 and d_fac > 3.0:
+        sidewalk = mat == "walk" and d_road <= 13.0 and not A.wide_cover(x, z)      # на широкой площади ларёк — рыночный, не «посреди тротуара»
+        if sidewalk and d_road > 3.0 and d_fac > 3.0 and A.outer_dist(x, z, d_road) > 3.0:      # у внешнего края (≤ 3 м) — по правилу 6, не «посреди»
             fl.append("посреди тротуара (>3 м от бордюра и фасада)")
         if d_fac <= 1.0:
             fl.append("вплотную к стене/фасаду")
@@ -636,7 +660,7 @@ def run(snap: str, outdir: str) -> dict:
         d_road = dr(x, z)
         d_fac = rect_dist(A.facades, x, z)
         loc = "прочее"
-        if mat == "walk" and d_road <= 13.0:
+        if mat == "walk" and d_road <= 13.0 and not A.wide_cover(x, z):
             loc = "полоса у бордюра (≤ 5 м)" if d_road <= 5.0 else ("у фасада (≤ 2 м)" if d_fac <= 2.0 else "ХОДОВАЯ ЧАСТЬ")
         elif mat == "road":
             loc = "на проезжей части"
