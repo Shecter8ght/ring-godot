@@ -1712,7 +1712,16 @@ def stage_s2_4_small() -> Patch:
     return V4.build(Patch("s2_4_small", BASE_REV_S2E))
 
 
-STAGES = {"s2_4_small": stage_s2_4_small, "s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+# ------------------------------------------------------------------ вторая очередь, этап 5а: доводка геометрии и свет (tools/prospekt_s2_5a.py)
+BASE_REV_S2F = "ab8d764c"         # снимок плана после этапа 4
+
+
+def stage_s2_5a_polish() -> Patch:
+    import prospekt_s2_5a as V5  # noqa: E402
+    return V5.build(Patch("s2_5a_polish", BASE_REV_S2F))
+
+
+STAGES = {"s2_5a_polish": stage_s2_5a_polish, "s2_4_small": stage_s2_4_small, "s2_3_station": stage_s2_3_station, "s2_2_yarus": stage_s2_2_yarus, "s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1738,6 +1747,9 @@ def main() -> None:
         if name == "s2_4_small":
             import prospekt_s2_4_data as _d4
             _d4.plan_data(p)
+        if name == "s2_5a_polish":
+            import prospekt_s2_5a_data as _d5
+            _d5.plan_data(p)
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":

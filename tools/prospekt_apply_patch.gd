@@ -268,6 +268,8 @@ func _add_building(b: Dictionary) -> void:
 		node.set("glass_bands", bool(extra.get("glass_bands", false)))
 	else:
 		node.set("kind", String(b.get("kind", "mass")))
+		if b.has("jib"):
+			node.set("jib", bool(b.jib))
 		if b.has("interior"):
 			node.set("interior", String(b.interior))
 			node.set("loot_theme", String(b.get("loot_theme", "")))

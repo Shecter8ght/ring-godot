@@ -47,6 +47,11 @@ const KEY_SCENE: PackedScene = preload("res://scenes/world/key_pickup.tscn")
 @export var key_item: String = ""
 ## Сейф в том же кабинете — таблица лута; пусто — нет.
 @export var safe_table: String = ""
+## Кран (kind = crane): false — без стрелы, противовеса и троса (мачта с кабиной; стрела «упала» и построена отдельно).
+@export var jib: bool = true:
+	set(value):
+		jib = value
+		_request_rebuild()
 ## Универсам: служебный коридор «Только для персонала» вдоль стены −X от входа до склада — дверь в зал у
 ## фасада, проём в склад (пролог, «Ярус»: обход мимо мародёров в зале, docs/design/prologue.md §4.5).
 @export var staff_corridor: bool = false:
@@ -757,10 +762,12 @@ func _crane(g: RefCounted) -> void:
 	for y: int in range(2, 38, 3):
 		g.box(Vector3(0, float(y), 0), Vector3(1.8, 0.15, 1.8), "rust", false)
 		g.beam(Vector3(-0.8, float(y), -0.8), Vector3(0.8, float(y + 3), -0.8), 0.1, 0.1, "rust")
-	g.box(Vector3(12, h, 0), Vector3(56.0, 1.0, 1.4), "rust", false)
-	g.box(Vector3(-12, h - 1.0, 0), Vector3(5.0, 2.5, 2.5), "concrete", false)
+	if jib:
+		g.box(Vector3(12, h, 0), Vector3(56.0, 1.0, 1.4), "rust", false)
+		g.box(Vector3(-12, h - 1.0, 0), Vector3(5.0, 2.5, 2.5), "concrete", false)
 	g.box(Vector3(3, h - 1.2, 1.2), Vector3(2.2, 2.0, 1.8), "dark", false)
-	g.box(Vector3(26, h - 11.0, 0), Vector3(0.045, 21.0, 0.045), "steel", false)
+	if jib:
+		g.box(Vector3(26, h - 11.0, 0), Vector3(0.045, 21.0, 0.045), "steel", false)
 
 # ---------------------------------------------------------------- лут, двери, ключи (только в игре)
 

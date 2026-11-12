@@ -516,6 +516,8 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/pro
                                                               # индекс P_*) → --import; исходники — E:/Models Blender/ENVIRONMENT/RING_Prospekt_Plants
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_plants_perf.tscn [-- off] # кадры в секунду у растений «Проспекта»
                                                               # (сквер, берёзы, тополя, сверху); «off» — растения скрыты, сравнение в одной сборке
+tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_light_perf.tscn [-- метка] # кадры в секунду «Проспекта» в точках света интерьеров
+                                                              # (зал «Яруса», склад, зал вокзала, холл полиции, блокпост, башня схода) → user://prospekt_light_perf_<метка>.txt
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/zone01_trees/<этап>.py -- [maple negundo poplar] [preview]
                                                               # клёны и тополя зоны 1 (клён остролистный и ясенелистный, тополь берлинский; поздняя осень):
                                                               # forms (форма, -- maple poplar; check_forms.py — повторное открытие) → python -X utf8
