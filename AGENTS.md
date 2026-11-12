@@ -771,6 +771,14 @@ tools/godot.cmd --windowed --resolution 1100x760 res://tools/mosin_pu_shots.tscn
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/prepare_veras_attachments.py -- geometry|bake|export|imports <varn_v1|varn_v2|supp_veras> [100]
                                                               # рукоятки ВАРН и глушитель из библиотеки → assets/models/attachments/<id> (сетка + LOD, карты 100)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_mag_loader.py # ускоритель снаряжения магазинов: модель, превью mag_loader_preview.png; затем --import и icon_bake -- mag_loader
+python -X utf8 tools/asten919/build.py <папка полей> [деталь …] [--k 2]   # АСТЕН-919 (по мотивам Glock 17 Gen4 MOS), high-poly неявными
+                                                              # поверхностями: поля расстояний деталей (numpy, sdf.py; --k 2 — черновик), 90 с; затем
+                                                              # blender --background --factory-startup --python tools/asten919/assemble.py -- <папка полей> <out.blend>
+                                                              # (сетка OpenVDB, нормали из поля, пустышка ASTEN919_Controls с ползунками поз); виды — blender -b <out.blend>
+                                                              # --python tools/asten919/shots.py -- <папка> [виды] [--pose slide_back,mag_out,trigger,catch,lock];
+                                                              # пересечения деталей в позах — python -X utf8 tools/asten919/check_overlaps.py <папка полей>;
+                                                              # контур рамки со снимка — trace_photo.py, наложение вида на снимок — compare.py; выдача и описание —
+                                                              # E:/Models Blender/WEAPONS/АСТЕН-919 (asset-state.md)
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

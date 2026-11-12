@@ -1,0 +1,362 @@
+{
+ "schema_version": 1,
+ "description": "АСТЕН-919, геометрия v01: габариты против данных производителя прототипа (Glock 17 Gen4 MOS), замкнутость сеток, сквозные канал ствола и шахта магазина.",
+ "targets": [
+  {
+   "id": "pistol_overall",
+   "collections": [
+    "Frame",
+    "Slide",
+    "Barrel",
+    "Controls",
+    "Pins",
+    "Recoil_Spring",
+    "Magazine"
+   ],
+   "finite_transforms": true,
+   "dimensions_mm": {
+    "expected": [
+     202.0,
+     32.0,
+     139.0
+    ],
+    "tolerance_mm": [
+     2.5,
+     0.6,
+     3.5
+    ]
+   }
+  },
+  {
+   "id": "slide",
+   "objects": [
+    "Slide"
+   ],
+   "dimensions_mm": {
+    "expected": [
+     186.0,
+     25.5,
+     31.0
+    ],
+    "tolerance_mm": [
+     0.3,
+     0.2,
+     2.0
+    ]
+   }
+  },
+  {
+   "id": "barrel",
+   "objects": [
+    "Barrel"
+   ],
+   "dimensions_mm": {
+    "expected": [
+     114.0,
+     17.4,
+     26.8
+    ],
+    "tolerance_mm": [
+     0.3,
+     0.3,
+     1.0
+    ]
+   }
+  },
+  {
+   "id": "closed_meshes",
+   "objects": [
+    "Frame",
+    "Slide",
+    "Barrel",
+    "Barrel_Threaded",
+    "Thread_Protector",
+    "Slide_Stop",
+    "Slide_Lock",
+    "Mag_Catch",
+    "Trigger",
+    "Trigger_Safety",
+    "Magazine_Body",
+    "Magazine_Follower",
+    "Magazine_Floorplate",
+    "Guide_Rod",
+    "Locking_Block",
+    "Trigger_Housing",
+    "Extractor",
+    "MOS_Cover_Plate",
+    "Rear_Sight",
+    "Front_Sight",
+    "Slide_Cover_Plate",
+    "Ejector",
+    "Serial_Plate"
+   ],
+   "topology": {
+    "evaluated": {
+     "max_nonmanifold_edges": 0,
+     "max_loose_vertices": 0
+    }
+   }
+  }
+ ],
+ "passages": [
+  {
+   "id": "bore_from_breech",
+   "objects": [
+    "Barrel"
+   ],
+   "unit": "mm",
+   "samples": [
+    {
+     "start": [
+      1.0,
+      0,
+      0
+     ],
+     "end": [
+      118.0,
+      0,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      2.5,
+      0
+     ],
+     "end": [
+      118.0,
+      2.5,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      -2.5,
+      0
+     ],
+     "end": [
+      118.0,
+      -2.5,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      0,
+      2.5
+     ],
+     "end": [
+      118.0,
+      0,
+      2.5
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      0,
+      -2.5
+     ],
+     "end": [
+      118.0,
+      0,
+      -2.5
+     ]
+    }
+   ],
+   "max_hits": 0
+  },
+  {
+   "id": "bore_from_muzzle",
+   "objects": [
+    "Barrel"
+   ],
+   "unit": "mm",
+   "samples": [
+    {
+     "start": [
+      118.0,
+      0,
+      0
+     ],
+     "end": [
+      1.0,
+      0,
+      0
+     ]
+    },
+    {
+     "start": [
+      118.0,
+      1.8,
+      1.8
+     ],
+     "end": [
+      1.0,
+      1.8,
+      1.8
+     ]
+    },
+    {
+     "start": [
+      118.0,
+      -1.8,
+      -1.8
+     ],
+     "end": [
+      1.0,
+      -1.8,
+      -1.8
+     ]
+    }
+   ],
+   "max_hits": 0
+  },
+  {
+   "id": "bore_threaded_with_protector",
+   "objects": [
+    "Barrel_Threaded",
+    "Thread_Protector"
+   ],
+   "unit": "mm",
+   "samples": [
+    {
+     "start": [
+      1.0,
+      0,
+      0
+     ],
+     "end": [
+      130.0,
+      0,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      2.5,
+      0
+     ],
+     "end": [
+      130.0,
+      2.5,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      -2.5,
+      0
+     ],
+     "end": [
+      130.0,
+      -2.5,
+      0
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      0,
+      2.5
+     ],
+     "end": [
+      130.0,
+      0,
+      2.5
+     ]
+    },
+    {
+     "start": [
+      1.0,
+      0,
+      -2.5
+     ],
+     "end": [
+      130.0,
+      0,
+      -2.5
+     ]
+    }
+   ],
+   "max_hits": 0
+  },
+  {
+   "id": "magazine_well_in_frame",
+   "objects": [
+    "Frame",
+    "Trigger_Housing",
+    "Locking_Block"
+   ],
+   "unit": "mm",
+   "samples": [
+    {
+     "start": [
+      -14.447,
+      0.0,
+      -8.0
+     ],
+     "end": [
+      -62.122,
+      0.0,
+      -126.0
+     ]
+    },
+    {
+     "start": [
+      -14.447,
+      8.0,
+      -8.0
+     ],
+     "end": [
+      -62.122,
+      8.0,
+      -126.0
+     ]
+    },
+    {
+     "start": [
+      -14.447,
+      -8.0,
+      -8.0
+     ],
+     "end": [
+      -62.122,
+      -8.0,
+      -126.0
+     ]
+    },
+    {
+     "start": [
+      -2.583,
+      0.0,
+      -8.0
+     ],
+     "end": [
+      -50.258,
+      0.0,
+      -126.0
+     ]
+    },
+    {
+     "start": [
+      -26.311,
+      0.0,
+      -8.0
+     ],
+     "end": [
+      -73.986,
+      0.0,
+      -126.0
+     ]
+    }
+   ],
+   "max_hits": 0
+  }
+ ]
+}
