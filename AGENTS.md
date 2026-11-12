@@ -451,6 +451,9 @@ python -X utf8 tools/prospekt_north_side_plan.py              # «Проспек
                                                               # в сцену не внесено (docs/design/prospekt_map.md §22)
 python -X utf8 tools/prospekt_ideas_plan.py                   # «Проспект»: сводный план предложений по восьми зонам и идеям
                                                               # → docs/design/prospekt_ideas_9_master.png (docs/design/prospekt_map.md §24; в сцену не внесено)
+python -X utf8 tools/prospekt_stage2_plan.py [10 … 14]         # «Проспект», вторая очередь: чертежи по решениям владельца — генплан, «Ярус» со складом,
+                                                              # вокзал и площадь, Объездная на эстакаде, малые зоны → docs/design/prospekt_s2_<N>_*.png
+                                                              # (docs/design/prospekt_map.md §25; в сцену не внесено)
 python -X utf8 tools/prospekt_patch.py <этап>                    # «Проспект», перенос чертежей этапами (docs/tasks/prospekt_north_vershina_build.md): патч этапа
                                                               # (1_street …) из словарей чертежей → data/blockouts/prospekt_patch_<этап>.json: remove (вещи, куски улиц, узлы) и add
 tools/godot.cmd --headless res://tools/prospekt_apply_patch.tscn -- <этап> # применить патч к scenes/levels/prospekt_study.tscn: убрать и добавить узлы (PlanPiece, PropSpot),
