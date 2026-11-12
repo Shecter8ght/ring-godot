@@ -285,6 +285,10 @@ python -X utf8 tools/dorm_modules/furniture2_wear_zones.py [набор …] # м
                                                               # assets/models/dorm/furniture (тот же furniture.json; material — набор); --import, python -X utf8
                                                               # tools/dorm_modules/furniture_imports.py, --import; расстановка — furnish_rooms.py (кухни, умывальни,
                                                               # душевые, туалеты; pose подвижного, серые умывальники и чаши снимаются по clear)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/loot_containers/build_batch1.py -- <файл.blend> [preview <папка> [ключи]] [check [detail]]
+                                                              # контейнеры для лута, партия 1 (форма на просмотр): сейф напольный и настенная ячейка, оружейный шкаф, кассовое место,
+                                                              # сумка-укладка (ткань симуляцией) и настенная аптечка, картотечный шкаф; у каждого закрытый и открытый корень, подвижные узлы с осью;
+                                                              # check — габариты, треугольники, пересечения в открытом положении → RING_Loot_Containers_v01.blend
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/dorm_modules/build_items3.py -- <файл.blend> [preview <папка> [номера]]
                                                               # вещи общежития, партия 3 (RING_Dorm_Items, интервью 2026-11-02), группа А — ящики для лута и вещи
                                                               # жильцов: дощатые ящики под патроны (с цинками) и ЗИП, стальной сундук, раскладной ящик для
