@@ -67,12 +67,12 @@ display_name = "Дворами к насыпи"
 radius = 4.5
 
 [node name="Extraction_2" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(-148.5, 0.08, 186)
-display_name = "Пролом в заборе стройки"
+position = Vector3(-247, 0.08, 170)
+display_name = "Пролом в ограждении за Объездной"
 radius = 4.5
 
 [node name="Extraction_3" parent="Gameplay" instance=ExtResource("5")]
-position = Vector3(-147, 6.3, 268.7)
+position = Vector3(-246, 6.3, 268.7)
 display_name = "По путям на запад"
 radius = 4.5
 chance = 0.6

@@ -1625,9 +1625,67 @@ def plan_data_s2_1a() -> None:
     print("  данные: граница, заходы, ящики городка обновлены")
 
 
+# ------------------------------------------------------------------ вторая очередь, этап 1б: Объездная (tools/prospekt_s2_1b.py)
+BASE_REV_S2B = "ee322226"         # снимок плана после этапа 1а
 
 
-STAGES = {"s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
+def stage_s2_1b_ring() -> Patch:
+    import prospekt_s2_1b as R  # noqa: E402
+    return R.build(Patch("s2_1b_ring", BASE_REV_S2B))
+
+
+RING_DECK_ROUTE = [[-219.2, 202.0], [-219.2, 199.0], [-219.2, 192.0], [-218.55, 191.4], [-217.9, 192.0], [-217.9, 198.75], [-218.55, 199.4],
+                   [-219.2, 198.8], [-219.2, 192.0], [-219.2, 191.35], [-221.3, 191.35], [-222.95, 193.0], [-222.95, 217.0],
+                   [-222.8, 224.0], [-222.8, 248.0], [-221.8, 252.0], [-222.8, 224.0], [-221.3, 222.85], [-219.2, 222.85],
+                   [-219.2, 222.25], [-219.2, 215.45], [-218.55, 214.85], [-217.9, 215.45], [-217.9, 222.25], [-218.55, 222.85],
+                   [-219.2, 222.25], [-219.2, 215.45], [-219.2, 214.1], [-219.2, 212.5]]
+UNDER_RING_ROUTE = [[-216.0, 125.0], [-222.5, 125.0], [-222.5, 199.0], [-222.5, 207.1], [-222.5, 125.0], [-222.5, 98.0], [-222.5, 62.0],
+                    [-222.5, 20.0], [-229.25, 18.0], [-229.25, 13.0], [-222.5, 13.0], [-222.5, -46.0], [-222.5, -48.4]]
+
+
+def _route_text(rid: str, label: str, pts: list, extra: str = "") -> str:
+    body = ",\n".join(f"    [{x}, {z}]" for x, z in pts)
+    return ('  {\n   "id": "%s",\n   "label": "%s",\n   "max_open_m": 0.0,\n   "points": [\n%s\n   ]%s\n  }' % (rid, label, body, extra))
+
+
+def plan_data_s2_1b() -> None:
+    """Выходы и маршруты проверки этапа 1б (сцена prospekt.tscn и prospekt.json правятся текстом, повтор не дублирует)."""
+    path = ROOT / "scenes/levels/prospekt.tscn"
+    text = open(path, encoding="utf-8", newline="").read()
+    reps = [('position = Vector3(-148.5, 0.08, 186)\ndisplay_name = "Пролом в заборе стройки"',
+             'position = Vector3(-247, 0.08, 170)\ndisplay_name = "Пролом в ограждении за Объездной"'),
+            ('position = Vector3(-147, 6.3, 268.7)\ndisplay_name = "По путям на запад"',
+             'position = Vector3(-246, 6.3, 268.7)\ndisplay_name = "По путям на запад"')]
+    for a, b in reps:
+        if a in text:
+            text = text.replace(a, b)
+        elif b not in text:
+            raise SystemExit("prospekt.tscn: нет места для замены: " + a)
+    open(path, "w", encoding="utf-8", newline="").write(text)
+    path = ROOT / "data/blockouts/prospekt.json"
+    text = open(path, encoding="utf-8", newline="").read()
+    reps = [('"label": "Пролом в заборе стройки",\n   "at": [-148.5, 186.0]', '"label": "Пролом в ограждении за Объездной",\n   "at": [-247.0, 170.0]'),
+            ('"label": "По путям на запад",\n   "at": [-147.0, 268.7]', '"label": "По путям на запад",\n   "at": [-246.0, 268.7]')]
+    for a, b in reps:
+        if a in text:
+            text = text.replace(a, b)
+        elif b not in text:
+            raise SystemExit("prospekt.json: нет места для замены: " + a)
+    if '"id": "ring_deck"' not in text:
+        tail = '   "min_y": -0.3\n  }\n ],\n "checks"'
+        if tail not in text:
+            raise SystemExit("prospekt.json: нет конца probe_routes")
+        new = ('   "min_y": -0.3\n  },\n'
+               + _route_text("ring_deck", "Объездная: тротуар Вокзальной → северный сход → полотно → до южного блока и обратно → южный сход → тротуар", RING_DECK_ROUTE)
+               + ",\n"
+               + _route_text("under_ring", "под Объездной: ворота гаражей → на юг до Вокзальной → на север через блокпост до плит Z −50", UNDER_RING_ROUTE)
+               + '\n ],\n "checks"')
+        text = text.replace(tail, new)
+    open(path, "w", encoding="utf-8", newline="").write(text)
+    print("  данные: выходы «Пролом» и «По путям» переехали, маршруты ring_deck и under_ring добавлены")
+
+
+STAGES = {"s2_1b_ring": stage_s2_1b_ring, "s2_1a_southwest": stage_s2_1a_southwest, "1_street": stage_1_street, "2_backs": stage_2_backs, "3_frontline": stage_3_frontline,
           "4_wash": stage_4_wash, "5a_bank_site": stage_5a_bank_site,
           "5b_bank_plan": stage_5b_bank_plan, "6a_vershina_site": stage_6a_vershina_site,
           "6b_vershina_ground": stage_6b_vershina_ground, "7_finish": stage_7_finish}
@@ -1642,6 +1700,8 @@ def main() -> None:
         path = p.save()
         if name == "s2_1a_southwest":
             plan_data_s2_1a()
+        if name == "s2_1b_ring":
+            plan_data_s2_1b()
         if name == "4_wash":
             plan_data_4()
         if name == "5b_bank_plan":
