@@ -476,6 +476,11 @@ python -X utf8 tools/prospekt_ld_plan.py                       # «Проспе�
 python -X utf8 tools/prospekt_vershina_plan.py                 # «Проспект», район высоток: чертежи предложения по переделке ЖК «Вершина»
                                                               # (генплан, первый этаж стилобата, развёртка, разрез) → docs/design/prospekt_vershina_*.png;
                                                               # расстановка — словари в скрипте, в сцену не внесена (docs/design/prospekt_map.md §21)
+python -X utf8 tools/prospekt_house7_plan.py                 # «Проспект», дом 7 (пробный жилой дом): чертёж под место и фасады → docs/design/prospekt_house7_1_site.png, prospekt_house7_2_facades.png (docs/design/prospekt_bc5_yard_concepts.md; в сцену не внесено)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_houses/house7.py -- <выход.blend> [preview <папка>] [check]
+                                                              # «Проспект», дом 7 — форма без текстур (набор частей фасада H_* для всех домов серии + свои узлы: портал, служебная дверь, кровля):
+                                                              # tools/prospekt_houses/kit.py (модули) и house7.py (сборка из экземпляров, check — габарит / этажи / оболочки, preview — камеры и ортофасады);
+                                                              # python -X utf8 tools/prospekt_houses/sheets.py <папка Просмотр/form> — листы сверки с концептом; файл и кадры — E:/Models Blender/ENVIRONMENT/RING_Prospekt_Houses
 python -X utf8 tools/prospekt_north_side_plan.py              # «Проспект», северная сторона проспекта: чертежи предложения — квартал, развёртка
                                                               # и карманы, банк «Капитал» по этажам, автомойка «Блеск» → docs/design/prospekt_north_*.png;
                                                               # в сцену не внесено (docs/design/prospekt_map.md §22)
