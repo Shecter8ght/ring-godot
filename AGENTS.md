@@ -396,6 +396,8 @@ tools/loot_containers/lc3_start.cmd ; python -X utf8 tools/loot_containers/lc3_s
                                                               # просмотр: blender -b RING_Loot_Containers_uv_v01.blend --factory-startup --python tools/loot_containers/lc3_review.py --
                                                               # <textures/finish_v03> <finish_v03.blend> [shots <папка> [кадры]] [res=1600x1000] (тёмная студия, как у Sketchfab); листы сверки с образцами —
                                                               # python -X utf8 tools/loot_containers/lc3_compare.py [gun safe cash]
+                                                              # перед стеком (круг 2: износ по форме): python -X utf8 -I tools/loot_containers/lc3_masks.py (маски владельца → masks_v03) и lc3_zones.py [набор …]
+                                                              # (кромка, низ, верх, вокруг ручек по картам геометрии → wear_v03)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/loot_containers/medbag2.py -- build <RING_Loot_MedBag_v02.blend> [preview <папка>]
                                                               # медсумка v02, нейлоновая шитая (форма high-poly: кант, молнии, стропы, строчки; закрыта / раскрыта); затем blender -b <файл> --python tools/loot_containers/lc3_bag_uv.py -- pack <uv.blend>,
                                                               # … -- bake A B (карты геометрии), python -X utf8 tools/loot_containers/lc3_bag_maps.py A B copy (карты отделки по маскам владельца),
