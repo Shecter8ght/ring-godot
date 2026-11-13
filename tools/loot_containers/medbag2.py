@@ -34,6 +34,7 @@ ZIPX = 0.234                            # молния клапана: боко�
 ZIPY0, ZIPY1 = -0.112, 0.105
 HINGE = V((0.0, ZIPY1, H))
 CELL = 0.006
+BEND_K = 0.9                          # провис раскрытого клапана, м на м²
 TH = 0.0026                             # толщина ткани (Solidify)
 
 SIM = {}
@@ -100,29 +101,38 @@ def prof(c):
     return max(0.0, 1.0 - c * c) ** 0.6
 
 
+FOLDS = [
+    # центр (идеальный), нормаль грани, направление складки, амплитуда, ширина поперёк, длина вдоль
+    ((-0.205, -HY, 0.212), (0, -1, 0), (0.45, 0, -0.9), 0.0042, 0.013, 0.055),
+    ((0.212, -HY, 0.212), (0, -1, 0), (-0.40, 0, -0.9), 0.0036, 0.012, 0.050),
+    ((-0.060, -HY, 0.262), (0, -1, 0), (0.1, 0, 1.0), 0.0030, 0.018, 0.040),
+    ((0.058, -HY, 0.268), (0, -1, 0), (-0.1, 0, 1.0), 0.0034, 0.017, 0.045),
+    ((HX, 0.015, 0.185), (1, 0, 0), (0.0, 0.35, -0.9), 0.0044, 0.016, 0.060),
+    ((-HX, -0.04, 0.150), (-1, 0, 0), (0.0, -0.3, -0.9), 0.0038, 0.015, 0.070),
+    ((-0.10, HY, 0.255), (0, 1, 0), (1.0, 0, 0.25), 0.0034, 0.015, 0.060),
+    ((0.17, HY, 0.120), (0, 1, 0), (0.3, 0, -1.0), 0.0030, 0.016, 0.050),
+]
+
+
 def disp(p: V, n: V, seed: int = 0) -> V:
-    """Смещение ткани: раздутые панели, мелкие складки, заломы вдоль рёбер, провис верха."""
+    """Смещение ткани: выпуклые наружу стенки, мягкая низкочастотная рябь, несколько крупных неравных складок, провис верха."""
     ax = (abs(n.x), abs(n.y), abs(n.z))
     cx, cy, cz = p.x / HX, p.y / HY, (p.z - HZ) / HZ
-    bulge = (ax[1] ** 4) * 0.0058 * prof(cx) * prof(cz) + (ax[0] ** 4) * 0.0038 * prof(cy) * prof(cz) \
-        + (ax[2] ** 4) * (0.0048 if n.z > 0 else 0.0012) * prof(cx) * prof(cy)
+    bulge = (ax[1] ** 4) * 0.0062 * prof(cx) * prof(cz) + (ax[0] ** 4) * 0.0044 * prof(cy) * prof(cz) \
+        + (ax[2] ** 4) * (0.0046 if n.z > 0 else 0.0010) * prof(cx) * prof(cy)
     q = V(p)
-    w = 0.0017 * noise.noise(q * 11.0 + V((3.1, 1.7, 5.3))) + 0.0006 * noise.noise(q * 29.0 + V((7.7, 2.3, 1.1)))
-    # ближайшее ребро: расстояние и координата вдоль него
-    dom = max(range(3), key=lambda i: ax[i])
-    others = [i for i in range(3) if i != dom]
-
-    def dist(i):
-        if i == 2:
-            return min(p.z, H - p.z)
-        return (HX if i == 0 else HY) - abs(p[i])
-    ds = [(dist(i), i) for i in others]
-    d, ia = min(ds)
-    ic = next(i for i in others if i != ia)
-    t = p[ic] if ic != 2 else p.z
-    fold = noise.noise(V((t * 55.0, d * 7.0, seed + 0.37))) * 0.0031 * max(0.0, 1.0 - d / 0.055) ** 1.1
-    out = V(p) + n * (bulge + w + fold)
-    out.z -= 0.0036 * prof(cx) * prof(cy) * max(0.0, n.z)
+    w = 0.0019 * noise.noise(q * 8.0 + V((3.1, 1.7, 5.3))) + 0.0007 * noise.noise(q * 19.0 + V((7.7, 2.3, 1.1)))
+    out = V(p) + n * (bulge + w)
+    for c, fn, fd, amp, sp, sa in FOLDS:
+        fn_, fd_ = V(fn), V(fd).normalized()
+        if n.dot(fn_) < 0.5:
+            continue
+        r = V(p) - V(c)
+        al = r.dot(fd_)
+        u = fd_.cross(fn_).normalized()
+        dp = r.dot(u)
+        out += n * (amp * (dp / sp) * math.exp(-0.5 * (dp / sp) ** 2) * math.exp(-(al / sa) ** 2))
+    out.z -= 0.0062 * prof(cx) * prof(cy) * max(0.0, n.z)
     return out
 
 
@@ -743,8 +753,8 @@ def side_lines(acc, parent, frames, offs, thread, lift=0.0003, rnd=None, closed=
 
 def piping_ribbon(acc, parent, pts, nrm, closed, isl0=0, lateral=None):
     fr = frames_on(pts, nrm, lateral)
-    arc = [(0.0022 * math.cos(math.radians(a)), 0.0016 + 0.0022 * math.sin(math.radians(a))) for a in range(160, 19, -20)]
-    prof = [(-0.0058, -0.0002), (-0.0058, 0.0004), (-0.0030, 0.0004)] + arc + [(0.0030, 0.0004), (0.0058, 0.0004), (0.0058, -0.0002)]
+    arc = [(0.0020 * math.cos(math.radians(a)), 0.0012 + 0.0020 * math.sin(math.radians(a))) for a in range(160, 19, -20)]
+    prof = [(-0.0045, -0.0002), (-0.0045, 0.0003), (-0.0026, 0.0003)] + arc + [(0.0026, 0.0003), (0.0045, 0.0003), (0.0045, -0.0002)]
     acc.rib(parent, "piping", fr, prof, 0, closed_profile=True, closed_path=closed, chunk=0.9)
     return fr
 
@@ -812,7 +822,7 @@ def zip_halves(acc, par_in, par_out, fr, isl):
 
 
 def slider(acc, parent, fr, s_target, tab_dir, rnd, splay=0.0):
-    """Бегунок с язычком и резиновым наконечником на рамке fr в точке с длиной пути s_target."""
+    """Бегунок ~12 x 9 x 5 мм с узким язычком 5 x 28 мм и коротким наконечником; язычок висит по направлению tab_dir."""
     acc_len = 0.0
     idx = 1
     for i in range(1, len(fr)):
@@ -823,16 +833,16 @@ def slider(acc, parent, fr, s_target, tab_dir, rnd, splay=0.0):
     p, n, b = fr[idx]
     t = (fr[min(idx + 1, len(fr) - 1)][0] - fr[idx - 1][0]).normalized()
     bm = acc.bm(parent, "metal")
-    m = frame_matrix(p + n * 0.0034, t, b, n)
-    place_box(bm, (0.0215, 0.0135, 0.0058), 0.0018, m, 0)
-    place_box(bm, (0.0150, 0.0090, 0.0030), 0.0010, frame_matrix(p + n * 0.0070, t, b, n), 0)
-    piv = p + n * 0.0075 - t * 0.0045
-    d = (tab_dir - n * tab_dir.dot(n)).normalized() if abs(tab_dir.dot(n)) < 0.95 else tab_dir.normalized()
+    place_box(bm, (0.0120, 0.0090, 0.0048), 0.0014, frame_matrix(p + n * 0.0030, t, b, n), 0)
+    place_box(bm, (0.0075, 0.0060, 0.0024), 0.0008, frame_matrix(p + n * 0.0058, t, b, n), 0, seg=1)
+    piv = p + n * 0.0050 - t * 0.0040
+    d = (tab_dir - n * tab_dir.dot(n))
+    d = d.normalized() if d.length > 0.2 else tab_dir.normalized()
     d = (d * math.cos(splay) + b * math.sin(splay)).normalized()
     ez = (n - d * n.dot(d)).normalized()
     ey = ez.cross(d)
-    place_box(bm, (0.036, 0.0086, 0.0016), 0.0007, frame_matrix(piv + d * 0.017 + ez * 0.0010, d, ey, ez), 0, seg=1)
-    place_box(acc.bm(parent, "tip"), (0.021, 0.0094, 0.0052), 0.0021, frame_matrix(piv + d * 0.044 + ez * 0.0016, d, ey, ez), 0)
+    place_box(bm, (0.028, 0.0050, 0.0012), 0.0005, frame_matrix(piv + d * 0.0125 + ez * 0.0008, d, ey, ez), 0, seg=1)
+    place_box(acc.bm(parent, "tip"), (0.011, 0.0058, 0.0032), 0.0014, frame_matrix(piv + d * 0.0335 + ez * 0.0010, d, ey, ez), 0)
 
 
 # ======================================================================== стропы
@@ -890,38 +900,35 @@ def stitch_rows(acc, parent, fr, w, th, z0, z1, rnd, thread="t_red", x_cross=Tru
         add_stitches(acc, parent, pts, nr, thread, 0.0032, False, 0.0, rnd)
 
 
-def handle(acc, parent, surf, rnd, side, alpha, xl=0.058, w=0.036, th=0.0020, hh=0.105):
-    """Ручка-петля: обе ноги пришиты к стенке (side −1 — передняя, +1 — задняя), над краем стропа уходит дугой."""
+def handle(acc, parent, surf, rnd, side, alpha, xl=0.058, w=0.038, th=0.0022, zbot=0.172, length=0.15):
+    """Ручка из двух плоских строп 38 x 2,2 мм: ноги пришиты плашмя от zbot до верхнего ребра, выше — свободная петля ~180 мм,
+    ложится мягкой дугой наружу (alpha — наклон от вертикали у ребра); концы сходятся и лежат друг на друге. Без закрутки."""
     mode = "y-" if side < 0 else "y+"
-    zs = [0.052 + i * 0.002 for i in range(int((0.287 - 0.052) / 0.002) + 1)]
-    legs = []
-    for x in (-xl, xl):
-        pts, nrm = conform(surf, [V((x, 0, z)) for z in zs], mode, lift=th / 2 + 0.0012, it=12)
-        legs.append((pts, nrm))
-    (pl, nl), (pr, nr) = legs
+    zs = [zbot + i * 0.002 for i in range(int((0.287 - zbot) / 0.002) + 1)]
     o = V((0, side, 0))
-    up_t = V((0, 0, 1)) * math.cos(alpha) + o * math.sin(alpha)
     ex = V((1, 0, 0))
-    nloop = ex.cross(up_t).normalized()
-    O = (pl[-1] + pr[-1]) / 2
-    K = 56
-    arch, phis_a = [], []
-    for i in range(1, K):
-        s_ = math.pi * i / K
-        arch.append(O + ex * (-xl * math.cos(s_)) + up_t * (hh * math.sin(s_)))
-        phis_a.append((math.pi / 2) * smooth01(math.sin(s_) / 0.92))
-    path = pl + arch + pr[::-1]
-    phis = [0.0] * len(pl) + phis_a + [0.0] * len(pr)
-    nr0 = nl[0]
-    path = smooth_pts(path, 2)
-    fr = strap_frames(path, phis, nr0, ex, nloop)
-    acc.rib(parent, "webbing", fr, rect_profile(w, th, -th / 2), 0, closed_profile=True, chunk=1.2)
-    la, lb = fr[:len(pl)], fr[-len(pr):]
-    for lf in (la, lb):
+    out_frames = []
+    for k, sx in enumerate((-1, 1)):
+        pts, nrm = conform(surf, [V((sx * xl, 0, z)) for z in zs], mode, lift=th / 2 + 0.0012, it=10)
+        P = pts[-1]
+        n_steps = int(length / 0.002)
+        dx = -sx * (xl - 0.012) / n_steps / 0.002
+        free = []
+        for i in range(1, n_steps + 1):
+            s_ = i / n_steps
+            ang = alpha + math.radians(42) * s_ * s_
+            dv = V((dx, math.sin(ang) * side, math.cos(ang))).normalized()
+            P = P + dv * 0.002
+            free.append(P + o * (k * (th + 0.0004) * smooth01(s_ * 1.6)))
+        path = smooth_pts(pts + free, 2)
+        fr = strap_frames(path, [0.0] * len(path), nrm[0], ex, ex)
+        acc.rib(parent, "webbing", fr, rect_profile(w, th, -th / 2), 0, closed_profile=True, chunk=1.2)
+        lf = fr[:len(pts)]
         side_lines(acc, parent, lf, (-(w / 2 - 0.0042), w / 2 - 0.0042), "t_red", lift=th / 2 + 0.0003, rnd=rnd)
-        stitch_rows(acc, parent, lf, w, th, 0.058, 0.094, rnd)
-        stitch_rows(acc, parent, lf, w, th, 0.250, 0.282, rnd)
-    return fr
+        stitch_rows(acc, parent, lf, w, th, zbot + 0.004, zbot + 0.034, rnd)
+        stitch_rows(acc, parent, lf, w, th, 0.256, 0.284, rnd)
+        out_frames.append(fr)
+    return out_frames
 
 
 def side_tab(acc, parent, surf, rnd, sx, w=0.038, th=0.0020):
@@ -1060,6 +1067,13 @@ def main_zip_plan():
     return fillet_poly([V((-ZIPX, ZIPY1, H)), V((-ZIPX, ZIPY0, H)), V((ZIPX, ZIPY0, H)), V((ZIPX, ZIPY1, H))], 0.012, 0.0008)
 
 
+def flap_bend(bm):
+    """Раскрытый клапан слегка провисает: смещение по нормали пропорционально квадрату расстояния от шарнира + лёгкая волна."""
+    for v in bm.verts:
+        sd = max(0.0, HINGE.y - v.co.y)
+        v.co.z += BEND_K * sd * sd + 0.0016 * math.sin(v.co.x * 22.0) * (sd / 0.2)
+
+
 def init_shell():
     if "groups" in SIM:
         return
@@ -1081,14 +1095,17 @@ def build_state(top, M, at, open_, label):
     coll = L.collection(label, top)
     root = L.root("МС_сумка_укладка" + ("_раскрыта" if open_ else ""), coll, at)
 
-    def shell(g, name, mlist, parent, origin=(0, 0, 0)):
+    def shell(g, name, mlist, parent, origin=(0, 0, 0), bend=False):
         bm, names = SIM["groups"][g]
-        ob = to_obj(bm.copy(), name, coll, mlist, parent, origin=origin, solid=(TH, 1), names=names, recalc=False)
+        bm = bm.copy()
+        if bend:
+            flap_bend(bm)
+        ob = to_obj(bm, name, coll, mlist, parent, origin=origin, solid=(TH, 1), names=names, recalc=False)
         ob["lc_set"] = "A"
         return ob
     body = shell("body", "МС_корпус", [M["fabric"], M["fabric_in"]], root)
     band = shell("band", "МС_лента_низа", [M["band"], M["band"]], root)
-    flap = shell("flap", "МС_клапан", [M["fabric"], M["fabric_in"]], root, origin=HINGE)
+    flap = shell("flap", "МС_клапан", [M["fabric"], M["fabric_in"]], root, origin=HINGE, bend=open_)
     pbm, pnames = SIM["pocket"]
     pocket = to_obj(pbm.copy(), "МС_карман", coll, [M["fabric"], M["fabric_in"]], root, solid=(TH, 1), names=pnames, recalc=False)
     pocket["lc_set"] = "A"
@@ -1103,17 +1120,17 @@ def build_state(top, M, at, open_, label):
             plan = [V((sx * (HX - k), sy * (HY - k), z)) for z in [ZB + 0.004 + i * 0.002 for i in range(int((H - k - ZB - 0.004) / 0.002) + 1)]]
             pts, nrm = conform(surf, plan, "near", it=2)
             fr = piping_ribbon(acc, R, pts, nrm, False)
-            side_lines(acc, R, fr, (-0.0072, 0.0072), "t_red", rnd=rnd)
+            side_lines(acc, R, fr, (-0.0060, 0.0060), "t_red", rnd=rnd)
     for name, a, b, z, rr, thr in (("top", HX - k, HY - k, H - k, 0.7071 * RC, "t_red"), ("band", HX, HY, ZB, RC, "t_black")):
         pl = fillet_poly([V((-a, -b, z)), V((a, -b, z)), V((a, b, z)), V((-a, b, z))], rr, 0.002, closed=True)
         pts, nrm = conform(surf, pl, "near", it=2, closed=True)
         fr = piping_ribbon(acc, R, pts, nrm, True)
-        side_lines(acc, R, fr, (-0.0072, 0.0072), thr, rnd=rnd, closed=True)
+        side_lines(acc, R, fr, (-0.0060, 0.0060), thr, rnd=rnd, closed=True)
     # кант по ободу кармана
     pl = rect_path(-0.236, 0.236, 0.052, 0.205, 0.026, 0.0, 0.002)
     pts, nrm = conform(surf, pl, "y-", lift=0.0, it=2, closed=True)
     fr = piping_ribbon(acc, R, pts, nrm, True)
-    side_lines(acc, R, fr, (-0.0072, 0.0072), "t_red", rnd=rnd, closed=True)
+    side_lines(acc, R, fr, (-0.0060, 0.0060), "t_red", rnd=rnd, closed=True)
 
     # ---- молния клапана
     mp = main_zip_plan()
@@ -1125,10 +1142,10 @@ def build_state(top, M, at, open_, label):
     side_lines(acc, R, fr_m, (-0.0142,), "t_red", lift=0.0004, rnd=rnd)
     total = sum((fr_m[i][0] - fr_m[i - 1][0]).length for i in range(1, len(fr_m)))
     if not open_:
-        s1, s2 = 0.217 + 0.084, 0.217 + 0.110
-        td = V((0, -0.6, -0.8))
-        slider(acc, R, fr_m, s1, td, rnd, -0.07)
-        slider(acc, R, fr_m, s2, td, rnd, 0.07)
+        s1, s2 = 0.217 + 0.084, 0.217 + 0.099
+        td = V((0, -0.45, -0.9))
+        slider(acc, R, fr_m, s1, td, rnd, -0.05)
+        slider(acc, R, fr_m, s2, td, rnd, 0.05)
     else:
         slider(acc, R, fr_m, 0.020, V((-0.8, 0, -0.5)), rnd, 0.0)
         slider(acc, R, fr_m, total - 0.020, V((0.8, 0, -0.5)), rnd, 0.0)
@@ -1139,17 +1156,17 @@ def build_state(top, M, at, open_, label):
     zip_halves(acc, R, R, fr_p, 0)
     side_lines(acc, R, fr_p, (0.0098, 0.0036, -0.0098, -0.0036), "t_black", lift=0.0011, rnd=rnd)
     side_lines(acc, R, fr_p, (0.0142, -0.0142), "t_red", lift=0.0004, rnd=rnd)
-    slider(acc, R, fr_p, 0.060, V((0, 0, -1)), rnd, -0.10)
-    slider(acc, R, fr_p, 0.084, V((0, 0, -1)), rnd, 0.10)
+    slider(acc, R, fr_p, 0.060, V((0, 0, -1)), rnd, -0.04)
+    slider(acc, R, fr_p, 0.074, V((0, 0, -1)), rnd, 0.04)
 
     # ---- стропы, ленты, нашивки
-    handle(acc, R, surf, rnd, -1, math.radians(72 if open_ else 8))
-    handle(acc, R, surf, rnd, +1, math.radians(72 if open_ else 8))
+    handle(acc, R, surf, rnd, -1, math.radians(72 if open_ else 7))
+    handle(acc, R, surf, rnd, +1, math.radians(72 if open_ else 7))
     for sx in (-1, 1):
         side_tab(acc, R, surf, rnd, sx)
     reflect_strip(acc, R, surf, rnd)
-    disc_patch(acc, R, surf, rnd, (-0.105, 0.128))
-    label_patch(acc, R, surf, rnd, 0.090, 0.156, 0.150, 0.172)
+    disc_patch(acc, R, surf, rnd, (-0.150, 0.128))
+    label_patch(acc, R, surf, rnd, 0.112, 0.178, 0.140, 0.162)
     window_pocket(acc, F, surf, rnd, 0.098, 0.203, 0.000, 0.072)
 
     # ---- внутри клапана: сетчатые карманы и резинки
@@ -1195,6 +1212,8 @@ def build_state(top, M, at, open_, label):
         name = "МС_" + Acc.TITLE[kind] + ("_клапан" if par == F else "")
         keep = kind in ("label", "pvc", "patch", "mesh")
         org = tuple(HINGE) if par == F else (0, 0, 0)
+        if par == F and open_:
+            flap_bend(bm)
         ob = to_obj(bm, name, coll, mlist, pobj, origin=org, parent_origin=org, smooth=kind != "stitch", recalc=not keep)
         ob["lc_set"] = "B"
         ob["kind"] = kind

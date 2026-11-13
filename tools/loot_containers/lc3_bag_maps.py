@@ -286,28 +286,28 @@ def compose_A():
     x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
     nz = nrm[..., 2]
     # ---- цвет
-    red = lin((166, 22, 32))
+    red = lin((190, 26, 33))
     col = np.empty(shape + (3,), np.float32)
     col[:] = red
-    shade = 1.0 + 0.16 * wv + 0.07 * yarn
+    shade = 1.0 + 0.025 * wv + 0.02 * yarn
     col *= shade[..., None]
-    col *= (0.93 + 0.14 * big)[..., None]
+    col *= (0.97 + 0.06 * big)[..., None]
     # выгорание верхних плоскостей и светлые вытертые кромки
     fade = smoothstep(0.35, 0.95, nz) * (0.45 + 0.55 * mid)
-    col = col * (1 - 0.40 * fade[..., None]) + (col * np.array([1.5, 2.6, 2.3], np.float32) + 0.012) * (0.40 * fade[..., None])
+    col = col * (1 - 0.14 * fade[..., None]) + (col * np.array([1.25, 1.7, 1.6], np.float32) + 0.006) * (0.14 * fade[..., None])
     edge = smoothstep(80.0, 260.0, cur) * (0.3 + 0.7 * mid)
-    col = col * (1 - 0.65 * edge[..., None]) + lin((205, 120, 118)) * (0.65 * edge[..., None])
+    col = col * (1 - 0.18 * edge[..., None]) + lin((222, 62, 62)) * (0.18 * edge[..., None])
     # залоснение и грязь низа: тёмный, жирный
     low = smoothstep(0.17, 0.045, z) * (0.35 + 0.9 * rub)
     dirt_c = lin((46, 36, 30))
-    col = col * (1 - 0.62 * low[..., None]) + dirt_c * (0.62 * low[..., None]) * (0.7 + 0.3 * wv[..., None] * 0.3)
+    col = col * (1 - 0.30 * low[..., None]) + dirt_c * (0.30 * low[..., None]) * (0.7 + 0.3 * wv[..., None] * 0.3)
     # грязь в складках и у швов
     conc = smoothstep(0.0, -60.0, cur) * 0.0 + smoothstep(8.0, 55.0, -cur)
     dirt = np.clip((1 - ao) * 1.3 + conc * 0.9, 0, 1) * (0.4 + 1.0 * dpat)
-    col = col * (1 - 0.55 * dirt[..., None]) + lin((60, 46, 36)) * (0.55 * dirt[..., None]) * 0.8
+    col = col * (1 - 0.30 * dirt[..., None]) + lin((52, 34, 28)) * (0.30 * dirt[..., None]) * 0.8
     # пятна
-    st = smoothstep(0.35, 0.8, mask_field(shape, info, d, 'splash', 260, 21)) * 0.35
-    col = col * (1 - st[..., None]) + lin((70, 40, 34)) * st[..., None] * 0.9
+    st = smoothstep(0.35, 0.8, mask_field(shape, info, d, 'splash', 260, 21)) * 0.12
+    col = col * (1 - st[..., None]) + lin((70, 34, 30)) * st[..., None] * 0.9
     # чёрная лента низа
     blk = lin((30, 30, 32))
     bandc = np.empty_like(col)
@@ -323,26 +323,32 @@ def compose_A():
         if it["tag"] == "flap" and it["obj"].startswith("МС_клапан"):
             x0, y0, w, h = it["x"], it["y"], it["w"], it["h"]
             # u = x(мм), v = y(мм) корпуса: текст у шарнира, по центру левой половины
-            cu, cv = -75.0, 55.0
+            cu, cv = -60.0, -45.0
             px, py = x0 + (cu - it["umin"]) * d, y0 + (it["vmax"] - cv) * d
-            tm = text_mask(shape, [("ПЕРВАЯ ПОМОЩЬ", (px, py), 16.5 * d, True, 0)])
+            tm = text_mask(shape, [("ПЕРВАЯ ПОМОЩЬ", (px, py), 25.0 * d, True, 0)])
             wear = smoothstep(0.3, 0.8, mask_field(shape, info, d, 'scratch', 45, 31)) * 0.6 + smoothstep(0.55, 0.9, mid) * 0.3
-            pr = tm * (0.85 - wear * 0.5) * (0.82 + 0.18 * np.clip(0.5 - 0.2 * wv, 0, 1))
+            pr = tm * (0.97 - wear * 0.22)
     pcol = lin((222, 220, 214))
     col = col * (1 - pr[..., None]) + pcol * pr[..., None] * (0.9 + 0.1 * shade[..., None])
+    redm = cover & ~is_band & (pr < 0.01)
+    med = np.median(col[redm], axis=0)
+    tgt = lin((188, 25, 32))
+    col = np.where(is_band[..., None] | (pr > 0.01)[..., None], col, col * (tgt / np.maximum(med, 1e-4)))
+    print("A: медиана красного sRGB", np.round(srgb(np.median(col[redm], axis=0)) * 255).astype(int), flush=True)
     # ---- яркость чёрного — не выше ~45/255
     capb = lin((45, 45, 46))
     col = np.where(is_band[..., None], np.minimum(col, capb), col)
     # ---- шероховатость
-    rough = 0.50 + 0.12 * (-wv) * 0.5 + 0.08 * yarn
-    rough = rough + 0.12 * fade + 0.25 * dirt - 0.20 * low - 0.15 * edge * 0 
-    rough = np.where(is_band, 0.58 + 0.1 * wv * 0.5 + 0.2 * dust, rough)
+    gloss = smoothstep(25.0, 130.0, cur) * (0.3 + 0.9 * mid)
+    rough = 0.50 - 0.03 * wv + 0.02 * yarn
+    rough = rough + 0.05 * fade + 0.12 * dirt - 0.10 * low - 0.12 * gloss
+    rough = np.where(is_band, 0.62 + 0.03 * wv + 0.12 * dust, rough)
     rough = np.where(pr > 0.3, 0.75, rough)
     rough = np.clip(rough, 0.22, 0.92)
     # ---- нормаль: плетение + рёбра ленты + мелкая рябь
     hgt = wv * 0.5 + 0.12 * yarn
     hgt = np.where(is_band, hgt + 0.9 * rib, hgt)
-    nm = height_to_normal(hgt.astype(np.float32), 0.45)
+    nm = height_to_normal(hgt.astype(np.float32), 0.30)
     nm = np.where(cover[..., None], nm, np.array([0, 0, 1], np.float32))
     for arr_name, arr in (("col", col),):
         pass
@@ -426,19 +432,19 @@ def compose_B():
 
     # стропа: красная, ребристая вдоль длины; дуга ручки засалена отпечатками ладоней; пушащиеся кромки — маски ворса
     rib = 0.5 + 0.5 * np.cos(2 * math.pi * vm / 1.6)
-    c = lin((148, 20, 34)) * ones3 * (0.86 + 0.2 * rib + 0.1 * wv)[..., None] * (0.92 + 0.16 * big)[..., None]
+    c = lin((176, 22, 34)) * ones3 * (0.93 + 0.08 * rib + 0.03 * wv)[..., None] * (0.97 + 0.06 * big)[..., None]
     arch = smoothstep(235, 270, um) * smoothstep(510, 475, um)
-    greasy = np.clip(arch * (0.35 + 0.9 * palm) + smoothstep(60, 0, um) * 0.5 * (0.4 + wipe), 0, 1)
-    c = c * (1 - 0.65 * greasy[..., None]) + lin((44, 22, 22)) * (0.65 * greasy[..., None])
-    fuzz = np.clip(edge * 0.6 + smoothstep(14.5, 18.0, np.abs(vm)) * fibre * 1.2, 0, 1)
-    c = c * (1 - 0.6 * fuzz[..., None]) + lin((205, 112, 114)) * (0.6 * fuzz[..., None])
-    c = c * (1 - 0.5 * dirt[..., None]) + lin((58, 44, 36)) * (0.5 * dirt[..., None])
-    put(M["стропы"], c, np.clip(0.58 + 0.1 * rib - 0.3 * greasy + 0.2 * fuzz + 0.2 * dirt, 0.2, 0.9), rib * 0.9 + wv * 0.3 + fibre * 0.3)
+    greasy = np.clip(arch * (0.2 + 0.5 * palm) + smoothstep(60, 0, um) * 0.25 * (0.4 + wipe), 0, 1)
+    c = c * (1 - 0.4 * greasy[..., None]) + lin((70, 18, 22)) * (0.4 * greasy[..., None])
+    fuzz = np.clip(edge * 0.25 + smoothstep(15.5, 19.0, np.abs(vm)) * fibre * 0.35, 0, 1)
+    c = c * (1 - 0.3 * fuzz[..., None]) + lin((205, 60, 62)) * (0.3 * fuzz[..., None])
+    c = c * (1 - 0.22 * dirt[..., None]) + lin((58, 38, 32)) * (0.22 * dirt[..., None])
+    put(M["стропы"], c, np.clip(0.55 + 0.05 * rib - 0.2 * greasy + 0.08 * fuzz + 0.1 * dirt, 0.2, 0.9), rib * 0.9 + wv * 0.3)
     # кант
-    c = lin((122, 123, 126)) * ones3 * (0.85 + 0.15 * wv)[..., None]
+    c = lin((118, 118, 121)) * ones3 * (0.96 + 0.04 * wv)[..., None]
     c = c * (1 - 0.6 * dirt[..., None]) + lin((62, 52, 44)) * (0.6 * dirt[..., None])
-    c = c * (1 - 0.4 * edge[..., None]) + lin((170, 168, 166)) * (0.4 * edge[..., None])
-    put(M["кант"], c, 0.6 + 0.2 * dirt)
+    c = c * (1 - 0.15 * edge[..., None]) + lin((150, 148, 146)) * (0.15 * edge[..., None])
+    put(M["кант"], c, 0.78 + 0.1 * dirt)
     # чёрные тесьмы
     blk = lin((24, 24, 26))
     for nm_ in ("тесьма", "рамка", "резинки", "липучки"):
@@ -461,7 +467,7 @@ def compose_B():
     # бирюзовая резина
     rb = load_gray(f"{TEX}/Rubber002/height_2k.jpg")
     rb = cv2.resize(rb, (SIZE, SIZE), interpolation=cv2.INTER_AREA)
-    c = lin((36, 138, 126)) * ones3 * (0.85 + 0.3 * rb)[..., None]
+    c = lin((118, 124, 124)) * ones3 * (0.9 + 0.2 * rb)[..., None]
     c = c * (1 - 0.5 * dirt[..., None]) + lin((50, 46, 40)) * (0.5 * dirt[..., None])
     put(M["наконечники"], c, 0.42 + 0.3 * dirt, rb * 0.3)
     # светоотражающая лента: микропризма, потёртости по маскам грязи/протирания
@@ -473,7 +479,7 @@ def compose_B():
     prism = np.clip(1 - 2 * np.maximum(hx * 1.7 + hy * 0.6, hy * 1.2), 0, 1)
     wear = np.clip(smoothstep(0.3, 0.8, wipe) * 0.55 + dirt * 0.5 + edge * 0.3, 0, 1)
     c = lin((196, 200, 196)) * ones3 * (0.9 + 0.15 * prism)[..., None]
-    c = c * (1 - 0.7 * wear[..., None]) + lin((98, 88, 78)) * (0.7 * wear[..., None])
+    c = c * (1 - 0.45 * wear[..., None]) + lin((98, 88, 78)) * (0.45 * wear[..., None])
     put(M["светоотр"], c, np.clip(0.28 + 0.55 * wear, 0.2, 0.9), prism * 1.2 * (1 - wear))
     # ярлык
     im_cache = {}
@@ -497,10 +503,11 @@ def compose_B():
     # нашивка: зелёная, белое кольцо и равноконечный крест; вышивка гладью (диагональные нити)
     pm = M["эмблема"]
     ptop = pm & (isl_of == 0)
-    ru = np.hypot(um - 40.0, vm - 40.0)
-    cross = ((np.abs(um - 40) < 4.6) & (np.abs(vm - 40) < 21)) | ((np.abs(vm - 40) < 4.6) & (np.abs(um - 40) < 21))
+    pu, pv = (pos[..., 0] + 0.150) * 1000.0, (pos[..., 2] - 0.128) * 1000.0     # по положению на модели: без артефактов UV
+    ru = np.hypot(pu, pv)
+    cross = ((np.abs(pu) < 4.6) & (np.abs(pv) < 21)) | ((np.abs(pv) < 4.6) & (np.abs(pu) < 21))
     pat = cross | ((ru > 28.5) & (ru < 33.5))
-    thr = 0.5 + 0.5 * np.cos(2 * math.pi * (um + vm) / 1.4 / 1.414)
+    thr = 0.5 + 0.5 * np.cos(2 * math.pi * (um + vm) / 1.4 / 1.414) * 0.15
     pat = cv2.GaussianBlur(pat.astype(np.float32), (0, 0), 0.8)
     c = lin((226, 226, 222)) * (0.88 + 0.16 * thr)[..., None] * pat[..., None] + lin((18, 92, 60)) * (0.85 + 0.22 * thr)[..., None] * (1 - pat[..., None])
     c = c * (1 - 0.5 * dirt[..., None]) + lin((60, 50, 40)) * (0.5 * dirt[..., None])

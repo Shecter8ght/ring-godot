@@ -77,8 +77,8 @@ def studio():
     w = bpy.data.worlds.get("Студия_МС") or bpy.data.worlds.new("Студия_МС")
     w.use_nodes = True
     bg = next(n for n in w.node_tree.nodes if n.type == "BACKGROUND")
-    bg.inputs[0].default_value = (0.82, 0.82, 0.84, 1)
-    bg.inputs[1].default_value = 0.28
+    bg.inputs[0].default_value = (0.62, 0.62, 0.64, 1)
+    bg.inputs[1].default_value = 0.16
     sc.world = w
     # циклорама: пол и плавный подъём стены
     bm = bmesh.new()
@@ -98,7 +98,7 @@ def studio():
         p.use_smooth = True
     gm = bpy.data.materials.new("студия_серый")
     gm.use_nodes = True
-    gm.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.72, 0.72, 0.74, 1)
+    gm.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.50, 0.50, 0.52, 1)
     gm.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.9
     me.materials.append(gm)
 
@@ -113,9 +113,9 @@ def studio():
         lo.location = loc
         lo.rotation_euler = tuple(math.radians(a) for a in rot)
         bpy.context.scene.collection.objects.link(lo)
-    area("студия_ключ", (-1.4, -1.9, 2.0), (50, 0, -32), 200, 1.6, 1.2)
-    area("студия_скользящий", (1.7, -0.2, 0.55), (84, 0, 62), 90, 0.7, 1.6)
-    area("студия_заполняющий", (0.4, -2.6, 0.9), (82, 0, 8), 20, 2.5)
+    area("студия_ключ", (-1.4, -1.9, 2.0), (50, 0, -32), 110, 1.6, 1.2)
+    area("студия_скользящий", (1.7, -0.2, 0.55), (84, 0, 62), 55, 0.7, 1.6)
+    area("студия_заполняющий", (0.4, -2.6, 0.9), (82, 0, 8), 14, 2.5)
     cd = bpy.data.cameras.new("кам")
     co = bpy.data.objects.new("студия_кам", cd)
     bpy.context.scene.collection.objects.link(co)
@@ -149,7 +149,7 @@ def build():
     except Exception:
         pass
     sc.view_settings.view_transform = "Standard"
-    sc.view_settings.exposure = -0.2
+    sc.view_settings.exposure = -0.5
     sc.render.resolution_x, sc.render.resolution_y = 1400, 1000
     sc.render.film_transparent = False
     for scr in bpy.data.screens:
