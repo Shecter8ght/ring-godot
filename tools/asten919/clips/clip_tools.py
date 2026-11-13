@@ -6,6 +6,8 @@
   клип из списка   — открывает клип: его ключи на шкале с кадра 1. Двигать ключи во времени, наклонять пистолет
                      (Weapon_CTRL), вести левую кисть (ik_hand.L), затвор и магазин — как обычную анимацию.
                      Маркеры фаз (mag_out, insert …) можно двигать: они запоминаются при переходе в другой клип.
+  «Выбрать кость»  — кнопки выделяют нужную кость (пистолет, левая кисть, затвор, магазин, старый магазин быстрой
+                     перезарядки, гильзы): дальше G — двигать, R — вращать, K — ключ.
   «Хваты из поз → во все клипы» — переносит поправленные позы в клипы, движение и ваши ключи не трогает:
        пальцы и кости рук — там, где ключ клипа совпадал с прежней позой, ставится новая поза;
        левая кисть — там, где она стояла «как в позе» (тот же поворот), её место меняется так же, как в позе;
@@ -32,6 +34,11 @@ POSE_RU = dict(grip="ХВАТ", trigger="палец на спуске", pressed=
                stop="большой: рычаг задержки", up="большой вверх", mag="магазин в левой", seat="ладонь досылает",
                pinch="щепоть на затворе", free="левая свободна")
 FINGER = ("thumb", "palm", "f_index", "f_middle", "f_ring", "f_pinky")
+# Кнопки «выбрать кость»: подпись → (риг, кость). Кости пистолета мелкие и сидят внутри модели — мышью их не поймать.
+PICK = (("Пистолет", ARMS, "Weapon_CTRL"), ("Левая кисть", ARMS, "ik_hand.L"),
+        ("Затвор", GUN, "Slide"), ("Магазин", GUN, "Magazine_Control"),
+        ("Старый магазин", GUN, "SpareMag_Control"), ("Спуск", GUN, "Trigger"),
+        ("Гильза", GUN, "Case"), ("Гильза задержки", GUN, "JamCase"))
 GUN_REF = ("mag", "seat", "pinch")                    # кадры поз, где стоит и положение пистолета
 GUN_NEAR_DEG, GUN_NEAR_M = 12.0, 0.035                # ключ пистолета «возле позы»: ближе этого
 
@@ -324,7 +331,53 @@ def open_action(context, name):
     return True
 
 
+def set_bone_select(pb, on):
+    if hasattr(pb, "select"):                         # Blender 5: выделение хранится у кости позы
+        pb.select = on
+    else:
+        pb.bone.select = on
+
+
+def pick_bone(context, rig_name, bone):
+    """Выделить одну кость (оба рига — в режиме поз, чтобы ключи рук и пистолета были видны на шкале вместе)."""
+    arms, wr = rigs()
+    ob = bpy.data.objects.get(rig_name)
+    if ob is None or bone not in ob.pose.bones:
+        return False
+    if context.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
+    for o in list(context.selected_objects):
+        o.select_set(False)
+    for o in (arms, wr):
+        if o is not None:
+            o.hide_set(False)
+            o.select_set(True)
+    context.view_layer.objects.active = ob
+    bpy.ops.object.mode_set(mode="POSE")
+    for o in (arms, wr):
+        for pb in (o.pose.bones if o is not None else ()):
+            set_bone_select(pb, False)
+    set_bone_select(ob.pose.bones[bone], True)
+    ob.data.bones.active = ob.data.bones[bone]
+    return True
+
+
 # ------------------------------------------------------------------ интерфейс
+class ASTEN_OT_pick(bpy.types.Operator):
+    bl_idname = "asten.pick"
+    bl_label = "Выбрать кость"
+    bl_description = "Выделить эту кость: дальше G — двигать, R — вращать, K — ключ"
+    bl_options = {"REGISTER", "UNDO"}
+    rig: bpy.props.StringProperty()
+    bone: bpy.props.StringProperty()
+
+    def execute(self, context):
+        if not pick_bone(context, self.rig, self.bone):
+            self.report({"WARNING"}, "Нет такой кости: " + self.bone)
+            return {"CANCELLED"}
+        return {"FINISHED"}
+
+
 class ASTEN_OT_open(bpy.types.Operator):
     bl_idname = "asten.open"
     bl_label = "Открыть"
@@ -378,6 +431,12 @@ class ASTEN_PT_clips(bpy.types.Panel):
             n = int(math.ceil(last_key(act, arms)))
             col.operator("asten.open", text=f"{act.name[len(PREFIX):]}   ·   {n} к", depress=cur == act.name).name = act.name
         lay.separator()
+        lay.label(text="Выбрать кость:")
+        grid = lay.grid_flow(row_major=True, columns=2, even_columns=True, align=True)
+        for label, rig, bone in PICK:
+            op = grid.operator("asten.pick", text=label)
+            op.rig, op.bone = rig, bone
+        lay.separator()
         lay.operator("asten.sync", icon="FILE_REFRESH")
         box = lay.box().column(align=True)
         box.scale_y = 0.8
@@ -386,7 +445,7 @@ class ASTEN_PT_clips(bpy.types.Panel):
             box.label(text=ln)
 
 
-CLASSES = (ASTEN_OT_open, ASTEN_OT_sync, ASTEN_PT_clips)
+CLASSES = (ASTEN_OT_open, ASTEN_OT_pick, ASTEN_OT_sync, ASTEN_PT_clips)
 
 
 def register():
