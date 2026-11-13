@@ -1140,3 +1140,17 @@ Fresnel-шейдер. HDRI студии Blender упакован только в
 
 <!-- Sonora Studio ca218ccb-9d4c-4ec8-874a-98429622b9fa -->
 Звук «Шаг по стеклу»: `assets/audio/sonora/step_glass_09.wav`, `assets/audio/sonora/step_glass_10.wav`, `assets/audio/sonora/step_glass_11.wav`, `assets/audio/sonora/step_glass_12.wav`, `assets/audio/sonora/step_glass_13.wav`, `assets/audio/sonora/step_glass_14.wav`, `assets/audio/sonora/step_glass_15.wav`, `assets/audio/sonora/step_glass_16.wav`, `assets/audio/sonora/step_glass_17.wav`, `assets/audio/sonora/step_glass_18.wav`, `assets/audio/sonora/step_glass_19.wav`, `assets/audio/sonora/step_glass_20.wav`, `assets/audio/sonora/step_glass_21.wav`, `assets/audio/sonora/step_glass_22.wav`, `assets/audio/sonora/step_glass_23.wav`, `assets/audio/sonora/step_glass_24.wav`. Собственный звук / ИИ. Добавлен через Sonora Studio.
+
+## Контейнеры для лута · медицинская сумка-укладка (`assets/models/loot_containers`, 2026-11-13)
+
+- Модель — своя (`tools/loot_containers/medbag2.py` — форма, `lc3_bag_uv.py`, `lc3_bag_maps.py` — карты high-poly,
+  `medbag_game.py` — игровая сетка и запекание), исходники — `E:/Models Blender/ENVIRONMENT/RING_Loot_Containers`
+  (asset-state.md, finish-spec-bag.json). В игру — только запечённые карты.
+- Фототекстуры-основы (все CC0 1.0, ambientCG, Lennart Demes, https://ambientcg.com/view?id=<id>): Fabric041 (плетение
+  ткани), Metal044A (никель фурнитуры), Rubber002 (резина наконечников). Сырьё с license.txt — `_asset_src/textures/<id>/`.
+- Маски износа: ambientCG Smear001–008, SurfaceImperfections001–020 (CC0 1.0; библиотека владельца
+  `Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`, лицензии там же в `00_ЛИЦЕНЗИЯ_и_источники.txt`) и маски
+  владельца (свои): грязь и налёт, пыль, брызги, разводы протирания, ворс, следы резины, царапины, отпечатки ладоней.
+  Полный перечень файлов — `_asset_src/loot_containers/maps_v03/lc_bag/masks_used.json`.
+- Эмблема (белый крест в белом кольце на зелёном), ярлык «АРГО-МЕД» и надпись «ПЕРВАЯ ПОМОЩЬ» — вымышленные, шрифт
+  **DejaVu Sans Bold** (© Bitstream, изменения DejaVu — public domain; лицензия Bitstream Vera Fonts), запечены в карты.
