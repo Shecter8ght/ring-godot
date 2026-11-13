@@ -101,6 +101,95 @@ def prof(c):
     return max(0.0, 1.0 - c * c) ** 0.6
 
 
+SIMF = {}
+SIM_CACHE = "E:/Games/RING-godot/_asset_src/loot_containers/work_bag/sim_v3.json"
+
+
+def run_cloth_sim():
+    """Ткань на давлении с гравитацией: оболочка по грубой сетке (16 мм) на полу и на «вещах» разной высоты внутри;
+    возвращает идеальные положения вершин и смещения (sim − идеал). Результат кэшируется."""
+    if os.path.exists(SIM_CACHE):
+        d = json.load(open(SIM_CACHE, encoding="utf-8"))
+        return d["ideal"], d["disp"]
+    bm, info = build_shell(0.016, False)
+    verts = list(bm.verts)
+    ideal = [tuple(info[v][0]) for v in verts]
+    sc = bpy.context.scene
+    me = bpy.data.meshes.new("МС_ткань_сим")
+    bm.to_mesh(me)
+    bag = bpy.data.objects.new("МС_ткань_сим", me)
+    sc.collection.objects.link(bag)
+
+    def collider(name, mn, mx, r=0.0, fr=8.0):
+        b = bmesh.new()
+        L.bm_box(b, mn, mx)
+        m = bpy.data.meshes.new(name)
+        b.to_mesh(m)
+        o = bpy.data.objects.new(name, m)
+        sc.collection.objects.link(o)
+        o.modifiers.new("Столкновение", "COLLISION")
+        o.collision.thickness_outer = 0.004
+        o.collision.cloth_friction = fr
+        return o
+    collider("пол_сим", (-1, -1, -0.3), (1, 1, -0.002))
+    # вещи внутри (как у v01, со сдвигом и наклоном — неровно): ткань проседает на них неравномерно
+    collider("вещи1", (-0.246, -0.120, 0.020), (0.020, 0.128, 0.262))
+    collider("вещи2", (0.030, -0.128, 0.020), (0.250, 0.118, 0.270))
+    cl = bag.modifiers.new("Ткань", "CLOTH")
+    st = cl.settings
+    st.quality = 8
+    st.mass = 0.006
+    st.tension_stiffness, st.compression_stiffness, st.shear_stiffness = 60.0, 60.0, 30.0
+    st.bending_stiffness = 0.6
+    st.air_damping = 2.0
+    st.use_pressure = True
+    st.uniform_pressure_force = 0.2
+    st.pressure_factor = 1.0
+    cl.collision_settings.use_collision = True
+    cl.collision_settings.distance_min = 0.006
+    cl.collision_settings.use_self_collision = False
+    cl.collision_settings.collision_quality = 4
+    sc.frame_start, sc.frame_end = 1, 70
+    cl.point_cache.frame_start, cl.point_cache.frame_end = 1, 70
+    for f in range(1, 71):
+        sc.frame_set(f)
+    dg = bpy.context.evaluated_depsgraph_get()
+    done = bpy.data.meshes.new_from_object(bag.evaluated_get(dg), depsgraph=dg)
+    disp_ = [tuple(V(done.vertices[k].co) - V(ideal[k])) for k in range(len(verts))]
+    for o in list(bpy.data.objects):
+        if o.name.startswith(("МС_ткань_сим", "пол_сим", "вещи")):
+            bpy.data.objects.remove(o)
+    bpy.data.meshes.remove(done)
+    sc.frame_set(1)
+    bm.free()
+    json.dump({"ideal": ideal, "disp": disp_}, open(SIM_CACHE, "w", encoding="utf-8"))
+    return ideal, disp_
+
+
+def sim_lookup(p):
+    """Смещение ткани от симуляции в идеальной точке p: по ближайшей грани грубой сетки, взвешенно по вершинам."""
+    if "tree" not in SIMF:
+        ideal, d = run_cloth_sim()
+        # грани грубой сетки восстанавливаем заново (тот же порядок вершин)
+        bm, info = build_shell(0.016, False)
+        bm.verts.index_update()
+        polys = [tuple(v.index for v in f.verts) for f in bm.faces]
+        SIMF["ideal"] = [V(q) for q in ideal]
+        SIMF["d"] = [V(q) for q in d]
+        SIMF["polys"] = polys
+        SIMF["tree"] = BVHTree.FromPolygons(SIMF["ideal"], polys)
+        mags = [v.length for v in SIMF["d"]]
+        print("СИМ: смещение, мм: среднее %.1f, макс %.1f" % (1000 * sum(mags) / len(mags), 1000 * max(mags)), flush=True)
+        bm.free()
+    loc, nrm, fi, dist = SIMF["tree"].find_nearest(V(p))
+    ws, acc = 0.0, V((0, 0, 0))
+    for k in SIMF["polys"][fi]:
+        w = 1.0 / ((SIMF["ideal"][k] - loc).length + 2e-3) ** 2
+        acc += SIMF["d"][k] * w
+        ws += w
+    return acc / ws
+
+
 FOLDS = [
     # центр (идеальный), нормаль грани, направление складки, амплитуда, ширина поперёк, длина вдоль
     ((-0.205, -HY, 0.212), (0, -1, 0), (0.45, 0, -0.9), 0.0042, 0.013, 0.055),
@@ -115,14 +204,19 @@ FOLDS = [
 
 
 def disp(p: V, n: V, seed: int = 0) -> V:
-    """Смещение ткани: выпуклые наружу стенки, мягкая низкочастотная рябь, несколько крупных неравных складок, провис верха."""
+    """Ткань: смещение симуляции на давлении + блуждание линий рёбер ±5 мм + складки по направляющим + провис верха."""
     ax = (abs(n.x), abs(n.y), abs(n.z))
-    cx, cy, cz = p.x / HX, p.y / HY, (p.z - HZ) / HZ
-    bulge = (ax[1] ** 4) * 0.0062 * prof(cx) * prof(cz) + (ax[0] ** 4) * 0.0044 * prof(cy) * prof(cz) \
-        + (ax[2] ** 4) * (0.0046 if n.z > 0 else 0.0010) * prof(cx) * prof(cy)
+    cx, cy = p.x / HX, p.y / HY
+    cz = (max(p.z, 0.07) - HZ) / HZ                      # стенка не втягивается к низу — чёрная лента в одной плоскости со стенкой
+    bulge = (ax[1] ** 4) * 0.0050 * prof(cx) * prof(cz) + (ax[0] ** 4) * 0.0036 * prof(cy) * prof(cz) \
+        + (ax[2] ** 4) * (0.0030 if n.z > 0 else 0.0008) * prof(cx) * prof(cy)
     q = V(p)
-    w = 0.0019 * noise.noise(q * 8.0 + V((3.1, 1.7, 5.3))) + 0.0007 * noise.noise(q * 19.0 + V((7.7, 2.3, 1.1)))
-    out = V(p) + n * (bulge + w)
+    w = 0.0016 * noise.noise(q * 8.0 + V((3.1, 1.7, 5.3))) + 0.0006 * noise.noise(q * 19.0 + V((7.7, 2.3, 1.1)))
+    wander = V((noise.noise(q * 6.5 + V((1.3, 9.1, 4.4))), noise.noise(q * 6.5 + V((8.2, 2.5, 6.6))), noise.noise(q * 6.5 + V((5.5, 3.3, 7.7))))) * 0.0058
+    sd = sim_lookup(p)
+    wz = min(1.0, max(0.0, (p.z - 0.03) / 0.09))
+    wh = 0.25 if n.z < -0.6 else 1.0                       # стенки сжаты / выпучены по всей высоте, чёрная лента — в одной плоскости со стенкой
+    out = V(p) + V((sd.x * 0.55 * wh, sd.y * 0.55 * wh, sd.z * 0.25 * wz)) + n * (bulge + w) + wander
     for c, fn, fd, amp, sp, sa in FOLDS:
         fn_, fd_ = V(fn), V(fd).normalized()
         if n.dot(fn_) < 0.5:
@@ -131,15 +225,16 @@ def disp(p: V, n: V, seed: int = 0) -> V:
         al = r.dot(fd_)
         u = fd_.cross(fn_).normalized()
         dp = r.dot(u)
-        out += n * (amp * (dp / sp) * math.exp(-0.5 * (dp / sp) ** 2) * math.exp(-(al / sa) ** 2))
-    out.z -= 0.0062 * prof(cx) * prof(cy) * max(0.0, n.z)
+        out += n * (0.8 * amp * (dp / sp) * math.exp(-0.5 * (dp / sp) ** 2) * math.exp(-(al / sa) ** 2))
+    out.z -= 0.0035 * prof(cx) * prof(cy) * max(0.0, n.z)
     return out
 
 
-def build_shell():
+def build_shell(cell=CELL, fine=True):
     """Целая оболочка со всеми узлами; затем грани делятся по панелям. Возвращает {имя: bmesh} с идеальными данными."""
-    ns = [axis_nodes(HX, RC, 4, [-ZIPX, ZIPX], CELL), axis_nodes(HY, RC, 4, [ZIPY0, ZIPY1], CELL),
-          axis_nodes(HZ, RC, 4, [ZB - HZ], CELL)]
+    seg = 4 if fine else 2
+    ns = [axis_nodes(HX, RC, seg, [-ZIPX, ZIPX] if fine else [], cell), axis_nodes(HY, RC, seg, [ZIPY0, ZIPY1] if fine else [], cell),
+          axis_nodes(HZ, RC, seg, [ZB - HZ] if fine else [], cell)]
     ctr = V((0, 0, HZ))
     hs = (HX, HY, HZ)
     cache, info = {}, {}
@@ -841,8 +936,9 @@ def slider(acc, parent, fr, s_target, tab_dir, rnd, splay=0.0):
     d = (d * math.cos(splay) + b * math.sin(splay)).normalized()
     ez = (n - d * n.dot(d)).normalized()
     ey = ez.cross(d)
-    place_box(bm, (0.028, 0.0050, 0.0012), 0.0005, frame_matrix(piv + d * 0.0125 + ez * 0.0008, d, ey, ez), 0, seg=1)
-    place_box(acc.bm(parent, "tip"), (0.011, 0.0058, 0.0032), 0.0014, frame_matrix(piv + d * 0.0335 + ez * 0.0010, d, ey, ez), 0)
+    for (c0, ln, wd, yo) in ((0.007, 0.014, 0.0080, 0.0), (0.018, 0.008, 0.0022, 0.0029), (0.018, 0.008, 0.0022, -0.0029), (0.027, 0.010, 0.0080, 0.0)):
+        place_box(bm, (ln, wd, 0.0013), 0.0005, frame_matrix(piv + d * c0 + ey * yo + ez * 0.0008, d, ey, ez), 0, seg=1)
+    place_box(acc.bm(parent, "tip"), (0.010, 0.0058, 0.0032), 0.0014, frame_matrix(piv + d * 0.0365 + ez * 0.0010, d, ey, ez), 0)
 
 
 # ======================================================================== стропы
@@ -900,33 +996,37 @@ def stitch_rows(acc, parent, fr, w, th, z0, z1, rnd, thread="t_red", x_cross=Tru
         add_stitches(acc, parent, pts, nr, thread, 0.0032, False, 0.0, rnd)
 
 
-def handle(acc, parent, surf, rnd, side, alpha, xl=0.058, w=0.038, th=0.0022, zbot=0.172, length=0.15):
-    """Ручка из двух плоских строп 38 x 2,2 мм: ноги пришиты плашмя от zbot до верхнего ребра, выше — свободная петля ~180 мм,
-    ложится мягкой дугой наружу (alpha — наклон от вертикали у ребра); концы сходятся и лежат друг на друге. Без закрутки."""
+def handle(acc, parent, surf, rnd, side, alpha=0.0, xl=0.058, w=0.038, th=0.0022, zbot=0.172, length=0.15):
+    """Ручка из двух плоских строп 38 x 2,2 мм: ноги пришиты плашмя от zbot до верхнего ребра; свободные концы переваливаются через
+    ребро и обвисают вниз по стенке между ногами, сходясь к центру (никто сумку не держит). Без закрутки."""
     mode = "y-" if side < 0 else "y+"
-    zs = [zbot + i * 0.002 for i in range(int((0.287 - zbot) / 0.002) + 1)]
-    o = V((0, side, 0))
+    zs = [zbot + i * 0.002 for i in range(int((0.270 - zbot) / 0.002) + 1)]
     ex = V((1, 0, 0))
     out_frames = []
+    n_t = int(length / 0.002)
     for k, sx in enumerate((-1, 1)):
         pts, nrm = conform(surf, [V((sx * xl, 0, z)) for z in zs], mode, lift=th / 2 + 0.0012, it=10)
-        P = pts[-1]
-        n_steps = int(length / 0.002)
-        dx = -sx * (xl - 0.012) / n_steps / 0.002
-        free = []
-        for i in range(1, n_steps + 1):
-            s_ = i / n_steps
-            ang = alpha + math.radians(42) * s_ * s_
-            dv = V((dx, math.sin(ang) * side, math.cos(ang))).normalized()
-            P = P + dv * 0.002
-            free.append(P + o * (k * (th + 0.0004) * smooth01(s_ * 1.6)))
-        path = smooth_pts(pts + free, 2)
+        P0, N0 = pts[-1], nrm[-1]
+        tail, plan, lifts = [], [], []
+        for i in range(1, n_t + 1):
+            s_ = i / n_t
+            bump = math.sin(math.pi * min(s_ / 0.3, 1.0))
+            x = sx * (xl - (xl - 0.014) * smooth01(s_ * 1.8))
+            stack = k * (th + 0.0004) * smooth01(s_ * 3.0)
+            if s_ < 0.3:
+                tail.append(V((x, P0.y, P0.z + 0.006 * bump)) + N0 * (0.0012 + 0.009 * bump + stack) + V((0, 0, 0.0)))
+            else:
+                plan.append(V((x, 0, 0.270 - (s_ - 0.3) / 0.7 * 0.100)))
+                lifts.append(th / 2 + 0.0012 + stack)
+        tp, tn = conform(surf, plan, mode, lift=0.0, it=3)
+        tail += [a + nn * lf for a, nn, lf in zip(tp, tn, lifts)]
+        path = smooth_pts(pts + tail, 6)
         fr = strap_frames(path, [0.0] * len(path), nrm[0], ex, ex)
         acc.rib(parent, "webbing", fr, rect_profile(w, th, -th / 2), 0, closed_profile=True, chunk=1.2)
         lf = fr[:len(pts)]
         side_lines(acc, parent, lf, (-(w / 2 - 0.0042), w / 2 - 0.0042), "t_red", lift=th / 2 + 0.0003, rnd=rnd)
         stitch_rows(acc, parent, lf, w, th, zbot + 0.004, zbot + 0.034, rnd)
-        stitch_rows(acc, parent, lf, w, th, 0.256, 0.284, rnd)
+        stitch_rows(acc, parent, lf, w, th, 0.240, 0.266, rnd)
         out_frames.append(fr)
     return out_frames
 
@@ -964,8 +1064,8 @@ def reflect_strip(acc, parent, surf, rnd):
     xs = [-0.228 + i * 0.002 for i in range(int(0.456 / 0.002) + 1)]
     pts, nrm = conform(surf, [V((x, 0, 0.083)) for x in xs], "y-", lift=0.0004, it=3)
     fr = frames_on(pts, nrm)
-    acc.rib(parent, "reflect", fr, rect_profile(0.038, 0.0009), 0, closed_profile=True, chunk=0.9)
-    side_lines(acc, parent, fr, (-0.0155, 0.0155), "t_white", lift=0.0009 + 0.0003, rnd=rnd)
+    acc.rib(parent, "reflect", fr, rect_profile(0.025, 0.0009), 0, closed_profile=True, chunk=0.9)
+    side_lines(acc, parent, fr, (-0.0095, 0.0095), "t_white", lift=0.0009 + 0.0003, rnd=rnd)
 
 
 def disc_patch(acc, parent, surf, rnd, c, R=0.040):
@@ -1222,7 +1322,26 @@ def build_state(top, M, at, open_, label):
     return root
 
 
+def strap_clearance():
+    """Вершины строп и кантов глубже поверхности ткани (под ней): считаем число таких вершин."""
+    surf = SIM["surf"]
+    res = {}
+    for ob in bpy.data.objects:
+        if ob.type != "MESH" or ob.get("kind") not in ("webbing", "piping", "reflect"):
+            continue
+        if ob.name.endswith(".001"):
+            continue
+        bad = 0
+        for v in ob.data.vertices:
+            r = surf.near(ob.matrix_world @ v.co, 0.02)
+            if r and (ob.matrix_world @ v.co - r[0]).dot(r[1]) < -0.0003:
+                bad += 1
+        res[ob.name] = (bad, len(ob.data.vertices))
+    return res
+
+
 def check(roots):
+    print("ПЕРЕСЕЧЕНИЯ (вершин под тканью / всего):", strap_clearance())
     dg = bpy.context.evaluated_depsgraph_get()
     for root in roots:
         pts, tri = [], 0
@@ -1291,6 +1410,7 @@ def setup_render(neutral=True):
 FORM_VIEWS = [
     # имя, состояние, цель (в корне), дистанция, азимут, подъём, фокус
     ("34_closed", False, (0.0, 0.0, 0.16), 1.25, -22, 17, 45),
+    ("side", False, (0.0, 0.0, 0.16), 2.0, 90, 0, "ortho:0.62"),
     ("open", True, (0.0, 0.0, 0.2), 1.45, -28, 32, 40),
     ("zip", False, (-0.12, -0.112, 0.30), 0.30, -18, 38, 50),
     ("strap", False, (0.0, -0.145, 0.10), 0.42, -22, 8, 50),
@@ -1313,7 +1433,12 @@ def render_views(roots, folder, tag="form", views=FORM_VIEWS, only=None):
         a, e = math.radians(az), math.radians(el)
         cam.location = c + V((math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e))) * dist
         cam.rotation_euler = (c - cam.location).to_track_quat("-Z", "Y").to_euler()
-        cam.data.lens = lens
+        if isinstance(lens, str):
+            cam.data.type = 'ORTHO'
+            cam.data.ortho_scale = float(lens.split(':')[1])
+        else:
+            cam.data.type = 'PERSP'
+            cam.data.lens = lens
         cam.data.clip_start = 0.01
         sc.render.filepath = os.path.join(folder, f"{tag}_{name}.png")
         bpy.ops.render.render(write_still=True)

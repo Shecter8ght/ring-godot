@@ -340,15 +340,32 @@ def compose_A():
     col = np.where(is_band[..., None], np.minimum(col, capb), col)
     # ---- шероховатость
     gloss = smoothstep(25.0, 130.0, cur) * (0.3 + 0.9 * mid)
-    rough = 0.50 - 0.03 * wv + 0.02 * yarn
-    rough = rough + 0.05 * fade + 0.12 * dirt - 0.10 * low - 0.12 * gloss
-    rough = np.where(is_band, 0.62 + 0.03 * wv + 0.12 * dust, rough)
+    rough = 0.41 - 0.025 * wv + 0.015 * yarn
+    rough = rough + 0.04 * fade + 0.10 * dirt - 0.04 * low - 0.06 * gloss + 0.04 * (mid - 0.3)
+    rough = np.where(is_band, 0.47 - 0.02 * wv + 0.10 * dust, rough)
     rough = np.where(pr > 0.3, 0.75, rough)
-    rough = np.clip(rough, 0.22, 0.92)
+    rough = np.clip(rough, 0.30, 0.85)
     # ---- нормаль: плетение + рёбра ленты + мелкая рябь
     hgt = wv * 0.5 + 0.12 * yarn
     hgt = np.where(is_band, hgt + 0.9 * rib, hgt)
     nm = height_to_normal(hgt.astype(np.float32), 0.30)
+    # сморщивание вдоль швов: поперечные морщинки шагом 8–14 мм, глубина ~0,8 мм, затухают на ~12 мм от шва
+    pk = np.zeros(shape, np.float32)
+    for it in info:
+        if it["tag"] in ("flap", "pocket") and it["obj"].startswith("МС_клапан"):
+            pass
+        u0, u1, v0, v1 = it["umin"], it["umax"], it["vmin"], it["vmax"]
+        reg = (slice(max(0, it["y"] - 12), min(SIZE, it["y"] + it["h"] + 12)), slice(max(0, it["x"] - 12), min(SIZE, it["x"] + it["w"] + 12)))
+        uu, vv = um[reg], vm[reg]
+        for dist_, along, ph in ((uu - u0, vv, 1.0), (u1 - uu, vv, 2.3), (vv - v0, uu, 3.7), (v1 - vv, uu, 5.1)):
+            lam = 11.0 + 3.0 * np.sin(along / 37.0 + ph)
+            phase = 2 * math.pi * (along / lam) + 1.7 * np.sin(along / 23.0 + 2 * ph)
+            env = np.exp(-np.clip(dist_, 0, None) / 6.0) * (np.clip(dist_, -1, None) > -1)
+            pk[reg] += 0.8 * env * np.cos(phase) * (0.6 + 0.8 * (0.5 + 0.5 * np.sin(along / 15.0 + ph * 3)))
+    gxp = cv2.Sobel(pk, cv2.CV_32F, 1, 0, ksize=3) / 8.0 * d
+    gyp = cv2.Sobel(pk, cv2.CV_32F, 0, 1, ksize=3) / 8.0 * d
+    nm = np.stack([nm[..., 0] - gxp, nm[..., 1] + gyp, nm[..., 2]], -1)
+    nm = nm / np.maximum(np.linalg.norm(nm, axis=-1, keepdims=True), 1e-6)
     nm = np.where(cover[..., None], nm, np.array([0, 0, 1], np.float32))
     for arr_name, arr in (("col", col),):
         pass
@@ -458,11 +475,11 @@ def compose_B():
     put(M["спираль"], c, 0.33 + 0.2 * dirt)
     # металл: никель, царапины — маски Scratches/«Царапины» владельца
     m = M["металл"]
-    c = lin((176, 178, 180)) * ones3 * (0.9 + 0.1 * big)[..., None]
+    c = lin((205, 207, 210)) * ones3 * (0.92 + 0.08 * big)[..., None]
     c = c * (1 - 0.4 * scratch[..., None])
     c = c * (1 - 0.7 * dirt[..., None]) + lin((40, 36, 32)) * (0.7 * dirt[..., None])
     c = c * (1 - 0.5 * edge[..., None]) + lin((210, 212, 214)) * (0.5 * edge[..., None])
-    put(m, c, np.clip(0.34 + 0.4 * scratch + 0.3 * dirt, 0.2, 0.9), -scratch * 0.8)
+    put(m, c, np.clip(0.26 + 0.35 * scratch + 0.2 * dirt, 0.15, 0.8), -scratch * 0.8)
     metal = np.where(m, np.clip(1.0 - 0.6 * dirt, 0.4, 1.0), metal)
     # бирюзовая резина
     rb = load_gray(f"{TEX}/Rubber002/height_2k.jpg")
@@ -477,9 +494,9 @@ def compose_B():
     hx = np.abs(((a + (np.floor(b) % 2) * 0.5) % 1) - 0.5)
     hy = np.abs((b % 1) - 0.5)
     prism = np.clip(1 - 2 * np.maximum(hx * 1.7 + hy * 0.6, hy * 1.2), 0, 1)
-    wear = np.clip(smoothstep(0.3, 0.8, wipe) * 0.55 + dirt * 0.5 + edge * 0.3, 0, 1)
-    c = lin((196, 200, 196)) * ones3 * (0.9 + 0.15 * prism)[..., None]
-    c = c * (1 - 0.45 * wear[..., None]) + lin((98, 88, 78)) * (0.45 * wear[..., None])
+    wear = np.clip(smoothstep(0.3, 0.8, wipe) * 0.22 + dirt * 0.25 + edge * 0.15, 0, 1)
+    c = lin((228, 231, 228)) * ones3 * (0.94 + 0.08 * prism)[..., None]
+    c = c * (1 - 0.35 * wear[..., None]) + lin((150, 142, 132)) * (0.35 * wear[..., None])
     put(M["светоотр"], c, np.clip(0.28 + 0.55 * wear, 0.2, 0.9), prism * 1.2 * (1 - wear))
     # ярлык
     im_cache = {}
