@@ -10,6 +10,7 @@ import json
 import math
 import os
 import sys
+import zlib
 
 import bpy
 from mathutils import Vector
@@ -32,8 +33,10 @@ NORTH = [(0, 1.4, "P"), (1.4, 4.8, "W"), (4.8, 6.3, "P"), (6.3, 10.6, "LP"), (10
          (31.2, 34.6, "W"), (34.6, 36.0, "P")]
 # торец: плановая сетка 26 м, но у обоих углов по 1,5 м занимает возврат угловой панели южного / северного фасада,
 # поэтому торцевые пролёты отсчитываются от y = −11,5 (сетка плана минус 1,5 с каждой стороны)
-END = [(0, 4.1, "P"), (4.1, 5.9, "WV"), (5.9, 10.6, "P"), (10.6, 12.4, "WV"), (12.4, 17.1, "P"), (17.1, 18.9, "WV"),
-       (18.9, 23.0, "P")]      # три колонны равномерно: центры 5,0 / 11,5 / 18,0 от y = −11,5 (четверти полной ширины 26 м)
+# торец 26 м: угловой простенок | колонна окна в тёмной вертикали | простенок | группа из двух лоджий по центру | простенок | колонна | угловой
+# (сетка от y = −11,5: 1,5 + 3,0 + 3,0 + 8,0 + 3,0 + 3,0 + 1,5 = 23; швы панелей по 1,5 м; группа — лоджии 3,6 + простенок 0,8 + 3,6)
+END = [(0, 1.5, "P"), (1.5, 4.5, "WV"), (4.5, 7.5, "P"), (7.5, 11.1, "LP"), (11.1, 11.9, "P"), (11.9, 15.5, "LG"),
+       (15.5, 18.5, "P"), (18.5, 21.5, "WV"), (21.5, 23.0, "P")]
 END_Y0 = -11.5
 PORTAL = (-7.0, 7.0)
 PORTAL_OUT = 2.4
@@ -42,9 +45,11 @@ LIB = "E:/Models Blender/ENVIRONMENT/RING_Prospekt_Houses"
 # ---------------------------------------------------------------- сборка модулей
 def build_kit():
     kit.mod_window(3.5); kit.mod_window(3.4)
-    kit.mod_window(1.8, end=True)
-    kit.mod_loggia_perf(4.85); kit.mod_loggia_perf(3.9)
-    kit.mod_loggia_glass(4.85); kit.mod_loggia_glass(3.9)
+    kit.mod_window(3.0, end=True)
+    for v in "abcd":
+        kit.mod_window(3.5, variant=v)
+    kit.mod_loggia_perf(4.85); kit.mod_loggia_perf(3.9); kit.mod_loggia_perf(3.6)
+    kit.mod_loggia_glass(4.85); kit.mod_loggia_glass(3.9); kit.mod_loggia_glass(3.6)
     kit.mod_panel(1.5); kit.mod_panel(0.8)
     for c in ("L", "R"):
         kit.mod_panel(1.5, corner=c)
@@ -52,17 +57,25 @@ def build_kit():
     kit.mod_parapet(3.0); kit.mod_parapet(1.5)
 
 
-def key_for(kind, w, corner=None):
+def curtain_variant(face, floor, col, kind):
+    """Штора-заглушка вразнобой, но детерминированно: ~15 % окон без шторы (тёмные), остальным a…d (у лоджий a…c)."""
+    h = zlib.crc32(("%s|%d|%d" % (face, floor, col)).encode())
+    if h % 20 < 3:
+        return None
+    return "abcd"[(h >> 5) % (4 if kind in ("W", "WV") else 3)]
+
+
+def key_for(kind, w, corner=None, variant=None):
     if kind == "P":
         return kit.mod_panel(w, corner=corner)
     if kind == "W":
-        return kit.mod_window(w)
+        return kit.mod_window(w, variant=variant)
     if kind == "WV":
-        return kit.mod_window(w, end=True)
+        return kit.mod_window(w, end=True, variant=variant)
     if kind == "LP":
-        return kit.mod_loggia_perf(w)
+        return kit.mod_loggia_perf(w, variant=variant)
     if kind == "LG":
-        return kit.mod_loggia_glass(w)
+        return kit.mod_loggia_glass(w, variant=variant)
     raise KeyError(kind)
 
 
@@ -80,7 +93,7 @@ def expand(bays):
     i = 0
     while i < len(bays):
         a, b_, k = bays[i]
-        if k == "LP":
+        if k == "LP" and bays[i + 1][2] in ("WD", "LG"):
             j = i + 1
             tot = b_ - a
             if bays[j][2] == "WD":
@@ -108,9 +121,9 @@ def upper_floors(col, face, bays):
             corner = "L"
         if face in ("S", "N") and kind == "P" and i == n - 1:
             corner = "R"
-        m = key_for(kind, w, corner)
         for f in range(FLOORS_UP):
             z = HG + HF * f
+            m = key_for(kind, w, corner, curtain_variant(face, f, i, kind) if kind in ("W", "WV", "LP", "LG") else None)
             x, y = pos(a)
             inst(col, m, (x, y, z), rot, "%s_f%02d_%02d" % (face, f + 1, i), body=True)
 
@@ -260,10 +273,9 @@ def mod_portal():
         for zz in (0.9, 1.5):
             b.box(xh - 0.012, xh + 0.012, yf0 - 0.10, yf0 - 0.04, zz - 0.012, zz + 0.012, "steel")
     # тёплый интерьер за стеклом и потолочные светильники
-    b.box(x0 + fr, x1 - fr, -11.80, -11.78, z0 + 0.12, z1 - fr, "wood")
+    b.box(x0 + fr, x1 - fr, -11.80, -11.78, z0 + 0.12, z1 - fr, "panel_beige")
     b.box(x0 + fr, x1 - fr, -12.38, -11.80, 0.15, 0.17, "wood")
-    for xc in (-3.0, -1.0, 1.0):
-        b.box(xc - 0.6, xc + 0.6, -12.2, -12.0, 3.30, 3.33, "lamp")
+    b.box(x0 + 0.3, x1 - 0.3, -12.30, -11.60, 3.34, 3.38, "lamp")          # излучающая панель на потолке вестибюля
     kit.register("H7_PortalGlazing", b)
 
     # --- ступенчатая клумба справа от входа: три террасы-цветника 0,45 / 0,90 / 1,35 м, глубина по 0,7 м, длина 3,4 м
@@ -440,11 +452,13 @@ def build(out):
 
     # набор частей: модули в ряд (y = 200 — вне кадров дома), подписи — пустышки с именем
     cur = 60.0
-    for name in ("H_Window_3500", "H_WindowEnd_1800", "H_LoggiaPerf_4850", "H_LoggiaGlass_4850", "H_Panel_800", "H_Panel_1500",
+    for name in ("H_Window_3500", "H_Window_a_3500", "H_Window_b_3500", "H_Window_c_3500", "H_Window_d_3500", "H_WindowEnd_3000",
+                 "H_LoggiaPerf_3600", "H_LoggiaGlass_3600", "H_LoggiaPerf_4850", "H_LoggiaGlass_4850", "H_Panel_800", "H_Panel_1500",
                  "H_PanelCornerL_1500", "H_PanelCornerR_1500", "H_GroundPilaster", "H_GroundField_2500", "H_GroundCornerPost",
                  "H_Parapet_3000", "H7_ServiceDoor"):
-        w = {"H_Window_3500": 3.5, "H_WindowEnd_1800": 1.8, "H_LoggiaPerf_4850": 4.85, "H_LoggiaGlass_4850": 4.85,
-             "H_Panel_800": 0.8, "H_Parapet_3000": 3.0, "H7_ServiceDoor": 2.5, "H_GroundField_2500": 2.5,
+        w = {"H_Window_3500": 3.5, "H_Window_a_3500": 3.5, "H_Window_b_3500": 3.5, "H_Window_c_3500": 3.5, "H_Window_d_3500": 3.5,
+             "H_WindowEnd_3000": 3.0, "H_LoggiaPerf_3600": 3.6, "H_LoggiaGlass_3600": 3.6, "H_LoggiaPerf_4850": 4.85,
+             "H_LoggiaGlass_4850": 4.85, "H_Panel_800": 0.8, "H_Parapet_3000": 3.0, "H7_ServiceDoor": 2.5, "H_GroundField_2500": 2.5,
              "H_GroundPilaster": 0.5, "H_GroundCornerPost": 0.5}.get(name, 1.5)
         inst(kset, name, (cur, 200, 0), 0, name)
         lab = bpy.data.objects.new("LABEL " + name, None)
@@ -504,12 +518,16 @@ def setup_preview(prev, sc):
     sc.view_settings.exposure = -0.8
     sc.render.resolution_x, sc.render.resolution_y = 1600, 1000
     cams = {
-        "cam_court": ((-58, -66, 8), (-2, -6, 17), 28, None),
+        "cam_court": ((58, -66, 8), (2, -6, 17), 28, None),
+        "cam_court_sw": ((-58, -66, 8), (-2, -6, 17), 28, None),
         "cam_avenue": ((-6, 78, 1.7), (-6, 13, 1.7), 24, None),
+        "cam_north_east": ((64, 64, 9), (0, 0, 17), 28, None),
+        "cam_end_east": ((43, 0, 9.0), (18, 0, 19.0), 18, None),
+        "cam_end_west": ((-43, 0, 9.0), (-18, 0, 19.0), 18, None),
         "cam_portal": ((0.5, -21, 0.8), (0.5, -14.5, 3.4), 20, None),
+        "cam_planter": ((8.5, -19.0, 1.9), (4.0, -14.3, 0.8), 30, None),
+        "cam_plinth": ((22, -16.0, 1.2), (-6, -13.0, 2.6), 22, None),
         "cam_loggia": ((-6.0, -27, 14.5), (-6.5, -13, 18.0), 45, None),
-        "cam_end": ((78, -12, 3.0), (18, 0, 17), 30, None),
-        "cam_corner_up": ((-30, -30, 33), (-18, -13, 33), 35, None),
     }
     for n, (loc, tgt, lens, _) in cams.items():
         cd = bpy.data.cameras.new(n)
@@ -645,12 +663,12 @@ def render(prev_dir):
         sc.render.filepath = os.path.join(prev_dir, fname)
         bpy.ops.render.render(write_still=True)
 
-    for n in ("cam_court", "cam_avenue", "cam_portal", "cam_loggia", "cam_end", "cam_corner_up"):
+    for n in ("cam_court", "cam_court_sw", "cam_avenue", "cam_north_east", "cam_end_east", "cam_end_west", "cam_portal", "cam_planter", "cam_loggia"):
         shot(n, n + ".png")
     for n, f in (("ortho_south", "ortho_south.png"), ("ortho_north", "ortho_north.png"), ("ortho_east", "ortho_east.png")):
         shot(n, f, res=(1100, 1000))
     # набор частей: ортокамера с юга на ряд
-    for i, (x, sx, nm) in enumerate(((60, 24.0, "set_a"), (84, 30.0, "set_b"), (112, 28.0, "set_c"))):
+    for i, (x, sx, nm) in enumerate(((60, 28.0, "set_a"), (88, 28.0, "set_b"), (116, 28.0, "set_c"), (144, 28.0, "set_d"))):
         cd = bpy.data.cameras.new(nm)
         cd.type = "ORTHO"; cd.ortho_scale = sx; cd.clip_end = 600
         co = bpy.data.objects.new(nm, cd)
@@ -665,6 +683,8 @@ def render(prev_dir):
     sun.rotation_euler = (math.radians(75), math.radians(0), math.radians(-70))
     for n, f in (("cam_portal", "portal_grazing.png"), ("cam_loggia", "loggia_grazing.png")):
         shot(n, f)
+    sun.rotation_euler = (math.radians(82), 0, math.radians(-80))      # свет вдоль южного фасада
+    shot("cam_plinth", "cam_plinth.png")
 
 
 def main():

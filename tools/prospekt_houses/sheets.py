@@ -12,7 +12,7 @@ H = 760
 FONT = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 16)
 
 
-def sheet(name, ccrop, ours, ocrop, title):
+def sheet(name, ccrop, ours, ocrop, title, note="НАШЕ (Blender, форма)"):
     a = c.crop(ccrop)
     b = Image.open(form / ours).convert("RGB").crop(ocrop)
     a = a.resize((int(a.width * H / a.height), H), Image.LANCZOS)
@@ -21,12 +21,12 @@ def sheet(name, ccrop, ours, ocrop, title):
     im.paste(a, (10, 30)); im.paste(b, (a.width + 20, 30))
     d = ImageDraw.Draw(im)
     d.text((12, 6), "КОНЦЕПТ  " + title, fill=(0, 0, 0), font=FONT)
-    d.text((a.width + 22, 6), "НАШЕ (Blender, форма)", fill=(0, 0, 0), font=FONT)
+    d.text((a.width + 22, 6), note, fill=(0, 0, 0), font=FONT)
     im.save(form / name)
 
 
 sheet("сверка_front.png", (60, 5, 470, 500), "ortho_south.png", (170, 85, 930, 935), "FRONT")
 sheet("сверка_rear.png", (570, 5, 980, 500), "ortho_north.png", (170, 85, 930, 935), "REAR")
-sheet("сверка_right.png", (1090, 5, 1480, 500), "ortho_east.png", (225, 85, 835, 935), "RIGHT")
+sheet("сверка_right.png", (1090, 5, 1480, 500), "ortho_east.png", (225, 85, 835, 935), "RIGHT", "НАШЕ: торец под глубину 26 м; сравнима только тёмная вертикаль")
 sheet("сверка_portal.png", (1002, 545, 1536, 985), "cam_portal.png", (0, 0, 1600, 1000), "DETAIL входа")
 print("ok")

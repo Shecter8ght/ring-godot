@@ -28,11 +28,13 @@ MATS = {
     "alu_frame":   ((0.040, 0.042, 0.046, 1), 0.85, 0.38),
     "glass":       ((0.020, 0.040, 0.052, 1), 0.0, 0.04),
     "wood":        ((0.40, 0.19, 0.075, 1), 0.0, 0.60),
-    "concrete":    ((0.40, 0.385, 0.36, 1), 0.0, 0.92),
+    "concrete":    ((0.33, 0.318, 0.30, 1), 0.0, 0.92),
     "steel":       ((0.58, 0.59, 0.61, 1), 1.0, 0.34),
     "perf_metal":  ((0.060, 0.062, 0.068, 1), 0.85, 0.50),
     "interior":    ((0.060, 0.040, 0.028, 1), 0.0, 0.95),
     "lamp":        ((1.0, 0.80, 0.50, 1), 0.0, 0.40),
+    "штора_заглушка": ((0.86, 0.80, 0.68, 1), 0.0, 0.90),
+    "тюль_заглушка": ((0.62, 0.58, 0.50, 1), 0.0, 0.90),
     "земля":       ((0.115, 0.080, 0.050, 1), 0.0, 0.95),
     "зелень_заглушка": ((0.13, 0.30, 0.08, 1), 0.0, 0.80),
 }
@@ -293,9 +295,10 @@ def _frame_cells(b, x0, x1, z0, z1, y0, y1, fr, impost_x=None, transom_z=None, s
     b.box(x0 + fr, x1 - fr, y0, y1, z1 - fr, z1, "alu_frame", bev=0.003)
     xs = [x0 + fr]
     zs = [z0 + fr]
-    if impost_x is not None:
-        b.box(impost_x - fr * 0.6, impost_x + fr * 0.6, y0, y1, z0 + fr, z1 - fr, "alu_frame", bev=0.003)
-        xs += [impost_x - fr * 0.6, impost_x + fr * 0.6]
+    imps = [] if impost_x is None else (list(impost_x) if isinstance(impost_x, (list, tuple)) else [impost_x])
+    for ix in imps:
+        b.box(ix - fr * 0.6, ix + fr * 0.6, y0, y1, z0 + fr, z1 - fr, "alu_frame", bev=0.003)
+        xs += [ix - fr * 0.6, ix + fr * 0.6]
     xs.append(x1 - fr)
     if transom_z is not None:
         b.box(x0 + fr, x1 - fr, y0, y1, transom_z - fr * 0.5, transom_z + fr * 0.5, "alu_frame", bev=0.003)
@@ -310,18 +313,46 @@ def _frame_cells(b, x0, x1, z0, z1, y0, y1, fr, impost_x=None, transom_z=None, s
     return cells
 
 
-def mod_window(w, end=False):
-    """Пролёт «окно»: проём 2,0 × 1,9 (у торца 1,6 × 1,9 в тёмной вертикали), подоконник 0,80 м, откосы, две створки
-    с импостом, отлив, ниша за стеклом, подоконник и карниз для штор."""
-    name = "H_Window%s_%s" % ("End" if end else "", wkey(w))
+def _drape(b, xa, xb, z0, z1, y, mat, step=0.11, amp=0.02):
+    """Штора-заглушка: вертикальные полосы с чередующимся сдвигом (намёк на складки)."""
+    if xb - xa < 0.03:
+        return
+    n = max(1, int((xb - xa) / step))
+    sw = (xb - xa) / n
+    for i in range(n):
+        yy = y + (amp if i % 2 else 0.0)
+        b.box(xa + i * sw, xa + (i + 1) * sw * 0.985, yy, yy + 0.012, z0, z1, mat)
+
+
+def _curtains(b, variant, xa, xb, z0, z1, y):
+    """Варианты: a — обе задёрнуты, b — одна сдвинута, c — обе раздвинуты по краям, d — тюль на всё окно."""
+    mid = (xa + xb) / 2
+    m = "штора_заглушка"
+    if variant == "a":
+        _drape(b, xa, mid - 0.01, z0, z1, y, m)
+        _drape(b, mid + 0.01, xb, z0, z1, y, m)
+    elif variant == "b":
+        _drape(b, xa, xa + 0.28, z0, z1, y, m)
+        _drape(b, mid, xb, z0, z1, y, m)
+    elif variant == "c":
+        _drape(b, xa, xa + 0.30, z0, z1, y, m)
+        _drape(b, xb - 0.30, xb, z0, z1, y, m)
+    elif variant == "d":
+        _drape(b, xa, xb, z0, z1, y, "тюль_заглушка", step=0.25, amp=0.012)
+
+
+def mod_window(w, end=False, variant=None):
+    """Пролёт «окно»: проём 3,0 × 2,1 (у торца 2,6 × 2,1 в тёмной вертикали 3,0), подоконник 0,60, откосы, три части — глухая
+    середина и две створки по 0,8 с импостами, отлив, ниша за стеклом, подоконник и карниз; variant a…d — штора-заглушка за стеклом."""
+    name = "H_Window%s%s_%s" % ("End" if end else "", "_" + variant if variant else "", wkey(w))
     if name in MODULES:
         return name
     b = B(name)
     mat = "dark_panel" if end else "panel_beige"
-    ow = (w - 0.2) if end else 2.0
+    ow = (w - 0.4) if end else 3.0
     x0 = (w - ow) / 2
     x1 = x0 + ow
-    zs, ze = 0.8, 2.7
+    zs, ze = 0.6, 2.7
     clad(b, 0, w, 0, zs, mat)
     clad(b, 0, w, ze, HF, mat)
     clad(b, 0, x0, zs, ze, mat)
@@ -332,9 +363,11 @@ def mod_window(w, end=False):
     b.box(x0 + PT, x1 - PT, PT, rv, ze - PT, ze, mat, bev=0.003)
     b.box(x0 - 0.03, x1 + 0.03, -0.05, rv + 0.05, zs, zs + 0.03, "alu_frame", bev=0.004)      # отлив
     fr = 0.065
-    cells = _frame_cells(b, x0 + PT, x1 - PT, zs + 0.03, ze - PT, 0.25, 0.32, fr, impost_x=(x0 + x1) / 2)
+    cells = _frame_cells(b, x0 + PT, x1 - PT, zs + 0.03, ze - PT, 0.25, 0.32, fr, impost_x=[x0 + 0.8, x1 - 0.8])
     sf = 0.04
-    for k, (sx0, sx1, sz0, sz1) in enumerate(cells):          # обе створки с внутренней рамкой
+    for k, (sx0, sx1, sz0, sz1) in enumerate(cells):
+        if k == 1:
+            continue                                          # глухая середина без створки
         for (a0, a1, c0, c1) in ((sx0, sx0 + sf, sz0, sz1), (sx1 - sf, sx1, sz0, sz1),
                                  (sx0 + sf, sx1 - sf, sz0, sz0 + sf), (sx0 + sf, sx1 - sf, sz1 - sf, sz1)):
             b.box(a0, a1, 0.22, 0.25, c0, c1, "alu_frame", bev=0.002)
@@ -343,6 +376,8 @@ def mod_window(w, end=False):
     b.box(x0 + PT, x1 - PT, 0.90, 0.95, zs + 0.03, ze - PT, "interior")
     b.box(x0 + PT, x1 - PT, 0.34, 0.66, zs + 0.03, zs + 0.075, "interior", bev=0.004)        # подоконник
     b.box(x0 + PT + 0.05, x1 - PT - 0.05, 0.42, 0.50, ze - PT - 0.07, ze - PT - 0.03, "steel", bev=0.003)   # карниз
+    if variant:
+        _curtains(b, variant, x0 + PT + 0.03, x1 - PT - 0.03, zs + 0.06, ze - PT - 0.10, 0.45)
     register(name, b)
     return name
 
@@ -353,7 +388,7 @@ LSW = 0.12                # боковые стенки ниши
 LGLASS_Y = 1.15           # остекление: ниша глубиной 1,2 м
 
 
-def _loggia(b, w, glass):
+def _loggia(b, w, glass, variant=None):
     wood_w = 0.6
     # бежевая полоса торца плиты по низу и тёмная фасция по верху — заподлицо с фасадом, непрерывные по группе
     clad(b, 0, w, 0, LZ0, "panel_beige", split=99)
@@ -380,6 +415,8 @@ def _loggia(b, w, glass):
     impost = gx0 + (gx1 - gx0) * 0.45
     _frame_cells(b, gx0, gx1, LZ0 + 0.02, LZ1 - 0.04, LGLASS_Y, LGLASS_Y + 0.07, 0.06, impost_x=impost, transom_z=2.15)
     b.box(impost + 0.12, impost + 0.16, 1.10, 1.15, LZ0 + 0.95, LZ0 + 1.20, "steel", bev=0.002)
+    if variant:      # штора за остеклением (6 см за стеклом — глубже некуда: за ним задняя стена)
+        _curtains(b, variant, gx0 + 0.03, gx1 - 0.03, LZ0 + 0.05, LZ1 - 0.08, 1.28)
     # ограждение 1,1 м от низа проёма, в плоскости фасада, утоплено на 4–5 см
     y0, y1 = 0.04, 0.09
     zb, zt = LZ0, LZ0 + 1.10
@@ -401,22 +438,22 @@ def _loggia(b, w, glass):
             b.box(px[i] + 0.06, px[i + 1] - 0.02, 0.060, 0.070, zb + 0.10, zt - 0.04, "glass", bev=0.001)
 
 
-def mod_loggia_perf(w):
-    name = "H_LoggiaPerf_%s" % wkey(w)
+def mod_loggia_perf(w, variant=None):
+    name = "H_LoggiaPerf%s_%s" % ("_" + variant if variant else "", wkey(w))
     if name in MODULES:
         return name
     b = B(name)
-    _loggia(b, w, False)
+    _loggia(b, w, False, variant)
     register(name, b)
     return name
 
 
-def mod_loggia_glass(w):
-    name = "H_LoggiaGlass_%s" % wkey(w)
+def mod_loggia_glass(w, variant=None):
+    name = "H_LoggiaGlass%s_%s" % ("_" + variant if variant else "", wkey(w))
     if name in MODULES:
         return name
     b = B(name)
-    _loggia(b, w, True)
+    _loggia(b, w, True, variant)
     register(name, b)
     return name
 
