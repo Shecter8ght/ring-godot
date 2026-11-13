@@ -543,6 +543,10 @@ python -X utf8 tools/gen_loot_containers.py                    # каталог 
                                                               # (от 5 до 25 мин на процессоре); export — <предмет> и <предмет>_open (подвижное — узлы с осью: hinge — ось и угол, slide — ось и ход), LOD1 ≈ ¼ → assets/models/loot_containers;
                                                               # затем --import, medbag_imports.py, --import, gen_loot_containers.py, prospekt_loot_fit + prospekt_loot_kinds.py --fit (настенные модели — "wall": true в каталоге:
                                                               # подгонка ищет стену и вешает на Balance.LOOT_WALL_HEIGHT; вид register — касса, места с таблицей register); кадры из игры — prospekt_raid_shots с PROSPEKT_CLEAN=1 и PROSPEKT_FILL=4 (лампа у камеры)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/loot_containers/build_counters.py -- <файл.blend> [preview <папка>] [check]
+                                                              # опоры под кассу «Проспекта» (форма без текстур, в игру не внесены): прилавок торговый ПТ_ (ЛДСП 16 мм, 1500 × 600 × 900, ящик на телескопах)
+                                                              # и кассовый бокс супермаркета КБ_ (транспортёр, сканер, накопитель, стол кассира, стойка с номером); у каждого socket_register — место кассы;
+                                                              # детали — counters.py; для масштаба — касса партии 1 и фигура 1,75 м; check — габариты, пересечения, нормали, касса на опоре
 tools/godot.cmd --headless res://tools/loot_stats.tscn         # замер лута по настоящему ItemDb.roll: по таблице — среднее, медиана, p90, пустые %; по «Проспекту» — ожидаемая стоимость Loot_N (схроны × 4/12),
                                                               # категории и штуки ключевых вещей за рейд (LOOT_STATS_N=3000, LOOT_STATS_OUT=<json>, LOOT_STATS_MAP=<узел → таблица> — расчёт до внесения в сцену);
                                                               # числа до / после — docs/design/data/loot_stats_{before,after}.{json,txt}
