@@ -277,14 +277,27 @@ MAG_HAND_W = left_rest_world("mag")                  # левая с магаз�
 MAG_C0 = TW @ (Vector((-0.045, 0.0, -0.075)) - U * MAG_DROP)      # середина магазина при этом
 
 
-def gun_basis(roll, pitch, yaw, dx, dy, dz):
-    """Поза пистолета от покоя (крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м) → matrix_basis."""
+def gun_basis(roll, pitch, yaw, dx, dy, dz, base=None):
+    """Поза пистолета (крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м) → matrix_basis.
+    base = None — от покоя; base = матрица позы владельца (pose_shift) — поправки от неё: повороты в осях уже
+    наклонённого пистолета вокруг середины рукояти, сдвиги — в мире."""
     R = (Matrix.Rotation(math.radians(yaw), 4, Vector((0, 0, 1))) @ Matrix.Rotation(math.radians(pitch), 4, Vector((-1, 0, 0)))
          @ Matrix.Rotation(math.radians(roll), 4, Vector((0, -1, 0))))
-    D = Matrix.Translation(Vector((dx, dy, dz))) @ Matrix.Translation(GRIP_W) @ R @ Matrix.Translation(-GRIP_W)
+    D = (Matrix.Translation(Vector((dx, dy, dz))) @ (base if base is not None else Matrix.Identity(4))
+         @ Matrix.Translation(GRIP_W) @ R @ Matrix.Translation(-GRIP_W))
     wc.matrix = AWI @ D @ AW @ WC_REST
     update()
     return wc.matrix_basis.copy()
+
+
+def pose_shift(basis):
+    """matrix_basis кости Weapon_CTRL из позы владельца → сдвиг пистолета в мире относительно покоя (хвата)."""
+    wc.matrix_basis = basis
+    update()
+    D = AW @ wc.matrix @ WC_REST.inverted() @ AWI
+    wc.matrix_basis = B["grip"]["Weapon_CTRL"]
+    update()
+    return D
 
 
 # ================================================================ ключи
@@ -341,8 +354,8 @@ class Clip:
 
     def gun(self, keys):
         """Пистолет с правой кистью: (кадр, крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м)."""
-        for frame, *pose in keys:
-            self.bone("Weapon_CTRL", frame, gun_basis(*pose))
+        for frame, base, pose in keys:
+            self.bone("Weapon_CTRL", frame, gun_basis(*pose, base=base))
         return self
 
     def left(self, keys):
@@ -492,25 +505,56 @@ PRESENT = (56, 17, 10, 0.036, 0.056, 0.062)          # шахта навстре
 POUCH = ((0.17, -0.10, 1.34), (25, 10, -30))         # «подсумок»: слева внизу, за кадром
 POUCH2 = ((0.165, -0.105, 1.345), (27, 12, -28))
 
-if SHORT:                                            # кадры поз левой руки, где рука не дотягивается: пистолет — как в клипе
-    cant = gun_basis(*CANT)                           # до назначения действия: оно пересчитало бы позу при update()
+# Передёргивание затвора: пистолет ближе к середине кадра, завален влево (окно выбрасывателя к глазам), дуло вверх.
+# Это положение владелец ставит сам — Weapon_CTRL на кадре позы 51 («щепоть на затворе»); пока там пистолет стоит
+# как в хвате, сборщик пишет туда это умолчание. Рывки при оттягивании и отпускании — RACK_TUG (от этой позы).
+RACK = (-42, 18, 6, 0.065, 0.030, 0.050)
+RACK_TUG = dict(brace=dict(dy=-0.006, pitch=-1.0),                       # перед рывком правая подаёт пистолет вперёд
+                pulled=dict(dy=0.022, pitch=4.0, roll=-3.0, dz=0.004),   # затвор оттянут: пистолет уходит за левой рукой
+                slam=dict(dy=-0.018, pitch=-5.0, dz=-0.004),             # отпущен: пружина бросает пистолет вперёд, дуло клюёт
+                rebound=dict(dy=0.005, pitch=1.6))                       # отбой назад, потом покой
+
+
+def same_as_grip(name, bone="Weapon_CTRL"):
+    return max(abs(a - b) for ra, rb in zip(B[name][bone], B["grip"][bone]) for a, b in zip(ra, rb)) < 1e-5
+
+
+defaults = {}                                        # кадры поз левой руки, куда пишется поза пистолета по умолчанию
+if same_as_grip("pinch"):
+    defaults["pinch"] = (gun_basis(*RACK), "положение при передёргивании по умолчанию — правьте Weapon_CTRL на этом кадре")
+for name, mm in SHORT.items():
+    if name != "pinch" and same_as_grip(name):
+        defaults[name] = (gun_basis(*CANT), f"левая рука не дотягивалась на {mm:.0f} мм — пистолет наклонён к лицу, как в клипе")
+    elif name not in defaults:
+        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): левая рука не дотягивается на {mm:.0f} мм — придвиньте пистолет или кисть")
+if defaults:                                         # позы посчитаны до назначения действия: оно пересчитало бы их при update()
     assign(poses_act)
-    for name, mm in SHORT.items():
-        wc.matrix_basis = cant
+    for name, (basis, why) in defaults.items():
+        wc.matrix_basis = basis
         key_pose(wc, POSE_FRAMES[name])
-        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): левая рука не дотягивалась на {mm:.0f} мм — пистолет на этом кадре "
-            f"поставлен как в клипе (наклон к лицу); место кисти на пистолете не изменилось")
+        B[name]["Weapon_CTRL"] = basis.copy()
+        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): пистолет — {why}")
     assign(None)
-    wc.matrix_basis = B["grip"]["Weapon_CTRL"]
-    update()
+wc.matrix_basis = B["grip"]["Weapon_CTRL"]
+update()
+G_RACK = pose_shift(B["pinch"]["Weapon_CTRL"])       # пистолет при передёргивании — как на кадре позы 51
 
 
 def k(frame, pose, **d):
-    """Ключ пистолета: поза (крен, вверх, влево, dx, dy, dz) с поправками."""
-    v = list(pose)
+    """Ключ пистолета: поза (крен, вверх, влево, dx, dy, dz) или поза владельца (матрица pose_shift) с поправками."""
+    base = pose if isinstance(pose, Matrix) else None
+    v = [0.0] * 6 if base is not None else list(pose)
     for key, add in d.items():
-        v["rpyxzq".index(key) if False else ("roll", "pitch", "yaw", "dx", "dy", "dz").index(key)] += add
-    return (frame, *v)
+        v[("roll", "pitch", "yaw", "dx", "dy", "dz").index(key)] += add
+    return (frame, base, tuple(v))
+
+
+def rack_gun(base, hold, pull, back, release):
+    """Ключи пистолета на передёргивание: встал в позу base (hold) → подал вперёд (pull, начало рывка) → затвор сзади,
+    пистолет ушёл за левой рукой (back … release) → бросок вперёд после отпускания → отбой → покой в позе."""
+    return [k(hold, base), k(pull, base, **RACK_TUG["brace"]), k(back, base, **RACK_TUG["pulled"]),
+            k(release, base, **RACK_TUG["pulled"]), k(release + 3, base, **RACK_TUG["slam"]),
+            k(release + 6, base, **RACK_TUG["rebound"]), k(release + 10, base)]
 
 
 def swap(c, t, cant_from=None):
@@ -532,7 +576,7 @@ def reload_tactical(name="Reload_Tactical", full=None):
     """Неполная (п. 2) и полная (п. 1): full = None | 'stop' — затвор на задержке, большой правой опускает рычаг |
     'rack' — затвор закрыт, левая передёргивает щепотью."""
     t = 13
-    end = {None: 104, "stop": 118, "rack": 132}[full]
+    end = {None: 104, "stop": 118, "rack": 138}[full]
     c = Clip(name, end, dict(slide=1.0, stop=1.0) if full == "stop" else None)
     c.fingers(R_THUMB, [(5, "grip"), (11, "catch"), (t + 5, "catch"), (t + 11, "grip")])
     seat = swap(c, t)
@@ -554,14 +598,13 @@ def reload_tactical(name="Reload_Tactical", full=None):
         c.mark(slide_release=p + 1)
     else:
         p = seat + 16                                 # левая взяла затвор щепотью
-        RACK = (-8, 6, 14, 0.024, 0.046, 0.040)
-        c.left([(p, ("pinch", 0.0)), (p + 3, ("pinch", 0.0)), (p + 8, ("pinch", 1.0)), (p + 10, ("pinch", 1.0, (-0.012, 0.012, 0.014))),
-                (p + 28, "grip")])
-        c.fingers(L_FING, [(p - 6, "free"), (p, "pinch"), (p + 8, "pinch"), (p + 11, "free"), (p + 28, "grip")])
-        c.part("slide", [(p + 3, 0), (p + 8, 1), (p + 9, 1), (p + 11, 0)])
-        g += [k(p, RACK), k(p + 3, RACK, dy=-0.004), k(p + 8, RACK, pitch=2, dy=0.010), k(p + 12, RACK, pitch=-3, dy=-0.012),
-              k(p + 16, RACK), k(120, REST, roll=-3, pitch=1, dx=0.002, dy=0.003, dz=0.003), k(124, REST, roll=1.2, pitch=-0.4), k(128, REST)]
-        c.mark(rack_pull=p + 3, rack_release=p + 9)
+        c.left([(p, ("pinch", 0.0)), (p + 4, ("pinch", 0.0)), (p + 10, ("pinch", 1.0)), (p + 12, ("pinch", 1.0, (-0.012, 0.012, 0.014))),
+                (p + 32, "grip")])
+        c.fingers(L_FING, [(p - 6, "free"), (p, "pinch"), (p + 10, "pinch"), (p + 13, "free"), (p + 32, "grip")])
+        c.part("slide", [(p + 4, 0), (p + 10, 1), (p + 11, 1), (p + 13, 0)])
+        g += rack_gun(G_RACK, p, p + 4, p + 10, p + 11)
+        g += [k(end - 12, REST, roll=-3, pitch=1, dx=0.002, dy=0.003, dz=0.003), k(end - 8, REST, roll=1.2, pitch=-0.4), k(end - 4, REST)]
+        c.mark(rack_pull=p + 4, rack_release=p + 11)
     c.gun(g)
     return c.finish()
 
@@ -642,19 +685,18 @@ def inspect():
 def rack(name="Slide_Rack", jam=False):
     """Передёрнуть затвор щепотью (досыл при закрытом затворе); jam — заклинивший затвор (п. 7): гильза в окне,
     затвор недозакрыт — отвести назад, гильза выпадает, отпустить."""
-    c = Clip(name, 52, dict(slide=JAM_OPEN) if jam else None)
+    c = Clip(name, 58, dict(slide=JAM_OPEN) if jam else None)
     s0 = JAM_OPEN if jam else 0.0
-    R = (30, 6, 12, 0.022, 0.044, 0.040) if jam else (-8, 6, 14, 0.024, 0.046, 0.040)
-    c.left([(4, "grip"), (14, ("pinch", s0)), (16, ("pinch", s0)), (21, ("pinch", 1.0)), (23, ("pinch", 1.0, (-0.012, 0.012, 0.014))), (42, "grip")])
-    c.fingers(L_FING, [(4, "grip"), (9, "free"), (14, "pinch"), (21, "pinch"), (24, "free"), (42, "grip")])
-    c.part("slide", [(16, s0), (21, 1), (22, 1), (24, 0)])
-    c.gun([k(1, REST), k(12, R), k(16, R, dy=-0.004), k(21, R, pitch=2, dy=0.010), k(25, R, pitch=-3, dy=-0.012), k(29, R),
-           k(42, REST, roll=3, pitch=1, dz=0.003), k(46, REST, roll=-1.2, pitch=-0.4), k(49, REST)])
+    c.left([(4, "grip"), (14, ("pinch", s0)), (17, ("pinch", s0)), (23, ("pinch", 1.0)), (25, ("pinch", 1.0, (-0.012, 0.012, 0.014))), (46, "grip")])
+    c.fingers(L_FING, [(4, "grip"), (9, "free"), (14, "pinch"), (23, "pinch"), (26, "free"), (46, "grip")])
+    c.part("slide", [(17, s0), (23, 1), (24, 1), (26, 0)])
+    c.gun([k(1, REST)] + rack_gun(G_RACK, 13, 17, 23, 24)
+          + [k(47, REST, roll=3, pitch=1, dz=0.003), k(51, REST, roll=-1.2, pitch=-0.4), k(54, REST)])
     if jam:
-        c.scale("JamCase", [(1, 1), (34, 0)])
-        c.fly("JamCase", [(1, "rest", (0, 0, 0)), (18, "rest", (0, 0, 0)), (21, ("w", (-0.03, 0.01, -0.02)), (40, 20, 60)),
-                          (26, ("w", (-0.06, 0.02, -0.14)), (120, 60, 150)), (33, ("w", (-0.05, 0.02, -0.34)), (220, 110, 260))])
-    c.mark(pinch=14, pull=16, case_out=19 if jam else 0, release=22)
+        c.scale("JamCase", [(1, 1), (36, 0)])
+        c.fly("JamCase", [(1, "rest", (0, 0, 0)), (20, "rest", (0, 0, 0)), (23, ("w", (-0.03, 0.01, -0.02)), (40, 20, 60)),
+                          (28, ("w", (-0.06, 0.02, -0.14)), (120, 60, 150)), (35, ("w", (-0.05, 0.02, -0.34)), (220, 110, 260))])
+    c.mark(pinch=14, pull=17, case_out=20 if jam else 0, release=24)
     return c.finish()
 
 
@@ -757,7 +799,10 @@ lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".
           "    41 — левая рука с магазином: пальцы и место кисти. Магазин на этом кадре стоит на месте (вышел из шахты",
           "         на 55 мм) и за кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
           "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
-          "    На кадрах 41–61 пистолет (Weapon_CTRL) можно наклонять как удобно — в клипы это не идёт, кисть едет с ним.",
+          "    51 — ещё и ПИСТОЛЕТ (Weapon_CTRL): как он стоит, пока левая тянет затвор (ближе к середине, завален влево,",
+          "         дуло вверх). Это идёт в клипы Reload_Full_Rack и Slide_Rack; кисть едет вместе с пистолетом.",
+          "         Рывки при оттягивании и отпускании — числа RACK_TUG в build_clips.py.",
+          "    На кадрах 41, 46, 61 пистолет можно наклонять как удобно — в клипы это не идёт.",
           "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
           "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
 txt.from_string("\n".join(lines))
