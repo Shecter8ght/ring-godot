@@ -481,6 +481,11 @@ python -X utf8 tools/prospekt_house7_plan.py                 # «Проспек�
                                                               # «Проспект», дом 7 — форма без текстур (набор частей фасада H_* для всех домов серии + свои узлы: портал, служебная дверь, кровля):
                                                               # tools/prospekt_houses/kit.py (модули) и house7.py (сборка из экземпляров, check — габарит / этажи / оболочки, preview — камеры и ортофасады);
                                                               # python -X utf8 tools/prospekt_houses/sheets.py <папка Просмотр/form> — листы сверки с концептом; файл и кадры — E:/Models Blender/ENVIRONMENT/RING_Prospekt_Houses
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/prospekt_houses/house7_finish.py -- <выход.blend> [preview <папка>] [only cam,cam] [res 1400x875] [samples 64]
+                                                              # «Проспект», дом 7 — материалы v01 поверх принятой формы (форму-файл не трогает): плиточные фото-наборы CC0 по мировым координатам
+                                                              # (tools/prospekt_houses/materials.py) + фото-маски владельца, грязь по форме, декали, вестибюль, клумба с растениями, двор, мир с HDRI, кадры Cycles;
+                                                              # карты и маски готовит python -X utf8 tools/prospekt_houses/prep_textures.py → E:/Models Blender/ENVIRONMENT/RING_Prospekt_Houses/textures;
+                                                              # листы сверки с концептом и замер цвета — python -X utf8 tools/prospekt_houses/sheets_finish.py <папка Просмотр/finish>
 python -X utf8 tools/prospekt_north_side_plan.py              # «Проспект», северная сторона проспекта: чертежи предложения — квартал, развёртка
                                                               # и карманы, банк «Капитал» по этажам, автомойка «Блеск» → docs/design/prospekt_north_*.png;
                                                               # в сцену не внесено (docs/design/prospekt_map.md §22)
