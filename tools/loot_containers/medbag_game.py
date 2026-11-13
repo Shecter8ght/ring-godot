@@ -222,28 +222,7 @@ def stage_bake() -> None:
 # ------------------------------------------------------------------ экспорт
 
 def material():
-    m = bpy.data.materials.get(MODEL) or bpy.data.materials.new(MODEL)
-    m.use_nodes = True
-    nt = m.node_tree
-    for n in list(nt.nodes):
-        if n.type not in ("OUTPUT_MATERIAL", "BSDF_PRINCIPLED"):
-            nt.nodes.remove(n)
-    b = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
-
-    def img(suffix, non_color):
-        n = nt.nodes.new("ShaderNodeTexImage")
-        n.image = bpy.data.images.load(f"{MAPS}/{MODEL}_{suffix}.png", check_existing=True)
-        n.image.colorspace_settings.name = "Non-Color" if non_color else "sRGB"
-        return n
-    nt.links.new(img("baseColor", False).outputs["Color"], b.inputs["Base Color"])
-    sep = nt.nodes.new("ShaderNodeSeparateColor")
-    nt.links.new(img("occlusionRoughnessMetallic", True).outputs["Color"], sep.inputs["Color"])
-    nt.links.new(sep.outputs["Green"], b.inputs["Roughness"])
-    nt.links.new(sep.outputs["Blue"], b.inputs["Metallic"])
-    nm = nt.nodes.new("ShaderNodeNormalMap")
-    nt.links.new(img("normal", True).outputs["Color"], nm.inputs["Color"])
-    nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
-    return m
+    return G.game_material(MODEL, MAPS)
 
 
 def dec_lod(ob, ratio: float, name: str):

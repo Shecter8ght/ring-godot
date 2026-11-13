@@ -412,7 +412,8 @@
    },
    "dir": "res://assets/models/loot_containers",
    "index": "res://assets/models/loot_containers/loot_containers_models.json",
-   "lod": 14.0
+   "lod": 14.0,
+   "support": true
   },
   "lc_aid": {
    "open": "lc_aid_open",

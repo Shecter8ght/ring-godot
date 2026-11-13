@@ -144,6 +144,33 @@ func _fit(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Dictionary) 
 	var floor_y: float = _floor(space, pos)
 	if floor_y == INF:
 		return {"ok": false, "why": "нет пола", "yaw": 0.0, "drop": 0.0}
+	if bool(spec.get("support", false)):
+		# модель «на опоре» (касса): под местом должна быть твёрдая поверхность на высоте Balance.LOOT_SUPPORT_RANGE над полом
+		# и достаточно широкая под габарит; пола под ногами мало — касса на плитке не стоит
+		var rng: Array = Balance.LOOT_SUPPORT_RANGE
+		# опору отличаем от плиты пола (под полом тоже что-то есть): вокруг места, дальше габарита, поверхность должна обрываться вниз
+		# на 0,3–1,2 м хотя бы в половине направлений (край прилавка, стола), а не тянуться ровно, как пол
+		var ring_r: float = maxf(_union(spec).size.x, _union(spec).size.z) * 0.5 + 0.35
+		var lower: Array[float] = []
+		var level: int = 0
+		for k in range(8):
+			var a: float = float(k) * PI * 0.25
+			var p0: Vector3 = Vector3(pos.x + cos(a) * ring_r, floor_y + 0.1, pos.z + sin(a) * ring_r)
+			var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(p0, p0 + Vector3(0, -2.5, 0), 1))
+			var y: float = -INF if hit.is_empty() else (hit.position as Vector3).y
+			if y > floor_y - 0.05:
+				level += 1
+			elif floor_y - y >= float(rng[0]) and floor_y - y <= float(rng[1]):
+				lower.append(floor_y - y)
+		if lower.size() < 4:
+			return {"ok": false, "why": "нет опоры: это пол или широкая поверхность (обрыв вниз %.1f–%.1f м в %d из 8 направлений, ровно в %d)" % [float(rng[0]), float(rng[1]), lower.size(), level], "yaw": 0.0, "drop": 0.0}
+		var half: Vector3 = _union(spec).size * 0.5
+		for sx in [-1.0, 1.0]:
+			for sz in [-1.0, 1.0]:
+				var p: Vector3 = Vector3(pos.x + sx * half.x * 0.9, floor_y + 0.1, pos.z + sz * half.z * 0.9)
+				var h: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(p, p + Vector3(0, -0.3, 0), 1))
+				if h.is_empty():
+					return {"ok": false, "why": "нет опоры: поверхность уже кассы", "yaw": 0.0, "drop": 0.0}
 	var drop: float = pos.y - floor_y
 	var box: AABB = _union(spec)
 	# днище мешка и ящика чуть ниже опоры (прогиб, ножки): проверяем только то, что выше 5 см от пола

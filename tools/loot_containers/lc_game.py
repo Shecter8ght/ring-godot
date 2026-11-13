@@ -239,7 +239,8 @@ def cluster_movers(low_c: list) -> list:
                 break
         else:
             out.append({"R": r, "t": t, "parts": [o]})
-    return out
+    # крохотные группы (промежуточная рейка картотеки, 12 треугольников) отдельным узлом не нужны: остаются неподвижными
+    return [c for c in out if sum(len(p.data.polygons) for p in c["parts"]) >= 40]
 
 
 def hinge_of(r: np.ndarray, t: np.ndarray):

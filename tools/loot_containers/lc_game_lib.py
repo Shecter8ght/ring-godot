@@ -256,6 +256,13 @@ def game_material(name: str, maps_dir: str, emissive: bool = False):
     nt.links.new(img("occlusionRoughnessMetallic", True).outputs["Color"], sep.inputs["Color"])
     nt.links.new(sep.outputs["Green"], b.inputs["Roughness"])
     nt.links.new(sep.outputs["Blue"], b.inputs["Metallic"])
+    # затенение из канала R той же карты: экспортёр glTF читает его из группы «glTF Material Output» (occlusionTexture)
+    grp = bpy.data.node_groups.get("glTF Material Output") or bpy.data.node_groups.new("glTF Material Output", "ShaderNodeTree")
+    if "Occlusion" not in [i.name for i in grp.interface.items_tree]:
+        grp.interface.new_socket("Occlusion", in_out="INPUT", socket_type="NodeSocketFloat")
+    gn = nt.nodes.new("ShaderNodeGroup")
+    gn.node_tree = grp
+    nt.links.new(sep.outputs["Red"], gn.inputs["Occlusion"])
     nm = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(img("normal", True).outputs["Color"], nm.inputs["Color"])
     nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])

@@ -2,7 +2,7 @@
 
     python -X utf8 tools/loot_containers/medbag_imports.py, затем ещё раз `tools/godot.cmd --headless --import`.
 
-Сжатие VRAM и mip-уровни; у нормалей — флаг карты нормалей (RGTC); у ORM — сглаживание шероховатости по нормали, канал
+Сжатие VRAM и mip-уровни; у моделей — без автоматических LOD (generate_lods=false: лоскуты вместо рисунка); у нормалей — флаг карты нормалей (RGTC); у ORM — сглаживание шероховатости по нормали, канал
 явно (зелёный: значение 8, которое пишет редактор, фильтр выключает — навык godot-asset-preparation).
 """
 import re
@@ -31,6 +31,13 @@ for f in sorted(D.glob("*.webp.import")):
     elif base.endswith("_occlusionRoughnessMetallic.webp"):
         t = setp(t, "roughness/mode", "3")
         t = setp(t, "roughness/src_normal", f'"{RES}{base.replace("_occlusionRoughnessMetallic", "_normal")}"')
+    f.write_text(t, encoding="utf-8", newline="\n")
+    n += 1
+# модели: своих LOD1 хватает (узлы *_lod1), автоматические LOD движка упрощают сетку, не глядя на швы развёртки, —
+# на маленьких предметах уже с 1–2 м вместо рисунка лоскуты разных островов
+for f in sorted(D.parent.glob("*.gltf.import")):
+    t = f.read_text(encoding="utf-8")
+    t = setp(t, "meshes/generate_lods", "false")
     f.write_text(t, encoding="utf-8", newline="\n")
     n += 1
 print("IMPORTS loot_containers", n)

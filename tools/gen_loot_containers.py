@@ -35,6 +35,7 @@ LOOT_MODELS = {
     "lc_aid": ("lc_aid_open", [""]),
     "lc_cell": ("lc_cell_open", [""]),   # встраиваемая в стену ячейка: только в каталоге, ни к какому виду не подключена
 }
+SUPPORT_MODELS = {"lc_cash"}   # стоят только на опоре (прилавок, стол): подгонка без опоры оставляет бокс (Balance.LOOT_SUPPORT_RANGE)
 WALL_MODELS = {"lc_aid"}   # висят на стене: подгонка ищет стену и высоту Balance.LOOT_WALL_HEIGHT
 LOD_DIST = 14.0   # дальше — узлы *_lod1 (≈ ¼ треугольников)
 # вид -> модель по умолчанию ("" — модели пока нет)
@@ -62,6 +63,8 @@ for m, (op, variants) in LOOT_MODELS.items():
                  "index": LOOT_DIR + "/loot_containers_models.json", "lod": LOD_DIST}
     if m in WALL_MODELS:
         models[m]["wall"] = True
+    if m in SUPPORT_MODELS:
+        models[m]["support"] = True
 out = {"version": 1, "dir": "res://assets/models/dorm/furniture", "index": "res://assets/models/dorm/furniture/furniture.json",
        "far": 45.0, "models": models, "kinds": {k: {"model": v} for k, v in KINDS.items()}}
 open(ROOT / "data/loot_containers.json", "w", encoding="utf8", newline="\n").write(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
