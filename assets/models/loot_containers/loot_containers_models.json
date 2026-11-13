@@ -1,18 +1,18 @@
 {
  "lc_medbag": {
   "file": "res://assets/models/loot_containers/lc_medbag.gltf",
-  "triangles": 7954,
-  "triangles_lod1": 1956,
+  "triangles": 7390,
+  "triangles_lod1": 1824,
   "aabb": {
    "center": [
     0.002,
     0.1496,
-    0.0038
+    0.0037
    ],
    "size": [
     0.6583,
-    0.3082,
-    0.3599
+    0.3083,
+    0.3602
    ]
   },
   "material": "lc_medbag",
@@ -22,8 +22,8 @@
  },
  "lc_medbag_open": {
   "file": "res://assets/models/loot_containers/lc_medbag_open.gltf",
-  "triangles": 7954,
-  "triangles_lod1": 1956,
+  "triangles": 7390,
+  "triangles_lod1": 1824,
   "aabb": {
    "center": [
     0.002,
@@ -32,7 +32,7 @@
    ],
    "size": [
     0.6583,
-    0.5027,
+    0.5028,
     0.4044
    ]
   },
@@ -70,6 +70,540 @@
      0.0
     ],
     "open": 110.0
+   }
+  ]
+ },
+ "lc_safe": {
+  "file": "res://assets/models/loot_containers/lc_safe.gltf",
+  "triangles": 4666,
+  "triangles_lod1": 1217,
+  "aabb": {
+   "center": [
+    0.0,
+    0.3499,
+    0.0108
+   ],
+   "size": [
+    0.4998,
+    0.6999,
+    0.4714
+   ]
+  },
+  "material": "lc_safe",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_safe_open": {
+  "file": "res://assets/models/loot_containers/lc_safe_open.gltf",
+  "triangles": 4666,
+  "triangles_lod1": 1638,
+  "aabb": {
+   "center": [
+    -0.0441,
+    0.3499,
+    0.233
+   ],
+   "size": [
+    0.588,
+    0.6999,
+    0.9158
+   ]
+  },
+  "material": "lc_safe",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "дверца",
+    "kind": "hinge",
+    "pivot": [
+     -0.23,
+     0.0,
+     0.2335
+    ],
+    "axis": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "open": 105.0
+   },
+   {
+    "node": "дверца_lod1",
+    "kind": "hinge",
+    "pivot": [
+     -0.23,
+     0.0,
+     0.2335
+    ],
+    "axis": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "open": 105.0
+   },
+   {
+    "node": "трейзер",
+    "kind": "hinge",
+    "pivot": [
+     -0.243,
+     0.0,
+     0.167
+    ],
+    "axis": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "open": 28.0
+   },
+   {
+    "node": "трейзер_lod1",
+    "kind": "hinge",
+    "pivot": [
+     -0.243,
+     0.0,
+     0.167
+    ],
+    "axis": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "open": 28.0
+   }
+  ]
+ },
+ "lc_aid": {
+  "file": "res://assets/models/loot_containers/lc_aid.gltf",
+  "triangles": 1746,
+  "triangles_lod1": 436,
+  "aabb": {
+   "center": [
+    -0.0044,
+    0.0,
+    0.0569
+   ],
+   "size": [
+    0.3647,
+    0.508,
+    0.1138
+   ]
+  },
+  "material": "lc_aid",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_aid_open": {
+  "file": "res://assets/models/loot_containers/lc_aid_open.gltf",
+  "triangles": 1746,
+  "triangles_lod1": 440,
+  "aabb": {
+   "center": [
+    -0.0661,
+    0.0,
+    0.221
+   ],
+   "size": [
+    0.4882,
+    0.508,
+    0.442
+   ]
+  },
+  "material": "lc_aid",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "дверца",
+    "kind": "hinge",
+    "pivot": [
+     -0.183,
+     -0.0,
+     0.099
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 110.0
+   },
+   {
+    "node": "дверца_lod1",
+    "kind": "hinge",
+    "pivot": [
+     -0.183,
+     -0.0,
+     0.099
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 110.0
+   }
+  ]
+ },
+ "lc_cell": {
+  "file": "res://assets/models/loot_containers/lc_cell.gltf",
+  "triangles": 2304,
+  "triangles_lod1": 576,
+  "aabb": {
+   "center": [
+    0.0,
+    0.13,
+    -0.109
+   ],
+   "size": [
+    0.3599,
+    0.26,
+    0.2558
+   ]
+  },
+  "material": "lc_cell",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_cell_open": {
+  "file": "res://assets/models/loot_containers/lc_cell_open.gltf",
+  "triangles": 2304,
+  "triangles_lod1": 574,
+  "aabb": {
+   "center": [
+    -0.0358,
+    0.13,
+    0.0295
+   ],
+   "size": [
+    0.4316,
+    0.26,
+    0.5329
+   ]
+  },
+  "material": "lc_cell",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "дверца",
+    "kind": "hinge",
+    "pivot": [
+     -0.15,
+     -0.0,
+     0.002
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 110.0
+   },
+   {
+    "node": "дверца_lod1",
+    "kind": "hinge",
+    "pivot": [
+     -0.15,
+     -0.0,
+     0.002
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 110.0
+   }
+  ]
+ },
+ "lc_gun": {
+  "file": "res://assets/models/loot_containers/lc_gun.gltf",
+  "triangles": 5650,
+  "triangles_lod1": 1412,
+  "aabb": {
+   "center": [
+    0.0,
+    0.9,
+    0.0105
+   ],
+   "size": [
+    0.8,
+    1.8,
+    0.471
+   ]
+  },
+  "material": "lc_gun",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_gun_open": {
+  "file": "res://assets/models/loot_containers/lc_gun_open.gltf",
+  "triangles": 5650,
+  "triangles_lod1": 1410,
+  "aabb": {
+   "center": [
+    -0.0215,
+    0.9,
+    0.193
+   ],
+   "size": [
+    0.843,
+    1.8,
+    0.8361
+   ]
+  },
+  "material": "lc_gun",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "створка_лев",
+    "kind": "hinge",
+    "pivot": [
+     -0.3815,
+     -0.0,
+     0.231
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 100.0
+   },
+   {
+    "node": "створка_лев_lod1",
+    "kind": "hinge",
+    "pivot": [
+     -0.3815,
+     -0.0,
+     0.231
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "open": 100.0
+   },
+   {
+    "node": "створка_прав",
+    "kind": "hinge",
+    "pivot": [
+     0.3815,
+     -0.0,
+     0.231
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     -0.0
+    ],
+    "open": 85.0
+   },
+   {
+    "node": "створка_прав_lod1",
+    "kind": "hinge",
+    "pivot": [
+     0.3815,
+     -0.0,
+     0.231
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     -0.0
+    ],
+    "open": 85.0
+   }
+  ]
+ },
+ "lc_file": {
+  "file": "res://assets/models/loot_containers/lc_file.gltf",
+  "triangles": 4311,
+  "triangles_lod1": 1076,
+  "aabb": {
+   "center": [
+    0.0,
+    0.66,
+    0.004
+   ],
+   "size": [
+    0.46,
+    1.32,
+    0.6279
+   ]
+  },
+  "material": "lc_file",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_file_open": {
+  "file": "res://assets/models/loot_containers/lc_file_open.gltf",
+  "triangles": 4675,
+  "triangles_lod1": 1168,
+  "aabb": {
+   "center": [
+    0.0,
+    0.66,
+    0.2109
+   ],
+   "size": [
+    0.46,
+    1.32,
+    1.0419
+   ]
+  },
+  "material": "lc_file",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "подвижное1",
+    "kind": "slide",
+    "pivot": [
+     0.0,
+     0.779,
+     0.2748
+    ],
+    "axis": [
+     -0.0,
+     -0.0,
+     1.0
+    ],
+    "open": 0.21
+   },
+   {
+    "node": "подвижное1_lod1",
+    "kind": "slide",
+    "pivot": [
+     0.0,
+     0.779,
+     0.2748
+    ],
+    "axis": [
+     -0.0,
+     -0.0,
+     1.0
+    ],
+    "open": 0.21
+   },
+   {
+    "node": "ящик",
+    "kind": "slide",
+    "pivot": [
+     -0.0007,
+     0.8512,
+     0.5571
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "open": 0.42
+   },
+   {
+    "node": "ящик_lod1",
+    "kind": "slide",
+    "pivot": [
+     -0.0007,
+     0.8512,
+     0.5571
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "open": 0.42
+   }
+  ]
+ },
+ "lc_cash": {
+  "file": "res://assets/models/loot_containers/lc_cash.gltf",
+  "triangles": 7590,
+  "triangles_lod1": 1897,
+  "aabb": {
+   "center": [
+    0.0,
+    0.2,
+    0.0028
+   ],
+   "size": [
+    0.41,
+    0.4,
+    0.4255
+   ]
+  },
+  "material": "lc_cash",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_cash_open": {
+  "file": "res://assets/models/loot_containers/lc_cash_open.gltf",
+  "triangles": 7590,
+  "triangles_lod1": 1895,
+  "aabb": {
+   "center": [
+    0.0,
+    0.2,
+    0.1527
+   ],
+   "size": [
+    0.41,
+    0.4,
+    0.7255
+   ]
+  },
+  "material": "lc_cash",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "лоток",
+    "kind": "slide",
+    "pivot": [
+     0.0134,
+     0.0439,
+     0.3455
+    ],
+    "axis": [
+     -0.0,
+     -0.0,
+     1.0
+    ],
+    "open": 0.3
+   },
+   {
+    "node": "лоток_lod1",
+    "kind": "slide",
+    "pivot": [
+     0.0134,
+     0.0439,
+     0.3455
+    ],
+    "axis": [
+     -0.0,
+     -0.0,
+     1.0
+    ],
+    "open": 0.3
    }
   ]
  }
