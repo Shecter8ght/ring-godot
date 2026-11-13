@@ -42,6 +42,8 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 ## (tools/prospekt_loot_fit.tscn); model_off — модель здесь не помещается, остаётся бокс.
 @export var model_yaw: float = 0.0
 @export var floor_drop: float = 0.0
+## Сдвиг модели по полу (x, z; настенные — к стене) — подгонка по физике.
+@export var model_shift: Vector2 = Vector2.ZERO
 @export var model_off: bool = false
 
 ## Содержимое брошено — ящик обыскан (у всех peer: rolled реплицируется); модель контейнера открывает крышку.
@@ -247,7 +249,7 @@ func _build_visual(parent: Node3D) -> void:
 	if kind != "" and not model_off:
 		_model = LootContainerVisual.create(kind, model_id, absi(String(name).hash()))
 		if _model != null:
-			_model.position = Vector3(0.0, -floor_drop, 0.0)
+			_model.position = Vector3(model_shift.x, -floor_drop, model_shift.y)
 			_model.rotation_degrees = Vector3(0.0, model_yaw, 0.0)
 			parent.add_child(_model)
 			return

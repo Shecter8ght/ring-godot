@@ -1660,7 +1660,10 @@ const LOOT_KINDS := {
 	"ration_crate": {"rows": 3, "search": 2.5},
 	"carton": {"rows": 3, "search": 2.0},
 	"locker": {"rows": 3, "search": 3.0},
+	"register": {"rows": 3, "search": 2.0},   # касса: вид только внешний, сетка и время — как были у мест без вида
 }
+## Настенные модели контейнеров (аптечка, data/loot_containers.json: "wall": true): на какой высоте от пола центр модели.
+const LOOT_WALL_HEIGHT := 1.45
 ## ЛЦУ (LaserSight): докуда видна точка, м; её радиус вблизи и прирост на метр дистанции (чтобы
 ## разглядеть сверху). Цветного отсвета вокруг точки нет.
 const LASER := {"range_m": 150.0, "dot_radius": 0.012, "dot_grow": 0.0012}

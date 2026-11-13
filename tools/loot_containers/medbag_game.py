@@ -27,9 +27,12 @@ import os
 import sys
 
 import bpy
-import bmesh
 import numpy as np
-from mathutils import Matrix, Vector as V, kdtree
+from mathutils import Matrix, Vector as V
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lc_game_lib as G  # noqa: E402
+from lc_game_lib import coords, copy_props, decimate_copy, displaced, eval_co, gd, join, low_mesh, tris  # noqa: E402,F401
 
 ROOT = "E:/Games/RING-godot"
 LIB = "E:/Models Blender/ENVIRONMENT/RING_Loot_Containers"
@@ -48,82 +51,14 @@ FLAP = "клапан"
 LOD1_RATIO = 0.25
 # имя детали → (целевое число треугольников ОСНОВЫ до утолщения, группа: body — к корпусу, flap — к клапану)
 PARTS = [
-    ("МС_корпус", 1500, "body"), ("МС_карман", 320, "body"), ("МС_лента_низа", 420, "body"), ("МС_стропы", 800, "body"),
-    ("МС_металл", 420, "body"), ("МС_наконечники", 150, "body"), ("МС_перегородки", 90, "body"),
-    ("МС_резинки", 110, "body"), ("МС_клапан", 600, "flap"), ("МС_резинки_клапан", 120, "flap"),
+    ("МС_корпус", 1400, "body"), ("МС_карман", 400, "body"), ("МС_лента_низа", 300, "body"), ("МС_стропы", 900, "body"),
+    ("МС_металл", 420, "body"), ("МС_перегородки", 90, "body"), ("МС_клапан", 600, "flap"),
 ]
 ROOTS = {False: "МС_сумка_укладка", True: "МС_сумка_укладка_раскрыта"}
 
 
 def hi(name: str, opened: bool):
     return bpy.data.objects[name + (".001" if opened else "")]
-
-
-def tris(me) -> int:
-    return sum(len(p.vertices) - 2 for p in me.polygons)
-
-
-def coords(me) -> np.ndarray:
-    a = np.empty(len(me.vertices) * 3)
-    me.vertices.foreach_get("co", a)
-    return a.reshape(-1, 3)
-
-
-def eval_co(ob) -> np.ndarray:
-    """Вершины с модификаторами, в осях объекта."""
-    e = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
-    me = e.to_mesh()
-    c = coords(me)
-    e.to_mesh_clear()
-    return c
-
-
-def copy_props(src, dst) -> None:
-    for p in src.bl_rna.properties:
-        if p.is_readonly or p.identifier in ("name", "type"):
-            continue
-        try:
-            setattr(dst, p.identifier, getattr(src, p.identifier))
-        except Exception:
-            pass
-
-
-def low_mesh(ob, target: int):
-    """Низкая сетка детали: схлопывание рёбер основы до target треугольников, затем то же утолщение, что у high-poly."""
-    n = tris(ob.data)
-    tmp = bpy.data.objects.new("tmp", ob.data.copy())
-    bpy.context.scene.collection.objects.link(tmp)
-    if n > target:
-        md = tmp.modifiers.new("dec", "DECIMATE")
-        md.decimate_type = "COLLAPSE"
-        md.ratio = max(0.003, target / n)
-        md.use_collapse_triangulate = True
-    for m in ob.modifiers:
-        if m.type == "SOLIDIFY":
-            copy_props(m, tmp.modifiers.new("sol", "SOLIDIFY"))
-    dg = bpy.context.evaluated_depsgraph_get()
-    me = bpy.data.meshes.new_from_object(tmp.evaluated_get(dg), depsgraph=dg)
-    bpy.data.objects.remove(tmp)
-    me.materials.clear()
-    for uv in list(me.uv_layers):
-        me.uv_layers.remove(uv)
-    return me
-
-
-def displaced(me, open_co: np.ndarray, closed_co: np.ndarray):
-    """Копия низкой сетки раскрытого состояния, сдвинутая в закрытое: каждая вершина берёт сдвиг ближайшей вершины high."""
-    kd = kdtree.KDTree(len(open_co))
-    for i, p in enumerate(open_co):
-        kd.insert(p, i)
-    kd.balance()
-    out = me.copy()
-    co = coords(out)
-    for i, p in enumerate(co):
-        _, j, _ = kd.find(p)
-        co[i] = p + (closed_co[j] - open_co[j])
-    out.vertices.foreach_set("co", co.ravel())
-    out.update()
-    return out
 
 
 def stage_lp() -> None:
@@ -140,55 +75,8 @@ def stage_lp() -> None:
         mc = displaced(mo, co_o, co_c)
         meshes[(name, True)], meshes[(name, False)] = mo, mc
         print("ДЕТАЛЬ", name, "основа", tris(ho.data), "→ после утолщения", tris(mo), "сдвиг до", round(float(np.abs(co_c - co_o).max()), 4), flush=True)
-    # одна развёртка: сетки раскрытого состояния склеиваются, раскладываются, UV возвращаются по номеру петли
-    bm = bmesh.new()
-    order = []
-    for name, _, _ in PARTS:
-        order.append((name, len(meshes[(name, True)].loops)))
-        bm.from_mesh(meshes[(name, True)])
-    jm = bpy.data.meshes.new("J")
-    bm.to_mesh(jm)
-    bm.free()
-    jm.uv_layers.new(name="UVMap")
-    J = bpy.data.objects.new("J", jm)
-    coll.objects.link(J)
-    for o in bpy.context.view_layer.objects:
-        o.select_set(False)
-    J.select_set(True)
-    bpy.context.view_layer.objects.active = J
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.0, area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
-    bpy.ops.uv.select_all(action="SELECT")
-    bpy.ops.uv.average_islands_scale()
-    bpy.ops.uv.pack_islands(rotate=True, margin=0.006)
-    bpy.ops.object.mode_set(mode="OBJECT")
-    uv = np.empty(len(jm.loops) * 2, np.float32)
-    jm.uv_layers["UVMap"].data.foreach_get("uv", uv)
-    uv = uv.reshape(-1, 2)
-    off = 0
-    for name, nl in order:
-        for opened in (True, False):
-            me = meshes[(name, opened)]
-            assert len(me.loops) == nl, (name, opened)
-            me.uv_layers.new(name="UVMap")
-            me.uv_layers["UVMap"].data.foreach_set("uv", uv[off:off + nl].ravel())
-        off += nl
-    # плотность: пикселей атласа на мм поверхности
-    a3 = sum(sum(p.area for p in meshes[(n, True)].polygons) for n, _, _ in PARTS)
-    au = 0.0
-    for p in jm.polygons:
-        pts = [uv[jm.loops[k].index] for k in p.loop_indices]
-        s = 0.0
-        for i in range(len(pts)):
-            x1, y1 = pts[i]
-            x2, y2 = pts[(i + 1) % len(pts)]
-            s += x1 * y2 - x2 * y1
-        au += abs(s) * 0.5
-    print("РАЗВЁРТКА: площадь поверхности %.3f м², занято атласа %.1f %%, плотность %.2f пикс/мм" % (a3, au * 100, math.sqrt(au * SIZE * SIZE / (a3 * 1e6))), flush=True)
-    bpy.data.objects.remove(J)
-    bpy.data.meshes.remove(jm)
     # объекты состояний: те же родители и позы, что у high-poly (запекание — в мировых осях, как они стоят в файле)
+    objs = {True: [], False: []}
     for opened in (True, False):
         root = bpy.data.objects[ROOTS[opened]]
         hf = hi("МС_клапан", opened)
@@ -199,8 +87,6 @@ def stage_lp() -> None:
         fl.matrix_basis = hf.matrix_basis.copy()
         for name, _, grp in PARTS:
             me = meshes[(name, opened)]
-            me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
-            me.set_sharp_from_angle(angle=math.radians(60))  # бинормаль Godot — в вершинах: круче 60° — жёстко
             me.name = "низк:" + name + (".o" if opened else ".c")
             ob = bpy.data.objects.new(me.name, me)
             coll.objects.link(ob)
@@ -211,7 +97,13 @@ def stage_lp() -> None:
             ob["part"] = name
             ob["group"] = grp
             ob["opened"] = opened
-    # сами high-poly закрытого состояния и подвижные узлы остаются как есть — для сверки
+            objs[opened].append(ob)
+    # одна развёртка укладчиком проекта (острова по изломам, плотная укладка, один атлас 2K) — на раскрытом, закрытому — те же UV
+    G.layout_uv(objs[True], SIZE, angle_deg=89, margin=3, group_margin=1, score='top', order='side', precision=0.002)
+    if os.environ.get('LC_BLENDER_PACK'):
+        print('УКЛАДКА Blender: заполнение %.1f %%' % (G.fill_blender(objs[True], SIZE, margin_px=3) * 100), flush=True)
+    G.pack_uv_to_twin(objs[True], objs[False])
+    G.finish_shading(objs[True] + objs[False])
     os.makedirs(WORK, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=WORK_BLEND, compress=True)
     print("saved", WORK_BLEND)
@@ -329,11 +221,6 @@ def stage_bake() -> None:
 
 # ------------------------------------------------------------------ экспорт
 
-def gd(v) -> list[float]:
-    """Точка Blender → оси Godot (y вверх, z = −y)."""
-    return [round(v[0], 4), round(v[2], 4), round(-v[1], 4)]
-
-
 def material():
     m = bpy.data.materials.get(MODEL) or bpy.data.materials.new(MODEL)
     m.use_nodes = True
@@ -359,37 +246,9 @@ def material():
     return m
 
 
-def join(objs: list, name: str):
-    for o in bpy.context.view_layer.objects:
-        o.select_set(False)
-    for o in objs:
-        o.select_set(True)
-    bpy.context.view_layer.objects.active = objs[0]
-    bpy.ops.object.join()
-    ob = bpy.context.view_layer.objects.active
-    ob.name = name
-    ob.data.name = name
-    return ob
-
-
-def decimate_copy(ob, ratio: float, name: str):
-    c = ob.copy()
-    c.data = ob.data.copy()
-    bpy.context.scene.collection.objects.link(c)
-    md = c.modifiers.new("dec", "DECIMATE")
-    md.decimate_type = "COLLAPSE"
-    md.ratio = ratio
-    md.use_collapse_triangulate = True
-    dg = bpy.context.evaluated_depsgraph_get()
-    me = bpy.data.meshes.new_from_object(c.evaluated_get(dg), depsgraph=dg)
-    c.modifiers.remove(md)
-    old = c.data
-    c.data = me
-    bpy.data.meshes.remove(old)
-    c.name = name
-    c.data.name = name
-    me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
-    me.set_sharp_from_angle(angle=math.radians(60))
+def dec_lod(ob, ratio: float, name: str):
+    c = decimate_copy(ob, ratio, name)
+    c.data.polygons.foreach_set("use_smooth", [True] * len(c.data.polygons))
     return c
 
 
@@ -432,8 +291,8 @@ def build_state(opened: bool, mat):
     root_src = bpy.data.objects[ROOTS[opened]]
     jb.matrix_world = Matrix.Identity(4)
     bpy.context.view_layer.update()
-    lod_b = decimate_copy(jb, LOD1_RATIO, "корпус_lod1")
-    lod_f = decimate_copy(jf, LOD1_RATIO, FLAP + "_lod1")
+    lod_b = dec_lod(jb, LOD1_RATIO, "корпус_lod1")
+    lod_f = dec_lod(jf, LOD1_RATIO, FLAP + "_lod1")
     for c, src in ((lod_b, jb), (lod_f, jf)):
         c.parent = root
         c.matrix_parent_inverse = Matrix.Identity(4)

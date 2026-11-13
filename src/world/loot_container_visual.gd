@@ -19,7 +19,8 @@ static var _mats: Dictionary = {}
 var closed: Node3D
 ## Своя модель открытого; null — открывается та же (лежащий чемодан: створка из позы «закрыто»).
 var opened_model: Node3D
-## Подвижное открытого: [{node, axis, rest (базис узла в открытом), from (угол закрытого, градусы)}].
+## Подвижное открытого: [{node, axis, rest (базис узла в открытом), from (угол закрытого, градусы)}]; у выдвижного (slide) — ещё
+## rest_pos (положение в открытом), from — смещение закрытого вдоль axis, м.
 var movers: Array[Dictionary] = []
 var is_open: bool = false
 ## Лениво: возвращает узел открытой модели (добавляется потомком при первом open()); info и pose — как у setup().
@@ -52,6 +53,15 @@ func _prepare_open(open_node: Node3D, info: Dictionary, pose: Dictionary) -> voi
 		var axis: Vector3 = Vector3(float(mover.axis[0]), float(mover.axis[1]), float(mover.axis[2])).normalized()
 		var from: float = float(pose.get(String(mover.node), -float(mover.open)))
 		var rest: Basis = part.basis
+		if String(mover.get("kind", "hinge")) == "slide":
+			# выдвижное (ящик картотеки, лоток кассы): open — ход, м, вдоль axis; закрытое положение = открытое − axis · ход
+			var rest_pos: Vector3 = part.position
+			if open_node == null:
+				rest_pos = part.position - axis * from
+			else:
+				part.position = rest_pos + axis * from
+			movers.append({"node": part, "axis": axis, "rest": rest, "from": from, "slide": true, "rest_pos": rest_pos})
+			continue
 		if open_node == null:
 			# поза «закрыто» уже применена расстановкой: открытый базис — обратно на её угол
 			rest = Basis(axis, deg_to_rad(-from)) * part.basis
@@ -87,6 +97,9 @@ func open(instant: bool = false) -> void:
 func _swing(t: float) -> void:
 	for m: Dictionary in movers:
 		var part: Node3D = m.node as Node3D
+		if m.has("slide"):
+			part.position = (m.rest_pos as Vector3) + (m.axis as Vector3) * float(m.from) * (1.0 - t)
+			continue
 		part.basis = Basis(m.axis as Vector3, deg_to_rad(float(m.from) * (1.0 - t))) * (m.rest as Basis)
 
 

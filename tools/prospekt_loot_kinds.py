@@ -45,6 +45,8 @@ def kind_for(name: str, table: str, look: int, rec: dict) -> tuple[str, str]:
     note = rec["note"].lower()
     k = rec["kind"]
     tier = rec["tier"]
+    if table == "register":
+        return "register", "касса"   # внешний вид — модель кассы; таблица, сетка и время обыска прежние
     if table in KEEP_TABLES:
         # серверная стойка «Жёсткие диски» — системный блок, «Серверная: стойка» остаётся
         if table == "server_rack" and "диск" in note:
@@ -226,6 +228,8 @@ def main() -> None:
                 body = set_prop(body, "model_yaw", "%g" % f["yaw"]) if f["ok"] and f["yaw"] else body
                 body = set_prop(body, "floor_drop", "%g" % f["drop"]) if f["ok"] and f["drop"] else body
                 body = set_prop(body, "model_off", "true") if not f["ok"] else body
+                if f["ok"] and f.get("shift"):
+                    body = set_prop(body, "model_shift", "Vector2(%g, %g)" % tuple(f["shift"]))
         out.append(body)
         pos = m.end(3)
     out.append(scene[pos:])

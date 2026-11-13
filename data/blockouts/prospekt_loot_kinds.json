@@ -679,23 +679,23 @@
   "note": "инструмент у подкопа"
  },
  "Loot_97": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "окно операциониста"
  },
  "Loot_98": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "окно операциониста"
  },
  "Loot_99": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "окно операциониста"
  },
@@ -980,30 +980,30 @@
   "note": "стеллаж «Яруса»"
  },
  "Loot_140": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "касса"
  },
  "Loot_141": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "касса"
  },
  "Loot_142": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "касса"
  },
  "Loot_143": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "касса"
  },
@@ -1141,9 +1141,9 @@
   "note": "полиция: стол дежурного"
  },
  "Loot_163": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "вокзальное кафе: касса"
  },
@@ -1218,9 +1218,9 @@
   "note": "ремонт телефонов: телефоны и платы"
  },
  "Loot_174": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "кафе «Угол»: касса"
  },
@@ -1232,16 +1232,16 @@
   "note": "кафе «Угол»: на столе"
  },
  "Loot_176": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "табак: касса"
  },
  "Loot_177": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "пивная «Разливное»: касса"
  },
@@ -1281,9 +1281,9 @@
   "note": "продукты «Угловой»: полки"
  },
  "Loot_183": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "продукты «Угловой»: касса"
  },
@@ -1337,9 +1337,9 @@
   "note": "ломбард «Золото»: охотничье ружьё в залоге"
  },
  "Loot_191": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "шаурма: касса"
  },
@@ -1400,9 +1400,9 @@
   "note": "палатка в сквере"
  },
  "Loot_200": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "рынок в сквере: касса палатки"
  },
@@ -1470,9 +1470,9 @@
   "note": "вещи пассажиров вагона"
  },
  "Loot_210": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "раздавленный ларёк"
  },
@@ -1808,9 +1808,9 @@
   "note": "медпалатка эвакуации"
  },
  "Loot_258": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "фудтрак: касса"
  },
@@ -1864,9 +1864,9 @@
   "note": "парковка корпуса 3: салон"
  },
  "Loot_266": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "ларёк на парковке"
  },
@@ -1990,23 +1990,23 @@
   "note": "фильтр ЧВК: тело между контейнерами"
  },
  "Loot_284": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "ларёк: касса"
  },
  "Loot_285": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "ларёк: касса"
  },
  "Loot_286": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "ларёк: касса"
  },
@@ -2054,9 +2054,9 @@
   "note": "палатка лагеря: вещи"
  },
  "Loot_293": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "автомойка «Блеск»: касса клиентской"
  },
@@ -2320,23 +2320,23 @@
   "note": "Вершина, двор: бытовое"
  },
  "Loot_331": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "«Ярус», зал: Касса"
  },
  "Loot_332": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "«Ярус», зал: Касса"
  },
  "Loot_333": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "«Ярус», зал: Касса экспресс"
  },
@@ -2474,9 +2474,9 @@
   "note": "«Ярус», второй этаж: Охрана: сейф-шкаф"
  },
  "Loot_353": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "«Ярус», второй этаж: Счётная: касса"
  },
@@ -2537,16 +2537,16 @@
   "note": "«Ярус», крыша склада: Крыша склада: сумка"
  },
  "Loot_362": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "вокзал, первый этаж: Окно кассы"
  },
  "Loot_363": {
-  "kind": "",
+  "kind": "register",
   "table": "register",
-  "why": "особое место",
+  "why": "касса",
   "was": "register",
   "note": "вокзал, первый этаж: Окно кассы"
  },

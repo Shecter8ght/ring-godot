@@ -28,14 +28,21 @@ MODELS = {
 LOOT_DIR = "res://assets/models/loot_containers"
 LOOT_MODELS = {
     "lc_medbag": ("lc_medbag_open", [""]),
+    "lc_safe": ("lc_safe_open", [""]),
+    "lc_gun": ("lc_gun_open", [""]),
+    "lc_file": ("lc_file_open", [""]),
+    "lc_cash": ("lc_cash_open", [""]),
+    "lc_aid": ("lc_aid_open", [""]),
+    "lc_cell": ("lc_cell_open", [""]),   # встраиваемая в стену ячейка: только в каталоге, ни к какому виду не подключена
 }
+WALL_MODELS = {"lc_aid"}   # висят на стене: подгонка ищет стену и высоту Balance.LOOT_WALL_HEIGHT
 LOD_DIST = 14.0   # дальше — узлы *_lod1 (≈ ¼ треугольников)
 # вид -> модель по умолчанию ("" — модели пока нет)
 KINDS = {
-    "weapon_crate": "it_zip", "ammo_crate": "it_ammo", "weapon_locker": "", "medbag": "lc_medbag", "med_cabinet": "",
+    "weapon_crate": "it_zip", "ammo_crate": "it_ammo", "weapon_locker": "lc_gun", "medbag": "lc_medbag", "med_cabinet": "lc_aid",
     "toolbox": "it_toolbox", "car_trunk": "", "duffel": "it_duffel", "suitcase": "it_suitcase", "jacket": "",
-    "safe": "", "pc_block": "it_pc", "tech_shelf": "", "filing": "", "ration_crate": "", "carton": "it_carton",
-    "locker": "it_trunk",
+    "safe": "lc_safe", "pc_block": "it_pc", "tech_shelf": "", "filing": "lc_file", "ration_crate": "", "carton": "it_carton",
+    "locker": "it_trunk", "register": "lc_cash",
 }
 
 
@@ -53,6 +60,8 @@ for m, (op, variants) in MODELS.items():
 for m, (op, variants) in LOOT_MODELS.items():
     models[m] = {"open": op, "variants": variants, "aabb": box(m, LOOT_INDEX), "open_aabb": box(op, LOOT_INDEX), "dir": LOOT_DIR,
                  "index": LOOT_DIR + "/loot_containers_models.json", "lod": LOD_DIST}
+    if m in WALL_MODELS:
+        models[m]["wall"] = True
 out = {"version": 1, "dir": "res://assets/models/dorm/furniture", "index": "res://assets/models/dorm/furniture/furniture.json",
        "far": 45.0, "models": models, "kinds": {k: {"model": v} for k, v in KINDS.items()}}
 open(ROOT / "data/loot_containers.json", "w", encoding="utf8", newline="\n").write(json.dumps(out, ensure_ascii=False, indent=1) + "\n")

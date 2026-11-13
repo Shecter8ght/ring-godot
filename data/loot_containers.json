@@ -258,12 +258,12 @@
     "center": [
      0.002,
      0.1496,
-     0.0038
+     0.0037
     ],
     "size": [
      0.6583,
-     0.3082,
-     0.3599
+     0.3083,
+     0.3602
     ]
    },
    "open_aabb": {
@@ -274,8 +274,207 @@
     ],
     "size": [
      0.6583,
-     0.5027,
+     0.5028,
      0.4044
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
+  },
+  "lc_safe": {
+   "open": "lc_safe_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.3499,
+     0.0108
+    ],
+    "size": [
+     0.4998,
+     0.6999,
+     0.4714
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.0441,
+     0.3499,
+     0.233
+    ],
+    "size": [
+     0.588,
+     0.6999,
+     0.9158
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
+  },
+  "lc_gun": {
+   "open": "lc_gun_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.9,
+     0.0105
+    ],
+    "size": [
+     0.8,
+     1.8,
+     0.471
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.0215,
+     0.9,
+     0.193
+    ],
+    "size": [
+     0.843,
+     1.8,
+     0.8361
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
+  },
+  "lc_file": {
+   "open": "lc_file_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.66,
+     0.004
+    ],
+    "size": [
+     0.46,
+     1.32,
+     0.6279
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.66,
+     0.2109
+    ],
+    "size": [
+     0.46,
+     1.32,
+     1.0419
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
+  },
+  "lc_cash": {
+   "open": "lc_cash_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.2,
+     0.0028
+    ],
+    "size": [
+     0.41,
+     0.4,
+     0.4255
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.0,
+     0.2,
+     0.1527
+    ],
+    "size": [
+     0.41,
+     0.4,
+     0.7255
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
+  },
+  "lc_aid": {
+   "open": "lc_aid_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     -0.0044,
+     0.0,
+     0.0569
+    ],
+    "size": [
+     0.3647,
+     0.508,
+     0.1138
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.0661,
+     0.0,
+     0.221
+    ],
+    "size": [
+     0.4882,
+     0.508,
+     0.442
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0,
+   "wall": true
+  },
+  "lc_cell": {
+   "open": "lc_cell_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.0,
+     0.13,
+     -0.109
+    ],
+    "size": [
+     0.3599,
+     0.26,
+     0.2558
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     -0.0358,
+     0.13,
+     0.0295
+    ],
+    "size": [
+     0.4316,
+     0.26,
+     0.5329
     ]
    },
    "dir": "res://assets/models/loot_containers",
@@ -291,13 +490,13 @@
    "model": "it_ammo"
   },
   "weapon_locker": {
-   "model": ""
+   "model": "lc_gun"
   },
   "medbag": {
    "model": "lc_medbag"
   },
   "med_cabinet": {
-   "model": ""
+   "model": "lc_aid"
   },
   "toolbox": {
    "model": "it_toolbox"
@@ -315,7 +514,7 @@
    "model": ""
   },
   "safe": {
-   "model": ""
+   "model": "lc_safe"
   },
   "pc_block": {
    "model": "it_pc"
@@ -324,7 +523,7 @@
    "model": ""
   },
   "filing": {
-   "model": ""
+   "model": "lc_file"
   },
   "ration_crate": {
    "model": ""
@@ -334,6 +533,9 @@
   },
   "locker": {
    "model": "it_trunk"
+  },
+  "register": {
+   "model": "lc_cash"
   }
  }
 }

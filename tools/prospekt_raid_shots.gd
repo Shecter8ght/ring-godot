@@ -9,6 +9,7 @@ extends Node
 ## PROSPEKT_ANGULAR=0 — сравнить с обычной фильтрацией теней без PCSS.
 ## RAID_LIGHT_SCENE=res://… — другая карта; RAID_LIGHT_VIEW=имя:x:y:z:куда_x:куда_y:куда_z;… — её камеры.
 ## PROSPEKT_OPEN=Loot_1,Loot_2 — открыть эти контейнеры лута (как после обыска).
+## PROSPEKT_FILL=3 — лампа у камеры (энергия 3, радиус 8 м): снимать предметы в тёмных помещениях.
 ## RAID_LIGHT_REUSE=1 — переключать условия на одной карте (проверяет и переходы погоды без повторного навмеша).
 
 const SCENE: String = "res://scenes/levels/prospekt.tscn"
@@ -141,6 +142,12 @@ func _ready() -> void:
 			we.environment.ambient_light_energy, we.environment.tonemap_exposure,
 			"вкл" if we.environment.fog_enabled else "выкл", we.environment.fog_density,
 			"своя камера" if camera else "глазами игрока"])
+		var fill: OmniLight3D = null
+		if OS.get_environment("PROSPEKT_FILL") != "":
+			fill = OmniLight3D.new()
+			fill.light_energy = float(OS.get_environment("PROSPEKT_FILL"))
+			fill.omni_range = 8.0
+			level.add_child(fill)
 		for view: Dictionary in shot_views:
 			if not views.is_empty() and not String(view.id) in views:
 				continue
@@ -155,6 +162,8 @@ func _ready() -> void:
 				var d: Vector3 = look - at
 				rig._look_yaw = atan2(d.x, d.z)
 				rig._look_pitch = atan2(d.y, Vector2(d.x, d.z).length())
+			if fill:
+				fill.global_position = at
 			await _frames(SETTLE_FRAMES)
 			await RenderingServer.frame_post_draw
 			var path: String = out_dir.path_join("%s__%s.png" % [c.id, view.id])

@@ -40,7 +40,7 @@ func _ready() -> void:
 		if spec.is_empty():
 			continue
 		total += 1
-		var res: Dictionary = _fit(space, c, spec)
+		var res: Dictionary = _fit_wall(space, c, spec) if bool(spec.get("wall", false)) else _fit(space, c, spec)
 		if not bool(res.ok):
 			bad += 1
 		out[String(c.name)] = res
@@ -97,6 +97,46 @@ func _fits(space: PhysicsDirectSpaceState3D, pos: Vector3, floor_y: float, yaw_d
 	q.collision_mask = 1
 	q.transform = Transform3D(basis, Vector3(pos.x, floor_y, pos.z) + basis * center_local)
 	return space.intersect_shape(q, 1).is_empty()
+
+
+## Настенная модель (аптечка, "wall" в каталоге): начало модели — на плоскости стены, лицо (+Z модели) — от стены, центр на
+## высоте Balance.LOOT_WALL_HEIGHT от пола. Ближайшие стены ищутся лучами в восьми направлениях на этой высоте; берётся
+## первая, у которой габарит закрытой и открытой модели (с дверцей) никуда не упирается.
+func _fit_wall(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Dictionary) -> Dictionary:
+	var pos: Vector3 = c.global_position
+	var floor_y: float = _floor(space, pos)
+	if floor_y == INF:
+		return {"ok": false, "why": "нет пола", "yaw": 0.0, "drop": 0.0}
+	var hang: float = floor_y + Balance.LOOT_WALL_HEIGHT
+	var from: Vector3 = Vector3(pos.x, hang, pos.z)
+	var hits: Array[Dictionary] = []
+	for k in range(8):
+		var a: float = float(k) * PI * 0.25
+		var d := Vector3(cos(a), 0, sin(a))
+		var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(from, from + d * WALL_RAY, 1))
+		if not hit.is_empty() and absf((hit.normal as Vector3).y) < 0.3:
+			hits.append({"dist": from.distance_to(hit.position as Vector3), "pos": hit.position, "normal": hit.normal})
+	hits.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return float(x.dist) < float(y.dist))
+	if hits.is_empty():
+		return {"ok": false, "why": "нет стены в %.1f м" % WALL_RAY, "yaw": 0.0, "drop": 0.0}
+	var box: AABB = _union(spec)
+	for h: Dictionary in hits:
+		var n: Vector3 = (h.normal as Vector3)
+		n.y = 0.0
+		n = n.normalized()
+		var yaw: float = rad_to_deg(atan2(n.x, n.z))
+		var origin: Vector3 = Vector3((h.pos as Vector3).x, hang, (h.pos as Vector3).z)
+		var basis := Basis(Vector3.UP, deg_to_rad(yaw))
+		var sh := BoxShape3D.new()
+		sh.size = box.size - Vector3(0.04, 0.04, 0.04)
+		var q := PhysicsShapeQueryParameters3D.new()
+		q.shape = sh
+		q.collision_mask = 1
+		q.transform = Transform3D(basis, origin + basis * box.get_center() + n * 0.01)
+		if space.intersect_shape(q, 1).is_empty():
+			return {"ok": true, "why": "на стене", "yaw": snappedf(wrapf(yaw, -180.0, 180.0), 0.1), "drop": snappedf(pos.y - hang, 0.01),
+				"shift": [snappedf(origin.x - pos.x, 0.01), snappedf(origin.z - pos.z, 0.01)]}
+	return {"ok": false, "why": "не помещается: стена занята", "yaw": 0.0, "drop": snappedf(pos.y - hang, 0.01)}
 
 
 func _fit(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Dictionary) -> Dictionary:
