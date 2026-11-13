@@ -283,6 +283,10 @@ def compose_A():
     for k, v in name_of.items():
         if "лента" in v:
             is_band |= part == k
+    for k_, it_ in enumerate(info):            # чёрная лента — по островам раскладки, а не по номеру детали (края карты не затекают красным)
+        if it_["tag"].startswith("band"):
+            is_band |= iid == k_
+    cover = cover | is_band
     x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
     nz = nrm[..., 2]
     # ---- цвет
@@ -313,7 +317,7 @@ def compose_A():
     bandc = np.empty_like(col)
     bandc[:] = blk
     rib = 0.5 + 0.5 * np.cos(2 * math.pi * vm / 1.5)
-    bandc *= (1.0 + 0.2 * wv + 0.15 * rib - 0.07)[..., None]
+    bandc *= (1.0 + 0.05 * wv + 0.03 * rib - 0.015)[..., None]
     dust = np.clip((1 - ao) * 0.5 + smoothstep(0.1, 0.6, mid) * 0.3 + edge * 0.5 + low * 0.2, 0, 1)
     bandc = bandc * (1 - 0.6 * dust[..., None]) + lin((54, 50, 47)) * (0.6 * dust[..., None])
     col = np.where(is_band[..., None], bandc, col)
@@ -347,13 +351,13 @@ def compose_A():
     rough = np.clip(rough, 0.30, 0.85)
     # ---- нормаль: плетение + рёбра ленты + мелкая рябь
     hgt = wv * 0.5 + 0.12 * yarn
-    hgt = np.where(is_band, hgt + 0.9 * rib, hgt)
+    hgt = np.where(is_band, hgt * 0.35, hgt)
     nm = height_to_normal(hgt.astype(np.float32), 0.30)
     # сморщивание вдоль швов: поперечные морщинки шагом 8–14 мм, глубина ~0,8 мм, затухают на ~12 мм от шва
     pk = np.zeros(shape, np.float32)
     for it in info:
-        if it["tag"] in ("flap", "pocket") and it["obj"].startswith("МС_клапан"):
-            pass
+        if "лента" in it["obj"]:
+            continue
         u0, u1, v0, v1 = it["umin"], it["umax"], it["vmin"], it["vmax"]
         reg = (slice(max(0, it["y"] - 12), min(SIZE, it["y"] + it["h"] + 12)), slice(max(0, it["x"] - 12), min(SIZE, it["x"] + it["w"] + 12)))
         uu, vv = um[reg], vm[reg]

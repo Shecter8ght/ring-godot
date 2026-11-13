@@ -579,6 +579,11 @@ def to_obj(bm, name, coll, mlist, parent, origin=(0, 0, 0), parent_origin=(0, 0,
     bm.free()
     for p in me.polygons:
         p.use_smooth = smooth
+    if smooth:
+        try:
+            me.set_sharp_from_angle(angle=math.radians(38))
+        except Exception:
+            pass
     for m in mlist:
         me.materials.append(m)
     ob = bpy.data.objects.new(name, me)
@@ -847,10 +852,9 @@ def side_lines(acc, parent, frames, offs, thread, lift=0.0003, rnd=None, closed=
 
 
 def piping_ribbon(acc, parent, pts, nrm, closed, isl0=0, lateral=None):
+    """Кант — одна трубка Ø 4 мм, лежащая на шве (без лент по бокам)."""
     fr = frames_on(pts, nrm, lateral)
-    arc = [(0.0020 * math.cos(math.radians(a)), 0.0012 + 0.0020 * math.sin(math.radians(a))) for a in range(160, 19, -20)]
-    prof = [(-0.0045, -0.0002), (-0.0045, 0.0003), (-0.0026, 0.0003)] + arc + [(0.0026, 0.0003), (0.0045, 0.0003), (0.0045, -0.0002)]
-    acc.rib(parent, "piping", fr, prof, 0, closed_profile=True, closed_path=closed, chunk=0.9)
+    acc.rib(parent, "piping", fr, circle_profile(0.0020, 10, 0.0023), 0, closed_profile=True, closed_path=closed, chunk=0.9)
     return fr
 
 
@@ -996,39 +1000,83 @@ def stitch_rows(acc, parent, fr, w, th, z0, z1, rnd, thread="t_red", x_cross=Tru
         add_stitches(acc, parent, pts, nr, thread, 0.0032, False, 0.0, rnd)
 
 
-def handle(acc, parent, surf, rnd, side, alpha=0.0, xl=0.058, w=0.038, th=0.0022, zbot=0.172, length=0.15):
-    """Ручка из двух плоских строп 38 x 2,2 мм: ноги пришиты плашмя от zbot до верхнего ребра; свободные концы переваливаются через
-    ребро и обвисают вниз по стенке между ногами, сходясь к центру (никто сумку не держит). Без закрутки."""
+def bez(p0, p1, p2, p3, k):
+    out = []
+    for i in range(k + 1):
+        t = i / k
+        a = (1 - t) ** 3
+        b = 3 * t * (1 - t) ** 2
+        c = 3 * t * t * (1 - t)
+        d = t ** 3
+        out.append(p0 * a + p1 * b + p2 * c + p3 * d)
+    return out
+
+
+def handle(acc, parent, surf, rnd, side, alpha=0.0, xl=0.058, w=0.038, th=0.0022, zbot=0.172):
+    """Ручка — одна плоская стропа 38 x 2,2 мм: пришитая нога у ребра поднимается на 12 мм, перегибается (радиус оси 12,5 мм) и висит
+    ровной U-образной петлёй плашмя вдоль стенки (зазор ~4 мм, низ U на ~130 мм ниже ребра, правая ветвь на 6 мм короче),
+    вторая нога зеркально. Строится по кривым, без симуляции и закрутки; ширина стропы плоская."""
     mode = "y-" if side < 0 else "y+"
-    zs = [zbot + i * 0.002 for i in range(int((0.270 - zbot) / 0.002) + 1)]
-    ex = V((1, 0, 0))
-    out_frames = []
-    n_t = int(length / 0.002)
-    for k, sx in enumerate((-1, 1)):
-        pts, nrm = conform(surf, [V((sx * xl, 0, z)) for z in zs], mode, lift=th / 2 + 0.0012, it=10)
-        P0, N0 = pts[-1], nrm[-1]
-        tail, plan, lifts = [], [], []
-        for i in range(1, n_t + 1):
-            s_ = i / n_t
-            bump = math.sin(math.pi * min(s_ / 0.3, 1.0))
-            x = sx * (xl - (xl - 0.014) * smooth01(s_ * 1.8))
-            stack = k * (th + 0.0004) * smooth01(s_ * 3.0)
-            if s_ < 0.3:
-                tail.append(V((x, P0.y, P0.z + 0.006 * bump)) + N0 * (0.0012 + 0.009 * bump + stack) + V((0, 0, 0.0)))
-            else:
-                plan.append(V((x, 0, 0.270 - (s_ - 0.3) / 0.7 * 0.100)))
-                lifts.append(th / 2 + 0.0012 + stack)
-        tp, tn = conform(surf, plan, mode, lift=0.0, it=3)
-        tail += [a + nn * lf for a, nn, lf in zip(tp, tn, lifts)]
-        path = smooth_pts(pts + tail, 6)
-        fr = strap_frames(path, [0.0] * len(path), nrm[0], ex, ex)
-        acc.rib(parent, "webbing", fr, rect_profile(w, th, -th / 2), 0, closed_profile=True, chunk=1.2)
-        lf = fr[:len(pts)]
+    ztop, rf = 0.270, 0.0125
+    zs_foot = [zbot + i * 0.002 for i in range(int((ztop - zbot) / 0.002) + 1)]
+    z_end = {-1: 0.208, 1: 0.202}
+    seq = {}
+    for sx in (-1, 1):
+        fp, fn = conform(surf, [V((sx * xl, 0, z)) for z in zs_foot], mode, lift=th / 2 + 0.0012, it=10)
+        P0, N0 = fp[-1], fn[-1]
+        Z = V((0, 0, 1))
+        pts, nrm = list(fp), list(fn)
+        for i in range(1, 7):                                   # подъём 12 мм
+            pts.append(P0 + Z * 0.002 * i)
+            nrm.append(N0)
+        C = P0 + Z * 0.012 + N0 * rf                           # перегиб
+        for i in range(1, 21):
+            th_ = math.pi * i / 20
+            q = C - N0 * (rf * math.cos(th_)) + Z * (rf * math.sin(th_))
+            pts.append(q)
+            nrm.append((C - q).normalized())
+        top_w = (th / 2 + 0.0012) + 2 * rf
+        for i in range(1, 7):                                   # вниз до z = ztop
+            pts.append(P0 + Z * (0.012 - 0.002 * i) + N0 * top_w)
+            nrm.append(-N0)
+        zl = [ztop - i * 0.002 for i in range(1, int((ztop - z_end[sx]) / 0.002) + 1)]
+        bp, bn = conform(surf, [V((sx * xl, 0, z)) for z in zl], mode, lift=0.0, it=10)
+        for q, nn, z in zip(bp, bn, zl):
+            t_ = min(1.0, (ztop - z) / 0.04)
+            wv = 0.0051 + (top_w - 0.0051) * (1.0 - smooth01(t_))
+            pts.append(q + nn * wv)
+            nrm.append(-nn)
+        seq[sx] = (pts, nrm, len(fp))
+    # низ U — кубическая кривая Безье между концами ветвей
+    pl, pr = seq[-1][0][-1], seq[1][0][-1]
+    ctrl_l, ctrl_r = V((pl.x, pl.y, pl.z - 0.085)), V((pr.x, pr.y, pr.z - 0.085))
+    ub = bez(pl, ctrl_l, ctrl_r, pr, 70)[1:-1]
+    plan = [V((q.x, 0, q.z)) for q in ub]
+    bp, bn = conform(surf, plan, mode, lift=0.0, it=6)
+    ub_pts = [q + nn * 0.0051 for q, nn in zip(bp, bn)]
+    ub_nrm = [-nn for nn in bn]
+    A_pts, A_n, nfA = seq[-1]
+    B_pts, B_n, nfB = seq[1]
+    path = A_pts + ub_pts + B_pts[::-1]
+    nrms = A_n + ub_nrm + B_n[::-1]
+    m = len(path)
+    fr = []
+    pb = None
+    for i in range(m):
+        t = (path[min(i + 1, m - 1)] - path[max(i - 1, 0)]).normalized()
+        n = nrms[i] - t * nrms[i].dot(t)
+        n = n.normalized() if n.length > 1e-6 else (fr[-1][1] if fr else V((0, -1, 0)))
+        b = t.cross(n).normalized()
+        if pb is not None and b.dot(pb) < 0:
+            b, n = -b, -n
+        fr.append((path[i], n, b))
+        pb = b
+    acc.rib(parent, "webbing", fr, rect_profile(w, th, -th / 2), 0, closed_profile=True, chunk=1.5)
+    for lf in (fr[:nfA], fr[-nfB:]):
         side_lines(acc, parent, lf, (-(w / 2 - 0.0042), w / 2 - 0.0042), "t_red", lift=th / 2 + 0.0003, rnd=rnd)
         stitch_rows(acc, parent, lf, w, th, zbot + 0.004, zbot + 0.034, rnd)
-        stitch_rows(acc, parent, lf, w, th, 0.240, 0.266, rnd)
-        out_frames.append(fr)
-    return out_frames
+        stitch_rows(acc, parent, lf, w, th, 0.236, 0.264, rnd)
+    return fr
 
 
 def side_tab(acc, parent, surf, rnd, sx, w=0.038, th=0.0020):
@@ -1061,11 +1109,20 @@ def side_tab(acc, parent, surf, rnd, sx, w=0.038, th=0.0020):
 
 
 def reflect_strip(acc, parent, surf, rnd):
-    xs = [-0.228 + i * 0.002 for i in range(int(0.456 / 0.002) + 1)]
-    pts, nrm = conform(surf, [V((x, 0, 0.083)) for x in xs], "y-", lift=0.0004, it=3)
-    fr = frames_on(pts, nrm)
-    acc.rib(parent, "reflect", fr, rect_profile(0.025, 0.0009), 0, closed_profile=True, chunk=0.9)
-    side_lines(acc, parent, fr, (-0.0095, 0.0095), "t_white", lift=0.0009 + 0.0003, rnd=rnd)
+    """Лента 25 x 0,5 мм: каждая вершина — на ткани + 0,8 мм по нормали (сетка лучами), края ровные, строчки лежат на ленте."""
+    x0, x1, zc, hw = -0.228, 0.228, 0.083, 0.0125
+    nu, nv = int((x1 - x0) / 0.003), 8
+    bm = acc.bm(parent, "reflect")
+    grid_surface(bm, surf, lambda i, j: V((x0 + (x1 - x0) * i / nu, 0, zc - hw + 2 * hw * j / nv)), nu, nv, "y-", 0.0008,
+                 acc.island(parent, "reflect"), lambda p: ((p.x - x0) * 1000.0, (p.z - (zc - hw)) * 1000.0), 0, outward=V((0, -1, 0)))
+    # узкий борт ленты (0,5 мм) — чтобы край читался толщиной
+    for zz, sg in ((zc - hw, -1), (zc + hw, 1)):
+        pts, nrm = conform(surf, [V((x0 + (x1 - x0) * i / nu, 0, zz)) for i in range(nu + 1)], "y-", lift=0.0008, it=1)
+        fr = frames_on(pts, nrm)
+        acc.rib(parent, "reflect", fr, [(-0.0002, -0.0002), (0.0002, -0.0002), (0.0002, 0.0005), (-0.0002, 0.0005)], 0, closed_profile=True, chunk=0.9)
+    for zz in (zc - 0.0095, zc + 0.0095):
+        pts, nrm = conform(surf, [V((x0 + (x1 - x0) * i / (nu * 2), 0, zz)) for i in range(nu * 2 + 1)], "y-", lift=0.0008 + 0.0006, it=1)
+        add_stitches(acc, parent, pts, nrm, "t_white", 0.0032, False, 0.0, rnd)
 
 
 def disc_patch(acc, parent, surf, rnd, c, R=0.040):
@@ -1167,6 +1224,24 @@ def main_zip_plan():
     return fillet_poly([V((-ZIPX, ZIPY1, H)), V((-ZIPX, ZIPY0, H)), V((ZIPX, ZIPY0, H)), V((ZIPX, ZIPY1, H))], 0.012, 0.0008)
 
 
+CLEAR_KINDS = ("webbing", "piping", "reflect", "ztape", "zcoil", "stitch", "label", "patch", "pvc", "frame", "metal", "tip")
+CLEAR_MARGIN = 0.0004
+
+
+def clear_above(bm, surf):
+    """Сдвиг вершин, оказавшихся под тканью или в 0,4 мм от неё, по нормали ткани (интерьер клапана и перегородки не трогаем)."""
+    n = 0
+    for v in bm.verts:
+        r = surf.near(v.co, 0.012)
+        if r is None:
+            continue
+        d = (v.co - r[0]).dot(r[1])
+        if d < CLEAR_MARGIN + 0.0001 and d > -0.015:
+            v.co += r[1] * (CLEAR_MARGIN + 0.0003 - d)
+            n += 1
+    return n
+
+
 def flap_bend(bm):
     """Раскрытый клапан слегка провисает: смещение по нормали пропорционально квадрату расстояния от шарнира + лёгкая волна."""
     for v in bm.verts:
@@ -1225,7 +1300,10 @@ def build_state(top, M, at, open_, label):
         pl = fillet_poly([V((-a, -b, z)), V((a, -b, z)), V((a, b, z)), V((-a, b, z))], rr, 0.002, closed=True)
         pts, nrm = conform(surf, pl, "near", it=2, closed=True)
         fr = piping_ribbon(acc, R, pts, nrm, True)
-        side_lines(acc, R, fr, (-0.0060, 0.0060), thr, rnd=rnd, closed=True)
+        if name == "band":
+            side_lines(acc, R, fr, (0.0,), thr, lift=0.0043, rnd=rnd, closed=True)      # одна чёрная строчка прямо на шве
+        else:
+            side_lines(acc, R, fr, (-0.0060, 0.0060), thr, rnd=rnd, closed=True)
     # кант по ободу кармана
     pl = rect_path(-0.236, 0.236, 0.052, 0.205, 0.026, 0.0, 0.002)
     pts, nrm = conform(surf, pl, "y-", lift=0.0, it=2, closed=True)
@@ -1287,7 +1365,7 @@ def build_state(top, M, at, open_, label):
             add_stitches(acc, F, pt2, [-n for n in n2], "t_black", 0.0032, False, 0.0, rnd)
 
     # ---- внутри корпуса: перегородки на липучке и резиновые держатели у задней стенки
-    hs = 0.1415
+    hs = 0.116
     ax3 = (V((1, 0, 0)), V((0, 1, 0)), V((0, 0, 1)))
     for x in (-0.092, 0.092):
         place_box(acc.bm(R, "divider"), (0.010, 2 * hs, 0.225), 0.004, frame_matrix(V((x, 0, 0.1245)), *ax3), 0)
@@ -1303,6 +1381,12 @@ def build_state(top, M, at, open_, label):
             fr = frames_on(pts, [-N] * 15)
             acc.rib(R, "elastic", fr, rect_profile(0.008, 0.0013, -0.0006), 0, closed_profile=True, chunk=0.9)
 
+    # ---- ни одна вершина накладной детали не под тканью (запас 0,4 мм по нормали ткани)
+    for (par, kind), bm_ in acc.d.items():
+        if kind in CLEAR_KINDS:
+            for _ in range(3):
+                if clear_above(bm_, surf) == 0:
+                    break
     # ---- вывод накопленных деталей
     for (par, kind), bm in acc.d.items():
         mlist = [M[n] for n in Acc.KINDS[kind]]
@@ -1325,16 +1409,17 @@ def build_state(top, M, at, open_, label):
 def strap_clearance():
     """Вершины строп и кантов глубже поверхности ткани (под ней): считаем число таких вершин."""
     surf = SIM["surf"]
+    bpy.context.view_layer.update()
     res = {}
     for ob in bpy.data.objects:
-        if ob.type != "MESH" or ob.get("kind") not in ("webbing", "piping", "reflect"):
+        if ob.type != "MESH" or ob.get("kind") not in CLEAR_KINDS:
             continue
         if ob.name.endswith(".001"):
             continue
         bad = 0
         for v in ob.data.vertices:
             r = surf.near(ob.matrix_world @ v.co, 0.02)
-            if r and (ob.matrix_world @ v.co - r[0]).dot(r[1]) < -0.0003:
+            if r and (ob.matrix_world @ v.co - r[0]).dot(r[1]) < CLEAR_MARGIN - 0.0001:
                 bad += 1
         res[ob.name] = (bad, len(ob.data.vertices))
     return res

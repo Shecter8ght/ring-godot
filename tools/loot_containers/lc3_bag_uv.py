@@ -17,7 +17,7 @@ import numpy as np
 
 OUT = "E:/Games/RING-godot/_asset_src/loot_containers/maps_v03/lc_bag"
 SIZE = 4096
-GAP = 14
+GAP = 28
 FIXED = {"t_red": (20.0, 4090.0), "t_black": (84.0, 4090.0), "t_gray": (148.0, 4090.0), "t_white": (212.0, 4090.0)}
 RESERVED_BOTTOM = 80          # нижняя полоса атласа B — клетки ниток
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -213,7 +213,7 @@ def do_bake(which):
         for l in list(em.inputs["Color"].links):
             nt.links.remove(l)
         nt.links.new(sock, em.inputs["Color"])
-        bpy.ops.object.bake(type="EMIT", margin=10, use_clear=True)
+        bpy.ops.object.bake(type="EMIT", margin=8, use_clear=True)
         buf = np.empty(res * res * 4, np.float32)
         img.pixels.foreach_get(buf)
         np.save(os.path.join(OUT, f"{which}_{kind}.npy"), np.flipud(buf.reshape(res, res, 4))[..., :3].copy())
@@ -228,7 +228,7 @@ def do_bake(which):
     img = bpy.data.images.new(f"{which}_ao", res, res, float_buffer=True, alpha=False)
     img.colorspace_settings.name = "Non-Color"
     tex.image = img
-    bpy.ops.object.bake(type="AO", margin=10, use_clear=True)
+    bpy.ops.object.bake(type="AO", margin=8, use_clear=True)
     buf = np.empty(res * res * 4, np.float32)
     img.pixels.foreach_get(buf)
     np.save(os.path.join(OUT, f"{which}_ao.npy"), np.flipud(buf.reshape(res, res, 4))[..., 0].copy())
