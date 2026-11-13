@@ -176,16 +176,18 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
         last = t2
     else:
         # тон краски и грязь — крупные мягкие пятна 10–40 см из масок владельца (разброс на плоскости 5–8/255)
-        t = _layer("Тон краски — тёмные пятна (SI014)", pos, color=(0.55, 0.60, 0.50), cmode=L.BlendingMode.Multiply,
-                   cop=0.95 * k, rough=0.08, rmode="add", rop=0.4 * k)
+        fl = CTX["game"] == "lc_file"   # картотека: нейтральный серый, пятнистость тона ещё на 40 % слабее (круг 5)
+        tk = 0.6 if fl else 1.0
+        t = _layer("Тон краски — тёмные пятна (SI014)", pos, color=(0.60, 0.60, 0.60) if fl else (0.55, 0.60, 0.50),
+                   cmode=L.BlendingMode.Multiply, cop=0.95 * k * tk, rough=0.08, rmode="add", rop=0.4 * k)
         spread(t, si(14), 1700, bbox, rot=0.4)
         made.append(_scope(t, meshes))
-        t2 = _layer("Тон краски — светлые пятна (SI016)", _above(t), color=(0.50, 0.56, 0.45), cmode=L.BlendingMode.Screen,
-                    cop=0.34 * k, rough=-0.05, rmode="add", rop=0.5)
+        t2 = _layer("Тон краски — светлые пятна (SI016)", _above(t), color=(0.56, 0.56, 0.56) if fl else (0.50, 0.56, 0.45), cmode=L.BlendingMode.Screen,
+                    cop=0.34 * k * tk, rough=-0.05, rmode="add", rop=0.5)
         spread(t2, si(16), 2200, bbox, rot=1.2)
         made.append(_scope(t2, meshes))
-        t3 = _layer("Грязь — крупные пятна (grunge_4)", _above(t2), color=(0.38, 0.40, 0.34), cmode=L.BlendingMode.Multiply,
-                    cop=0.75 * k, rough=0.10, rmode="add", rop=0.4)
+        t3 = _layer("Грязь — крупные пятна (grunge_4)", _above(t2), color=(0.40, 0.40, 0.40) if fl else (0.38, 0.40, 0.34), cmode=L.BlendingMode.Multiply,
+                    cop=0.75 * k * tk, rough=0.10, rmode="add", rop=0.4)
         spread(t3, sh("Grunge4"), 1900, bbox, rot=0.7)
         made.append(_scope(t3, meshes))
         last = t3
@@ -236,7 +238,7 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
         alpha = f"{SRC}/wear_v03/{CTX['game']}_scr_alpha.png"
         if os.path.exists(alpha):
             # 2–3 короткие тонкие царапины у штурвала / ручки (lc3_scratches.py): цвет на ~22/255 светлее краски
-            s = _layer("Царапины у штурвала (lc3_scratches)", _above(last), color=(0.25, 0.25, 0.25), cop=1.0, rough=0.40, metal=0.0)
+            s = _layer("Царапины у штурвала (lc3_scratches)", _above(last), color=(0.36, 0.36, 0.36), cop=0.85, rough=0.35, metal=0.0)
             sp_finish.bitmap_mask(s, alpha)
             made.append(_scope(s, meshes))
             last = s

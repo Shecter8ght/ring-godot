@@ -68,6 +68,31 @@ def island_border(g: dict, px: int) -> np.ndarray:
     return d <= px
 
 
+def bevel_edge(game: str) -> np.ndarray | None:
+    """Карта кромок круга 4 — из 3D (lc4_edge_bake.py: узел Bevel запечён в развёртку по каждой детали): светится на острых и
+    скруглённых рёбрах и на границах островов. None — карты нет (тогда прежний расчёт по картам положения)."""
+    f = SRC / "prints" / "geo" / f"{game}_edge.npy"
+    if not f.exists():
+        return None
+    r = np.load(f)[..., 0].astype(np.float32)
+    return cv2.GaussianBlur(r, (0, 0), 0.8)
+
+
+# жалюзи шкафа: каждая ламель — узкая полоска, целиком «кромка»; зону там вдвое ослабляем, чтобы рисунок сколов дал
+# только короткие вразнобой сколы по передним кромкам, а не сплошную белую полосу поперёк
+SLATS = {"lc_gun": ["ОШ_жалюзи_лев", "ОШ_жалюзи_прав"]}
+
+
+def edge_from_bevel(game: str, g: dict, lo: float, hi: float) -> np.ndarray | None:
+    r = bevel_edge(game)
+    if r is None:
+        return None
+    z = smooth(r, lo, hi)
+    if game in SLATS:
+        z = np.where(FZ.parts(g, *SLATS[game]), z * 0.5, z)
+    return (z * (g["part_id"] > 0)).astype(np.float32)
+
+
 SMALL = {"lc_cell", "lc_aid", "lc_cash"}   # малые предметы: зоны вдвое уже (иначе вся деталь «у ручки» и «у пола»)
 
 
@@ -104,16 +129,21 @@ def zones(game: str) -> None:
     h = pos[..., 2] - zmin
     # круг 3: цепочка сколов должна читаться с двух метров при 0,85 пикс/мм — полоса 4–16 мм; сейф и ячейка — тонкая 1,5–5 мм
     if want("edge"):
-        save("edge", game, clean(clean(FZ.edge_zone(g, 0.004, 0.016), 9, 0.95), 41, 0.45))
+        z = edge_from_bevel(game, g, 0.6, 0.98)
+        save("edge", game, z if z is not None else clean(clean(FZ.edge_zone(g, 0.004, 0.016), 9, 0.95), 41, 0.45))
     if want("edge_c"):
-        # круг 4: прерывистая светлая линия 3–6 мм вдоль длинных рёбер (рисунок кладёт Painter крупными чешуйками)
-        save("edge_c", game, clean(clean(FZ.edge_zone(g, 0.003, 0.006), 9, 0.95), 41, 0.45))
+        # круг 5: полоса 4–8 мм вдоль каждого выпуклого и скруглённого ребра (карта из 3D), сколы кладёт рисунок владельца
+        z = edge_from_bevel(game, g, 0.6, 0.98)
+        save("edge_c", game, z if z is not None else clean(clean(FZ.edge_zone(g, 0.003, 0.006), 9, 0.95), 41, 0.45))
     if want("edge_s"):
-        # сейф и ячейка: сколы только по самим рёбрам — полоса 2–6 мм у границ островов, кольцо у лимба и т. п. вне
-        z = clean(clean(FZ.edge_zone(g, 0.002, 0.006), 9, 0.95), 41, 0.30)
-        save("edge_s", game, z * island_border(g, 7))
+        z = edge_from_bevel(game, g, 0.6, 0.98)
+        if z is None:
+            z = clean(clean(FZ.edge_zone(g, 0.002, 0.006), 9, 0.95), 41, 0.30) * island_border(g, 7)
+        save("edge_s", game, z)
     if want("edgew"):
-        save("edgew", game, clean(clean(FZ.edge_zone(g, 0.004, 0.024), 9, 0.95), 41, 0.45))
+        r = bevel_edge(game)
+        z = None if r is None else smooth(cv2.GaussianBlur(r, (0, 0), 3.0), 0.25, 0.6) * (g["part_id"] > 0)
+        save("edgew", game, z if z is not None else clean(clean(FZ.edge_zone(g, 0.004, 0.024), 9, 0.95), 41, 0.45))
     if want("inside") and game in INSIDE:
         m = FZ.parts(g, *INSIDE[game]) & valid
         c = pos[FZ.parts(g, INSIDE[game][0]) & valid].mean(0)

@@ -49,6 +49,10 @@ V3 = {
     # денежный ящик кассы: крашеный металл того же тона, темнее
     "V3-CASH-DRAWER": {"code": "V3-CASH-DRAWER", "title": "Краска бежево-серая тёмная (денежный ящик)", "kind": "coating",
                        "base": {"color": [0.50, 0.46, 0.40], "rough": 0.55, "metal": 0.0}, "grain": GRAIN_PAINT},
+    # картотека: светло-серый порошок, шагрень, лёгкий атласный блеск; пятнистость тона убавлена (круг 5)
+    "V3-FILE-LGR": {"code": "V3-FILE-LGR", "title": "Порошок светло-серый, атлас (картотека)", "kind": "coating",
+                    "base": {"color": [0.62, 0.63, 0.62], "rough": 0.40, "metal": 0.0},
+                    "grain": {"mm": 1.6, "rough": 0.2, "color": 0.02, "height": 0.003}},
     # аптечка: белая эмаль, слегка желтоватая
     "V3-AID-WHITE": {"code": "V3-AID-WHITE", "title": "Эмаль белая, пожелтевшая (аптечка)", "kind": "coating",
                      "base": {"color": [0.84, 0.82, 0.74], "rough": 0.40, "metal": 0.0},
@@ -60,7 +64,7 @@ BY_CODE = {
     "lc_gun": {"PW-SGN-SAT": ("V3-GUN-GRN", "paint")},
     "lc_safe": {"PW-GRA-SAT": ("V3-SAFE-BLK", "paint"), "PW-LGR-SAT": (None, "paint"), "CR-GLS": ("V3-DARKMETAL", "bare")},
     "lc_cell": {"PW-GRY-SAT": ("V3-SAFE-BLK", "paint")},
-    "lc_file": {"PW-LGR-SAT": (None, "paint"), "PT-BLK-SAT": (None, "paint")},
+    "lc_file": {"PW-LGR-SAT": ("V3-FILE-LGR", "paint"), "PT-BLK-SAT": (None, "paint")},
     "lc_cash": {"PL-BGE-TEX": ("V3-ABS", "abs"), "PT-BLK-SAT": ("V3-CASH-DRAWER", "paint")},
     "lc_aid": {"PW-WHT-SMO": ("V3-AID-WHITE", "paint")},
 }
@@ -148,7 +152,7 @@ def build_and_export(name: str, parts: list, kinds: dict, out_dir: Path, marker:
     print(F.sp_run.wait(F.sp_run.SP_JOBS / marker, 1800))
 
 
-K_GAME = {"lc_safe": 1.0, "lc_cell": 1.0, "lc_file": 1.0, "lc_aid": 1.0, "lc_cash": 0.8}
+K_GAME = {"lc_safe": 1.0, "lc_cell": 1.0, "lc_file": 0.6, "lc_aid": 1.0, "lc_cash": 0.8}
 
 
 def stack(names: list[str], k: float = 0.0, floor: float = 0.2) -> None:
