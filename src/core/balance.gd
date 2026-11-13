@@ -1409,7 +1409,7 @@ const NOISE_STEP := {"stand": 7.0, "sprint": 14.0, "crouch": 3.0, "prone": 1.5}
 const NOISE_STEP_INTERVAL := 0.45
 ## Звук шагов (Footsteps): между шагами — STEP_STRIDE / скорость, но в пределах STEP_INTERVAL, с;
 ## быстрее STEP_RUN_SPEED, м/с — бег (свои записи). Стена между ушами и шагами — глуше на
-## AUDIO_OCCLUDED_DB: преграда уменьшает только громкость готовой записи.
+## SOUND_PROPAGATION: преграда уменьшает громкость и приглушает верх готовой записи.
 ## Бегом не чаще ~3 шагов в секунду, как у настоящего бегуна (было 0.26 с — почти 4 в секунду: камера
 ## на бегу тряслась мелко и «хаотично», владелец 2026-10-19).
 const STEP_STRIDE := 1.2
@@ -1442,7 +1442,23 @@ const WET_STEPS := {"film_min": 0.35, "puddle_min": 0.2, "roof_lift": 0.35, "roo
 ## шаги в воде слышнее (noise_k), брызги и круги — ближе fx_distance к камере.
 const WATER := {"ankle": 0.12, "knee": 0.45, "waist": 0.9, "speed": [1.0, 0.78, 0.55], "ai_speed": [1.0, 0.8, 0.6],
 	"no_sprint": 0.5, "no_prone": 0.25, "noise_k": 1.6, "fx_distance": 45.0}
-const AUDIO_OCCLUDED_DB := 8.0
+## Пространственный звук. x — потеря громкости в дБ, y — доля приглушения верха.
+## Прямой путь считается по коллизиям, профили можно менять после прослушивания.
+const SOUND_PROPAGATION := {
+	"wall": Vector2(12.0, 1.0), "door": Vector2(8.0, 0.74), "glass": Vector2(3.0, 0.26),
+	"wall_hz": 1250.0, "wall_high_db": 15.0,
+	"probe_width_m": 0.3, "wide_probe_max_m": 55.0,
+	"door_path_max_m": 26.0, "door_path_extra_m": 8.0, "door_path_probes": 3,
+	"door_path": Vector2(3.5, 0.34),
+	"rescan_sec": 0.10, "blend_sec": 0.085, "long_sec": 0.55,
+}
+## От скольких метров начинает пропадать верх, где достигает полной силы, частота и потеря верха, дБ.
+const SOUND_AIR := {
+	"Shots": Vector4(45.0, 400.0, 3200.0, 20.0),
+	"Voices": Vector4(8.0, 36.0, 3900.0, 11.0),
+	"Steps": Vector4(6.0, 28.0, 3800.0, 10.0),
+	"World": Vector4(12.0, 100.0, 3600.0, 13.0),
+}
 
 ## Место выстрела (AcousticPlace, лучи физики от ствола): ceiling_max_m — выше потолка нет (небо — улица);
 ## четыре луча вверх-вбок под 45° (длина — высота потолка × 2): попали меньше side_hits_min — это навес без

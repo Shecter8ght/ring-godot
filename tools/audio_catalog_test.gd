@@ -158,6 +158,18 @@ func _ready() -> void:
 	check((overlay.get("_players") as Array).size() == 1, "in-game bench starts selected recording")
 	check((overlay.get("_players") as Array)[0].can_process(), "bench audio also works from the paused game")
 	var preview: AudioStreamPlayer3D = (overlay.get("_players") as Array)[0] as AudioStreamPlayer3D
+	var sound_path: OptionButton = overlay.get("_sound_path")
+	sound_path.select(sound_path.get_item_index(Audio.SoundPathPreview.WALL))
+	sound_path.item_selected.emit(sound_path.selected)
+	preview = (overlay.get("_players") as Array)[0] as AudioStreamPlayer3D
+	var spectral: CheckBox = overlay.get("_spectral")
+	var wall_level := preview.volume_db
+	check(preview.attenuation_filter_cutoff_hz < 1500.0 and preview.attenuation_filter_db < -20.0,
+		"режим «За стеной» включает фильтр даже в пустой сцене")
+	spectral.button_pressed = false
+	check(preview.playing and preview.attenuation_filter_db == 0.0 and is_equal_approx(preview.volume_db, wall_level),
+		"отключение фильтра не останавливает запись и не меняет её громкость")
+	spectral.button_pressed = true
 	var headset_choice: OptionButton = overlay.get("_headset_choice")
 	var preview_bus: int = AudioServer.get_bus_index(preview.bus)
 	var game_bus: int = AudioServer.get_bus_index("Steps")

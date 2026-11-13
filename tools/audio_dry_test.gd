@@ -1,5 +1,5 @@
 extends Node3D
-## Измеряет реальный выход Audio: запись проходит без окраски и добавленного хвоста.
+## Измеряет реальный выход Audio: прямой звук, гарнитура, воздух и преграды.
 
 var checked: int = 0
 var failed: int = 0
@@ -36,6 +36,7 @@ func _ready() -> void:
 		check(float(measurement.error) < 0.015, String(item.name) + ": форма сигнала сохранена после поправки громкости")
 		check(float(measurement.late) < 0.000001, String(item.name) + ": движок не добавляет хвост")
 	check(float(recordings.far.gain) < float(recordings.near.gain), "Расстояние уменьшает громкость")
+	await _test_propagation()
 	var shot_bus: int = AudioServer.get_bus_index("Shots")
 	var headset: Dictionary = WeaponDb.headset("headset_perimeter")
 	Settings.set_headset(headset)
@@ -97,7 +98,7 @@ func _make_probe() -> AudioStreamWAV:
 	stream.data = data
 	return stream
 
-func _capture(label: String, distance: float, place: String, direct: bool) -> PackedVector2Array:
+func _capture(label: String, distance: float, place: String, direct: bool, filtered: bool = false) -> PackedVector2Array:
 	# Захват только читает отсчёты; в игровом пути этого эффекта нет.
 	var master: int = AudioServer.get_bus_index("Master")
 	var tap: AudioEffectCapture = AudioEffectCapture.new()
@@ -116,12 +117,16 @@ func _capture(label: String, distance: float, place: String, direct: bool) -> Pa
 		var cell: float = float(Balance.SHOT_PLACE.cell_m)
 		var key: Vector3i = Vector3i(roundi(pos.x / cell), roundi(pos.y / cell), roundi(pos.z / cell))
 		Audio._place_cache[key] = {"place":place,"t":Time.get_ticks_msec() * 0.001}
-		Audio.play("wpn_hg_02_shot", pos)
+		if distance > float(Balance.AUDIO_FAR.delay_from_m):
+			Audio._play_now("wpn_hg_02_shot", "wpn_hg_02_shot_outdoor", probe, pos, 0.0, Balance.SONORA_AUDIO.shot)
+		else:
+			Audio.play("wpn_hg_02_shot", pos)
 		var players: Array[Node] = find_children("*", "AudioStreamPlayer3D", true, false)
 		check(not players.is_empty(), label + ": источник создан")
 		if not players.is_empty():
 			var player: AudioStreamPlayer3D = players.back() as AudioStreamPlayer3D
-			check(player.pitch_scale == 1.0 and player.attenuation_filter_db == 0.0, label + ": высота и спектр без обработки")
+			check(player.pitch_scale == 1.0 and (player.attenuation_filter_db < 0.0 if filtered else player.attenuation_filter_db == 0.0),
+				label + ": высота записи сохранена, фильтр в нужном состоянии")
 			check(player.bus == &"Shots", label + ": обычная шина выстрелов")
 	await get_tree().create_timer(0.55).timeout
 	var frames: PackedVector2Array = tap.get_buffer(tap.get_frames_available())
@@ -141,6 +146,103 @@ func _capture(label: String, distance: float, place: String, direct: bool) -> Pa
 		wav.data = data
 		wav.save_to_wav(output_folder.path_join(label + ".wav"))
 	return frames
+
+
+func _test_propagation() -> void:
+	var wall := StaticBody3D.new()
+	wall.collision_layer = Hitscan.LAYER_WORLD
+	var box := BoxShape3D.new()
+	box.size = Vector3(2.0, 4.0, 0.2)
+	var shape := CollisionShape3D.new()
+	shape.shape = box
+	wall.add_child(shape)
+	wall.position = Vector3(0, 0, -4.0)
+	add_child(wall)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var blocked := await _capture("behind_wall", 8.0, "outdoor", false, true)
+	wall.position.x = 4.0
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var clear := await _capture("open_same_distance", 8.0, "outdoor", false)
+	_check_spectral_loss("Стена", blocked, clear, 12.0)
+	var distant := await _capture("far_air", 170.0, "outdoor", false, true)
+	_check_spectral_loss("Воздух на 170 м", distant, clear, 3.0)
+	# Во время петли стену можно поставить и убрать, а громкость записи по-прежнему настраивается.
+	var source := Node3D.new()
+	source.position = Vector3(0, 0, -8.0)
+	add_child(source)
+	var loop := Audio.start_loop("wpn_hg_02_shot", source)
+	check(loop != null and loop.attenuation_filter_db == 0.0, "Петля начинается с чистого пути")
+	wall.position.x = 0.0
+	await get_tree().create_timer(0.36).timeout
+	check(loop.attenuation_filter_db < -12.0 and loop.volume_db < -6.0, "Фильтр и уровень меняются во время звука")
+	var blocked_level := loop.volume_db
+	var id := String(loop.get_meta("audio_event"))
+	var gain := Audio.mix_gain(id)
+	Audio.set_mix_gain(id, gain + 2.0)
+	check(absf(loop.volume_db - blocked_level - 2.0) < 0.05, "Настройка громкости сохраняет ослабление стены")
+	Audio.set_mix_gain(id, gain)
+	wall.position.x = 4.0
+	await get_tree().create_timer(0.60).timeout
+	print("SOUND_PATH reopen filter_db=%.2f level_db=%.2f blocked_level_db=%.2f" % [
+		loop.attenuation_filter_db, loop.volume_db, blocked_level])
+	check(absf(loop.attenuation_filter_db) < 1.0 and loop.volume_db > blocked_level + 8.0, "После выхода из-за стены звук проясняется")
+	source.queue_free()
+	wall.queue_free()
+	await _test_door_path()
+
+
+func _test_door_path() -> void:
+	var door := (load("res://scenes/props/door.tscn") as PackedScene).instantiate() as Door
+	door.position = Vector3(2.0, -1.2, -4.0)
+	add_child(door)
+	var panel := StaticBody3D.new()
+	panel.collision_layer = Hitscan.LAYER_WORLD
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(7.0, 4.0, 0.2)
+	shape.shape = box
+	panel.add_child(shape)
+	panel.position = Vector3(-1.5, 0.0, -4.0)
+	add_child(panel)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var source := Vector3(1.1, 0, -8)
+	var world := get_world_3d()
+	check(not Audio.SoundPropagation.through_door(world.direct_space_state, Vector3.ZERO, source, [door]).is_finite(),
+		"Закрытая дверь не пропускает обход")
+	door.is_open = true
+	door._target_angle = PI * 0.5
+	(door.get_node("Leaf") as Node3D).rotation.y = PI * 0.5
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var player := Audio._play_now("wpn_hg_02_shot", "wpn_hg_02_shot_outdoor", probe, source, 0.0, Balance.SONORA_AUDIO.shot)
+	check(is_equal_approx(float(player.get_meta("sound_path_loss_db")), float(Balance.SOUND_PROPAGATION.door_path.x))
+		and player.global_position.x > 2.0 and player.global_position.length() > source.length(),
+		"С закрытой прямой звук слышен со стороны открытого проёма")
+	player.queue_free()
+	panel.collision_layer = Hitscan.LAYER_GLASS
+	door.is_open = false
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(Audio.SoundPropagation.sample(world.direct_space_state, Vector3.ZERO, source) == Balance.SOUND_PROPAGATION.glass,
+		"Целое стекло глушит слабее стены")
+	panel.collision_layer = 0
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check(Audio.SoundPropagation.sample(world.direct_space_state, Vector3.ZERO, source) == Vector2.ZERO,
+		"После исчезновения стекла прямой путь чистый")
+	panel.queue_free()
+	door.queue_free()
+
+
+func _check_spectral_loss(label: String, recorded: PackedVector2Array, clear: PackedVector2Array, min_db: float) -> void:
+	var low := linear_to_db(_tone(recorded, 200.0) / maxf(0.000001, _tone(clear, 200.0)))
+	var high := linear_to_db(_tone(recorded, 9000.0) / maxf(0.000001, _tone(clear, 9000.0)))
+	print("SOUND_PATH ", label, " low_db=%.2f high_db=%.2f" % [low, high])
+	check(_energy(recorded) > 0.000001 and low < -1.0 and high < low - min_db,
+		label + ": верх тише низа после выравнивания громкости")
 
 func _energy(data: PackedVector2Array) -> float:
 	var sum: float = 0.0

@@ -122,7 +122,7 @@ func _show_state(delta: float) -> void:
 		if down:
 			_hum.stop()
 		else:
-			_hum.play()
+			Audio.play_world_loop(_hum)
 	if _lamp_mat == null:
 		return
 	_blink_t += delta

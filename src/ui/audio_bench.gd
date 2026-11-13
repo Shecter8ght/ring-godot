@@ -19,6 +19,8 @@ var _file_level: SpinBox
 var _distance: SpinBox
 var _angle: SpinBox
 var _loop: CheckBox
+var _sound_path: OptionButton
+var _spectral: CheckBox
 var _play_button: Button
 var _headset_choice: OptionButton
 var _headset_levels: VBoxContainer
@@ -30,6 +32,7 @@ var _updating: bool = false
 var _dirty: bool = false
 var _players: Array[Node] = []
 var _listener: AudioListener3D
+var _preview_camera: Camera3D
 var _mouse_before: Input.MouseMode
 
 
@@ -40,6 +43,10 @@ func _ready() -> void:
 	_mouse_before = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not Audio._has_ears():
+		# Для 3D-звука из главного меню Godot нужна камера в этом мире.
+		_preview_camera = Camera3D.new()
+		_preview_camera.current = true
+		add_child(_preview_camera)
 		_listener = AudioListener3D.new()
 		add_child(_listener)
 		_listener.make_current()
@@ -164,6 +171,23 @@ func _build() -> void:
 	_angle.max_value = 180
 	_angle.step = 15
 	position_row.add_child(_angle)
+	var path_row := HBoxContainer.new()
+	right.add_child(path_row)
+	path_row.add_child(_label("Преграда"))
+	_sound_path = OptionButton.new()
+	_sound_path.add_item("Как в сцене", Audio.SoundPathPreview.SCENE)
+	_sound_path.add_item("Открыто", Audio.SoundPathPreview.OPEN)
+	_sound_path.add_item("За стеной", Audio.SoundPathPreview.WALL)
+	path_row.add_child(_sound_path)
+	_sound_path.item_selected.connect(func(_index: int) -> void:
+		if not _players.is_empty():
+			_play())
+	_spectral = CheckBox.new()
+	_spectral.text = "Приглушать высокие частоты"
+	_spectral.button_pressed = true
+	_spectral.tooltip_text = "Выключи для сравнения на той же дистанции и с тем же ослаблением громкости за стеной."
+	_spectral.toggled.connect(_preview_spectral)
+	right.add_child(_spectral)
 	_loop = CheckBox.new()
 	_loop.text = "Повторять до остановки"
 	right.add_child(_loop)
@@ -463,10 +487,17 @@ func _play() -> void:
 	var model: Dictionary = _selected_headset()
 	var bus: StringName = Settings.preview_headset(Audio._bus_for(_id), model)
 	var player: Node = Audio.preview_event(_id, pos, _variants.selected, _loop.button_pressed, bus,
-		float(model.get("hear_k", 1.0)) if bus != &"" else -1.0)
+		float(model.get("hear_k", 1.0)) if bus != &"" else -1.0,
+		_sound_path.get_selected_id(), _spectral.button_pressed)
 	if player != null:
 		_players.append(player)
 		_status.text = "Играет: " + _title.text
+
+
+func _preview_spectral(enabled: bool) -> void:
+	for player: Node in _players:
+		if is_instance_valid(player) and player is AudioStreamPlayer3D:
+			Audio.set_preview_spectral(player as AudioStreamPlayer3D, enabled)
 
 
 func _stop() -> void:

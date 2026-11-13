@@ -1,11 +1,28 @@
 extends Node
-## Движок выбирает запись места и считает пространственную громкость. Тембр гарнитуры задаёт Settings.
+## Движок выбирает запись места и считает, как звук дошёл до игрока. Тембр гарнитуры задаёт Settings.
 
 const REGISTRY: String = "res://data/audio_events.json"
 const MIX_PATH: String = "res://data/audio_mix.json"
 const MAP_AMBIENCE_PATH: String = "user://map_ambience.cfg"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
+const SoundPropagation := preload("res://src/audio/sound_propagation.gd")
 const StepLayerPatch := preload("res://src/audio/step_layer_patch.gd")
+
+enum SoundPathPreview { SCENE, OPEN, WALL }
+
+class SoundPath:
+	var player: AudioStreamPlayer3D
+	var profile: Vector4
+	var checks_walls: bool
+	var refresh_left: float
+	var current: Vector2
+	var target: Vector2
+	var follow: Node3D
+	var offset: Vector3
+	var source: Vector3
+	var door: Vector3 = Vector3.INF
+	var via_door: bool
+	var door_share: float
 
 signal stepped(kind: String, surface: String, pos: Vector3)
 signal event_played(event_id: String, hook: String, pos: Vector3)
@@ -40,6 +57,11 @@ var _local_map_files: Dictionary = {}
 var _local_map_streams: Dictionary = {}
 var map_ambience_save_path: String = MAP_AMBIENCE_PATH
 var _voice_events: Dictionary = {}
+var _sound_paths: Array[SoundPath] = []
+var _near_sound_doors: Array[Node] = []
+var _sound_doors_frame: int = -1
+var _sound_path_frame: int = -1
+var _sound_path_samples: Dictionary = {}
 
 
 func _load_voice_lines() -> void:
@@ -66,12 +88,12 @@ func voice_event_for(speaker: String, text: String) -> String:
 	return String(_voice_events.get(speaker + "\n" + text, _voice_events.get("*\n" + text, "")))
 
 
-func play_voice_line(speaker: String, text: String, pos: Vector3 = Vector3.INF, radio: bool = false) -> bool:
+func play_voice_line(speaker: String, text: String, pos: Vector3 = Vector3.INF, radio: bool = false, follow: Node3D = null) -> bool:
 	var event_id := voice_event_for(speaker, text)
 	if event_id == "" or not has_sound(event_id):
 		return false
 	if pos.is_finite():
-		play(event_id, pos)
+		play(event_id, pos, 0.0, 0.0, null, null, follow)
 	else:
 		play_ui(event_id, 0.0, &"Radio" if radio else &"")
 	return true
@@ -192,7 +214,7 @@ func _pick_from(records: Array, key: String) -> AudioStream:
 	return records[index] as AudioStream
 
 func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0, emitter: Node = null,
-		recording: AudioStream = null) -> void:
+		recording: AudioStream = null, follow: Node3D = null) -> void:
 	if hook == "":
 		return
 	var spec: Dictionary = _kind_spec(hook)
@@ -212,9 +234,12 @@ func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0
 		return
 	var delay: float = distance / float(Balance.AUDIO_FAR.sound_mps) if _has_ears() and bool(spec.get("far", false)) and distance > float(Balance.AUDIO_FAR.delay_from_m) else 0.0
 	if delay > 0.0:
-		get_tree().create_timer(delay).timeout.connect(func() -> void: _play_now(hook, id, stream, pos, extra_db, spec))
+		var scene := get_tree().current_scene
+		get_tree().create_timer(delay).timeout.connect(func() -> void:
+			if is_instance_valid(scene) and get_tree().current_scene == scene:
+				_play_now(hook, id, stream, pos, extra_db, spec))
 	else:
-		_play_now(hook, id, stream, pos, extra_db, spec)
+		_play_now(hook, id, stream, pos, extra_db, spec, {}, follow)
 
 func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 	var ancestor: Node = emitter
@@ -227,22 +252,21 @@ func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 	return false
 
 func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, spec: Dictionary,
-		bus_override: StringName = &"", hear_k: float = -1.0) -> AudioStreamPlayer3D:
+		preview: Dictionary = {}, follow: Node3D = null) -> AudioStreamPlayer3D:
 	if get_tree().current_scene == null:
 		return null
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
 	_tag_mix(player, id, stream, float(spec.db) + extra_db)
-	player.unit_size = float(spec.unit) * (hear_k if hear_k > 0.0 else float(Settings.headset.get("hear_k", 1.0)))
+	player.unit_size = float(spec.unit) * float(preview.get("hear_k", Settings.headset.get("hear_k", 1.0)))
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
-	_configure_recorded_player(player)
-	if bool(spec.get("occlude", true)) and _has_ears() and _occluded(_listener_pos(), pos):
-		player.volume_db -= float(Balance.AUDIO_OCCLUDED_DB)
-	player.bus = bus_override if bus_override != &"" else _bus_for(hook)
+	var bus := _bus_for(hook)
+	player.bus = StringName(preview.get("bus", bus))
 	player.finished.connect(player.queue_free)
 	get_tree().current_scene.add_child(player)
 	player.global_position = pos
+	_setup_sound_path(player, bus, bool(spec.get("occlude", true)), preview, follow)
 	player.play()
 	event_played.emit(id, hook, pos)
 	if _is_weapon_shot(hook):
@@ -270,7 +294,7 @@ func _kind_spec(hook: String) -> Dictionary:
 		return Balance.SONORA_AUDIO.weapon_action
 	return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.AUDIO_EVENT_PROFILES.get(hook, Balance.SONORA_AUDIO.world)) as Dictionary
 
-## Пространственная подача готовой записи: без изменения спектра, высоты и акустики.
+## Начальные параметры позиционного источника. Приглушение задаётся после размещения в мире.
 func _configure_recorded_player(player: AudioStreamPlayer3D) -> void:
 	player.attenuation_filter_cutoff_hz = float(Balance.SONORA_AUDIO.unfiltered_hz)
 	player.attenuation_filter_db = 0.0
@@ -370,7 +394,157 @@ func _tag_mix(player: Node, id: String, stream: AudioStream, base_db: float) -> 
 func _apply_mix(player: Node) -> void:
 	var id: String = String(player.get_meta("audio_event", ""))
 	var file: String = String(player.get_meta("audio_file", ""))
-	player.set("volume_db", float(player.get_meta("audio_base_db", 0.0)) + mix_gain(id) + (mix_gain(id, file) if file != "" else 0.0))
+	var level := float(player.get_meta("audio_base_db", 0.0)) + mix_gain(id) + (mix_gain(id, file) if file != "" else 0.0)
+	player.set("volume_db", level - float(player.get_meta("sound_path_loss_db", 0.0)))
+
+
+func _setup_sound_path(player: AudioStreamPlayer3D, bus: StringName, checks_walls: bool,
+		preview: Dictionary = {}, follow: Node3D = null, looped: bool = false) -> void:
+	var profile: Vector4 = Balance.SOUND_AIR.get(String(bus), Balance.SOUND_AIR.World)
+	var mode := int(preview.get("path", SoundPathPreview.SCENE))
+	var spectral := bool(preview.get("spectral", true))
+	var ear := _listener_pos()
+	var source := player.global_position
+	var blocked := Vector2.ZERO
+	var door := Vector3.INF
+	if mode == SoundPathPreview.WALL:
+		blocked = Balance.SOUND_PROPAGATION.wall
+	elif mode == SoundPathPreview.SCENE and checks_walls:
+		blocked = _sample_sound_path(player, ear, source)
+		door = _sound_door(player, ear, source, blocked)
+		if door.is_finite():
+			blocked = Balance.SOUND_PROPAGATION.door_path
+	var heard_at := _sound_position(ear, source, door, 1.0)
+	player.global_position = heard_at
+	_apply_sound_path(player, profile, ear.distance_to(heard_at), blocked, spectral)
+	if not preview.is_empty():
+		player.set_meta("preview_sound_path", blocked)
+		player.set_meta("preview_air_profile", profile)
+		return
+	if not looped and bus != &"Voices" and (bus == &"Shots" or player.stream.get_length() < float(Balance.SOUND_PROPAGATION.long_sec)):
+		return
+	var path := SoundPath.new()
+	path.player = player
+	path.profile = profile
+	path.checks_walls = checks_walls
+	path.current = blocked
+	path.target = blocked
+	path.source = source
+	path.door = door
+	path.via_door = door.is_finite()
+	path.door_share = 1.0 if path.via_door else 0.0
+	path.refresh_left = float(_sound_paths.size() % 5 + 1) * 0.02
+	if is_instance_valid(follow):
+		path.follow = follow
+		path.offset = source - follow.global_position
+	_sound_paths.append(path)
+
+
+func _sample_sound_path(player: AudioStreamPlayer3D, ear: Vector3, source: Vector3) -> Vector2:
+	var world := player.get_world_3d()
+	if world == null or not _has_ears():
+		return Vector2.ZERO
+	# Один шаг может запустить запись подошвы, снаряжения и мусора в одной точке.
+	var frame := Engine.get_process_frames()
+	if _sound_path_frame != frame:
+		_sound_path_frame = frame
+		_sound_path_samples.clear()
+	var key := [world.get_instance_id(), ear, source]
+	if not _sound_path_samples.has(key):
+		_sound_path_samples[key] = SoundPropagation.sample(world.direct_space_state, ear, source)
+	return _sound_path_samples[key]
+
+
+func _sound_door(player: AudioStreamPlayer3D, ear: Vector3, source: Vector3, blocked: Vector2) -> Vector3:
+	var cfg: Dictionary = Balance.SOUND_PROPAGATION
+	if blocked.y < 0.55 or ear.distance_squared_to(source) > pow(float(cfg.door_path_max_m), 2):
+		return Vector3.INF
+	var frame := Engine.get_process_frames()
+	if _sound_doors_frame != frame:
+		_sound_doors_frame = frame
+		_near_sound_doors.clear()
+		var radius_sq := pow(float(cfg.door_path_max_m) + float(cfg.door_path_extra_m), 2)
+		for node in get_tree().get_nodes_in_group("doors"):
+			var door := node as Door
+			if door and door.global_position.distance_squared_to(ear) <= radius_sq:
+				_near_sound_doors.append(door)
+	return SoundPropagation.through_door(player.get_world_3d().direct_space_state, ear, source, _near_sound_doors)
+
+
+func _sound_position(ear: Vector3, source: Vector3, door: Vector3, share: float) -> Vector3:
+	if not door.is_finite() or share < 0.001:
+		return source
+	var distance := ear.distance_to(door) + door.distance_to(source)
+	return source.lerp(ear + ear.direction_to(door) * distance, share)
+
+
+func _apply_sound_path(player: AudioStreamPlayer3D, profile: Vector4, distance: float, blocked: Vector2, spectral: bool = true) -> void:
+	var prior_loss := float(player.get_meta("sound_path_loss_db", 0.0))
+	if absf(prior_loss - blocked.x) > 0.01 or (blocked.x == 0.0 and prior_loss > 0.0):
+		if blocked.x == 0.0:
+			player.remove_meta("sound_path_loss_db")
+		else:
+			player.set_meta("sound_path_loss_db", blocked.x)
+		player.max_db = float(Balance.SONORA_AUDIO.max_db) - blocked.x
+		_apply_mix(player)
+	if not spectral:
+		player.attenuation_filter_db = 0.0
+		player.attenuation_filter_cutoff_hz = float(Balance.SONORA_AUDIO.unfiltered_hz)
+		return
+	var air := smoothstep(profile.x, profile.y, distance)
+	var cfg: Dictionary = Balance.SOUND_PROPAGATION
+	var wall_hz := float(cfg.wall_hz)
+	var air_hz := lerpf(float(Balance.SONORA_AUDIO.unfiltered_hz), profile.z, smoothstep(0.0, 0.2, air))
+	var cutoff := lerpf(air_hz, profile.z, smoothstep(0.0, 0.25, blocked.y))
+	player.attenuation_filter_cutoff_hz = exp(lerpf(log(cutoff), log(wall_hz), blocked.y))
+	# У близкой преграды громкость уже ограничена max_db. Не даём встроенному фильтру
+	# почти исчезнуть только из-за того, что сам источник близко к слушателю.
+	var close_wall := maxf(0.15, 1.0 - db_to_linear(player.max_db))
+	player.attenuation_filter_db = -minf(80.0, air * profile.w + blocked.y * float(cfg.wall_high_db) / close_wall)
+
+
+func _update_sound_paths(delta: float) -> void:
+	if _sound_paths.is_empty():
+		return
+	var ear := _listener_pos()
+	var cfg: Dictionary = Balance.SOUND_PROPAGATION
+	var blend := 1.0 - exp(-delta / float(cfg.blend_sec))
+	for index in range(_sound_paths.size() - 1, -1, -1):
+		var path := _sound_paths[index]
+		var player := path.player
+		if not is_instance_valid(player) or player.is_queued_for_deletion() or player.has_meta("sound_path_fading"):
+			_sound_paths.remove_at(index)
+			continue
+		if is_instance_valid(path.follow):
+			path.source = path.follow.global_position + path.offset
+		if not player.playing:
+			player.global_position = path.source
+			_sound_paths.remove_at(index)
+			continue
+		var distance := ear.distance_to(path.source)
+		if player.max_distance > 0.0 and distance > player.max_distance:
+			player.global_position = path.source
+			continue
+		path.refresh_left -= delta
+		if path.checks_walls and path.refresh_left <= 0.0:
+			path.refresh_left = float(cfg.rescan_sec)
+			path.target = _sample_sound_path(player, ear, path.source)
+			var door := _sound_door(player, ear, path.source, path.target)
+			path.via_door = door.is_finite()
+			if path.via_door:
+				path.door = door
+				path.target = cfg.door_path
+		path.current = path.target if path.current.distance_squared_to(path.target) < 0.0001 else path.current.lerp(path.target, blend)
+		path.door_share = lerpf(path.door_share, 1.0 if path.via_door else 0.0, blend)
+		player.global_position = _sound_position(ear, path.source, path.door, path.door_share)
+		_apply_sound_path(player, path.profile, ear.distance_to(player.global_position), path.current)
+
+
+## A/B на стенде: тот же звук и преграда, меняются только частоты.
+func set_preview_spectral(player: AudioStreamPlayer3D, spectral: bool) -> void:
+	var path: Vector2 = player.get_meta("preview_sound_path", Vector2.ZERO)
+	var profile: Vector4 = player.get_meta("preview_air_profile", Balance.SOUND_AIR.World)
+	_apply_sound_path(player, profile, _listener_pos().distance_to(player.global_position), path, spectral)
 
 
 func _update_map_ambient() -> void:
@@ -456,7 +630,7 @@ func play_map_ambience(scene_path: String, parent: Node) -> AudioStreamPlayer:
 
 ## Стенд выбирает конкретную запись, но использует тот же профиль, шину и пространственную подачу.
 func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = false,
-		bus_override: StringName = &"", hear_k: float = -1.0) -> Node:
+		bus_override: StringName = &"", hear_k: float = -1.0, path: int = SoundPathPreview.SCENE, spectral: bool = true) -> Node:
 	var records: Array = _samples.get(id, [])
 	if records.is_empty():
 		return null
@@ -481,7 +655,10 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 			player.finished.connect(player.queue_free)
 		player.play()
 		return player
-	var player: AudioStreamPlayer3D = _play_now(id, id, stream, pos, 0.0, spec, bus_override, hear_k)
+	var preview := {"bus": bus_override if bus_override != &"" else bus, "path": path, "spectral": spectral}
+	if hear_k > 0.0:
+		preview.hear_k = hear_k
+	var player := _play_now(id, id, stream, pos, 0.0, spec, preview)
 	if player == null:
 		return null
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -518,8 +695,26 @@ func start_loop(hook: String, parent: Node3D, extra_db: float = 0.0) -> AudioStr
 	_configure_recorded_player(player)
 	player.bus = _bus_for(hook)
 	parent.add_child(player)
-	player.play()
+	play_world_loop(player, bool(spec.get("occlude", true)))
 	return player
+
+
+## Уже расставленный источник с циклической записью, например гул генератора.
+func play_world_loop(player: AudioStreamPlayer3D, checks_walls: bool = true) -> void:
+	if player.stream == null:
+		return
+	for index in range(_sound_paths.size() - 1, -1, -1):
+		if is_instance_valid(_sound_paths[index].player) and _sound_paths[index].player == player:
+			player.global_position = _sound_paths[index].source
+			_sound_paths.remove_at(index)
+	if not player.has_meta("audio_base_db"):
+		player.set_meta("audio_base_db", player.volume_db)
+	_configure_recorded_player(player)
+	if player.has_meta("sound_path_loss_db"):
+		player.remove_meta("sound_path_loss_db")
+	_apply_mix(player)
+	_setup_sound_path(player, player.bus, checks_walls, {}, player.get_parent() as Node3D, true)
+	player.play()
 
 
 func start_ui_loop(hook: String, parent: Node, base_db: float) -> AudioStreamPlayer:
@@ -575,7 +770,8 @@ func _on_audio_node_added(node: Node) -> void:
 			if not button.disabled:
 				play_ui("ui_hover", -11.0))
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_sound_paths(delta)
 	_update_map_ambient()
 	# Уровни могут создаваться и выгружаться внутри Raid; привязки ищутся в их собственных сценах.
 	if not _scan_needed:
@@ -682,6 +878,7 @@ func _track_burst(pos: Vector3, players: Array[AudioStreamPlayer3D]) -> void:
 func _fade_out(p: AudioStreamPlayer3D, sec: float) -> void:
 	if not p.is_inside_tree():
 		return
+	p.set_meta("sound_path_fading", true)
 	var tw := p.create_tween()
 	tw.tween_property(p, "volume_db", p.volume_db - 40.0, sec)
 	tw.tween_callback(p.queue_free)
@@ -917,10 +1114,7 @@ func _has_ears() -> bool:
 
 func _occluded(listener: Vector3, pos: Vector3) -> bool:
 	var world := get_viewport().find_world_3d() if get_viewport() else null
-	if world == null or listener.distance_to(pos) < 1.5:
-		return false
-	var q := PhysicsRayQueryParameters3D.create(listener, pos + Vector3.UP * 0.4, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
-	return not world.direct_space_state.intersect_ray(q).is_empty()
+	return world != null and SoundPropagation.sample(world.direct_space_state, listener, pos).x > 0.0
 
 
 func _listener_pos() -> Vector3:

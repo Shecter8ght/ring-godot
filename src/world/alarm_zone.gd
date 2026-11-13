@@ -128,7 +128,7 @@ func _rpc_trigger() -> void:
 	_siren.bus = &"World"
 	_siren.position = Vector3(0, 2.6, 0)
 	add_child(_siren)
-	_siren.play()
+	Audio.play_world_loop(_siren)
 	# пульт — на проходе у центра магазина (центр мог прийтись на стеллаж)
 	var nav := NavigationServer3D.map_get_closest_point(get_world_3d().navigation_map, global_position)
 	if nav != Vector3.ZERO:

@@ -2785,8 +2785,8 @@ func _voice_for(text: String) -> String:
 
 
 func _show_say(text: String, voice: String = "") -> void:
-	if not Audio.play_voice_line("", text, global_position + Vector3.UP * 1.5):
-		Audio.play(voice if voice != "" else _voice_for(text), global_position + Vector3.UP * 1.5)
+	if not Audio.play_voice_line("", text, global_position + Vector3.UP * 1.5, false, self):
+		Audio.play(voice if voice != "" else _voice_for(text), global_position + Vector3.UP * 1.5, 0.0, 0.0, null, null, self)
 	# Надпись над головой — только вблизи и не сквозь стены: издали она висела в воздухе мелкой
 	# строчкой и выдавала мародёра за стеной (голос слышно и так).
 	var viewer: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() else null
