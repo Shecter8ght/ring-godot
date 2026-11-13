@@ -126,6 +126,13 @@ func refresh() -> void:
 	_world.add_child(_cond_option(Balance.RAID_WEATHER, false))
 	_world.add_child(Pause._label("Свет и небо"))
 	_world.add_child(_sky_option())
+	_world.add_child(Pause._label("Метки чужих отрядов"))
+	var rivals := CheckButton.new()
+	rivals.focus_mode = Control.FOCUS_NONE
+	rivals.button_pressed = Settings.cheat_rival_marks
+	rivals.tooltip_text = "Временная подсказка для плейтеста: мини-карта и компас показывают позывные и характер чужих отрядов."
+	rivals.toggled.connect(func(on: bool) -> void: Settings.cheat_rival_marks = on)
+	_world.add_child(rivals)
 	_world.add_child(Pause._label("Переместиться"))
 	_world.add_child(_teleport_option())
 

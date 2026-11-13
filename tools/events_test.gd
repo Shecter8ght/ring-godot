@@ -105,6 +105,15 @@ func _floor_draft() -> void:
 		await get_tree().create_timer(6.0).timeout
 		_check("пульт: отключил сигнализацию — сирена молчит, шума нет", can and not az.sounding() and not heard[0] and not panel.can_use(), "")
 	# задание по рации
+	var radio_hits: Array[String] = []
+	var check_radio := func(id: String, _hook: String, _pos: Vector3) -> void:
+		if id.begins_with("radio_job_"):
+			radio_hits.append(id)
+	Audio.event_played.connect(check_radio)
+	for id: String in ["radio_job_laptop", "radio_job_paid"]:
+		var recording := AudioStreamWAV.new()
+		recording.data = PackedByteArray([128, 128, 128, 128])
+		Audio._samples[id] = [recording]
 	ev._radio = {"id": "laptop", "at": 0.0, "shown": false, "reward": 54000}
 	for i in range(3):
 		await get_tree().process_frame
@@ -112,6 +121,10 @@ func _floor_draft() -> void:
 	var m0 := Profile.money
 	ev.on_local_extracted(me)
 	_check("рация: вынес вещь — Михалыч заплатил", Profile.money == m0 + 54000, "+%d" % (Profile.money - m0))
+	_check("рация: заказ и оплата вызывают свои реплики по одному разу",
+		radio_hits == ["radio_job_laptop", "radio_job_paid"], str(radio_hits))
+	Audio.event_played.disconnect(check_radio)
+	Audio.reload_events()
 
 
 ## Рейдовая карта ТЦ: генератор у техкомплекса, сброс, ЧВК и их бой с мародёрами.

@@ -24,6 +24,9 @@ var _guard_seen: Dictionary = {}
 var _carry_vis: Dictionary = {}
 ## Корень уровня (сцена .tscn, в которой живём) — места ставятся в него.
 var _root: Node
+## Цели с репликой на этой карте. Каждую проговариваем один раз за рейд у каждого игрока.
+var _raid_voice_seen: Dictionary = {}
+var _raid_voice_pending: Dictionary = {}
 
 
 func _ready() -> void:
@@ -71,6 +74,8 @@ func _exit_tree() -> void:
 func _refresh() -> void:
 	if not is_inside_tree():
 		return
+	if raid:
+		_queue_raid_voice()
 	var want := {}
 	for w in Quests.sites_for(level):
 		var sid := String(w.site)
@@ -328,6 +333,38 @@ func _me() -> Player:
 	return get_tree().get_first_node_in_group("players") as Player
 
 
+func _queue_raid_voice() -> void:
+	_raid_voice_pending.clear()
+	for qid: String in Quests.ids():
+		if Quests.state(qid) != "ACTIVE":
+			continue
+		var objective := Quests.objective(qid)
+		var voice: Array = objective.get("raid_voice", [])
+		var key := "%s/%s/%s" % [qid, Quests.stage(qid).get("id", ""), objective.get("id", "")]
+		if voice.size() != 2 or _raid_voice_seen.has(key):
+			continue
+		var sites: Dictionary = Quests.def(qid).get("sites", {})
+		var site: Dictionary = sites.get(String(objective.get("site", "")), {})
+		if String(site.get("level", "")) != level:
+			continue
+		var lines := Quests.dialogue(qid, String(voice[0]))
+		var index := int(voice[1])
+		if index < 0 or index >= lines.size():
+			continue
+		var line: Array = lines[index]
+		_raid_voice_pending[key] = [line[0], line[1], "radio", Quests.speaker(qid, String(line[0])).name]
+
+
+func _play_raid_voice(me: Player) -> void:
+	if (_raid_voice_pending.is_empty() or Loading.active or me == null or not me.is_alive()
+			or (Raid.current and Raid.current.has_left(me.peer_id))):
+		return
+	for key: String in _raid_voice_pending:
+		_raid_voice_seen[key] = true
+		Quests.subtitles.emit([_raid_voice_pending[key]])
+	_raid_voice_pending.clear()
+
+
 func _player(peer: int) -> Player:
 	if not Net.is_networked():
 		peer = 1
@@ -340,6 +377,7 @@ func _player(peer: int) -> Player:
 
 func _process(_delta: float) -> void:
 	var me := _me()
+	_play_raid_voice(me)
 	var mine := _my_carried()
 	if me:
 		me.carrying = mine != ""

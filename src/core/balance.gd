@@ -408,7 +408,8 @@ const PROLOGUE := {
 ## Ворота кордона (GateWarden, §8 пролога — и в обычных рейдах): ЧВК не трогают игроков, пока те не подошли
 ## к воротам ближе zone_m; подошёл — окрик, через shout_sec — предупредительный в воздух, ещё через warn_sec — огонь.
 ## Ушёл от ворот до огня — через reset_sec всё сначала. Попал в бойца — огонь сразу.
-const GATE_WARDEN := {"zone_m": 7.0, "shout_sec": 3.0, "warn_sec": 4.0, "reset_sec": 6.0}
+const GATE_WARDEN := {"zone_m": 7.0, "shout_sec": 3.0, "warn_sec": 4.0, "reset_sec": 6.0,
+	"post_m": 10.0, "fire_m": 19.0, "notice_m": 20.0, "height_m": 3.0}
 ## Выручка Михалыча: остался без огнестрела и без денег на самый дешёвый ствол — бесплатный
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
 const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
@@ -1455,6 +1456,7 @@ const SHOT_PLACE := {"ceiling_max_m": 40.0, "wall_max_m": 30.0, "side_hits_min":
 const MARAUDER_COUNT := 24
 const MARAUDER_WALK := 1.5
 const MARAUDER_RUN := 3.4
+const AI_STEP_RUN_SPEED := 2.9
 ## Ближе этого до точки спавна игрока мародёры не появляются, м.
 const MARAUDER_SPAWN_MIN_DIST := 45.0
 ## Безопасный старт: мародёр не появляется в прямой видимости точки появления ближе los_m;
@@ -1963,9 +1965,14 @@ const AI_CLASS := {
 	"SPECIAL": {"burst": 3, "burst_pause": 0.7, "interval_min": 0.11, "spread": 2.4, "range": 100.0},
 	"LMG": {"burst": 6, "burst_pause": 1.0, "interval_min": 0.075, "spread": 2.8, "range": 150.0},
 }
-## Патроны у мародёров не кончаются: перезарядка (с анимацией и временем) берёт полный магазин,
-## запасные не тратятся — «Пустой!» и отход без патронов не бывает.
-const AI_INFINITE_AMMO := true
+## По одной полной перезарядке на ствол. После расхода всех патронов ствола запас
+## пополняется через случайное число игровых секунд из этого интервала.
+const AI_AMMO_REFILL_SEC := [30.0, 60.0]
+const AI_WEAPON_SWAP_SEC := 0.5
+## Первые выстрелы в новом бою с каждым стоящим игроком проходят рядом.
+const AI_OPENING_FIRE := {"misses": 3, "offset_m": 1.2, "interval_sec": 0.32}
+## Доля слышимой дальности за стеной или закрытой дверью.
+const AI_HEARING_BLOCKED := {"quiet": 0.35, "loud": 0.6}
 ## Урон пуль ИИ по игроку — доля урона патрона (ИИ стреляет часто и много, но бьёт ощутимо).
 const AI_DAMAGE_K := 0.6
 ## Баллистика по классу оружия (у всех — игрок и ИИ, Hitscan): range — куда долетает пуля, м
@@ -4370,6 +4377,9 @@ const AUDIO_EVENT_PROFILES: Dictionary = {
 	"engine": {"db": 2.0, "unit": 15.0, "max": 160.0},
 	# мародёр роется в контейнере — слышно за стеной
 	"rummage": {"db": -13.0, "unit": 3.0, "max": 22.0, "occlude": true},
+	"ai_search": {"db": -7.0, "unit": 4.0, "max": 32.0, "occlude": true},
+	"ai_investigate": {"db": -9.0, "unit": 4.0, "max": 28.0, "occlude": true},
+	"ai_cordon_warning": {"db": -2.0, "unit": 6.0, "max": 38.0, "occlude": true},
 	"door": {"db": -6.0, "unit": 4.0, "max": 30.0},
 	"hit": {"db": -4.0, "unit": 5.0, "max": 30.0},
 	"reload": {"db": -8.0, "unit": 3.0, "max": 15.0},

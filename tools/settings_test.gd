@@ -22,6 +22,12 @@ func _ready() -> void:
 	Settings.set_volume("Shots", 0.5)
 	_check("громкость выстрелов 50 % — −6 дБ", absf(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Shots")) + 6.02) < 0.1, "%.1f дБ" % AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Shots")))
 	Settings.set_volume("Shots", 1.0)
+	Settings.set_volume("Radio", 0.5)
+	_check("рация регулируется отдельно от голосов и эффектов", Audio._bus_for("radio_job_laptop") == &"Radio"
+		and Audio._bus_for("voice_rival_radio_0032") == &"Radio" and Audio._bus_for("ai_search") == &"Voices"
+		and absf(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Radio")) + 6.02) < 0.1
+		and is_zero_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Voices"))), "")
+	Settings.set_volume("Radio", 1.0)
 	var env := (inst.find_children("*", "WorldEnvironment", true, false)[0] as WorldEnvironment).environment
 	var sdfgi0 := env.sdfgi_enabled
 	# тень солнца по качеству (Balance.SHADOW_QUALITY): на ТЦ в сцене — 260 м и 4 каскада

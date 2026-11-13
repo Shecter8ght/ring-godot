@@ -383,7 +383,8 @@ func _tick_radio() -> void:
 	if _radio.is_empty() or bool(_radio.shown) or _t < float(_radio.at):
 		return
 	_radio.shown = true
-	Audio.play("radio", _listener(), -4.0)
+	Audio.play_ui("radio", -4.0)
+	Audio.play_ui("radio_job_" + String(_radio.id))
 	_notify("Рация, Михалыч: «%s — вынеси, заплачу %s ₽»" % [ItemDb.item_name(String(_radio.id)), InventoryUI.money(int(_radio.reward))])
 	var layer := CanvasLayer.new()
 	layer.layer = 11
@@ -409,6 +410,7 @@ func on_local_extracted(me: Player) -> void:
 		return
 	Profile.money += int(_radio.reward)
 	Profile.save()
+	Audio.play_ui("radio_job_paid")
 	_notify("Михалыч: «Принёс — держи %s ₽»" % InventoryUI.money(int(_radio.reward)))
 	_radio = {}
 

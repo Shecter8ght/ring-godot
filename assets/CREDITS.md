@@ -1154,3 +1154,11 @@ Fresnel-шейдер. HDRI студии Blender упакован только в
   Полный перечень файлов — `_asset_src/loot_containers/maps_v03/lc_bag/masks_used.json`.
 - Эмблема (белый крест в белом кольце на зелёном), ярлык «АРГО-МЕД» и надпись «ПЕРВАЯ ПОМОЩЬ» — вымышленные, шрифт
   **DejaVu Sans Bold** (© Bitstream, изменения DejaVu — public domain; лицензия Bitstream Vera Fonts), запечены в карты.
+
+## Голоса NPC и игрока — ElevenLabs (2026-11-13)
+
+612 реплик в `assets/audio/voice/*.mp3` сгенерированы владельцем проекта с помощью ElevenLabs и созданных им голосов
+(SCAV, VETERAN, PMC, RESIDENT, RIVAL_RADIO, MIKHALYCH, ILYA, KIRILL, NINA, PLAYER). Это не готовая сторонняя
+библиотека записей. Исходный пакет, MP3 и WAV: `C:/Users/Schecter_8ght/Desktop/РЕПЛИКИ/RING_генерация`;
+манифест и генератор сохранены там же. Перенос в игру — `tools/import_npc_voice_pack.py`. Условия сервиса:
+https://elevenlabs.io/terms. 44 реплики Сергея и Антона в этот набор не входят.

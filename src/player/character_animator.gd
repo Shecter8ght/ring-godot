@@ -22,7 +22,7 @@ const HIDE_WEAPON := ["grenade_throw", "pickup", "prone_throw"]
 const FREE_LEFT_HAND := ["pistol_reload", "rifle_reload", "prone_reload", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster"]
 const DIRS8 := ["f", "fl", "l", "bl", "b", "br", "r", "fr"]
 ## Действия верхом тела поверх ходьбы и стойки и действия всем телом (стоя на месте).
-const UPPER_ACTS := ["rifle_reload", "pistol_reload", "pistol_draw", "rifle_draw", "rifle_holster", "grenade_throw"]
+const UPPER_ACTS := ["rifle_reload", "pistol_reload", "pistol_draw", "rifle_draw", "rifle_holster", "grenade_throw", "pickup"]
 const FULL_ACTS := ["pickup", "grenade_throw"]
 ## Позы целиком (узлы цепочек поз). prone_crawl_f — ползком вперёд: клип «назад» задом наперёд.
 ## Последние — застывшие позы для снимков (hold_pose).
@@ -568,9 +568,9 @@ func _process(delta: float) -> void:
 		family = "pistol" if String(enemy._spec.get("class", "")) == "PISTOL" else "rifle"
 		crouched = enemy.crouched
 		downed = enemy._health.downed
-		aiming = enemy.state == Marauder.State.COMBAT
-		# вверх-вниз смотрит, пока целится; в патруле — прямо
-		look_pitch = enemy.look_pitch if aiming else 0.0
+		aiming = (enemy.state in [Marauder.State.COMBAT, Marauder.State.SEARCH, Marauder.State.INVESTIGATE]
+			or (crouched and enemy.state == Marauder.State.PATROL and not enemy._looting_pose))
+		look_pitch = enemy.look_pitch
 		event_seq = enemy.animation_event_seq
 		event_name = enemy.animation_event
 	elif _actor.has_method("anim_state"):
@@ -820,6 +820,8 @@ func _event_action(ev: String, family: String, crouched: bool, prone: bool, movi
 			return ["upper", "grenade_throw"] if crouched or moving else ["full", "grenade_throw"]
 		"pickup":
 			return [] if crouched or prone or moving else ["full", "pickup"]
+		"ai_loot":
+			return ["upper", "pickup"]
 	return ["upper", ev] if ev in UPPER_ACTS and not prone else []
 
 

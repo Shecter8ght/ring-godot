@@ -14,6 +14,8 @@ var loud_db: Callable
 var movement_kind: Callable
 ## Игрок сообщает состояние пола, в том числе по сети: в воздухе шагов нет.
 var grounded: Callable
+## На лестнице, при ползании раненого и после смерти шаги не проигрываются.
+var can_step: Callable
 var _was_airborne: bool = false
 ## Мародёр: тяжёлые ботинки — ниже и чуть громче.
 var ai: bool = false
@@ -70,6 +72,12 @@ func _process(delta: float) -> void:
 	var pos := (get_parent() as Node3D).global_position
 	var v := Vector2(pos.x - _last.x, pos.z - _last.z).length() / delta
 	_last = pos
+	if can_step.is_valid() and not bool(can_step.call()):
+		_was_airborne = false
+		_walking = false
+		_speed = 0.0
+		_phase = 1.0
+		return
 	var landed: bool = false
 	if grounded.is_valid():
 		on_ground = bool(grounded.call())
@@ -132,7 +140,8 @@ func _process(delta: float) -> void:
 	if special != "" and special != "step_crouch":
 		Audio.play(special, pos, extra)
 		return
-	Audio.step(pos, _speed > Balance.STEP_RUN_SPEED, ai, extra, _left, (get_parent() as Node3D).global_basis.x, _local_steps)
+	var run_speed := Balance.AI_STEP_RUN_SPEED if ai else Balance.STEP_RUN_SPEED
+	Audio.step(pos, _speed > run_speed, ai, extra, _left, (get_parent() as Node3D).global_basis.x, _local_steps)
 
 
 func _read_timing() -> void:

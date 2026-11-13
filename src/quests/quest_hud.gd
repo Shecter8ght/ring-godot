@@ -196,8 +196,8 @@ func start_dialogue(lines: Array, done: Callable) -> void:
 func _show_line() -> void:
 	var l: Array = _dlg_lines[_dlg_i]
 	var me := String(l[0]) == "player"
-	if not me:
-		Audio.play_ui("anton" if "Антон" in String(l[0]) else "trader")
+	if l.size() > 1:
+		Audio.play_voice_line(String(l[0]), String(l[1]))
 	_dlg_who.text = PLAYER_WHO if me else String(l[0])
 	_dlg_text.text = String(l[1]) if l.size() > 1 else ""
 	_dlg_who.add_theme_color_override("font_color", PLAYER_COLOR if me else NPC_COLOR)
@@ -225,9 +225,10 @@ func _next_sub() -> void:
 	var color := DESC_COLOR
 	if e is Array and (e as Array).size() >= 2:
 		var me := String(e[0]) == "player"
-		if not me:
-			Audio.play_ui("anton" if "Антон" in String(e[0]) else "trader")
-		_subs.text = "%s: %s" % [PLAYER_WHO if me else String(e[0]), String(e[1])]
+		var radio: bool = (e as Array).size() >= 3 and String(e[2]) == "radio"
+		Audio.play_voice_line(String(e[0]), String(e[1]), Vector3.INF, radio)
+		var speaker := String(e[3]) if e.size() >= 4 else String(e[0])
+		_subs.text = "%s: %s" % [PLAYER_WHO if me else speaker, String(e[1])]
 		color = PLAYER_COLOR if me else NPC_COLOR
 	else:
 		_subs.text = String(e)

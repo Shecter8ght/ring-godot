@@ -171,6 +171,9 @@ var _sun: DirectionalLight3D
 const SCOPE_SUN_NEAR_DEG := 35.0
 var _weapon_label: Label
 var _compass: Compass
+var _rival_minimap: RivalMinimap
+var _gate_hint: Label
+var _gate_warden: GateWarden
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _camera: Camera3D = $Pivot/Camera3D
@@ -646,6 +649,40 @@ func _process(delta: float) -> void:
 		_compass.set_heading(cam.global_basis)
 	_compass.set_marks(_extraction_marks(pl))
 	_compass.set_mates(_mate_marks(pl))
+	_update_rival_hud(pl, cam)
+	_update_gate_hint(pl)
+
+
+func _update_rival_hud(pl: Player, cam: Camera3D) -> void:
+	var rivals := RivalRaids.current
+	var marks: Array = []
+	if (Settings.cheat_rival_marks and is_instance_valid(rivals) and pl and pl.is_local()
+			and pl.combat_enabled and pl.is_alive() and not pl.is_downed() and (Raid.current == null or not Raid.current.has_left(pl.peer_id))):
+		marks = rivals.map_marks
+	_rival_minimap.visible = not marks.is_empty()
+	var directions: Array = []
+	if _rival_minimap.visible:
+		if _rival_minimap.map_id == "":
+			_rival_minimap.map_id = Floors.id_for_scene(rivals.level.scene_file_path)
+		var facing := -cam.global_basis.z if cam else Vector3.FORWARD
+		_rival_minimap.update_marks(pl.global_position, facing, marks)
+		for mark: Dictionary in marks:
+			var d: Vector3 = mark.pos - pl.global_position
+			directions.append([rad_to_deg(atan2(d.x, -d.z)), Vector2(d.x, d.z).length(), mark])
+	_compass.set_rivals(directions)
+
+
+func _update_gate_hint(pl: Player) -> void:
+	var hint := ""
+	if (pl and pl.is_local() and pl.is_alive() and not pl.is_downed() and pl.combat_enabled
+			and is_instance_valid(_gate_warden) and (Raid.current == null or not Raid.current.has_left(pl.peer_id))):
+		hint = _gate_warden.player_hint(pl.global_position)
+	if hint != _gate_hint.text:
+		_gate_hint.text = hint
+		_gate_hint.visible = hint != ""
+		if _gate_hint.visible:
+			var danger := _gate_warden.hostile or _gate_warden.is_past_line(pl.global_position)
+			_gate_hint.modulate = Color("ff9a72") if danger else Color("ffd385")
 
 
 ## Напарники для компаса: [курс°, расстояние м, ник]. Ушедшие и погибшие — нет.
@@ -2117,6 +2154,74 @@ func _build_hud() -> void:
 	_compass.offset_bottom = 58.0
 	_compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(_compass)
+	_rival_minimap = RivalMinimap.new()
+	layer.add_child(_rival_minimap)
+	_rival_minimap.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_rival_minimap.offset_left = -232
+	_rival_minimap.offset_right = -16
+	_rival_minimap.offset_top = 16
+	_rival_minimap.offset_bottom = 346
+	_rival_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_rival_minimap.hide()
+	_gate_warden = get_tree().get_first_node_in_group("gate_wardens") as GateWarden
+	_gate_hint = Label.new()
+	layer.add_child(_gate_hint)
+	_gate_hint.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_gate_hint.offset_left = -360
+	_gate_hint.offset_right = 360
+	_gate_hint.offset_top = 152
+	_gate_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gate_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_gate_hint.add_theme_font_size_override("font_size", 19)
+	_gate_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+	_gate_hint.add_theme_constant_override("outline_size", 8)
+	_gate_hint.hide()
+
+
+## План рейда сверху, с положением игрока и вошедших чужих отрядов.
+class RivalMinimap extends RaidMapPreview:
+	var _here: Vector3
+	var _facing: Vector2
+	var _marks: Array = []
+
+	func update_marks(here: Vector3, facing: Vector3, marks: Array) -> void:
+		_here = here
+		_facing = Vector2(facing.x, facing.z).normalized()
+		if _facing == Vector2.ZERO:
+			_facing = Vector2.UP
+		_marks = marks
+		queue_redraw()
+
+	func _draw() -> void:
+		var background := Color(0.035, 0.045, 0.05, 0.94)
+		var image := Rect2(Vector2(5, 5), Vector2(size.x - 10.0, size.x - 10.0))
+		var bottom := image.end.y + 7.0
+		var panel := Rect2(Vector2.ZERO, Vector2(size.x, bottom + _marks.size() * 19.0 + 4.0))
+		draw_rect(panel, background)
+		if _tex:
+			var tex_size := Vector2(_tex.get_size())
+			var fitted := tex_size * minf(image.size.x / tex_size.x, image.size.y / tex_size.y)
+			image = Rect2(image.get_center() - fitted * 0.5, fitted)
+			draw_texture_rect(_tex, image, false, Color(0.76, 0.80, 0.82))
+		draw_rect(panel, Color(1.0, 1.0, 1.0, 0.26), false, 1.0)
+		draw_string_outline(_font, image.position + Vector2(7, 15), "С ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color.BLACK)
+		draw_string(_font, image.position + Vector2(7, 15), "С ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
+		for i in range(_marks.size()):
+			var mark: Dictionary = _marks[i]
+			var pos: Vector3 = mark.pos
+			var at := _to_view(pos.x, pos.z, image)
+			var col := RivalRaids.mark_color(mark)
+			var number := str(i + 1)
+			draw_circle(at, 9.0, background, true, -1.0, true)
+			draw_arc(at, 9.0, 0.0, TAU, 16, col, 1.5, true)
+			draw_string(_font, at + Vector2(-8, 4), number, HORIZONTAL_ALIGNMENT_CENTER, 16, 12, col)
+			var title := "%s  %s · %s%s" % [number, mark.name, mark.style, " ↗" if bool(mark.leaving) else ""]
+			draw_string(_font, Vector2(9, bottom + 13.0 + i * 19.0), title, HORIZONTAL_ALIGNMENT_LEFT, size.x - 18.0, 13, col)
+		var here := _to_view(_here.x, _here.z, image).clamp(image.position + Vector2(8, 8), image.end - Vector2(8, 8))
+		var right := Vector2(_facing.y, -_facing.x)
+		draw_circle(here, 7.0, background)
+		draw_colored_polygon(PackedVector2Array([here + _facing * 9.0,
+			here - _facing * 4.0 + right * 4.0, here - _facing * 4.0 - right * 4.0]), Color("91d5ff"))
 
 
 ## Полоса компаса: риски каждые 5°, крупнее каждые 15°, стороны света буквами, курс под центром.
@@ -2130,6 +2235,18 @@ class Compass extends Control:
 	## Напарники: [курс°, расстояние, ник].
 	var mates: Array = []
 	var _mates_sig: String = ""
+	var rivals: Array = []
+	var _rivals_sig: String = ""
+
+
+	func set_rivals(m: Array) -> void:
+		var sig := ""
+		for k in m:
+			sig += "%d,%d,%s,%s;" % [int(k[0]), int(k[1]), k[2].name, k[2].style]
+		if sig != _rivals_sig:
+			_rivals_sig = sig
+			rivals = m
+			queue_redraw()
 
 
 	func set_mates(m: Array) -> void:
@@ -2232,6 +2349,29 @@ class Compass extends Control:
 		var hs := "%03d" % (int(round(heading)) % 360)
 		var hw := font.get_string_size(hs, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
 		draw_string(font, Vector2(cx - hw * 0.5, base_y + 44), hs, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 0.85, 0.5, 0.8))
+		var rows: Array = []
+		for r in rivals:
+			var mark: Dictionary = r[2]
+			var off := wrapf(float(r[0]) - heading, -180.0, 180.0)
+			var x := cx + clampf(off, -span, span) * ppd
+			var edge := "‹ " if off < -span else (" ›" if off > span else "")
+			var title := "%s · %s · %d м" % [mark.name, mark.style, roundi(r[1])]
+			if edge != "":
+				title = edge + title if off < 0.0 else title + edge
+			var tw := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+			var lx := clampf(x - tw * 0.5, 0.0, maxf(0.0, w - tw))
+			var band := Rect2(lx - 6, 0, tw + 12, 1)
+			var lane := 0
+			while lane < rows.size() and rows[lane].any(func(box: Rect2) -> bool: return box.intersects(band)):
+				lane += 1
+			if lane == rows.size():
+				rows.append([])
+			rows[lane].append(band)
+			var color := RivalRaids.mark_color(mark)
+			var y := base_y + 62.0 + 16.0 * lane
+			draw_line(Vector2(x - 3, y - 13), Vector2(x + 3, y - 13), color, 1.5)
+			draw_string_outline(font, Vector2(lx, y), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color.BLACK)
+			draw_string(font, Vector2(lx, y), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, color)
 
 
 func _update_hud(pl: Player) -> void:

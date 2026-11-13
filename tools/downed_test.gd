@@ -188,6 +188,7 @@ func _marauder_rules() -> void:
 	_check("товарищ поднял раненого", up and a.state == Marauder.State.COMBAT and b.state != Marauder.State.RESCUE,
 		"%s / %s" % [Marauder.State.keys()[a.state], Marauder.State.keys()[b.state]])
 	var ah := a.get_node("Health") as Health
+	a.equipment.erase("helmet")
 	ah.take_damage(10.0, Vector3.ZERO, "head")
 	_check("мародёру в голову без шлема — смерть", not ah.alive, "")
 	# в шлеме пуля остановлена — лёг (шлем закрывает не всю голову — несколько попыток)

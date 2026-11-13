@@ -146,7 +146,10 @@ func _ready() -> void:
 	var m0 := m._mag
 	var pid := String(m.equipment.primary.id)
 	var shots := 0
-	m.last_known = m.global_position + Vector3(sin(m._facing), 0.0, cos(m._facing)) * 12.0
+	m._fire_reaction.reset()
+	var where := m.global_position
+	m.global_position = where + Vector3.UP * 30.0
+	m.last_known = m.global_position + Vector3.UP * 12.0
 	for i in range(40):
 		if shots >= 7:
 			break
@@ -154,9 +157,10 @@ func _ready() -> void:
 		var before := m._mag
 		m._try_fire()
 		shots += before - m._mag
+	m.global_position = where
 	var left := m._mag
 	var spare_n := m.spare.size()
-	_check("CASE 17: ИИ тратит настоящие патроны", shots == 7 and left == m0 - 7 and int((m.equipment.primary.mag as Dictionary).rounds) == left,
+	_check("CASE 17: ИИ тратит настоящие патроны", shots == 7 and left == m0 - 7 and Gear.total_rounds(m.equipment.primary) == left,
 		"выстрелов %d, в магазине %d → %d" % [shots, m0, left])
 	m.process_mode = Node.PROCESS_MODE_INHERIT
 	# насмерть (шлем может удержать пулю — тогда лёг бы раненым)
@@ -175,9 +179,11 @@ func _ready() -> void:
 				wi = i
 			elif (crate.items[i] as Dictionary).has("rounds"):
 				mags += 1
+			elif String(ItemDb.item(String(crate.items[i].id)).get("cat", "")) == "armor":
+				mags += ItemDb.rig_list({"armor": crate.items[i]}).size()
 	# (магазины могут быть и сверх запасных — из таблицы лута «Периметра»)
-	_check("CASE 17: в ящике — оружие с остатком в магазине и запасные магазины", wi >= 0 and int(crate.items[wi].mag.rounds) == left and mags >= spare_n,
-		"остаток %d, запасных %d из %d" % [int(crate.items[wi].mag.rounds) if wi >= 0 else -1, mags, spare_n])
+	_check("CASE 17: в ящике — оружие с остатком в магазине и запасные магазины", wi >= 0 and Gear.total_rounds(crate.items[wi]) == left and mags >= spare_n,
+		"остаток %d, запасных %d из %d" % [Gear.total_rounds(crate.items[wi]) if wi >= 0 else -1, mags, spare_n])
 	# CASE 18: снять прицел с трупа
 	if crate:
 		pl.global_position = crate.global_position + Vector3(0.8, 0.1, 0)

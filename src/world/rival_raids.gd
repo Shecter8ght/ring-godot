@@ -6,7 +6,7 @@ extends Node
 ## эвакуации. Выбили отряд — его сумки ваши. Дизайн — docs/design/rival_raids.md.
 ##
 ## Считает хост (узел «Rivals» у уровня): расписание входов, планы отрядов (RivalSquad), память
-## состава (RivalRoster). Остальным — только сообщения рации. Бойцы — обычные Marauder фракции
+## состава (RivalRoster). Остальным — сообщения рации и временные метки для плейтеста. Бойцы — Marauder фракции
 ## «rival»: позицию игрока знают только по зрению, шуму и окрику своего отряда.
 ##
 ## Работает в настоящем рейде (Profile.pending_raid, не тестовый профиль). Запуск уровня напрямую и
@@ -20,6 +20,8 @@ static var current: RivalRaids
 var level: Node
 ## Все отряды этого рейда (и ушедшие, и выбитые) — для итога и тестов.
 var squads: Array[RivalSquad] = []
+## Снимок для временных меток в рейде, обновляется у всех игроков.
+var map_marks: Array = []
 ## Ждут входа: [{t, record}] по возрастанию t.
 var _queue: Array = []
 var _t: float = 0.0
@@ -40,6 +42,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	level = get_parent()
 	_rng.randomize()
+	Net.scenes_changed.connect(_publish_map_marks)
 
 
 func _is_host() -> bool:
@@ -74,6 +77,7 @@ func _process(delta: float) -> void:
 		var changed: int = s.tick(0.5)
 		if changed >= 0:
 			_on_phase(s, changed)
+	_publish_map_marks()
 
 
 ## Расписание рейда: сколько отрядов и когда входят.
@@ -121,7 +125,43 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 	RivalRoster.note(s.id, "raids")
 	print("rivals: вошли «%s» (%d) у %s, выход «%s», грабят %d с, хватит %d" % [s.name, sq.members.size(), at.round(), s.exit_name, int(s.loot_budget), s.pack_goal])
 	_radio("В ТЦ зашла ещё одна группа — «%s»." % s.name)
+	_publish_map_marks()
 	return s
+
+
+func _publish_map_marks() -> void:
+	if not _is_host():
+		return
+	var marks: Array = []
+	for s: RivalSquad in squads:
+		if s.phase in [RivalSquad.Phase.OUT, RivalSquad.Phase.WIPED]:
+			continue
+		var leader := s.squad.leader()
+		if leader == null:
+			continue
+		var style_name := String(s.style.get("name", ""))
+		if bool(s.style.get("flee", false)):
+			style_name = "осторожные"
+		marks.append({"pos": leader.global_position, "name": s.name, "style": style_name,
+			"leaving": s.phase == RivalSquad.Phase.EXTRACT})
+	if not marks.is_empty() or not map_marks.is_empty():
+		if Net.is_networked():
+			Net.broadcast_scene(self, &"_sync_map_marks", [marks])
+		else:
+			map_marks = marks
+
+
+@rpc("authority", "call_local", "reliable")
+func _sync_map_marks(marks: Array) -> void:
+	map_marks = marks
+
+
+static func mark_color(mark: Dictionary) -> Color:
+	match String(mark.style):
+		"осторожные": return Color("dcadff")
+		"жадные": return Color("ffd36e")
+		"стрелки": return Color("ff9db6")
+	return Color("ffa36d")
 
 
 func _on_phase(s: RivalSquad, phase: int) -> void:
@@ -238,6 +278,7 @@ func _radio(text: String) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _rpc_radio(text: String) -> void:
+	Audio.play_voice_line("rival_radio", text.trim_prefix("Рация: "))
 	if Raid.current:
 		Raid.current.notify(text)
 

@@ -63,6 +63,7 @@ func _reset(arch: String = "gunner", seed_value: int = 1) -> void:
 	_enemy._suppress_t = 0.0
 	_enemy._fire_reaction.reset()
 	_enemy._fire_reaction.rng.seed = seed_value
+	_enemy._opening_shots.clear()
 	_enemy.shot_times.clear()
 	_enemy.probe_time = 0.0
 	_enemy.live = false
@@ -183,13 +184,22 @@ func _solo() -> void:
 	_step()
 	var hp: float = player.health.hp
 	_check("реальная пуля не наносит урон в тик обнаружения", is_equal_approx(hp, player.health.max_hp))
-	for frame: int in range(1, 80):
+	for frame: int in range(1, 240):
 		_enemy.probe_time = frame * STEP
 		_step()
-		if not _enemy.shot_times.is_empty():
+		if _enemy.shot_times.size() == int(Balance.AI_OPENING_FIRE.misses):
 			break
-	_check("первая разрешённая пуля может сразу попасть: без гарантированного промаха", player.health.hp < hp)
-	_check("попадание не раньше завершения наведения", not _enemy.shot_times.is_empty() and _enemy.shot_times[0] >= _enemy._fire_reaction.last_delay)
+	_check("первые три настоящих выстрела проходят мимо", _enemy.shot_times.size() == 3 and is_equal_approx(player.health.hp, hp) and _enemy._mag == 96)
+	_check("первый выстрел после завершения наведения", not _enemy.shot_times.is_empty() and _enemy.shot_times[0] >= _enemy._fire_reaction.last_delay)
+	_enemy._facing = 0.0
+	_enemy._perceive(0.1)
+	_enemy._facing = PI
+	_enemy._perceive(0.01)
+	_enemy._tick_weapon(3.0)
+	_enemy._try_fire()
+	_check("четвёртый выстрел может попасть после короткого выхода из виду", _enemy.shot_times.size() == 4 and player.health.hp < hp)
+	await _check_hearing()
+	_check_ammo()
 	# Та же пауза применяется и к бою фракций, а не только к Player.
 	var foe: Marauder = (load("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder
 	foe.archetype = "pmc"
@@ -223,14 +233,18 @@ func _network_host() -> void:
 	_enemy.live = true
 	_step()
 	_check("хост подтвердил гостя и ещё не стреляет", _enemy._target_player == _players[_client] and _enemy.shot_times.is_empty())
-	for frame: int in range(1, 90):
+	var guest: Player = _players[_client] as Player
+	var misses_safe := true
+	for frame: int in range(1, 240):
 		await get_tree().physics_frame
 		_enemy.probe_time = frame * STEP
 		_step()
-		if not _enemy.shot_times.is_empty():
+		if _enemy.shot_times.size() <= int(Balance.AI_OPENING_FIRE.misses):
+			misses_safe = misses_safe and guest.health.hp == guest.health.max_hp
+		if _enemy.shot_times.size() > int(Balance.AI_OPENING_FIRE.misses):
 			break
-	var guest: Player = _players[_client] as Player
-	_check("первая настоящая пуля хоста попала гостю после паузы", guest.health.hp < guest.health.max_hp and not _enemy.shot_times.is_empty() and _enemy.shot_times[0] >= _enemy._fire_reaction.last_delay)
+	_check("гость цел после трёх выстрелов хоста", misses_safe)
+	_check("четвёртая пуля хоста может попасть гостю", guest.health.hp < guest.health.max_hp and _enemy.shot_times.size() == 4)
 	_check("чужое предупреждение не показано хосту", _rig._detection._contacts.is_empty())
 	await get_tree().create_timer(0.3).timeout
 	_check_guest.rpc_id(_client)
@@ -247,3 +261,76 @@ func _check_guest() -> void:
 	_check("гость сам не рассчитывает выстрелы", _enemy.shot_times.is_empty())
 	print("AI_REACTION guest_warning_to_hit_ms=%d" % window_ms)
 	_peer_checked.rpc_id(1)
+
+
+func _check_hearing() -> void:
+	var actor: Vector3 = _enemy.global_position
+	var source := actor + Vector3.LEFT * 8.0
+	var door := StaticBody3D.new()
+	door.collision_layer = Hitscan.LAYER_DOOR
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.25, 3.0, 2.0)
+	shape.shape = box
+	door.add_child(shape)
+	add_child(door)
+	door.global_position = actor + Vector3.LEFT * 4.0 + Vector3.UP
+	await _settle()
+	var ear := actor + Vector3.UP * 1.4
+	var world := get_world_3d()
+	_check("закрытая дверь глушит шаги, близкий выстрел всё ещё слышен",
+		not NoiseBus.audible(world, ear, source, 10.0, "step") and NoiseBus.audible(world, ear, source, 15.0, "shot"))
+	door.collision_layer = Hitscan.LAYER_WORLD
+	await _settle()
+	_check("стена глушит шаги", not NoiseBus.audible(world, ear, source, 10.0, "step"))
+	door.global_position += Vector3.BACK * 4.0
+	await _settle()
+	_check("открытый проём пропускает те же шаги", NoiseBus.audible(world, ear, source, 10.0, "step"))
+	door.queue_free()
+
+
+func _check_ammo() -> void:
+	var bot := (load("res://scenes/ai/marauder.tscn") as PackedScene).instantiate() as Marauder
+	bot.archetype = "pmc"
+	bot.loadout_id = "perimeter_leader"
+	bot.position = Vector3(-10, 1, -10)
+	add_child(bot)
+	bot.set_physics_process(false)
+	bot.last_known = bot.global_position + Vector3.FORWARD * 6.0
+	var loaded := bot._mag
+	var cap := WeaponDb.capacity(bot.equipment.primary)
+	for i in range(loaded):
+		bot._shot_t = 0.0
+		bot._try_fire()
+	_check("пустой основной, запас ещё на одну перезарядку", bot._mag == 0 and bot._can_reload("primary") and bot._ammo_refill.is_empty())
+	bot._start_reload()
+	bot._tick_weapon(bot._reload_t + 0.01)
+	_check("полный магазин взят из запаса основного", bot._mag == cap and not bot._can_reload("primary") and bot._can_reload("secondary"))
+	for i in range(cap):
+		bot._shot_t = 0.0
+		bot._try_fire()
+	var left := float(bot._ammo_refill.get("primary", 0))
+	bot._start_reload()
+	_check("после второго магазина основной ждёт 30–60 с, боец взял запасной",
+		left >= 30.0 and left <= 60.0 and bot._active == "secondary" and bot._mag > 0)
+	bot._tick_weapon(left - 0.1)
+	_check("запас основного не вернулся раньше срока", not bot._can_reload("primary"))
+	bot._tick_weapon(0.2)
+	_check("вернулся только запас, боец продолжает с пистолетом",
+		bot._can_reload("primary") and Gear.total_rounds(bot.equipment.primary) == 0 and bot._active == "secondary")
+	bot._use("primary")
+	bot._start_reload()
+	bot._tick_weapon(bot._reload_t + 0.01)
+	_check("после ожидания можно снова зарядить основной", bot._mag == cap and not bot._can_reload("primary"))
+	var pump := WeaponDb.make_weapon("SG_03_BASE", bot._rng)
+	bot.equipment.primary = pump
+	bot._equip_reserve("primary", String(pump.mag.ammo))
+	bot._use("primary")
+	var tube_cap := WeaponDb.capacity(pump)
+	for i in range(tube_cap):
+		bot._shot_t = 0.0
+		bot._try_fire()
+	bot._start_reload()
+	bot._tick_weapon(bot._reload_t + 0.01)
+	_check("ружьё получает одну полную пачку россыпью", bot._mag == tube_cap and not bot._can_reload("primary"))
+	bot.queue_free()

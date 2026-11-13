@@ -39,10 +39,48 @@ var _map_paths: Dictionary = {}
 var _local_map_files: Dictionary = {}
 var _local_map_streams: Dictionary = {}
 var map_ambience_save_path: String = MAP_AMBIENCE_PATH
+var _voice_events: Dictionary = {}
+
+
+func _load_voice_lines() -> void:
+	_voice_events.clear()
+	var path := "res://data/npc_voice_map.json"
+	if not FileAccess.file_exists(path):
+		return
+	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not raw is Dictionary or int((raw as Dictionary).get("schemaVersion", 0)) != 1:
+		return
+	for value: Variant in (raw as Dictionary).get("lines", []):
+		if not value is Dictionary:
+			continue
+		var row: Dictionary = value as Dictionary
+		var speaker := String(row.get("speaker", ""))
+		var text := String(row.get("text", ""))
+		var event_id := String(row.get("event", ""))
+		if speaker == "" or text == "" or event_id == "":
+			continue
+		_voice_events[speaker + "\n" + text] = event_id
+
+
+func voice_event_for(speaker: String, text: String) -> String:
+	return String(_voice_events.get(speaker + "\n" + text, _voice_events.get("*\n" + text, "")))
+
+
+func play_voice_line(speaker: String, text: String, pos: Vector3 = Vector3.INF, radio: bool = false) -> bool:
+	var event_id := voice_event_for(speaker, text)
+	if event_id == "" or not has_sound(event_id):
+		return false
+	if pos.is_finite():
+		play(event_id, pos)
+	else:
+		play_ui(event_id, 0.0, &"Radio" if radio else &"")
+	return true
+
 
 func _ready() -> void:
 	_rng.randomize()
 	_load_mix()
+	_load_voice_lines()
 	var local: ConfigFile = ConfigFile.new()
 	if local.load(map_ambience_save_path) == OK:
 		var files: Variant = local.get_value("ambient", "files", {})
@@ -242,9 +280,13 @@ func _configure_recorded_player(player: AudioStreamPlayer3D) -> void:
 	player.max_db = minf(player.max_db, float(Balance.SONORA_AUDIO.max_db))
 
 func _bus_for(hook: String) -> StringName:
+	if hook == "radio" or hook.begins_with("voice_rival_radio_") or hook.begins_with("radio_job_"):
+		return &"Radio"
 	if _is_weapon_shot(hook):
 		return &"Shots"
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
+	if String(event.get("category", "")) == "Голоса ИИ и персонажей":
+		return &"Voices"
 	if event.has("map_scene") or String(event.get("profile", "")) == "ambient":
 		return &"Ambient"
 	if String(event.get("profile", "")) in ["osoka_launch", "osoka_motor"]:
@@ -395,11 +437,17 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 		return null
 	var stream: AudioStream = records[clampi(variant, 0, records.size() - 1)] if variant >= 0 else _pick_from(records, id)
 	var spec: Dictionary = _kind_spec(id)
-	if _bus_for(id) == &"Ambient" or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
+	var bus := _bus_for(id)
+	if bus in [&"Ambient", &"Radio"] or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.stream = stream
-		player.bus = _bus_for(id)
-		_tag_mix(player, id, stream, float(Balance.SONORA_AUDIO.ambient_db) if _bus_for(id) == &"Ambient" else float(Balance.OSOKA.tone_db))
+		player.bus = bus
+		var base_db := 0.0
+		if bus == &"Ambient":
+			base_db = float(Balance.SONORA_AUDIO.ambient_db)
+		elif bus != &"Radio":
+			base_db = float(Balance.OSOKA.tone_db)
+		_tag_mix(player, id, stream, base_db)
 		player.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(player)
 		if looped:
@@ -417,14 +465,14 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 		player.finished.connect(player.play)
 	return player
 
-func play_ui(hook: String, extra_db: float = 0.0) -> void:
+func play_ui(hook: String, extra_db: float = 0.0, bus_override: StringName = &"") -> void:
 	var stream: AudioStream = _pick(hook, _listener_pos())
 	if stream == null:
 		return
 	var player: AudioStreamPlayer = AudioStreamPlayer.new()
 	player.stream = stream
 	_tag_mix(player, resolve_event(hook), stream, extra_db)
-	player.bus = _bus_for(hook)
+	player.bus = _bus_for(hook) if bus_override == &"" else bus_override
 	player.finished.connect(player.queue_free)
 	add_child(player)
 	player.play()

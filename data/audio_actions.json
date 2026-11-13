@@ -555,10 +555,26 @@
     },
     {
       "hook": "ai_search",
-      "name": "Мародёр ищет — «где он?»",
+      "name": "Потерял игрока — «Ушёл… Ищем.»",
       "category": "Голоса ИИ и персонажей",
       "type": "one",
       "profile": "ai_search",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_investigate",
+      "name": "Проверяет шум — «Проверю тут…»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_investigate",
+      "supportsObject": false
+    },
+    {
+      "hook": "ai_cordon_warning",
+      "name": "Кордон — «Стой! Назад за линию!»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "ai_cordon_warning",
       "supportsObject": false
     },
     {
@@ -853,6 +869,62 @@
       "hook": "radio",
       "name": "Рация — шипение, тангента",
       "category": "События рейда",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_laptop",
+      "name": "Михалыч по рации — «Если найдёшь ноутбук, вынеси его. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_gpu",
+      "name": "Михалыч по рации — «Если найдёшь видеокарту, вынеси её. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_server_drive",
+      "name": "Михалыч по рации — «Если найдёшь диск с сервера, вынеси его. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_camera",
+      "name": "Михалыч по рации — «Если найдёшь фотоаппарат, вынеси его. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_documents",
+      "name": "Михалыч по рации — «Если найдёшь документы охраны, вынеси их. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_diamond_ring",
+      "name": "Михалыч по рации — «Если найдёшь кольцо с бриллиантом, вынеси его. Заплачу.»",
+      "category": "Голоса ИИ и персонажей",
+      "type": "one",
+      "profile": "radio",
+      "supportsObject": false
+    },
+    {
+      "hook": "radio_job_paid",
+      "name": "Михалыч по рации — «Принёс. Держи оплату.»",
+      "category": "Голоса ИИ и персонажей",
       "type": "one",
       "profile": "radio",
       "supportsObject": false

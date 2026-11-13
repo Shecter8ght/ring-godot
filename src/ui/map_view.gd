@@ -2,7 +2,7 @@ class_name MapView
 extends CanvasLayer
 ## Карта этажа на M: план из данных сектора (помещения кольца и полосы аллеи), постройки сцены,
 ## эскалаторы, точки эвакуации с названиями, свой игрок стрелкой и напарники точками. Врагов,
-## лута и ключей на карте нет — только то, что знает человек с планом ТЦ. Север (-Z) вверху.
+## лута и ключей на карте нет. В плейтесте можно включить метки чужих отрядов. Север (-Z) вверху.
 ## Колесо — приблизить к себе, Esc или M — закрыть.
 
 const FILL := {
@@ -266,6 +266,14 @@ func _draw_map() -> void:
 					label_rect.position = label_at - text_size * 0.5
 		power_labels.append(label_rect)
 		_label(label_at, title, 12, col)
+	if Settings.cheat_rival_marks and is_instance_valid(RivalRaids.current):
+		for mark: Dictionary in RivalRaids.current.map_marks:
+			var pos: Vector3 = mark.pos
+			var at := _to_screen(Vector2(pos.x, pos.z))
+			var color := RivalRaids.mark_color(mark)
+			_canvas.draw_circle(at, 7.0, Color(0.06, 0.06, 0.08))
+			_canvas.draw_arc(at, 7.0, 0.0, TAU, 16, color, 2.0, true)
+			_label(at + Vector2(0, -20), "%s · %s" % [mark.name, mark.style], 14, color)
 	# напарники — точки с ником, сам — стрелка по взгляду
 	for p in get_tree().get_nodes_in_group("players"):
 		var pl := p as Player

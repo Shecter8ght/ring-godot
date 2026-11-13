@@ -70,6 +70,8 @@ func _loot_and_leave(exits: Array) -> void:
 	_check("отряд вошёл", s != null and s.alive().size() >= 2, "" if s == null else str(s.alive().size()))
 	if s == null:
 		return
+	_check("на карте один знак вошедшего отряда с его позывным и характером",
+		_rivals.map_marks.size() == 1 and _rivals.map_marks[0].name == s.name and _rivals.map_marks[0].style == "штурмовики")
 	_check("бойцы — фракция rival, враждебны игрокам", s.alive()[0].faction == "rival" and s.alive()[0].hostile_to_players)
 	_check("память: рейд записан", int(RivalRoster.memory(s.id).raids) == 1)
 	s._key_checked = true
@@ -90,6 +92,7 @@ func _loot_and_leave(exits: Array) -> void:
 		s.alive().map(func(m: Marauder) -> int: return int(m.global_position.distance_to(s.exit_pos)))])
 	await _wait(0.5)
 	_check("бойцов на карте не осталось, добыча унесена", s.alive().is_empty() and s.loot_value > 0 and packed > 0, "вынесли на %d" % s.loot_value)
+	_check("метка вышедшего отряда снята", _rivals.map_marks.is_empty())
 	var mem: Dictionary = RivalRoster.memory(s.id)
 	_check("память: ушли с добычей", int(mem.out) == 1 and int(mem.loot) == s.loot_value)
 

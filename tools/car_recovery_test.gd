@@ -24,6 +24,17 @@ func _ready() -> void:
 	var m0 := Profile.money
 	_check("тест: инструкция шага «стоянка» всплыла", not Balance.QUEST_TEST_HINTS or Quests.hud._test_text.text.contains("северо-восточным докам"), Quests.hud._test_text.text)
 	_check("у каждого шага есть тестовая инструкция", _all_hinted())
+	var field := QuestWorld.new()
+	field.level = "zone01_mall"
+	field._queue_raid_voice()
+	_check("полевую реплику Ильи не ставим в очередь на чужой карте", field._raid_voice_pending.is_empty())
+	field.level = "mall_map"
+	field._queue_raid_voice()
+	var reminder: Array = field._raid_voice_pending.get("car_recovery/parking/park_wide", [])
+	_check("на карте цели подготовлена запись Ильи для рации",
+		reminder.size() == 4 and reminder[0] == "ilya" and reminder[2] == "radio"
+		and Audio.has_sound(Audio.voice_event_for(String(reminder[0]), String(reminder[1]))))
+	field.free()
 	_site("car_mall_parking_wide")
 	_site("car_mall_parking_detail")
 	_check("стоянка снята — ждём отчёта", _oid() == "report_park")

@@ -1,0 +1,3065 @@
+{
+  "schemaVersion": 1,
+  "lines": [
+    {
+      "speaker": "*",
+      "text": "Контакт!",
+      "event": "ai_spot"
+    },
+    {
+      "speaker": "*",
+      "text": "По нам стреляют!",
+      "event": "voice_scav_0002"
+    },
+    {
+      "speaker": "*",
+      "text": "Мародёры!",
+      "event": "voice_scav_0003"
+    },
+    {
+      "speaker": "*",
+      "text": "Периметр! Наёмники!",
+      "event": "voice_scav_0004"
+    },
+    {
+      "speaker": "*",
+      "text": "Тут крысы засели!",
+      "event": "voice_scav_0005"
+    },
+    {
+      "speaker": "*",
+      "text": "Чужая группа! Контакт!",
+      "event": "voice_scav_0006"
+    },
+    {
+      "speaker": "*",
+      "text": "Обхожу!",
+      "event": "voice_scav_0007"
+    },
+    {
+      "speaker": "*",
+      "text": "Двигаюсь!",
+      "event": "voice_scav_0008"
+    },
+    {
+      "speaker": "*",
+      "text": "Прикрываю!",
+      "event": "voice_scav_0009"
+    },
+    {
+      "speaker": "*",
+      "text": "Отхожу!",
+      "event": "voice_scav_0010"
+    },
+    {
+      "speaker": "*",
+      "text": "Граната!",
+      "event": "ai_nade"
+    },
+    {
+      "speaker": "*",
+      "text": "Ушёл… Ищем.",
+      "event": "ai_search"
+    },
+    {
+      "speaker": "*",
+      "text": "Проверю тут…",
+      "event": "ai_investigate"
+    },
+    {
+      "speaker": "*",
+      "text": "Перезаряжаюсь!",
+      "event": "ai_reload"
+    },
+    {
+      "speaker": "*",
+      "text": "Пустой!",
+      "event": "voice_scav_0015"
+    },
+    {
+      "speaker": "*",
+      "text": "Перехожу на запасное!",
+      "event": "voice_scav_0016"
+    },
+    {
+      "speaker": "*",
+      "text": "Основное!",
+      "event": "voice_scav_0017"
+    },
+    {
+      "speaker": "*",
+      "text": "Меня зацепило!",
+      "event": "ai_hurt"
+    },
+    {
+      "speaker": "*",
+      "text": "Живой!",
+      "event": "voice_scav_0019"
+    },
+    {
+      "speaker": "*",
+      "text": "Держись, иду!",
+      "event": "voice_scav_0020"
+    },
+    {
+      "speaker": "*",
+      "text": "Тащу! Прикрой!",
+      "event": "voice_scav_0021"
+    },
+    {
+      "speaker": "*",
+      "text": "Не пройти к тебе!",
+      "event": "voice_scav_0022"
+    },
+    {
+      "speaker": "*",
+      "text": "Есть кое-что",
+      "event": "voice_scav_0023"
+    },
+    {
+      "speaker": "*",
+      "text": "Ничего не видно — ближе работаем",
+      "event": "voice_scav_0024"
+    },
+    {
+      "speaker": "*",
+      "text": "Туман ушёл. На позицию.",
+      "event": "voice_scav_0025"
+    },
+    {
+      "speaker": "*",
+      "text": "Пошли вон отсюда!",
+      "event": "resident"
+    },
+    {
+      "speaker": "*",
+      "text": "Стой! Назад за линию!",
+      "event": "ai_cordon_warning"
+    },
+    {
+      "speaker": "*",
+      "text": "Отходим!",
+      "event": "voice_veteran_0028"
+    },
+    {
+      "speaker": "*",
+      "text": "Проверю тела. Прикройте.",
+      "event": "voice_veteran_0029"
+    },
+    {
+      "speaker": "*",
+      "text": "Заперто. Ищем ключ.",
+      "event": "voice_veteran_0030"
+    },
+    {
+      "speaker": "*",
+      "text": "Ключ у меня",
+      "event": "voice_veteran_0031"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Барсук».",
+      "event": "voice_rival_radio_0032"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» больше не отвечают.",
+      "event": "voice_rival_radio_0033"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Тишина».",
+      "event": "voice_rival_radio_0034"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» больше не отвечают.",
+      "event": "voice_rival_radio_0035"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Северный».",
+      "event": "voice_rival_radio_0036"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» больше не отвечают.",
+      "event": "voice_rival_radio_0037"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Комбинат».",
+      "event": "voice_rival_radio_0038"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» больше не отвечают.",
+      "event": "voice_rival_radio_0039"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Лом».",
+      "event": "voice_rival_radio_0040"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» больше не отвечают.",
+      "event": "voice_rival_radio_0041"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Сорок Первый».",
+      "event": "voice_rival_radio_0042"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» больше не отвечают.",
+      "event": "voice_rival_radio_0043"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Вороны».",
+      "event": "voice_rival_radio_0044"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» больше не отвечают.",
+      "event": "voice_rival_radio_0045"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Гараж».",
+      "event": "voice_rival_radio_0046"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» больше не отвечают.",
+      "event": "voice_rival_radio_0047"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Заводские».",
+      "event": "voice_rival_radio_0048"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» больше не отвечают.",
+      "event": "voice_rival_radio_0049"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Маяк».",
+      "event": "voice_rival_radio_0050"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» больше не отвечают.",
+      "event": "voice_rival_radio_0051"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Шёпот».",
+      "event": "voice_rival_radio_0052"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» больше не отвечают.",
+      "event": "voice_rival_radio_0053"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Кирпич».",
+      "event": "voice_rival_radio_0054"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» больше не отвечают.",
+      "event": "voice_rival_radio_0055"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Третий Подъезд».",
+      "event": "voice_rival_radio_0056"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» больше не отвечают.",
+      "event": "voice_rival_radio_0057"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Полынь».",
+      "event": "voice_rival_radio_0058"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» больше не отвечают.",
+      "event": "voice_rival_radio_0059"
+    },
+    {
+      "speaker": "*",
+      "text": "В ТЦ зашла ещё одна группа — «Санитары».",
+      "event": "voice_rival_radio_0060"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» больше не отвечают.",
+      "event": "voice_rival_radio_0061"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0062"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0063"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0064"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0065"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0066"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0067"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0068"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0069"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0070"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0071"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0072"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0073"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0074"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0075"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0076"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0077"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0078"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0079"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0080"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0081"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0082"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0083"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0084"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0085"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0086"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0087"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0088"
+    },
+    {
+      "speaker": "*",
+      "text": "«Барсук» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0089"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0090"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0091"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0092"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0093"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0094"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0095"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0096"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0097"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0098"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0099"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0100"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0101"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0102"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0103"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0104"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0105"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0106"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0107"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0108"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0109"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0110"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0111"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0112"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0113"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0114"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0115"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0116"
+    },
+    {
+      "speaker": "*",
+      "text": "«Тишина» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0117"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0118"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0119"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0120"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0121"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0122"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0123"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0124"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0125"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0126"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0127"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0128"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0129"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0130"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0131"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0132"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0133"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0134"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0135"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0136"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0137"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0138"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0139"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0140"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0141"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0142"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0143"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0144"
+    },
+    {
+      "speaker": "*",
+      "text": "«Северный» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0145"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0146"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0147"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0148"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0149"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0150"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0151"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0152"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0153"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0154"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0155"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0156"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0157"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0158"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0159"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0160"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0161"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0162"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0163"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0164"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0165"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0166"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0167"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0168"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0169"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0170"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0171"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0172"
+    },
+    {
+      "speaker": "*",
+      "text": "«Комбинат» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0173"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0174"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0175"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0176"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0177"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0178"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0179"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0180"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0181"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0182"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0183"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0184"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0185"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0186"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0187"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0188"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0189"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0190"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0191"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0192"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0193"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0194"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0195"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0196"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0197"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0198"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0199"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0200"
+    },
+    {
+      "speaker": "*",
+      "text": "«Лом» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0201"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0202"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0203"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0204"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0205"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0206"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0207"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0208"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0209"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0210"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0211"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0212"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0213"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0214"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0215"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0216"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0217"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0218"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0219"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0220"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0221"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0222"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0223"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0224"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0225"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0226"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0227"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0228"
+    },
+    {
+      "speaker": "*",
+      "text": "«Сорок Первый» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0229"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0230"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0231"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0232"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0233"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0234"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0235"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0236"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0237"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0238"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0239"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0240"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0241"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0242"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0243"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0244"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0245"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0246"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0247"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0248"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0249"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0250"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0251"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0252"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0253"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0254"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0255"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0256"
+    },
+    {
+      "speaker": "*",
+      "text": "«Вороны» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0257"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0258"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0259"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0260"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0261"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0262"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0263"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0264"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0265"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0266"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0267"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0268"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0269"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0270"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0271"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0272"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0273"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0274"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0275"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0276"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0277"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0278"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0279"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0280"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0281"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0282"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0283"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0284"
+    },
+    {
+      "speaker": "*",
+      "text": "«Гараж» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0285"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0286"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0287"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0288"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0289"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0290"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0291"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0292"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0293"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0294"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0295"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0296"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0297"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0298"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0299"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0300"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0301"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0302"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0303"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0304"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0305"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0306"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0307"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0308"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0309"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0310"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0311"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0312"
+    },
+    {
+      "speaker": "*",
+      "text": "«Заводские» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0313"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0314"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0315"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0316"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0317"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0318"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0319"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0320"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0321"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0322"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0323"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0324"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0325"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0326"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0327"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0328"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0329"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0330"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0331"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0332"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0333"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0334"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0335"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0336"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0337"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0338"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0339"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0340"
+    },
+    {
+      "speaker": "*",
+      "text": "«Маяк» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0341"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0342"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0343"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0344"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0345"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0346"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0347"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0348"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0349"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0350"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0351"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0352"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0353"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0354"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0355"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0356"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0357"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0358"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0359"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0360"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0361"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0362"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0363"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0364"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0365"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0366"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0367"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0368"
+    },
+    {
+      "speaker": "*",
+      "text": "«Шёпот» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0369"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0370"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0371"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0372"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0373"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0374"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0375"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0376"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0377"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0378"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0379"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0380"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0381"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0382"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0383"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0384"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0385"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0386"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0387"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0388"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0389"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0390"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0391"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0392"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0393"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0394"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0395"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0396"
+    },
+    {
+      "speaker": "*",
+      "text": "«Кирпич» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0397"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0398"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0399"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0400"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0401"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0402"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0403"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0404"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0405"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0406"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0407"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0408"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0409"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0410"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0411"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0412"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0413"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0414"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0415"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0416"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0417"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0418"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0419"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0420"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0421"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0422"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0423"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0424"
+    },
+    {
+      "speaker": "*",
+      "text": "«Третий Подъезд» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0425"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0426"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0427"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0428"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0429"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0430"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0431"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0432"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0433"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0434"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0435"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0436"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0437"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0438"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0439"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0440"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0441"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0442"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0443"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0444"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0445"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0446"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0447"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0448"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0449"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0450"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0451"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0452"
+    },
+    {
+      "speaker": "*",
+      "text": "«Полынь» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0453"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Лесная дорога. С добычей.",
+      "event": "voice_rival_radio_0454"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Лесная дорога. Пустые.",
+      "event": "voice_rival_radio_0455"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Служебная дорога. С добычей.",
+      "event": "voice_rival_radio_0456"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Служебная дорога. Пустые.",
+      "event": "voice_rival_radio_0457"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Ж/д пути. С добычей.",
+      "event": "voice_rival_radio_0458"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Ж/д пути. Пустые.",
+      "event": "voice_rival_radio_0459"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Старый мост. С добычей.",
+      "event": "voice_rival_radio_0460"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Старый мост. Пустые.",
+      "event": "voice_rival_radio_0461"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Автостанция. С добычей.",
+      "event": "voice_rival_radio_0462"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Автостанция. Пустые.",
+      "event": "voice_rival_radio_0463"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через К ТЦ. С добычей.",
+      "event": "voice_rival_radio_0464"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через К ТЦ. Пустые.",
+      "event": "voice_rival_radio_0465"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Ливнёвка. С добычей.",
+      "event": "voice_rival_radio_0466"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Ливнёвка. Пустые.",
+      "event": "voice_rival_radio_0467"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Пролом в заборе. С добычей.",
+      "event": "voice_rival_radio_0468"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Пролом в заборе. Пустые.",
+      "event": "voice_rival_radio_0469"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Тоннель на юг — в следующий район. С добычей.",
+      "event": "voice_rival_radio_0470"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Тоннель на юг — в следующий район. Пустые.",
+      "event": "voice_rival_radio_0471"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Дворами к насыпи. С добычей.",
+      "event": "voice_rival_radio_0472"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Дворами к насыпи. Пустые.",
+      "event": "voice_rival_radio_0473"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Пролом в ограждении за Объездной. С добычей.",
+      "event": "voice_rival_radio_0474"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Пролом в ограждении за Объездной. Пустые.",
+      "event": "voice_rival_radio_0475"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через По путям на запад. С добычей.",
+      "event": "voice_rival_radio_0476"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через По путям на запад. Пустые.",
+      "event": "voice_rival_radio_0477"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Паркинг −1, выезд в город. С добычей.",
+      "event": "voice_rival_radio_0478"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Паркинг −1, выезд в город. Пустые.",
+      "event": "voice_rival_radio_0479"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Водопропускная труба. С добычей.",
+      "event": "voice_rival_radio_0480"
+    },
+    {
+      "speaker": "*",
+      "text": "«Санитары» вышли через Водопропускная труба. Пустые.",
+      "event": "voice_rival_radio_0481"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Смотри. Ящик вернули. Стяжка срезана и поставлена новая, не моя. Внутри вместо бронебойных — сырые гражданские, из аптечек вынута половина.",
+      "event": "voice_mikhalych_0482"
+    },
+    {
+      "speaker": "player",
+      "text": "Кто-то из посредников?",
+      "event": "voice_player_0483"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Кто-то по дороге. А продают как «от Михалыча». Двое постоянных уже пришли с претензией, один — с ножом. Имя здесь заново не купишь.",
+      "event": "voice_mikhalych_0484"
+    },
+    {
+      "speaker": "player",
+      "text": "И что ты хочешь?",
+      "event": "voice_player_0485"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Пломбу. Наклейку поперёк крышки — мой знак и номер партии. Сорвали или переклеили — сразу видно. От руки такую не нарисуешь, нужен принтер. В торговом центре, в копицентре у фотосалона, стоял широкий, под ценники и вывески. Вынеси корпус — остальное соберём.",
+      "event": "voice_mikhalych_0486"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Принтер встанет здесь, в мастерской. Мне — пломбы, тебе — наклейки на стволы, какие захочешь.",
+      "event": "voice_mikhalych_0487"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Тяжёлый, а толку пока ноль: внутри пусто. Плату управления сняли, когда центр закрывали, — технику перед консервацией «обезвреживали». Всё такое свозили в серверную охраны. Ищи в стойке.",
+      "event": "voice_mikhalych_0488"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Плата родная, включается. Только не печатает: головка засохла насмерть, промывать бесполезно.",
+      "event": "voice_mikhalych_0489"
+    },
+    {
+      "speaker": "player",
+      "text": "Где взять новую?",
+      "event": "voice_player_0490"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "В сервисном центре был гарантийный склад, головки лежали в заводской упаковке. Сейчас там мародёры обосновались. Осторожнее.",
+      "event": "voice_mikhalych_0491"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Встала как родная. Принтер поставил в мастерской, рядом с верстаком. Прогнал тест — полосит, но это от пустых картриджей.",
+      "event": "voice_mikhalych_0492"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "На ближайшую поставку мне нужны расходники: три листа плёнки и комплект картриджей. В офисах и на складах этого добра хватало. Принесёшь — положи в тайник, я заберу. И принтер твой.",
+      "event": "voice_mikhalych_0493"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Пока пусто. Нужны три листа самоклеящейся плёнки и комплект картриджей. Положи в тайник — заберу сам.",
+      "event": "voice_mikhalych_0494"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Вот теперь дело. Первая партия пломб ушла в печать — посмотрим, кто полезет в мои ящики на этот раз.",
+      "event": "voice_mikhalych_0495"
+    },
+    {
+      "speaker": "player",
+      "text": "А мне что?",
+      "event": "voice_player_0496"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Принтер в мастерской, пользуйся. Плёнку теперь держу на продажу, картриджи ищи сам — мне их самому не хватает. Первый лист и краска — за мой счёт, из остатков.",
+      "event": "voice_mikhalych_0497"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Был у поста по генератору. На выезде потекло охлаждение, машину оставил у служебной стоянки. Место и снимки приложил. Доступ закончился, обратно меня не проводят.",
+      "event": "voice_ilya_0498"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Купе серое, номер К 417 МР. Примета — треснувшая хромированная накладка на левом пороге. Стоянка у северо-восточных доков, на снимках видно два ориентира.",
+      "event": "voice_ilya_0499"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Проверьте, стоит ли она там. За проверку заплачу отдельно. Если найдёте — обсудим возврат. Сотовая сеть в районе отключена — снимки передайте через терминал убежища.",
+      "event": "voice_ilya_0500"
+    },
+    {
+      "speaker": "player",
+      "text": "Посмотрю, что там на стоянке.",
+      "event": "voice_player_0501"
+    },
+    {
+      "speaker": "player",
+      "text": "Стоянку нашёл по вашим снимкам, оба ориентира на месте. Машины нет. Старое пятно охлаждающей жидкости и кусок вашей накладки. Снимки отправил.",
+      "event": "voice_player_0502"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Это мой кусок хрома. Вывоз я не заказывал. Оплатил проверку.",
+      "event": "voice_ilya_0503"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Если не против, работаем дальше. Спрошу знакомых, где в зоне берут снятое с машин.",
+      "event": "voice_ilya_0504"
+    },
+    {
+      "speaker": "player",
+      "text": "До стоянки не дошёл, но ваш номер нашёлся в боксе скупки у АЗС — среди чужих. Рядом бирка партии и накладная с тем же кодом: «ЮР / 8». Снимки отправил.",
+      "event": "voice_player_0505"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Мой номер. Значит, машину разбирают. Оплатил проверку и находку.",
+      "event": "voice_ilya_0506"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Спрошу у Нины с перевалки, что значит «ЮР».",
+      "event": "voice_ilya_0507"
+    },
+    {
+      "speaker": "player",
+      "text": "Машины на стоянке нет: пятно охлаждающей жидкости и кусок вашей накладки. А в боксе скупки у АЗС — ваш номер среди чужих, рядом бирка партии и накладная с кодом «ЮР / 8». Снимки отправил.",
+      "event": "voice_player_0508"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Обидно, но лучше знать. Оплатил проверку и находку.",
+      "event": "voice_ilya_0509"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Спрошу у Нины с перевалки, что значит «ЮР».",
+      "event": "voice_ilya_0510"
+    },
+    {
+      "speaker": "perevalka",
+      "text": "По машинам спросить напрямую некому. В боксе у заправки принимали снятые детали. Сейчас кто там — не знаю. Если машину пустили на разбор, след может остаться там.",
+      "event": "voice_nina_0511"
+    },
+    {
+      "speaker": "player",
+      "text": "Понял, проверю бокс у АЗС.",
+      "event": "voice_player_0512"
+    },
+    {
+      "speaker": "player",
+      "text": "В боксе у АЗС ваш номер — среди чужих. Рядом бирка партии и накладная на запчасти с тем же кодом: «ЮР / 8». Снимки отправил.",
+      "event": "voice_player_0513"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Мой номер. Значит, разбирают. Оплатил находку. Спрошу у Нины, что за «ЮР».",
+      "event": "voice_ilya_0514"
+    },
+    {
+      "speaker": "perevalka",
+      "text": "«ЮР» — старые южные ремонтные площадки у автостанции Пригорода. Восьмёрка — их внутренний номер бокса, не адрес: на городской карте его нет, и маркировка сохранилась не везде.",
+      "event": "voice_nina_0515"
+    },
+    {
+      "speaker": "perevalka",
+      "text": "Там несколько дворов и ангаров, рядом гаражи у путей. Ищи по старой нумерации и следам разборки.",
+      "event": "voice_nina_0516"
+    },
+    {
+      "speaker": "player",
+      "text": "Понял. Пройду дворы у автостанции.",
+      "event": "voice_player_0517"
+    },
+    {
+      "speaker": "player",
+      "text": "Ангар восьмой, у ремонтных дворов. Бригаду при нём убрали. Машина там: кузов ваш, примета на месте, маркировка совпадает. Колеса нет — стоит на кирпичах. Снимки отправил.",
+      "event": "voice_player_0518"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Это она. Оплатил поиск.",
+      "event": "voice_ilya_0519"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Покупать новую дороже, чем вернуть эту. Пусть сначала посмотрит механик — Кирилл, он на связи.",
+      "event": "voice_ilya_0520"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Кирилл, мастерская. По общим снимкам не скажу, что сняли, а что просто не видно. Нужны две вещи.",
+      "event": "voice_kirill_0521"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Первое — аккумулятор: обычный, 12 вольт. Подключать сначала плюс, потом минус. Двигатель не заводить — охлаждение разобрано.",
+      "event": "voice_kirill_0522"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Второе — снимки: подкапотное, место радиатора, колёсная ниша, проводка у аккумулятора.",
+      "event": "voice_kirill_0523"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Аккумулятор оплатил у Михалыча — лежит в тайнике. Раз машина нашлась, оплатил и полевой модем мастерской. Заберите его здесь, перед следующим выходом.",
+      "event": "voice_ilya_0524"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Сотовые станции в районе отключены от сети оператора. Телефон снимки сохранит, но отправить не сможет. У терминала убежища своя наружная антенна и отдельный канал. Этот модем тоже работает по радиоканалу — через наш ретранслятор, без сотовой сети.",
+      "event": "voice_kirill_0525"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Модем настроен на мастерскую. Как поставите аккумулятор и снимете все четыре узла, откройте журнал и отправьте пакет. Список деталей пришлю туда же — возвращаться ради него не нужно.",
+      "event": "voice_kirill_0526"
+    },
+    {
+      "speaker": "player",
+      "text": "Поставлю и сниму.",
+      "event": "voice_player_0527"
+    },
+    {
+      "speaker": "player",
+      "text": "Аккумулятор стоит, приборка ожила, ручник снимается, руль не заблокирован. Снимки узлов отправил.",
+      "event": "voice_player_0528"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Вижу. Двигатель не трогали — хорошо. Сняли колесо и радиатор вместе с патрубками.",
+      "event": "voice_kirill_0529"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Без колеса машину не выкатить. Радиатор — Ильи: по накладной он в той же партии «ЮР / 8». Ищите в кладовой ремонтного комплекса по бирке. Колесо, скорее всего, там же; подойдёт и такое же, например со склада техники у ТЦ.",
+      "event": "voice_kirill_0530"
+    },
+    {
+      "speaker": "kirill",
+      "text": "Больше по снимкам не вижу. Остальное проверим, когда заберём.",
+      "event": "voice_kirill_0531"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Колесо — на машину. Радиатор ставить не нужно: положите его в ящик сбоку у задней части машины, с подписью «РАДИАТОР». Команду пришлю сам, после вас.",
+      "event": "voice_ilya_0532"
+    },
+    {
+      "speaker": "player",
+      "text": "Сделаю.",
+      "event": "voice_player_0533"
+    },
+    {
+      "speaker": "player",
+      "text": "Колесо стоит, радиатор с патрубками лежит в ящике у машины. Я ушёл.",
+      "event": "voice_player_0534"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Команда заехала после вас. Машина у меня.",
+      "event": "voice_ilya_0535"
+    },
+    {
+      "speaker": "ilya",
+      "text": "Спасибо. Остаток перевёл.",
+      "event": "voice_ilya_0536"
+    },
+    {
+      "speaker": "player",
+      "text": "Давно?",
+      "event": "voice_player_0538"
+    },
+    {
+      "speaker": "player",
+      "text": "Один пошёл?",
+      "event": "voice_player_0541"
+    },
+    {
+      "speaker": "player",
+      "text": "Посмотрю. Ничего не обещаю.",
+      "event": "voice_player_0544"
+    },
+    {
+      "speaker": "player",
+      "text": "Нашёл на парковке. Рядом гильзы и кровь.",
+      "event": "voice_player_0545"
+    },
+    {
+      "speaker": "player",
+      "text": "Не было. Капли уходят от машин в сторону.",
+      "event": "voice_player_0548"
+    },
+    {
+      "speaker": "player",
+      "text": "В грузовом шлюзе он перевязывался. И оставил надпись: «П-3. 21:00».",
+      "event": "voice_player_0552"
+    },
+    {
+      "speaker": "player",
+      "text": "Встреча? С кем?",
+      "event": "voice_player_0555"
+    },
+    {
+      "speaker": "player",
+      "text": "Серёга. Ты что-то недоговариваешь.",
+      "event": "voice_player_0557"
+    },
+    {
+      "speaker": "player",
+      "text": "На П-3 была встреча. И пачки 5.45 — синяя изолента крест-накрест, с петлёй. Как у тебя на полке.",
+      "event": "voice_player_0559"
+    },
+    {
+      "speaker": "player",
+      "text": "Ну?",
+      "event": "voice_player_0561"
+    },
+    {
+      "speaker": "player",
+      "text": "Ты торговал нами.",
+      "event": "voice_player_0565"
+    },
+    {
+      "speaker": "player",
+      "text": "Найду. Но разговор не окончен.",
+      "event": "voice_player_0570"
+    },
+    {
+      "speaker": "player",
+      "text": "За шкафом в служебке. Бумаги. Почерк не его.",
+      "event": "voice_player_0571"
+    },
+    {
+      "speaker": "player",
+      "text": "Это не слухи. Это расписание.",
+      "event": "voice_player_0575"
+    },
+    {
+      "speaker": "player",
+      "text": "На обороте его рукой: «Красные ворота».",
+      "event": "voice_player_0578"
+    },
+    {
+      "speaker": "player",
+      "text": "О цене потом.",
+      "event": "voice_player_0581"
+    },
+    {
+      "speaker": "player",
+      "text": "Разбирайтесь сами. Я своё сделал.",
+      "event": "voice_player_0591"
+    },
+    {
+      "speaker": "player",
+      "text": "Надо уходить. Сергей должен это увидеть.",
+      "event": "voice_player_0592"
+    },
+    {
+      "speaker": "player",
+      "text": "Два стула, окурки, кровь. Разговор не задался.",
+      "event": "voice_player_0593"
+    },
+    {
+      "speaker": "player",
+      "text": "С этим — к Сергею. Пусть объяснит.",
+      "event": "voice_player_0594"
+    },
+    {
+      "speaker": "player",
+      "text": "Красные ворота. Тихо… слишком тихо.",
+      "event": "voice_player_0595"
+    },
+    {
+      "speaker": "player",
+      "text": "Потерпи. Выберемся.",
+      "event": "voice_player_0596"
+    },
+    {
+      "speaker": "player",
+      "text": "Тела нет. Ушёл сам… или унесли.",
+      "event": "voice_player_0597"
+    },
+    {
+      "speaker": "player",
+      "text": "Значит, после перестрелки он был жив.",
+      "event": "voice_player_0598"
+    },
+    {
+      "speaker": "player",
+      "text": "Назначил встречу. Или ему назначили.",
+      "event": "voice_player_0599"
+    },
+    {
+      "speaker": "player",
+      "text": "Он пришёл один. Как просили.",
+      "event": "voice_player_0600"
+    },
+    {
+      "speaker": "player",
+      "text": "Где-то я такую уже видел…",
+      "event": "voice_player_0601"
+    },
+    {
+      "speaker": "player",
+      "text": "Зачем ему чужие записи?",
+      "event": "voice_player_0602"
+    },
+    {
+      "speaker": "player",
+      "text": "Это не слухи. Это разведка. На всех нас.",
+      "event": "voice_player_0603"
+    },
+    {
+      "speaker": "player",
+      "text": "От него. Идти можешь?",
+      "event": "voice_player_0605"
+    },
+    {
+      "speaker": "player",
+      "text": "Кто — они?",
+      "event": "voice_player_0607"
+    },
+    {
+      "speaker": "player",
+      "text": "Спрошу. Держись за меня.",
+      "event": "voice_player_0610"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Есть заказ. Три сборки, дорогие. Заказчик хочет на каждой своё имя и номер — чтобы выданное не путали с чужим. За маркировку платит отдельно.",
+      "event": "voice_mikhalych_0613"
+    },
+    {
+      "speaker": "player",
+      "text": "И чем собираешься наносить?",
+      "event": "voice_player_0614"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "В мастерской торгового центра стоял лазерный маркировщик. Ты вынесешь раму и контроллер, я возьму на себя восстановление и подключение. Поставим здесь.",
+      "event": "voice_mikhalych_0615"
+    },
+    {
+      "speaker": "player",
+      "text": "А мне с этого что?",
+      "event": "voice_player_0616"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Станком пользуешься бесплатно, сколько понадобится. Головки только свои. На мой заказ расходники уже есть, твои не трону.",
+      "event": "voice_mikhalych_0617"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Направляющая целая. Раму приведу в порядок. Теперь нужен родной контроллер — без него это просто железо. Ищи в подсобке электроники.",
+      "event": "voice_mikhalych_0618"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Контроллер живой. Станок установил в свободном месте мастерской, подключение оплатил. Когда генератор работает — будет питание.",
+      "event": "voice_mikhalych_0619"
+    },
+    {
+      "speaker": "player",
+      "text": "Можно уже пробовать?",
+      "event": "voice_player_0620"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Нужна целая головка. Видели сервисный кейс у разгрузки, но там засели мародёры. Достанешь — проверим. Головку после проверки заберёшь себе.",
+      "event": "voice_mikhalych_0621"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Проверил фокус на тестовой пластине, головку не расходовал. Все три нанесения твои.",
+      "event": "voice_mikhalych_0622"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Буквы режет ровно. Дата будет сегодняшняя, номер — у каждого ствола свой. Только подумай, что писать: обратно уже не сотрёшь.",
+      "event": "voice_mikhalych_0623"
+    },
+    {
+      "speaker": "player",
+      "text": "Если ствол потеряю, хоть узнаю потом.",
+      "event": "voice_player_0624"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Если его подберут местные — вполне. Смотри, с чем они ходят. Вещи здесь меняют руки.",
+      "event": "voice_mikhalych_0625"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Тише по стеклу.",
+      "event": "voice_mikhalych_0626"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Я сказал под дорогой.",
+      "event": "voice_mikhalych_0627"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Вот они. Слева от тамбура дверь «Только для персонала» — коридор вдоль зала прямо на склад, мимо них.",
+      "event": "voice_mikhalych_0628"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Или через зал между рядами, если хочешь посмотреть, что там на полках. Решай сам.",
+      "event": "voice_mikhalych_0629"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Ну вот, позвал всех. Добивай и не стой на месте.",
+      "event": "voice_mikhalych_0630"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Прошёл. Нормально. На складе темно — фонарь, если есть.",
+      "event": "voice_mikhalych_0631"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Гранаты побереги.",
+      "event": "voice_mikhalych_0632"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Я же сказал.",
+      "event": "voice_mikhalych_0633"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Слышу тебя. Ворота за тобой закрыли — назад не ходи, у них приказ, они не шутят.",
+      "event": "voice_mikhalych_0634"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Твои вещи рядом: кофейня, первый павильон слева. Сумка в подсобке за стойкой. Иди.",
+      "event": "voice_mikhalych_0635"
+    },
+    {
+      "speaker": "player",
+      "text": "Понял.",
+      "event": "voice_player_0636"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "За стойкой подсобка. Сумка твоя, сверху мой пакет — донесёшь, в рюкзак, не в карман. Одевайся без спешки, там тихо.",
+      "event": "voice_mikhalych_0637"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Прежде чем идти — проверь магазин, дошли патрон.",
+      "event": "voice_mikhalych_0638"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Теперь слушай. По проспекту не ходи — он насквозь простреливается. По тротуару вдоль павильонов до перехода, под дорогой на ту сторону, там парковка и магазин «Ярус».",
+      "event": "voice_mikhalych_0639"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Через магазин насквозь, за ним разгрузка и калитка. Дальше сквером к путям — там тоннель под насыпью, через него и выйдешь.",
+      "event": "voice_mikhalych_0640"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Выходишь за автобусом, с дороги тебя не видно. Дальше парковка — иди вдоль кадок к навесу, у входа фургон.",
+      "event": "voice_mikhalych_0641"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "В магазине кто-то есть: тележку слышно. Не лезь к ним.",
+      "event": "voice_mikhalych_0642"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Кто-то у ворот, видишь свет? Мимо не пройдёшь. Он тебя не ждёт — не торопись.",
+      "event": "voice_mikhalych_0643"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Жив? Забери, что у него есть. Засов на воротах — открой и выходи во двор.",
+      "event": "voice_mikhalych_0644"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Вышел? Иди сквером к путям. Не по середине — вдоль кустов и палаток, площадь со всех окон видна.",
+      "event": "voice_mikhalych_0645"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Под насыпью тоннель — увидишь машины в очереди, туда.",
+      "event": "voice_mikhalych_0646"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "На насыпь не лезь — с неё ты как на ладони. Вдоль вагонов к дороге.",
+      "event": "voice_mikhalych_0647"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Вижу тебя. Заходи по правой стороне, у зелёного фонаря стой. Минута — и ты дома.",
+      "event": "voice_mikhalych_0648"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Ну, здравствуй. Дошёл — значит, не зря договаривались. Пакет мой — на приёмную полку, там.",
+      "event": "voice_mikhalych_0649"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Твоя полка в тайнике свободна, разбирайся. Связь с заказчиками — через ноутбук, туда всё приходит.",
+      "event": "voice_mikhalych_0650"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "И вот что: в зале тир, патроны на нём не тратятся. Пристреляйся, прежде чем идти снова.",
+      "event": "voice_mikhalych_0651"
+    },
+    {
+      "speaker": "player",
+      "text": "Понял. Где полка?",
+      "event": "voice_player_0652"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Ну, здравствуй. Дошёл — значит, не зря договаривались. Пакет где? Ладно, не последний.",
+      "event": "voice_mikhalych_0653"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "Твоя полка в тайнике свободна, разбирайся. Связь с заказчиками — через ноутбук, туда всё приходит.",
+      "event": "voice_mikhalych_0654"
+    },
+    {
+      "speaker": "Михалыч",
+      "text": "И вот что: в зале тир, патроны на нём не тратятся. Пристреляйся, прежде чем идти снова.",
+      "event": "voice_mikhalych_0655"
+    },
+    {
+      "speaker": "player",
+      "text": "Понял.",
+      "event": "voice_player_0656"
+    }
+  ]
+}
