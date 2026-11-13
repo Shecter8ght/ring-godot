@@ -23,6 +23,7 @@ var _sound_path: OptionButton
 var _spectral: CheckBox
 var _play_button: Button
 var _headset_choice: OptionButton
+var _headset_factory: CheckBox
 var _headset_levels: VBoxContainer
 var _headset_caption: Label
 var _headset_controls: Dictionary = {}
@@ -213,6 +214,11 @@ func _build() -> void:
 	controls.add_child(_button("■ Стоп", _stop))
 	_headset_levels = VBoxContainer.new()
 	right.add_child(_headset_levels)
+	_headset_factory = CheckBox.new()
+	_headset_factory.text = "Слушать заводской пресет"
+	_headset_factory.tooltip_text = "Сравнить с настройками из игры. Твои правки сохранятся."
+	_headset_factory.toggled.connect(func(_enabled: bool) -> void: _headset_selected(_headset_choice.selected))
+	_headset_levels.add_child(_headset_factory)
 	_headset_caption = _label("")
 	_headset_levels.add_child(_headset_caption)
 	var bands: GridContainer = GridContainer.new()
@@ -226,7 +232,8 @@ func _build() -> void:
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bands.add_child(cell)
 		var minimum: float = Settings.HEADSET_GAIN_MIN if key == "gain" else Settings.HEADSET_EQ_MIN
-		_headset_controls[key] = _gain_control(cell, labels[index], minimum, Settings.HEADSET_DB_MAX, _change_headset.bind(key))
+		_headset_controls[key] = _gain_control(cell, labels[index], minimum, Settings.HEADSET_DB_MAX,
+			_change_headset.bind(key), _headset_factory)
 	right.add_child(_button("Сбросить уровни события и записи", _reset_levels))
 	_status = _label("Настройки сохраняются автоматически.")
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -252,7 +259,8 @@ func _level_control(parent: VBoxContainer, text: String, file_level: bool) -> Sp
 	return _gain_control(parent, text, -60.0, 24.0, _change_level.bind(file_level))
 
 
-func _gain_control(parent: VBoxContainer, text: String, minimum: float, maximum: float, on_change: Callable) -> SpinBox:
+func _gain_control(parent: VBoxContainer, text: String, minimum: float, maximum: float, on_change: Callable,
+		read_only: CheckBox = null) -> SpinBox:
 	parent.add_child(_label(text))
 	var row: HBoxContainer = HBoxContainer.new()
 	parent.add_child(row)
@@ -269,6 +277,10 @@ func _gain_control(parent: VBoxContainer, text: String, minimum: float, maximum:
 	number.suffix = " дБ"
 	number.custom_minimum_size.x = 92
 	row.add_child(number)
+	if read_only != null:
+		read_only.toggled.connect(func(enabled: bool) -> void:
+			slider.editable = not enabled
+			number.editable = not enabled)
 	slider.value_changed.connect(func(value: float) -> void: number.value = value)
 	number.value_changed.connect(func(value: float) -> void:
 		slider.set_value_no_signal(value)
@@ -384,7 +396,8 @@ func _select(id: String) -> void:
 	var event: Dictionary = Audio._events[id]
 	_title.text = _display_name(event)
 	var bus: StringName = Audio._bus_for(id)
-	_details.text = "Пустое назначение. Добавьте запись в Sonora." if not Audio.has_sound(id) else "%s · вариантов %d" % [Settings.BUSES.get(String(bus), bus), (Audio._samples[id] as Array).size()]
+	var bus_label: String = "Интерфейс" if bus == Settings.INTERFACE_BUS else String(Settings.BUSES.get(String(bus), bus))
+	_details.text = "Пустое назначение. Добавьте запись в Sonora." if not Audio.has_sound(id) else "%s · вариантов %d" % [bus_label, (Audio._samples[id] as Array).size()]
 	_variants.clear()
 	for file: String in event.get("files", []):
 		_variants.add_item(file.get_file())
@@ -429,7 +442,7 @@ func _update_headset_controls() -> void:
 	if not _headset_levels.visible:
 		return
 	_headset_caption.text = "Профиль · " + String(Settings.BUSES[String(bus)])
-	var profile: Dictionary = Settings.headset_profile(_selected_headset(), bus)
+	var profile: Dictionary = Settings.headset_profile(_selected_headset(), bus, _uses_factory_headset())
 	_updating = true
 	for key: String in Settings.HEADSET_CONTROLS:
 		var control: SpinBox = _headset_controls[key]
@@ -437,19 +450,19 @@ func _update_headset_controls() -> void:
 	_updating = false
 
 
+func _uses_factory_headset() -> bool:
+	return _headset_choice.selected >= 2 and _headset_factory.button_pressed
+
+
 func _headset_selected(_index: int) -> void:
 	_update_headset_controls()
 	if _headset_choice.disabled or _players.is_empty():
 		return
-	var model: Dictionary = _selected_headset()
-	Settings.preview_headset(Audio._bus_for(_id), model)
-	for player: Node in _players:
-		if is_instance_valid(player) and player is AudioStreamPlayer3D:
-			(player as AudioStreamPlayer3D).unit_size = float(Audio._kind_spec(_id).unit) * float(model.get("hear_k", 1.0))
+	Settings.preview_headset(Audio._bus_for(_id), _selected_headset(), _uses_factory_headset())
 
 
 func _change_headset(value: float, key: String) -> void:
-	if not _headset_levels.visible:
+	if not _headset_levels.visible or _uses_factory_headset():
 		return
 	Audio.set_headset_mix(String(_selected_headset().get("code", "")), Audio._bus_for(_id), key, value)
 	_queue_save()
@@ -484,10 +497,8 @@ func _play() -> void:
 	if camera != null:
 		direction = camera.global_basis * direction
 	var pos: Vector3 = Audio._listener_pos() + direction * _distance.value
-	var model: Dictionary = _selected_headset()
-	var bus: StringName = Settings.preview_headset(Audio._bus_for(_id), model)
+	var bus: StringName = Settings.preview_headset(Audio._bus_for(_id), _selected_headset(), _uses_factory_headset())
 	var player: Node = Audio.preview_event(_id, pos, _variants.selected, _loop.button_pressed, bus,
-		float(model.get("hear_k", 1.0)) if bus != &"" else -1.0,
 		_sound_path.get_selected_id(), _spectral.button_pressed)
 	if player != null:
 		_players.append(player)

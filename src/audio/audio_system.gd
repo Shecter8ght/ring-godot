@@ -258,7 +258,7 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
 	_tag_mix(player, id, stream, float(spec.db) + extra_db)
-	player.unit_size = float(spec.unit) * float(preview.get("hear_k", Settings.headset.get("hear_k", 1.0)))
+	player.unit_size = float(spec.unit)
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	var bus := _bus_for(hook)
@@ -313,6 +313,8 @@ func _bus_for(hook: String) -> StringName:
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
 	if String(event.get("category", "")) == "Голоса ИИ и персонажей":
 		return &"Voices"
+	if hook.begins_with("ui_") or String(event.get("group", "")) == "Меню и сообщения":
+		return Settings.INTERFACE_BUS
 	if event.has("map_scene") or String(event.get("profile", "")) == "ambient":
 		return &"Ambient"
 	if String(event.get("profile", "")) in ["osoka_launch", "osoka_motor"]:
@@ -630,21 +632,21 @@ func play_map_ambience(scene_path: String, parent: Node) -> AudioStreamPlayer:
 
 ## Стенд выбирает конкретную запись, но использует тот же профиль, шину и пространственную подачу.
 func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = false,
-		bus_override: StringName = &"", hear_k: float = -1.0, path: int = SoundPathPreview.SCENE, spectral: bool = true) -> Node:
+		bus_override: StringName = &"", path: int = SoundPathPreview.SCENE, spectral: bool = true) -> Node:
 	var records: Array = _samples.get(id, [])
 	if records.is_empty():
 		return null
 	var stream: AudioStream = records[clampi(variant, 0, records.size() - 1)] if variant >= 0 else _pick_from(records, id)
 	var spec: Dictionary = _kind_spec(id)
 	var bus := _bus_for(id)
-	if bus in [&"Ambient", &"Radio"] or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
+	if bus in [&"Ambient", &"Radio", Settings.INTERFACE_BUS] or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.stream = stream
 		player.bus = bus_override if bus_override != &"" else bus
 		var base_db := 0.0
 		if bus == &"Ambient":
 			base_db = float(Balance.SONORA_AUDIO.ambient_db)
-		elif bus != &"Radio":
+		elif id in ["osoka_seeker_track", "osoka_seeker_lock"]:
 			base_db = float(Balance.OSOKA.tone_db)
 		_tag_mix(player, id, stream, base_db)
 		player.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -656,8 +658,6 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 		player.play()
 		return player
 	var preview := {"bus": bus_override if bus_override != &"" else bus, "path": path, "spectral": spectral}
-	if hear_k > 0.0:
-		preview.hear_k = hear_k
 	var player := _play_now(id, id, stream, pos, 0.0, spec, preview)
 	if player == null:
 		return null

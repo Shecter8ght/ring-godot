@@ -62,14 +62,17 @@ var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.
 	"Voices": 1.0, "Radio": 1.0}
 ## Гарнитура на ушах своего игрока. Выбор модели задаёт снаряжение.
 var headset: Dictionary = {}
-const HEADSET_DB := {&"Shots": "shots_db", &"Steps": "steps_db", &"World": "world_db", &"Voices": "voices_db"}
+const HEADSET_DB := {&"Shots": "shots_db", &"Steps": "steps_db", &"World": "world_db", &"Voices": "voices_db",
+	&"Ambient": "ambient_db"}
 const HEADSET_CONTROLS := ["gain", "low", "mid", "high"]
 const HEADSET_GAIN_MIN := -30.0
 const HEADSET_EQ_MIN := -18.0
 const HEADSET_DB_MAX := 12.0
 const HEADSET_PREVIEW_BUS := &"HeadsetPreview"
+const INTERFACE_BUS := &"Interface"
 var _preview_audio_bus: StringName = &""
 var _preview_headset: Dictionary = {}
+var _preview_factory: bool = false
 
 ## Чит «бессмертие» (меню Esc → Читы) — раздел cheats; в коопе решает хост.
 var god: bool = false
@@ -503,7 +506,7 @@ func set_volume(bus: String, v: float) -> void:
 
 ## Шины звука (все — в Master): создаются при старте, если их нет в раскладке проекта.
 func _make_buses() -> void:
-	for bus: String in BUSES:
+	for bus: String in BUSES.keys() + [String(INTERFACE_BUS)]:
 		var index: int = AudioServer.get_bus_index(bus)
 		if index < 0:
 			AudioServer.add_bus()
@@ -522,17 +525,21 @@ func apply_audio() -> void:
 		if i < 0:
 			continue
 		_apply_bus_level(i, bus, headset_profile(headset, bus))
+	var interface_index: int = AudioServer.get_bus_index(INTERFACE_BUS)
+	if interface_index >= 0:
+		_apply_bus_level(interface_index, &"World", {})
 	if _preview_audio_bus != &"":
-		preview_headset(_preview_audio_bus, _preview_headset)
+		preview_headset(_preview_audio_bus, _preview_headset, _preview_factory)
 
 
-func headset_profile(model: Dictionary, bus: StringName) -> Dictionary:
+func headset_profile(model: Dictionary, bus: StringName, factory: bool = false) -> Dictionary:
 	if model.is_empty() or not HEADSET_DB.has(bus):
 		return {}
 	var profile: Dictionary = {"gain": float(model.get(HEADSET_DB[bus], 0.0))}
 	var defaults: Dictionary = model.get("eq", {})
-	profile.merge(defaults.get(String(bus), {}), true)
-	profile.merge(Audio.headset_mix(String(model.get("code", "")), String(bus)), true)
+	profile.merge(defaults.get(String(bus), defaults.get("quiet", {})), true)
+	if not factory:
+		profile.merge(Audio.headset_mix(String(model.get("code", "")), String(bus)), true)
 	return profile
 
 
@@ -569,30 +576,32 @@ func _apply_headset_eq(index: int, profile: Dictionary) -> void:
 
 
 ## Стенд слушает выбранную модель через отдельную шину. Снаряжение в рейде не переключается.
-func preview_headset(bus: StringName, model: Dictionary) -> StringName:
+func preview_headset(bus: StringName, model: Dictionary, factory: bool = false) -> StringName:
 	if not HEADSET_DB.has(bus):
 		return &""
 	_preview_audio_bus = bus
 	_preview_headset = model
+	_preview_factory = factory
 	var index: int = AudioServer.get_bus_index(HEADSET_PREVIEW_BUS)
 	if index < 0:
 		AudioServer.add_bus()
 		index = AudioServer.bus_count - 1
 		AudioServer.set_bus_name(index, HEADSET_PREVIEW_BUS)
 		AudioServer.set_bus_send(index, &"Master")
-	_apply_bus_level(index, bus, headset_profile(model, bus))
+	_apply_bus_level(index, bus, headset_profile(model, bus, factory))
 	return HEADSET_PREVIEW_BUS
 
 
 func end_headset_preview() -> void:
 	_preview_audio_bus = &""
 	_preview_headset = {}
+	_preview_factory = false
 	var index: int = AudioServer.get_bus_index(HEADSET_PREVIEW_BUS)
 	if index >= 0:
 		_apply_headset_eq(index, {})
 
 
-## Надел / снял гарнитуру: выстрелы глушатся, шаги и мелочь — громче (активная).
+## Надел / снял гарнитуру: меняются громкость и тембр звукового мира.
 func set_headset(h: Dictionary) -> void:
 	if h == headset:
 		return

@@ -199,6 +199,16 @@ func _ready() -> void:
 		overlay.call("_save")
 		saved = JSON.parse_string(FileAccess.get_file_as_string(Audio.mix_save_path)) as Dictionary
 		check(float(saved.headsets.HEADSET_04.Steps.high) == -8.0, "правка частот сохраняется по модели и категории")
+		var factory: CheckBox = overlay.get("_headset_factory")
+		factory.button_pressed = true
+		Settings.apply_audio()
+		var defaults: Dictionary = Settings.headset_profile(model, &"Steps", true)
+		check(preview.playing and not high.editable and is_equal_approx(high.value, float(defaults.high))
+			and is_equal_approx(eq.get_band_gain_db(5), float(defaults.high)), "заводской профиль слышен на лету")
+		check(game_eq.get_band_gain_db(5) == -8.0, "заводское прослушивание не меняет рейд")
+		factory.button_pressed = false
+		check(preview.playing and high.editable and high.value == -8.0 and eq.get_band_gain_db(5) == -8.0,
+			"после сравнения на стенде остаются свои настройки")
 		headset_choice.select(1)
 		headset_choice.item_selected.emit(1)
 		check(AudioServer.get_bus_effect_count(preview_bus) == 0 and AudioServer.get_bus_effect_count(game_bus) == 1,

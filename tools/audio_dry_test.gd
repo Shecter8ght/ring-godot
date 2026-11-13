@@ -38,15 +38,33 @@ func _ready() -> void:
 	check(float(recordings.far.gain) < float(recordings.near.gain), "Расстояние уменьшает громкость")
 	await _test_propagation()
 	var shot_bus: int = AudioServer.get_bus_index("Shots")
-	var headset: Dictionary = WeaponDb.headset("headset_perimeter")
-	Settings.set_headset(headset)
-	var filtered: PackedVector2Array = await _capture("headset", 1.0, "outdoor", false)
-	var low_db: float = linear_to_db(_tone(filtered, 200.0) / _tone(reference, 200.0))
-	var high_db: float = linear_to_db(_tone(filtered, 9000.0) / _tone(reference, 9000.0))
-	print("HEADSET_EQ low_db=%.2f high_db=%.2f" % [low_db, high_db])
-	check(low_db > -11.0 and high_db < low_db - 3.0, "Гарнитура сильнее приглушает верх, чем низ")
+	var profiles: Dictionary = {}
+	for id: String in WeaponDb.ids("headsets"):
+		Settings.set_headset(WeaponDb.headset(id))
+		var shot: PackedVector2Array = await _capture(id + "_shot", 1.0, "outdoor", false)
+		var quiet: PackedVector2Array = await _capture(id + "_ambient", 1.0, "outdoor", true, false, &"Ambient")
+		var measured: Dictionary = {"shot_low": _tone_delta(shot, reference, 200.0),
+			"shot_high": _tone_delta(shot, reference, 9000.0), "quiet_low": _tone_delta(quiet, reference, 100.0),
+			"quiet_mid": _tone_delta(quiet, reference, 1000.0), "quiet_high": _tone_delta(quiet, reference, 9000.0)}
+		profiles[id] = measured
+		print("HEADSET_EQ ", id, " ", JSON.stringify(measured))
+		check(measured.shot_low < -5.0 and measured.shot_high < measured.shot_low - 4.0,
+			id + ": выстрелы тише и теряют резкость")
+	var passive: Dictionary = profiles.headset_passive
+	var active: Dictionary = profiles.headset_active
+	var tactical: Dictionary = profiles.headset_tactical
+	var perimeter: Dictionary = profiles.headset_perimeter
+	check(passive.quiet_high < -20.0 and passive.quiet_high < passive.quiet_low - 10.0, "Пассивные пропускают больше низа")
+	check(active.quiet_mid > active.quiet_high + 7.0 and active.quiet_mid > active.quiet_low + 5.0, "Активная выделяет середину")
+	check(absf(tactical.quiet_low - tactical.quiet_high) < 4.0, "Тактическая сохраняет широкий спектр")
+	check(perimeter.quiet_high < tactical.quiet_high - 5.0 and perimeter.shot_high < tactical.shot_high - 3.0,
+		"Периметр сильнее тактической гасит резкий фон и выстрелы")
+	check(Audio._bus_for("ui_click") == Settings.INTERFACE_BUS and Audio._bus_for("radio_job_paid") == &"Radio"
+		and AudioServer.get_bus_effect_count(AudioServer.get_bus_index(Settings.INTERFACE_BUS)) == 0
+		and AudioServer.get_bus_effect_count(AudioServer.get_bus_index("Radio")) == 0, "Рация и меню обходят эквалайзер гарнитуры")
 	Settings.set_headset({})
 	check(AudioServer.get_bus_effect_count(shot_bus) == 0, "Снятие гарнитуры убирает её эквалайзер")
+	check(AudioServer.get_bus_effect_count(AudioServer.get_bus_index("Ambient")) == 0, "Снятие гарнитуры возвращает фон")
 	Audio.play("wpn_hg_02_shot", Vector3(0, 0, -1), 0.0, 0.72)
 	var pitched: AudioStreamPlayer3D = find_children("*", "AudioStreamPlayer3D", true, false).back() as AudioStreamPlayer3D
 	check(pitched.pitch_scale == 1.0, "Прежний параметр pitch не меняет готовую запись")
@@ -90,7 +108,8 @@ func _make_probe() -> AudioStreamWAV:
 		var value: float = 0.0
 		if time >= 0.0 and time < 0.09:
 			var envelope: float = sin(PI * time / 0.09) * exp(-time * 24.0)
-			value = envelope * (0.32 * sin(TAU * 200.0 * time) + 0.18 * sin(TAU * 3000.0 * time) + 0.12 * sin(TAU * 9000.0 * time))
+			value = envelope * (0.18 * sin(TAU * 100.0 * time) + 0.25 * sin(TAU * 200.0 * time)
+				+ 0.18 * sin(TAU * 1000.0 * time) + 0.12 * sin(TAU * 9000.0 * time))
 		data.encode_s16(i * 2, int(round(value * 32767.0)))
 	var stream: AudioStreamWAV = AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
@@ -98,7 +117,12 @@ func _make_probe() -> AudioStreamWAV:
 	stream.data = data
 	return stream
 
-func _capture(label: String, distance: float, place: String, direct: bool, filtered: bool = false) -> PackedVector2Array:
+func _tone_delta(measured: PackedVector2Array, reference: PackedVector2Array, hz: float) -> float:
+	return linear_to_db(_tone(measured, hz) / _tone(reference, hz))
+
+
+func _capture(label: String, distance: float, place: String, direct: bool, filtered: bool = false,
+		direct_bus: StringName = &"Master") -> PackedVector2Array:
 	# Захват только читает отсчёты; в игровом пути этого эффекта нет.
 	var master: int = AudioServer.get_bus_index("Master")
 	var tap: AudioEffectCapture = AudioEffectCapture.new()
@@ -109,6 +133,7 @@ func _capture(label: String, distance: float, place: String, direct: bool, filte
 	if direct:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.stream = probe
+		player.bus = direct_bus
 		player.finished.connect(player.queue_free)
 		add_child(player)
 		player.play()

@@ -1,5 +1,5 @@
 {
- "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Гарнитура: дБ своих выстрелов / шагов / мира, hear_k — дальность слуха. Защита класса — Balance.ARMOR_CLASS_PROT. Три брони, пояс и три шлема (решение владельца 2026-10-22, схема docs/design/npc_gear_by_type.md): armor.places — места под подсумки, armor.npc / helmet.npc — модель на теле NPC (вещь и сетка в assets/models/characters/npc_gear, fit — посадка рюкзака). Старые id (vest_*, carrier_*, helmet_*) — псевдонимы в data/weapons.json → aliases. armor.pairs_big — пары соседних мест под большой подсумок (места считаются половинками: пистолетный ½, автоматный 1, большой 2; docs/design/equip_doll_v2.md).",
+ "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Гарнитура: уровни в дБ по шинам и кривые эквалайзера для выстрелов и остальных звуков мира. Защита класса — Balance.ARMOR_CLASS_PROT. Три брони, пояс и три шлема (решение владельца 2026-10-22, схема docs/design/npc_gear_by_type.md): armor.places — места под подсумки, armor.npc / helmet.npc — модель на теле NPC (вещь и сетка в assets/models/characters/npc_gear, fit — посадка рюкзака). Старые id (vest_*, carrier_*, helmet_*) — псевдонимы в data/weapons.json → aliases. armor.pairs_big — пары соседних мест под большой подсумок (места считаются половинками: пистолетный ½, автоматный 1, большой 2; docs/design/equip_doll_v2.md).",
  "vests": {
   "armor_poor": {
    "name": "Бронежилет бомжовский",
@@ -488,17 +488,15 @@
    },
    "headset": {
     "code": "HEADSET_01",
-    "shots_db": -9.0,
-    "steps_db": -3.0,
-    "world_db": -3.0,
-    "voices_db": -3.0,
+    "listening": "Приглушают весь мир. Остаётся глухой гул, шаги и слова разобрать труднее.",
+    "shots_db": -14.0,
+    "steps_db": -14.0,
+    "world_db": -14.0,
+    "voices_db": -14.0,
+    "ambient_db": -14.0,
     "eq": {
-     "Shots": {"mid": -2.0, "high": -8.0},
-     "Steps": {"mid": -1.0, "high": -5.0},
-     "World": {"mid": -1.0, "high": -6.0},
-     "Voices": {"high": -5.0}
-    },
-    "hear_k": 0.95
+     "quiet": {"low": 5.0, "mid": -4.0, "high": -13.0}
+    }
    }
   },
   "headset_active": {
@@ -522,15 +520,16 @@
    },
    "headset": {
     "code": "HEADSET_02",
-    "shots_db": -10.0,
-    "steps_db": 4.0,
-    "world_db": 2.0,
+    "listening": "Тихие звуки слышны через микрофоны. У слов и шагов заметная середина, бас и тонкие шорохи тише.",
+    "shots_db": -11.0,
+    "steps_db": 0.0,
+    "world_db": 0.0,
+    "voices_db": 0.0,
+    "ambient_db": 0.0,
     "eq": {
-     "Shots": {"mid": -1.0, "high": -4.0},
-     "Steps": {"low": -2.0, "mid": 1.0},
-     "Voices": {"low": -2.0, "mid": 1.0}
-    },
-    "hear_k": 1.05
+     "Shots": {"low": 2.0, "mid": -3.0, "high": -9.0},
+     "quiet": {"low": -6.0, "mid": 4.0, "high": -6.0}
+    }
    }
   },
   "headset_tactical": {
@@ -553,15 +552,16 @@
    },
    "headset": {
     "code": "HEADSET_03",
-    "shots_db": -12.0,
-    "steps_db": 6.0,
-    "world_db": 3.0,
+    "listening": "Шаги, шорохи и фон звучат ближе всего к открытому уху. Резкость выстрелов приглушена.",
+    "shots_db": -11.0,
+    "steps_db": 1.0,
+    "world_db": 1.0,
+    "voices_db": 1.0,
+    "ambient_db": 1.0,
     "eq": {
-     "Shots": {"mid": -1.0, "high": -5.0},
-     "Steps": {"low": -2.0, "mid": 2.0},
-     "Voices": {"low": -2.0, "mid": 1.0}
-    },
-    "hear_k": 1.1
+     "Shots": {"low": 1.0, "mid": -2.0, "high": -8.0},
+     "quiet": {"low": -1.0, "mid": 0.0, "high": 1.0}
+    }
    }
   },
   "headset_perimeter": {
@@ -585,15 +585,16 @@
    },
    "headset": {
     "code": "HEADSET_04",
-    "shots_db": -6.0,
-    "steps_db": 8.0,
-    "world_db": 4.0,
+    "listening": "Фоновый шум и выстрелы тише. Речь остаётся слышна, мелкие шорохи приглушены.",
+    "shots_db": -14.0,
+    "steps_db": -2.0,
+    "world_db": -2.0,
+    "voices_db": -2.0,
+    "ambient_db": -4.0,
     "eq": {
-     "Shots": {"mid": -2.0, "high": -6.0},
-     "Steps": {"low": -3.0, "mid": 2.0},
-     "Voices": {"low": -2.0, "mid": 2.0}
-    },
-    "hear_k": 1.15
+     "Shots": {"low": 1.0, "mid": -3.0, "high": -10.0},
+     "quiet": {"low": -4.0, "mid": 2.0, "high": -2.0}
+    }
    }
   }
  }

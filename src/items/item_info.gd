@@ -265,7 +265,7 @@ static func describe(id: String) -> String:
 		return "\n\n".join(out)
 	var hs := WeaponDb.headset(id)
 	if not hs.is_empty():
-		out.append("Надеваются в слот «Уши». Приглушают грохот выстрелов на %d дБ — в перестрелке не глохнешь и лучше слышишь остальное." % int(absf(float(hs.get("shots_db", 0.0)))))
+		out.append("Слот «Уши». " + String(hs.get("listening", "Приглушает выстрелы.")))
 		return "\n\n".join(out)
 	out.append(desc if desc != "" else "Товар: продать Михалычу.")
 	var use: Dictionary = it.get("use", {})
