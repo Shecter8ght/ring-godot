@@ -20,6 +20,10 @@ var _distance: SpinBox
 var _angle: SpinBox
 var _loop: CheckBox
 var _play_button: Button
+var _headset_choice: OptionButton
+var _headset_levels: VBoxContainer
+var _headset_caption: Label
+var _headset_controls: Dictionary = {}
 var _save_timer: Timer
 var _id: String = ""
 var _updating: bool = false
@@ -96,7 +100,6 @@ func _build() -> void:
 	_reload_tab.name = "Перезарядка"
 	tabs.add_child(_reload_tab)
 	tabs.tab_changed.connect(_show_tab)
-	catalog.add_child(_label("Громкость сохраняется для игры. Прослушивание учитывает шины, расстояние, гарнитуру и преграды текущей сцены."))
 	var row: HBoxContainer = HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 24)
@@ -126,10 +129,14 @@ func _build() -> void:
 	_list.item_selected.connect(func(index: int) -> void: _select(String(_list.get_item_metadata(index))))
 	_list.item_activated.connect(func(_index: int) -> void: _play())
 	left.add_child(_list)
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	row.add_child(scroll)
 	var right: VBoxContainer = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 12)
-	row.add_child(right)
+	scroll.add_child(right)
 	_title = _label("Выберите звук", 22)
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_title)
@@ -160,13 +167,43 @@ func _build() -> void:
 	_loop = CheckBox.new()
 	_loop.text = "Повторять до остановки"
 	right.add_child(_loop)
+	var headset_row: HBoxContainer = HBoxContainer.new()
+	right.add_child(headset_row)
+	headset_row.add_child(_label("Гарнитура"))
+	_headset_choice = OptionButton.new()
+	_headset_choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_headset_choice.add_item("Как в рейде")
+	_headset_choice.add_item("Без гарнитуры")
+	_headset_choice.set_item_metadata(1, "")
+	for id: String in WeaponDb.ids("headsets"):
+		var item: Dictionary = WeaponDb.items()[id]
+		_headset_choice.add_item(String(item.name))
+		_headset_choice.set_item_metadata(_headset_choice.item_count - 1, id)
+	_headset_choice.item_selected.connect(_headset_selected)
+	headset_row.add_child(_headset_choice)
 	var controls: HBoxContainer = HBoxContainer.new()
 	right.add_child(controls)
 	_play_button = _button("▶ Прослушать", _play)
 	_play_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	controls.add_child(_play_button)
 	controls.add_child(_button("■ Стоп", _stop))
-	right.add_child(_button("Сбросить эти две поправки в 0 дБ", _reset_levels))
+	_headset_levels = VBoxContainer.new()
+	right.add_child(_headset_levels)
+	_headset_caption = _label("")
+	_headset_levels.add_child(_headset_caption)
+	var bands: GridContainer = GridContainer.new()
+	bands.columns = 2
+	bands.add_theme_constant_override("h_separation", 12)
+	_headset_levels.add_child(bands)
+	var labels: Array[String] = ["Громкость гарнитуры", "Низ · 32–100 Гц", "Середина · 320–1000 Гц", "Верх · 3,2–10 кГц"]
+	for index: int in Settings.HEADSET_CONTROLS.size():
+		var key: String = Settings.HEADSET_CONTROLS[index]
+		var cell: VBoxContainer = VBoxContainer.new()
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bands.add_child(cell)
+		var minimum: float = Settings.HEADSET_GAIN_MIN if key == "gain" else Settings.HEADSET_EQ_MIN
+		_headset_controls[key] = _gain_control(cell, labels[index], minimum, Settings.HEADSET_DB_MAX, _change_headset.bind(key))
+	right.add_child(_button("Сбросить уровни события и записи", _reset_levels))
 	_status = _label("Настройки сохраняются автоматически.")
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_status)
@@ -188,27 +225,31 @@ func _show_tab(index: int) -> void:
 
 
 func _level_control(parent: VBoxContainer, text: String, file_level: bool) -> SpinBox:
+	return _gain_control(parent, text, -60.0, 24.0, _change_level.bind(file_level))
+
+
+func _gain_control(parent: VBoxContainer, text: String, minimum: float, maximum: float, on_change: Callable) -> SpinBox:
 	parent.add_child(_label(text))
 	var row: HBoxContainer = HBoxContainer.new()
 	parent.add_child(row)
 	var slider: HSlider = HSlider.new()
-	slider.min_value = -60
-	slider.max_value = 24
+	slider.min_value = minimum
+	slider.max_value = maximum
 	slider.step = 0.5
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(slider)
 	var number: SpinBox = SpinBox.new()
-	number.min_value = -60
-	number.max_value = 24
+	number.min_value = minimum
+	number.max_value = maximum
 	number.step = 0.5
 	number.suffix = " дБ"
-	number.custom_minimum_size.x = 120
+	number.custom_minimum_size.x = 92
 	row.add_child(number)
 	slider.value_changed.connect(func(value: float) -> void: number.value = value)
 	number.value_changed.connect(func(value: float) -> void:
 		slider.set_value_no_signal(value)
 		if not _updating:
-			_change_level(value, file_level))
+			on_change.call(value))
 	return number
 
 
@@ -304,6 +345,7 @@ func _fill_list() -> void:
 		_play_button.disabled = true
 		_title.text = "Ничего не найдено"
 		_details.text = "Измените поиск или вкладку."
+		_update_headset_controls()
 
 
 func _select(id: String) -> void:
@@ -317,7 +359,8 @@ func _select(id: String) -> void:
 			break
 	var event: Dictionary = Audio._events[id]
 	_title.text = _display_name(event)
-	_details.text = "Пустое назначение. Добавьте запись в Sonora." if not Audio.has_sound(id) else "Шина: %s · вариантов: %d. Громкость записи складывается с громкостью события." % [Audio._bus_for(id), (Audio._samples[id] as Array).size()]
+	var bus: StringName = Audio._bus_for(id)
+	_details.text = "Пустое назначение. Добавьте запись в Sonora." if not Audio.has_sound(id) else "%s · вариантов %d" % [Settings.BUSES.get(String(bus), bus), (Audio._samples[id] as Array).size()]
 	_variants.clear()
 	for file: String in event.get("files", []):
 		_variants.add_item(file.get_file())
@@ -327,6 +370,7 @@ func _select(id: String) -> void:
 	_event_level.value = Audio.mix_gain(id)
 	_updating = false
 	_select_variant()
+	_update_headset_controls()
 
 
 func _file() -> String:
@@ -345,6 +389,49 @@ func _change_level(value: float, file_level: bool) -> void:
 	if _id == "" or (file_level and _file() == ""):
 		return
 	Audio.set_mix_gain(_id, value, _file() if file_level else "")
+	_queue_save()
+
+
+func _selected_headset() -> Dictionary:
+	if _headset_choice.selected <= 0:
+		return Settings.headset
+	return WeaponDb.headset(String(_headset_choice.get_selected_metadata()))
+
+
+func _update_headset_controls() -> void:
+	var bus: StringName = Audio._bus_for(_id) if _id != "" else &""
+	_headset_choice.disabled = not Settings.HEADSET_DB.has(bus)
+	_headset_levels.visible = not _headset_choice.disabled and _headset_choice.selected >= 2
+	if not _headset_levels.visible:
+		return
+	_headset_caption.text = "Профиль · " + String(Settings.BUSES[String(bus)])
+	var profile: Dictionary = Settings.headset_profile(_selected_headset(), bus)
+	_updating = true
+	for key: String in Settings.HEADSET_CONTROLS:
+		var control: SpinBox = _headset_controls[key]
+		control.value = float(profile.get(key, 0.0))
+	_updating = false
+
+
+func _headset_selected(_index: int) -> void:
+	_update_headset_controls()
+	if _headset_choice.disabled or _players.is_empty():
+		return
+	var model: Dictionary = _selected_headset()
+	Settings.preview_headset(Audio._bus_for(_id), model)
+	for player: Node in _players:
+		if is_instance_valid(player) and player is AudioStreamPlayer3D:
+			(player as AudioStreamPlayer3D).unit_size = float(Audio._kind_spec(_id).unit) * float(model.get("hear_k", 1.0))
+
+
+func _change_headset(value: float, key: String) -> void:
+	if not _headset_levels.visible:
+		return
+	Audio.set_headset_mix(String(_selected_headset().get("code", "")), Audio._bus_for(_id), key, value)
+	_queue_save()
+
+
+func _queue_save() -> void:
 	_dirty = true
 	_status.text = "Сохраняем…"
 	_save_timer.start()
@@ -373,7 +460,10 @@ func _play() -> void:
 	if camera != null:
 		direction = camera.global_basis * direction
 	var pos: Vector3 = Audio._listener_pos() + direction * _distance.value
-	var player: Node = Audio.preview_event(_id, pos, _variants.selected, _loop.button_pressed)
+	var model: Dictionary = _selected_headset()
+	var bus: StringName = Settings.preview_headset(Audio._bus_for(_id), model)
+	var player: Node = Audio.preview_event(_id, pos, _variants.selected, _loop.button_pressed, bus,
+		float(model.get("hear_k", 1.0)) if bus != &"" else -1.0)
 	if player != null:
 		_players.append(player)
 		_status.text = "Играет: " + _title.text
@@ -385,6 +475,7 @@ func _stop() -> void:
 			player.call("stop")
 			player.queue_free()
 	_players.clear()
+	Settings.end_headset_preview()
 
 
 func _close() -> void:

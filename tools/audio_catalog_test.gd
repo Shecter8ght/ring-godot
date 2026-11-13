@@ -157,6 +157,43 @@ func _ready() -> void:
 	overlay.call("_play")
 	check((overlay.get("_players") as Array).size() == 1, "in-game bench starts selected recording")
 	check((overlay.get("_players") as Array)[0].can_process(), "bench audio also works from the paused game")
+	var preview: AudioStreamPlayer3D = (overlay.get("_players") as Array)[0] as AudioStreamPlayer3D
+	var headset_choice: OptionButton = overlay.get("_headset_choice")
+	var preview_bus: int = AudioServer.get_bus_index(preview.bus)
+	var game_bus: int = AudioServer.get_bus_index("Steps")
+	var model: Dictionary = WeaponDb.headset("headset_perimeter")
+	var perimeter_index: int = -1
+	for index: int in range(2, headset_choice.item_count):
+		if headset_choice.get_item_metadata(index) == "headset_perimeter":
+			perimeter_index = index
+			break
+	check(perimeter_index >= 2 and preview.bus == Settings.HEADSET_PREVIEW_BUS, "стенд выбирает гарнитуру на своей шине")
+	if perimeter_index >= 2:
+		headset_choice.select(perimeter_index)
+		headset_choice.item_selected.emit(perimeter_index)
+		var controls: Dictionary = overlay.get("_headset_controls")
+		var high: SpinBox = controls.high
+		Audio.mix_save_path = "user://audio_mix_test.json"
+		high.value = -8.0
+		check(preview.playing and Settings.headset.is_empty() and AudioServer.get_bus_effect_count(game_bus) == 0,
+			"смена гарнитуры стенда применяется на лету только к записи")
+		var eq: AudioEffectEQ6 = AudioServer.get_bus_effect(preview_bus, 0) as AudioEffectEQ6
+		check(eq != null and eq.get_band_gain_db(5) == -8.0, "ползунок верха меняет частоты при прослушивании")
+		Settings.set_headset(model)
+		var game_eq: AudioEffectEQ6 = AudioServer.get_bus_effect(game_bus, 0) as AudioEffectEQ6
+		check(game_eq != null and game_eq.get_band_gain_db(5) == -8.0 and is_equal_approx(
+			AudioServer.get_bus_volume_db(game_bus), AudioServer.get_bus_volume_db(preview_bus)),
+			"та же гарнитура в игре использует тот же профиль")
+		overlay.call("_save")
+		saved = JSON.parse_string(FileAccess.get_file_as_string(Audio.mix_save_path)) as Dictionary
+		check(float(saved.headsets.HEADSET_04.Steps.high) == -8.0, "правка частот сохраняется по модели и категории")
+		headset_choice.select(1)
+		headset_choice.item_selected.emit(1)
+		check(AudioServer.get_bus_effect_count(preview_bus) == 0 and AudioServer.get_bus_effect_count(game_bus) == 1,
+			"сравнение без гарнитуры на стенде не снимает её у игрока")
+		Audio.mix_save_path = save_path
+		Audio._mix = old_mix
+		Settings.set_headset({})
 	get_tree().paused = false
 	if DisplayServer.get_name() != "headless":
 		overlay.call("_refresh")

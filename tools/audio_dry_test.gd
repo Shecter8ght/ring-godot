@@ -36,6 +36,16 @@ func _ready() -> void:
 		check(float(measurement.error) < 0.015, String(item.name) + ": форма сигнала сохранена после поправки громкости")
 		check(float(measurement.late) < 0.000001, String(item.name) + ": движок не добавляет хвост")
 	check(float(recordings.far.gain) < float(recordings.near.gain), "Расстояние уменьшает громкость")
+	var shot_bus: int = AudioServer.get_bus_index("Shots")
+	var headset: Dictionary = WeaponDb.headset("headset_perimeter")
+	Settings.set_headset(headset)
+	var filtered: PackedVector2Array = await _capture("headset", 1.0, "outdoor", false)
+	var low_db: float = linear_to_db(_tone(filtered, 200.0) / _tone(reference, 200.0))
+	var high_db: float = linear_to_db(_tone(filtered, 9000.0) / _tone(reference, 9000.0))
+	print("HEADSET_EQ low_db=%.2f high_db=%.2f" % [low_db, high_db])
+	check(low_db > -11.0 and high_db < low_db - 3.0, "Гарнитура сильнее приглушает верх, чем низ")
+	Settings.set_headset({})
+	check(AudioServer.get_bus_effect_count(shot_bus) == 0, "Снятие гарнитуры убирает её эквалайзер")
 	Audio.play("wpn_hg_02_shot", Vector3(0, 0, -1), 0.0, 0.72)
 	var pitched: AudioStreamPlayer3D = find_children("*", "AudioStreamPlayer3D", true, false).back() as AudioStreamPlayer3D
 	check(pitched.pitch_scale == 1.0, "Прежний параметр pitch не меняет готовую запись")
@@ -137,6 +147,14 @@ func _energy(data: PackedVector2Array) -> float:
 	for value: Vector2 in data:
 		sum += value.length_squared()
 	return sum
+
+
+func _tone(data: PackedVector2Array, hz: float) -> float:
+	var rate: float = AudioServer.get_mix_rate()
+	var magnitude: Vector2 = Vector2.ZERO
+	for i: int in data.size():
+		magnitude += (data[i].x + data[i].y) * Vector2.from_angle(TAU * hz * float(i) / rate)
+	return magnitude.length()
 
 func _start(data: PackedVector2Array) -> int:
 	for i: int in data.size():

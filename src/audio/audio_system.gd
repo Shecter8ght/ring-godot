@@ -1,5 +1,5 @@
 extends Node
-## Явные записи без постобработки. Движок выбирает запись места и считает пространственную громкость.
+## Движок выбирает запись места и считает пространственную громкость. Тембр гарнитуры задаёт Settings.
 
 const REGISTRY: String = "res://data/audio_events.json"
 const MIX_PATH: String = "res://data/audio_mix.json"
@@ -226,19 +226,20 @@ func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 		ancestor = ancestor.get_parent()
 	return false
 
-func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, spec: Dictionary) -> void:
+func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, spec: Dictionary,
+		bus_override: StringName = &"", hear_k: float = -1.0) -> AudioStreamPlayer3D:
 	if get_tree().current_scene == null:
-		return
+		return null
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
 	_tag_mix(player, id, stream, float(spec.db) + extra_db)
-	player.unit_size = float(spec.unit) * float(Settings.headset.get("hear_k", 1.0))
+	player.unit_size = float(spec.unit) * (hear_k if hear_k > 0.0 else float(Settings.headset.get("hear_k", 1.0)))
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	_configure_recorded_player(player)
 	if bool(spec.get("occlude", true)) and _has_ears() and _occluded(_listener_pos(), pos):
 		player.volume_db -= float(Balance.AUDIO_OCCLUDED_DB)
-	player.bus = _bus_for(hook)
+	player.bus = bus_override if bus_override != &"" else _bus_for(hook)
 	player.finished.connect(player.queue_free)
 	get_tree().current_scene.add_child(player)
 	player.global_position = pos
@@ -246,6 +247,7 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 	event_played.emit(id, hook, pos)
 	if _is_weapon_shot(hook):
 		_track_burst(pos, [player])
+	return player
 
 func _is_weapon_shot(hook: String) -> bool:
 	return (hook.ends_with("_shot") or hook.ends_with("_shot_sup")) \
@@ -323,6 +325,28 @@ func set_mix_gain(id: String, db: float, file: String = "") -> void:
 		values[key] = clampf(db, -60.0, 24.0)
 	for node: Node in get_tree().get_nodes_in_group("sonora_mixed_players"):
 		_apply_mix(node)
+
+
+func headset_mix(code: String, bus: String) -> Dictionary:
+	var profiles: Dictionary = _mix.get("headsets", {})
+	var model: Dictionary = profiles.get(code, {})
+	return model.get(bus, {})
+
+
+func set_headset_mix(code: String, bus: StringName, control: String, db: float) -> void:
+	if code == "" or not Settings.HEADSET_DB.has(bus) or control not in Settings.HEADSET_CONTROLS:
+		return
+	if not _mix.has("headsets"):
+		_mix.headsets = {}
+	var profiles: Dictionary = _mix.headsets
+	if not profiles.has(code):
+		profiles[code] = {}
+	var model: Dictionary = profiles[code]
+	if not model.has(String(bus)):
+		model[String(bus)] = {}
+	model[String(bus)][control] = clampf(db, Settings.HEADSET_GAIN_MIN if control == "gain" else Settings.HEADSET_EQ_MIN,
+		Settings.HEADSET_DB_MAX)
+	Settings.apply_audio()
 
 
 func save_mix() -> Error:
@@ -431,7 +455,8 @@ func play_map_ambience(scene_path: String, parent: Node) -> AudioStreamPlayer:
 
 
 ## Стенд выбирает конкретную запись, но использует тот же профиль, шину и пространственную подачу.
-func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = false) -> Node:
+func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = false,
+		bus_override: StringName = &"", hear_k: float = -1.0) -> Node:
 	var records: Array = _samples.get(id, [])
 	if records.is_empty():
 		return null
@@ -441,7 +466,7 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 	if bus in [&"Ambient", &"Radio"] or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.stream = stream
-		player.bus = bus
+		player.bus = bus_override if bus_override != &"" else bus
 		var base_db := 0.0
 		if bus == &"Ambient":
 			base_db = float(Balance.SONORA_AUDIO.ambient_db)
@@ -456,9 +481,9 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 			player.finished.connect(player.queue_free)
 		player.play()
 		return player
-	_play_now(id, id, stream, pos, 0.0, spec)
-	var players: Array[Node] = get_tree().get_nodes_in_group("sonora_mixed_players")
-	var player: AudioStreamPlayer3D = players.back() as AudioStreamPlayer3D
+	var player: AudioStreamPlayer3D = _play_now(id, id, stream, pos, 0.0, spec, bus_override, hear_k)
+	if player == null:
+		return null
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
 	if looped:
 		player.finished.disconnect(player.queue_free)
