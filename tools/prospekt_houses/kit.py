@@ -28,11 +28,13 @@ MATS = {
     "alu_frame":   ((0.040, 0.042, 0.046, 1), 0.85, 0.38),
     "glass":       ((0.020, 0.040, 0.052, 1), 0.0, 0.04),
     "wood":        ((0.40, 0.19, 0.075, 1), 0.0, 0.60),
-    "concrete":    ((0.34, 0.335, 0.32, 1), 0.0, 0.92),
+    "concrete":    ((0.40, 0.385, 0.36, 1), 0.0, 0.92),
     "steel":       ((0.58, 0.59, 0.61, 1), 1.0, 0.34),
     "perf_metal":  ((0.060, 0.062, 0.068, 1), 0.85, 0.50),
     "interior":    ((0.060, 0.040, 0.028, 1), 0.0, 0.95),
     "lamp":        ((1.0, 0.80, 0.50, 1), 0.0, 0.40),
+    "земля":       ((0.115, 0.080, 0.050, 1), 0.0, 0.95),
+    "зелень_заглушка": ((0.13, 0.30, 0.08, 1), 0.0, 0.80),
 }
 
 
@@ -133,6 +135,17 @@ class B:
         for v in verts:
             v.co += Vector((cx, cy, (z0 + z1) / 2))
         self._finish_shell(verts, mat, bev, 1)
+
+    def sphere(self, cx, cy, cz, rx, ry, rz, mat, sub=2):
+        """Эллипсоид (кусты-заглушки, неровности земли)."""
+        bm = self.bm
+        res = bmesh.ops.create_icosphere(bm, subdivisions=sub, radius=1.0)
+        mi = self.mi(mat)
+        for v in res["verts"]:
+            v.co = Vector((cx + v.co.x * rx, cy + v.co.y * ry, cz + v.co.z * rz))
+        for f in {f for v in res["verts"] for f in v.link_faces}:
+            f.material_index = mi
+            f.smooth = True
 
     def cyl_x(self, x0, x1, cy, cz, r, mat, seg=14):
         """Цилиндр вдоль X (поручни, рейки)."""
@@ -246,31 +259,26 @@ def mod_panel(w, corner=None, dark=False):
     return name
 
 
-def mod_ground(w, corner=None, h=HG):
-    """Панель бетонного первого этажа: щитовая опалубка, русты 12 мм геометрией, вертикальное ребро. Доски — на текстуре."""
-    name = "H_Ground%s_%s" % ("Corner" + corner if corner else "", wkey(w))
+def mod_ground(w, corner=None, rib=None, h=HG):
+    """Панель бетонного первого этажа: гладкая стена с рустами 12 мм геометрией (лицо в плоскости фасада y = 0).
+    rib='L'|'R' — пилястра-ребро 350 × 300 мм (вынос 0,30) у левого / правого края; corner — угловая панель с возвратом."""
+    name = "H_Ground%s%s_%s" % ("Corner" + corner if corner else "", "Rib" + rib if rib else "", wkey(w))
     if name in MODULES:
         return name
-    b = B(name, mirror_w=(w if corner == "R" else None))
-    # главное тело
+    b = B(name, mirror_w=(w if (corner == "R" or rib == "R") else None))
     x0 = 0.06 if corner else 0.0
-    b.box(x0, w, 0.20, D, 0, h, "concrete")
+    b.box(x0, w, 0.06, D, 0, h, "concrete")
     ncourse = 3
     for i in range(ncourse):
         za = h * i / ncourse + 0.006
         zb = h * (i + 1) / ncourse - 0.006
         if i == 0:
             za = 0.0
-        b.box(0.0, w, 0.14, 0.20, za, zb, "concrete", bev=0.010, seg=2)
+        b.box(0.0, w, 0.0, 0.06, za, zb, "concrete", bev=0.010, seg=2)
         if corner:
-            b.box(0.0, 0.06, 0.206, D - 0.1, za, zb, "concrete", bev=0.010, seg=2)
-    # рёбра: у обычной панели — по левому краю, у угла — по внутреннему краю
-    if corner:
-        b.box(w - 0.30, w, 0.0, 0.14, 0.0, h, "concrete", bev=0.014, seg=2)
-    else:
-        b.box(0.0, 0.30, 0.0, 0.14, 0.0, h, "concrete", bev=0.014, seg=2)
-    # цоколь: ступень-отлив 150 мм
-    b.box(0.0, w, 0.0, 0.14, 0.0, 0.15, "concrete", bev=0.008, seg=2)
+            b.box(0.0, 0.06, 0.066, D - 0.1, za, zb, "concrete", bev=0.010, seg=2)
+    if rib:
+        b.box(0.0, 0.35, -0.30, 0.0, 0.0, h, "concrete", bev=0.015, seg=2)
     register(name, b)
     return name
 
@@ -303,61 +311,94 @@ def _frame_cells(b, x0, x1, z0, z1, y0, y1, fr, impost_x=None, transom_z=None, s
 
 
 def mod_window(w, end=False):
-    """Пролёт «окно»: проём с откосами, рама с импостом, створка, отлив, ниша за стеклом, подоконник, карниз."""
+    """Пролёт «окно»: проём 2,0 × 1,9 (у торца 1,6 × 1,9 в тёмной вертикали), подоконник 0,80 м, откосы, две створки
+    с импостом, отлив, ниша за стеклом, подоконник и карниз для штор."""
     name = "H_Window%s_%s" % ("End" if end else "", wkey(w))
     if name in MODULES:
         return name
     b = B(name)
     mat = "dark_panel" if end else "panel_beige"
-    ow = w - (0.5 if end else 1.0)
+    ow = (w - 0.2) if end else 2.0
     x0 = (w - ow) / 2
     x1 = x0 + ow
-    zs, ze = 0.9, 2.6
+    zs, ze = 0.8, 2.7
     clad(b, 0, w, 0, zs, mat)
     clad(b, 0, w, ze, HF, mat)
     clad(b, 0, x0, zs, ze, mat)
     clad(b, x1, w, zs, ze, mat)
-    # откосы 20 мм (возврат облицовки в проём)
     rv = 0.20
     b.box(x0, x0 + PT, PT, rv, zs, ze, mat, bev=0.003)
     b.box(x1 - PT, x1, PT, rv, zs, ze, mat, bev=0.003)
     b.box(x0 + PT, x1 - PT, PT, rv, ze - PT, ze, mat, bev=0.003)
-    # отлив
-    b.box(x0 - 0.03, x1 + 0.03, -0.05, rv + 0.05, zs, zs + 0.03, "alu_frame", bev=0.004)
-    # рама на глубине 250 мм
+    b.box(x0 - 0.03, x1 + 0.03, -0.05, rv + 0.05, zs, zs + 0.03, "alu_frame", bev=0.004)      # отлив
     fr = 0.065
-    impost = x0 + ow * 0.52
-    cells = _frame_cells(b, x0 + PT, x1 - PT, zs + 0.03, ze - PT, 0.25, 0.32, fr, impost_x=impost, transom_z=2.15)
-    # створка: внутренняя рамка 40 мм вокруг левой нижней ячейки, чуть впереди
-    ca = cells[0]
-    sx0, sx1, sz0, sz1 = ca
+    cells = _frame_cells(b, x0 + PT, x1 - PT, zs + 0.03, ze - PT, 0.25, 0.32, fr, impost_x=(x0 + x1) / 2)
     sf = 0.04
-    for (a0, a1, c0, c1) in ((sx0, sx0 + sf, sz0, sz1), (sx1 - sf, sx1, sz0, sz1),
-                             (sx0 + sf, sx1 - sf, sz0, sz0 + sf), (sx0 + sf, sx1 - sf, sz1 - sf, sz1)):
-        b.box(a0, a1, 0.22, 0.25, c0, c1, "alu_frame", bev=0.002)
-    b.box(sx1 - 0.16, sx1 - 0.12, 0.19, 0.22, sz0 + 0.55, sz0 + 0.75, "steel", bev=0.002)   # ручка
-    # ниша за стеклом
+    for k, (sx0, sx1, sz0, sz1) in enumerate(cells):          # обе створки с внутренней рамкой
+        for (a0, a1, c0, c1) in ((sx0, sx0 + sf, sz0, sz1), (sx1 - sf, sx1, sz0, sz1),
+                                 (sx0 + sf, sx1 - sf, sz0, sz0 + sf), (sx0 + sf, sx1 - sf, sz1 - sf, sz1)):
+            b.box(a0, a1, 0.22, 0.25, c0, c1, "alu_frame", bev=0.002)
+        hx = sx1 - 0.10 if k == 0 else sx0 + 0.06
+        b.box(hx, hx + 0.04, 0.19, 0.22, sz0 + 0.65, sz0 + 0.95, "steel", bev=0.002)          # ручка
     b.box(x0 + PT, x1 - PT, 0.90, 0.95, zs + 0.03, ze - PT, "interior")
-    b.box(x0 + PT, x1 - PT, 0.34, 0.66, zs + 0.03, zs + 0.075, "interior", bev=0.004)    # подоконник
-    b.box(x0 + PT + 0.05, x1 - PT - 0.05, 0.42, 0.50, ze - PT - 0.07, ze - PT - 0.03, "steel", bev=0.003)   # карниз для штор
+    b.box(x0 + PT, x1 - PT, 0.34, 0.66, zs + 0.03, zs + 0.075, "interior", bev=0.004)        # подоконник
+    b.box(x0 + PT + 0.05, x1 - PT - 0.05, 0.42, 0.50, ze - PT - 0.07, ze - PT - 0.03, "steel", bev=0.003)   # карниз
     register(name, b)
     return name
 
 
 # ---------- лоджии ----------
-def _loggia_shell(b, w):
-    sw = 0.15
-    b.box(0, sw, 0, D, 0, LOG_H, "dark_panel", bev=0.003)
-    b.box(w - sw, w, 0, D, 0, LOG_H, "dark_panel", bev=0.003)
-    b.box(sw, w - sw, 1.40, D, 0, LOG_H, "concrete")
-    b.box(sw, w - sw, 1.34, 1.40, 0.02, LOG_H, "dark_panel")
-    b.box(sw, w - sw, 0.02, 1.34, 0, 0.02, "concrete")                # пол
-    # остекление: рама на глубине 1,15…1,22, дверь слева 0,9 + окно, ригель 2,1
-    fr = 0.06
-    xa, xb = sw + 0.02, w - sw - 0.02
-    impost = xa + (xb - xa) * 0.42
-    _frame_cells(b, xa, xb, 0.02, LOG_H - 0.04, 1.15, 1.22, fr, impost_x=impost, transom_z=2.05)
-    b.box(impost + 0.12, impost + 0.16, 1.10, 1.15, 0.95, 1.20, "steel", bev=0.002)   # ручка двери
+LZ0, LZ1 = 0.30, 2.70     # проём лоджии по высоте: 0,30 — полоса торца плиты (беж), 2,70…3,00 — тёмная фасция
+LSW = 0.12                # боковые стенки ниши
+LGLASS_Y = 1.15           # остекление: ниша глубиной 1,2 м
+
+
+def _loggia(b, w, glass):
+    wood_w = 0.6
+    # бежевая полоса торца плиты по низу и тёмная фасция по верху — заподлицо с фасадом, непрерывные по группе
+    clad(b, 0, w, 0, LZ0, "panel_beige", split=99)
+    clad(b, 0, w, LZ1, HF, "dark_panel", split=99)
+    clad(b, 0, LSW, LZ0, LZ1, "panel_beige")
+    clad(b, w - LSW, w, LZ0, LZ1, "panel_beige")
+    # ниша: пол, задняя стена, левая стенка — тёмная, правая — дерево
+    b.box(LSW, w - LSW, 0.02, 1.40, LZ0, LZ0 + 0.015, "concrete")
+    b.box(LSW, w - LSW, 1.40, D, LZ0, LZ1, "concrete")
+    b.box(LSW, w - LSW, 1.34, 1.40, LZ0 + 0.015, LZ1, "dark_panel")
+    b.box(LSW, LSW + 0.01, 0.10, 1.34, LZ0 + 0.015, LZ1, "dark_panel")
+    xr = w - LSW
+    y = 0.10
+    while y + 0.045 < 1.12:                                  # рейки на правой стенке (вертикальные)
+        b.box(xr - 0.03, xr, y, y + 0.045, LZ0 + 0.02, LZ1 - 0.02, "wood", bev=0.003)
+        y += 0.06
+    # задняя стена: остекление слева, полоса дерева 0,6 справа
+    gx0, gx1 = LSW + 0.02, xr - wood_w - 0.02
+    b.box(xr - wood_w, xr, LGLASS_Y + 0.03, 1.34, LZ0 + 0.015, LZ1, "dark_panel")
+    xs = xr - wood_w + 0.01
+    while xs + 0.045 < xr:
+        b.box(xs, xs + 0.045, LGLASS_Y, LGLASS_Y + 0.03, LZ0 + 0.03, LZ1 - 0.03, "wood", bev=0.003)
+        xs += 0.06
+    impost = gx0 + (gx1 - gx0) * 0.45
+    _frame_cells(b, gx0, gx1, LZ0 + 0.02, LZ1 - 0.04, LGLASS_Y, LGLASS_Y + 0.07, 0.06, impost_x=impost, transom_z=2.15)
+    b.box(impost + 0.12, impost + 0.16, 1.10, 1.15, LZ0 + 0.95, LZ0 + 1.20, "steel", bev=0.002)
+    # ограждение 1,1 м от низа проёма, в плоскости фасада, утоплено на 4–5 см
+    y0, y1 = 0.04, 0.09
+    zb, zt = LZ0, LZ0 + 1.10
+    xa, xb = LSW + 0.005, w - LSW - 0.005
+    if not glass:
+        b.box(xa, xa + 0.04, y0, y1, zb, zt, "alu_frame", bev=0.004)
+        b.box(xb - 0.04, xb, y0, y1, zb, zt, "alu_frame", bev=0.004)
+        b.box(xa + 0.04, xb - 0.04, y0, y1, zt - 0.04, zt, "alu_frame", bev=0.004)
+        b.box(xa + 0.04, xb - 0.04, y0, y1, zb + 0.02, zb + 0.06, "alu_frame", bev=0.004)
+        b.box(xa + 0.04, xb - 0.04, 0.060, 0.063, zb + 0.06, zt - 0.04, "perf_metal", bev=0.001)
+    else:
+        n = 3
+        px = [xa + (xb - xa - 0.04) * i / n for i in range(n + 1)]
+        for p in px:
+            b.box(p, p + 0.04, y0, y1, zb, zt, "steel", bev=0.005, seg=2)
+        b.box(xa, xb, 0.05, 0.11, zb + 0.04, zb + 0.10, "steel", bev=0.004)
+        b.cyl_x(xa, xb, 0.065, zt, 0.025, "steel")
+        for i in range(n):
+            b.box(px[i] + 0.06, px[i + 1] - 0.02, 0.060, 0.070, zb + 0.10, zt - 0.04, "glass", bev=0.001)
 
 
 def mod_loggia_perf(w):
@@ -365,16 +406,7 @@ def mod_loggia_perf(w):
     if name in MODULES:
         return name
     b = B(name)
-    _loggia_shell(b, w)
-    sw = 0.15
-    y0, y1 = 0.05, 0.10
-    # ограждение: рама из труб 40 × 40 + лист 3 мм (перфорация — текстурой)
-    xa, xb = sw + 0.005, w - sw - 0.005
-    b.box(xa, xa + 0.04, y0, y1, 0.0, 1.10, "alu_frame", bev=0.004)
-    b.box(xb - 0.04, xb, y0, y1, 0.0, 1.10, "alu_frame", bev=0.004)
-    b.box(xa + 0.04, xb - 0.04, y0, y1, 1.06, 1.10, "alu_frame", bev=0.004)
-    b.box(xa + 0.04, xb - 0.04, y0, y1, 0.02, 0.06, "alu_frame", bev=0.004)
-    b.box(xa + 0.04, xb - 0.04, 0.060, 0.063, 0.06, 1.06, "perf_metal", bev=0.001)
+    _loggia(b, w, False)
     register(name, b)
     return name
 
@@ -384,18 +416,7 @@ def mod_loggia_glass(w):
     if name in MODULES:
         return name
     b = B(name)
-    _loggia_shell(b, w)
-    sw = 0.15
-    y0, y1 = 0.05, 0.10
-    n = 3
-    xa, xb = sw + 0.005, w - sw - 0.005
-    px = [xa + (xb - xa - 0.04) * i / n for i in range(n + 1)]
-    for p in px:
-        b.box(p, p + 0.04, y0, y1, 0.0, 1.10, "steel", bev=0.005, seg=2)
-    b.box(xa, xb, 0.05, 0.11, 0.04, 0.10, "steel", bev=0.004)                 # прижимной профиль
-    b.cyl_x(xa, xb, 0.075, 1.10, 0.025, "steel")                              # поручень ⌀ 50
-    for i in range(n):
-        b.box(px[i] + 0.06, px[i + 1] - 0.02, 0.070, 0.080, 0.10, 1.06, "glass", bev=0.001)   # триплекс 10
+    _loggia(b, w, True)
     register(name, b)
     return name
 
@@ -457,5 +478,57 @@ def mod_belt(L):
     b.box(0, L, -0.06, 0.20, 0.0, 0.18, "dark_panel", bev=0.006, seg=2)
     b.box(0, L, -0.07, 0.20, 0.18, 0.21, "alu_frame", bev=0.004)
     b.box(0, L, 0.0, 0.20, -0.05, 0.0, "concrete")
+    register(name, b)
+    return name
+
+
+# ---------- бетонный первый этаж: пилястры и рифлёные поля ----------
+GF_PLINTH = 0.55     # гладкий цоколь под рифлением
+GF_TOP = 0.30        # гладкая полоса под поясом
+GF_FLUTE = 0.07      # глубина каннелюр
+
+
+def mod_ground_pilaster(h=HG):
+    """Пилястра-столб 0,50 × 0,45 (вынос 0,45) на всю высоту первого этажа, с базой и капителью."""
+    name = "H_GroundPilaster"
+    if name in MODULES:
+        return name
+    b = B(name)
+    b.box(0.0, 0.5, -0.45, 0.20, 0.15, h - 0.15, "concrete", bev=0.014)
+    b.box(-0.03, 0.53, -0.48, 0.20, 0.0, 0.15, "concrete", bev=0.012)
+    b.box(-0.03, 0.53, -0.48, 0.20, h - 0.15, h, "concrete", bev=0.012)
+    register(name, b)
+    return name
+
+
+def mod_corner_post(h=HG):
+    """Угловой столб: начало — наружный угол дома, юго-западный; остальные углы — поворотом на 90°."""
+    name = "H_GroundCornerPost"
+    if name in MODULES:
+        return name
+    b = B(name)
+    b.box(-0.45, 0.50, -0.45, 0.50, 0.15, h - 0.15, "concrete", bev=0.014)
+    b.box(-0.48, 0.53, -0.48, 0.53, 0.0, 0.15, "concrete", bev=0.012)
+    b.box(-0.48, 0.53, -0.48, 0.53, h - 0.15, h, "concrete", bev=0.012)
+    register(name, b)
+    return name
+
+
+def mod_ground_field(w, h=HG):
+    """Поле между пилястрами: заглублённое (лицо ребра в плоскости фасада), вертикальные каннелюры шагом ~0,28,
+    гладкий цоколь 0,55 и гладкая полоса 0,30 под поясом."""
+    name = "H_GroundField_%s" % wkey(w)
+    if name in MODULES:
+        return name
+    b = B(name)
+    b.box(0, w, GF_FLUTE, D, 0, h, "concrete")
+    b.box(0, w, 0.0, GF_FLUTE, 0, GF_PLINTH, "concrete", bev=0.012)
+    b.box(0, w, 0.0, GF_FLUTE, h - GF_TOP, h, "concrete", bev=0.012)
+    n = max(1, round(w / 0.28))
+    p = w / n
+    rw = p * 0.64
+    for i in range(n):
+        xc = (i + 0.5) * p
+        b.box(xc - rw / 2, xc + rw / 2, 0.0, GF_FLUTE, GF_PLINTH, h - GF_TOP, "concrete", bev=0.012)
     register(name, b)
     return name
