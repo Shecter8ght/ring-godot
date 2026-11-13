@@ -856,7 +856,10 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   (черновые позы-хваты действием ASTEN919_Poses: кадры 1…61) → blender -b <позы.blend> --python
 #   tools/asten919/clips/build_clips.py -- <E:/Models Blender/WEAPONS/АСТЕН-919/АСТЕН-919_руки_клипы_v01.blend> (клипы
 #   действиями ASTEN919_<Клип> и подряд на дорожке NLA; движение — таблицы в скрипте, пальцы и места кистей — из поз);
-#   после правки поз владельцем — tools\asten919\clips\rebuild.cmd; кадры для своей проверки — stills.py
+#   это генератор черновиков: дальше клипы владелец правит в Blender сам — панель «АСТЕН» внутри файла (clip_tools.py:
+#   открыть позы / клип, «Хваты из поз → во все клипы» — перенос поз без потери ручных ключей); rebuild.cmd на файле
+#   с клипами делает то же, что эта кнопка, заново из таблиц (сотрёт ручные правки клипов) — regenerate.cmd;
+#   кадры для своей проверки — stills.py (кадр клипа: «Reload_Full:25», позы: «poses:41»)
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

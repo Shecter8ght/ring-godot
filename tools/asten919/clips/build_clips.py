@@ -18,6 +18,11 @@
               переносит в позы сам, ключи не на кадрах поз — отбрасывает.
 Каждый клип начинается и кончается позой «ХВАТ» (кадр 1 поз); Fire — с пальцем на спуске.
 
+ВАЖНО: этот скрипт — генератор черновых клипов. После него клипы правит владелец прямо в Blender (панель «АСТЕН»,
+clip_tools.py): ключи клипов — его, позы в клипы переносит кнопка панели. Повторный запуск генератора стирает ручные
+правки клипов (позы остаются) — он запускается только через regenerate.cmd с подтверждением; rebuild.cmd на файле
+с клипами делает лишь то же, что кнопка панели.
+
 КАК МЕНЯТЬ ДВИЖЕНИЕ (клипы руками не править — пересборка их стирает; всё движение — в этом скрипте)
   1. Положение пистолета — на кадрах поз, без кода: Weapon_CTRL на кадре 41 (магазин вынимают), 46 (новый вставляют
      и досылают), 51 (левая тянет затвор). Поставил, ключ, rebuild.cmd — клипы возьмут это положение (G_MAG, G_SEAT,
@@ -269,27 +274,25 @@ U = Vector((math.sin(math.radians(22.0)), 0.0, math.cos(math.radians(22.0))))   
 EYE = cam.matrix_world.translation.copy()
 
 
+# Позы считаются матрицами, без «поставил кость → update() → прочитал»: после вставки ключа Blender при update()
+# пересчитывает анимацию и затирает только что поставленную позу (так первый ключ левой кисти перед взятием магазина
+# получался «как в хвате», а не «как на кадре 41»).
+WC_PARENT = WC_REST @ B["grip"]["Weapon_CTRL"].inverted()            # Weapon_CTRL без своей позы (в осях рига)
+IK_REL = arms.data.bones["Weapon_CTRL"].matrix_local.inverted() @ arms.data.bones["ik_hand.L"].matrix_local
+assert ikL.parent is not None and ikL.parent.name == "Weapon_CTRL", "ik_hand.L должна быть дочерней Weapon_CTRL"
+_chk = (WC_REST @ IK_REL @ B["grip"]["ik_hand.L"]) - ikL.matrix
+assert max(abs(v) for row in _chk for v in row) < 1e-5, "расчёт позы ik_hand.L не сходится с Blender"
+IK_AT_REST = WC_REST @ IK_REL                         # цель левой кисти без своей позы, пистолет в покое
+
+
 def ik_variant(pose, shift_src):
     """Место левой кисти из позы, сдвинутое в осях пистолета (м) → matrix_basis цели ik_hand.L (пистолет в покое)."""
-    ikL.matrix_basis = B[pose]["ik_hand.L"]
-    update()
-    m = AW @ ikL.matrix
-    m = Matrix.Translation(RW @ Vector(shift_src)) @ m
-    ikL.matrix = AWI @ m
-    update()
-    out = ikL.matrix_basis.copy()
-    ikL.matrix_basis = B["grip"]["ik_hand.L"]
-    update()
-    return out
+    m = Matrix.Translation(RW @ Vector(shift_src)) @ AW @ IK_AT_REST @ B[pose]["ik_hand.L"]
+    return IK_AT_REST.inverted() @ AWI @ m
 
 
 def left_rest_world(pose):
-    ikL.matrix_basis = B[pose]["ik_hand.L"]
-    update()
-    m = (AW @ ikL.matrix).copy()
-    ikL.matrix_basis = B["grip"]["ik_hand.L"]
-    update()
-    return m
+    return AW @ IK_AT_REST @ B[pose]["ik_hand.L"]
 
 
 MAG_HAND_W = left_rest_world("mag")                  # левая с магазином (вышел на MAG_DROP), пистолет в покое
@@ -304,19 +307,12 @@ def gun_basis(roll, pitch, yaw, dx, dy, dz, base=None):
          @ Matrix.Rotation(math.radians(roll), 4, Vector((0, -1, 0))))
     D = (Matrix.Translation(Vector((dx, dy, dz))) @ (base if base is not None else Matrix.Identity(4))
          @ Matrix.Translation(GRIP_W) @ R @ Matrix.Translation(-GRIP_W))
-    wc.matrix = AWI @ D @ AW @ WC_REST
-    update()
-    return wc.matrix_basis.copy()
+    return WC_PARENT.inverted() @ AWI @ D @ AW @ WC_REST
 
 
 def pose_shift(basis):
     """matrix_basis кости Weapon_CTRL из позы владельца → сдвиг пистолета в мире относительно покоя (хвата)."""
-    wc.matrix_basis = basis
-    update()
-    D = AW @ wc.matrix @ WC_REST.inverted() @ AWI
-    wc.matrix_basis = B["grip"]["Weapon_CTRL"]
-    update()
-    return D
+    return AW @ WC_PARENT @ basis @ WC_REST.inverted() @ AWI
 
 
 # ================================================================ ключи
@@ -396,9 +392,7 @@ class Clip:
                 update()
                 m = Euler([math.radians(v) for v in spec[2]], "XYZ").to_matrix().to_4x4() @ MAG_HAND_W.to_3x3().to_4x4()
                 m.translation = Vector(spec[1])
-                ikL.matrix = AWI @ m
-                update()
-                basis, arm = ikL.matrix_basis.copy(), "mag"
+                basis, arm = (wc.matrix @ IK_REL).inverted() @ AWI @ m, "mag"   # пистолет — где он на этом кадре
             self.bone("ik_hand.L", frame, basis)
             for n in L_BODY:                          # hand.L, upper_arm.L, локоть — как в той же позе владельца
                 self.bone(n, frame, B[arm][n])
@@ -456,8 +450,9 @@ class Clip:
                 m = gun_now @ wr.matrix_world.inverted() @ Matrix.Translation(RW @ Vector(pos)) @ rest @ R
             last = m.copy()
             pb.matrix = wr.matrix_world.inverted() @ m
-            update()
-            q = pb.matrix_basis.to_euler("XYZ", self.prev[bone]) if bone in self.prev else pb.matrix_basis.to_euler("XYZ")
+            mb = pb.matrix_basis.copy()               # сразу: update() пересчитал бы анимацию поверх
+            pb.location = mb.translation
+            q = mb.to_euler("XYZ", self.prev[bone]) if bone in self.prev else mb.to_euler("XYZ")
             pb.rotation_euler = q
             self.prev[bone] = q.copy()
             pb.keyframe_insert("location", frame=frame)
@@ -764,73 +759,47 @@ REC["Slide_Rack"] = rack()
 REC["Fire"] = fire()
 REC["Finger_To_Trigger"] = finger_to_trigger()
 
-# ================================================================ общая шкала NLA
+# ================================================================ файл: позы и клипы — действия, панель в Blender
+# Клипы — отдельные действия (у каждого слоты рук и пистолета), общей шкалы NLA нет: владелец открывает позы или клип
+# кнопкой панели «АСТЕН» (clip_tools.py, текст внутри файла) и правит ключи прямо в Blender. Поправленные позы в клипы
+# переносит кнопка панели — по снимку прежних поз ASTEN919_Poses_applied, движение при этом не трогается.
+import clip_tools  # noqa: E402
+
 assign(None)
-for m in list(S.timeline_markers):
-    S.timeline_markers.remove(m)
-tracks = {}
-for ob in (arms, wr):
-    t = ob.animation_data.nla_tracks.new()
-    t.name = "Клипы"
-    tracks[ob.name] = t
-for name, f in POSE_FRAMES.items():
-    S.timeline_markers.new(f"ПОЗА {name}", frame=f)
-at = 101
-for name, rec in REC.items():
+for i, (name, rec) in enumerate(REC.items()):
     act = bpy.data.actions[PREFIX + name]
-    for ob in (arms, wr):
-        st = tracks[ob.name].strips.new(name, at, act)
-        st.action_slot = slot_of(act, ob)
-        st.action_frame_start, st.action_frame_end = 1, rec["frames"]
-        st.frame_end = at + rec["frames"] - 1
-        st.extrapolation = "HOLD_FORWARD"
-        st.blend_type = "REPLACE"
-    rec["timeline_start"] = at
-    S.timeline_markers.new(f"▶ {name}", frame=at)
-    for mk, fr in rec["marks"].items():
-        if fr:
-            S.timeline_markers.new(f"{mk}", frame=at + fr - 1)
-    at += rec["frames"] + GAP
-S.frame_start, S.frame_end = 1, at - GAP
-# Позы — рабочее действие обоих ригов (не дорожка NLA): ключ на кадре позы (I / K в Pose Mode) пишется прямо в него.
-# Оно действует только на своих кадрах 1–100 (Extrapolation: Nothing), дальше играют клипы дорожки «Клипы».
+    act["order"] = i
+    act["marks"] = json.dumps({mk: fr for mk, fr in rec["marks"].items() if fr}, ensure_ascii=False)
+    act.use_frame_range = False                       # длина клипа — по последнему ключу: владелец может её менять
+    rec["timeline_start"] = 1
 poses_act.use_frame_range = False
-for fc in [fc for layer in poses_act.layers for st in layer.strips for bag in st.channelbags for fc in bag.fcurves]:
-    fc.keyframe_points.insert(TAIL, fc.evaluate(1))   # кадры 62–100: рука возвращается в хват, с него начинается первый клип
-    fc.update()
-assign(poses_act)
-for ob in (arms, wr):
-    ob.animation_data.action_extrapolation = "NOTHING"
-    ob.animation_data.action_blend_type = "REPLACE"
-    ob.animation_data.action_influence = 1.0
-S.frame_set(1)
+snap = poses_act.copy()
+snap.name = clip_tools.APPLIED
+snap.use_fake_user = True
+panel = bpy.data.texts.get(clip_tools.PANEL_TEXT) or bpy.data.texts.new(clip_tools.PANEL_TEXT)
+panel.from_string((HERE / "clip_tools.py").read_text(encoding="utf-8"))
+panel.use_module = True                               # панель регистрируется при открытии файла
+clip_tools.open_action(bpy.context, POSES)
 (ROOT / "_asset_src/asten919/anim/clips.json").write_text(json.dumps(REC, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
 txt = bpy.data.texts.get("АСТЕН-919 — позы и клипы (читать)") or bpy.data.texts.new("АСТЕН-919 — позы и клипы (читать)")
-lines = [__doc__, "", "Клипы (кадр начала на общей шкале, длина, фазы — кадры внутри клипа):"]
+lines = [clip_tools.__doc__, "", "ЧТО В КАКОЙ ПОЗЕ (кадры «Позы (хваты)»)",
+         "     1  ХВАТ — всё: обе руки на пистолете, пальцы, место пистолета в кадре (Weapon_CTRL). С него начинается",
+         "        и им кончается каждый клип.",
+         "    11, 16 — только указательный правой (на спуске; спуск выжат).",
+         "    21, 26, 31 — только большой правой (кнопка магазина; рычаг задержки; вверх для осмотра).",
+         "    41 — вся левая рука с магазином. Магазин на этом кадре стоит на месте (вышел из шахты на 55 мм) и за",
+         "         кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
+         "    46, 51 — вся левая рука: ладонь досылает магазин; щепоть на затворе.",
+         "    61 — пальцы свободной левой.",
+         "    Пистолет (Weapon_CTRL) на кадрах 41, 46, 51 — как он стоит, когда магазин вынимают / вставляют / когда",
+         "         левая тянет затвор. Ключи пистолета в клипах, стоящие возле этих поз, едут за поправкой позы.",
+         "    Остальные кости на кадрах 11–61 кнопка панели сама копирует с кадра 1 — хват правится один раз.",
+         "", "КЛИПЫ (длина, фазы — кадры внутри клипа)"]
 for name, rec in REC.items():
-    lines.append(f"  {rec['timeline_start']:5d}  {name:22s} {rec['frames']:4d} к ({rec['seconds']:.2f} с)  {rec['marks']}")
-lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".join(f"{k_} {v}" for k_, v in POSE_FRAMES.items()),
-          "",
-          "КАК ПРАВИТЬ ХВАТ",
-          "  Кадры 1–61 — позы (действие ASTEN919_Poses, оно рабочее: ключ пишется прямо в него). Кадры 101 и дальше —",
-          "  клипы, они собраны скриптом из этих поз; руками их не править — пересборка сотрёт.",
-          "  1. Встать на кадр позы (маркеры «ПОЗА …»), Pose Mode, поставить кости, выделить их (или все), I или K.",
-          "  2. Сохранить файл, запустить tools\\asten919\\clips\\rebuild.cmd (в папке игры), в Blender — File → Revert.",
-          "  Что в какой позе читается:",
-          "     1  ХВАТ — всё: обе руки на пистолете, пальцы, место пистолета в кадре (Weapon_CTRL). С него начинается",
-          "        и им кончается каждый клип.",
-          "    11, 16 — только указательный правой (на спуске; спуск выжат).",
-          "    21, 26, 31 — только большой правой (кнопка магазина; рычаг задержки; вверх для осмотра).",
-          "    41 — левая рука с магазином: пальцы и место кисти. Магазин на этом кадре стоит на месте (вышел из шахты",
-          "         на 55 мм) и за кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
-          "    ПИСТОЛЕТ (Weapon_CTRL) на кадрах 41, 46, 51 идёт в клипы: 41 — как он стоит, когда магазин вынимают,",
-          "         46 — когда новый вставляют и досылают, 51 — пока левая тянет затвор. Кисть едет вместе с пистолетом.",
-          "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
-          "         Рывки при оттягивании и отпускании затвора — числа RACK_TUG в build_clips.py.",
-          "    На кадре 61 пистолет можно наклонять как удобно — в клипы это не идёт.",
-          "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
-          "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
+    lines.append(f"  {name:22s} {rec['frames']:4d} к ({rec['seconds']:.2f} с)  {rec['marks']}")
+lines += ["", "Собрать все клипы заново из таблиц build_clips.py (сотрёт ручные правки клипов; позы останутся):",
+          "  tools\\asten919\\clips\\regenerate.cmd в папке игры."]
 txt.from_string("\n".join(lines))
 OUT.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT), compress=True)
-log("сохранено", OUT, "клипов", len(REC), "кадров на шкале", S.frame_end)
+log("сохранено", OUT, "клипов", len(REC))

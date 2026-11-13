@@ -12,7 +12,19 @@ from mathutils import Matrix, Vector
 
 A = sys.argv[sys.argv.index("--") + 1:]
 OUT = Path(A[0])
-FRAMES = [int(x) for x in A[1].split(",")] if len(A) > 1 and A[1] else [bpy.context.scene.frame_current]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import clip_tools  # noqa: E402
+
+
+def frame_of(x):
+    """«51» — кадр открытого действия; «Reload_Full:25» — кадр 25 клипа, «poses:41» — кадр позы."""
+    if ":" in x:
+        clip, f = x.split(":")
+        return (clip_tools.POSES if clip == "poses" else clip_tools.PREFIX + clip, int(f))
+    return (None, int(x))
+
+
+FRAMES = [frame_of(x) for x in A[1].split(",")] if len(A) > 1 and A[1] else [(None, bpy.context.scene.frame_current)]
 VIEWS = A[2].split(",") if len(A) > 2 and A[2] else ["eye", "right", "left", "bottom", "back", "top"]
 TAG = A[3] if len(A) > 3 else ""
 S = bpy.context.scene
@@ -44,7 +56,9 @@ cam_data.clip_start, cam_data.clip_end = 0.01, 5.0
 cam = bpy.data.objects.new("check", cam_data)
 S.collection.objects.link(cam)
 OUT.mkdir(parents=True, exist_ok=True)
-for f in FRAMES:
+for act_name, f in FRAMES:
+    if act_name:
+        assert clip_tools.open_action(bpy.context, act_name), act_name
     S.frame_set(f)
     bpy.context.view_layer.update()
     TW = root.matrix_world.copy()
@@ -63,6 +77,7 @@ for f in FRAMES:
             m.translation = c + d * 1.0
             cam.matrix_world = m
             S.camera = cam
-        S.render.filepath = str(OUT / f"{TAG}{v}_{f:03d}.png")
+        clip = (act_name or "").replace(clip_tools.PREFIX, "")
+        S.render.filepath = str(OUT / f"{TAG}{v}_{clip + '_' if clip else ''}{f:03d}.png")
         bpy.ops.render.render(write_still=True)
 print("STILLS", OUT)
