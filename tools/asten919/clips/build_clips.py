@@ -18,6 +18,25 @@
               переносит в позы сам, ключи не на кадрах поз — отбрасывает.
 Каждый клип начинается и кончается позой «ХВАТ» (кадр 1 поз); Fire — с пальцем на спуске.
 
+КАК МЕНЯТЬ ДВИЖЕНИЕ (клипы руками не править — пересборка их стирает; всё движение — в этом скрипте)
+  1. Положение пистолета — на кадрах поз, без кода: Weapon_CTRL на кадре 41 (магазин вынимают), 46 (новый вставляют
+     и досылают), 51 (левая тянет затвор). Поставил, ключ, rebuild.cmd — клипы возьмут это положение (G_MAG, G_SEAT,
+     G_RACK). Остальные положения — числа в функциях клипов: FLICK (взмах быстрой перезарядки), LSIDE / RSIDE (осмотр),
+     LOW (проверка магазина): (крен по часовой°, дуло вверх°, дуло влево°, влево м, к глазам м, вверх м) от хвата.
+  2. Когда что происходит — таблицы ключей в функциях клипов (reload_tactical, reload_fast, mag_check, inspect, rack,
+     fire; общий кусок смены магазина — swap). Номера кадров — внутри клипа, длина клипа — Clip(имя, кадров):
+       c.gun([k(кадр, поза, roll=…, pitch=…, yaw=…, dx=…, dy=…, dz=…), …])  пистолет: поза и поправки к ней
+       c.left([(кадр, "grip" | ("mag", вышел_м) | ("seat", вышел_м) | ("pinch", ход 0…1) | ("world", точка, поворот)), …])
+       c.fingers(кости, [(кадр, имя позы), …])                             пальцы из кадров поз
+       c.part("slide" | "trigger" | "stop" | "catch" | "mag", [(кадр, ход), …])   детали пистолета
+       c.hold([(кадр, 0 | 1)])  магазин в левой кисти;  c.mark(имя=кадр)  маркеры фаз
+     Хочешь медленнее — раздвинь кадры ключей (и увеличь длину клипа), сильнее — увеличь поправку.
+  3. Рывки передёргивания — таблица RACK_TUG (подал вперёд, ушёл за рукой, бросок после отпускания, отбой).
+  4. Новая поза с кадра поз в клип — три шага, как сделаны G_MAG / G_SEAT / G_RACK: (а) матрица из позы:
+     G_X = pose_shift(B["имя позы"]["Weapon_CTRL"]); (б) умолчание в GUN_DEFAULT, пока на кадре стоит хват;
+     (в) в таблице клипа k(кадр, G_X) вместо чисел.
+  Проба на копии файла, чтобы не трогать рабочий: rebuild.cmd "<полный путь к копии.blend>".
+
 blender -b "<позы или клипы.blend>" --python-exit-code 1 --python tools/asten919/clips/build_clips.py -- <выход.blend>
 """
 import json
@@ -519,14 +538,18 @@ def same_as_grip(name, bone="Weapon_CTRL"):
     return max(abs(a - b) for ra, rb in zip(B[name][bone], B["grip"][bone]) for a, b in zip(ra, rb)) < 1e-5
 
 
-defaults = {}                                        # кадры поз левой руки, куда пишется поза пистолета по умолчанию
-if same_as_grip("pinch"):
-    defaults["pinch"] = (gun_basis(*RACK), "положение при передёргивании по умолчанию — правьте Weapon_CTRL на этом кадре")
-for name, mm in SHORT.items():
-    if name != "pinch" and same_as_grip(name):
-        defaults[name] = (gun_basis(*CANT), f"левая рука не дотягивалась на {mm:.0f} мм — пистолет наклонён к лицу, как в клипе")
-    elif name not in defaults:
-        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): левая рука не дотягивается на {mm:.0f} мм — придвиньте пистолет или кисть")
+# Положение пистолета в клипах берётся с кадров поз левой руки (Weapon_CTRL на кадре): 41 — магазин вынимают,
+# 46 — новый вставляют и досылают, 51 — левая тянет затвор. Пока на кадре пистолет стоит как в хвате, сборщик пишет
+# туда умолчание (CANT / PRESENT / RACK) — дальше владелец правит его на кадре сам.
+GUN_DEFAULT = dict(mag=(CANT, "когда вынимают магазин"), seat=(PRESENT, "когда вставляют и досылают магазин"),
+                   pinch=(RACK, "когда левая тянет затвор"))
+defaults = {}
+for name, (pose, when) in GUN_DEFAULT.items():
+    if same_as_grip(name):
+        defaults[name] = (gun_basis(*pose), f"положение по умолчанию ({when}) — правьте Weapon_CTRL на этом кадре")
+    elif name in SHORT:
+        log(f"поза «{name}» (кадр {POSE_FRAMES[name]}): левая рука не дотягивается на {SHORT[name]:.0f} мм — придвиньте "
+            f"пистолет или кисть")
 if defaults:                                         # позы посчитаны до назначения действия: оно пересчитало бы их при update()
     assign(poses_act)
     for name, (basis, why) in defaults.items():
@@ -537,7 +560,9 @@ if defaults:                                         # позы посчитан
     assign(None)
 wc.matrix_basis = B["grip"]["Weapon_CTRL"]
 update()
-G_RACK = pose_shift(B["pinch"]["Weapon_CTRL"])       # пистолет при передёргивании — как на кадре позы 51
+G_MAG = pose_shift(B["mag"]["Weapon_CTRL"])          # пистолет, когда вынимают магазин, — как на кадре позы 41
+G_SEAT = pose_shift(B["seat"]["Weapon_CTRL"])        # когда вставляют и досылают — как на кадре позы 46
+G_RACK = pose_shift(B["pinch"]["Weapon_CTRL"])       # при передёргивании — как на кадре позы 51
 
 
 def k(frame, pose, **d):
@@ -580,8 +605,8 @@ def reload_tactical(name="Reload_Tactical", full=None):
     c = Clip(name, end, dict(slide=1.0, stop=1.0) if full == "stop" else None)
     c.fingers(R_THUMB, [(5, "grip"), (11, "catch"), (t + 5, "catch"), (t + 11, "grip")])
     seat = swap(c, t)
-    g = [k(1, REST), k(11, CANT), k(26, CANT, roll=-2, pitch=1, dz=0.002), k(46, CANT, roll=6, pitch=3, dx=0.002, dz=0.002),
-         k(58, PRESENT), k(seat - 3, PRESENT, roll=1), k(seat + 1, PRESENT, pitch=1.6, dz=0.006), k(seat + 5, PRESENT)]
+    g = [k(1, REST), k(11, G_MAG), k(26, G_MAG, roll=-2, pitch=1, dz=0.002), k(46, G_MAG, roll=6, pitch=3, dx=0.002, dz=0.002),
+         k(58, G_SEAT), k(seat - 3, G_SEAT, roll=1), k(seat + 1, G_SEAT, pitch=1.6, dz=0.006), k(seat + 5, G_SEAT)]
     if full is None:
         g += [k(92, REST, roll=3, pitch=1, dx=0.002, dy=0.003, dz=0.003), k(96, REST, roll=-1.2, pitch=-0.4), k(100, REST)]
         c.left([(seat + 16, "grip")])
@@ -591,7 +616,7 @@ def reload_tactical(name="Reload_Tactical", full=None):
         c.fingers(R_THUMB, [(seat + 4, "grip"), (p - 2, "stop"), (p + 3, "stop"), (p + 10, "grip")])
         c.part("stop", [(p - 1, 1), (p + 1, 0)])
         c.part("slide", [(p, 1), (p + 2, 0)])
-        g += [k(p, PRESENT, roll=-8, pitch=-3), k(p + 3, PRESENT, roll=-9, pitch=-5.5, dy=-0.006), k(p + 7, PRESENT, roll=-10, pitch=-3),
+        g += [k(p, G_SEAT, roll=-8, pitch=-3), k(p + 3, G_SEAT, roll=-9, pitch=-5.5, dy=-0.006), k(p + 7, G_SEAT, roll=-10, pitch=-3),
               k(106, REST, roll=3, pitch=1, dx=0.002, dy=0.003, dz=0.003), k(110, REST, roll=-1.2, pitch=-0.4), k(114, REST)]
         c.left([(seat + 22, "grip")])
         c.fingers(L_FING, [(seat + 22, "grip")])
@@ -623,14 +648,14 @@ def reload_fast(name="Reload_Fast_Tactical", full=False):
     c.left([(7, ("world", *POUCH)), (13, ("world", *POUCH2)), (23, ("mag", 0.140)), (27, ("mag", 0.122)), (33, ("mag", MAG_DROP)),
             (36, ("seat", 0.048)), (38, ("seat", 0.0)), (41, ("seat", 0.007))])
     c.part("mag", [(33, MAG_DROP), (36, 0.048), (38, 0.0)])
-    g = [k(1, REST), k(4, REST, roll=10, dz=0.008), k(8, FLICK), k(10, FLICK, roll=5, pitch=-1), k(22, PRESENT), k(35, PRESENT, roll=1),
-         k(39, PRESENT, pitch=1.6, dz=0.006), k(42, PRESENT)]
+    g = [k(1, REST), k(4, REST, roll=10, dz=0.008), k(8, FLICK), k(10, FLICK, roll=5, pitch=-1), k(22, G_SEAT), k(35, G_SEAT, roll=1),
+         k(39, G_SEAT, pitch=1.6, dz=0.006), k(42, G_SEAT)]
     if full:
         p = 49
         c.fingers(R_THUMB, [(41, "grip"), (p - 2, "stop"), (p + 3, "stop"), (p + 9, "grip")])
         c.part("stop", [(p - 1, 1), (p + 1, 0)])
         c.part("slide", [(p, 1), (p + 2, 0)])
-        g += [k(p, PRESENT, roll=-8, pitch=-3), k(p + 3, PRESENT, roll=-9, pitch=-5.5, dy=-0.006), k(66, REST, roll=3, pitch=1, dz=0.003),
+        g += [k(p, G_SEAT, roll=-8, pitch=-3), k(p + 3, G_SEAT, roll=-9, pitch=-5.5, dy=-0.006), k(66, REST, roll=3, pitch=1, dz=0.003),
               k(70, REST, roll=-1.2, pitch=-0.4), k(73, REST)]
         c.left([(60, "grip")])
         c.fingers(L_FING, [(60, "grip")])
@@ -660,8 +685,8 @@ def mag_check():
             (60, ("world", tuple(eyes2), (12, -3, 9))), (68, ("mag", 0.140)), (73, ("mag", 0.122)), (80, ("mag", MAG_DROP)),
             (84, ("seat", 0.048)), (87, ("seat", 0.0)), (90, ("seat", 0.007)), (103, "grip")])
     LOW = (18, 4, 6, 0.012, 0.022, 0.006)
-    c.gun([k(1, REST), k(11, CANT), k(26, CANT, roll=-2, pitch=1), k(38, LOW), k(60, LOW, roll=2, pitch=1), k(69, PRESENT), k(83, PRESENT, roll=1),
-           k(88, PRESENT, pitch=1.6, dz=0.006), k(92, PRESENT), k(104, REST, roll=3, pitch=1, dz=0.003), k(108, REST, roll=-1.2, pitch=-0.4), k(111, REST)])
+    c.gun([k(1, REST), k(11, G_MAG), k(26, G_MAG, roll=-2, pitch=1), k(38, LOW), k(60, LOW, roll=2, pitch=1), k(69, G_SEAT), k(83, G_SEAT, roll=1),
+           k(88, G_SEAT, pitch=1.6, dz=0.006), k(92, G_SEAT), k(104, REST, roll=3, pitch=1, dz=0.003), k(108, REST, roll=-1.2, pitch=-0.4), k(111, REST)])
     c.mark(catch=t, mag_out=t + 12, hold_start=38, hold_end=60, insert=73, mag_in=80, seat=87)
     return c.finish()
 
@@ -798,11 +823,11 @@ lines += ["", "Позы (действие ASTEN919_Poses, кадры): " + ", ".
           "    21, 26, 31 — только большой правой (кнопка магазина; рычаг задержки; вверх для осмотра).",
           "    41 — левая рука с магазином: пальцы и место кисти. Магазин на этом кадре стоит на месте (вышел из шахты",
           "         на 55 мм) и за кистью не едет — кисть ставится вокруг него; в клипах он лежит в кисти так же.",
+          "    ПИСТОЛЕТ (Weapon_CTRL) на кадрах 41, 46, 51 идёт в клипы: 41 — как он стоит, когда магазин вынимают,",
+          "         46 — когда новый вставляют и досылают, 51 — пока левая тянет затвор. Кисть едет вместе с пистолетом.",
           "    46, 51 — левая: ладонь досылает магазин; щепоть на затворе (пальцы и ik_hand.L).",
-          "    51 — ещё и ПИСТОЛЕТ (Weapon_CTRL): как он стоит, пока левая тянет затвор (ближе к середине, завален влево,",
-          "         дуло вверх). Это идёт в клипы Reload_Full_Rack и Slide_Rack; кисть едет вместе с пистолетом.",
-          "         Рывки при оттягивании и отпускании — числа RACK_TUG в build_clips.py.",
-          "    На кадрах 41, 46, 61 пистолет можно наклонять как удобно — в клипы это не идёт.",
+          "         Рывки при оттягивании и отпускании затвора — числа RACK_TUG в build_clips.py.",
+          "    На кадре 61 пистолет можно наклонять как удобно — в клипы это не идёт.",
           "    61 — левая свободна: только пальцы (куда рука идёт — в таблицах движения).",
           "  Остальные кости на кадрах 11–61 при пересборке копируются с кадра 1 — хват правится один раз."]
 txt.from_string("\n".join(lines))
