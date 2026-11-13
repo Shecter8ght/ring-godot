@@ -9,9 +9,11 @@ extends Node3D
 
 const OPEN_SEC: float = 0.6
 const CATALOG_PATH: String = "res://data/loot_containers.json"
+## Суффикс узлов упрощённой сетки (LOD1) у моделей с расстоянием смены «lod» в каталоге.
+const LOD_SUFFIX: String = "_lod1"
 
 static var _catalog: Dictionary = {}
-static var _index: Dictionary = {}
+static var _indexes: Dictionary = {}
 static var _mats: Dictionary = {}
 
 var closed: Node3D
@@ -122,14 +124,17 @@ static func create(kind: String, model_id: String, variant_seed: int) -> LootCon
 	var spec: Dictionary = model_spec(model)
 	if spec.is_empty():
 		return null
-	var dir: String = String(catalog().get("dir", ""))
+	# модель может быть из другого источника (свои контейнеры: assets/models/loot_containers): dir / index — в её записи
+	var dir: String = String(spec.get("dir", catalog().get("dir", "")))
+	var index_path: String = String(spec.get("index", catalog().get("index", "")))
+	var lod_dist: float = float(spec.get("lod", 0.0))
 	var path: String = "%s/%s.gltf" % [dir, model]
 	if not ResourceLoader.exists(path):
 		return null
 	var variants: Array = spec.get("variants", [""]) as Array
 	var variant: String = String(variants[variant_seed % maxi(1, variants.size())]) if not variants.is_empty() else ""
 	var far: float = float(catalog().get("far", 45.0))
-	var closed_node: Node3D = _instance(dir, model, variant, far)
+	var closed_node: Node3D = _instance(dir, model, variant, far, index_path, lod_dist)
 	if closed_node == null:
 		return null
 	closed_node.name = "Закрыт"
@@ -140,33 +145,42 @@ static func create(kind: String, model_id: String, variant_seed: int) -> LootCon
 	if open_id == "":
 		vis.setup(closed_node, null, {}, {})
 	else:
-		var info: Dictionary = (_furniture_index().get(open_id, {}) as Dictionary)
+		var info: Dictionary = (_index_at(index_path).get(open_id, {}) as Dictionary)
 		vis.setup_lazy(closed_node, func() -> Node3D:
-			var n: Node3D = _instance(dir, open_id, variant, far)
+			var n: Node3D = _instance(dir, open_id, variant, far, index_path, lod_dist)
 			if n != null:
 				n.name = "Открыт"
 			return n, info)
 	return vis
 
 
-static func _furniture_index() -> Dictionary:
-	if _index.is_empty():
-		_index = _read(String(catalog().get("index", "")))
-	return _index
+## Индекс моделей источника (furniture.json общежития или loot_containers_models.json): движки, габариты, подвижное.
+static func _index_at(path: String) -> Dictionary:
+	if not _indexes.has(path):
+		_indexes[path] = _read(path)
+	return _indexes[path] as Dictionary
 
 
-static func _instance(dir: String, model: String, variant: String, far: float) -> Node3D:
+## lod_dist > 0 — у модели есть узлы «*_lod1» (≈ ¼ треугольников): основные сетки рисуются до lod_dist, упрощённые — от него до far.
+static func _instance(dir: String, model: String, variant: String, far: float, index_path: String, lod_dist: float = 0.0) -> Node3D:
 	var path: String = "%s/%s.gltf" % [dir, model]
 	if not ResourceLoader.exists(path):
 		return null
 	var node: Node3D = (load(path) as PackedScene).instantiate() as Node3D
-	var info: Dictionary = _furniture_index().get(model, {}) as Dictionary
+	var info: Dictionary = _index_at(index_path).get(model, {}) as Dictionary
 	for found: Node in node.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node: MeshInstance3D = found as MeshInstance3D
 		# дальше far модель не рисуется: сотни контейнеров карты не дают тысяч сеток в кадре
 		mesh_node.visibility_range_end = far
 		mesh_node.visibility_range_end_margin = 2.0
 		mesh_node.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		if lod_dist > 0.0:
+			if String(mesh_node.name).ends_with(LOD_SUFFIX):
+				mesh_node.visibility_range_begin = lod_dist
+				mesh_node.visibility_range_begin_margin = 1.0
+			else:
+				mesh_node.visibility_range_end = lod_dist
+				mesh_node.visibility_range_end_margin = 1.0
 		if variant == "" or mesh_node.mesh == null:
 			continue
 		for s: int in range(mesh_node.mesh.get_surface_count()):

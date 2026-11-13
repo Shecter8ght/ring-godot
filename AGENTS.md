@@ -523,7 +523,14 @@ python -X utf8 tools/prospekt_loot_kinds.py [--apply | --fit]  # «Проспе�
                                                               # (правится руками, повторный запуск берёт его; --rules — пересчитать); --apply — kind/table/model_id в узлы сцены и container в план;
                                                               # --fit — ещё поворот, пол и «не помещается» из prospekt_loot_fit.json (model_off — остаётся бокс; model_ok плана прячет маркер блокаута)
 LOOT_FIT_OUT=data/blockouts/prospekt_loot_fit.json tools/godot.cmd --headless res://tools/prospekt_loot_fit.tscn # подгонка моделей контейнеров по физике карты: пол лучом, спинка к стене, габарит закрытой и открытой модели не в коллизии
-python -X utf8 tools/gen_loot_containers.py                    # каталог моделей контейнеров data/loot_containers.json (габариты — из индекса мебели общежития; вид без модели — model "", подключение правкой данных)
+python -X utf8 tools/gen_loot_containers.py                    # каталог моделей контейнеров data/loot_containers.json (габариты — из индексов: мебель общежития и assets/models/loot_containers/loot_containers_models.json — у модели из второго источника свои dir / index / lod в записи; вид без модели — model "", подключение правкой данных)
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/loot_containers/medbag_game.py -- lp|bake|export
+                                                              # медицинская сумка-укладка (принята 2026-11-13), игровая версия: lp — низкие сетки по деталям (≈ 7,95 тыс. треугольников на состояние,
+                                                              # закрытая — смещением раскрытой, общая развёртка в один атлас 2K), bake — карты с high-poly раскрытой (≈ 17 мин на процессоре, Cycles:
+                                                              # цвет, шероховатость, металл через излучение, касательная нормаль, AO), export — lc_medbag и lc_medbag_open (корпус одной сеткой, клапан —
+                                                              # узел с осью, LOD1 ≈ ¼ — узлы *_lod1) → assets/models/loot_containers + loot_containers_models.json; затем --import,
+                                                              # python -X utf8 tools/loot_containers/medbag_imports.py, --import, gen_loot_containers.py, prospekt_loot_fit + prospekt_loot_kinds.py --fit;
+                                                              # сверка с high-poly — blender -b <RING_Loot_MedBag_finish_v03.blend> --python tools/loot_containers/medbag_game_compare.py -- [open closed top]
 tools/godot.cmd --headless res://tools/loot_stats.tscn         # замер лута по настоящему ItemDb.roll: по таблице — среднее, медиана, p90, пустые %; по «Проспекту» — ожидаемая стоимость Loot_N (схроны × 4/12),
                                                               # категории и штуки ключевых вещей за рейд (LOOT_STATS_N=3000, LOOT_STATS_OUT=<json>, LOOT_STATS_MAP=<узел → таблица> — расчёт до внесения в сцену);
                                                               # числа до / после — docs/design/data/loot_stats_{before,after}.{json,txt}

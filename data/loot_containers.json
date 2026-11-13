@@ -248,6 +248,39 @@
      0.4394
     ]
    }
+  },
+  "lc_medbag": {
+   "open": "lc_medbag_open",
+   "variants": [
+    ""
+   ],
+   "aabb": {
+    "center": [
+     0.002,
+     0.1496,
+     0.0038
+    ],
+    "size": [
+     0.6583,
+     0.3082,
+     0.3599
+    ]
+   },
+   "open_aabb": {
+    "center": [
+     0.002,
+     0.2468,
+     -0.0184
+    ],
+    "size": [
+     0.6583,
+     0.5027,
+     0.4044
+    ]
+   },
+   "dir": "res://assets/models/loot_containers",
+   "index": "res://assets/models/loot_containers/loot_containers_models.json",
+   "lod": 14.0
   }
  },
  "kinds": {
@@ -261,7 +294,7 @@
    "model": ""
   },
   "medbag": {
-   "model": ""
+   "model": "lc_medbag"
   },
   "med_cabinet": {
    "model": ""

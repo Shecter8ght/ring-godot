@@ -527,6 +527,7 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+floor_drop = 0.61
 
 [node name="Loot_11" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-141.8, 4.77, -49.3)
@@ -568,6 +569,7 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+floor_drop = 0.61
 
 [node name="Loot_16" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-106.8, 4.77, -49.3)
@@ -609,6 +611,7 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+floor_drop = 0.61
 
 [node name="Loot_21" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-200.3, -6.7, -115.9)
@@ -1364,6 +1367,8 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+model_yaw = -135
+floor_drop = 0.6
 
 [node name="Loot_112" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-22, 12.9, -64.3)
@@ -1494,6 +1499,7 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+model_off = true
 
 [node name="Loot_128" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-134, 0.62, 69.5)
@@ -2146,6 +2152,7 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+floor_drop = 0.61
 
 [node name="Loot_206" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-46, 0.6, 176.5)
@@ -2371,6 +2378,8 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+model_yaw = 90
+floor_drop = 0.61
 
 [node name="Loot_232" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(60.58, 0.6, 172.5)
@@ -2423,6 +2432,8 @@ table = "medbag"
 search_s = 2
 look = 4
 kind = "medbag"
+model_yaw = -90
+floor_drop = 0.45
 
 [node name="Loot_238" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-196, 0.6, -38.62)
@@ -2441,6 +2452,7 @@ table = "medbag"
 search_s = 3.5
 look = 0
 kind = "medbag"
+floor_drop = 0.52
 
 [node name="Loot_240" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-205.5, 0.6, 5.5)
@@ -2607,6 +2619,8 @@ table = "medbag"
 search_s = 2
 look = 4
 kind = "medbag"
+model_yaw = 90
+floor_drop = 0.5
 
 [node name="Loot_258" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-44, 0.6, 92)
@@ -2630,6 +2644,8 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+model_yaw = 90
+floor_drop = 0.5
 
 [node name="Loot_261" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(57.04, 0.6, 107.4)
@@ -2720,6 +2736,8 @@ table = "medbag"
 search_s = 2.5
 look = 4
 kind = "medbag"
+model_yaw = -180
+floor_drop = 0.52
 
 [node name="Loot_272" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-190, 0.6, -132.8)
@@ -3155,6 +3173,7 @@ table = "medbag"
 search_s = 2
 look = 4
 kind = "medbag"
+floor_drop = 0.6
 
 [node name="Loot_322" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(52, 0.68, -117)

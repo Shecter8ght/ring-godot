@@ -1,0 +1,76 @@
+{
+ "lc_medbag": {
+  "file": "res://assets/models/loot_containers/lc_medbag.gltf",
+  "triangles": 7954,
+  "triangles_lod1": 1956,
+  "aabb": {
+   "center": [
+    0.002,
+    0.1496,
+    0.0038
+   ],
+   "size": [
+    0.6583,
+    0.3082,
+    0.3599
+   ]
+  },
+  "material": "lc_medbag",
+  "variants": [
+   ""
+  ]
+ },
+ "lc_medbag_open": {
+  "file": "res://assets/models/loot_containers/lc_medbag_open.gltf",
+  "triangles": 7954,
+  "triangles_lod1": 1956,
+  "aabb": {
+   "center": [
+    0.002,
+    0.2468,
+    -0.0184
+   ],
+   "size": [
+    0.6583,
+    0.5027,
+    0.4044
+   ]
+  },
+  "material": "lc_medbag",
+  "variants": [
+   ""
+  ],
+  "movers": [
+   {
+    "node": "клапан",
+    "kind": "hinge",
+    "pivot": [
+     0.0,
+     0.3,
+     -0.105
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "open": 110.0
+   },
+   {
+    "node": "клапан_lod1",
+    "kind": "hinge",
+    "pivot": [
+     0.0,
+     0.3,
+     -0.105
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "open": 110.0
+   }
+  ]
+ }
+}
