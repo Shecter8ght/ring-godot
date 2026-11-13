@@ -444,6 +444,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.71
 
 [node name="Loot_1" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-177.5, 4.77, -58.1)
@@ -461,6 +463,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = -0.16
 
 [node name="Loot_3" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-171.8, 4.77, -49.3)
@@ -469,6 +473,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.59
 
 [node name="Loot_4" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-164.5, 4.77, -58.1)
@@ -486,6 +492,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -45
+floor_drop = -0.16
 
 [node name="Loot_6" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-158.8, 4.77, -49.3)
@@ -494,6 +502,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.59
 
 [node name="Loot_7" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-147.5, 4.77, -58.1)
@@ -511,6 +521,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = -0.16
 
 [node name="Loot_9" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-158, 8.63, -53.3)
@@ -536,6 +548,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.59
 
 [node name="Loot_12" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-124.5, 4.77, -58.1)
@@ -553,6 +567,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = -0.16
 
 [node name="Loot_14" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-141, 8.63, -53.3)
@@ -578,6 +594,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.59
 
 [node name="Loot_17" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-95.5, 4.77, -58.1)
@@ -1257,6 +1275,9 @@ display_name = "Окно операциониста"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_98" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-22.5, 0.6, -79.4)
@@ -1264,6 +1285,9 @@ display_name = "Окно операциониста"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_99" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-19.2, 0.6, -79.4)
@@ -1271,6 +1295,9 @@ display_name = "Окно операциониста"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_100" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-36.3, 0.6, -69)
@@ -1279,6 +1306,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_101" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-12, 0.6, -82.4)
@@ -1287,6 +1315,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_102" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-25.5, 0.6, -91.3)
@@ -1295,6 +1324,8 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+model_yaw = -135
+floor_drop = 0.6
 
 [node name="Loot_103" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-36.8, 0.6, -76.6)
@@ -1303,6 +1334,8 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_104" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-29.5, 0.6, -73)
@@ -1311,6 +1344,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_105" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-12, 0.6, -67.3)
@@ -1326,6 +1361,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = 45
+floor_drop = 0.6
 
 [node name="Loot_107" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-24, 5.1, -86.3)
@@ -1334,6 +1371,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_108" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-6, 5.1, -65.3)
@@ -1342,6 +1381,8 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_yaw = 135
+floor_drop = 0.6
 
 [node name="Loot_109" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-38.7, 9, -62.6)
@@ -1395,6 +1436,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_115" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-28, -2.6, -80.4)
@@ -1403,6 +1445,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_116" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-28, -2.6, -71.4)
@@ -1411,6 +1454,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_117" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-17, -2.6, -73.3)
@@ -1419,6 +1463,8 @@ table = "safe"
 search_s = 5
 look = 2
 kind = "safe"
+model_yaw = 135
+floor_drop = 0.6
 
 [node name="Loot_118" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-7.5, -2.6, -66.6)
@@ -1427,6 +1473,7 @@ table = "safe"
 search_s = 1.5
 look = 0
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_119" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-18, -2.6, -85.4)
@@ -1435,6 +1482,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+floor_drop = 0.6
 
 [node name="Loot_120" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-30, -2.6, -92.3)
@@ -1450,6 +1498,7 @@ table = "safe"
 search_s = 3.5
 look = 0
 kind = "safe"
+model_off = true
 
 [node name="Loot_122" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-12.6, 0.6, -35.98)
@@ -1465,6 +1514,7 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+floor_drop = 0.59
 
 [node name="Loot_124" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-174.5, 4.77, 25.8)
@@ -1483,6 +1533,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = 0.59
 
 [node name="Loot_126" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-166, 8.63, 21.5)
@@ -1626,6 +1678,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_141" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-87.2, 0.62, 64.7)
@@ -1633,6 +1688,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_142" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-76, 0.62, 60.5)
@@ -1640,6 +1698,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_143" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-127, 0.62, 60.5)
@@ -1647,6 +1708,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_144" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-116, 0.6, 84.6)
@@ -1669,6 +1733,9 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_yaw = 90
+floor_drop = -0.85
+model_shift = Vector2(-1.4, 0)
 
 [node name="Loot_147" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-139.6, 6.6, 85)
@@ -1678,6 +1745,8 @@ search_s = 6
 look = 1
 required_key = "key_yarus_office"
 kind = "safe"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_148" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-121.5, 0.62, 64.8)
@@ -1701,6 +1770,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_off = true
 
 [node name="Loot_151" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-100, 0.6, 124)
@@ -1769,6 +1839,7 @@ table = "safe"
 search_s = 5
 look = 2
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_159" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-91, 0.72, 226)
@@ -1777,6 +1848,8 @@ table = "safe"
 search_s = 5
 look = 2
 kind = "safe"
+model_yaw = 45
+floor_drop = 0.6
 
 [node name="Loot_160" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-100, 0.72, 216)
@@ -1785,6 +1858,8 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_yaw = 45
+floor_drop = 0.6
 
 [node name="Loot_161" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-88.5, 0.72, 240)
@@ -1793,6 +1868,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+floor_drop = 0.6
 
 [node name="Loot_162" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-102, 0.72, 237.2)
@@ -1801,6 +1877,7 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+floor_drop = 0.6
 
 [node name="Loot_163" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-129.5, 0.72, 234)
@@ -1808,6 +1885,8 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+floor_drop = 0.6
 
 [node name="Loot_164" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-134, 0.72, 223)
@@ -1836,6 +1915,7 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+floor_drop = 0.6
 
 [node name="Loot_167" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-92, 8.2, 221)
@@ -1844,6 +1924,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_168" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-100, 8.2, 237)
@@ -1901,6 +1982,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_175" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-16.12, 0.72, 28)
@@ -1909,6 +1993,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -45
+floor_drop = 0.6
 
 [node name="Loot_176" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-18.88, 0.72, 25.8)
@@ -1916,6 +2002,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_177" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-30.57, 0.72, 28)
@@ -1923,6 +2012,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_178" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-28.85, 0.72, 33.5)
@@ -1973,6 +2065,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_184" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(9.12, 0.72, 29.2)
@@ -1988,6 +2083,9 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_yaw = -180
+floor_drop = -0.85
+model_shift = Vector2(0, 0.6)
 
 [node name="Loot_186" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-1.38, 0.72, 33.6)
@@ -1996,6 +2094,9 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_yaw = -180
+floor_drop = -0.85
+model_shift = Vector2(0, 0.6)
 
 [node name="Loot_187" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-1.38, 0.72, 45.8)
@@ -2004,6 +2105,9 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_yaw = -180
+floor_drop = -0.85
+model_shift = Vector2(0, 1.05)
 
 [node name="Loot_188" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(23, 0.72, 85.25)
@@ -2028,6 +2132,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+floor_drop = 0.6
 
 [node name="Loot_191" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(31, 0.72, 74.88)
@@ -2035,6 +2140,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_192" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(26.8, 0.72, 65.12)
@@ -2043,6 +2151,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_193" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(26.8, 0.72, 57.62)
@@ -2111,6 +2221,8 @@ display_name = "Касса палатки"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_off = true
 
 [node name="Loot_201" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-43.8, 4.77, 129.5)
@@ -2119,6 +2231,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.59
 
 [node name="Loot_202" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-32.5, 4.77, 122.7)
@@ -2136,6 +2250,8 @@ table = "filing"
 search_s = 1.5
 look = 0
 kind = "filing"
+model_yaw = -45
+floor_drop = -0.16
 
 [node name="Loot_204" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-43, 8.63, 126.5)
@@ -2196,6 +2312,9 @@ display_name = "Раздавленный ларёк"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -135
+floor_drop = 0.48
 
 [node name="Loot_211" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(162, 0.6, -36.5)
@@ -2204,6 +2323,8 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+floor_drop = -0.91
+model_shift = Vector2(0.63, -0.62)
 
 [node name="Loot_212" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(157.3, 0.6, -27.3)
@@ -2230,6 +2351,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+model_off = true
 
 [node name="Loot_215" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(181.3, 0.6, -31.3)
@@ -2238,6 +2360,7 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_off = true
 
 [node name="Loot_216" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(175, 0.6, 13.2)
@@ -2263,6 +2386,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_off = true
 
 [node name="Loot_219" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(172.9, 0.6, 121)
@@ -2344,6 +2468,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.59
 
 [node name="Loot_228" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(27.2, 4.77, 121.5)
@@ -2628,6 +2754,8 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+floor_drop = 0.5
 
 [node name="Loot_259" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(10.4, 0.6, 62)
@@ -2694,6 +2822,8 @@ display_name = "Ларёк на парковке"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+floor_drop = 0.55
 
 [node name="Loot_267" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(181.3, 0.6, 131)
@@ -2849,6 +2979,8 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+floor_drop = 0.45
 
 [node name="Loot_285" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-77.8, 0.6, 11.05)
@@ -2856,6 +2988,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 45
+floor_drop = 0.45
 
 [node name="Loot_286" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-172.8, 0.6, 8.45)
@@ -2863,6 +2998,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 90
+floor_drop = 0.45
 
 [node name="Loot_287" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(97.6, 0.6, -2)
@@ -2928,6 +3066,8 @@ display_name = "Касса клиентской"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+floor_drop = 0.6
 
 [node name="Loot_294" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(7.6, 0.68, -76.5)
@@ -2983,6 +3123,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_300" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(51, 0.68, -81)
@@ -2991,6 +3133,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_301" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(60.5, 0.68, -81.5)
@@ -3018,6 +3162,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+floor_drop = 0.6
 
 [node name="Loot_304" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(66, 0.68, -77.5)
@@ -3034,6 +3179,7 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+floor_drop = 0.6
 
 [node name="Loot_306" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(86, 0.68, -77.5)
@@ -3042,6 +3188,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_307" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(79, 0.68, -66.5)
@@ -3088,6 +3236,7 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+floor_drop = 0.6
 
 [node name="Loot_312" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(111, 0.68, -66)
@@ -3096,6 +3245,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_313" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(124, 0.68, -66)
@@ -3133,6 +3283,7 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+floor_drop = 0.6
 
 [node name="Loot_317" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(71, 0.68, -98)
@@ -3228,6 +3379,8 @@ table = "safe"
 search_s = 6
 look = 1
 kind = "safe"
+model_yaw = -90
+floor_drop = 0.52
 
 [node name="Loot_328" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(84, 0.68, -88)
@@ -3263,6 +3416,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 45
+floor_drop = 0.6
 
 [node name="Loot_332" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-80, 0.62, 60.3)
@@ -3270,6 +3426,9 @@ display_name = "Касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_333" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-70, 0.62, 60.3)
@@ -3277,6 +3436,9 @@ display_name = "Касса экспресс"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = 135
+floor_drop = 0.6
 
 [node name="Loot_334" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-80, 0.62, 69.5)
@@ -3425,6 +3587,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = 90
+floor_drop = 0.6
 
 [node name="Loot_351" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-111, 6.6, 84)
@@ -3440,6 +3604,8 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_353" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-84, 7.355, 84)
@@ -3447,6 +3613,9 @@ display_name = "Счётная: касса"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -135
+floor_drop = 0.6
 
 [node name="Loot_354" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-124, 0.62, 94)
@@ -3532,6 +3701,9 @@ display_name = "Окно кассы"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_363" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(122, 1.7, 234.5)
@@ -3539,6 +3711,9 @@ display_name = "Окно кассы"
 table = "register"
 search_s = 2
 look = 0
+kind = "register"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_364" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(116, 0.62, 226)
@@ -3557,6 +3732,7 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+floor_drop = 0.6
 
 [node name="Loot_366" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(123, 0.62, 245)
@@ -3565,6 +3741,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+floor_drop = 0.6
 
 [node name="Loot_367" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(126, 0.62, 240)
@@ -3573,6 +3750,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_368" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(180, 0.62, 224)
@@ -3656,6 +3835,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_377" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(123, 5.155, 225)
@@ -3674,6 +3855,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -180
+floor_drop = 0.6
 
 [node name="Loot_379" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(170, 4.4, 225)
@@ -3691,6 +3874,7 @@ table = "med_cabinet"
 search_s = 2
 look = 4
 kind = "med_cabinet"
+model_off = true
 
 [node name="Loot_381" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(155, 8.2, 244)
@@ -3781,6 +3965,8 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_391" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-190, 0.7, 25)
@@ -3789,6 +3975,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -45
+floor_drop = 0.6
 
 [node name="Loot_392" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-181, 1.4, 18)
@@ -3805,6 +3993,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = 45
+floor_drop = 0.6
 
 [node name="Loot_394" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-193, 4.1, 18)
@@ -3813,6 +4003,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_395" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-204, 4.1, 27)
@@ -3821,6 +4013,8 @@ table = "filing"
 search_s = 2.5
 look = 0
 kind = "filing"
+model_yaw = -90
+floor_drop = 0.6
 
 [node name="Loot_396" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-211.5, 0.66, 53)
