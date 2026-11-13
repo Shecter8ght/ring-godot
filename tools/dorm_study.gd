@@ -30,7 +30,6 @@ var fov_label: Label
 var lighting: Node3D
 ## F10 или U — весь интерфейс стенда скрыт (подсказки, панель света, план, подписи в мире): смотреть на свет без помех.
 var hud_hidden: bool = false
-var labels_before: bool = true
 ## L — расстановка оставленного людьми света по месту (только прогулка).
 var placer: Node
 
@@ -68,6 +67,7 @@ func _ready() -> void:
 		lighting.call("attach_camera",camera)
 	fov_h = float(plan.scale.fov_h)
 	_ui()
+	Settings.map_labels_changed.connect(_sync_map_labels)
 	_set_fov(fov_h)
 	get_viewport().size_changed.connect(_refresh_fov)
 	await _frames(4)
@@ -249,8 +249,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			map.visible = not map.visible
 			walker.set("blocked_input", map.visible)
 		KEY_H:
-			for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
-				(node as Node3D).visible = not (node as Node3D).visible
+			Settings.set_map_labels(not Settings.map_labels)
 		KEY_R:
 			_jump_to(8)
 		KEY_N:
@@ -266,11 +265,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _toggle_hud() -> void:
 	hud_hidden = not hud_hidden
 	hud.visible = not hud_hidden
-	var labels: Array[Node] = get_tree().get_nodes_in_group("dorm_study_labels")
-	if hud_hidden and not labels.is_empty():
-		labels_before = (labels[0] as Node3D).visible
-	for node: Node in labels:
-		(node as Node3D).visible = labels_before and not hud_hidden
+	_sync_map_labels()
+
+
+func _sync_map_labels() -> void:
+	for node: Node in get_tree().get_nodes_in_group("dorm_study_labels"):
+		(node as Node3D).visible = Settings.map_labels and not hud_hidden
 
 
 func _jump_to(index: int) -> void:

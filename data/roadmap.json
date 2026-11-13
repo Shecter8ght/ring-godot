@@ -225,11 +225,8 @@
      "id": "map.labels_off",
      "title": "Служебные подписи мест убраны",
      "done_when": "В рейде над местами не висят надписи блокаута.",
-     "status": "todo",
-     "stage": "s4",
-     "needs": [
-      "map.signs"
-     ]
+     "status": "done",
+     "stage": "s4"
     },
     {
      "id": "map.final_bake",

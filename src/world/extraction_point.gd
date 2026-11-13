@@ -88,4 +88,5 @@ func _rebuild() -> void:
 	label.modulate = Color(0.45, 1.0, 0.55)
 	label.outline_size = 10
 	label.position.y = 3.0
+	label.add_to_group(Settings.MAP_LABEL_GROUP)
 	_vis.add_child(label)

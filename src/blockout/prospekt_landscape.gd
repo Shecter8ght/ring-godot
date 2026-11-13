@@ -1433,6 +1433,7 @@ func _signs() -> void:
 		label.outline_size = 14
 		label.modulate = Color("f1ead8")
 		label.no_depth_test = false
+		label.add_to_group(Settings.MAP_LABEL_GROUP)
 		generated.add_child(label)
 		label.position = Vector3(float(at[0]), float(at[1]), float(at[2]))
 

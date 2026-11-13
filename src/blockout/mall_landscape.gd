@@ -1598,6 +1598,7 @@ func _markers(g: RefCounted) -> void:
 		label.outline_size = 18
 		label.modulate = Color("f1ead8")
 		label.position = Vector3(float(at[0]), ground(float(at[0]), float(at[1])) + 14.0, float(at[1]))
+		label.add_to_group(Settings.MAP_LABEL_GROUP)
 		generated.add_child(label)
 
 

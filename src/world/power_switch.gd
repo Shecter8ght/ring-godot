@@ -53,4 +53,4 @@ func _build_visual(parent: Node3D) -> void:
 	_box(parent, Vector3(0, 1.1, 0), Vector3(0.9, 1.6, 0.35), Color(0.36, 0.38, 0.4))
 	_box(parent, Vector3(0.2, 1.2, -0.2), Vector3(0.08, 0.4, 0.08), Color(0.1, 0.1, 0.1))
 	_lamp = _box(parent, Vector3(-0.25, 1.75, -0.19), Vector3(0.1, 0.1, 0.04), Color(1.0, 0.25, 0.15), 3.0)
-	_label(parent, display_name, 2.3, Color(1.0, 0.85, 0.6))
+	_label(parent, display_name, 2.3, Color(1.0, 0.85, 0.6), true)

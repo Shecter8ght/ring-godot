@@ -13,8 +13,10 @@ extends Node
 ## Alt+Enter — переключить.
 
 signal changed
+signal map_labels_changed
 
 const PATH := "user://settings.cfg"
+const MAP_LABEL_GROUP := &"map_place_labels"
 const QUALITY := ["low", "medium", "high"]
 const QUALITY_NAMES := {"low": "Низко", "medium": "Средне", "high": "Высоко"}
 const WINDOW_MODES := ["fullscreen", "windowed"]
@@ -35,6 +37,8 @@ var lens_fx: bool = true
 var motion_blur: bool = false
 ## Крестик попадания и убийства; обычная настройка интерфейса.
 var hitmarker: bool = true
+## Надписи над местами и черновыми указателями на картах.
+var map_labels: bool = false
 ## Во весь экран или в окне (WINDOW_MODES).
 var window_mode: String = "fullscreen"
 ## Множитель чувствительности мыши: от первого лица (взгляд) и в изометрии (поворот камеры СКМ).
@@ -136,6 +140,7 @@ func _load() -> void:
 	fov_h = clampf(float(cfg.get_value("view", "fov_h", fov_h)), FOV_H_RANGE[0], FOV_H_RANGE[1])
 	camera_motion = clampf(float(cfg.get_value("view", "camera_motion", camera_motion)), 0.0, 1.0)
 	hitmarker = bool(cfg.get_value("view", "hitmarker", hitmarker))
+	map_labels = bool(cfg.get_value("view", "map_labels", map_labels))
 	for key: String in reticle.keys():
 		reticle[key] = int(cfg.get_value("sight", key, reticle[key]))
 	for b in BUSES:
@@ -177,6 +182,7 @@ func save() -> void:
 	cfg.set_value("view", "fov_h", fov_h)
 	cfg.set_value("view", "camera_motion", camera_motion)
 	cfg.set_value("view", "hitmarker", hitmarker)
+	cfg.set_value("view", "map_labels", map_labels)
 	for key: String in reticle:
 		cfg.set_value("sight", key, int(reticle[key]))
 	for b in BUSES:
@@ -251,6 +257,13 @@ func set_hitmarker(on: bool) -> void:
 	changed.emit()
 
 
+func set_map_labels(on: bool) -> void:
+	map_labels = on
+	get_tree().set_group(MAP_LABEL_GROUP, &"visible", on)
+	save()
+	map_labels_changed.emit()
+
+
 func set_motion_blur(on: bool) -> void:
 	motion_blur = on
 	save()
@@ -288,6 +301,12 @@ func _input(event: InputEvent) -> void:
 	var k := event as InputEventKey
 	if k and k.pressed and not k.echo and k.alt_pressed and (k.keycode == KEY_ENTER or k.keycode == KEY_KP_ENTER):
 		set_window_mode("windowed" if window_mode == "fullscreen" else "fullscreen")
+		get_viewport().set_input_as_handled()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_map_labels", false, true) and not UiTheme.typing():
+		set_map_labels(not map_labels)
 		get_viewport().set_input_as_handled()
 
 
@@ -526,6 +545,8 @@ func _on_node_added(n: Node) -> void:
 		_apply_env.call_deferred(n as WorldEnvironment)
 	elif n is OmniLight3D or n is SpotLight3D:
 		soften(n as Light3D)
+	elif n is Label3D and n.is_in_group(MAP_LABEL_GROUP):
+		(n as Label3D).visible = map_labels
 	elif n is DirectionalLight3D:
 		# дальность и каскады тени по качеству — и у карт с проверенными тенями (после _ready сцены)
 		_apply_sun_quality.call_deferred(n as DirectionalLight3D)

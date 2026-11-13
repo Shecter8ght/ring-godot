@@ -59,4 +59,4 @@ func _process(_delta: float) -> void:
 func _build_visual(parent: Node3D) -> void:
 	_box(parent, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.5), Color(0.3, 0.3, 0.32))
 	_box(parent, Vector3(0, 0.93, 0), Vector3(0.22, 0.04, 0.14), Color(1.0, 0.8, 0.2), 1.5)
-	_label(parent, display_name, 1.5, Color(1.0, 0.85, 0.4))
+	_label(parent, display_name, 1.5, Color(1.0, 0.85, 0.4), true)

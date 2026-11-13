@@ -239,6 +239,8 @@ func _build_geometry(target: Node3D, data: Dictionary, palette: Dictionary) -> v
 		plaque.outline_modulate = Color("c9cdd0")
 		plaque.no_depth_test = false
 		plaque.add_to_group("dorm_door_numbers" if bool(item.get("permanent",false)) else "dorm_study_labels")
+		if plaque.is_in_group("dorm_study_labels"):
+			plaque.add_to_group(Settings.MAP_LABEL_GROUP)
 		target.add_child(plaque)
 	for item: Dictionary in data.get("doors",[]):
 		var leaf: Node3D = StudyDoor.new() as Node3D

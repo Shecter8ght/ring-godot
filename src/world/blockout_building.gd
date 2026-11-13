@@ -120,6 +120,7 @@ func _build() -> void:
 		label.outline_size = 10
 		var top := height if kind != Kind.GARAGE else float(levels - 1) * level_height + PARAPET_H
 		label.position = Vector3(0, top + 2.0, 0)
+		label.add_to_group(Settings.MAP_LABEL_GROUP)
 		_gen.add_child(label)
 	geometry_rebuilt.emit()
 

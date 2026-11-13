@@ -45,6 +45,7 @@ func _ready() -> void:
 	_check("высоко — как в сцене", env.sdfgi_enabled == sdfgi0 and is_equal_approx(get_viewport().scaling_3d_scale, 1.0), "")
 	_check("высоко: тень солнца как в сцене (%.0f м, 4 каскада)" % sun_m0, is_equal_approx(sun.directional_shadow_max_distance, sun_m0)
 		and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS, "%.0f м" % sun.directional_shadow_max_distance)
+	_check_map_labels(inst)
 	Settings.set_sens(2.0, 0.5)
 	var rig := get_tree().get_first_node_in_group("camera_rig") as CameraRig
 	_check("хит-маркер по умолчанию включён", Settings.hitmarker, "")
@@ -134,6 +135,31 @@ func _ready() -> void:
 	_check("в инструментах настройки не сохраняются", Settings._tool_run, "")
 	print("settings_test: провалено %d" % _fails)
 	get_tree().quit(_fails)
+
+
+func _check_map_labels(level: Node) -> void:
+	var labels := get_tree().get_nodes_in_group(Settings.MAP_LABEL_GROUP)
+	_check("надписи карты скрыты при загрузке", not labels.is_empty() and labels.all(func(n: Node) -> bool: return not (n as Label3D).visible), "")
+	Pause.open_settings()
+	var toggle := Pause.find_child("MapLabelsToggle", true, false) as CheckButton
+	_check("пункт «Подписи мест на картах» выключен", toggle != null and not toggle.button_pressed, "")
+	if toggle:
+		toggle.button_pressed = true
+		_check("меню сразу показывает надписи на паузе", Settings.map_labels and labels.all(func(n: Node) -> bool: return (n as Label3D).visible), "")
+		toggle.button_pressed = false
+		_check("меню снова скрывает надписи", not Settings.map_labels and labels.all(func(n: Node) -> bool: return not (n as Label3D).visible), "")
+	Pause.close_menu()
+	var late := Label3D.new()
+	late.add_to_group(Settings.MAP_LABEL_GROUP)
+	level.add_child(late)
+	_check("новая надпись берёт текущее значение", not late.visible, "")
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_KP_MULTIPLY
+	key.pressed = true
+	Settings._unhandled_input(key)
+	_check("звёздочка на цифровом блоке переключает надписи", Settings.map_labels and late.visible, "")
+	Settings.set_map_labels(false)
+	late.queue_free()
 
 
 ## Ждать, пока кадры станут короткими (карта догрузилась, навигация и шейдеры собраны): до 20 с.

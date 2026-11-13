@@ -1745,6 +1745,7 @@ func _stories(list: Array) -> void:
 		label.modulate = Color("f0c27a")
 		label.visibility_range_end = 160.0
 		label.position = Vector3(float(at[0]), landscape.ground(float(at[0]), float(at[1])) + float(story.get("height", 5.0)), float(at[1]))
+		label.add_to_group(Settings.MAP_LABEL_GROUP)
 		generated.add_child(label)
 
 

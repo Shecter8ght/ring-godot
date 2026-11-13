@@ -36,6 +36,7 @@ const ACTIONS := [
 	["zero_up|zero_down|zero_left|zero_right", "Пристрелка (в прицеле): щелчок барабанчика вверх / вниз / влево / вправо"],
 	["interact", "Двери, обыск, рубильники, подобрать, лестница (залезть / спуститься); над раненым напарником — держать: поднять (аптечка)"],
 	["inventory", "Рюкзак"],
+	["toggle_map_labels", "Показать / скрыть подписи мест на картах"],
 	["use_med", "Лечиться: выбрать чем (лёжа раненым — аптечка: подняться, бинт: +время)"],
 	["drag", "Тащить раненого напарника / отпустить; лёжа раненым — держать: сдаться"],
 	["camera_left|camera_right", "Наклон влево / вправо"],
@@ -435,6 +436,15 @@ func _build_settings(h: HBoxContainer) -> void:
 	hitmarker.toggled.connect(Settings.set_hitmarker)
 	Settings.changed.connect(func() -> void: hitmarker.set_pressed_no_signal(Settings.hitmarker))
 	grid.add_child(hitmarker)
+	grid.add_child(_label("Подписи мест на картах"))
+	var map_labels := CheckButton.new()
+	map_labels.name = "MapLabelsToggle"
+	map_labels.focus_mode = Control.FOCUS_NONE
+	map_labels.button_pressed = Settings.map_labels
+	map_labels.tooltip_text = "Показывать служебные надписи, которые висят над местами на картах."
+	map_labels.toggled.connect(Settings.set_map_labels)
+	Settings.map_labels_changed.connect(func() -> void: map_labels.set_pressed_no_signal(Settings.map_labels))
+	grid.add_child(map_labels)
 	grid.add_child(_label("Клавиши"))
 	var keys_btn := Button.new()
 	keys_btn.text = "Сменить клавиши…"

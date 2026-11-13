@@ -64,6 +64,11 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	rebuild()
+	for node: Node in find_children("*", "Label3D", true, false):
+		var label := node as Label3D
+		if label.get_parent().name == &"Подписи" or label.get_parent().has_meta("marker"):
+			label.add_to_group(Settings.MAP_LABEL_GROUP)
+			label.visible = Settings.map_labels
 
 
 func _process(delta: float) -> void:

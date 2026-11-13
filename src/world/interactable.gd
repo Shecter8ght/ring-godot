@@ -81,7 +81,7 @@ func _box(parent: Node3D, pos: Vector3, size: Vector3, color: Color, glow: float
 	return mi
 
 
-func _label(parent: Node3D, text: String, y: float, color: Color) -> void:
+func _label(parent: Node3D, text: String, y: float, color: Color, map_label: bool = false) -> void:
 	var l := Label3D.new()
 	l.text = text
 	l.pixel_size = 0.006
@@ -90,4 +90,6 @@ func _label(parent: Node3D, text: String, y: float, color: Color) -> void:
 	l.modulate = color
 	l.outline_size = 8
 	l.position.y = y
+	if map_label:
+		l.add_to_group(Settings.MAP_LABEL_GROUP)
 	parent.add_child(l)

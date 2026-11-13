@@ -157,7 +157,7 @@ func _build_visual(parent: Node3D) -> void:
 	# выхлоп: труба вверх над кожухом и колпак
 	_box(parent, Vector3(0.9, 2.0, 0.2), Vector3(0.14, 0.6, 0.14), steel)
 	_box(parent, Vector3(0.9, 2.33, 0.2), Vector3(0.22, 0.05, 0.22), steel)
-	_label(parent, display_name, 2.7, Color(1.0, 0.85, 0.6))
+	_label(parent, display_name, 2.7, Color(1.0, 0.85, 0.6), true)
 	var body := StaticBody3D.new()
 	body.collision_layer = Hitscan.LAYER_WORLD
 	body.collision_mask = 0
