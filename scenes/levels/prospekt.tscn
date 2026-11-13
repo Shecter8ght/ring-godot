@@ -1278,6 +1278,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_98" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-22.5, 0.6, -79.4)
@@ -1288,6 +1289,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_99" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-19.2, 0.6, -79.4)
@@ -1298,6 +1300,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_100" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-36.3, 0.6, -69)
@@ -1681,6 +1684,7 @@ look = 0
 kind = "register"
 model_yaw = -90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_141" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-87.2, 0.62, 64.7)
@@ -1691,6 +1695,7 @@ look = 0
 kind = "register"
 model_yaw = 90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_142" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-76, 0.62, 60.5)
@@ -1701,6 +1706,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_143" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-127, 0.62, 60.5)
@@ -1711,6 +1717,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_144" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-116, 0.6, 84.6)
@@ -1887,6 +1894,7 @@ search_s = 2
 look = 0
 kind = "register"
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_164" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-134, 0.72, 223)
@@ -1985,6 +1993,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_175" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-16.12, 0.72, 28)
@@ -2005,6 +2014,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_177" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-30.57, 0.72, 28)
@@ -2015,6 +2025,7 @@ look = 0
 kind = "register"
 model_yaw = -90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_178" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-28.85, 0.72, 33.5)
@@ -2068,6 +2079,7 @@ look = 0
 kind = "register"
 model_yaw = 90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_184" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(9.12, 0.72, 29.2)
@@ -2143,6 +2155,7 @@ look = 0
 kind = "register"
 model_yaw = -90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_192" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(26.8, 0.72, 65.12)
@@ -2315,6 +2328,7 @@ look = 0
 kind = "register"
 model_yaw = -135
 floor_drop = 0.48
+model_off = true
 
 [node name="Loot_211" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(162, 0.6, -36.5)
@@ -2756,6 +2770,7 @@ search_s = 2
 look = 0
 kind = "register"
 floor_drop = 0.5
+model_off = true
 
 [node name="Loot_259" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(10.4, 0.6, 62)
@@ -2824,6 +2839,7 @@ search_s = 2
 look = 0
 kind = "register"
 floor_drop = 0.55
+model_off = true
 
 [node name="Loot_267" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(181.3, 0.6, 131)
@@ -2981,6 +2997,7 @@ search_s = 2
 look = 0
 kind = "register"
 floor_drop = 0.45
+model_off = true
 
 [node name="Loot_285" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-77.8, 0.6, 11.05)
@@ -2991,6 +3008,7 @@ look = 0
 kind = "register"
 model_yaw = 45
 floor_drop = 0.45
+model_off = true
 
 [node name="Loot_286" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-172.8, 0.6, 8.45)
@@ -3001,6 +3019,7 @@ look = 0
 kind = "register"
 model_yaw = 90
 floor_drop = 0.45
+model_off = true
 
 [node name="Loot_287" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(97.6, 0.6, -2)
@@ -3068,6 +3087,7 @@ search_s = 2
 look = 0
 kind = "register"
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_294" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(7.6, 0.68, -76.5)
@@ -3419,6 +3439,7 @@ look = 0
 kind = "register"
 model_yaw = 45
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_332" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-80, 0.62, 60.3)
@@ -3429,6 +3450,7 @@ look = 0
 kind = "register"
 model_yaw = 90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_333" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-70, 0.62, 60.3)
@@ -3439,6 +3461,7 @@ look = 0
 kind = "register"
 model_yaw = 135
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_334" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-80, 0.62, 69.5)
@@ -3616,6 +3639,7 @@ look = 0
 kind = "register"
 model_yaw = -135
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_354" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(-124, 0.62, 94)
@@ -3704,6 +3728,7 @@ look = 0
 kind = "register"
 model_yaw = -90
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_363" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(122, 1.7, 234.5)
@@ -3714,6 +3739,7 @@ look = 0
 kind = "register"
 model_yaw = -180
 floor_drop = 0.6
+model_off = true
 
 [node name="Loot_364" parent="Gameplay/Loot" instance=ExtResource("12")]
 position = Vector3(116, 0.62, 226)

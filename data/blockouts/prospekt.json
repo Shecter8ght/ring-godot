@@ -3240,7 +3240,6 @@
    "at": [-29.5, 0.0, -79.4],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "good",
    "note": "окно операциониста",
    "yaw": 0.0
@@ -3249,7 +3248,6 @@
    "at": [-22.5, 0.0, -79.4],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "good",
    "note": "окно операциониста",
    "yaw": 0.0
@@ -3258,7 +3256,6 @@
    "at": [-19.2, 0.0, -79.4],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "good",
    "note": "окно операциониста",
    "yaw": 0.0
@@ -3613,7 +3610,6 @@
    "at": [-99.8, 0.02, 64.7],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "касса",
    "yaw": 0.0
@@ -3622,7 +3618,6 @@
    "at": [-87.2, 0.02, 64.7],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "касса",
    "yaw": 0.0
@@ -3631,7 +3626,6 @@
    "at": [-76, 0.02, 60.5],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "касса",
    "yaw": 0.0
@@ -3640,7 +3634,6 @@
    "at": [-127, 0.02, 60.5],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "касса",
    "yaw": 0.0
@@ -3805,7 +3798,6 @@
    "at": [-129.5, 0.12, 234.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "вокзальное кафе: касса",
    "yaw": 0.0
@@ -3898,7 +3890,6 @@
    "at": [-10.88, 0.12, 32.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "кафе «Угол»: касса",
    "yaw": 0.0
@@ -3916,7 +3907,6 @@
    "at": [-18.88, 0.12, 25.8],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "табак: касса",
    "yaw": 0.0
@@ -3925,7 +3915,6 @@
    "at": [-30.57, 0.12, 28.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "пивная «Разливное»: касса",
    "yaw": 0.0
@@ -3974,7 +3963,6 @@
    "at": [15.38, 0.12, 26.2],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "продукты «Угловой»: касса",
    "yaw": 0.0
@@ -4041,7 +4029,6 @@
    "at": [31.0, 0.12, 74.88],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "шаурма: касса",
    "yaw": 0.0
@@ -4201,7 +4188,6 @@
    "at": [4.0, 0.0, 238.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "раздавленный ларёк",
    "yaw": 0.0
@@ -4608,7 +4594,6 @@
    "at": [-44.0, 0.0, 92.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "фудтрак: касса",
    "yaw": 0.0
@@ -4675,7 +4660,6 @@
    "at": [117.8, 0.0, 94.6],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "ларёк на парковке",
    "yaw": 0.0
@@ -4821,7 +4805,6 @@
    "at": [-47.8, 0.0, -42.35],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "ларёк: касса",
    "yaw": 0.0
@@ -4830,7 +4813,6 @@
    "at": [-77.8, 0.0, 11.05],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "ларёк: касса",
    "yaw": 0.0
@@ -4839,7 +4821,6 @@
    "at": [-172.8, 0.0, 8.45],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "ларёк: касса",
    "yaw": 0.0
@@ -4899,7 +4880,6 @@
    "at": [8.0, 0.08, -71.0],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "автомойка «Блеск»: касса клиентской",
    "yaw": 0.0
@@ -5233,7 +5213,6 @@
    "at": [-137.5, 0.02, 60.3],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "«Ярус», зал: Касса",
    "yaw": 0.0
@@ -5242,7 +5221,6 @@
    "at": [-80, 0.02, 60.3],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "«Ярус», зал: Касса",
    "yaw": 0.0
@@ -5251,7 +5229,6 @@
    "at": [-70, 0.02, 60.3],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "«Ярус», зал: Касса экспресс",
    "yaw": 0.0
@@ -5419,7 +5396,6 @@
    "at": [-84, 6.755, 84],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "good",
    "note": "«Ярус», второй этаж: Счётная: касса",
    "yaw": 0.0
@@ -5500,7 +5476,6 @@
    "at": [112, 0.02, 234.5],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "вокзал, первый этаж: Окно кассы",
    "yaw": 0.0
@@ -5509,7 +5484,6 @@
    "at": [122, 1.1, 234.5],
    "kind": "register",
    "container": "register",
-   "model_ok": true,
    "tier": "common",
    "note": "вокзал, первый этаж: Окно кассы",
    "yaw": 0.0
