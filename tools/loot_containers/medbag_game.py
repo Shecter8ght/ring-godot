@@ -71,7 +71,11 @@ def stage_lp() -> None:
         ho, hc = hi(name, True), hi(name, False)
         co_o, co_c = eval_co(ho), eval_co(hc)
         assert co_o.shape == co_c.shape, name
-        mo = low_mesh(ho, target)
+        zc = None
+        if name == "МС_лента_низа":   # лента низа ~42 мм: схлопывание тянет верхнюю кромку на красную стенку — держим по высоте high
+            zb = coords(ho.data)[:, 2]
+            zc = (float(zb.min()), float(zb.max()))
+        mo = low_mesh(ho, target, zclamp=zc)
         mc = displaced(mo, co_o, co_c)
         meshes[(name, True)], meshes[(name, False)] = mo, mc
         print("ДЕТАЛЬ", name, "основа", tris(ho.data), "→ после утолщения", tris(mo), "сдвиг до", round(float(np.abs(co_c - co_o).max()), 4), flush=True)

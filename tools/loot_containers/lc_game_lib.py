@@ -57,7 +57,7 @@ def copy_props(src, dst) -> None:
             pass
 
 
-def low_mesh(ob, target: int, solidify: bool = True):
+def low_mesh(ob, target: int, solidify: bool = True, zclamp: tuple | None = None):
     """Низкая сетка детали: схлопывание рёбер до target треугольников (основа до утолщения), затем то же утолщение, что у
     high-poly (если у него есть модификатор). Материалы и развёртка сняты."""
     n = tris(ob.data)
@@ -72,9 +72,35 @@ def low_mesh(ob, target: int, solidify: bool = True):
         for m in ob.modifiers:
             if m.type == "SOLIDIFY":
                 copy_props(m, tmp.modifiers.new("sol", "SOLIDIFY"))
+    if zclamp is not None:
+        sols = [m for m in tmp.modifiers if m.type == "SOLIDIFY"]
+        for m in sols:
+            m.show_viewport = False
+            m.show_render = False
+        dg = bpy.context.evaluated_depsgraph_get()
+        m1 = bpy.data.meshes.new_from_object(tmp.evaluated_get(dg), depsgraph=dg)
+        co = coords(m1)
+        co[:, 2] = np.clip(co[:, 2], zclamp[0], zclamp[1])
+        m1.vertices.foreach_set("co", co.ravel())
+        m1.update()
+        for m in list(tmp.modifiers):
+            tmp.modifiers.remove(m)
+        old = tmp.data
+        tmp.data = m1
+        bpy.data.meshes.remove(old)
+        for m in ob.modifiers:
+            if m.type == "SOLIDIFY":
+                sm = tmp.modifiers.new("sol", "SOLIDIFY")
+                copy_props(m, sm)
+                sm.use_even_offset = False   # равномерное утолщение на изломах ленты даёт шипы длиной до 0,2 м
     dg = bpy.context.evaluated_depsgraph_get()
     me = bpy.data.meshes.new_from_object(tmp.evaluated_get(dg), depsgraph=dg)
     bpy.data.objects.remove(tmp)
+    if zclamp is not None:
+        co = coords(me)
+        co[:, 2] = np.clip(co[:, 2], zclamp[0] - 0.004, zclamp[1] + 0.004)
+        me.vertices.foreach_set("co", co.ravel())
+        me.update()
     me.materials.clear()
     for uv in list(me.uv_layers):
         me.uv_layers.remove(uv)
