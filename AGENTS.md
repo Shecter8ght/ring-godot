@@ -388,6 +388,14 @@ python -X utf8 tools/dorm_modules/electrics_wear_zones.py [набор …]  # э
 python -X utf8 tools/loot_containers/lc_fetch_materials.py ; blender -b <uv_v01.blend> --python tools/loot_containers/lc2_dump_uv.py -- <json> ; python -X utf8 tools/loot_containers/lc2_struct.py
                                                               # отделка v02 на фото-основах: загрузка наборов CC0 (ambientCG) → _asset_src/textures, выгрузка развёртки, структурные карты (строчки, валик, точки сварки);
                                                               # blender -b RING_Loot_Containers_uv_v01.blend --python tools/loot_containers/lc2_review.py -- <finish_v02.blend> [shots <папка> [кадры]] — материалы-узлы и файл просмотра
+tools/loot_containers/lc3_start.cmd ; python -X utf8 tools/loot_containers/lc3_sp.py stack [набор …] [k=<сила износа>] [floor=<грязь у пола>]
+                                                              # контейнеры для лута, партия 1, отделка v03 (образцы владельца 2026-11-13: шкаф зелёный, сейф чёрный, касса состаренный АБС;
+                                                              # заводская отделка и износ сразу, в Painter): свой мост (_asset_src/loot_containers/sp_jobs_v03), стек на проектах v01 (lc3_sp.py:
+                                                              # отделки V3, замены по коду и по сетке; lc3_stacks.py: группа «Этап 2 — износ», РИСУНОК — только фото-маски библиотеки
+                                                              # Маски_АЛЬФА, генераторы Painter дают лишь место) → _asset_src/loot_containers/maps_v03/<набор>, проекты sp/<набор>_v03.spp;
+                                                              # просмотр: blender -b RING_Loot_Containers_uv_v01.blend --factory-startup --python tools/loot_containers/lc3_review.py --
+                                                              # <textures/finish_v03> <finish_v03.blend> [shots <папка> [кадры]] [res=1600x1000] (тёмная студия, как у Sketchfab); листы сверки с образцами —
+                                                              # python -X utf8 tools/loot_containers/lc3_compare.py [gun safe cash]
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/loot_containers/medbag2.py -- build <RING_Loot_MedBag_v02.blend> [preview <папка>]
                                                               # медсумка v02, нейлоновая шитая (форма high-poly: кант, молнии, стропы, строчки; закрыта / раскрыта); затем blender -b <файл> --python tools/loot_containers/lc3_bag_uv.py -- pack <uv.blend>,
                                                               # … -- bake A B (карты геометрии), python -X utf8 tools/loot_containers/lc3_bag_maps.py A B copy (карты отделки по маскам владельца),
