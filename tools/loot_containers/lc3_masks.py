@@ -70,6 +70,7 @@ def derived(raw: dict):
     out["ChipsSpeck"] = rank(raw["SI007"], 0.30)
     out["ChipsEdge65"] = rank(np.rot90(raw["SI013"], 3), 0.65)
     out["ChipsEdge50"] = rank(np.fliplr(raw["SI013"]), 0.50)
+    out["ChipsEdge85"] = rank(np.flipud(raw["SI013"]), 0.85)
     brk = rank(np.rot90(raw["SI012"], 2), 0.40)
     out["ScrFew"] = rank(raw["Scratches004"], 0.004) * brk
     out["ScrTouch"] = rank(raw["Scratches001"], 0.02) * rank(np.flipud(raw["SI012"]), 0.55)

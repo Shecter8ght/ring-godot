@@ -49,6 +49,25 @@ KEYS = {"lc_cash": ["КМ_клавиатура__тёмные", "КМ_клави�
                     "КМ_клавиатура__зелёная", "КМ_клавиатура__синяя"]}
 _core = FZ.core
 FZ.core = lambda mask, px=1: _core(mask, 1)   # рёбра лежат на границах островов — срез в 2 пикселя съедал всю полосу
+INSIDE = {"lc_gun": ["ОШ_корпус", "ОШ_полка", "ОШ_ящик_патроны", "ОШ_ложемент"]}   # нутро шкафа: нормаль к центру корпуса
+ONLY = set(__import__("os").environ.get("LC3_ZONES", "").split(",")) - {""}   # только эти зоны (быстрый пересчёт)
+
+
+def want(name: str) -> bool:
+    return not ONLY or name in ONLY
+
+
+def island_border(g: dict, px: int) -> np.ndarray:
+    """Пиксели не дальше px от границы острова детали (соседний пиксель другой детали или пустой): кромки листа лежат на
+    границах островов развёртки, а «кромочные» пятна посреди панели (кольцо у лимба, штриховка) — нет."""
+    pid = g["part_id"]
+    b = np.zeros(pid.shape, np.uint8)
+    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        b |= (np.roll(pid, (dy, dx), (0, 1)) != pid).astype(np.uint8)
+    d = cv2.distanceTransform((1 - b).astype(np.uint8), cv2.DIST_L2, 3)
+    return d <= px
+
+
 SMALL = {"lc_cell", "lc_aid", "lc_cash"}   # малые предметы: зоны вдвое уже (иначе вся деталь «у ручки» и «у пола»)
 
 
@@ -84,9 +103,25 @@ def zones(game: str) -> None:
     zmin = float(pos[..., 2][valid].min())
     h = pos[..., 2] - zmin
     # круг 3: цепочка сколов должна читаться с двух метров при 0,85 пикс/мм — полоса 4–16 мм; сейф и ячейка — тонкая 1,5–5 мм
-    save("edge", game, clean(clean(FZ.edge_zone(g, 0.004, 0.016), 9, 0.95), 41, 0.45))
-    save("edge_s", game, clean(clean(FZ.edge_zone(g, 0.0015, 0.005), 9, 0.95), 41, 0.30))
-    save("edgew", game, clean(clean(FZ.edge_zone(g, 0.004, 0.024), 9, 0.95), 41, 0.45))
+    if want("edge"):
+        save("edge", game, clean(clean(FZ.edge_zone(g, 0.004, 0.016), 9, 0.95), 41, 0.45))
+    if want("edge_c"):
+        # круг 4: прерывистая светлая линия 3–6 мм вдоль длинных рёбер (рисунок кладёт Painter крупными чешуйками)
+        save("edge_c", game, clean(clean(FZ.edge_zone(g, 0.003, 0.006), 9, 0.95), 41, 0.45))
+    if want("edge_s"):
+        # сейф и ячейка: сколы только по самим рёбрам — полоса 2–6 мм у границ островов, кольцо у лимба и т. п. вне
+        z = clean(clean(FZ.edge_zone(g, 0.002, 0.006), 9, 0.95), 41, 0.30)
+        save("edge_s", game, z * island_border(g, 7))
+    if want("edgew"):
+        save("edgew", game, clean(clean(FZ.edge_zone(g, 0.004, 0.024), 9, 0.95), 41, 0.45))
+    if want("inside") and game in INSIDE:
+        m = FZ.parts(g, *INSIDE[game]) & valid
+        c = pos[FZ.parts(g, INSIDE[game][0]) & valid].mean(0)
+        v = c - pos
+        cosv = (nrm * v).sum(-1) / (np.linalg.norm(v, axis=-1) + 1e-6)
+        save("inside", game, smooth(cosv, 0.1, 0.5) * m)
+    elif want("inside"):
+        save("inside", game, np.zeros(valid.shape, np.float32))
     save("up", game, smooth(nrm[..., 2], 0.55, 0.95) * valid)
     k = 0.35 if game in SMALL else 1.0
     save("floor", game, (1 - smooth(h, 0.12 * k, 0.25 * k)) * valid)   # нижние 20–25 см (малые предметы — ниже)
@@ -117,7 +152,9 @@ def zones(game: str) -> None:
         d, _ = cKDTree(pos[kp][::3]).query(pos[valid])
         dd = np.full(valid.shape, 9.0, np.float32)
         dd[valid] = d
-        save("keyfield", game, (1 - smooth(dd, 0.004, 0.02)) * valid)
+        # верх клавиш чистый: грязь — в щелях между клавишами и у их оснований (на корпусе и боках клавиш)
+        tops = kp & (nrm[..., 2] > 0.7)
+        save("keyfield", game, (1 - smooth(dd, 0.004, 0.02)) * valid * (~tops))
     else:
         save("keyfield", game, np.zeros(valid.shape, np.float32))
     print("зоны", game, valid.shape, "zmin %.3f" % zmin, flush=True)

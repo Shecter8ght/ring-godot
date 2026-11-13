@@ -18,6 +18,8 @@
 рисунки с заданной долей площади по их же пикселям). МЕСТО — карты зон в развёртке по картам геометрии (lc3_zones.py).
 Облаков и noise_* / grunge_* Painter в видимых слоях износа нет.
 """
+import os
+
 import substance_painter.layerstack as L
 
 import sp_finish
@@ -27,7 +29,7 @@ from sp_lib import CH, fill
 GROUP = "Этап 2 — износ"
 PRINT = "Печать (этап 1)"
 STEEL = (0.68, 0.68, 0.69)   # светлая оголённая сталь: в тёмной студии зеркальный металл читается чёрным — светлее и шершавее
-GRAYWORN = (0.31, 0.31, 0.31)   # осветлённое ребро сейфа и ячейки: серый sRGB ~79, не блестящий металл
+GRAYWORN = (0.37, 0.37, 0.37)   # осветлённое ребро сейфа и ячейки: серый sRGB ~94 (85–105), не блестящий металл
 PRIMER = (0.15, 0.17, 0.14)   # кайма грунта по краю скола
 SRC = "E:/Games/RING-godot/_asset_src/loot_containers"
 MASKS = SRC + "/masks_v03"   # рабочие копии масок владельца и рисунки по их пикселям (lc3_masks.py)
@@ -159,8 +161,11 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
     цвета — только шероховатость, осветлённые рёбра, пыль сверху и в зазорах."""
     pat, col, rgh, met, hgt, ezone, border = edge or ("ChipsEdge50", STEEL, 0.50, 0.85, 0.497, "edge", True)
     soft = CTX["game"] in SOFT
+    soft_tone = soft or CTX["game"] == "lc_cash"   # плоскость без изменения цвета (сейф, ячейка, денежный ящик кассы)
+    small = CTX["game"] in ("lc_cell", "lc_aid", "lc_cash")
+    per = 900 if soft else 1300   # крупные чешуйки: мелкие при 0,85 пикс/мм пропадают
     made = []
-    if soft:
+    if soft_tone:
         # плоскость: только неоднородность шероховатости ±0,06 (разводы Smear), цвет не меняется
         t = _layer("Шероховатость — разводы (Smear004)", pos, rough=0.06, rmode="add", rop=0.6)
         spread(t, sm(4), 2000, bbox, rot=1.1)
@@ -185,7 +190,7 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
         made.append(_scope(t3, meshes))
         last = t3
         # вертикальные потёки: под жалюзи (зона drip) и под ручкой (touch) × SI010 (капли и потёки)
-        for zn, rot in (("drip", 0.0), ("touch", 0.1)):
+        for zn, rot in ((("drip", 0.0), ("touch", 0.1)) if not small else ()):
             d = _layer(f"Потёки (зона {zn} × SI010)", _above(last), color=(0.45, 0.46, 0.40), cmode=L.BlendingMode.Multiply,
                        cop=0.55 * k, rough=0.10, rmode="add", rop=0.5)
             zone(d, zn, si(10), 1500, bbox, rot=rot)
@@ -194,13 +199,25 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
     # кромки: цепочка светлых рваных чешуек вдоль наружных рёбер (зона × чешуйки SI013, порог — резкий край)
     if border:
         b = _layer("Кайма грунта у сколов (зона × " + pat + ")", _above(last), color=PRIMER, rough=0.62, metal=0.0, height=0.498)
-        zone(b, ezone, _m(pat), 520, bbox, rot=0.3, harden=(0.35, 0.9))
+        zone(b, ezone, _m(pat), per, bbox, rot=0.3, harden=(0.35, 0.9))
         made.append(_scope(b, meshes))
         last = b
     c = _layer("Сколы кромок (зона × " + pat + ")", _above(last), color=col, rough=rgh, metal=met, height=hgt)
-    zone(c, ezone, _m(pat), 520, bbox, rot=0.3, harden=(0.5, 0.9))
+    zone(c, ezone, _m(pat), per, bbox, rot=0.3, harden=(0.65, 0.9))
     made.append(_scope(c, meshes))
     last = c
+    if not soft:
+        # углы и участки рёбер: рваные пятна 15–30 мм (широкая зона × чешуйки ChipsEdge14 крупно)
+        cp = _layer("Углы и рёбра — рваные пятна (edgew × ChipsEdge14)", _above(last), color=col, rough=rgh, metal=met, height=hgt)
+        zone(cp, "edgew", _m("ChipsEdge14"), 1300, bbox, rot=1.7, harden=(0.5, 0.9))
+        made.append(_scope(cp, meshes))
+        last = cp
+    if CTX["game"] == "lc_cash":
+        lk = _layer("Потёртость до металла у замка (touch_core × ChipsEdge50)", _above(last), color=(0.62, 0.62, 0.60), rough=0.45,
+                    metal=0.8, height=0.497)
+        zone(lk, "touch_core", _m("ChipsEdge50"), 700, bbox, rot=0.5, harden=(0.5, 0.9))
+        made.append(_scope(lk, meshes))
+        last = lk
     if not soft:
         # затёртость у ребра и на углах: широкая зона × крапинки SI007, светлее краски (без блеска металла)
         w = _layer("Затёртость у кромки (зона edgew × SI007)", _above(last), color=(0.55, 0.58, 0.52),
@@ -216,15 +233,23 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
         last = hd
     else:
         # 2–3 коротких слабых царапины у штурвала / ручки: на 15–20/255 светлее краски
-        s = _layer("Царапины у штурвала (зона touch_core × ScrTouch)", _above(last), color=(0.28, 0.28, 0.28),
-                   cmode=L.BlendingMode.Screen, cop=0.5 * k, rough=0.10, rmode="add", rop=0.4)
-        zone(s, "touch_core", _m("ScrTouch"), 650, bbox, rot=1.9)
-        made.append(_scope(s, meshes))
-        last = s
+        alpha = f"{SRC}/wear_v03/{CTX['game']}_scr_alpha.png"
+        if os.path.exists(alpha):
+            # 2–3 короткие тонкие царапины у штурвала / ручки (lc3_scratches.py): цвет на ~22/255 светлее краски
+            s = _layer("Царапины у штурвала (lc3_scratches)", _above(last), color=(0.25, 0.25, 0.25), cop=1.0, rough=0.40, metal=0.0)
+            sp_finish.bitmap_mask(s, alpha)
+            made.append(_scope(s, meshes))
+            last = s
     # пыль: сверху (up × SI012), светлее и шершавее краски; в зазорах — по AO
-    u = _layer("Пыль сверху (зона up × SI012)", _above(last), color=(0.50, 0.50, 0.49), cop=0.28 * k, rough=0.9, rop=0.4 * k,
-               metal=0.0)
-    zone(u, "up", si(12), 1500, bbox, rot=0.7)
+    if soft:
+        # ровная тонкая дымка с лёгкой неоднородностью, без резких границ (SI014 — облачное фото), вдвое слабее прежнего
+        u = _layer("Пыль сверху — тонкая дымка (зона up × SI014)", _above(last), color=(0.50, 0.50, 0.49), cop=0.12 * k, rough=0.9,
+                   rop=0.2 * k, metal=0.0)
+        zone(u, "up", si(14), 2400, bbox, rot=0.7)
+    else:
+        u = _layer("Пыль сверху (зона up × SI012)", _above(last), color=(0.50, 0.50, 0.49), cop=0.28 * k, rough=0.9, rop=0.4 * k,
+                   metal=0.0)
+        zone(u, "up", si(12), 1500, bbox, rot=0.7)
     made.append(_scope(u, meshes))
     last = u
     # низ у пола: нижние 20–25 см темнее и грязнее, граница рваная (floor × grunge_3 / dirt_5)
@@ -246,6 +271,27 @@ def paint_wear(pos, meshes, bbox, k, floor, edge=None):
                    cmode=L.BlendingMode.Multiply, cop=0.55 * k, rough=-0.05, rmode="add", rop=0.5)
         zone(r, "kick", _m("Rubber03"), 500, bbox, rot=0.4)
         made.append(_scope(r, meshes))
+    if CTX["game"] == "lc_gun":
+        # нутро: тон на ~8–10 % светлее, грязи вдвое меньше (плоский слой поверх), пыль в углах и на полке
+        n1 = _layer("Нутро светлее и чище (зона inside)", _above(last), color=(0.325, 0.42, 0.285), cop=0.6, rough=0.62, metal=0.0)
+        zone(n1, "inside")
+        made.append(_scope(n1, meshes))
+        n2 = _layer("Нутро — пыль в углах (inside × AO × SI012)", _above(n1), color=(0.50, 0.50, 0.49), cop=0.30, rough=0.9,
+                    metal=0.0)
+        z = zone(n2, "inside")
+        g = sp_lib.mask_generator(n2, "mg_ambient_occlusion/mg_ambient_occlusion", {"ao_invert": 1}, above=z)
+        g.set_blending_mode(L.BlendingMode.Multiply)
+        gh = thresh(g, 0.25, 0.4)
+        own(n2, si(12), 1500, bbox, above=gh, rot=0.7)
+        made.append(_scope(n2, meshes))
+        n3 = _layer("Нутро — пыль на полке (inside × up × SI012)", _above(n2), color=(0.50, 0.50, 0.49), cop=0.25, rough=0.9,
+                    metal=0.0)
+        z = zone(n3, "inside")
+        u2 = L.insert_fill(L.InsertPosition.above_node(z))
+        u2.set_source(None, sp_finish._bitmap(zone_path("up")))
+        u2.set_projection_mode(L.ProjectionMode.UV)
+        u2.set_blending_mode(L.BlendingMode.Multiply)
+        made.append(_scope(n3, meshes))
     return made
 
 
@@ -288,7 +334,7 @@ def dark_wear(pos, meshes, bbox, k):
     return made
 
 
-def abs_wear(pos, meshes, bbox, k):
+def abs_wear(pos, meshes, bbox, k, keys=False):
     """Бежевый АБС: неровное жёлто-бурое пожелтение на верхних и выступающих местах, тёмная грязь в щелях и в поле клавиш
     (AO и зона keyfield × dirt), затёртый глянец на кромках, жир у замка."""
     made = []
@@ -303,13 +349,15 @@ def abs_wear(pos, meshes, bbox, k):
     # тёмная грязь между клавишами и в стыках корпуса: цвет ~(60, 50, 40) умножением до 0,5
     d = _layer("Грязь в щелях (AO × dirt_4)", _above(y2), color=(0.24, 0.20, 0.16), cmode=L.BlendingMode.Multiply,
                cop=0.9, rough=0.8, rop=0.8)
-    ao_seams(d, bbox, "dirt_4", 900, ao=0.16, pos=0.45)
+    ao_seams(d, bbox, "dirt_4", 900, ao=0.10 if keys else 0.16, pos=0.45)
     made.append(_scope(d, meshes))
-    d2 = _layer("Грязь между клавишами (зона keyfield × dirt_5)", _above(d), color=(0.24, 0.20, 0.16),
-                cmode=L.BlendingMode.Multiply, cop=0.9, rough=0.8, rop=0.8)
-    zone(d2, "keyfield", sh("dirt_5"), 800, bbox, rot=0.4, harden=(0.35, 0.5))
-    made.append(_scope(d2, meshes))
-    e = _layer("Затёртый глянец кромок (зона edge × ChipsEdge50)", _above(d2), color=(0.86, 0.82, 0.74),
+    if not keys:   # верх клавиш чистый: грязь между клавишами — на корпусе вокруг (зона keyfield без верхов клавиш)
+        d2 = _layer("Грязь между клавишами (зона keyfield × dirt_5)", _above(d), color=(0.24, 0.20, 0.16),
+                    cmode=L.BlendingMode.Multiply, cop=0.9, rough=0.8, rop=0.8)
+        zone(d2, "keyfield", sh("dirt_5"), 800, bbox, rot=0.4, harden=(0.35, 0.5))
+        made.append(_scope(d2, meshes))
+        d = d2
+    e = _layer("Затёртый глянец кромок (зона edge × ChipsEdge50)", _above(d), color=(0.86, 0.82, 0.74),
                cmode=L.BlendingMode.Screen, cop=0.20 * k, rough=-0.20, rmode="add", rop=0.9)
     zone(e, "edge", _m("ChipsEdge50"), 520, bbox, rot=0.9, harden=(0.45, 0.7))
     made.append(_scope(e, meshes))
@@ -323,7 +371,7 @@ def abs_wear(pos, meshes, bbox, k):
 def keys_wear(pos, meshes, bbox, k):
     """Клавиши: всё, что у корпуса АБС (грязь между клавишами и т. д.), плюс верх ВСЕХ заполирован пальцами (глаже на 0,12) и
     на ~7 % клавиш подпись затёрта (крупные пятна ChipsEdge14 поверх печати: цвет клавиши, 55 %)."""
-    made = abs_wear(pos, meshes, bbox, k)
+    made = abs_wear(pos, meshes, bbox, k, keys=True)
     last = made[-1]
     pol = _layer("Верх клавиш заполирован (весь)", _above(last), rough=-0.12, rmode="add", rop=1.0)
     made.append(_scope(pol, meshes))
@@ -349,12 +397,12 @@ def misc_wear(pos, meshes, bbox, k):
 KINDS = {"paint": paint_wear, "bare": bare_wear, "dark": dark_wear, "abs": abs_wear, "keys": keys_wear, "misc": misc_wear}
 # сколы кромок по предмету: (рисунок, цвет, шероховатость, металл, высота, зона, кайма грунта)
 EDGE = {
-    "lc_gun": ("ChipsEdge65", STEEL, 0.50, 0.85, 0.497, "edge", True),
-    "lc_file": ("ChipsEdge65", STEEL, 0.50, 0.85, 0.497, "edge", True),
-    "lc_safe": ("ChipsEdge65", GRAYWORN, 0.55, 0.0, 0.499, "edge_s", False),
-    "lc_cell": ("ChipsEdge65", GRAYWORN, 0.55, 0.0, 0.499, "edge_s", False),
-    "lc_aid": ("ChipsEdge50", (0.55, 0.55, 0.55), 0.5, 0.7, 0.497, "edge", True),
-    "lc_cash": ("ChipsEdge14", (0.40, 0.38, 0.35), 0.55, 0.4, 0.498, "edge", True),
+    "lc_gun": ("ChipsEdge85", STEEL, 0.50, 0.85, 0.497, "edge_c", True),
+    "lc_file": ("ChipsEdge85", STEEL, 0.50, 0.85, 0.497, "edge_c", True),
+    "lc_safe": ("ChipsEdge65", GRAYWORN, 0.50, 0.0, 0.499, "edge_s", False),
+    "lc_cell": ("ChipsEdge65", GRAYWORN, 0.50, 0.0, 0.499, "edge_s", False),
+    "lc_aid": ("ChipsEdge50", (0.55, 0.55, 0.55), 0.5, 0.7, 0.497, "edge_c", True),
+    "lc_cash": ("ChipsEdge50", (0.58, 0.58, 0.57), 0.5, 0.8, 0.497, "edge_c", True),
 }
 
 
