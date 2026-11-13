@@ -1162,3 +1162,19 @@ Fresnel-шейдер. HDRI студии Blender упакован только в
 библиотека записей. Исходный пакет, MP3 и WAV: `C:/Users/Schecter_8ght/Desktop/РЕПЛИКИ/RING_генерация`;
 манифест и генератор сохранены там же. Перенос в игру — `tools/import_npc_voice_pack.py`. Условия сервиса:
 https://elevenlabs.io/terms. 44 реплики Сергея и Антона в этот набор не входят.
+
+## Контейнеры для лута · сейф, ячейка, оружейный шкаф, картотека, касса, аптечка (`assets/models/loot_containers`, 2026-11-13)
+
+- Модели — свои (`tools/loot_containers/build_batch1.py` — форма, `lc_uv.py` — развёртка, `lc3_sp.py` / `lc3_stacks.py` —
+  отделка с износом в Substance Painter, `lc_game.py` — игровые сетки и запекание), исходники —
+  `E:/Models Blender/ENVIRONMENT/RING_Loot_Containers` (asset-state.md, finish-spec.json). Основы материалов —
+  процедурные ресурсы полки Painter; в игру — только запечённые карты.
+- Маски износа (рисунок сколов, царапин, грязи, разводов; все CC0 1.0): ambientCG (Lennart Demes,
+  https://ambientcg.com/view?id=<id>) — SurfaceImperfections007, 010, 012, 013, 014, 015, 016, Scratches001–004, Smear001,
+  004, 006, Fingerprints001; ShareTextures (https://www.sharetextures.com) — dirt_4, dirt_5, grunge_1, grunge_2, grunge_3,
+  grunge_4, scratches_5. Лежат в библиотеке владельца `Маски_АЛЬФА/50_Скачанные_CC0_ambientCG_ShareTextures`
+  (лицензии — `00_ЛИЦЕНЗИЯ_и_источники.txt` там же), рабочие копии — `_asset_src/loot_containers/masks_v03`.
+- Маски владельца (свои): пористая коррозия, отпечаток ладони, следы резины (`Маски_АЛЬФА/12_…`, `02_…`, `18_…`).
+- Шильдики, наклейки, шкала лимба, подписи клавиш, цифры индикаторов кассы, зелёный крест и надписи аптечки —
+  вымышленные («КРЕПЬ», «РУБЕЖ», «АРХИВ-4», «ТОРГ-410»), шрифт **DejaVu Sans / DejaVu Sans Bold** (© Bitstream, изменения
+  DejaVu — public domain; лицензия Bitstream Vera Fonts), запечены в карты.
