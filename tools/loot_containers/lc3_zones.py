@@ -43,6 +43,10 @@ TOUCH = {
     "lc_aid": ["АП_защёлка"],
 }
 ITEMS = list(TOUCH)
+# места потёков (под жалюзи шкафа) и поля клавиш (грязь между клавишами)
+DRIP = {"lc_gun": ["ОШ_жалюзи_лев", "ОШ_жалюзи_прав"]}
+KEYS = {"lc_cash": ["КМ_клавиатура__тёмные", "КМ_клавиатура__светлые", "КМ_клавиатура__красная",
+                    "КМ_клавиатура__зелёная", "КМ_клавиатура__синяя"]}
 _core = FZ.core
 FZ.core = lambda mask, px=1: _core(mask, 1)   # рёбра лежат на границах островов — срез в 2 пикселя съедал всю полосу
 SMALL = {"lc_cell", "lc_aid", "lc_cash"}   # малые предметы: зоны вдвое уже (иначе вся деталь «у ручки» и «у пола»)
@@ -69,7 +73,8 @@ def clean(zone: np.ndarray, win: int = 13, dens: float = 0.4) -> np.ndarray:
     """Кромочная зона без «штриховки»: панели с шумной нормалью давали плотную сетку полос по всей плоскости, а
     настоящая кромка — полоса в 3–5 пикселей (плотность в окне ~0,2–0,3): где плотнее — не кромка."""
     d = cv2.boxFilter((zone > 0.5).astype(np.float32), -1, (win, win))
-    return np.where(d > dens, 0.0, zone).astype(np.float32)
+    z = np.where(d > dens, 0.0, zone)
+    return np.where(z < 0.35, 0.0, z).astype(np.float32)   # слабый серый фон панелей — не кромка
 
 
 def zones(game: str) -> None:
@@ -78,11 +83,13 @@ def zones(game: str) -> None:
     valid = FZ.core(g["part_id"] > 0)
     zmin = float(pos[..., 2][valid].min())
     h = pos[..., 2] - zmin
-    save("edge", game, clean(FZ.edge_zone(g, 0.002, 0.011), 9, 0.95))
-    save("edgew", game, clean(FZ.edge_zone(g, 0.002, 0.020), 9, 0.95))
+    # круг 3: цепочка сколов должна читаться с двух метров при 0,85 пикс/мм — полоса 4–16 мм; сейф и ячейка — тонкая 1,5–5 мм
+    save("edge", game, clean(clean(FZ.edge_zone(g, 0.004, 0.016), 9, 0.95), 41, 0.45))
+    save("edge_s", game, clean(clean(FZ.edge_zone(g, 0.0015, 0.005), 9, 0.95), 41, 0.30))
+    save("edgew", game, clean(clean(FZ.edge_zone(g, 0.004, 0.024), 9, 0.95), 41, 0.45))
     save("up", game, smooth(nrm[..., 2], 0.55, 0.95) * valid)
     k = 0.35 if game in SMALL else 1.0
-    save("floor", game, (1 - smooth(h, 0.06 * k, 0.14 * k)) * valid)
+    save("floor", game, (1 - smooth(h, 0.12 * k, 0.25 * k)) * valid)   # нижние 20–25 см (малые предметы — ниже)
     vert = 1 - smooth(np.abs(nrm[..., 2]), 0.2, 0.5)
     save("kick", game, (1 - smooth(h, 0.12, 0.30)) * vert * valid)
     k2 = 0.5 if (game in SMALL or game == "lc_safe") else 1.0
@@ -96,6 +103,23 @@ def zones(game: str) -> None:
     else:
         save("touch", game, np.zeros(valid.shape, np.float32))
         save("touch_core", game, np.zeros(valid.shape, np.float32))
+    drip = FZ.parts(g, *DRIP[game]) if game in DRIP else None
+    if drip is not None and drip.any():
+        zmax = float(pos[..., 2][drip].max())
+        d, _ = cKDTree(pos[drip][::3]).query(pos[valid])
+        dd = np.full(valid.shape, 9.0, np.float32)
+        dd[valid] = d
+        save("drip", game, (1 - smooth(dd, 0.0, 0.12)) * (pos[..., 2] < zmax) * valid)
+    else:
+        save("drip", game, np.zeros(valid.shape, np.float32))
+    kp = FZ.parts(g, *KEYS[game]) if game in KEYS else None
+    if kp is not None and kp.any():
+        d, _ = cKDTree(pos[kp][::3]).query(pos[valid])
+        dd = np.full(valid.shape, 9.0, np.float32)
+        dd[valid] = d
+        save("keyfield", game, (1 - smooth(dd, 0.004, 0.02)) * valid)
+    else:
+        save("keyfield", game, np.zeros(valid.shape, np.float32))
     print("зоны", game, valid.shape, "zmin %.3f" % zmin, flush=True)
 
 

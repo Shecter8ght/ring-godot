@@ -38,6 +38,10 @@ SRC = {
     "Rubber01": OWN / "18_Следы_резины_и_контакта" / "Резина_01_Короткий_мазок.png",
     "Palm": OWN / "02_Отпечатки_ладоней" / "Ладонь_растёртая_01.png",
     "ChipsWorn": OWN / "10_Сколы_и_потёртости_покрытия" / "Сколы_с_потёртостями_01.png",
+    "SI010": first("ambientCG/SurfaceImperfections010/*Opacity.png"),
+    "Grunge1": first("ShareTextures/grunge_1/*.png"),
+    "Grunge2": first("ShareTextures/grunge_2/*.png"),
+    "Grunge4": first("ShareTextures/grunge_4/*.png"),
     "Scratches001": first("ambientCG/Scratches001/*Opacity.png"),
     "Scratches004": first("ambientCG/Scratches004/*Opacity.png"),
     "Smear001": first("ambientCG/Smear001/*Color.*"),
@@ -64,6 +68,8 @@ def derived(raw: dict):
     out["ChipsEdge45"] = rank(raw["SI013"], 0.45)
     out["ChipsEdge14"] = rank(np.rot90(raw["SI013"]), 0.14)
     out["ChipsSpeck"] = rank(raw["SI007"], 0.30)
+    out["ChipsEdge65"] = rank(np.rot90(raw["SI013"], 3), 0.65)
+    out["ChipsEdge50"] = rank(np.fliplr(raw["SI013"]), 0.50)
     brk = rank(np.rot90(raw["SI012"], 2), 0.40)
     out["ScrFew"] = rank(raw["Scratches004"], 0.004) * brk
     out["ScrTouch"] = rank(raw["Scratches001"], 0.02) * rank(np.flipud(raw["SI012"]), 0.55)

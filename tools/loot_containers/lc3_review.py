@@ -81,12 +81,12 @@ def studio(coll, span):
     bm = bmesh.new()
     L.bm_box(bm, (-3.0, -4.0, -0.02), (span + 3.0, 3.0, 0.0))
     L.finish_bm(bm, "студия_пол", coll, L.material("Студия_пол", (0.025, 0.025, 0.027), 0.55))
-    lights = [("ключевой", (span * 0.35, -3.2, 3.6), 760, 5.0, (math.radians(52), 0, math.radians(-12))),
-              ("ключевой_2", (span * 0.8, -3.2, 3.6), 600, 5.0, (math.radians(52), 0, math.radians(10))),
-              ("контровой_лево", (-0.8, 1.9, 2.6), 650, 1.6, (math.radians(-118), 0, math.radians(-30))),
-              ("контровой_право", (span + 0.8, 1.9, 2.6), 650, 1.6, (math.radians(-118), 0, math.radians(30))),
-              ("контровой_центр", (span * 0.5, 2.2, 3.0), 400, 3.0, (math.radians(-130), 0, 0)),
-              ("заполнение", (span * 0.5, -4.0, 1.2), 60, 4.0, (math.radians(88), 0, 0))]
+    lights = [("ключевой", (span * 0.35, -3.2, 3.6), 520, 5.0, (math.radians(52), 0, math.radians(-12))),
+              ("ключевой_2", (span * 0.8, -3.2, 3.6), 400, 5.0, (math.radians(52), 0, math.radians(10))),
+              ("контровой_лево", (-0.8, 1.9, 2.6), 500, 1.6, (math.radians(-118), 0, math.radians(-30))),
+              ("контровой_право", (span + 0.8, 1.9, 2.6), 500, 1.6, (math.radians(-118), 0, math.radians(30))),
+              ("контровой_центр", (span * 0.5, 2.2, 3.0), 300, 3.0, (math.radians(-130), 0, 0)),
+              ("заполнение", (span * 0.5, -4.0, 1.2), 40, 4.0, (math.radians(88), 0, 0))]
     for name, loc, e, size, rot in lights:
         ld = bpy.data.lights.new(name, "AREA")
         ld.energy = e
@@ -146,6 +146,15 @@ def main() -> None:
                 key = "glass" if any(k in ob.name for k in GLASS) else ""
                 if key not in mats:
                     mats[key] = R.material(f"{game}{'_стекло' if key else ''}", maps_dir, glass=bool(key))
+                    emi = os.path.join(maps_dir, f"{game}_emissive.png")
+                    if game == "lc_cash" and not key and os.path.exists(emi):
+                        # свечение зелёных цифр индикаторов: отдельная карта (в пресете glTF Painter канала излучения нет)
+                        nt = mats[key].node_tree
+                        bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+                        tn = nt.nodes.new("ShaderNodeTexImage")
+                        tn.image = R.load(emi, False)
+                        nt.links.new(tn.outputs["Color"], bsdf.inputs["Emission Color"])
+                        bsdf.inputs["Emission Strength"].default_value = 4.0
                 ob.data.materials.append(mats[key])
                 for p in ob.data.polygons:
                     p.use_smooth = True
@@ -156,6 +165,14 @@ def main() -> None:
         x += 0.35
     st = L.collection("Студия")
     studio(st, x)
+    # лицевая панель сейфа читается 35–50 sRGB: добавочный ключевой софтбокс над ним (образец освещён ярче остальных)
+    sp = spots[("lc_safe", "закрыто")]
+    ld = bpy.data.lights.new("ключевой_сейф", "AREA")
+    ld.energy, ld.size = 130, 1.6
+    lo = bpy.data.objects.new("ключевой_сейф", ld)
+    lo.location = (sp.x - 0.3, -1.7, 1.9)
+    lo.rotation_euler = (math.radians(62), 0, math.radians(-8))
+    st.objects.link(lo)
     if "Стена" not in bpy.data.objects:
         import bmesh
         bm = bmesh.new()

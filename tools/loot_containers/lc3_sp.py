@@ -28,7 +28,7 @@ GRAIN_PAINT = {"mm": 0.4, "rough": 0.16, "color": 0.03, "height": 0.006}
 V3 = {
     # зелёная армейская краска оружейного шкафа: sRGB ≈ (86, 100, 72) на свету, полуматовая, мелкая фактура
     "V3-GUN-GRN": {"code": "V3-GUN-GRN", "title": "Краска зелёная армейская, полуматовая (шкаф)", "kind": "coating",
-                   "base": {"color": [0.30, 0.39, 0.27], "rough": 0.60, "metal": 0.0}, "grain": GRAIN_PAINT},
+                   "base": {"color": [0.282, 0.345, 0.235], "rough": 0.60, "metal": 0.0}, "grain": GRAIN_PAINT},
     # чёрная матовая краска с мелкой фактурой (сейф): не темнее ~30/255 sRGB
     "V3-SAFE-BLK": {"code": "V3-SAFE-BLK", "title": "Краска чёрная матовая, мелкая фактура (сейф)", "kind": "coating",
                     "base": {"color": [0.135, 0.135, 0.130], "rough": 0.62, "metal": 0.0},
@@ -114,6 +114,8 @@ def v3_parts(spec: dict, name: str, meshes: list[str]) -> tuple[list, dict]:
                 new, kind = BY_CODE.get(name, {}).get(code, (None, None))
             if kind is None:
                 kind = kind_of(code)
+            if name == "lc_cash" and base.startswith("КМ_клавиатура"):
+                kind = "keys"   # клавиши: верх заполирован, подписи затёрты, грязь в щелях между ними
             fcode = new or code
             final = plain(V3.get(fcode) or (fin if not new else fcode))
             key = json.dumps(final, ensure_ascii=False, sort_keys=True)
@@ -146,7 +148,7 @@ def build_and_export(name: str, parts: list, kinds: dict, out_dir: Path, marker:
     print(F.sp_run.wait(F.sp_run.SP_JOBS / marker, 1800))
 
 
-K_GAME = {"lc_safe": 1.0, "lc_cell": 1.0, "lc_file": 1.0, "lc_aid": 1.0, "lc_cash": 1.0}
+K_GAME = {"lc_safe": 1.0, "lc_cell": 1.0, "lc_file": 1.0, "lc_aid": 1.0, "lc_cash": 0.8}
 
 
 def stack(names: list[str], k: float = 0.0, floor: float = 0.2) -> None:
