@@ -2,6 +2,38 @@
   "schemaVersion": 2,
   "actions": [
     {
+      "hook": "step_base",
+      "name": "Основа шага — удар подошвы",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_base",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_layer_concrete",
+      "name": "Слой покрытия — бетон и асфальт",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_layer_concrete",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_layer_gravel",
+      "name": "Слой покрытия — гравий и камушки",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_layer_gravel",
+      "supportsObject": false
+    },
+    {
+      "hook": "step_layer_water",
+      "name": "Слой покрытия — лужи",
+      "category": "Шаги и движение",
+      "type": "one",
+      "profile": "step_layer_water",
+      "supportsObject": false
+    },
+    {
       "hook": "mag_drop",
       "name": "Пустой магазин падает на пол",
       "category": "Оружие — обращение",

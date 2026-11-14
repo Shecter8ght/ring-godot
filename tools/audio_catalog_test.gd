@@ -89,6 +89,7 @@ func _ready() -> void:
 	Audio._samples.shell_12_concrete = []
 	check(Audio._pick(Audio.shell_hook("concrete", "wpn_sg_02"), Vector3.ZERO) == null, "empty 12-gauge card stays silent")
 	Audio._samples.shell_12_concrete = original_12
+	_check_step_layers(camera)
 	# Compare a selected variant on the bench with ordinary gameplay and a live gain edit.
 	var originals: Array = Audio._samples.step_wood
 	Audio._samples.step_wood = [probe]
@@ -171,6 +172,24 @@ func _ready() -> void:
 		"отключение фильтра не останавливает запись и не меняет её громкость")
 	spectral.button_pressed = true
 	check(preview.bus == &"Steps", "Стенд использует обычную шину шагов")
+	overlay.call("_select", "step_layer_gravel")
+	var step_mode: OptionButton = overlay.get("_step_mode")
+	# Каждый режим запускает один синхронный шаг, в том числе при паузе.
+	for mode: int in range(3):
+		step_mode.select(mode)
+		step_mode.item_selected.emit(mode)
+		heard.clear()
+		overlay.call("_play")
+		var expected: Array = [["step_base", "step_layer_gravel"], ["step_base"], ["step_layer_gravel"]][mode]
+		check(heard == expected, "стенд проигрывает выбранные слои шага: %s" % step_mode.get_item_text(mode))
+	var base_gain: SpinBox = overlay.get("_step_base_gain")
+	Audio.mix_save_path = "user://audio_mix_test.json"
+	base_gain.value = -3.0
+	overlay.call("_save")
+	saved = JSON.parse_string(FileAccess.get_file_as_string(Audio.mix_save_path)) as Dictionary
+	check(float(saved.events.step_base) == -3.0, "громкость основы сохраняется отдельно")
+	Audio.mix_save_path = save_path
+	Audio._mix = old_mix
 	get_tree().paused = false
 	if DisplayServer.get_name() != "headless":
 		overlay.call("_refresh")
@@ -181,3 +200,33 @@ func _ready() -> void:
 	overlay.queue_free()
 	print("AUDIO_CATALOG_TEST checked=%d failed=%d" % [checked, failed])
 	get_tree().quit(1 if failed else 0)
+
+
+func _check_step_layers(camera: Camera3D) -> void:
+	var contacts: Array[Vector3] = []
+	var observe: Callable = func(_id: String, _hook: String, pos: Vector3) -> void: contacts.append(pos)
+	Audio.event_played.connect(observe)
+	var steps: Array[String] = []
+	var observe_step: Callable = func(hook: String, _surf: String, _pos: Vector3) -> void: steps.append(hook)
+	Audio.stepped.connect(observe_step)
+	for floor: Array in [[0.0, "step_concrete", "step_layer_concrete"], [4.0, "step_water", "step_layer_water"],
+			[8.0, "step_gravel", "step_layer_gravel"]]:
+		var pos: Vector3 = Vector3(float(floor[0]), 0, 0)
+		camera.position = pos + Vector3(0, 1.6, 1)
+		for run: bool in [false, true]:
+			heard.clear()
+			contacts.clear()
+			steps.clear()
+			Audio.step(pos, run, run, 0.0, true, Vector3.RIGHT)
+			check(heard.slice(0, 2) == ["step_base", floor[2]] and heard.count(floor[1]) == 0,
+				"с каждого касания звучат основа и покрытие: %s" % floor[1])
+			check(contacts.size() >= 2 and contacts[0].is_equal_approx(contacts[1]) and steps == [floor[1]],
+				"оба звука из одной точки стопы и один сигнал шага")
+	var gravel: Array = Audio._samples.step_layer_gravel
+	Audio._samples.step_layer_gravel = []
+	heard.clear()
+	Audio.step(Vector3(8, 0, 0), false, false, 0.0, true)
+	check(heard == ["step_base"], "пустое покрытие оставляет основу")
+	Audio._samples.step_layer_gravel = gravel
+	Audio.stepped.disconnect(observe_step)
+	Audio.event_played.disconnect(observe)

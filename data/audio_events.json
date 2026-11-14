@@ -2,6 +2,82 @@
   "schemaVersion": 2,
   "events": [
     {
+      "id": "step_base",
+      "name": "Основа шага — удар подошвы",
+      "category": "Шаги и движение",
+      "group": "Слои шага",
+      "binding": {
+        "type": "action",
+        "hook": "step_base"
+      },
+      "type": "one",
+      "profile": "step_base",
+      "files": [
+        "sonora/step_base_01.wav",
+        "sonora/step_base_02.wav",
+        "sonora/step_base_03.wav",
+        "sonora/step_base_04.wav"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "step_layer_concrete",
+      "name": "Слой покрытия — бетон и асфальт",
+      "category": "Шаги и движение",
+      "group": "Слои шага",
+      "binding": {
+        "type": "action",
+        "hook": "step_layer_concrete"
+      },
+      "type": "one",
+      "profile": "step_layer_concrete",
+      "files": [
+        "sonora/step_layer_concrete_01.wav",
+        "sonora/step_layer_concrete_02.wav",
+        "sonora/step_layer_concrete_03.wav",
+        "sonora/step_layer_concrete_04.wav"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "step_layer_gravel",
+      "name": "Слой покрытия — гравий и камушки",
+      "category": "Шаги и движение",
+      "group": "Слои шага",
+      "binding": {
+        "type": "action",
+        "hook": "step_layer_gravel"
+      },
+      "type": "one",
+      "profile": "step_layer_gravel",
+      "files": [
+        "sonora/step_layer_gravel_01.wav",
+        "sonora/step_layer_gravel_02.wav",
+        "sonora/step_layer_gravel_03.wav",
+        "sonora/step_layer_gravel_04.wav"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "step_layer_water",
+      "name": "Слой покрытия — лужи",
+      "category": "Шаги и движение",
+      "group": "Слои шага",
+      "binding": {
+        "type": "action",
+        "hook": "step_layer_water"
+      },
+      "type": "one",
+      "profile": "step_layer_water",
+      "files": [
+        "sonora/step_layer_water_01.wav",
+        "sonora/step_layer_water_02.wav",
+        "sonora/step_layer_water_03.wav",
+        "sonora/step_layer_water_04.wav"
+      ],
+      "enabled": true
+    },
+    {
       "id": "wpn_hg_01_shot_room",
       "name": "Без глушителя в помещении",
       "category": "Оружие",

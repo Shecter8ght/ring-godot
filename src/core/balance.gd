@@ -4400,6 +4400,10 @@ const AUDIO_EVENT_PROFILES: Dictionary = {
 	"step": {"db": -16.0, "unit": 3.0, "max": 22.0},
 	"step_ai": {"db": -14.0, "unit": 3.0, "max": 26.0},
 	# шаги по поверхностям (Audio.step): occlude — за стеной глуше
+	"step_base": {"db": -16.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_layer_concrete": {"db": -21.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_layer_gravel": {"db": -18.0, "unit": 3.0, "max": 28.0, "occlude": true},
+	"step_layer_water": {"db": -18.0, "unit": 3.0, "max": 28.0, "occlude": true},
 	"step_stone": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},
 	"step_stone_run": {"db": -12.0, "unit": 3.0, "max": 34.0, "occlude": true},
 	"step_dirt": {"db": -15.0, "unit": 3.0, "max": 28.0, "occlude": true},

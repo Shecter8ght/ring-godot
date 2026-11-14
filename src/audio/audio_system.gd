@@ -2,6 +2,12 @@ extends Node
 ## Движок выбирает запись места и считает, как звук дошёл до игрока.
 
 const REGISTRY: String = "res://data/audio_events.json"
+const STEP_BASE: String = "step_base"
+const STEP_MATERIALS := {
+	"step_concrete": "step_layer_concrete",
+	"step_gravel": "step_layer_gravel",
+	"step_water": "step_layer_water",
+}
 const MIX_PATH: String = "res://data/audio_mix.json"
 const MAP_AMBIENCE_PATH: String = "user://map_ambience.cfg"
 const AcousticPlace := preload("res://src/audio/acoustic_place.gd")
@@ -890,7 +896,13 @@ func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right:
 			axis.y = 0.0
 		side_m *= Balance.lab_number("step_timing", "pan_pct") / 100.0
 	var sound_pos: Vector3 = pos + axis.normalized() * side_m * (-1.0 if left else 1.0)
-	play(kind, sound_pos, db, 0.0, null, _step_recording(takes, surf, pos))
+	var recording: AudioStream = _step_recording(takes, surf, pos)
+	var material: String = STEP_MATERIALS.get(kind, "")
+	if material != "" and recording == null and not _preview.has(kind) and has_sound(STEP_BASE):
+		play(STEP_BASE, sound_pos, db)
+		play(material, sound_pos, db)
+	else:
+		play(kind, sound_pos, db, 0.0, null, recording)
 	_play_step_layers(pos, sound_pos, kind, db, ai)
 	if run:
 		play("gear_rattle", pos, db - 5.0)

@@ -23,6 +23,10 @@ var _sound_path: OptionButton
 var _spectral: CheckBox
 var _play_button: Button
 var _save_timer: Timer
+var _step_repeat: Timer
+var _step_controls: VBoxContainer
+var _step_mode: OptionButton
+var _step_base_gain: SpinBox
 var _id: String = ""
 var _updating: bool = false
 var _dirty: bool = false
@@ -152,6 +156,19 @@ func _build() -> void:
 	right.add_child(_variants)
 	_event_level = _level_control(right, "Громкость события · дБ", false)
 	_file_level = _level_control(right, "Поправка выбранной записи · дБ", true)
+	_step_controls = VBoxContainer.new()
+	_step_controls.hide()
+	right.add_child(_step_controls)
+	_step_mode = OptionButton.new()
+	for mode: String in ["Основа и покрытие", "Только основа", "Только покрытие"]:
+		_step_mode.add_item(mode)
+	_step_mode.item_selected.connect(_step_mode_changed)
+	_step_controls.add_child(_step_mode)
+	_step_base_gain = _gain_control(_step_controls, "Громкость основы шага · дБ", -60.0, 24.0, _change_step_base_gain)
+	_step_repeat = Timer.new()
+	_step_repeat.wait_time = Balance.STEP_WALK_SEC
+	_step_repeat.timeout.connect(_play_step_take)
+	add_child(_step_repeat)
 	var position_row: HBoxContainer = HBoxContainer.new()
 	right.add_child(position_row)
 	position_row.add_child(_label("Расстояние, м"))
@@ -333,6 +350,7 @@ func _fill_list() -> void:
 	else:
 		_id = ""
 		_play_button.disabled = true
+		_step_controls.hide()
 		_title.text = "Ничего не найдено"
 		_details.text = "Измените поиск или вкладку."
 
@@ -356,8 +374,12 @@ func _select(id: String) -> void:
 		_variants.add_item(file.get_file())
 		_variants.set_item_metadata(_variants.item_count - 1, file)
 	_play_button.disabled = not Audio.has_sound(id)
+	_step_controls.visible = id in Audio.STEP_MATERIALS.values()
+	if _step_controls.visible:
+		_update_step_play_button()
 	_updating = true
 	_event_level.value = Audio.mix_gain(id)
+	_step_base_gain.value = Audio.mix_gain(Audio.STEP_BASE)
 	_updating = false
 	_select_variant()
 
@@ -381,6 +403,22 @@ func _change_level(value: float, file_level: bool) -> void:
 	_queue_save()
 
 
+func _change_step_base_gain(value: float) -> void:
+	Audio.set_mix_gain(Audio.STEP_BASE, value)
+	_queue_save()
+
+
+func _update_step_play_button() -> void:
+	var mode: int = _step_mode.selected
+	_play_button.disabled = not ((mode != 2 and Audio.has_sound(Audio.STEP_BASE)) or (mode != 1 and Audio.has_sound(_id)))
+
+
+func _step_mode_changed(_index: int) -> void:
+	_update_step_play_button()
+	if not _step_repeat.is_stopped():
+		_play()
+
+
 func _queue_save() -> void:
 	_dirty = true
 	_status.text = "Сохраняем…"
@@ -402,19 +440,41 @@ func _reset_levels() -> void:
 
 func _play() -> void:
 	_stop()
-	if _id == "":
+	if _id == "" or _play_button.disabled:
 		return
+	if _step_controls.visible:
+		_play_step_take()
+		if _loop.button_pressed:
+			_step_repeat.start()
+	else:
+		_add_preview(_id, _play_position(), _variants.selected, _loop.button_pressed)
+	_status.text = "Играет: " + _title.text
+
+
+func _play_step_take() -> void:
+	_players = _players.filter(func(player: Variant) -> bool: return is_instance_valid(player))
+	var position: Vector3 = _play_position()
+	var base_count: int = (Audio._samples.get(Audio.STEP_BASE, []) as Array).size()
+	if _step_mode.selected != 2 and base_count > 0:
+		_add_preview(Audio.STEP_BASE, position, maxi(_variants.selected, 0) % base_count, false)
+	if _step_mode.selected != 1:
+		_add_preview(_id, position, _variants.selected, false)
+
+
+func _play_position() -> Vector3:
 	var angle: float = deg_to_rad(_angle.value)
 	var direction: Vector3 = Vector3(sin(angle), 0, -cos(angle))
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	if camera != null:
 		direction = camera.global_basis * direction
-	var pos: Vector3 = Audio._listener_pos() + direction * _distance.value
-	var player: Node = Audio.preview_event(_id, pos, _variants.selected, _loop.button_pressed,
+	return Audio._listener_pos() + direction * _distance.value
+
+
+func _add_preview(id: String, pos: Vector3, variant: int, looped: bool) -> void:
+	var player: Node = Audio.preview_event(id, pos, variant, looped,
 		_sound_path.get_selected_id(), _spectral.button_pressed)
 	if player != null:
 		_players.append(player)
-		_status.text = "Играет: " + _title.text
 
 
 func _preview_spectral(enabled: bool) -> void:
@@ -424,6 +484,7 @@ func _preview_spectral(enabled: bool) -> void:
 
 
 func _stop() -> void:
+	_step_repeat.stop()
 	for player: Node in _players:
 		if is_instance_valid(player):
 			player.call("stop")
