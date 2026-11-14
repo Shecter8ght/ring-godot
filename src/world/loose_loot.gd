@@ -17,6 +17,10 @@ extends LootContainer
 ## готовой от Raid (items, rolled), точка ничего не бросает сама.
 var dropped: bool = false
 var lay_yaw: float = 0.0
+## Вещь прилетела физическим телом (TossedItem): лежит так, как оно успокоилось, — lay_pose, положение модели
+## относительно точки (точка — на поверхности под ней).
+var posed: bool = false
+var lay_pose: Transform3D = Transform3D.IDENTITY
 
 
 func _ready() -> void:
@@ -79,7 +83,10 @@ func _build_visual(parent: Node3D) -> void:
 	if id == "":
 		return
 	if dropped:
-		lay_item(parent, id, lay_yaw)
+		if posed:
+			pose_item(parent, id, lay_pose)
+		else:
+			lay_item(parent, id, lay_yaw)
 		return
 	var model: Node3D = ItemModels.build(id)
 	parent.add_child(model)
@@ -100,6 +107,22 @@ static func floor_near(pl: Player) -> Vector3:
 	var query := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 0.8, pos + Vector3.DOWN * 2.5, Hitscan.LAYER_WORLD)
 	var hit: Dictionary = pl.get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.position if not hit.is_empty() else pos
+
+
+## Вещь лежит так, как успокоилось её летевшее тело (TossedItem): та же модель с началом в центре габарита,
+## pose — её положение относительно точки. Подмена тела на лежащую вещь не видна.
+static func pose_item(parent: Node3D, id: String, pose: Transform3D) -> void:
+	var holder: Node3D = TossedItem.centered_model(id)
+	holder.name = "Laid"
+	holder.transform = pose
+	parent.add_child(holder)
+
+
+## Точка лежащей вещи и поза модели относительно неё по месту, где успокоилось тело (pose — мир): точка — на
+## поверхности под телом (floor — попадание луча вниз; пусто — в центре тела).
+static func rest_place(pose: Transform3D, floor: Dictionary) -> Array:
+	var root: Vector3 = floor.position if not floor.is_empty() else pose.origin
+	return [root, Transform3D(pose.basis, pose.origin - root)]
 
 
 ## Положить вещь на пол плашмя (самой тонкой стороной вверх) и повернуть на yaw: уроненный магазин

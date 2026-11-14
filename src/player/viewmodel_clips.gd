@@ -109,6 +109,20 @@ var _eject_hide: float = 0.0
 var _spare_parts: Array[Node3D] = []
 var _spare_rounds: Node3D
 var _fast: bool = false
+## Старый магазин вылетает настоящим телом (TossedItem): на кадре config.drop_frame клипа руки его отпускают —
+## игрок просит хоста пустить тело из этого места (Player.toss_old_mag), и в руках магазин больше не рисуется.
+## _spare_hist — где узел магазина был в последние кадры ([время, место и поворот в осях камеры]): по ним скорость
+## и вращение вылета; _spare_seat — поворот «оси оружия → оси кости магазина», пока магазин ещё стоит в шахте
+## (тело и лежащая вещь собраны в осях оружия). _spare_wait — сколько ещё ждать тело от хоста (гость).
+var _drop_frame: int = -1
+var _spare_hist: Array = []
+var _spare_time: float = 0.0
+var _spare_seat: Basis = Basis.IDENTITY
+var _spare_seated: bool = false
+var _spare_released: bool = false
+var _spare_gone: bool = false
+var _spare_wait: float = 0.0
+var _spare_centers: Dictionary = {}
 ## Проверка с удержанием: клип стоит на участке показа; фаза покачивания; сглаженный поворот кисти.
 var _holding: bool = false
 var _hold_phase: float = 0.0
@@ -386,8 +400,118 @@ func swap_fraction(kind: String) -> float:
 	return clampf(float(frame) / float(config.get("fps", 30)) / maxf(length, 0.01), 0.0, 1.0)
 
 
+## Доля клипа быстрой перезарядки kind ("reload_fast" / "reload_fast_empty"), где руки отпускают старый магазин
+## (config.drop_frame); −1 — у клипа такого кадра нет.
+func drop_fraction(kind: String) -> float:
+	var at: int = int((config.get("drop_frame", {}) as Dictionary).get(_base_clip(kind), -1))
+	var clip: String = _clip_name(kind)
+	if at < 0 or clip == "" or _anim == null or not _anim.has_animation(clip):
+		return -1.0
+	return clampf(float(at) / float(config.get("fps", 30)) / maxf(_anim.get_animation(clip).length, 0.01), 0.0, 1.0)
+
+
 func _base_clip(kind: String) -> String:
 	return String((config.get("clips", {}) as Dictionary).get(kind, ""))
+
+
+## Старый магазин быстрой перезарядки, кадр за кадром (зовёт CameraRig, когда модель уже стоит в позе этого
+## кадра): пока он виден — запоминается, где он в осях камеры cam; клип дошёл до кадра сброса — игрок пускает
+## настоящее тело из этого места с этой скоростью, и руки магазин больше не рисуют. space — пространство рук
+## (масштаб по X и Y даёт рукам своё поле зрения): место берётся таким, каким его видно на экране, поворот — без
+## этого масштаба.
+func track_spare(pl: Player, delta: float, cam: Node3D, space: Node3D) -> void:
+	if not _fast or _clip == "" or _drop_frame < 0 or _swap_frame < 0 or _spare_gone:
+		return
+	var at: float = _anim.current_animation_position * float(config.get("fps", 30))
+	var node: Node3D = _spare_node()
+	var hold: BoneAttachment3D = _attachment_of(node)
+	if at < _swap_frame or hold == null or cam == null or space == null:
+		return
+	var sk: Skeleton3D = hold.get_parent() as Skeleton3D
+	if sk == null or hold.bone_idx < 0:
+		return
+	# кость магазина в осях пространства рук (без его масштаба) — по позе скелета этого кадра
+	var bone: Transform3D = space.global_transform.affine_inverse() * sk.global_transform * sk.get_bone_global_pose(hold.bone_idx)
+	var rot: Basis = bone.basis.orthonormalized()
+	if not _spare_seated:
+		# магазин ещё в шахте: его оси — оси оружия (рама)
+		_spare_seated = true
+		_spare_seat = rot.inverse() * (space.global_transform.affine_inverse() * frame.global_transform).basis.orthonormalized()
+	var seen: Transform3D = cam.global_transform.affine_inverse() * space.global_transform
+	_spare_time += delta
+	_spare_hist.append([_spare_time, seen * (bone * _spare_center(node, hold)), Quaternion(rot * _spare_seat).normalized()])
+	while _spare_hist.size() > 2 and _spare_time - float(_spare_hist[1][0]) >= float(Balance.MAG_TOSS.sample_sec):
+		_spare_hist.pop_front()
+	if at >= _drop_frame and not _spare_released:
+		if pl.toss_old_mag(_spare_launch(pl, cam)):
+			_spare_released = true
+			_spare_wait = float(Balance.MAG_TOSS.guest_wait)
+	if _spare_released:
+		# тело появилось в мире (у гостя — пришло от хоста) — магазин в руках больше не нужен
+		_spare_wait -= delta
+		if pl.mag_body_seen or _spare_wait <= 0.0:
+			_spare_gone = true
+			for spare: Node3D in _spare_parts:
+				spare.visible = false
+			if _spare_rounds:
+				_spare_rounds.visible = false
+			for other: Dictionary in _spare_looks.values():
+				(other.node as Node3D).visible = false
+
+
+## Откуда и как вылетает магазин (мир): место и поворот — последняя запись, скорость и вращение — по записям
+## за Balance.MAG_TOSS.sample_sec, плюс движение самого стрелка. Записей мало — пусто (игрок бросит запасным).
+func _spare_launch(pl: Player, cam: Node3D) -> Dictionary:
+	if _spare_hist.size() < 2:
+		return {}
+	var now: Array = _spare_hist[_spare_hist.size() - 1]
+	var old: Array = _spare_hist[0]
+	var dt: float = float(now[0]) - float(old[0])
+	if dt < 0.004:
+		return {}
+	var view: Basis = cam.global_basis.orthonormalized()
+	var turn: Quaternion = ((now[2] as Quaternion) * (old[2] as Quaternion).inverse()).normalized()
+	var angle: float = wrapf(turn.get_angle(), -PI, PI)
+	var spin: Vector3 = turn.get_axis() * (angle / dt) if absf(angle) > 0.0001 else Vector3.ZERO
+	return {"pos": cam.global_transform * (now[1] as Vector3), "rot": (Quaternion(view) * (now[2] as Quaternion)).normalized(),
+		"vel": view * (((now[1] as Vector3) - (old[1] as Vector3)) / dt) + pl.velocity, "spin": view * spin}
+
+
+## Узел старого магазина, который сейчас показывает клип: своя модель магазина (45, барабан) или штатный корпус.
+func _spare_node() -> Node3D:
+	var look: Dictionary = _spare_looks.get(_reload_old, {}) if _reload_old not in ["", "*"] else {}
+	if not look.is_empty():
+		return look.node as Node3D
+	return _spare_parts[0] if not _spare_parts.is_empty() else null
+
+
+func _attachment_of(node: Node3D) -> BoneAttachment3D:
+	var n: Node = node
+	while n != null and n != self:
+		if n is BoneAttachment3D:
+			return n as BoneAttachment3D
+		n = n.get_parent()
+	return null
+
+
+## Центр габарита магазина в осях его кости (с него начинается тело — у TossedItem начало в центре габарита).
+func _spare_center(node: Node3D, hold: BoneAttachment3D) -> Vector3:
+	var key: int = node.get_instance_id()
+	if not _spare_centers.has(key):
+		var box := AABB()
+		var first: bool = true
+		var meshes: Array = node.find_children("*", "MeshInstance3D", true, false)
+		if node is MeshInstance3D:
+			meshes.append(node)
+		for raw: Node in meshes:
+			var mesh := raw as MeshInstance3D
+			if mesh.mesh == null or String(mesh.name).begins_with("Round_"):
+				continue
+			var part: AABB = WeaponModels.between(hold, mesh) * mesh.get_aabb()
+			box = part if first else box.merge(part)
+			first = false
+		_spare_centers[key] = box.get_center()
+	return _spare_centers[key]
 
 
 func _play(clip: String, blend: float, duration: float = 0.0) -> void:
@@ -486,6 +610,12 @@ func update(pl: Player, delta: float) -> void:
 		_fast = true
 		var fast_role: String = "reload_fast_empty" if pl._reload_empty else "reload_fast"
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(fast_role), -1))
+		_drop_frame = int((config.get("drop_frame", {}) as Dictionary).get(_base_clip(fast_role), -1))
+		_spare_hist.clear()
+		_spare_time = 0.0
+		_spare_seated = false
+		_spare_released = false
+		_spare_gone = false
 		_play(_clip_name(fast_role), BLEND_IN, pl.reload_timer)
 	elif not reloading and _last_reload > 0.0 and _clip != "" and _clip != _clip_name("check"):
 		# закончилась или прервана — в стойку (досылка уже показана клипом)
@@ -604,8 +734,9 @@ func _show_magazines(showing: String, shown: int, mag_in: bool) -> void:
 		std.visible = mag_in and look.is_empty()
 	for other: Dictionary in _mag_looks.values():
 		(other.node as Node3D).visible = mag_in and other.node == look.get("node")
-	# старый магазин быстрой перезарядки: виден с кадра, когда новый уже в руке, до конца клипа
-	var spare_on: bool = _fast and _clip != "" and _swap_frame >= 0 \
+	# старый магазин быстрой перезарядки: виден с кадра, когда новый уже в руке, до конца клипа — или пока не
+	# вылетел настоящим телом (track_spare)
+	var spare_on: bool = _fast and _clip != "" and _swap_frame >= 0 and not _spare_gone \
 			and _anim.current_animation_position * float(config.get("fps", 30)) >= _swap_frame
 	var old_look: Dictionary = _spare_looks.get(_reload_old, {}) if _reload_old not in ["", "*"] else {}
 	for spare: Node3D in _spare_parts:
@@ -643,6 +774,7 @@ func preview_reload(role: String, fraction: float, mag: String) -> void:
 		_rounds_before = 0 if role.ends_with("empty") else maxi(1, _rounds_after / 2)
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
 		_fast = role.begins_with("reload_fast")
+		_spare_gone = false
 		var frame: float = _anim.current_animation_position * float(config.get("fps", 30))
 		var shown: int = _rounds_after if _swap_frame >= 0 and frame >= _swap_frame else _rounds_before
 		_show_magazines(mag, shown, true)

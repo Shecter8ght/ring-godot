@@ -79,6 +79,10 @@ var _drops: Node3D
 const DROP_NAME := "Выброшено"
 var _drop_spawner: MultiplayerSpawner
 var _drop_count: int = 0
+## Вещи в полёте (TossedItem: старый магазин быстрой перезарядки) — свой узел и свой спавнер: в Drops только ящики.
+var _tossed: Node3D
+var _toss_spawner: MultiplayerSpawner
+var _toss_count: int = 0
 
 var _hud: CanvasLayer
 var _progress: ProgressBar
@@ -123,6 +127,9 @@ func _ready() -> void:
 	_drops = Node3D.new()
 	_drops.name = "Drops"
 	add_child(_drops)
+	_tossed = Node3D.new()
+	_tossed.name = "Tossed"
+	add_child(_tossed)
 	_build_hud()
 	# условия рейда — сводкой в начале
 	notify.call_deferred(RaidConditions.title())
@@ -151,6 +158,11 @@ func _ready() -> void:
 		add_child(_drop_spawner)
 		_drop_spawner.spawn_path = _drops.get_path()
 		_drop_spawner.spawn_function = _make_drop
+		_toss_spawner = MultiplayerSpawner.new()
+		_toss_spawner.name = "TossSpawner"
+		add_child(_toss_spawner)
+		_toss_spawner.spawn_path = _tossed.get_path()
+		_toss_spawner.spawn_function = _make_toss
 
 
 func _exit_tree() -> void:
@@ -1445,6 +1457,68 @@ func _drop_entry(peer_id: int, where: String, idx: int, loose: bool = false) -> 
 	Audio.play("item_drop", pl.global_position)
 
 
+## Вещь вылетает из рук настоящим телом (старый магазин быстрой перезарядки): хост забирает её из where / idx
+## и пускает TossedItem из точки launch ({pos, rot, vel, spin, sound} — мир; точку и скорость хост проверяет).
+## Тело успокоится — на его месте ляжет обычная находка с той же записью (_toss_rested).
+func request_toss_entry(where: String, idx: int, launch: Dictionary) -> void:
+	if _is_host():
+		_toss_entry(multiplayer.get_unique_id(), where, idx, launch)
+	else:
+		_rpc_toss_entry.rpc_id(1, where, idx, launch)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_toss_entry(where: String, idx: int, launch: Dictionary) -> void:
+	if multiplayer.is_server():
+		_toss_entry(multiplayer.get_remote_sender_id(), where, idx, launch)
+
+
+func _toss_entry(peer_id: int, where: String, idx: int, launch: Dictionary) -> void:
+	_cancel_op(peer_id)
+	var pl := player_of(peer_id)
+	if pl == null or not pl.is_alive() or where.begins_with("equip:"):
+		return
+	var e := pl.inventory.take_entry(where, idx)
+	if e.is_empty():
+		return
+	var data: Dictionary = TossedItem.checked_launch(pl, launch)
+	data["name"] = "Toss_%d" % _toss_count
+	data["entry"] = e
+	data["peer"] = peer_id
+	_toss_count += 1
+	if _toss_spawner:
+		_toss_spawner.spawn(data)
+	else:
+		_tossed.add_child(_make_toss(data))
+
+
+## Тело летящей вещи у каждого peer; физику считает хост, он же ждёт, пока оно успокоится.
+func _make_toss(data: Dictionary) -> Node:
+	var body := TossedItem.create(data, _is_host(), true)
+	if _is_host():
+		body.rested.connect(_toss_rested.bind(body))
+	return body
+
+
+## Хост: тело успокоилось — на его месте лежит вещь в той же позе; место не годится (нет поверхности под ним,
+## улетело за карту) — на полу под точкой вылета, а нет пола и там — у ног хозяина.
+func _toss_rested(pose: Transform3D, ok: bool, body: TossedItem) -> void:
+	var entry: Dictionary = body.entry
+	var cfg: Dictionary = Balance.MAG_TOSS
+	if ok:
+		var place: Array = LooseLoot.rest_place(pose, TossedItem.floor_under(_tossed.get_world_3d(), pose.origin, float(cfg.floor_probe)))
+		_spawn_loose_data({"pos": place[0], "pose": place[1], "toss": Vector3.ZERO}, entry)
+		return
+	var under: Dictionary = TossedItem.floor_under(_tossed.get_world_3d(), body.start, float(cfg.fallback_drop))
+	var pl := player_of(body.owner_peer)
+	if not under.is_empty():
+		spawn_item(under.position, entry, randf() * TAU)
+	elif pl != null:
+		spawn_loose(pl, entry)
+	else:
+		spawn_item(body.start, entry)
+
+
 ## Владелец: отдать хосту снаряжение из профиля (вызывает уровень при появлении игрока).
 func submit_loadout(lo: Dictionary) -> void:
 	if _is_host():
@@ -2388,8 +2462,14 @@ func spawn_drop(pos: Vector3, display: String, list: Array, look: LootContainer.
 ## Хост: вещь упала под ноги игроку и лежит сама по себе (сброшенный магазин) — рядом с ногами, на
 ## полу, повёрнута как упала. Не мешок: издалека не видно, найдёшь — подберёшь (F).
 func spawn_loose(pl: Player, entry: Dictionary) -> void:
-	var data := {"name": "Drop_%d" % _drop_count, "pos": LooseLoot.floor_near(pl), "display": ItemDb.item_name(String(entry.id)), "items": [entry], "look": int(LootContainer.Look.NONE),
-		"toss": Vector3.UP * float(Balance.DROPPED_MAG.fall), "fall_sec": 0.0, "loose": true, "yaw": randf() * TAU}
+	_spawn_loose_data({"pos": LooseLoot.floor_near(pl), "toss": Vector3.UP * float(Balance.DROPPED_MAG.fall), "yaw": randf() * TAU}, entry)
+
+
+## Лежащая сама по себе вещь: place — {pos, toss, yaw} (плашмя) или {pos, toss, pose} (как успокоилось тело).
+func _spawn_loose_data(place: Dictionary, entry: Dictionary) -> void:
+	var data := {"name": "Drop_%d" % _drop_count, "display": ItemDb.item_name(String(entry.id)), "items": [entry], "look": int(LootContainer.Look.NONE),
+		"fall_sec": 0.0, "loose": true}
+	data.merge(place)
 	_drop_count += 1
 	if _drop_spawner:
 		_drop_spawner.spawn(data)
@@ -2437,6 +2517,9 @@ func _make_drop(data: Dictionary) -> Node:
 	if loose:
 		(c as LooseLoot).dropped = true
 		(c as LooseLoot).lay_yaw = float(data.get("yaw", 0.0))
+		if data.has("pose"):
+			(c as LooseLoot).posed = true
+			(c as LooseLoot).lay_pose = data.pose
 	c.name = String(data.name)
 	c.position = data.pos
 	c.display_name = String(data.display)

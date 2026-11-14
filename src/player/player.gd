@@ -115,6 +115,13 @@ var _velcro_at: float = -1.0
 ## Сколько раз прозвучала липучка (для проверок).
 var velcro_count: int = 0
 var _reload_old_mag: Dictionary = {}
+## Старый магазин быстрой перезарядки уже вылетел настоящим телом (TossedItem) — в конце перезарядки второй раз
+## не роняется, а звук падения звучит при ударе тела о поверхность. mag_body_seen — тело появилось у этого peer
+## (ставит само тело): руки больше не рисуют магазин. _toss_at — на какой секунде перезарядки запасной бросок у
+## ствола без кадра сброса в клипе (−1 — магазин отпускает клип рук, ViewmodelClips.track_spare).
+var _mag_tossed: bool = false
+var mag_body_seen: bool = false
+var _toss_at: float = -1.0
 ## Магазин был вынут: перезарядка — только вставить новый (короче: Balance.RELOAD_INSERT.time_k);
 ## быстрой (двойное R) у неё нет — выбивать нечего.
 var _reload_insert: bool = false
@@ -1757,6 +1764,10 @@ func _tick_reload(delta: float, spec: Dictionary, keys: bool) -> void:
 	if _velcro_at >= 0.0 and _reload_age >= _velcro_at:
 		_velcro_at = -1.0
 		_play_velcro()
+	# быстрая перезарядка без кадра сброса в клипе: старый магазин вылетает запасным броском (пока хост не
+	# убрал его в рюкзак — повтор на следующем кадре)
+	if _reload_fast and not _mag_tossed and _toss_at >= 0.0 and _reload_age >= _toss_at:
+		toss_old_mag({})
 	reload_timer -= delta
 	if _reload_kind != "clear":
 		_play_reload_marks(spec)
@@ -1785,6 +1796,8 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 	_reload_fast = false
 	_reload_age = 0.0
 	_reload_old_mag = {}
+	_mag_tossed = false
+	_toss_at = -1.0
 	_velcro_at = -1.0
 	var from_pouch: bool = false
 	_reload_insert = mag_out()
@@ -1888,6 +1901,10 @@ func _try_fast_reload() -> void:
 	if pm_reload:
 		# модель в руках персонажа (и у напарников) — та же смена на оставшееся время
 		_weapon_action("reload", _reload_empty, reload_timer)
+	_mag_tossed = false
+	# когда магазин вылетит: по кадру сброса клипа рук, а нет его — на доле перезарядки из Balance
+	var by_clip: bool = is_local() and _camera_rig is CameraRig and (_camera_rig as CameraRig).reload_drop_by_clip(_reload_empty)
+	_toss_at = -1.0 if by_clip else (reload_timer + _reload_age) * float(Balance.MAG_TOSS.fallback_at)
 	_reload_audio.switch_to(weapon_id, _reload_audio.mode(_reload_empty, true), reload_timer, _reload_age)
 	# быстрая: сначала берут новый магазин из подсумка (им же выбивают старый) — липучка сразу
 	if _velcro_at >= 0.0:
@@ -1934,10 +1951,16 @@ func _rpc_velcro() -> void:
 	Audio.play("pouch_velcro", global_position + Vector3.UP * float(Balance.POUCH_VELCRO.height_m))
 
 
-## Быстрая перезарядка закончена: старый магазин (хост уже положил его в рюкзак) — на землю,
-## лежать под ногами магазином (Raid.spawn_loose; в убежище — HideoutLevel.request_drop_entry).
+## Быстрая перезарядка закончена. Обычно старый магазин к этому времени уже вылетел настоящим телом
+## (toss_old_mag — по кадру сброса клипа рук или запасным броском); не вылетел — бросается сейчас, а если и это
+## невозможно — по-старому ложится под ноги (Raid.spawn_loose; в убежище — HideoutLevel.request_drop_entry).
 func _drop_old_mag() -> void:
 	if not _reload_fast:
+		return
+	# магазин уже вылетел телом (по клипу рук или запасным броском) — звук прозвучит при его ударе о пол
+	if _mag_tossed or toss_old_mag({}):
+		_reload_fast = false
+		_mag_tossed = false
 		return
 	_reload_fast = false
 	_play_weapon_sound(spec(), "mag_drop")
@@ -1946,14 +1969,64 @@ func _drop_old_mag() -> void:
 	var h := items_host()
 	if h == null or not h.has_method("request_drop_entry"):
 		return
-	# хост убрал старый магазин в сумку сброса разгрузки или в рюкзак — оттуда и роняем
+	var at: Dictionary = _old_mag_place()
+	if not at.is_empty():
+		h.call("request_drop_entry", String(at.where), int(at.idx), true)
+
+
+## Где у игрока лежит старый магазин этой перезарядки: хост убрал его в сумку сброса разгрузки или в рюкзак.
+## {where, idx}; пусто — ещё не убрал (ответ хоста в пути) или его нет.
+func _old_mag_place() -> Dictionary:
+	if _reload_old_mag.is_empty():
+		return {}
 	for where: String in ["dump", "backpack", "rig"]:
 		var list: Array = inventory.list_of(where)
 		for i in range(list.size()):
 			var it: Dictionary = list[i]
 			if String(it.get("id", "")) == String(_reload_old_mag.id) and it.has("rounds") and int(it.rounds) == int(_reload_old_mag.rounds):
-				h.call("request_drop_entry", where, i, true)
-				return
+				return {"where": where, "idx": i}
+	return {}
+
+
+## Старый магазин быстрой перезарядки покидает оружие настоящим телом: хост забирает его из рюкзака и пускает
+## TossedItem (Raid / HideoutLevel.request_toss_entry). launch — {pos, rot, vel, spin} в мире: где магазин виден
+## в руках и как двигался в клипе (ViewmodelClips.track_spare); пусто — запасной бросок вправо числами
+## Balance.MAG_TOSS. false — вылетать нечему (песочница) или хост магазин ещё не убрал: позвать снова.
+func toss_old_mag(launch: Dictionary) -> bool:
+	if not _reload_fast or _mag_tossed or not loadout_mode:
+		return false
+	var h := items_host()
+	if h == null or not h.has_method("request_toss_entry"):
+		return false
+	# у ствола с патронником смена уходит хосту в конце перезарядки: пока он не сменил магазин (ревизия записи
+	# ствола прежняя), в рюкзаке лежат только запасные — такой же по виду и остатку вылетел бы вместо старого
+	if _has_chamber(weapon_id) and int(_base_entry(_reload_slot).get("rev", 0)) == _reload_rev:
+		return false
+	var at: Dictionary = _old_mag_place()
+	if at.is_empty():
+		return false
+	var data: Dictionary = launch.duplicate() if not launch.is_empty() else _fallback_toss()
+	data["sound"] = _weapon_sound(spec(), "mag_drop")
+	_mag_tossed = true
+	mag_body_seen = false
+	h.call("request_toss_entry", String(at.where), int(at.idx), data)
+	return true
+
+
+## Запасной бросок старого магазина — у ствола без клипа рук или без кадра сброса в нём: от оружия перед
+## стрелком вправо (оси камеры; у чужого игрока — оси корпуса на высоте глаз).
+func _fallback_toss() -> Dictionary:
+	var cfg: Dictionary = Balance.MAG_TOSS
+	var cam: Camera3D = get_viewport().get_camera_3d() if is_local() and is_inside_tree() else null
+	var view: Transform3D = cam.global_transform.orthonormalized() if cam != null \
+			else Transform3D(Basis(Vector3.UP, body_yaw() + PI), eye_position())
+	var p: Array = cfg.fallback_pos
+	var v: Array = cfg.fallback_vel
+	var s: Array = cfg.fallback_spin
+	# оружие в руках развёрнуто на 180° относительно осей камеры
+	return {"pos": view * Vector3(float(p[0]), float(p[1]), float(p[2])), "rot": Quaternion(view.basis * Basis(Vector3.UP, PI)),
+		"vel": view.basis * Vector3(float(v[0]), float(v[1]), float(v[2])) + velocity,
+		"spin": view.basis * Vector3(float(s[0]), float(s[1]), float(s[2]))}
 
 
 ## Задержка: передёрнуть (R) — патроны не тратятся.

@@ -1052,6 +1052,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if clips:
 		# свои руки уже в сцене клипов — процедурные руки Persona не нужны
 		_arms.visible = false
+		# старый магазин быстрой перезарядки: место и скорость — по окончательной позе модели в этом кадре
+		clips.track_spare(pl, delta, _ads_cam, _vm_space)
 	else:
 		if _viewmodel_rig:
 			_arms.set_hand_target("Left", _viewmodel_rig.get_hand_target(), _viewmodel_rig.get_hand_weight())
@@ -1279,6 +1281,14 @@ func reload_swap_fraction(empty: bool) -> float:
 	if _viewmodel is ViewmodelClips:
 		return (_viewmodel as ViewmodelClips).swap_fraction("reload_empty" if empty else "reload")
 	return -1.0
+
+
+## Есть ли у клипа быстрой перезарядки кадр, на котором старый магазин отпущен (viewmodel.drop_frame): тогда
+## магазин вылетает телом по клипу, иначе — запасным броском (Balance.MAG_TOSS.fallback_at).
+func reload_drop_by_clip(empty: bool) -> bool:
+	if _viewmodel is ViewmodelClips:
+		return (_viewmodel as ViewmodelClips).drop_fraction("reload_fast_empty" if empty else "reload_fast") >= 0.0
+	return false
 
 
 ## Действия деталей одинаковы у модели перед глазами и у модели в руке персонажа.

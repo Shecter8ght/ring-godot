@@ -56,6 +56,9 @@ var _toast_t: float = 0.0
 var _inv_sig: String = ""
 ## Сброшенные магазины на полу (HideoutFloorItem): в профиле их нет, пока не подобраны.
 var _floor_items: Array[HideoutFloorItem] = []
+## Магазины в полёте (TossedItem): станут вещами на полу, когда успокоятся.
+var _flying: Array[TossedItem] = []
+var _toss_count: int = 0
 
 
 ## План рейда принят у стола планирования (в сети — хостом): теперь к воротам во дворе, в зону сбора
@@ -418,6 +421,43 @@ func request_drop_entry(where: String, idx: int, _loose: bool = false) -> void:
 	_floor_items.append(item)
 
 
+## Быстрая перезарядка: старый магазин вылетает из оружия настоящим телом (TossedItem, как в рейде) и остаётся
+## лежать там, где упал. Тело местное — в убежище у каждого свой профиль. launch — {pos, rot, vel, spin, sound}.
+func request_toss_entry(where: String, idx: int, launch: Dictionary) -> void:
+	var entry: Dictionary = _player.inventory.take_entry(where, idx)
+	if entry.is_empty():
+		return
+	_to_profile()
+	var data: Dictionary = TossedItem.checked_launch(_player, launch)
+	data["name"] = "Toss_%d" % _toss_count
+	data["entry"] = entry
+	data["peer"] = _player.peer_id
+	_toss_count += 1
+	var body := TossedItem.create(data, true, false)
+	body.rested.connect(_toss_rested.bind(body))
+	_flying.append(body)
+	add_child(body)
+
+
+## Тело успокоилось — на его месте лежит вещь; место не годится — на полу у ног.
+func _toss_rested(pose: Transform3D, ok: bool, body: TossedItem) -> void:
+	_flying.erase(body)
+	var item := HideoutFloorItem.new()
+	item.entry = body.entry
+	var at: Vector3 = LooseLoot.floor_near(_player)
+	if ok:
+		var place: Array = LooseLoot.rest_place(pose, TossedItem.floor_under(get_world_3d(), pose.origin, float(Balance.MAG_TOSS.floor_probe)))
+		at = place[0]
+		item.posed = true
+		item.lay_pose = place[1]
+	else:
+		item.lay_yaw = randf() * TAU
+	add_child(item)
+	item.global_position = at
+	item.picked.connect(_pick_floor.bind(item))
+	_floor_items.append(item)
+
+
 func _pick_floor(item: HideoutFloorItem) -> void:
 	if not item in _floor_items:
 		return
@@ -432,11 +472,15 @@ func _pick_floor(item: HideoutFloorItem) -> void:
 
 ## Уходим из убежища: что осталось лежать на полу — в тайник.
 func _floor_to_stash() -> void:
-	if _floor_items.is_empty():
+	if _floor_items.is_empty() and _flying.is_empty():
 		return
 	for item: HideoutFloorItem in _floor_items:
 		ItemDb.add_to(Profile.stash, item.entry.duplicate(true), Profile.stash_grid())
 	_floor_items.clear()
+	# магазин ещё летит — тоже в тайник
+	for body: TossedItem in _flying:
+		ItemDb.add_to(Profile.stash, body.entry.duplicate(true), Profile.stash_grid())
+	_flying.clear()
 	Profile.save()
 
 

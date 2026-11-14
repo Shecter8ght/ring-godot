@@ -1750,6 +1750,10 @@
       "reload_fast": 13,
       "reload_fast_full": 13
      },
+     "drop_frame": {
+      "reload_fast": 29,
+      "reload_fast_full": 29
+     },
      "ads_z": 0.3,
      "hip_offset": [
       -0.04,
