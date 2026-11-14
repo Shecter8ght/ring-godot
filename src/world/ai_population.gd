@@ -330,13 +330,7 @@ func arrive_now() -> int:
 func _arrival_point() -> Vector3:
 	var min_m: float = float(cfg().arrive_min_m)
 	var ok: Array[Vector3] = []
-	for n in get_tree().get_nodes_in_group("ai_arrivals"):
-		var a := n as AIArrival
-		if a == null:
-			continue
-		var at := _ground(a.global_position)
-		if at == Vector3.INF:
-			continue
+	for at: Vector3 in arrival_points():
 		var good := true
 		for p in get_tree().get_nodes_in_group("players"):
 			var pl := p as Player
@@ -350,6 +344,19 @@ func _arrival_point() -> Vector3:
 	if ok.is_empty():
 		return Vector3.INF
 	return ok[_rng.randi_range(0, ok.size() - 1)]
+
+
+## Пограничные входы, привязанные к навигации. Видимость проверяет тот, кто ставит бойцов.
+func arrival_points() -> Array[Vector3]:
+	var points: Array[Vector3] = []
+	for n in get_tree().get_nodes_in_group("ai_arrivals"):
+		var a := n as AIArrival
+		if a == null:
+			continue
+		var at := _ground(a.global_position)
+		if at != Vector3.INF:
+			points.append(at)
+	return points
 
 
 func _on_noise(pos: Vector3, _radius_m: float, kind: String) -> void:

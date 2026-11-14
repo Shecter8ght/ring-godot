@@ -1,6 +1,6 @@
 class_name RivalRaids
 extends Node
-## Чужие отряды в рейде — «другие игроки»: в ТЦ, кроме вас, заходят ещё группы за добычей. Каждая
+## Чужие отряды в рейде — «другие игроки»: в район, кроме вас, заходят ещё группы за добычей. Каждая
 ## входит со своей стороны, обыскивает контейнеры (после неё они пустые), воюет с мародёрами,
 ## «Периметром», жильцами, другими отрядами и с вами, а набрав своё — уходит через настоящую точку
 ## эвакуации. Выбили отряд — его сумки ваши. Дизайн — docs/design/rival_raids.md.
@@ -18,12 +18,15 @@ static var forced: bool = false
 static var current: RivalRaids
 
 var level: Node
+var sector_id: String = ""
 ## Все отряды этого рейда (и ушедшие, и выбитые) — для итога и тестов.
 var squads: Array[RivalSquad] = []
 ## Снимок для временных меток в рейде, обновляется у всех игроков.
 var map_marks: Array = []
 ## Ждут входа: [{t, record}] по возрастанию t.
 var _queue: Array = []
+## Очерёдность чужих групп на «Проспекте»: каждый позывной заходит один раз за рейд.
+var _prospekt_roster: Array = []
 var _t: float = 0.0
 var _tick: float = 0.0
 var _ready_host: bool = false
@@ -66,9 +69,12 @@ func _process(delta: float) -> void:
 		if active():
 			_plan()
 	_t += delta
-	while not _queue.is_empty() and float(_queue[0].t) <= _t:
-		var next: Dictionary = _queue.pop_front()
-		enter(next.record)
+	if sector_id == "prospekt":
+		_advance_prospekt_arrivals()
+	else:
+		while not _queue.is_empty() and float(_queue[0].t) <= _t:
+			var next: Dictionary = _queue.pop_front()
+			enter(next.record)
 	_tick -= delta
 	if _tick > 0.0:
 		return
@@ -83,6 +89,10 @@ func _process(delta: float) -> void:
 ## Расписание рейда: сколько отрядов и когда входят.
 func _plan() -> void:
 	var cfg: Dictionary = Balance.RIVALS
+	if sector_id == "prospekt":
+		_prospekt_roster = RivalRoster.pick(RivalRoster.squads().size(), _rng)
+		_plan_prospekt_arrival(cfg.enter_sec)
+		return
 	# сколько отрядов — под число игроков
 	var by_party: Array = cfg.squads[AIPopulation.party_size() - 1]
 	var n := _rng.randi_range(int(by_party[0]), int(by_party[1]))
@@ -92,17 +102,62 @@ func _plan() -> void:
 	print("rivals: отрядов %d, входы %s" % [_queue.size(), _queue.map(func(q: Dictionary) -> String: return "%s@%d" % [q.record.name, int(q.t)])])
 
 
-## Отряд входит в рейд: у дальней от игроков точки эвакуации (не нашлось — в дальней комнате),
-## выход — другая точка. at / exit_at — задать явно (тесты, консоль). Возвращает отряд или null.
+func _plan_prospekt_arrival(window: Array) -> void:
+	if not _prospekt_roster.is_empty():
+		_queue.append({"t": _t + _rng.randf_range(float(window[0]), float(window[1])),
+			"record": _prospekt_roster.pop_front()})
+
+
+func _active_squads() -> Array[RivalSquad]:
+	return squads.filter(func(s: RivalSquad) -> bool:
+		return s.phase == RivalSquad.Phase.LOOT or s.phase == RivalSquad.Phase.EXTRACT)
+
+
+func _advance_prospekt_arrivals() -> void:
+	if _queue.is_empty() or float(_queue[0].t) > _t:
+		return
+	if Raid.current and Raid.current.over:
+		_queue.clear()
+		return
+	var cfg: Dictionary = Balance.PROSPEKT_RIVALS
+	var next: Dictionary = _queue[0]
+	if _active_squads().size() >= int(cfg.max_active) or enter(next.record) == null:
+		next["t"] = _t + float(cfg.retry_sec)
+		return
+	_queue.pop_front()
+	_plan_prospekt_arrival(cfg.interval_sec)
+
+
+## Отряд входит с края карты на «Проспекте» или у дальней точки эвакуации на других картах.
+## at / exit_at — задать явно (тесты, консоль). Возвращает отряд или null.
 func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vector3.INF) -> RivalSquad:
 	if not _is_host() or not level.has_method("spawn_squad"):
 		return null
 	var exits: Array = _exits()
-	if at == Vector3.INF:
-		at = _entry_point(exits)
-	if at == Vector3.INF:
-		print("rivals: «%s» — некуда войти (игроки рядом со всеми входами)" % record.get("name", "?"))
+	var style: Dictionary = RivalRoster.style(String(record.get("style", "assault")))
+	var archs: Array = (style.get("archs", ["rival", "rival"]) as Array).duplicate()
+	var cfg: Dictionary = Balance.RIVALS
+	var prospekt := sector_id == "prospekt"
+	var size := _prospekt_group_size() if prospekt else _rng.randi_range(int(cfg.size[0]), int(cfg.size[1]))
+	archs.resize(clampi(size, 1, archs.size()))
+	var sq: Squad
+	if prospekt and at == Vector3.INF:
+		sq = _spawn_prospekt_squad(archs)
+	else:
+		if at == Vector3.INF:
+			at = _entry_point(exits)
+		if at != Vector3.INF:
+			sq = level.call("spawn_squad", at, archs, {}) as Squad
+	if sq == null or sq.members.is_empty():
+		print("rivals: «%s» — вход не найден" % record.get("name", "?"))
 		return null
+	if at == Vector3.INF:
+		at = sq.members[0].global_position
+	if prospekt:
+		var patrol := _prospekt_patrol(at)
+		if patrol.is_valid():
+			for m: Marauder in sq.members:
+				m.patrol_point_provider = patrol
 	var exit: Dictionary = {"pos": exit_at, "name": "выход"}
 	if exit_at == Vector3.INF:
 		exit = _pick_exit(exits, at)
@@ -111,22 +166,73 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 		for e: Dictionary in exits:
 			if (e.pos as Vector3).distance_to(exit_at) < 1.0:
 				exit = e
-	var style: Dictionary = RivalRoster.style(String(record.get("style", "assault")))
-	var archs: Array = (style.get("archs", ["rival", "rival"]) as Array).duplicate()
-	var cfg: Dictionary = Balance.RIVALS
-	archs.resize(clampi(_rng.randi_range(int(cfg.size[0]), int(cfg.size[1])), 1, archs.size()))
-	var sq: Squad = level.call("spawn_squad", at, archs, {}) as Squad
-	if sq == null or sq.members.is_empty():
-		return null
 	var s := RivalSquad.new()
 	s.setup(record, sq, exit, _rng)
 	s.other_exit = _other_exit
 	squads.append(s)
 	RivalRoster.note(s.id, "raids")
 	print("rivals: вошли «%s» (%d) у %s, выход «%s», грабят %d с, хватит %d" % [s.name, sq.members.size(), at.round(), s.exit_name, int(s.loot_budget), s.pack_goal])
-	_radio("В ТЦ зашла ещё одна группа — «%s»." % s.name)
+	_radio("%s зашла ещё одна группа — «%s»." % ["На «Проспект»" if prospekt else "В ТЦ", s.name])
 	_publish_map_marks()
 	return s
+
+
+func _prospekt_group_size() -> int:
+	var cfg: Dictionary = Balance.PROSPEKT_RIVALS
+	var weights: Array = cfg.solo_size_weights if AIPopulation.party_size() == 1 else cfg.coop_size_weights
+	return 1 + _rng.rand_weighted(PackedFloat32Array(weights))
+
+
+func _spawn_prospekt_squad(archs: Array) -> Squad:
+	var pop := level.get_node_or_null("Population") as AIPopulation
+	if pop == null or int(level.get("_marauders_spawned")) <= 0:
+		return null
+	var entries := pop.arrival_points()
+	var opts := {"can_spawn": _hidden_from_players, "spread_inward": true}
+	while not entries.is_empty():
+		var at: Vector3 = entries.pop_at(_rng.randi_range(0, entries.size() - 1))
+		if not _hidden_from_players(at):
+			continue
+		var sq := level.call("spawn_squad", at, archs, opts) as Squad
+		if sq and not sq.members.is_empty():
+			return sq
+	return null
+
+
+func _hidden_from_players(at: Vector3) -> bool:
+	var space := (level as Node3D).get_world_3d().direct_space_state
+	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR
+	for n: Node in get_tree().get_nodes_in_group("players"):
+		var pl := n as Player
+		if pl == null or not pl.is_alive():
+			continue
+		if pl.global_position.distance_to(at) < float(Balance.RIVALS.spawn_min_m):
+			return false
+		var eye := pl.eye_position()
+		for height: float in [Marauder.EYE_HEIGHT, Marauder.CROUCH_EYE, 0.0]:
+			var q := PhysicsRayQueryParameters3D.create(eye, at + Vector3.UP * height, mask)
+			if space.intersect_ray(q).is_empty():
+				return false
+	return true
+
+
+## Между обысками отряд выбирает точки ближайшего к месту входа уличного маршрута.
+func _prospekt_patrol(at: Vector3) -> Callable:
+	var route_points := PackedVector3Array()
+	var best := INF
+	for n: Node in get_tree().get_nodes_in_group("ai_routes"):
+		var route := n as AIRoute
+		if route == null:
+			continue
+		var points := route.points()
+		for p: Vector3 in points:
+			var distance := at.distance_squared_to(p)
+			if distance < best:
+				best = distance
+				route_points = points
+	if route_points.is_empty():
+		return Callable()
+	return func() -> Vector3: return route_points[_rng.randi_range(0, route_points.size() - 1)]
 
 
 func _publish_map_marks() -> void:
@@ -267,18 +373,16 @@ func _players_distance(p: Vector3) -> float:
 	return best
 
 
-## Рация: о входе и выходе чужих групп слышат все в рейде и всегда (решение владельца, 2026-10-10;
-## посмотреть, как влияет на игру).
+## Рация: сообщения о чужих группах получают все, кто в рейде (решение владельца, 2026-10-10).
 func _radio(text: String) -> void:
-	if Net.is_networked():
-		_rpc_radio.rpc("Рация: " + text)
-	else:
-		_rpc_radio("Рация: " + text)
+	Net.broadcast_scene(self, &"_rpc_radio", ["Рация: " + text])
 
 
 @rpc("authority", "call_local", "reliable")
 func _rpc_radio(text: String) -> void:
-	Audio.play_voice_line("rival_radio", text.trim_prefix("Рация: "))
+	var voiced := Audio.play_voice_line("rival_radio", text.trim_prefix("Рация: "))
+	if not voiced and text.begins_with("Рация: На «Проспект»"):
+		Audio.play_ui("radio")
 	if Raid.current:
 		Raid.current.notify(text)
 

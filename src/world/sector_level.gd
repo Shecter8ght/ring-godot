@@ -114,6 +114,7 @@ func _ready() -> void:
 	# чужие отряды — «другие игроки» рейда (узел есть у всех: по нему хост шлёт рацию)
 	var rivals := RivalRaids.new()
 	rivals.name = "Rivals"
+	rivals.sector_id = String(_sector_def.get("id", ""))
 	add_child(rivals)
 	# население слоями (если на карте есть точки) и счётчик стычек — считает хост
 	_population = AIPopulation.new()
@@ -286,7 +287,9 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 ## Хост: отряд из archs (типы AI_ARCHETYPES) у точки at. opts: home + home_r — держатся у места
 ## (жильцы, охрана), hostile — жильцы враждебны сразу, target — сразу идут проверить точку (ЧВК к
 ## грузу), loadout — выкладка всем (data/loadouts.json). До готовности навмеша — в очередь.
-## Возвращает отряд (null — навигация ещё не готова: отряд появится позже, из очереди).
+## can_spawn — проверка каждой позиции. Если хотя бы одна не подходит, весь отряд ждёт.
+## spread_inward — разброс от входа только в сторону центра карты, чтобы не встать на заборе.
+## Возвращает отряд или null: навигация ещё не готова либо позиции не прошли проверку.
 func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> Squad:
 	if _marauders_spawned == 0:
 		_pending_squads.append([at, archs, opts])
@@ -294,10 +297,23 @@ func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> Squad:
 	var map := get_world_3d().navigation_map
 	var squad := Squad.new()
 	var n := archs.size()
-	var first: Marauder = null
+	var can_spawn: Callable = opts.get("can_spawn", Callable())
+	var spread_inward: bool = bool(opts.get("spread_inward", false))
+	var inward := Vector2.ZERO
+	if spread_inward:
+		var bounds: Array = _sector_def.bounds
+		var center := Vector2((float(bounds[0]) + float(bounds[2])) * 0.5, (float(bounds[1]) + float(bounds[3])) * 0.5)
+		inward = (center - Vector2(at.x, at.z)).normalized()
+	var members: Array[Dictionary] = []
 	for k in range(n):
 		var a := TAU * float(k) / float(maxi(n, 1)) + _rng.randf() * 0.5
-		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(1.5, 3.5))
+		var dir := Vector2(cos(a), sin(a))
+		if spread_inward and dir.dot(inward) < 0.0:
+			dir = dir.reflect(Vector2(-inward.y, inward.x))
+		var p := NavigationServer3D.map_get_closest_point(map, at + Vector3(dir.x, 0.0, dir.y) * _rng.randf_range(1.5, 3.5))
+		p += Vector3.UP * 0.1
+		if can_spawn.is_valid() and not bool(can_spawn.call(p)):
+			return null
 		var arch := String(archs[k])
 		var wpn := Marauder.loadout_for(arch, _rng)
 		# «Периметр» — группа по ролям: командир, стрелок, штурмовик, марксман
@@ -306,14 +322,17 @@ func spawn_squad(at: Vector3, archs: Array, opts: Dictionary = {}) -> Squad:
 		# выкладка задана явно (консоль разработчика, события)
 		if opts.has("loadout"):
 			wpn = String(opts.loadout)
-		var nm := "%s%d" % [arch.capitalize(), _guard_count]
-		_guard_count += 1
-		var data := {"name": nm, "pos": p + Vector3(0, 0.1, 0), "loadout": wpn, "arch": arch}
+		var data := {"pos": p, "loadout": wpn, "arch": arch}
 		if opts.has("home"):
 			data["home"] = opts.home
 			data["home_r"] = float(opts.get("home_r", 6.0))
 		if bool(opts.get("hostile", false)):
 			data["hostile"] = true
+		members.append(data)
+	var first: Marauder = null
+	for data: Dictionary in members:
+		data["name"] = "%s%d" % [String(data.arch).capitalize(), _guard_count]
+		_guard_count += 1
 		var m: Marauder
 		if _marauder_spawner:
 			m = _marauder_spawner.spawn(data) as Marauder
