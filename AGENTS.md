@@ -903,6 +903,17 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   открыть позы / клип, «Хваты из поз → во все клипы» — перенос поз без потери ручных ключей); rebuild.cmd на файле
 #   с клипами делает то же, что эта кнопка, заново из таблиц (сотрёт ручные правки клипов) — regenerate.cmd;
 #   кадры для своей проверки — stills.py (кадр клипа: «Reload_Full:25», позы: «poses:41»)
+# Пулемёт «Частокол» (по мотивам ПКП «Печенег»), high-poly неявными поверхностями — форма ждёт приёмки:
+#   bash tools/pkp/go.sh <k> "<модули>" "<виды>" — поля расстояний деталей (python: sdf.py, part_*.py, build.py; k = 2 —
+#   черновик, 1 — рабочий шаг; PKP_JOBS — работники, PKP_ADAPT=0.4 — чистовая сетка, PKP_TAG — своя папка) → сборка сцены
+#   (blender: assemble.py, OpenVDB) → кадры (shots.py; ref13 / ref14 — камерами боковых рендеров владельца, --pose — позы
+#   рига) → наложение на образцы (compare.py) → E:/Models Blender/WEAPONS/Печенег — модель/work/pkp_k<k>.blend.
+#   Риг — ползунки пустышки PKP_Controls (part_rig.py: крышка, лоток, рукоятка, рама, щитки, спуск, предохранитель,
+#   плечевой упор, сошки, прицел, коробка). Проверки на собранном файле: blender -b <файл> --python
+#   tools/pkp/check_overlaps.py -- [--depth 0.25] (пересечения во всех позах), tools/pkp/measure.py -- [отчёт.json]
+#   (габариты против заводских, открытые рёбра). Миллиметры с рендеров-образцов — refmap.py и ref_tiles.py (--mm --y
+#   <глубина>), подбор камеры образца — fit_cam.py. Памятка исполнителю отдельного модуля — tools/pkp/HELPERS.md;
+#   размеры — dims.py; состояние и вопросы владельцу — asset-state.md в папке модели
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
