@@ -56,10 +56,12 @@ func _ready() -> void:
 	var tv: HideoutActivity = _level.get_node("Activities/Tv") as HideoutActivity
 	var radio: HideoutActivity = _level.get_node("Activities/Radio") as HideoutActivity
 	for activity: HideoutActivity in [tv,radio]:
-		for state: int in range(1,5):
+		var channel_count: int = HideoutActivity.TV_CHANNELS.size() if activity == tv else HideoutActivity.RADIO_STATIONS.size()
+		for step: int in range(1, channel_count + 1):
 			activity.request_use()
 			await get_tree().create_timer(.25).timeout
-			_check("%s channel %d + shader/audio" % [activity.name,state%4], activity.state == state%4 and (activity._screen_mat != null if activity == tv else activity._sound != null))
+			var channel: int = step % channel_count
+			_check("%s channel %d + shader/audio" % [activity.name, channel], activity.state == channel and (activity._screen_mat != null if activity == tv else activity._sound != null))
 	# Дождаться фонового синтеза и убедиться, что воспроизведение реально запущено.
 	radio._switch(1)
 	tv._switch(2)

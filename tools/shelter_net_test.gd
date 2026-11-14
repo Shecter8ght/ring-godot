@@ -30,7 +30,8 @@ func _run() -> void:
 	await _players(2)
 	await get_tree().create_timer(1.0).timeout
 	_tv()._switch(2)
-	_radio()._switch(3)
+	var custom_station: int = HideoutActivity.CUSTOM_RADIO_STATION
+	_radio()._switch(custom_station)
 	_power()._use(1)
 	await _players(3)
 	await get_tree().create_timer(1.5).timeout
@@ -39,16 +40,17 @@ func _run() -> void:
 	for i: int in range(actors.size()):
 		for j: int in range(i+1,actors.size()):
 			_check("spawns do not overlap", (actors[i] as Node3D).global_position.distance_to((actors[j] as Node3D).global_position)>1.1)
-	await _phase("late_join",2,3,false)
-	await _phase("jump_hideout",2,3,false)
+	await _phase("late_join",2,custom_station,false)
+	await _phase("jump_hideout",2,custom_station,false)
 	_command.rpc("guest_switch",3,0,true)
 	await get_tree().create_timer(2.5).timeout
 	await _phase("guest_switch_result",3,0,true)
-	for channel: int in range(4):
-		_tv()._switch(channel)
-		_radio()._switch(channel)
+	for radio_channel: int in range(HideoutActivity.RADIO_STATIONS.size()):
+		var tv_channel: int = mini(radio_channel, HideoutActivity.TV_CHANNELS.size() - 1)
+		_tv()._switch(tv_channel)
+		_radio()._switch(radio_channel)
 		await get_tree().create_timer(.5).timeout
-		await _phase("channels_%d" % channel,channel,channel,true)
+		await _phase("channels_%d" % radio_channel,tv_channel,radio_channel,true)
 	var before: Dictionary = {}
 	for actor: Node in actors:
 		before[(actor as Player).peer_id] = (actor as Node3D).global_position

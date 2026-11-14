@@ -2,7 +2,7 @@
 class_name HideoutActivity
 extends Interactable
 ## Досуг в убежище (F рядом): телевизор — каналы (новости, футбол, помехи, выкл.), экран светит
-## в комнату; магнитола — станции (лоуфай, рок-н-ролл, вальс под баян), звук синтезируется тут же;
+## в комнату; магнитола — три синтезированные станции и «Мои треки» из папки user://radio;
 ## ящик пива — выпил: в глазах качает (у себя), своим — «открыл пиво»; место на диване — сесть.
 ## Состояние ТВ и магнитолы общее для всех в убежище (кооп): переключил — у всех, пришёл позже —
 ## передадут. Всё локально, без хоста (в убежище его может и не быть).
@@ -10,7 +10,9 @@ extends Interactable
 enum Kind { TV, RADIO, BEER, SEAT }
 
 const TV_CHANNELS := ["выкл.", "новости", "футбол", "помехи"]
-const RADIO_STATIONS := ["выкл.", "лоуфай", "рок-н-ролл", "вальс под баян"]
+const RADIO_STATIONS := ["выкл.", "лоуфай", "рок-н-ролл", "вальс под баян", "Мои треки"]
+const CUSTOM_RADIO_STATION := 4
+const RADIO_DIR := "user://radio"
 ## Цвет, которым экран светит в комнату, по каналу.
 const TV_GLOW := [Color(0, 0, 0), Color(0.35, 0.5, 1.0), Color(0.45, 0.95, 0.5), Color(0.8, 0.82, 0.85)]
 const MIX := 22050.0
@@ -36,6 +38,10 @@ var _known: Array[int] = []
 ## Какой луп должен играть (строится в фоне — вдруг уже переключили).
 var _want: String = ""
 var _audio_tasks: Array[int] = []
+var _radio_files: PackedStringArray
+var _radio_next: int = 0
+var _radio_task: int = -1
+var _radio_revision: int = 0
 var _shared_ready: bool = false
 ## ТВ: яркость света от экрана без мерцания и фаза мерцания.
 var _glow_energy: float = 0.0
@@ -48,6 +54,9 @@ func _exit_tree() -> void:
 	for task: int in _audio_tasks:
 		WorkerThreadPool.wait_for_task_completion(task)
 	_audio_tasks.clear()
+	if _radio_task != -1:
+		WorkerThreadPool.wait_for_task_completion(_radio_task)
+		_radio_task = -1
 	if is_instance_valid(_sound):
 		_sound.stop()
 
@@ -66,12 +75,16 @@ func _ready() -> void:
 					occupied = true
 					_known.append(id)
 		if not occupied:
-			state = clampi(int(Profile.hideout_media.get("tv" if kind == Kind.TV else "radio", 0)), 0, 3)
+			state = _saved_state()
 		_sound = AudioStreamPlayer3D.new()
 		_sound.bus = &"Ambient"
+		_sound.volume_db = -6.0 if kind == Kind.RADIO else -10.0
 		_sound.unit_size = 3.0
 		_sound.max_distance = 24.0
 		add_child(_sound)
+		if kind == Kind.RADIO:
+			DirAccess.make_dir_recursive_absolute(RADIO_DIR)
+			_sound.finished.connect(_load_next_radio_track)
 		Net.scenes_changed.connect(_share_state)
 		_shared_ready = not Net.is_networked()
 		if Net.is_networked():
@@ -84,7 +97,10 @@ func prompt() -> String:
 		Kind.TV:
 			return "телевизор: %s → %s" % [TV_CHANNELS[state], TV_CHANNELS[(state + 1) % TV_CHANNELS.size()]]
 		Kind.RADIO:
-			return "магнитола: %s → %s" % [RADIO_STATIONS[state], RADIO_STATIONS[(state + 1) % RADIO_STATIONS.size()]]
+			var current: String = RADIO_STATIONS[state]
+			if state == CUSTOM_RADIO_STATION and _radio_task == -1 and _sound != null and _sound.stream == null:
+				current += " (нет треков в папке radio)"
+			return "магнитола: %s → %s" % [current, RADIO_STATIONS[(state + 1) % RADIO_STATIONS.size()]]
 		Kind.BEER:
 			return "открыть пиво"
 	return "сесть"
@@ -131,10 +147,26 @@ func _switch(v: int) -> void:
 func _set_state(v: int) -> void:
 	_shared_ready = true
 	_known = _here()
-	state = clampi(v, 0, 3)
+	var was_custom: bool = kind == Kind.RADIO and state == CUSTOM_RADIO_STATION
+	state = clampi(v, 0, _channel_count() - 1)
 	Profile.hideout_media["tv" if kind == Kind.TV else "radio"] = state
 	Profile.save()
+	if was_custom:
+		if state == CUSTOM_RADIO_STATION:
+			return
+		_radio_revision += 1
+		_sound.stop()
+		_sound.stream = null
 	_apply()
+
+
+func _channel_count() -> int:
+	return TV_CHANNELS.size() if kind == Kind.TV else RADIO_STATIONS.size()
+
+
+func _saved_state() -> int:
+	var key: String = "tv" if kind == Kind.TV else "radio"
+	return clampi(int(Profile.hideout_media.get(key, 0)), 0, _channel_count() - 1)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -187,7 +219,7 @@ func _initialize_shared() -> void:
 	# Все вошли одновременно: один участник начинает с сохранённого канала.
 	if here.is_empty() or here[0] == me:
 		_shared_ready = true
-		_switch(clampi(int(Profile.hideout_media.get("tv" if kind==Kind.TV else "radio",0)),0,3))
+		_switch(_saved_state())
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -218,7 +250,10 @@ func _apply() -> void:
 			set_process(state != 0 and gl != null)
 			_loop(["", "news", "crowd", "static"][state])
 		Kind.RADIO:
-			_loop(["", "lofi", "rock", "waltz"][state])
+			if state == CUSTOM_RADIO_STATION:
+				_start_radio_tracks()
+			else:
+				_loop(["", "lofi", "rock", "waltz"][state])
 
 
 ## ТВ: свет от экрана «дышит» вместе с картинкой — плавно, двумя несовпадающими волнами.
@@ -304,7 +339,63 @@ func _build_visual(parent: Node3D) -> void:
 			pass
 
 
-# ---------------------------------------------------------------- звук (синтез, без файлов)
+# ---------------------------------------------------------------- звук
+
+func _start_radio_tracks() -> void:
+	_loop("")
+	_sound.stream = null
+	_radio_files = PackedStringArray()
+	_radio_next = 0
+	var folder := DirAccess.open(RADIO_DIR)
+	if folder != null:
+		for file: String in folder.get_files():
+			if file.get_extension().to_lower() in ["mp3", "ogg", "wav"]:
+				_radio_files.append(file)
+	_load_next_radio_track()
+
+
+func _load_next_radio_track() -> void:
+	if state != CUSTOM_RADIO_STATION or _radio_task != -1 or _radio_files.is_empty():
+		return
+	_sound.stream = null
+	# Читаем по одному треку в фоне, чтобы большие WAV не задерживали кадр.
+	var files: PackedStringArray = _radio_files
+	var start: int = _radio_next
+	var revision: int = _radio_revision
+	_radio_task = WorkerThreadPool.add_task(func() -> void:
+		for offset: int in files.size():
+			var index: int = (start + offset) % files.size()
+			var stream := Audio.load_audio_file(RADIO_DIR.path_join(files[index]))
+			if stream != null and stream.get_length() > 0.0:
+				_radio_track_loaded.call_deferred(revision, stream, offset)
+				return
+		_radio_track_loaded.call_deferred(revision, null, files.size()))
+
+
+func _radio_track_loaded(revision: int, stream: AudioStream, skipped: int) -> void:
+	if _radio_task == -1:
+		return
+	WorkerThreadPool.wait_for_task_completion(_radio_task)
+	_radio_task = -1
+	if not is_inside_tree() or state != CUSTOM_RADIO_STATION:
+		return
+	# За время загрузки станцию могли выключить и выбрать снова с другим списком файлов.
+	if revision != _radio_revision:
+		_load_next_radio_track()
+		return
+	# Пропускаем сбойные файлы до следующего включения станции.
+	for _skipped in skipped:
+		_radio_next %= _radio_files.size()
+		_radio_files.remove_at(_radio_next)
+	if stream == null:
+		_sound.stream = null
+		return
+	if stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+	_radio_next = (_radio_next + 1) % _radio_files.size()
+	_sound.stream = stream
+	_sound.play()
+
 
 func _loop(key: String) -> void:
 	if _sound == null:
@@ -331,7 +422,6 @@ func _built(key: String, w: AudioStreamWAV) -> void:
 
 func _play_loop(key: String) -> void:
 	_sound.stream = _cache[key]
-	_sound.volume_db = -6.0 if kind == Kind.RADIO else -10.0
 	_sound.play()
 
 
