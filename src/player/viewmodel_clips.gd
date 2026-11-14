@@ -24,6 +24,10 @@ extends Node3D
 ## Переводчик огня (кость Selector) стоит по режиму Player.fire_mode (служебный клип selector_by_mode: запись на
 ## положение в порядке fire_modes ствола); X — клип большого пальца на этот переход (clips.fire_mode_<откуда>_<куда>,
 ## у ВЕРАС-54 auto_burst, burst_semi, semi_auto), рычаг идёт между положениями на участке клипа config.fire_mode_push.
+## Пистолет с патронником (АСТЕН-919, tools/asten919/clips/export_viewmodel.py): затвор — кости таблицы bolt_travel
+## (Slide и ствол), на задержке ещё и рычаг (slide_hold); в магазине на виду — патроны без того, что в стволе;
+## выстрел — свой клип clips.shot (с кадра config.shot_slide_back последнего выстрела затвор остаётся сзади);
+## «вынуть / вставить обойму» из окна рюкзака приходят действиями weapon_action (mag_out, mag_in, reload) без таймера.
 
 const BLEND_IN := 0.15
 const BLEND_OUT := 0.25
@@ -56,6 +60,20 @@ var _last_check: float = 0.0
 var _last_inspect: float = 0.0
 var _last_ammo: int = -1
 var _kick: float = 0.0
+## Пистолет (АСТЕН-919): кости затвора без кости Bolt — те, что ведёт таблица bolt_travel (Slide, Barrel);
+## slide_hold — рычаг задержки поднят (затвор на задержке); JamCase — гильза задержки (в покое сжата в точку).
+var _bolt_bones: Array[int] = []
+var _hold_src: Animation
+var _jam_bone: int = -1
+## Патронов в патроннике (chamber_capacity ствола): в магазине на виду — Player.ammo без патрона в стволе.
+var _chamber: int = 0
+## Действия рук с магазином без таймера перезарядки (пистолеты с патронником: «вынуть / вставить обойму» из
+## окна рюкзака идут через Player._weapon_action, как у рига модели): что, сколько ещё, с досылом ли, в пустую шахту.
+var _ext_pending: Dictionary = {}
+var _ext_left: float = 0.0
+var _ext_kind: String = ""
+var _ext_empty: bool = false
+var _ext_insert: bool = false
 var _sight_cache: Array = []
 ## Корпус магазина в сцене рук: вынут (Player.weapon_mag == "") — не виден, кроме перезарядки, где
 ## клип вставляет новый.
@@ -164,6 +182,8 @@ func _setup(id: String, mods: Dictionary) -> void:
 		_bolt = _weapon_skel.find_bone("Bolt")
 		_spring = _weapon_skel.find_bone("RecoilSpring")
 		_selector = _weapon_skel.find_bone("Selector")
+		_jam_bone = _weapon_skel.find_bone("JamCase")
+	_chamber = int(WeaponDb.weapon(id).get("chamber_capacity", 0))
 	# Стойка идёт по кругу: пока клип играет, он каждый кадр заново ставит кости рук. Иначе, доиграв,
 	# он оставлял позу как есть, и поправка кисти под рукоятку (сдвиг относительно клипа) прибавлялась
 	# кадр за кадром — рука уезжала от оружия.
@@ -173,6 +193,13 @@ func _setup(id: String, mods: Dictionary) -> void:
 			_anim.get_animation(clip_name).loop_mode = Animation.LOOP_LINEAR
 	_follower_src = _anim.get_animation("follower_by_rounds") if _anim.has_animation("follower_by_rounds") else null
 	_bolt_src = _anim.get_animation("bolt_travel") if _anim.has_animation("bolt_travel") else null
+	_hold_src = _anim.get_animation("slide_hold") if _anim.has_animation("slide_hold") else null
+	if _bolt_src and _bolt < 0 and _weapon_skel:
+		# у пистолета затвор — кость Slide (с ним ствол): таблица bolt_travel ведёт кости, которые в ней движутся
+		for i: int in _moving_tracks(_bolt_src):
+			var bone: int = _weapon_skel.find_bone(String(_bolt_src.track_get_path(i)).get_slice(":", 1))
+			if bone >= 0 and not _bolt_bones.has(bone):
+				_bolt_bones.append(bone)
 	_selector_src = _anim.get_animation("selector_by_mode") if _anim.has_animation("selector_by_mode") else null
 	if _selector_src:
 		# между положениями рычаг поворачивается плавно (записи — по кадру на положение)
@@ -182,6 +209,9 @@ func _setup(id: String, mods: Dictionary) -> void:
 		# две записи (закрыт / отведён) импортируются «ступенькой» — промежуточный ход затвора нужен плавным
 		for i in range(_bolt_src.get_track_count()):
 			_bolt_src.track_set_interpolation_type(i, Animation.INTERPOLATION_LINEAR)
+	if _hold_src:
+		for i in range(_hold_src.get_track_count()):
+			_hold_src.track_set_interpolation_type(i, Animation.INTERPOLATION_LINEAR)
 	for i in range(1, 31):
 		var r: Node3D = model.find_child("Round_%02d" % i, true, false) as Node3D
 		if r == null:
@@ -244,7 +274,13 @@ func _setup(id: String, mods: Dictionary) -> void:
 		frame = Node3D.new()
 		model.add_child(frame)
 	WeaponModels.apply_markers(frame, model, float(config.get("ads_z", 0.3)))
+	if bool(config.get("muzzle_own", false)):
+		# дульный обвес — на срез модели (Muzzle), а не на сокет процедурной основы, как у модели в мире с ригом
+		frame.set_meta("muzzle_own", true)
 	WeaponMods.fit(frame, String(WeaponDb.weapon(id).get("model", "rifle")), mods)
+	# заглушка резьбы (MuzzleDevice, у кости ствола — не под рамой): дульный обвес её закрывает
+	if not WeaponDb.mod_id(mods.get("muzzle", "")).is_empty():
+		WeaponMods._hide_part(model, "muzzle_device")
 	# место хвата — после установки обвеса: у рукоятки на удлинителе оно считается от рамки переходника
 	var under: String = WeaponGrips._under_key(mods)
 	if under != "":
@@ -291,6 +327,11 @@ func _clip_name(kind: String) -> String:
 ## Набор клипов магазина ("" — штатный и магазины без своей модели). mag — как Player.weapon_mag.
 func _set_of(mag: String) -> String:
 	return String((_mag_looks.get(mag, {}) as Dictionary).get("set", "")) if mag not in ["", "*"] else ""
+
+
+## Патронов на виду в магазине при счёте ammo (Player.ammo): у ствола с патронником один из них — в стволе.
+func _in_mag(ammo: int) -> int:
+	return maxi(ammo - mini(maxi(ammo, 0), _chamber), 0)
 
 
 ## Ёмкость магазина mag ("*" — штатный ствола).
@@ -369,6 +410,8 @@ func equip() -> void:
 	_holding = false
 	_turn = Vector2.ZERO
 	_fast = false
+	_ext_pending.clear()
+	_ext_left = 0.0
 	_play(_clip_name("draw") if String(config.get("mechanism", "")) == "break_action" else _clip_name("idle"), 0.0)
 
 
@@ -381,45 +424,62 @@ func update(pl: Player, delta: float) -> void:
 		_apply_hand_grip(delta)
 		_scale_hands()
 		return
-	var reloading: bool = pl.reload_timer > 0.0 and pl._reload_kind != "clear"
+	# действие рук с магазином без таймера перезарядки (окно рюкзака, пистолет с патронником) — пока идёт, оно вместо
+	# таймера; обычная перезарядка (таймер уже идёт) его отменяет
+	if not _ext_pending.is_empty():
+		if pl.reload_timer <= 0.0:
+			_ext_kind = String(_ext_pending.kind)
+			_ext_left = float(_ext_pending.duration)
+			_ext_empty = bool(_ext_pending.empty)
+			_ext_insert = bool(_ext_pending.insert)
+		_ext_pending.clear()
+	if pl.reload_timer > 0.0:
+		_ext_left = 0.0
+	var ext: bool = _ext_left > 0.0
+	var r_timer: float = _ext_left if ext else pl.reload_timer
+	var r_kind: String = _ext_kind if ext else pl._reload_kind
+	var r_empty: bool = _ext_empty if ext else pl._reload_empty
+	var r_insert: bool = _ext_insert if ext else pl._reload_insert
+	_ext_left = maxf(0.0, _ext_left - delta)
+	var reloading: bool = r_timer > 0.0 and r_kind != "clear"
 	if _clip == "":
 		_mag_set = _set_of(pl.weapon_mag)
-	if reloading and _last_reload <= 0.0 and pl._reload_kind == "eject":
+	if reloading and _last_reload <= 0.0 and r_kind == "eject":
 		# «вынуть магазин» из окна рюкзака: клип перезарядки до кадра, где старый магазин скрылся; дальше рука пуста
 		_reload_old = pl.weapon_mag
 		_reload_new = ""
 		_mag_set = _set_of(pl.weapon_mag)
-		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_before = _in_mag(pl.ammo)
 		_rounds_after = 0
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip("reload"), -1))
 		_fast = false
 		_eject = true
 		_eject_hide = 0.0
-		_play(_clip_name("reload"), BLEND_IN, pl.reload_timer)
+		_play(_clip_name("reload"), BLEND_IN, r_timer)
 		if _clip != "":
 			var eject_length: float = _anim.get_animation(_clip_name("reload")).length
 			var eject_to: float = float(_swap_frame) / float(config.get("fps", 30)) if _swap_frame >= 0 else eject_length * 0.4
-			_anim.speed_scale = eject_to / maxf(pl.reload_timer * float(Balance.HAND_MAG.out_hold), 0.05)
+			_anim.speed_scale = eject_to / maxf(r_timer * float(Balance.HAND_MAG.out_hold), 0.05)
 	elif reloading and _last_reload <= 0.0:
 		_eject = false
-		var empty: bool = pl._reload_empty
+		var empty: bool = r_empty
 		var role: String = "reload_empty" if empty else "reload"
 		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
 		_reload_old = pl.weapon_mag
-		_reload_new = pl.reload_next_mag()
+		_reload_new = "*" if ext else pl.reload_next_mag()
 		_mag_set = _set_of(_reload_new)
-		_rounds_before = 0 if empty else maxi(pl.ammo, 0)
+		_rounds_before = 0 if empty else _in_mag(pl.ammo)
 		_rounds_after = _capacity_of(_reload_new)
 		_swap_frame = int((config.get("swap_frame", {}) as Dictionary).get(_base_clip(role), -1))
 		_fast = false
-		_play(_clip_name(role), BLEND_IN, pl.reload_timer)
-		if pl._reload_insert and _swap_frame >= 0:
+		_play(_clip_name(role), BLEND_IN, r_timer)
+		if r_insert and _swap_frame >= 0:
 			# магазина в оружии нет: вынимать нечего — клип с кадра, где новый магазин уже в руке
 			var from: float = float(_swap_frame) / float(config.get("fps", 30))
 			var length: float = _anim.get_animation(_clip_name(role)).length
 			if from < length - 0.05:
 				_anim.seek(from, true)
-				_anim.speed_scale = (length - from) / maxf(pl.reload_timer, 0.05)
+				_anim.speed_scale = (length - from) / maxf(r_timer, 0.05)
 				_insert_hide = BLEND_IN
 	elif reloading and pl._reload_fast and not _fast and _clip_name("reload_fast") != "":
 		# второе R: перезарядка стала быстрой — её клип с начала, на оставшееся время
@@ -430,13 +490,13 @@ func update(pl: Player, delta: float) -> void:
 	elif not reloading and _last_reload > 0.0 and _clip != "" and _clip != _clip_name("check"):
 		# закончилась или прервана — в стойку (досылка уже показана клипом)
 		_play(_clip_name("idle"), BLEND_OUT)
-	_last_reload = pl.reload_timer if reloading else 0.0
+	_last_reload = r_timer if reloading else 0.0
 	if not reloading:
 		_fast = false
 	# задержка: R — передёрнуть затвор (клип на время устранения); прервали — в стойку
 	var clearing: bool = pl.reload_timer > 0.0 and pl._reload_kind == "clear"
 	if clearing and _last_clear <= 0.0:
-		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_before = _in_mag(pl.ammo)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
 		_play(_clip_name("clear"), BLEND_IN, pl.reload_timer)
@@ -445,14 +505,14 @@ func update(pl: Player, delta: float) -> void:
 	_last_clear = pl.reload_timer if clearing else 0.0
 	var jammed: bool = pl.is_jammed()
 	if pl.ammo_check_t > _last_check + 0.5 and _clip == "":
-		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_before = _in_mag(pl.ammo)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
 		_play(_clip_name("check"), BLEND_IN)
 	_last_check = pl.ammo_check_t
 	# осмотр оружия: клип на время осмотра; кончился или прервали — в стойку
 	if pl.weapon_inspect_t > _last_inspect + 0.5 and _clip == "" and _base_clip("inspect") != "":
-		_rounds_before = maxi(pl.ammo, 0)
+		_rounds_before = _in_mag(pl.ammo)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
 		_play(_clip_name("inspect"), BLEND_IN, pl.weapon_inspect_t)
@@ -465,17 +525,24 @@ func update(pl: Player, delta: float) -> void:
 		var role: String = "fire_mode_%s_%s" % [modes[pl.fire_mode_from], modes[pl.fire_mode_to]]
 		_play(_clip_name(role), BLEND_IN, pl.fire_mode_switch_t)
 	_last_switch = pl.fire_mode_switch_t
+	var shot_clip: String = _clip_name("shot")
 	if _last_ammo >= 0 and pl.ammo < _last_ammo:
-		_kick = BOLT_KICK_SEC
-		if _clip == _clip_name("check") or (_clip != "" and _clip == _clip_name("inspect")):
-			# выстрел посреди проверки или осмотра — руки сразу на оружие
-			_play(_clip_name("idle"), 0.1)
+		var calm: bool = _clip == "" or _clip == shot_clip or _clip == _clip_name("check") \
+			or (_clip != "" and _clip == _clip_name("inspect"))
+		if shot_clip != "" and calm:
+			# свой клип выстрела (АСТЕН-919): спуск, затвор, гильза и отдача в руках — с начала на каждый выстрел
+			_play(shot_clip, 0.03)
+		else:
+			_kick = BOLT_KICK_SEC
+			if _clip == _clip_name("check") or (_clip != "" and _clip == _clip_name("inspect")):
+				# выстрел посреди проверки или осмотра — руки сразу на оружие
+				_play(_clip_name("idle"), 0.1)
 	_last_ammo = pl.ammo
 	_restore_arm()
 	_advance(pl, delta)
 	if _clip != "" and not _anim.is_playing():
 		_play(_clip_name("idle"), BLEND_OUT)
-	var shown: int = maxi(pl.ammo, 0)
+	var shown: int = _in_mag(pl.ammo)
 	var after_swap: bool = false
 	if _clip != "":
 		var f: float = _anim.current_animation_position * float(config.get("fps", 30))
@@ -499,6 +566,10 @@ func update(pl: Player, delta: float) -> void:
 		_jam_case.visible = jammed or clear_clip
 	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
 	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and _clip == "" and not jammed
+	if bool(config.get("hold_open", false)) and pl.ammo <= 0 and not jammed and _clip != "" and _clip == shot_clip:
+		# последний выстрел: клип отводит затвор — с этого кадра он остаётся сзади, на задержке
+		var back: int = int(config.get("shot_slide_back", 0))
+		held = _anim.current_animation_position * float(config.get("fps", 30)) >= back
 	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip, held)
 	_selector_pose(pl)
 	_inspect_turn(pl, delta)
@@ -622,6 +693,18 @@ func _apply_hand_grip(delta: float) -> void:
 
 func weapon_action(action: String, _flag: bool = false, _duration: float = 0.0, _rounds_left: int = -1) -> void:
 	if String(config.get("mechanism", "")) != "break_action":
+		# пистолет с патронником: магазин из окна рюкзака — действие игрока без таймера перезарядки (у обычной
+		# перезарядки таймер уже идёт — тогда update это отбросит); flag — с досылом (затвор на задержке)
+		match action:
+			"mag_out":
+				_ext_pending = {"kind": "eject", "duration": _duration, "empty": false, "insert": false}
+			"mag_in":
+				_ext_pending = {"kind": "full", "duration": _duration, "empty": _flag, "insert": true}
+			"reload":
+				_ext_pending = {"kind": "full", "duration": _duration, "empty": _flag, "insert": false}
+			"cancel":
+				_ext_pending.clear()
+				_ext_left = 0.0
 		return
 	if action == "shot":
 		_play(_clip_name("shot"), 0.03)
@@ -759,6 +842,19 @@ func _pose_overrides(shown: int, delta: float, jam_hold: bool = false, held_open
 	if _kick > 0.0:
 		_kick = maxf(0.0, _kick - delta)
 		open = maxf(open, sin(PI * (1.0 - _kick / BOLT_KICK_SEC)))
+	if open > 0.0 and _bolt_src and not _bolt_bones.is_empty():
+		for bone: int in _bolt_bones:
+			_apply_sample(_bolt_src, _weapon_skel.get_bone_name(bone), bone, _table_time(_bolt_src, open, 2))
+	if held_open and _hold_src:
+		# рычаг задержки поднят — держит затвор
+		for i: int in _moving_tracks(_hold_src):
+			var hold_name: String = String(_hold_src.track_get_path(i)).get_slice(":", 1)
+			var hold_bone: int = _weapon_skel.find_bone(hold_name)
+			if hold_bone >= 0:
+				_apply_sample(_hold_src, hold_name, hold_bone, _table_time(_hold_src, 1.0, 2))
+	if jam_hold and _jam_bone >= 0:
+		# гильза задержки в окне (в покое кость сжата в точку — клипы «включают» её масштабом)
+		_weapon_skel.set_bone_pose_scale(_jam_bone, Vector3.ONE)
 	if open > 0.0 and _bolt >= 0 and _bolt_src:
 		_apply_sample(_bolt_src, "Bolt", _bolt, _table_time(_bolt_src, open, 2))
 		# возвратная пружина (ВЕРАС-54 v13) сжимается рамой — та же таблица, масштаб кости
@@ -778,6 +874,17 @@ func _selector_pose(pl: Player) -> void:
 		var k: float = 1.0 - pl.fire_mode_switch_t / float(Balance.FIRE_MODES.switch_sec)
 		at = lerpf(float(pl.fire_mode_from), float(pl.fire_mode_to), smoothstep(float(push[0]), float(push[1]), k))
 	_apply_sample(_selector_src, "Selector", _selector, _table_time(_selector_src, at, modes.size()))
+
+
+## Дорожки служебной таблицы, которые в ней меняются. Руки и пистолет в одном скелете (glTF склеивает риг пистолета,
+## сидящий на кости рук), и экспорт пишет в таблицу все кости — остальные стоят в покое и не должны перебивать клип.
+func _moving_tracks(src: Animation) -> Array[int]:
+	var out: Array[int] = []
+	for i in range(src.get_track_count()):
+		var n: int = src.track_get_key_count(i)
+		if n >= 2 and src.track_get_key_value(i, 0) != src.track_get_key_value(i, n - 1):
+			out.append(i)
+	return out
 
 
 ## Время записи index в служебном клипе-таблице из count записей по кадру на запись. Отсчёт — от конца

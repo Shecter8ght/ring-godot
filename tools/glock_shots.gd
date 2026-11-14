@@ -18,6 +18,7 @@ var _ground: MeshInstance3D
 var _captures: Array[Dictionary] = []
 var _only: PackedStringArray = []
 var _failures: int = 0
+var _vm: ViewmodelClips
 
 
 func _ready() -> void:
@@ -59,21 +60,23 @@ func _ready() -> void:
 		push_error("glock_shots: нет импортированных рук Persona")
 		get_tree().quit(1)
 		return
+	await _clip_shots()
+	# прежние процедурные руки на риге модели (запасной вид, если файла клипов нет) — только по only=rig
 	var config: Dictionary = WeaponDb.weapon(WEAPON_ID).get("rig", {}) as Dictionary
 	var phases: Dictionary = config.get("reload", {}) as Dictionary
 	var mag_out: float = lerpf(float(phases.get("mag_out", 0.22)), float(phases.get("mag_hidden", 0.34)), 0.65)
 	var mag_in: float = float(phases.get("mag_in", 0.65))
 	var charge: float = lerpf(float(phases.get("charge", 0.82)), float(phases.get("charge_end", 0.94)), 0.5)
-	await _fp("fp_hip", false)
-	await _fp("ads", true)
-	await _fp("reload_partial_mag_out", false, "reload", mag_out)
-	await _fp("reload_partial_mag_in", false, "reload", mag_in)
+	await _fp("rig_fp_hip", false)
+	await _fp("rig_ads", true)
+	await _fp("rig_reload_partial_mag_out", false, "reload", mag_out)
+	await _fp("rig_reload_partial_mag_in", false, "reload", mag_in)
 	# обойма из окна рюкзака: «вынуть» (середина и конец — рука уходит без магазина) и «вставить»
-	await _fp("hand_mag_out", false, "reload:out", 0.55)
-	await _fp("hand_mag_out_end", false, "reload:out", 0.9)
-	await _fp("hand_mag_in", false, "reload:in", 0.35)
-	await _fp("empty_locked", false, "", 0.0, true)
-	await _fp("reload_empty_charge", false, "reload", charge, true)
+	await _fp("rig_hand_mag_out", false, "reload:out", 0.55)
+	await _fp("rig_hand_mag_out_end", false, "reload:out", 0.9)
+	await _fp("rig_hand_mag_in", false, "reload:in", 0.35)
+	await _fp("rig_empty_locked", false, "", 0.0, true)
+	await _fp("rig_reload_empty_charge", false, "reload", charge, true)
 	await _model("model_side", Vector3(-0.45, 0.035, 0.0))
 	await _model("model_front", Vector3(0.065, 0.035, 0.44))
 	await _model("model_back", Vector3(-0.035, 0.035, -0.40))
@@ -150,6 +153,140 @@ func _build_stage() -> void:
 	_camera.fov = Settings.fps_fov_v()
 	add_child(_camera)
 	_camera.current = true
+
+
+## Клипы рук владельца (ViewmodelClips, tools/asten919/clips/export_viewmodel.py) — как в игре: сцена в осях камеры,
+## у бедра поза из Blender, в прицеле линия прицеливания на оси взгляда. Кадры фаз — метки клипов из отчёта вывода.
+func _clip_shots() -> void:
+	var report: Dictionary = {}
+	var text: String = FileAccess.get_file_as_string("res://assets/models/weapons/asten919/asten919_viewmodel.json")
+	if text != "":
+		report = JSON.parse_string(text) as Dictionary
+	var clips: Dictionary = report.get("clips", {}) as Dictionary
+	if not ViewmodelClips.available(WEAPON_ID) or clips.is_empty():
+		_failures += 1
+		push_error("glock_shots: нет клипов рук АСТЕН-919 (export_viewmodel.py) или их отчёта")
+		return
+	_weapon.visible = false
+	_arms.visible = false
+	_vm = ViewmodelClips.create(WEAPON_ID, {})
+	# клипы, у которых в игре пока нет случая, — на просмотр отдельными ролями этого экземпляра
+	_vm.config = _vm.config.duplicate(true)
+	for spare: String in ["reload_full_rack", "slide_rack", "finger_to_trigger"]:
+		(_vm.config.clips as Dictionary)[spare] = spare
+	_vm_space.add_child(_vm)
+	var at := func(clip: String, mark: String, shift: float = 0.0) -> float:
+		var c: Dictionary = clips.get(clip, {}) as Dictionary
+		var m: Dictionary = c.get("marks", {}) as Dictionary
+		return clampf((float(m.get(mark, 0)) + shift) / maxf(float(c.get("frames", 1)), 1.0), 0.0, 1.0)
+	var mid := func(clip: String, a: String, b: String) -> float:
+		return lerpf(at.call(clip, a), at.call(clip, b), 0.5)
+	await _clip("clip_hip", "idle", 0.0)
+	await _clip("clip_ads", "idle", 0.0, true)
+	await _clip("clip_reload_tactical_catch", "reload", at.call("reload_tactical", "catch"))
+	await _clip("clip_reload_tactical_out", "reload", at.call("reload_tactical", "mag_out"))
+	await _clip("clip_reload_tactical_new", "reload", mid.call("reload_tactical", "mag_new", "insert"))
+	await _clip("clip_reload_tactical_insert", "reload", at.call("reload_tactical", "insert"))
+	await _clip("clip_reload_tactical_seat", "reload", at.call("reload_tactical", "seat"))
+	await _clip("clip_reload_full_start", "reload_empty", at.call("reload_full", "catch"))
+	await _clip("clip_reload_full_insert", "reload_empty", at.call("reload_full", "insert"))
+	await _clip("clip_reload_full_release", "reload_empty", at.call("reload_full", "slide_release"))
+	await _clip("clip_reload_fast_flick", "reload_fast", at.call("reload_fast", "flick"))
+	await _clip("clip_reload_fast_insert", "reload_fast", at.call("reload_fast", "insert"))
+	await _clip("clip_reload_fast_full_release", "reload_fast_empty", at.call("reload_fast_full", "slide_release"))
+	await _clip("clip_check_hold", "check", mid.call("mag_check", "hold_start", "hold_end"))
+	await _clip("clip_inspect_left", "inspect", mid.call("inspect", "left_side_start", "left_side_end"))
+	await _clip("clip_inspect_right", "inspect", mid.call("inspect", "right_side_start", "right_side_end"))
+	await _clip("clip_jam_pull", "clear", at.call("jam_clear", "pull"))
+	await _clip("clip_fire_press", "shot", at.call("fire", "press"))
+	await _clip("clip_fire_slide", "shot", at.call("fire", "slide_back"))
+	await _clip("clip_empty_locked", "idle", 0.0, false, "held")
+	await _clip("clip_jammed", "idle", 0.0, false, "jam")
+	await _clip("clip_spare_full_rack_pull", "reload_full_rack", at.call("reload_full_rack", "rack_pull"))
+	await _clip("clip_spare_slide_rack", "slide_rack", at.call("slide_rack", "pull"))
+	await _clip("clip_spare_finger_trigger", "finger_to_trigger", 1.0)
+	await _hand_mag_clips()
+	_vm.queue_free()
+	_vm = null
+	if _wanted("clip_suppressor"):
+		var sup: ViewmodelClips = ViewmodelClips.create(WEAPON_ID, {"muzzle": {"id": "muzzle_supp_9_01"}})
+		_vm_space.add_child(sup)
+		_vm = sup
+		await _clip("clip_suppressor", "idle", 0.0)
+		await _clip("clip_suppressor_ads", "idle", 0.0, true)
+		sup.queue_free()
+		_vm = null
+	_weapon.visible = true
+	_arms.visible = true
+
+
+func _clip(stage: String, role: String, fraction: float, ads: bool = false, state: String = "") -> void:
+	if not _wanted(stage) or _vm == null:
+		return
+	_ground.position.y = -1.5
+	_camera.transform = Transform3D.IDENTITY
+	_camera.near = 0.05
+	_camera.fov = Settings.fps_fov_v()
+	var vk: float = CameraRig.viewmodel_scale(_camera.fov)
+	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)
+	_vm.preview_reload(role, fraction, "*")
+	if state == "held":
+		_vm._pose_overrides(0, 0.0, false, true)
+	elif state == "jam":
+		_vm._pose_overrides(8, 0.0, true, false)
+		if _vm._jam_case:
+			_vm._jam_case.visible = true
+	_vm.transform = _vm.ads_transform() if ads else _vm.hip_transform()
+	await _settle()
+	await _capture(stage, {"view": "first_person_clips", "role": role, "clip": _vm._clip_name(role), "fraction": fraction, "ads": ads, "state": state})
+
+
+## «Вынуть / вставить обойму» из окна рюкзака у пистолета с патронником: игрок шлёт действия mag_out / mag_in (как
+## риг модели), клипы рук ведёт ViewmodelClips.update по настоящему Player (без уровня и физики).
+func _hand_mag_clips() -> void:
+	if not (_wanted("clip_hand_mag_out") or _wanted("clip_hand_mag_out_end") or _wanted("clip_hand_mag_in")):
+		return
+	var pl: Player = (load("res://scenes/player/player.tscn") as PackedScene).instantiate() as Player
+	add_child(pl)
+	pl.set_physics_process(false)
+	pl.set_process(false)
+	pl.visible = false
+	pl.combat_enabled = false
+	pl.weapon_id = WEAPON_ID
+	pl.weapon_mag = "*"
+	pl.ammo = 18
+	_vm.equip()
+	var step := func(seconds: float) -> void:
+		var t: float = 0.0
+		while t < seconds:
+			_vm.update(pl, 1.0 / 60.0)
+			t += 1.0 / 60.0
+	_vm.weapon_action("mag_out", false, 1.0)
+	step.call(0.55)
+	await _clip_live("clip_hand_mag_out")
+	step.call(0.4)
+	await _clip_live("clip_hand_mag_out_end")
+	step.call(0.4)
+	pl.weapon_mag = ""
+	pl.ammo = 1
+	step.call(0.8)
+	_vm.weapon_action("mag_in", false, 1.2)
+	step.call(0.45)
+	await _clip_live("clip_hand_mag_in")
+	pl.queue_free()
+	await _frames(2)
+
+
+func _clip_live(stage: String) -> void:
+	if not _wanted(stage):
+		return
+	_camera.transform = Transform3D.IDENTITY
+	_camera.fov = Settings.fps_fov_v()
+	var vk: float = CameraRig.viewmodel_scale(_camera.fov)
+	_vm_space.transform = Transform3D(Basis.from_scale(Vector3(vk, vk, 1.0)), Vector3.ZERO)
+	_vm.transform = _vm.hip_transform()
+	await _settle()
+	await _capture(stage, {"view": "first_person_clips", "clip": _vm._clip, "position": _vm._anim.current_animation_position})
 
 
 ## Те же позиции камеры и модели, что у CameraRig, без покачивания и отдачи.
@@ -290,9 +427,13 @@ func _reset() -> void:
 
 
 func _wanted(stage: String) -> bool:
+	if stage in _only:
+		return true
+	if stage.begins_with("rig_"):
+		return "rig" in _only
 	if _only.is_empty():
 		return true
-	if stage in _only:
+	if "clips" in _only and stage.begins_with("clip_"):
 		return true
 	if "model" in _only and stage.begins_with("model_"):
 		return true

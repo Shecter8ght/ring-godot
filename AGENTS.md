@@ -937,7 +937,14 @@ python tools/flare_gun_claude_wear_masks.py                    # ракетни�
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/texture_flare_gun_claude.py -- build|render|inspect # ракетница Claude: слои UCUPaint на принятой геометрии, превью, проверка стека
 python tools/import_weapon_model.py pm_highpoly_v5          # проверенный ПМ из _asset_src: дерево, PBR, размеры, бюджеты, CREDITS
 tools/godot.cmd --headless res://tools/glock_test.tscn        # АСТЕН-919 (wpn_hg_02): детали без курка/флажка/глушителя, LOD, патроны 17+1, дуло с обвесом, гайка резьбы прячется под глушителем
-tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # АСТЕН-919 (wpn_hg_02): хват, ADS, перезарядка, третье лицо в docs/screens/glock_*.png
+                                                              # клипы рук: метки в осях модели в мире, все роли, патрон в стволе, затвор на задержке, глушитель
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/glock_shots.tscn # АСТЕН-919 (wpn_hg_02): клипы рук (glock_clip_*: хват, прицел, перезарядки, проверка, осмотр,
+                                                              # задержка, выстрел, затвор на задержке, обойма из рюкзака, глушитель), модель, третье лицо в docs/screens/glock_*.png;
+                                                              # прежние процедурные руки — -- only=rig
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" -b --factory-startup --python-exit-code 1 --python tools/asten919/clips/export_viewmodel.py
+                                                              # АСТЕН-919, клипы рук владельца в игру: копия его файла клипов (сам файл не трогается) → позы с IK и магазином
+                                                              # в левой кисти запечены → assets/models/weapons/asten919/asten919_viewmodel.gltf + отчёт .json (длины, метки фаз);
+                                                              # затем --import и python -X utf8 tools/asten919/clips/viewmodel_data.py (кадры фаз → data/weapons.json)
 tools/godot.cmd --windowed --resolution 1920x1080 res://tools/icon_detail_shots.tscn # подробные значки (Balance.ICON_DETAIL — пистолет АСТЕН-919 и обойма):
                                                               # мастер 384 точки на клетку, показ пересчитан под размер на экране (ItemIcons.sized); сетка рюкзака,
                                                               # слот, карточки торговца, строка конструктора, метка «БЕЗ МАГ» → docs/screens/icon_detail*.png;

@@ -47,6 +47,9 @@ static func defaults(weapon_id: String, role: String) -> Dictionary:
 	var weapon: Dictionary = WeaponDb.weapon(weapon_id)
 	var rig: Dictionary = weapon.get("rig", {})
 	var phases: Dictionary = rig.get("reload", {})
+	if role.ends_with("empty") and rig.has("reload_empty"):
+		# у полной перезарядки свои доли фаз (клипы рук разной длины — АСТЕН-919)
+		phases = rig.get("reload_empty", {})
 	if String(rig.get("mechanism", "")) == "break_action":
 		return {
 			"breech_open": {"at": float(phases.get("open_start", 0.1))},

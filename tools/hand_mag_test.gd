@@ -99,13 +99,22 @@ func _rig_cases() -> void:
 	add_child(with_mag)
 	var mag: Node3D = with_mag.part("Magazine")
 	var rest: Vector3 = mag.position
+	# моменты проверок — по долям фаз из данных (у АСТЕН-919 они сняты с клипов рук владельца): середина «вынул —
+	# скрылся» и середина «новый в руке — вставлен»
+	var rig_cfg: Dictionary = WeaponDb.weapon(GUN).get("rig", {}) as Dictionary
+	var tac: Dictionary = rig_cfg.get("reload", {}) as Dictionary
+	var full: Dictionary = rig_cfg.get("reload_empty", tac) as Dictionary
+	var hidden: float = float(tac.get("mag_hidden", 0.34))
+	var out_mid: float = float(Balance.HAND_MAG.out_hold) * lerpf(float(tac.get("mag_out", 0.22)), hidden, 0.5) / hidden
+	var full_hidden: float = float(full.get("mag_hidden", 0.34))
+	var in_mid: float = (lerpf(float(full.get("mag_new", 0.48)), float(full.get("mag_in", 0.65)), 0.5) - full_hidden) / (1.0 - full_hidden)
 	with_mag.play_reload(false, 1.0, "out")
-	with_mag.advance_action(0.4)
+	with_mag.advance_action(out_mid)
 	var moved: float = (mag.position - rest).length()
 	var mid_weight: float = with_mag.get_hand_weight()
 	_check("«вынуть»: на середине магазин выходит из рукояти, рука на нём", mag.visible and moved > 0.03 and mid_weight > 0.9,
 		"сдвиг %.3f м, рука %.2f" % [moved, mid_weight])
-	with_mag.advance_action(0.5)
+	with_mag.advance_action(0.9 - out_mid)
 	_check("«вынуть»: к концу магазина не видно, рука возвращается", not mag.visible and with_mag.get_hand_weight() < 0.5,
 		"рука %.2f" % with_mag.get_hand_weight())
 	with_mag.advance_action(0.2)
@@ -124,7 +133,7 @@ func _rig_cases() -> void:
 	empty.play_reload(true, 1.0, "in")
 	empty.advance_action(0.05)
 	var start_weight: float = empty.get_hand_weight()
-	empty.advance_action(0.35)
+	empty.advance_action(maxf(in_mid - 0.05, 0.0))
 	var mag_in: Node3D = empty.part("Magazine")
 	_check("«вставить»: магазин показан и идёт в рукоять, рука подошла", body.visible and mag_in.visible and start_weight < 0.6 and empty.get_hand_weight() > 0.9,
 		"рука %.2f → %.2f" % [start_weight, empty.get_hand_weight()])

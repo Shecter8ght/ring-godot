@@ -96,7 +96,8 @@ static func fit(root: Node3D, model_key: String, mods: Dictionary, lod: int = 0,
 		m["att"] = a
 		m["lod"] = lod
 		if top_level:
-			if rig and base == "muzzle" and bare_muzzle is Vector3:
+			# у клипов рук пистолета (ViewmodelClips, АСТЕН-919) рига на модели нет — срез у них тоже свой (meta muzzle_own)
+			if (rig or bool(root.get_meta("muzzle_own", false))) and base == "muzzle" and bare_muzzle is Vector3:
 				# Сокеты основы сняты с процедурной модели; на импортированной насадка встаёт на её срез.
 				m.pos = bare_muzzle
 			if key == "optic_primary":

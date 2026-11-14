@@ -97,6 +97,59 @@ func _common(rig: WeaponRig, model: Node3D, label: String, rounds_total: int) ->
 	_check(label + ": действие глушителя без детали не застревает", not rig.is_busy())
 
 
+## Руки от первого лица — клипы владельца (tools/asten919/clips/export_viewmodel.py, ViewmodelClips): метки в тех же
+## осях, что у модели в мире, все роли клипов есть, патрон в стволе не виден в магазине, затвор на задержке, глушитель.
+func _viewmodel() -> void:
+	_check("клипы рук: сцена есть", ViewmodelClips.available(GLOCK_ID))
+	if not ViewmodelClips.available(GLOCK_ID):
+		return
+	var vm: ViewmodelClips = ViewmodelClips.create(GLOCK_ID, {})
+	add_child(vm)
+	var muzzle: Vector3 = vm.frame.get_meta("muzzle", Vector3.ZERO)
+	_check("клипы рук: срез в осях рукояти как у модели в мире", muzzle.distance_to(MUZZLE_AT) < 0.004, str(muzzle))
+	_check("клипы рук: высота прицельной линии", absf(float(vm.frame.get_meta("sight_h", 0.0)) - SIGHT_H) < 0.004, str(vm.frame.get_meta("sight_h", 0.0)))
+	var anim: AnimationPlayer = vm.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
+	var missing: Array[String] = []
+	for role: Variant in (vm.config.get("clips", {}) as Dictionary).values():
+		if not anim.has_animation(String(role)):
+			missing.append(String(role))
+	for spare: Variant in vm.config.get("spare_clips", []):
+		if not anim.has_animation(String(spare)):
+			missing.append(String(spare))
+	for service: String in ["follower_by_rounds", "bolt_travel", "slide_hold"]:
+		if not anim.has_animation(service):
+			missing.append(service)
+	_check("клипы рук: все роли и служебные таблицы", missing.is_empty(), str(missing))
+	var swap: float = vm.swap_fraction("reload")
+	var swap_empty: float = vm.swap_fraction("reload_empty")
+	_check("клипы рук: кадр подмены магазина внутри клипа", swap > 0.2 and swap < 0.6 and swap_empty > 0.2 and swap_empty < 0.6, "%.3f / %.3f" % [swap, swap_empty])
+	_check("клипы рук: сброс старого магазина у быстрой", int((vm.config.get("drop_frame", {}) as Dictionary).get("reload_fast", -1)) > 0)
+	var rounds: int = 0
+	while vm.find_child("Round_%02d" % (rounds + 1), true, false) != null:
+		rounds += 1
+	_check("клипы рук: патронов в магазине модели", rounds == MAG_CAPACITY, str(rounds))
+	_check("клипы рук: 17+1 — в магазине видно 17, один в стволе — пусто", vm._in_mag(MAG_CAPACITY + 1) == MAG_CAPACITY and vm._in_mag(1) == 0 and vm._in_mag(0) == 0)
+	var skel: Skeleton3D = vm._weapon_skel
+	var slide: int = skel.find_bone("Slide") if skel else -1
+	_check("клипы рук: затвор ведёт таблица bolt_travel", slide >= 0 and vm._bolt_bones.has(slide))
+	if slide >= 0:
+		vm.preview_reload("idle", 0.0, "*")
+		var closed: Vector3 = skel.get_bone_pose_position(slide)
+		vm._pose_overrides(0, 0.0, false, true)
+		var travel: float = skel.get_bone_pose_position(slide).distance_to(closed)
+		_check("клипы рук: пусто — затвор на задержке", travel > 0.03 and travel < 0.06, "%.4f м" % travel)
+	var cap: MeshInstance3D = vm.find_child("MuzzleDevice", true, false) as MeshInstance3D
+	_check("клипы рук: заглушка резьбы видна без обвеса", cap != null and cap.visible)
+	vm.free()
+	var vm_sup: ViewmodelClips = ViewmodelClips.create(GLOCK_ID, {"muzzle": {"id": SUP_ID}})
+	add_child(vm_sup)
+	var sup_cap: MeshInstance3D = vm_sup.find_child("MuzzleDevice", true, false) as MeshInstance3D
+	_check("клипы рук: глушитель прячет заглушку резьбы", sup_cap != null and not sup_cap.visible)
+	var sup_muzzle: Vector3 = vm_sup.frame.get_meta("muzzle", Vector3.ZERO)
+	_check("клипы рук: срез с глушителем вынесен вперёд", sup_muzzle.z > MUZZLE_AT.z + 0.1 and absf(sup_muzzle.y - MUZZLE_AT.y) < 0.004, str(sup_muzzle))
+	vm_sup.free()
+
+
 func _run() -> void:
 	print("glock_test:")
 	var model: Node3D = WeaponModels.build(GLOCK_ID)
@@ -134,6 +187,7 @@ func _run() -> void:
 	definition["asset"] = asset_path
 	_check("без GLB работает процедурный запасной вариант", fallback != null and fallback.has_meta("muzzle") and WeaponRig.find_on(fallback) == null)
 	fallback.free()
+	_viewmodel()
 	# ПМ: своя ветка PM_LOD1 и свой глушитель по-прежнему находятся.
 	var pm: Node3D = WeaponModels.build(PM_ID, {}, 1)
 	add_child(pm)

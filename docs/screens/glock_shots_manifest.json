@@ -1,202 +1,546 @@
 {
 	"captures": [
 		{
-			"action": "",
 			"ads": false,
-			"arm_length_error_m": 0.0000000298023223876953,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_fp_hip.png",
-			"grip_error_m": 0.0000000307195300308649,
-			"progress": 0.0,
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_hip.png",
+			"fraction": 0.0,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "idle",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "",
 			"ads": true,
-			"arm_length_error_m": 0.0000000596046447753906,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_ads.png",
-			"grip_error_m": 0.0000000472686352281926,
-			"progress": 0.0,
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_ads.png",
+			"fraction": 0.0,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "idle",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.0000000745058059692383,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_reload_partial_mag_out.png",
-			"grip_error_m": 0.0000000351443176782595,
-			"progress": 0.298,
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_reload_tactical_catch.png",
+			"fraction": 0.125,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.0000000298023223876953,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_reload_partial_mag_in.png",
-			"grip_error_m": 0.0000000300342506420748,
-			"progress": 0.65,
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_reload_tactical_out.png",
+			"fraction": 0.240384615384615,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload:out",
 			"ads": false,
-			"arm_length_error_m": 0.0000000298023223876953,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_hand_mag_out.png",
-			"grip_error_m": 0.0000000300342506420748,
-			"progress": 0.55,
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_reload_tactical_new.png",
+			"fraction": 0.480769230769231,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload:out",
 			"ads": false,
-			"arm_length_error_m": 0.0000000745058059692383,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_hand_mag_out_end.png",
-			"grip_error_m": 0.0000000321002460168529,
-			"progress": 0.9,
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_reload_tactical_insert.png",
+			"fraction": 0.576923076923077,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload:in",
 			"ads": false,
-			"arm_length_error_m": 0.0000000298023223876953,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": false,
-			"file": "res://docs/screens/glock_hand_mag_in.png",
-			"grip_error_m": 0.0000000323458664297505,
-			"progress": 0.35,
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_reload_tactical_seat.png",
+			"fraction": 0.711538461538462,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "",
 			"ads": false,
-			"arm_length_error_m": 0.0000000298023223876953,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": true,
-			"file": "res://docs/screens/glock_empty_locked.png",
-			"grip_error_m": 0.0000000307195300308649,
-			"progress": 0.0,
+			"clip": "reload_full",
+			"file": "res://docs/screens/glock_clip_reload_full_start.png",
+			"fraction": 0.110169491525424,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload_empty",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
-			"action": "reload",
 			"ads": false,
-			"arm_length_error_m": 0.0000000596046447753906,
-			"asset_lod": 0,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"empty": true,
-			"file": "res://docs/screens/glock_reload_empty_charge.png",
-			"grip_error_m": 0.0000000300342506420748,
-			"progress": 0.88,
+			"clip": "reload_full",
+			"file": "res://docs/screens/glock_clip_reload_full_insert.png",
+			"fraction": 0.508474576271186,
 			"resolution": [
 				1280,
 				720
 			],
-			"suppressed": false,
-			"view": "first_person"
+			"role": "reload_empty",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_full",
+			"file": "res://docs/screens/glock_clip_reload_full_release.png",
+			"fraction": 0.745762711864407,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "reload_empty",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_fast",
+			"file": "res://docs/screens/glock_clip_reload_fast_flick.png",
+			"fraction": 0.129032258064516,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "reload_fast",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_fast",
+			"file": "res://docs/screens/glock_clip_reload_fast_insert.png",
+			"fraction": 0.435483870967742,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "reload_fast",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_fast_full",
+			"file": "res://docs/screens/glock_clip_reload_fast_full_release.png",
+			"fraction": 0.657894736842105,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "reload_fast_empty",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "mag_check",
+			"file": "res://docs/screens/glock_clip_check_hold.png",
+			"fraction": 0.429824561403509,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "check",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "inspect",
+			"file": "res://docs/screens/glock_clip_inspect_left.png",
+			"fraction": 0.18716577540107,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "inspect",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "inspect",
+			"file": "res://docs/screens/glock_clip_inspect_right.png",
+			"fraction": 0.427807486631016,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "inspect",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "jam_clear",
+			"file": "res://docs/screens/glock_clip_jam_pull.png",
+			"fraction": 0.293103448275862,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "clear",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "fire",
+			"file": "res://docs/screens/glock_clip_fire_press.png",
+			"fraction": 0.125,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "shot",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "fire",
+			"file": "res://docs/screens/glock_clip_fire_slide.png",
+			"fraction": 0.208333333333333,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "shot",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_empty_locked.png",
+			"fraction": 0.0,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "idle",
+			"state": "held",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_jammed.png",
+			"fraction": 0.0,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "idle",
+			"state": "jam",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_full_rack",
+			"file": "res://docs/screens/glock_clip_spare_full_rack_pull.png",
+			"fraction": 0.698630136986301,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "reload_full_rack",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "slide_rack",
+			"file": "res://docs/screens/glock_clip_spare_slide_rack.png",
+			"fraction": 0.293103448275862,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "slide_rack",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "finger_to_trigger",
+			"file": "res://docs/screens/glock_clip_spare_finger_trigger.png",
+			"fraction": 1.0,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "finger_to_trigger",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_hand_mag_out.png",
+			"position": 0.880000013113022,
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips"
+		},
+		{
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_hand_mag_out_end.png",
+			"position": 1.20000001788139,
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips"
+		},
+		{
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_tactical",
+			"file": "res://docs/screens/glock_clip_hand_mag_in.png",
+			"position": 2.08148151238759,
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips"
+		},
+		{
+			"ads": false,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_suppressor.png",
+			"fraction": 0.0,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "idle",
+			"state": "",
+			"view": "first_person_clips"
+		},
+		{
+			"ads": true,
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "idle",
+			"file": "res://docs/screens/glock_clip_suppressor_ads.png",
+			"fraction": 0.0,
+			"resolution": [
+				1280,
+				720
+			],
+			"role": "idle",
+			"state": "",
+			"view": "first_person_clips"
 		},
 		{
 			"asset_lod": 0,

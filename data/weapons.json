@@ -1284,13 +1284,13 @@
       -0.0412
      ],
      "reload": {
-      "catch": 0.08,
-      "mag_out": 0.22,
-      "mag_hidden": 0.34,
-      "mag_new": 0.48,
-      "mag_in": 0.65,
-      "charge": 0.82,
-      "charge_end": 0.94
+      "catch": 0.125,
+      "mag_out": 0.24,
+      "mag_hidden": 0.346,
+      "mag_new": 0.385,
+      "mag_in": 0.644,
+      "charge": 0.746,
+      "charge_end": 0.771
      },
      "viewmodel_offsets": {
       "reload": {
@@ -1319,6 +1319,15 @@
        0.015,
        0.03
       ]
+     },
+     "reload_empty": {
+      "catch": 0.11,
+      "mag_out": 0.212,
+      "mag_hidden": 0.305,
+      "mag_new": 0.339,
+      "mag_in": 0.568,
+      "charge": 0.746,
+      "charge_end": 0.771
      }
     },
     "hand_grips": {
@@ -1400,6 +1409,52 @@
        ]
       ]
      }
+    },
+    "viewmodel": {
+     "scene": "res://assets/models/weapons/asten919/asten919_viewmodel.gltf",
+     "fps": 30,
+     "clips": {
+      "idle": "idle",
+      "reload": "reload_tactical",
+      "reload_empty": "reload_full",
+      "reload_fast": "reload_fast",
+      "reload_fast_empty": "reload_fast_full",
+      "check": "mag_check",
+      "clear": "jam_clear",
+      "inspect": "inspect",
+      "shot": "fire"
+     },
+     "check_hold": [
+      38,
+      60
+     ],
+     "swap_frame": {
+      "reload_tactical": 36,
+      "reload_full": 36,
+      "reload_fast": 0,
+      "reload_fast_full": 0
+     },
+     "drop_frame": {
+      "reload_fast": 9,
+      "reload_fast_full": 9
+     },
+     "jam_open": 0.3,
+     "inspect_sec": 6.23,
+     "hold_open": true,
+     "hands_fixed": true,
+     "muzzle_own": true,
+     "shot_slide_back": 5,
+     "ads_z": 0.36,
+     "hip_offset": [
+      0,
+      0,
+      0
+     ],
+     "spare_clips": [
+      "reload_full_rack",
+      "slide_rack",
+      "finger_to_trigger"
+     ]
     }
    },
    "flavor": "Не самый редкий трофей, зато тот, который почти никогда не подводит в дверном проёме."

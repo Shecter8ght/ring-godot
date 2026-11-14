@@ -233,7 +233,7 @@ func play_reload(empty: bool, duration: float, part_only: String = "") -> void:
 				_queue_reload_sound(slot, float(_reload_sound_marks[slot].at))
 		_apply_pose()
 		return
-	var phases: Dictionary = _config.get("reload", {})
+	var phases: Dictionary = _reload_phases()
 	if String(_config.get("mechanism", "")) == "break_action":
 		_queue_sound("breech_open", float(phases.get("open_start", 0.1)))
 		_queue_sound("round_insert", float(phases.get("insert_end", 0.7)))
@@ -250,7 +250,7 @@ func play_reload(empty: bool, duration: float, part_only: String = "") -> void:
 
 ## Звук фазы полной перезарядки — в свою долю показанной части; фаза вне части не звучит.
 func _queue_reload_sound(slot: String, at: float) -> void:
-	var phases: Dictionary = _config.get("reload", {})
+	var phases: Dictionary = _reload_phases()
 	var hidden_at: float = float(phases.get("mag_hidden", phases.get("mag_out", 0.0)))
 	match _reload_part:
 		"out":
@@ -265,7 +265,7 @@ func _queue_reload_sound(slot: String, at: float) -> void:
 
 ## Доля полной перезарядки, которую показывает действие в момент shown (0…1): у части — свой отрезок.
 func _reload_phase(shown: float) -> float:
-	var phases: Dictionary = _config.get("reload", {})
+	var phases: Dictionary = _reload_phases()
 	var hidden_at: float = float(phases.get("mag_hidden", phases.get("mag_out", 0.0)))
 	match _reload_part:
 		"out":
@@ -483,8 +483,16 @@ func _pose_shot(progress: float) -> void:
 	_rotate_part("SlideStop", Vector3.RIGHT, float(_config.get("slide_stop_angle_deg", 0.0)) * (recoil if _locked else 0.0))
 
 
+## Доли фаз перезарядки (rig.reload). У полной (затвор на задержке) — свои, если в данных есть rig.reload_empty:
+## клипы рук АСТЕН-919 разной длины, и звуки по долям должны совпасть с каждым клипом.
+func _reload_phases() -> Dictionary:
+	if _empty_reload and _config.has("reload_empty"):
+		return _config.get("reload_empty", {}) as Dictionary
+	return _config.get("reload", {}) as Dictionary
+
+
 func _pose_reload(shown: float) -> void:
-	var phases: Dictionary = _config.get("reload", {})
+	var phases: Dictionary = _reload_phases()
 	# часть перезарядки («вынуть» / «вставить») показывает свой отрезок тех же фаз
 	var progress: float = _reload_phase(shown)
 	var hand_k: float = 1.0

@@ -1,0 +1,320 @@
+{
+ "source": "E:\\Models Blender\\WEAPONS\\АСТЕН-919\\АСТЕН-919_руки_клипы_v01.blend",
+ "source_mtime": 1794598688.7194123,
+ "jam_open": 0.3,
+ "slide_travel_m": 0.043,
+ "parts": [
+  "Part_Barrel",
+  "Part_Case",
+  "Part_JamCase",
+  "Part_MagCatch",
+  "Part_Magazine",
+  "Part_MagazineFollower",
+  "Part_Slide",
+  "Part_SlideLock",
+  "Part_SlideStop",
+  "Part_SpareMag",
+  "Part_Trigger",
+  "Part_WeaponRoot"
+ ],
+ "camera_lens_mm": 23.551326751708984,
+ "camera_fov_deg": 54.0,
+ "tris": 36818,
+ "tris_weapon": 32058,
+ "fps": 30,
+ "clips": {
+  "reload_tactical": {
+   "frames": 104,
+   "seconds": 3.467,
+   "marks": {
+    "catch": 13,
+    "mag_out": 25,
+    "mag_hidden": 36,
+    "mag_new": 40,
+    "insert": 60,
+    "mag_in": 67,
+    "seat": 74
+   },
+   "action": "ASTEN919_Reload_Tactical",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    6.5,
+    342.5
+   ]
+  },
+  "reload_full": {
+   "frames": 118,
+   "seconds": 3.933,
+   "marks": {
+    "catch": 13,
+    "mag_out": 25,
+    "mag_hidden": 36,
+    "mag_new": 40,
+    "insert": 60,
+    "mag_in": 67,
+    "seat": 74,
+    "slide_release": 88
+   },
+   "action": "ASTEN919_Reload_Full",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    6.5,
+    342.5
+   ]
+  },
+  "reload_full_rack": {
+   "frames": 146,
+   "seconds": 4.867,
+   "marks": {
+    "catch": 13,
+    "mag_out": 25,
+    "mag_hidden": 36,
+    "mag_new": 40,
+    "insert": 60,
+    "mag_in": 67,
+    "seat": 74,
+    "rack_pull": 102,
+    "rack_release": 111
+   },
+   "action": "ASTEN919_Reload_Full_Rack",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    16.8,
+    342.5
+   ]
+  },
+  "reload_fast": {
+   "frames": 62,
+   "seconds": 2.067,
+   "marks": {
+    "catch": 5,
+    "flick": 8,
+    "mag_out": 9,
+    "mag_new": 13,
+    "insert": 27,
+    "mag_in": 33,
+    "seat": 38
+   },
+   "action": "ASTEN919_Reload_Fast_Tactical",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    6.5,
+    350.4
+   ]
+  },
+  "reload_fast_full": {
+   "frames": 76,
+   "seconds": 2.533,
+   "marks": {
+    "catch": 5,
+    "flick": 8,
+    "mag_out": 9,
+    "mag_new": 13,
+    "insert": 27,
+    "mag_in": 33,
+    "seat": 38,
+    "slide_release": 50
+   },
+   "action": "ASTEN919_Reload_Fast_Full",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    6.5,
+    350.4
+   ]
+  },
+  "mag_check": {
+   "frames": 114,
+   "seconds": 3.8,
+   "marks": {
+    "catch": 13,
+    "mag_out": 25,
+    "hold_start": 38,
+    "hold_end": 60,
+    "insert": 73,
+    "mag_in": 80,
+    "seat": 87
+   },
+   "action": "ASTEN919_Mag_Check",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    6.5,
+    342.5
+   ]
+  },
+  "inspect": {
+   "frames": 187,
+   "seconds": 6.233,
+   "marks": {
+    "left_side_start": 20,
+    "left_side_end": 50,
+    "right_side_start": 66,
+    "right_side_end": 94
+   },
+   "action": "ASTEN919_Inspect",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    18.2,
+    342.4
+   ]
+  },
+  "jam_clear": {
+   "frames": 58,
+   "seconds": 1.933,
+   "marks": {
+    "pinch": 14,
+    "pull": 17,
+    "case_out": 20,
+    "release": 24
+   },
+   "action": "ASTEN919_Jam_Clear",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    16.8,
+    311.9
+   ]
+  },
+  "slide_rack": {
+   "frames": 58,
+   "seconds": 1.933,
+   "marks": {
+    "pinch": 14,
+    "pull": 17,
+    "release": 24
+   },
+   "action": "ASTEN919_Slide_Rack",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    16.8,
+    311.9
+   ]
+  },
+  "fire": {
+   "frames": 24,
+   "seconds": 0.8,
+   "marks": {
+    "press": 3,
+    "slide_back": 5,
+    "case_out": 5,
+    "reset": 13
+   },
+   "action": "ASTEN919_Fire",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    1.9,
+    7.2
+   ]
+  },
+  "finger_to_trigger": {
+   "frames": 10,
+   "seconds": 0.333,
+   "marks": {
+    "on_trigger": 8
+   },
+   "action": "ASTEN919_Finger_To_Trigger",
+   "weapon_bones": [
+    "Case",
+    "JamCase",
+    "MagCatch",
+    "Magazine_Control",
+    "Slide",
+    "SlideStop",
+    "SpareMag_Control",
+    "Trigger"
+   ],
+   "gun_move_cm_deg": [
+    0.0,
+    0.0
+   ]
+  }
+ }
+}
