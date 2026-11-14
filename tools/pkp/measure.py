@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import dims  # noqa: E402
 
-SKIP_FOR_GUN = ("Box", "Belt_", "Strip_", "Bipod_", "Cartridge", "Case_Spent")
+SKIP_FOR_GUN = ("Box", "Belt_", "Strip_", "Bipod_", "Cartridge", "Case_Spent", "Rail_", "Forend_")
 
 
 def bounds(objs, dg):

@@ -913,7 +913,9 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   tools/pkp/check_overlaps.py -- [--depth 0.25] (пересечения во всех позах), tools/pkp/measure.py -- [отчёт.json]
 #   (габариты против заводских, открытые рёбра). Миллиметры с рендеров-образцов — refmap.py и ref_tiles.py (--mm --y
 #   <глубина>), подбор камеры образца — fit_cam.py. Памятка исполнителю отдельного модуля — tools/pkp/HELPERS.md;
-#   размеры — dims.py; состояние и вопросы владельцу — asset-state.md в папке модели
+#   размеры — dims.py; состояние и вопросы владельцу — asset-state.md в папке модели. Места под кронштейны (опоры
+#   на крышке, втулки в корпусе газовой трубки) и съёмные кронштейны с планками Picatinny — part_mounts.py
+#   (коллекция «Кронштейны»: планка на крышку под прицел, цевьё с нижней и боковыми планками)
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

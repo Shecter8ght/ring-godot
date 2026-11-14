@@ -14,7 +14,7 @@ from multiprocessing import Pool
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 MODULES = ("part_receiver", "part_cover", "part_feed", "part_barrel", "part_stock", "part_grip", "part_trigger",
-           "part_sights", "part_bolt", "part_bipod", "part_box", "part_ammo")
+           "part_sights", "part_bolt", "part_bipod", "part_box", "part_ammo", "part_mounts")
 
 
 def catalog(only=None):
