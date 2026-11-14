@@ -1,0 +1,51 @@
+{
+ "about": "ПРИМЕР формата, заполнен задним числом по переписке об АСТЕН-919 (2026-11-12…13). Это не файл владельца и не его ответы на новую памятку: «живые» анимации и большая часть памятки тогда не спрашивались — у настоящего файла по ним были бы ответы.",
+ "weapon": "wpn_hg_02",
+ "name": "АСТЕН-919",
+ "kind": "pistol",
+ "created": "2026-11-12",
+ "status": "owner_editing",
+ "style": {
+  "reference": "Road to Vostok / EFT",
+  "words": "плавно и не суетливо; в передёргивании — упругость и тяжесть: пистолет тянется за рукой, бросок и отбой",
+  "tempo": "по замеру Glock 17 в Road to Vostok: неполная 3,43 с, полная 4,5 с, проверка 3,27 с"
+ },
+ "interview": [
+  {"q": "Какие анимации нужны?", "a": "список из 10 пунктов: полная, неполная, быстрая, быстрая неполная, проверка магазина, осмотр, заклинивший затвор, вылет гильз, палец на спуск, дымок (эффект)"},
+  {"q": "Полная перезарядка — как досылать?", "a": "передёрнуть указательным и большим левой, либо если затвор на задержке — большим правой флажок вниз (сделаны оба варианта)"},
+  {"q": "Быстрая перезарядка — как вылетает магазин?", "a": "пистолет резко разворачивается вдоль оси X против часовой, чтобы старая обойма вылетала вправо и оставалась на земле"},
+  {"q": "Кто ставит хваты?", "a": "«от тебя требуются ключевые кадры, хваты я буду править сам»"}
+ ],
+ "clips": [
+  {"id": "idle", "title": "Покой: хват обеими руками", "group": "base", "need": "yes", "phases": [], "blender": "кадр 1 поз", "game": "", "notes": ""},
+  {"id": "reload_full_stop", "title": "Полная, досыл рычагом задержки", "group": "reload", "need": "yes",
+   "phases": [{"mark": "catch", "text": "пистолет к лицу, большой правой жмёт кнопку", "owner": true},
+              {"mark": "mag_out", "text": "левая вынимает магазин", "owner": true},
+              {"mark": "mag_hidden", "text": "убирает в подсумок", "owner": true},
+              {"mark": "mag_new", "text": "берёт новый", "owner": true},
+              {"mark": "insert", "text": "совмещает с шахтой", "owner": false},
+              {"mark": "mag_in", "text": "вставляет", "owner": true},
+              {"mark": "seat", "text": "ладонью захлопывает", "owner": true},
+              {"mark": "slide_release", "text": "большой правой флажок вниз", "owner": true}],
+   "blender": "ASTEN919_Reload_Full", "game": "reload_empty", "notes": ""},
+  {"id": "reload_full_rack", "title": "Полная, досыл передёргиванием левой", "group": "reload", "need": "yes",
+   "phases": [{"mark": "seat", "text": "как выше до досылки магазина", "owner": false},
+              {"mark": "rack_pull", "text": "щепоть тянет затвор; пистолет ближе к центру, завален влево, окно выбрасывателя к глазам, тянется за рукой", "owner": true},
+              {"mark": "rack_release", "text": "отпускает — бросок вперёд, отбой", "owner": true}],
+   "blender": "ASTEN919_Reload_Full_Rack; положение пистолета — кадр позы 51", "game": "", "notes": "правка 2026-11-13: «упругость и тяжесть»"},
+  {"id": "reload_tactical", "title": "Неполная", "group": "reload", "need": "yes", "phases": [{"mark": "catch", "text": "как полная без досыла затвора", "owner": true}], "blender": "ASTEN919_Reload_Tactical", "game": "reload", "notes": ""},
+  {"id": "reload_fast_full", "title": "Быстрая полная", "group": "reload", "need": "yes", "phases": [{"mark": "flick", "text": "взмах против часовой, старый магазин вправо", "owner": true}, {"mark": "slide_release", "text": "досыл", "owner": false}], "blender": "ASTEN919_Reload_Fast_Full", "game": "reload_fast_empty; магазин на земле — код игры", "notes": ""},
+  {"id": "reload_fast_tactical", "title": "Быстрая неполная", "group": "reload", "need": "yes", "phases": [{"mark": "flick", "text": "взмах, старый магазин вправо", "owner": true}], "blender": "ASTEN919_Reload_Fast_Tactical", "game": "reload_fast", "notes": ""},
+  {"id": "mag_check", "title": "Проверка магазина", "group": "service", "need": "yes", "phases": [{"mark": "hold_start", "text": "магазин у глаз", "owner": false}, {"mark": "hold_end", "text": "обратно", "owner": false}], "blender": "ASTEN919_Mag_Check", "game": "check, удержание R", "notes": ""},
+  {"id": "inspect", "title": "Осмотр", "group": "service", "need": "yes", "phases": [{"mark": "left_side_start", "text": "левой стороной к лицу, большой вверх", "owner": true}, {"mark": "right_side_start", "text": "второе нажатие — правой стороной", "owner": true}], "blender": "ASTEN919_Inspect", "game": "inspect", "notes": ""},
+  {"id": "jam_clear", "title": "Заклинивший затвор", "group": "service", "need": "yes", "phases": [{"mark": "pull", "text": "отвести назад", "owner": true}, {"mark": "release", "text": "отпустить", "owner": true}], "blender": "ASTEN919_Jam_Clear", "game": "clear", "notes": ""},
+  {"id": "fire", "title": "Выстрел, вылет гильзы", "group": "base", "need": "yes", "phases": [{"mark": "press", "text": "палец жмёт спуск", "owner": true}, {"mark": "case_out", "text": "гильза вылетает", "owner": true}], "blender": "ASTEN919_Fire", "game": "shot; дымок и искажение воздуха — эффект в игре", "notes": ""},
+  {"id": "finger_to_trigger", "title": "Палец на спуск", "group": "base", "need": "yes", "phases": [{"mark": "on_trigger", "text": "палец на спуске", "owner": true}], "blender": "ASTEN919_Finger_To_Trigger", "game": "", "notes": ""},
+  {"id": "slide_rack", "title": "Передёрнуть отдельно", "group": "service", "need": "yes", "phases": [{"mark": "pull", "text": "тянет", "owner": false}], "blender": "ASTEN919_Slide_Rack", "game": "", "notes": "предложил агент"}
+ ],
+ "game_questions": [
+  {"clip": "reload_full_stop", "q": "в балансе перезарядка 1,6 / 2,13 с, клипы 3,5 / 3,9 с — менять баланс или клипы?", "a": ""},
+  {"clip": "reload_fast_full", "q": "старый магазин — физическим предметом по полёту из клипа?", "a": "да, отдельной работой по коду игры (карточка 2026-11-13)"}
+ ],
+ "accepted": false
+}

@@ -10,6 +10,7 @@
 | `blender-vegetation-workflow` | Геометрия деревьев, кустов, травы и другой органической растительности |
 | `godot-asset-preparation` | Заказанная игровая подготовка: сетки, bake, LOD, collision, экспорт и проверенный импорт |
 | `npc-character-gear` | Персонажи NPC и снаряжение на теле: тело, одежда симуляцией ткани, броня, шлемы, рюкзаки, подсумки — форма, мятая ткань и стропы, текстуры ткани, игровая версия, подготовка к скелету (добавлен 2026-10-23, Claude) |
+| `weapon-fps-hand-clips` | Анимации рук от первого лица для ствола: интервью владельцу (какие виды анимаций нужны — по памятке, фазы каждой) → `anim-spec.json` рядом с моделью, риг на мастере рук v14 и игровой сетке, позы-хваты, клипы, панель в Blender, где владелец правит сам; образец — `tools/asten919/clips` (добавлен 2026-11-14, Claude) |
 
 ## Решения владельца
 
@@ -65,9 +66,9 @@ python -X utf8 tools/install_asset_skills.py --install --verify-installed
 
 ## Вызов
 
-Codex: `$blender-asset-workflow`, `$weapon-asset-texturing`, `$weapon-asset-wear`, `$blender-vegetation-workflow`, `$godot-asset-preparation`, `$npc-character-gear`.
+Codex: `$blender-asset-workflow`, `$weapon-asset-texturing`, `$weapon-asset-wear`, `$blender-vegetation-workflow`, `$godot-asset-preparation`, `$npc-character-gear`, `$weapon-fps-hand-clips`.
 
-Claude Code: `/blender-asset-workflow`, `/weapon-asset-texturing`, `/weapon-asset-wear`, `/blender-vegetation-workflow`, `/godot-asset-preparation`.
+Claude Code: `/blender-asset-workflow`, `/weapon-asset-texturing`, `/weapon-asset-wear`, `/blender-vegetation-workflow`, `/godot-asset-preparation`, `/npc-character-gear`, `/weapon-fps-hand-clips`.
 
 Автоматическое применение разрешено по описанию задачи. Для обновлённого набора удобно открыть новую сессию. Проверка файлов/формата не является подтверждением, что конкретная будущая модель уже была изготовлена и проверена.
 
@@ -108,3 +109,11 @@ Godot 4.7.2, фильтр шероховатости выключает. Пос�
 
 Обновление 2026-11-01, позже (Claude): по слову владельца фильтр шероховатости включён у 122 карт ORM и в шести скриптах
 импорта оружия; `godot-asset-preparation` ссылается на проверку `tools/asset_kit/roughness_imports.py` после импорта.
+
+Добавление 2026-11-14 (Claude): `weapon-fps-hand-clips` — порядок работы над клипами рук, сложившийся на АСТЕН-919 и
+понравившийся владельцу («мне понравилось как ты сделал инструмент настройки в самом blender»). Главное по его слову —
+интервью до работы: памятка видов анимаций (`references/animation-catalog.json`, расширяемая — новое от владельца
+дописывается туда; в ней и названные им «живые»: глушитель, потеря магазина под стрессом, не попал в шахту, не той
+стороной) и фазы каждой; ответы — `anim-spec.json` (заготовка и проверка — `scripts/anim_spec.py`). У Claude Code —
+соединение `~/.claude/skills/weapon-fps-hand-clips` на папку репозитория, у Codex — копия в `~/.codex/skills`.
+Официальный `quick_validate.py` — проходит.
