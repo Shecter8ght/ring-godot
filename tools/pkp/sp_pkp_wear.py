@@ -53,26 +53,34 @@ RECIPES = {
         ("отлив воронения — тёплый", "dirt roughness", dict(color=(0.26, 0.21, 0.21)), 0.55, None, None),
         ("вытертое воронение пятнами", "stain roughness", dict(color=(0.33, 0.34, 0.35), rough=0.42, metal=0.9), 0.45,
          "open", None),
-        ("чёрный нагар в швах", "AO dirt", dict(color=(0.035, 0.033, 0.03), rough=0.6, metal=0.2), 0.75, "deep", None),
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         ("пыль в углах и швах", "cavity dirt", dict(color=(0.24, 0.23, 0.21), rough=0.85, metal=0.0), 0.45, "cavity", None),
         ("царапины", "micro scratches", dict(color=(0.36, 0.37, 0.38), rough=0.3, metal=1.0), 0.5, None, 0.97),
-        ("кромки — линия", None, dict(color=(0.62, 0.63, 0.64), rough=0.22, metal=1.0), 0.55, "edge", None),
         ("кромки вытерты до стали", "gun scratch edge", dict(color=(0.62, 0.63, 0.64), rough=0.24, metal=1.0), 1.0,
+         "edge", None),
+        ("кромки — сколы до металла", "edge damage", dict(color=(0.58, 0.59, 0.60), rough=0.26, metal=1.0), 0.8,
          "edge", None),
         ("верхушки заклёпок и винтов", None, dict(color=(0.60, 0.61, 0.62), rough=0.22, metal=1.0), 0.8, "tops", None),
     ],
     "bolt": [
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         ("масло и нагар в углах", "AO dirt", dict(color=(0.10, 0.09, 0.08), rough=0.4, metal=0.5), 0.7, "cavity", None),
         ("кромки заполированы трением", "gun scratch edge", dict(color=(0.80, 0.81, 0.82), rough=0.18, metal=1.0), 0.6,
          "edge", None),
         ("царапины", "micro scratches", dict(color=(0.70, 0.71, 0.72), rough=0.22, metal=1.0), 0.5, None, 0.97),
     ],
     "plastic": [
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         ("пыль в углах и насечке", "cavity dirt", dict(color=(0.20, 0.19, 0.18), rough=0.85, metal=0.0), 0.4, "cavity", None),
         ("царапины", "micro scratches", dict(color=(0.12, 0.12, 0.12), rough=0.45, metal=0.0), 0.3, None, 0.95),
         ("потёртые кромки", "gun scratch edge", dict(color=(0.10, 0.10, 0.10), rough=0.45, metal=0.0), 0.6, "edge", None),
     ],
     "paint": [
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         # v02: эмаль потемнела от грязи (образцы 02, 03: оливковая темнее и гуще; цвет эмали этапа 1 не меняется —
         # умножение поверх), грязь копится снизу
         ("эмаль потемнела от грязи", "dirt variation", dict(color=(0.55, 0.62, 0.45)), 1.0, None, None,
@@ -88,6 +96,8 @@ RECIPES = {
         ("грязь, засаленность", "dirt fabric", dict(color=(0.20, 0.17, 0.12), rough=0.9, metal=0.0), 0.6, None, None),
     ],
     "links": [
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         ("пыль в углах", "cavity dirt", dict(color=(0.24, 0.23, 0.21), rough=0.85, metal=0.0), 0.6, "cavity", None),
         ("кромки вытерты до стали", "gun scratch edge", dict(color=(0.45, 0.46, 0.47), rough=0.3, metal=1.0), 0.7,
          "edge", None),
@@ -100,6 +110,8 @@ RECIPES = {
         ("потемнения томпака", "dirt", dict(color=(0.42, 0.24, 0.15), rough=0.45, metal=1.0), 0.4, None, None),
     ],
     "alu": [
+        ("грязь в самых глубоких углах", "cavity dirt strong", dict(color=(0.05, 0.047, 0.042), rough=0.7, metal=0.1), 0.8,
+         "deep", None),
         ("пыль в углах", "cavity dirt", dict(color=(0.24, 0.23, 0.21), rough=0.85, metal=0.0), 0.6, "cavity", None),
         ("кромки до алюминия", "gun scratch edge", dict(color=(0.75, 0.75, 0.77), rough=0.3, metal=1.0), 0.85,
          "edge", None),
@@ -112,6 +124,30 @@ HANDLE_RECIPE = [
      "edge", None),
 ]
 GREASE_POS = 0.5
+# особые места по деталям (владелец 2026-11-14, к износу v02): (детали, имя, умная маска, каналы, непрозрачность,
+# место wear_place.py, порог). Детали — объекты формы; слой ложится на их сетки в наборе, место — карта набора.
+SPECIAL = [
+    # 2 — пятки сошек, где касаются земли
+    ({"Bipod_Foot_L", "Bipod_Foot_R"}, "земля на пятках сошек", "dirt variation",
+     dict(color=(0.20, 0.16, 0.11), rough=0.92, metal=0.0), 0.9, "feet", None),
+    # 3 — задняя кромка крышки (левое, верхнее, правое рёбра) и кнопка: на разную длину к дулу
+    ({"Top_Cover", "Cover_Latch"}, "задняя кромка крышки — краска до металла", "edge damage",
+     dict(color=(0.62, 0.63, 0.64), rough=0.25, metal=1.0), 1.0, "cover_rear", 0.8),
+    ({"Top_Cover", "Cover_Latch"}, "задняя кромка крышки — сильные царапины", "gun scratch storng",
+     dict(color=(0.56, 0.57, 0.58), rough=0.28, metal=1.0), 0.9, "cover_rear", 0.8),
+    # 5 — вдоль хода рукоятки перезаряжания
+    ({"Receiver"}, "царапины вдоль хода рукоятки перезаряжания", "gun scratch edge",
+     dict(color=(0.60, 0.61, 0.62), rough=0.25, metal=1.0), 1.0, "charge_path", 0.75),
+    # 6 — низ коробки для ленты и соседние рёбра и углы
+    ({"Box100_Body", "Box200_Body"}, "низ коробки — сколы", "hard damage",
+     dict(color=(0.48, 0.49, 0.50), rough=0.4, metal=1.0), 0.95, "box_bottom", None),
+    ({"Box100_Body", "Box200_Body"}, "низ коробки — сильные царапины", "gun scratch storng",
+     dict(color=(0.55, 0.56, 0.57), rough=0.35, metal=1.0), 0.9, "box_bottom", None),
+]
+# 4 — хват (рукоятка, цевьё, спуск, рукоятка перезаряжания, сошки, ручка переноски, верх приклада; защёлка крышки
+# и флажок предохранителя — из интервью): отпечатки «finger print» и пятна блеска «stain roughness», место «touch»
+TOUCH = ["Pistol_Grip", "Rail_Forend", "Trigger", "Charging_Handle", "Bipod_Yoke", "Bipod_Leg_L", "Bipod_Leg_R",
+         "Carry_Handle", "Stock", "Cover_Latch", "Safety_Lever"]
 WEAR_DIR = "E:/Games/RING-godot/_asset_src/pkp/tex/wear"
 
 
@@ -233,6 +269,21 @@ def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, position=N
     return lay
 
 
+def touch_layers(group, meshes, scene_mm, set_name):
+    """Хват: засаленные отпечатки («finger print») и пятна блеска («stain roughness») по месту touch."""
+    import sp_lib
+    lay = grease_layer(group, meshes, scene_mm)
+    place(lay, "touch", set_name)
+    st = sp_lib.fill("пятна блеска от рук", L.InsertPosition.inside_node(group, L.NodeStack.Substack), rough=0.16)
+    st.set_opacity(0.55, sp_lib.CH.SpecularRoughness)
+    sp_lib.only_meshes(st, meshes)
+    st.add_mask(L.MaskBackground.Black)
+    L.insert_smart_mask(L.InsertPosition.inside_node(st, L.NodeStack.Mask), smart_mask("stain roughness"))
+    to_triplanar(st, scene_mm)
+    place(st, "touch", set_name)
+    return lay
+
+
 def grease_layer(group, meshes, scene_mm):
     """Засаленные следы пальцев: только блеск и чуть темнее, рисунок — «finger print»."""
     import sp_lib
@@ -273,10 +324,15 @@ def build_set(set_name, meshes_json, spec, scene_mm):
     hm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in HANDLE)
     for name, mask, ch, op, where, pos in (HANDLE_RECIPE if hm else []):
         wear_layer(g, f"рукоятка · {name}", mask, ch, op, hm, scene_mm, position=pos, where=where, set_name=set_name)
-    gm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in GREASE)
+    for objs, name, mask, ch, op, where, pos in SPECIAL:
+        sm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in objs)
+        if sm:
+            wear_layer(g, name, mask, ch, op, sm, scene_mm, position=pos, where=where, set_name=set_name)
+            log.append(f"{where}:{len(sm)}")
+    gm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in TOUCH)
     if gm:
-        grease_layer(g, gm, scene_mm)
-        log.append(f"жир:{len(gm)}")
+        touch_layers(g, gm, scene_mm, set_name)
+        log.append(f"хват:{len(gm)}")
     return f"{set_name}: " + " ".join(log)
 
 
