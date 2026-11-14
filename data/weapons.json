@@ -1246,12 +1246,12 @@
      "ergo": 78,
      "rpm": 420,
      "auto": false,
-     "reload": 1.6,
+     "reload": 3.47,
      "range": 60,
      "noise": 60,
      "reliability": 0.985,
      "wear": 0.02,
-     "reload_empty": 2.13
+     "reload_empty": 3.93
     },
     "mounts": {
      "optic_primary": "SLIDE_RMR",

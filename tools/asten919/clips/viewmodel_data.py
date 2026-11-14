@@ -8,7 +8,8 @@
   weapon.rig.reload / rig.reload_empty — доли фаз модели в руках персонажа и звуков перезарядки по умолчанию: у неполной —
     по Reload_Tactical, у полной — по Reload_Full (рычаг задержки — charge).
 
-Время перезарядки (stats.reload / reload_empty) не меняется — его выбирает владелец (клип растягивается на него).
+  weapon.stats.reload / reload_empty — время перезарядки = длина клипов Reload_Tactical / Reload_Full (решение владельца
+    2026-11-14: «по клипам» — клип идёт в своём темпе, не сжимается; стресс и магазин из рюкзака удлиняют как раньше).
 
 python -X utf8 tools/asten919/clips/viewmodel_data.py
 """
@@ -68,6 +69,9 @@ def main():
     slide_full = full["marks"].get("slide_release", full["frames"] - 10)
     rig["reload"] = dict(phases(tac), **{k: v for k, v in phases(full, slide_full).items() if k.startswith("charge")})
     rig["reload_empty"] = phases(full, slide_full)
+    stats = w["stats"]
+    stats["reload"] = round(tac["seconds"], 2)
+    stats["reload_empty"] = round(full["seconds"], 2)
     WEAPONS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     print("ASTEN919_VM_DATA", json.dumps({"viewmodel": vm, "reload": rig["reload"], "reload_empty": rig["reload_empty"]},
                                          ensure_ascii=False))
