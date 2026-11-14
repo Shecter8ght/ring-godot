@@ -1,5 +1,5 @@
 {
- "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Гарнитура: уровни в дБ по шинам и кривые эквалайзера для выстрелов и остальных звуков мира. Защита класса — Balance.ARMOR_CLASS_PROT. Три брони, пояс и три шлема (решение владельца 2026-10-22, схема docs/design/npc_gear_by_type.md): armor.places — места под подсумки, armor.npc / helmet.npc — модель на теле NPC (вещь и сетка в assets/models/characters/npc_gear, fit — посадка рюкзака). Старые id (vest_*, carrier_*, helmet_*) — псевдонимы в data/weapons.json → aliases. armor.pairs_big — пары соседних мест под большой подсумок (места считаются половинками: пистолетный ½, автоматный 1, большой 2; docs/design/equip_doll_v2.md).",
+ "_comment": "Броня (см. docs/design/weapons.md, п.8). Жилет/плитоносец: armor.soft — встроенная мягкая защита (класс, прочность, покрытие груди), armor.plates — гнёзда плит (front/back), blunt — доля урона тупой травмой, если пуля остановлена. Плита: класс, материал, прочность, покрытие, blunt, wear — множитель износа. Шлем: класс, прочность, покрытие головы, mounts — что на нём держится. Защита класса — Balance.ARMOR_CLASS_PROT. Три брони, пояс и три шлема (решение владельца 2026-10-22, схема docs/design/npc_gear_by_type.md): armor.places — места под подсумки, armor.npc / helmet.npc — модель на теле NPC (вещь и сетка в assets/models/characters/npc_gear, fit — посадка рюкзака). Старые id (vest_*, carrier_*, helmet_*) — псевдонимы в data/weapons.json → aliases. armor.pairs_big — пары соседних мест под большой подсумок (места считаются половинками: пистолетный ½, автоматный 1, большой 2; docs/design/equip_doll_v2.md).",
  "vests": {
   "armor_poor": {
    "name": "Бронежилет бомжовский",
@@ -414,8 +414,7 @@
     "coverage": 0.72,
     "blunt": 0.3,
     "mounts": [
-     "NVG",
-     "HEADSET"
+     "NVG"
     ],
     "npc": {
      "item": "helmets",
@@ -452,7 +451,6 @@
     "blunt": 0.2,
     "mounts": [
      "NVG",
-     "HEADSET",
      "LIGHT",
      "VISOR"
     ],
@@ -463,139 +461,6 @@
     }
    },
    "desc": "Тяжёлый шлем с площадкой ПНВ, боковой планкой под фонарь и бронезабралом. Класс 4 — таких у мародёров не бывает, у «Периметра» — у каждого."
-  }
- },
- "headsets": {
-  "headset_passive": {
-   "name": "Наушники противошумные",
-   "cat": "armor",
-   "size": [
-    2,
-    1
-   ],
-   "value": 3000,
-   "stack": 1,
-   "weight": 0.35,
-   "tier": 1,
-   "rarity": "common",
-   "tags": [
-    "CIVILIAN",
-    "HUNTING",
-    "SCAV"
-   ],
-   "equip": {
-    "slot": "ears"
-   },
-   "headset": {
-    "code": "HEADSET_01",
-    "listening": "Приглушают весь мир. Остаётся глухой гул, шаги и слова разобрать труднее.",
-    "shots_db": -14.0,
-    "steps_db": -14.0,
-    "world_db": -14.0,
-    "voices_db": -14.0,
-    "ambient_db": -14.0,
-    "eq": {
-     "quiet": {"low": 5.0, "mid": -4.0, "high": -13.0}
-    }
-   }
-  },
-  "headset_active": {
-   "name": "Активная гарнитура",
-   "cat": "armor",
-   "size": [
-    2,
-    1
-   ],
-   "value": 14000,
-   "stack": 1,
-   "weight": 0.35,
-   "tier": 2,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY",
-    "POLICE"
-   ],
-   "equip": {
-    "slot": "ears"
-   },
-   "headset": {
-    "code": "HEADSET_02",
-    "listening": "Тихие звуки слышны через микрофоны. У слов и шагов заметная середина, бас и тонкие шорохи тише.",
-    "shots_db": -11.0,
-    "steps_db": 0.0,
-    "world_db": 0.0,
-    "voices_db": 0.0,
-    "ambient_db": 0.0,
-    "eq": {
-     "Shots": {"low": 2.0, "mid": -3.0, "high": -9.0},
-     "quiet": {"low": -6.0, "mid": 4.0, "high": -6.0}
-    }
-   }
-  },
-  "headset_tactical": {
-   "name": "Тактическая гарнитура",
-   "cat": "armor",
-   "size": [
-    2,
-    1
-   ],
-   "value": 26000,
-   "stack": 1,
-   "weight": 0.35,
-   "tier": 3,
-   "rarity": "uncommon",
-   "tags": [
-    "MILITARY"
-   ],
-   "equip": {
-    "slot": "ears"
-   },
-   "headset": {
-    "code": "HEADSET_03",
-    "listening": "Шаги, шорохи и фон звучат ближе всего к открытому уху. Резкость выстрелов приглушена.",
-    "shots_db": -11.0,
-    "steps_db": 1.0,
-    "world_db": 1.0,
-    "voices_db": 1.0,
-    "ambient_db": 1.0,
-    "eq": {
-     "Shots": {"low": 1.0, "mid": -2.0, "high": -8.0},
-     "quiet": {"low": -1.0, "mid": 0.0, "high": 1.0}
-    }
-   }
-  },
-  "headset_perimeter": {
-   "name": "Гарнитура «Периметр»",
-   "cat": "armor",
-   "size": [
-    2,
-    1
-   ],
-   "value": 48000,
-   "stack": 1,
-   "weight": 0.35,
-   "tier": 4,
-   "rarity": "rare",
-   "tags": [
-    "PERIMETER",
-    "RARE"
-   ],
-   "equip": {
-    "slot": "ears"
-   },
-   "headset": {
-    "code": "HEADSET_04",
-    "listening": "Фоновый шум и выстрелы тише. Речь остаётся слышна, мелкие шорохи приглушены.",
-    "shots_db": -14.0,
-    "steps_db": -2.0,
-    "world_db": -2.0,
-    "voices_db": -2.0,
-    "ambient_db": -4.0,
-    "eq": {
-     "Shots": {"low": 1.0, "mid": -3.0, "high": -10.0},
-     "quiet": {"low": -4.0, "mid": 2.0, "high": -2.0}
-    }
-   }
   }
  }
 }

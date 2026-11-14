@@ -54,7 +54,7 @@ var loadout_id: String = ""
 ## Совместимость (тесты, старые спавнеры): оружие ключом — pistol / rifle / shotgun / bolt или пресет.
 var weapon: String = ""
 ## Что на нём: оружие (primary, secondary — записи с магазином и обвесом), броня с плитами,
-## шлем, гарнитура; запасные магазины (россыпь — для встроенных) и аптечки. Выпадает при смерти
+## шлем; запасные магазины (россыпь — для встроенных) и аптечки. Выпадает при смерти
 ## тем, что осталось (патроны тратятся по-настоящему).
 var equipment: Dictionary = {}
 ## Внешность по снаряжению (NpcOutfit.describe, JSON): броня, шлем, рюкзак, подсумки. Считает хост после
@@ -395,7 +395,7 @@ static func weapon_for(arch: String, rng: RandomNumberGenerator) -> String:
 
 
 ## Снаряжение из data/loadouts.json: оружие по пресетам, запасные магазины тем же патроном,
-## броня с плитами, шлем, гарнитура, аптечки; износ — dur снаряжения.
+## броня с плитами, шлем, аптечки; износ — dur снаряжения.
 func _equip_loadout() -> void:
 	var lo := WeaponDb.loadout(loadout_id)
 	if lo.is_empty():
@@ -435,9 +435,6 @@ func _equip_loadout() -> void:
 		var h := ItemDb.make(hid, 1)
 		h.dur = roundf(float(h.dur) * wear)
 		equipment["helmet"] = h
-	var ear := _pick(lo.get("headset", []))
-	if ear != "":
-		equipment["ears"] = ItemDb.make(ear, 1)
 	# рюкзак — у части мародёров (data/loadouts.json "backpack"), выпадает в ящик с тела
 	var bpk := _pick(lo.get("backpack", []))
 	if bpk != "":
@@ -3099,7 +3096,7 @@ func _on_died() -> void:
 					continue
 				i += 1
 		var drop: Array = []
-		for slot in ["primary", "secondary", "armor", "helmet", "ears", "backpack"]:
+		for slot in ["primary", "secondary", "armor", "helmet", "backpack"]:
 			if equipment.has(slot):
 				drop.append((equipment[slot] as Dictionary).duplicate(true))
 		for it in spare:

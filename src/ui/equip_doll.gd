@@ -2,16 +2,15 @@ class_name EquipDoll
 extends Control
 ## Снаряжение на силуэте (окно рюкзака в рейде и тайник в убежище; docs/design/equip_doll_v2.md): в середине —
 ## контур человека в А-позе (BodySilhouette, без 3D-модели), напротив частей тела — их слоты: слева голова
-## (шлем, уши — гарнитура, независимый слот, глаза — ПНВ / очки), справа корпус (броня или пояс) и спина
-## (рюкзак). У надетого шлема раскрываются его крепления (ПНВ, гарнитура, фонарь, забрало), у брони — полоска
+## (шлем, глаза — ПНВ / очки), справа корпус (броня или пояс) и спина
+## (рюкзак). У надетого шлема раскрываются его крепления (ПНВ, фонарь, забрало), у брони — полоска
 ## мест под подсумки на половинках (PouchPlaces). Внизу — два слота крупного оружия, пистолет и ракетница.
 ## Слоты — обычные SlotView (views: слот → ячейка), места — PouchPlaces (places): окно подключает их сигналы.
 
 const SIZE := Vector2(440.0, 484.0)
 const LAYOUT := {
 	"helmet": Rect2(0, 0, 92, 80),
-	"ears": Rect2(0, 86, 92, 80),
-	"eyes": Rect2(0, 172, 92, 80),
+	"eyes": Rect2(0, 86, 92, 80),
 	"armor": Rect2(348, 0, 92, 80),
 	"backpack": Rect2(348, 172, 92, 80),
 	"primary": Rect2(0, 326, 217, 82),
@@ -25,7 +24,7 @@ const FIGURE := Rect2(98, 0, 244, 258)
 const MOUNT_CHIP := Rect2(97, 2, 46, 18)
 ## Полоска мест под подсумки (подпись — над ней).
 const PLACES_AT := Vector2(0, 278)
-const MOUNT_NAMES := {"NVG": "ПНВ", "HEADSET": "Уши", "LIGHT": "Свет", "VISOR": "Забр"}
+const MOUNT_NAMES := {"NVG": "ПНВ", "LIGHT": "Свет", "VISOR": "Забр"}
 
 var views: Dictionary = {}
 var places: PouchPlaces
@@ -122,9 +121,6 @@ func _build_chips() -> void:
 				var nvg := _eq.get("eyes") is Dictionary and bool(ItemDb.equip(String((_eq.eyes as Dictionary).get("id", ""))).get("nvg", false))
 				chip.state = "on" if nvg else "free"
 				chip.hint = "Площадка ПНВ: ПНВ из слота «Глаза» стоит на шлеме" if nvg else "Площадка ПНВ свободна — надень ПНВ в слот «Глаза»"
-			"HEADSET":
-				chip.state = "on" if _eq.has("ears") else "free"
-				chip.hint = "Гарнитура надета — чашки встают на шлем" if _eq.has("ears") else "Под гарнитуру: чашки встают на шлем (слот «Уши»)"
 			"LIGHT":
 				chip.state = "closed"
 				chip.hint = "Крепление фонаря на шлем — фонарей на шлем пока нет"

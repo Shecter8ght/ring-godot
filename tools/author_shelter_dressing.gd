@@ -238,7 +238,6 @@ func _layout() -> void:
 		["CleaningRag","WorkshopRag",Vector3(14.50,.951,-4.00),20],
 		["WeaponCleaningSet","WeaponService",Vector3(-13.55,.765,4.21),0],
 		["AmmoAndMagazines","WeaponAmmo",Vector3(-12.78,.768,4.48),12],
-		["HearingProtection","ArmoryHeadset",Vector3(-13.62,.765,3.75),10],
 		["WorkGloves","ArmoryGloves",Vector3(-12.91,.765,3.79),-20],
 		["MeterPanel","GeneratorMeters",Vector3(15.42,.97,-10.74),0],
 		["CableJunction","GeneratorCableDrop",Vector3(15.95,.20,-10.73),0],
@@ -289,7 +288,6 @@ func _layout() -> void:
 	for i: int in range(3):
 		var x: float = [-5.1,5.1,7.4][i]
 		_put("WorkGloves","BayGloves_%d"%i,Vector3(x-.32,.491,6.49),float(i*13-12))
-		_put("HearingProtection","BayHeadset_%d"%i,Vector3(x+.10,.491,6.52),float(i*10))
 		_put("FoldedTowel","BayCloth_%d"%i,Vector3(x+.58,.525,6.47),0)
 		var bed_x: float = [-2.15,0.0,2.15][i]
 		_put("BedBlanket","SleepingBlanket_%d"%i,Vector3(bed_x,3.29,-9.02),0)

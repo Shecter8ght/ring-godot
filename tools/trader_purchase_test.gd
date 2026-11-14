@@ -52,7 +52,7 @@ func _catalog() -> void:
 
 
 func _wearables() -> void:
-	for id: String in ["wpn_ar_01", "wpn_hg_01", "signal_launcher", "armor_poor", "helmet_simple", "sunglasses", "headset_passive", "bp_daypack", "nvg"]:
+	for id: String in ["wpn_ar_01", "wpn_hg_01", "signal_launcher", "armor_poor", "helmet_simple", "sunglasses", "bp_daypack", "nvg"]:
 		_reset()
 		# Ракетница помечена raid_only; здесь проверяем её слот при разрешённой покупке.
 		Settings.shop_loot = id == "signal_launcher"

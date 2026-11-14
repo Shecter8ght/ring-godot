@@ -13,7 +13,7 @@ func _ready() -> void:
 	for frame: int in range(40): await get_tree().process_frame
 	var level: Node = get_tree().current_scene
 	var dressing: Node = level.get_node("Dressing")
-	_check("authored room dressing loaded",dressing.get_child_count()==81)
+	_check("authored room dressing loaded",dressing.get_child_count()==77)
 	_check("no runtime particle emitters",level.find_children("*","GPUParticles3D",true,false).is_empty() and level.find_children("*","CPUParticles3D",true,false).is_empty())
 	var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/shelter/dressing/manifest.json")) as Dictionary
 	for id: String in source:

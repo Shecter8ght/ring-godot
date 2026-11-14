@@ -6,9 +6,9 @@ extends Node
 ## реплицируется. Списки всегда переприсваиваются копией — синхронизатор сравнивает значения.
 
 ## Слота «Разгрузка» больше нет (gear_v2, 2026-10-24): подсумки с магазинами висят на броне или поясе в слоте брони.
-const SLOTS := ["primary", "secondary", "sidearm", "launcher", "armor", "helmet", "ears", "eyes", "backpack"]
+const SLOTS := ["primary", "secondary", "sidearm", "launcher", "armor", "helmet", "eyes", "backpack"]
 const SLOT_NAMES := {"primary": "Оружие 1", "secondary": "Оружие 2", "sidearm": "Пистолет", "launcher": "Ракетница", "armor": "Броня",
-	"helmet": "Шлем", "ears": "Уши", "eyes": "Глаза", "backpack": "Рюкзак"}
+	"helmet": "Шлем", "eyes": "Глаза", "backpack": "Рюкзак"}
 
 var items: Array = []
 ## Ревизия слота не забывается, когда оружие вынуто: поздний пакет не попадёт в новый экземпляр.

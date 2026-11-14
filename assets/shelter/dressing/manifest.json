@@ -318,17 +318,6 @@
     "material": "DressingAtlas",
     "ucupaint_layers": 4
   },
-  "HearingProtection": {
-    "bounds_m": [
-      0.3701,
-      0.2444,
-      0.1565
-    ],
-    "triangles": 2056,
-    "collision": null,
-    "material": "DressingAtlas",
-    "ucupaint_layers": 4
-  },
   "WorkGloves": {
     "bounds_m": [
       0.267,

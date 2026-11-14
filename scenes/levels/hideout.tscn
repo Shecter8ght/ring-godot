@@ -123,9 +123,6 @@ bus = &"Master"
 [node name="BayGloves_0" parent="Dressing" parent_id_path=PackedInt32Array(1443542778) index="63" unique_id=1339241499]
 visible = false
 
-[node name="BayHeadset_0" parent="Dressing" parent_id_path=PackedInt32Array(1443542778) index="64" unique_id=726251548]
-visible = false
-
 [node name="FinishedMesh_00" parent="Dressing/BayCloth_0" parent_id_path=PackedInt32Array(2132973394) index="0" unique_id=1396732530]
 visible = false
 
@@ -524,7 +521,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.7, 0.9, -4.25)
 [editable path="Dressing/WorkshopRag"]
 [editable path="Dressing/WeaponService"]
 [editable path="Dressing/WeaponAmmo"]
-[editable path="Dressing/ArmoryHeadset"]
 [editable path="Dressing/ArmoryGloves"]
 [editable path="Dressing/GeneratorMeters"]
 [editable path="Dressing/GeneratorCableDrop"]
@@ -563,19 +559,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.7, 0.9, -4.25)
 [editable path="Dressing/Stock_61"]
 [editable path="Dressing/Stock_62"]
 [editable path="Dressing/BayGloves_0"]
-[editable path="Dressing/BayHeadset_0"]
 [editable path="Dressing/BayCloth_0"]
 [editable path="Dressing/SleepingBlanket_0"]
 [editable path="Dressing/BedsideBooks_0"]
 [editable path="Dressing/SleepingTowel_0"]
 [editable path="Dressing/BayGloves_1"]
-[editable path="Dressing/BayHeadset_1"]
 [editable path="Dressing/BayCloth_1"]
 [editable path="Dressing/SleepingBlanket_1"]
 [editable path="Dressing/BedsideBooks_1"]
 [editable path="Dressing/SleepingTowel_1"]
 [editable path="Dressing/BayGloves_2"]
-[editable path="Dressing/BayHeadset_2"]
 [editable path="Dressing/BayCloth_2"]
 [editable path="Dressing/SleepingBlanket_2"]
 [editable path="Dressing/BedsideBooks_2"]

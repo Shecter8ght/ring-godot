@@ -3189,20 +3189,12 @@ func _tick_hands_bounce(delta: float) -> void:
 	l.visible = l.light_energy > 0.002
 
 
-## Ушёл со сцены (конец рейда, убежище) — поправки гарнитуры снимаются; свой игрок, пока жив,
-## ставит их заново каждый кадр.
-func _exit_tree() -> void:
-	Settings.set_headset({})
-
-
 ## Что надето на глаза: ПНВ / очки / "".
 func eyes_item() -> String:
 	return String((inventory.equipment.get("eyes", {}) as Dictionary).get("id", "")) if inventory else ""
 
 
 func _tick_nvg(delta: float) -> void:
-	# гарнитура на ушах — поправки звука (своему игроку)
-	Settings.set_headset(WeaponDb.headset(String((inventory.equipment.get("ears", {}) as Dictionary).get("id", ""))) if inventory and health.alive else {})
 	var has := bool(ItemDb.equip(eyes_item()).get("nvg", false))
 	if Input.is_action_just_pressed("nvg") and not PauseMenu.shown:
 		if not has:

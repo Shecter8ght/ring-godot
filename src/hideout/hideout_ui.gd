@@ -1611,8 +1611,6 @@ func _subgroup(id: String) -> Array:
 		return [1, "Бронежилеты и плитоносцы"]
 	if not WeaponDb.plate(id).is_empty():
 		return [2, "Бронеплиты"]
-	if not WeaponDb.headset(id).is_empty():
-		return [3, "Гарнитуры"]
 	if ItemDb.item(id).has("pouch") or ItemDb.item(id).has("rig"):
 		return [4, "Подсумки"]
 	var cat := String(ItemDb.item(id).get("cat", "misc"))

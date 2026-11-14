@@ -297,7 +297,6 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_00.res" id="189_2y4xt"]
 [ext_resource type="PackedScene" path="res://levels/shelter/dressing/AmmoAndMagazines.tscn" id="189_qymsk"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/PH_Boots_01.res" id="190_lbsfe"]
-[ext_resource type="PackedScene" path="res://levels/shelter/dressing/HearingProtection.tscn" id="190_m547t"]
 [ext_resource type="PackedScene" path="res://levels/shelter/dressing/MeterPanel.tscn" id="191_17fox"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/props/BlastDoor_00.res" id="192_22ync"]
 [ext_resource type="PackedScene" path="res://levels/shelter/dressing/GeneratorServiceDetails.tscn" id="192_jgg53"]
@@ -473,7 +472,6 @@
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/CleaningRag_00.res" id="425_4jwcr"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/WeaponCleaningSet_00.res" id="427_wwkh2"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/AmmoAndMagazines_00.res" id="429_6fnk2"]
-[ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/HearingProtection_00.res" id="431_u7avu"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/MeterPanel_00.res" id="433_ahi00"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/GeneratorServiceDetails_00.res" id="435_atgdt"]
 [ext_resource type="ArrayMesh" path="res://levels/shelter/dressing/ExhaustConnection_00.res" id="437_707de"]
@@ -14645,14 +14643,6 @@ cast_shadow = 0
 gi_mode = 2
 mesh = ExtResource("429_6fnk2")
 
-[node name="ArmoryHeadset" parent="Dressing" unique_id=2104728712 instance=ExtResource("190_m547t")]
-transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, -13.62, 0.765, 3.75)
-
-[node name="FinishedMesh_00" parent="Dressing/ArmoryHeadset" index="0" unique_id=475314835]
-cast_shadow = 0
-gi_mode = 2
-mesh = ExtResource("431_u7avu")
-
 [node name="ArmoryGloves" parent="Dressing" unique_id=1857015331 instance=ExtResource("172_a23si")]
 transform = Transform3D(0.9396926, 0, -0.34202012, 0, 1, 0, 0.34202012, 0, 0.9396926, -12.91, 0.765, 3.79)
 
@@ -14954,14 +14944,6 @@ cast_shadow = 0
 gi_mode = 2
 mesh = ExtResource("387_w3m5h")
 
-[node name="BayHeadset_0" parent="Dressing" unique_id=726251548 instance=ExtResource("190_m547t")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.491, 6.52)
-
-[node name="FinishedMesh_00" parent="Dressing/BayHeadset_0" index="0" unique_id=475314835]
-cast_shadow = 0
-gi_mode = 2
-mesh = ExtResource("431_u7avu")
-
 [node name="BayCloth_0" parent="Dressing" unique_id=2132973394 instance=ExtResource("181_wt8tp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.52, 0.525, 6.47)
 
@@ -15002,14 +14984,6 @@ cast_shadow = 0
 gi_mode = 2
 mesh = ExtResource("387_w3m5h")
 
-[node name="BayHeadset_1" parent="Dressing" unique_id=1047540432 instance=ExtResource("190_m547t")]
-transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, 5.2, 0.491, 6.52)
-
-[node name="FinishedMesh_00" parent="Dressing/BayHeadset_1" index="0" unique_id=475314835]
-cast_shadow = 0
-gi_mode = 2
-mesh = ExtResource("431_u7avu")
-
 [node name="BayCloth_1" parent="Dressing" unique_id=1733631678 instance=ExtResource("181_wt8tp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.68, 0.525, 6.47)
 
@@ -15049,14 +15023,6 @@ transform = Transform3D(0.9702957, 0, 0.2419219, 0, 1, 0, -0.2419219, 0, 0.97029
 cast_shadow = 0
 gi_mode = 2
 mesh = ExtResource("387_w3m5h")
-
-[node name="BayHeadset_2" parent="Dressing" unique_id=82068255 instance=ExtResource("190_m547t")]
-transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 7.5, 0.491, 6.52)
-
-[node name="FinishedMesh_00" parent="Dressing/BayHeadset_2" index="0" unique_id=475314835]
-cast_shadow = 0
-gi_mode = 2
-mesh = ExtResource("431_u7avu")
 
 [node name="BayCloth_2" parent="Dressing" unique_id=1719178605 instance=ExtResource("181_wt8tp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.98, 0.525, 6.47)
@@ -18404,7 +18370,6 @@ distance_fade_length = 8.0
 [editable path="Dressing/WorkshopRag"]
 [editable path="Dressing/WeaponService"]
 [editable path="Dressing/WeaponAmmo"]
-[editable path="Dressing/ArmoryHeadset"]
 [editable path="Dressing/ArmoryGloves"]
 [editable path="Dressing/GeneratorMeters"]
 [editable path="Dressing/GeneratorCableDrop"]
@@ -18443,19 +18408,16 @@ distance_fade_length = 8.0
 [editable path="Dressing/Stock_61"]
 [editable path="Dressing/Stock_62"]
 [editable path="Dressing/BayGloves_0"]
-[editable path="Dressing/BayHeadset_0"]
 [editable path="Dressing/BayCloth_0"]
 [editable path="Dressing/SleepingBlanket_0"]
 [editable path="Dressing/BedsideBooks_0"]
 [editable path="Dressing/SleepingTowel_0"]
 [editable path="Dressing/BayGloves_1"]
-[editable path="Dressing/BayHeadset_1"]
 [editable path="Dressing/BayCloth_1"]
 [editable path="Dressing/SleepingBlanket_1"]
 [editable path="Dressing/BedsideBooks_1"]
 [editable path="Dressing/SleepingTowel_1"]
 [editable path="Dressing/BayGloves_2"]
-[editable path="Dressing/BayHeadset_2"]
 [editable path="Dressing/BayCloth_2"]
 [editable path="Dressing/SleepingBlanket_2"]
 [editable path="Dressing/BedsideBooks_2"]

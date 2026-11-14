@@ -2,7 +2,7 @@ class_name BodySilhouette
 extends Control
 ## Контур человека в А-позе (руки в стороны под 45°) вместо модели в окне снаряжения
 ## (docs/design/equip_doll_v2.md, п. 1): схема, а не портрет. Надетое обводится тем же контуром толще и тёплым
-## цветом: шлем на голове, наушники, ПНВ / очки, броня или пояс на корпусе, рюкзак за спиной, подсумки — плашками
+## цветом: шлем на голове, ПНВ / очки, броня или пояс на корпусе, рюкзак за спиной, подсумки — плашками
 ## на своих местах (половинки — как на полоске мест). Координаты — в рамке 244 × 258 (EquipDoll.FIGURE).
 
 const BOX := Vector2(244.0, 258.0)
@@ -115,9 +115,6 @@ func _draw() -> void:
 		_line(Vector2(HEAD.x - HEAD_R - 3.0, HEAD.y), Vector2(HEAD.x + HEAD_R + 3.0, HEAD.y), WORN, 1.5)
 		if "NVG" in ItemDb.helmet_mounts(_eq):
 			draw_rect(Rect2(HEAD.x - 4.0, HEAD.y - HEAD_R - 6.0, 8.0, 5.0), WORN)
-	if _has("ears"):
-		for sx: float in [-1.0, 1.0]:
-			draw_rect(Rect2(HEAD.x + sx * (HEAD_R + 1.0) - 4.0, HEAD.y - 6.0, 8.0, 13.0), WORN)
 	if _has("eyes"):
 		if bool(ItemDb.equip(_id("eyes")).get("nvg", false)):
 			# ПНВ: на площадке шлема или на головном креплении — трубки перед глазами

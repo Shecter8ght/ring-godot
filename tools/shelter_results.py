@@ -27,7 +27,7 @@ CASES = {
     **{f"revision_coop_{role}": (f"visual_revision_net_{role}", f"SHELTER_NET {role} failures=0") for role in ["host", "c1", "c2"]},
     "dressing_compile": ("dressing_compile", "compile_check: не собралось 0"),
     "dressing_acceptance": ("dressing_acceptance", "SHELTER_ACCEPTANCE failures=0"),
-    "dressing_effects": ("dressing_effects_test", "DRESSING_ACCEPTANCE checks=64 failures=0"),
+    "dressing_effects": ("dressing_effects_test", "DRESSING_ACCEPTANCE checks=63 failures=0"),
     **{f"dressing_coop_{role}": (f"dressing_net_{role}", f"SHELTER_NET {role} failures=0") for role in ["host", "c1", "c2"]},
 }
 

@@ -60,19 +60,7 @@ var reticle: Dictionary = {"shape": 1, "color": 0, "bold": 1}
 ## Громкость по шине, 0–1.
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0,
 	"Voices": 1.0, "Radio": 1.0}
-## Гарнитура на ушах своего игрока. Выбор модели задаёт снаряжение.
-var headset: Dictionary = {}
-const HEADSET_DB := {&"Shots": "shots_db", &"Steps": "steps_db", &"World": "world_db", &"Voices": "voices_db",
-	&"Ambient": "ambient_db"}
-const HEADSET_CONTROLS := ["gain", "low", "mid", "high"]
-const HEADSET_GAIN_MIN := -30.0
-const HEADSET_EQ_MIN := -18.0
-const HEADSET_DB_MAX := 12.0
-const HEADSET_PREVIEW_BUS := &"HeadsetPreview"
 const INTERFACE_BUS := &"Interface"
-var _preview_audio_bus: StringName = &""
-var _preview_headset: Dictionary = {}
-var _preview_factory: bool = false
 
 ## Чит «бессмертие» (меню Esc → Читы) — раздел cheats; в коопе решает хост.
 var god: bool = false
@@ -514,102 +502,26 @@ func _make_buses() -> void:
 			AudioServer.set_bus_name(index, bus)
 		if bus != "Master":
 			AudioServer.set_bus_send(index, "Master")
-		# Эффекты гарнитуры подключаются отдельно по надетой модели.
+		# Удалить прежние эффекты, если они были в раскладке.
 		for effect_index: int in range(AudioServer.get_bus_effect_count(index) - 1, -1, -1):
 			AudioServer.remove_bus_effect(index, effect_index)
 
 
 func apply_audio() -> void:
 	for bus: String in BUSES:
-		var i: int = AudioServer.get_bus_index(bus)
-		if i < 0:
-			continue
-		_apply_bus_level(i, bus, headset_profile(headset, bus))
-	var interface_index: int = AudioServer.get_bus_index(INTERFACE_BUS)
-	if interface_index >= 0:
-		_apply_bus_level(interface_index, &"World", {})
-	if _preview_audio_bus != &"":
-		preview_headset(_preview_audio_bus, _preview_headset, _preview_factory)
+		_apply_bus_level(bus, float(volume[bus]))
+	_apply_bus_level(INTERFACE_BUS, float(volume.World))
 
 
-func headset_profile(model: Dictionary, bus: StringName, factory: bool = false) -> Dictionary:
-	if model.is_empty() or not HEADSET_DB.has(bus):
-		return {}
-	var profile: Dictionary = {"gain": float(model.get(HEADSET_DB[bus], 0.0))}
-	var defaults: Dictionary = model.get("eq", {})
-	profile.merge(defaults.get(String(bus), defaults.get("quiet", {})), true)
-	if not factory:
-		profile.merge(Audio.headset_mix(String(model.get("code", "")), String(bus)), true)
-	return profile
-
-
-func _apply_bus_level(index: int, bus: StringName, profile: Dictionary) -> void:
-	var level: float = float(volume[String(bus)])
-	AudioServer.set_bus_mute(index, level <= 0.001)
-	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(level, 0.001)) + float(profile.get("gain", 0.0)))
-	if HEADSET_DB.has(bus):
-		_apply_headset_eq(index, profile)
-
-
-func _apply_headset_eq(index: int, profile: Dictionary) -> void:
-	var effect: AudioEffectEQ6
-	var effect_index: int = -1
-	for i: int in AudioServer.get_bus_effect_count(index):
-		var existing: AudioEffect = AudioServer.get_bus_effect(index, i)
-		if existing is AudioEffectEQ6 and existing.resource_name == "Гарнитура":
-			effect = existing as AudioEffectEQ6
-			effect_index = i
-			break
-	var bands: Vector3 = Vector3(profile.get("low", 0.0), profile.get("mid", 0.0), profile.get("high", 0.0))
-	if bands.is_zero_approx():
-		if effect_index >= 0:
-			AudioServer.remove_bus_effect(index, effect_index)
-		return
-	if effect == null:
-		effect = AudioEffectEQ6.new()
-		effect.resource_name = "Гарнитура"
-	for band: int in 3:
-		effect.set_band_gain_db(band * 2, bands[band])
-		effect.set_band_gain_db(band * 2 + 1, bands[band])
-	if effect_index < 0:
-		AudioServer.add_bus_effect(index, effect)
-
-
-## Стенд слушает выбранную модель через отдельную шину. Снаряжение в рейде не переключается.
-func preview_headset(bus: StringName, model: Dictionary, factory: bool = false) -> StringName:
-	if not HEADSET_DB.has(bus):
-		return &""
-	_preview_audio_bus = bus
-	_preview_headset = model
-	_preview_factory = factory
-	var index: int = AudioServer.get_bus_index(HEADSET_PREVIEW_BUS)
+func _apply_bus_level(bus: StringName, level: float) -> void:
+	var index: int = AudioServer.get_bus_index(bus)
 	if index < 0:
-		AudioServer.add_bus()
-		index = AudioServer.bus_count - 1
-		AudioServer.set_bus_name(index, HEADSET_PREVIEW_BUS)
-		AudioServer.set_bus_send(index, &"Master")
-	_apply_bus_level(index, bus, headset_profile(model, bus, factory))
-	return HEADSET_PREVIEW_BUS
-
-
-func end_headset_preview() -> void:
-	_preview_audio_bus = &""
-	_preview_headset = {}
-	_preview_factory = false
-	var index: int = AudioServer.get_bus_index(HEADSET_PREVIEW_BUS)
-	if index >= 0:
-		_apply_headset_eq(index, {})
-
-
-## Надел / снял гарнитуру: меняются громкость и тембр звукового мира.
-func set_headset(h: Dictionary) -> void:
-	if h == headset:
 		return
-	headset = h
-	apply_audio()
+	AudioServer.set_bus_mute(index, level <= 0.001)
+	AudioServer.set_bus_volume_db(index, linear_to_db(maxf(level, 0.001)))
 
 
-## Выстрел: общие наборы «shot_…» и выстрелы моделей «wpn_…_shot…» (громкость «Выстрелы», гарнитура).
+## Выстрел: общие наборы «shot_…» и выстрелы моделей «wpn_…_shot…» (громкость «Выстрелы»).
 static func is_shot(kind: String) -> bool:
 	return kind.begins_with("shot_") or (kind.begins_with("wpn_") and kind.contains("_shot"))
 

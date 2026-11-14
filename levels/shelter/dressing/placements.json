@@ -375,21 +375,6 @@
 		"yaw": 12.0
 	},
 	{
-		"asset": "HearingProtection",
-		"name": "ArmoryHeadset",
-		"position": [
-			-13.6199998855591,
-			0.764999985694885,
-			3.75
-		],
-		"rotation_degrees": [
-			0.0,
-			9.99999904632568,
-			0.0
-		],
-		"yaw": 10.0
-	},
-	{
 		"asset": "PH_Gloves",
 		"name": "ArmoryGloves",
 		"position": [
@@ -885,19 +870,19 @@
 		"yaw": 90.0
 	},
 	{
-		"asset": "Medicaw": 12.0
-	},
-	{
-		"asset": "FoldedTowel",
-		"name": "SleepingTowel_2",
+		"asset": "MedicalStock",
+		"name": "Stock_59",
 		"position": [
-			2.27999997138977,
-			3.15599989891052,
-			-10.6700000762939
+			-17.3999996185303,
+			1.14999997615814,
+			3.29999995231628
 		],
-		"yaw": 0.0
-	}
-]aw": 90.0
+		"rotation_degrees": [
+			0.0,
+			90.0,
+			0.0
+		],
+		"yaw": 90.0
 	},
 	{
 		"asset": "MixedCartons",
@@ -958,21 +943,6 @@
 			0.0
 		],
 		"yaw": -12.0
-	},
-	{
-		"asset": "HearingProtection",
-		"name": "BayHeadset_0",
-		"position": [
-			-5.0,
-			0.49099999666214,
-			6.51999998092651
-		],
-		"rotation_degrees": [
-			0.0,
-			0.0,
-			0.0
-		],
-		"yaw": 0.0
 	},
 	{
 		"asset": "FoldedTowel",
@@ -1050,21 +1020,6 @@
 		"yaw": 1.0
 	},
 	{
-		"asset": "HearingProtection",
-		"name": "BayHeadset_1",
-		"position": [
-			5.19999980926514,
-			0.49099999666214,
-			6.51999998092651
-		],
-		"rotation_degrees": [
-			0.0,
-			9.99999904632568,
-			0.0
-		],
-		"yaw": 10.0
-	},
-	{
 		"asset": "FoldedTowel",
 		"name": "BayCloth_1",
 		"position": [
@@ -1138,21 +1093,6 @@
 			0.0
 		],
 		"yaw": 14.0
-	},
-	{
-		"asset": "HearingProtection",
-		"name": "BayHeadset_2",
-		"position": [
-			7.5,
-			0.49099999666214,
-			6.51999998092651
-		],
-		"rotation_degrees": [
-			0.0,
-			19.9999980926514,
-			0.0
-		],
-		"yaw": 20.0
 	},
 	{
 		"asset": "FoldedTowel",

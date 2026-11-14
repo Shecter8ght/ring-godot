@@ -1,10 +1,10 @@
 {
-	"authored_assets": 194,
+	"authored_assets": 193,
 	"dressing": {
-		"assets": 34,
+		"assets": 33,
 		"baked_effect_assets": 2,
 		"effect_instances": 5,
-		"placements": 81,
+		"placements": 77,
 		"runtime_particle_simulation": false,
 		"ucupaint_layers": 4
 	},
@@ -12,6 +12,6 @@
 	"lights": 75.0,
 	"navigation_polygons": 300,
 	"procedural_level_generation": false,
-	"prop_instances": 444,
+	"prop_instances": 440,
 	"reflection_probes": 7.0
 }

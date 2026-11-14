@@ -33,10 +33,10 @@ static var _sound_families: Dictionary = {}
 static var _weapon_family: Dictionary = {}
 ## Все предметы арсенала (id → словарь предмета) — их подмешивает ItemDb.
 static var _items: Dictionary = {}
-## id → вид предмета (weapon, ammo, mag, mod, vest, plate, helmet, headset) — для выборки лута.
+## id → вид предмета (weapon, ammo, mag, mod, vest, plate, helmet) — для выборки лута.
 static var _kind: Dictionary = {}
 const _KIND := {"weapons": "weapon", "ammo": "ammo", "magazines": "mag", "attachments": "mod",
-	"vests": "vest", "plates": "plate", "helmets": "helmet", "headsets": "headset"}
+	"vests": "vest", "plates": "plate", "helmets": "helmet"}
 
 
 static func _ensure() -> void:
@@ -54,7 +54,7 @@ static func _ensure() -> void:
 		_items.merge(_w.get(sec, {}))
 		for id in _w.get(sec, {}):
 			_kind[id] = _KIND[sec]
-	for sec in ["vests", "plates", "helmets", "headsets"]:
+	for sec in ["vests", "plates", "helmets"]:
 		_items.merge(_a.get(sec, {}))
 		for id in _a.get(sec, {}):
 			_kind[id] = _KIND[sec]
@@ -258,11 +258,6 @@ static func helmet(id: String) -> Dictionary:
 	return ((_a.helmets as Dictionary).get(canonical(id), {}) as Dictionary).get("helmet", {})
 
 
-static func headset(id: String) -> Dictionary:
-	_ensure()
-	return ((_a.headsets as Dictionary).get(canonical(id), {}) as Dictionary).get("headset", {})
-
-
 static func loadout(id: String) -> Dictionary:
 	_ensure()
 	return (_l.loadouts as Dictionary).get(id, {})
@@ -278,10 +273,10 @@ static func pmc_squad() -> Array:
 	return _l.get("pmc_squad", [])
 
 
-## Все id раздела (weapons / ammo / magazines / attachments; vests / plates / helmets / headsets).
+## Все id раздела (weapons / ammo / magazines / attachments; vests / plates / helmets).
 ## Случайный предмет арсенала по фильтру — для таблиц лута ("pick:…"). Фильтр:
 ## "kind=ammo|mag; tags=POLICE|SCAV; tier=2; min_tier=1" — вид (weapon, ammo, mag, mod, vest,
-## plate, helmet, headset; preset — готовая сборка оружия, вернёт "preset:<id>"), хотя бы один
+## plate, helmet; preset — готовая сборка оружия, вернёт "preset:<id>"), хотя бы один
 ## тег, тир не выше tier и не ниже min_tier. Вес — по редкости (Balance.LOOT_RARITY_W). "" — нет.
 static func pick(query: String, rng: RandomNumberGenerator) -> String:
 	var pool := matching(query)

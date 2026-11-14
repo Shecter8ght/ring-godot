@@ -133,7 +133,10 @@ static func ensure() -> void:
 				ItemDb.canon_template(t as Dictionary)
 		# обмен оборвался (вылет, выход) — вещи из буфера обмена обратно в тайник
 		trade_hold = []
-		for held: Variant in d.get("trade_hold", []):
+		var held_items: Array = d.get("trade_hold", [])
+		ItemDb.canon_list(held_items)
+		money += ItemDb.purge_removed(held_items)
+		for held: Variant in held_items:
 			if held is Dictionary:
 				for key in ["x", "y", "r"]:
 					(held as Dictionary).erase(key)
@@ -146,6 +149,7 @@ static func ensure() -> void:
 		next_conditions = d.get("next_conditions", next_conditions)
 		for i in range(unlocked_stock.size()):
 			unlocked_stock[i] = WeaponDb.canonical(String(unlocked_stock[i]))
+		unlocked_stock = unlocked_stock.filter(func(id: Variant) -> bool: return not Balance.REMOVED_ITEMS.has(id))
 		# убранные из игры предметы (Balance.REMOVED_ITEMS): из сетки и слотов — прочь, деньги — по прежней цене
 		for l in [stash, backpack, pocket]:
 			money += ItemDb.purge_removed(l)
@@ -153,6 +157,7 @@ static func ensure() -> void:
 			if equipment[slot] is Dictionary and Balance.REMOVED_ITEMS.has(String((equipment[slot] as Dictionary).get("id", ""))):
 				money += int(Balance.REMOVED_ITEMS[String((equipment[slot] as Dictionary).id)]) * int((equipment[slot] as Dictionary).get("n", 1))
 				equipment.erase(slot)
+		equipment.erase("ears")
 		_migrate()
 		# до слота «Рюкзак» у всех был рюкзак на 30 ячеек — выдать его надетым, вещи на местах
 		if not flags.get("bp_slot", false):

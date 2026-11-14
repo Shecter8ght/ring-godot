@@ -414,7 +414,7 @@ const GATE_WARDEN := {"zone_m": 7.0, "shout_sec": 3.0, "warn_sec": 4.0, "reset_s
 ## набор, чтобы было с чем идти в рейд (сколько угодно раз, пока снова не встанешь на ноги).
 const RESCUE_KIT := [["wpn_hg_01", 1], ["ammo_918_pst", 48], ["bandage", 2]]
 ## Готовые комплекты у Михалыча (правая колонка окна): полный набор одной кнопкой — стволы с обвесом,
-## броня с плитами и подсумками, шлем, гарнитура, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты
+## броня с плитами и подсумками, шлем, рюкзак, в рюкзаке магазины, патроны, медицина, гранаты
 ## (снаряжённые магазины на входе в рейд сами переезжают в пустые подсумки — Inventory.prepare_mags). Формат —
 ## как у своих шаблонов (LoadoutTemplates): что есть в тайнике — берётся оттуда, остальное докупается.
 ## По одному на ступень снабжения: каталог 1, 2, 3 и 5.
@@ -425,7 +425,6 @@ const TRADER_KITS := [
 			"sidearm": {"id": "wpn_hg_01"},
 			"armor": {"id": "armor_poor", "pouches": ["pouch_pistol", "pouch_pistol"]},
 			"helmet": {"id": "helmet_simple"},
-			"ears": {"id": "headset_passive"},
 			"backpack": {"id": "bp_daypack"}},
 		"backpack": [["ammo_12_buck", 30], ["ammo_12_slug", 10], ["mag_918_8", 2], ["ammo_918_pst", 32], ["bandage", 3], ["medkit", 1], ["water", 1]]},
 	{"name": "Патрульный", "about": "ВЕРАС-54 с коллиматором и АСТЕН-919, плитоносец со стальными плитами.",
@@ -434,7 +433,6 @@ const TRADER_KITS := [
 			"sidearm": {"id": "wpn_hg_02"},
 			"armor": {"id": "armor_mid", "plates": {"front": "plate_steel", "back": "plate_steel"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
-			"ears": {"id": "headset_active"},
 			"backpack": {"id": "bp_tourist"}},
 		"backpack": [["mag_545_30", 4], ["ammo_545_std", 150], ["mag_919_17", 2], ["ammo_919_fmj", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 1], ["grenade", 2]]},
 	{"name": "Штурмовик", "about": "ГРАНЬ-15 с оптикой 4× и глушителем, керамика, ПНВ. Для ночи и тесных коридоров.",
@@ -443,7 +441,6 @@ const TRADER_KITS := [
 			"sidearm": {"id": "wpn_hg_02"},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_ceramic", "back": "plate_ceramic"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_mid"},
-			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
 		"backpack": [["tac_flashlight_01", 1], ["mag_556_30_gran", 5], ["ammo_556_std", 180], ["mag_919_17", 2], ["ammo_919_ap", 51], ["bandage", 4], ["medkit", 2], ["painkillers", 2], ["grenade", 3], ["flare", 1]]},
@@ -453,7 +450,6 @@ const TRADER_KITS := [
 			"secondary": {"id": "wpn_smg_03", "mods": {"optic_primary": "optic_holo_01", "underbarrel": "grip_offset_01"}},
 			"armor": {"id": "armor_top", "plates": {"front": "plate_military", "back": "plate_military"}, "pouches": ["pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle", "pouch_rifle"]},
 			"helmet": {"id": "helmet_top"},
-			"ears": {"id": "headset_tactical"},
 			"eyes": {"id": "nvg"},
 			"backpack": {"id": "bp_raid"}},
 		"backpack": [["mag_76251_20", 4], ["ammo_76251_match", 100], ["mag_45_vector30", 2], ["ammo_45_ap", 90], ["bandage", 4], ["medkit", 3], ["painkillers", 2], ["grenade", 2], ["flare", 1]]},
@@ -545,10 +541,6 @@ const TRADER_BUY_PRICES := {
 	"grip_vertical_01": 20000,
 	"hammer": 1400,
 	"headphones": 4600,
-	"headset_active": 30000,
-	"headset_passive": 3900,
-	"headset_perimeter": 200000,
-	"headset_tactical": 92000,
 	"helmet_simple": 12000,
 	"helmet_mid": 60000,
 	"helmet_top": 190000,
@@ -1628,13 +1620,14 @@ const AMMO_CHECK := {"hold_sec": 0.4, "show_sec": 3.0, "turn_deg": [45.0, 18.0],
 ## держать «действие», с; grid — сетка одной половины буфера; в рейде обмен рвётся, если разошлись
 ## дальше break_m.
 const TRADE := {"reach_m": 2.2, "hold_sec": 0.5, "grid": [8, 5], "break_m": 5.0}
-## Убранные предметы (решение владельца 2026-11-13, docs/design/loot_matrix_v2.md §6): записей в data/items.json больше нет.
+## Убранные предметы (docs/design/loot_matrix_v2.md §6).
 ## Старое сохранение с ними (тайник, рюкзак, карман, шаблоны) при загрузке очищается (ItemDb.purge_removed): вещь пропадает,
 ## а деньги возвращаются по значению ниже — это цена, за которую Михалыч купил бы её до удаления (оценка × TRADER_SELL_MULT).
 const REMOVED_ITEMS := {
 	"key_jewelry": 2750, "keycard_security": 5500, "work_gloves": 275, "clipboard": 330, "measuring_tape": 495,
 	"wall_clock": 990, "food_tomatoes": 715, "food_beans": 990, "food_sardines": 1210, "food_milk": 880,
 	"freeze_dried_meals": 2475, "protein_pack": 2640, "ration_emergency": 2860,
+	"headset_passive": 1650, "headset_active": 7700, "headset_tactical": 14300, "headset_perimeter": 26400,
 }
 ## Старые разгрузки (предметов больше нет, слота тоже): сколько автоматных подсумков получает владелец старого
 ## сохранения вместо разгрузки (Profile._migrate_rigs, ItemDb.canon_template). Предметы в items.json убраны 2026-11-13.
@@ -2018,7 +2011,7 @@ const SHOTGUN_POINT_BLANK := {"pb_m": 4.0, "pb_k": 2.2}
 ## Сколько ИИ перезаряжается, с: время оружия × это.
 const AI_RELOAD_K := 1.1
 ## Типы мародёров: доля среди всех (weight), снаряжение (loadout — data/loadouts.json: оружие,
-## магазины, броня, шлем, гарнитура, аптечки; leader — с этим шансом главарь), скорость ×,
+## магазины, броня, шлем, аптечки; leader — с этим шансом главарь), скорость ×,
 ## здоровье ×, память ×, дальность зрения ×, цвет куртки, фигура (масштаб), holds — держит
 ## позицию: не сближается, патруль у своего поста, ищет глазами, а не ногами (снайпер ходит один);
 ## ambush — склонность к засаде (× AI_AMBUSH.chance; нет — 1): разведчик рвётся вперёд, бывалый и ЧВК ждут.
@@ -2360,7 +2353,7 @@ const CIVILIAN_LOOT := {
 		["printer_head", 0.3, [1, 1]], ["printer_board", 0.4, [1, 1]]
 	]},
 	"sport": {"rolls": [1, 1], "entries": [
-		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]], ["headset_passive", 0.5, [1, 1]],
+		["ammo_12_buck", 2, [5, 15]], ["ammo_12_slug", 1, [5, 10]], ["ammo_556_civ", 0.5, [10, 20]],
 		["water", 2, [1, 1]], ["binoculars", 0.6, [1, 1]], ["thermos", 1, [1, 1]],
 		["nothing", 4, [0, 0]], ["pouch_pistol", 0.6, [1, 1]], ["pouch_rifle", 0.3, [1, 1]]
 	]},

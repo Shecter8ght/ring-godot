@@ -721,7 +721,7 @@ static func grid_accepts(role: String, entry: Dictionary) -> bool:
 	return true
 
 
-## Крепления надетого шлема (данные helmet.mounts: NVG, HEADSET, LIGHT, VISOR); без шлема — пусто.
+## Крепления надетого шлема (данные helmet.mounts: NVG, LIGHT, VISOR); без шлема — пусто.
 static func helmet_mounts(eq: Dictionary) -> Array:
 	var h: Variant = eq.get("helmet", null)
 	if not h is Dictionary:
@@ -1286,11 +1286,15 @@ static func canon_template(t: Dictionary) -> void:
 			for i in range(n):
 				pouches.append("pouch_rifle")
 			(slots_d.armor as Dictionary)["pouches"] = pouches
-	for slot in t.get("slots", {}):
-		var e: Variant = (t.slots as Dictionary)[slot]
+	slots_d.erase("ears")
+	for slot in slots_d.keys():
+		var e: Variant = slots_d[slot]
 		if not e is Dictionary:
 			continue
 		canon_entry(e as Dictionary)
+		if Balance.REMOVED_ITEMS.has(String((e as Dictionary).get("id", ""))):
+			slots_d.erase(slot)
+			continue
 		var plates: Variant = (e as Dictionary).get("plates", null)
 		if plates is Dictionary:
 			for g in plates:

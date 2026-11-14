@@ -330,8 +330,6 @@ CC0 1.0. Изменения: цвет и нормаль сложены в мас
 - «Garage_1» — ganic30, CC Attribution, https://sketchfab.com/3d-models/garage-1-4ca6068160cc43feb305f5547eb9f87e → sf_garage_row
 - «Low Poly Weathered Wood Block Scan - Game Ready» — -Arthur-, CC Attribution, https://sketchfab.com/3d-models/low-poly-weathered-wood-block-scan-game-ready-d6e22786fbfd4b239c54eced37de7a84 → sf_wood_block
 - «Modern Tactical Vest / Plate Carrier» — Exactly, CC Attribution, https://sketchfab.com/3d-models/modern-tactical-vest-plate-carrier-abe8e567ae72431384ee7535845b6f45 → sf_plate_carrier (плитоносцы)
-- «Tactical Headset - Game Ready» — Exactly, CC Attribution, https://sketchfab.com/3d-models/tactical-headset-game-ready-c1cee56e73ed47438015a646ad82dfa5 → sf_headset (активные наушники)
-- «Tactical Helmet with Headset (Game-Ready)» — Exactly, CC Attribution, https://sketchfab.com/3d-models/tactical-helmet-with-headset-game-ready-82adf376164f4d99a4e0b2949930e2ad → sf_helmet (шлемы)
 - «Lviv Missile Attack. Burned And Destroyed Car» — Serhii Revenko, CC Attribution, https://sketchfab.com/3d-models/lviv-missile-attack-burned-and-destroyed-car-5cdf33c5d3754f658e740f5360e3eeca → sf_car_burned
 - «Soviet Panel Brutal building (Baked)» — Blenderust, CC Attribution, https://sketchfab.com/3d-models/soviet-panel-brutal-building-baked-deb2133873534b8ebec4c97e5c7f6c3b → sf_panel5_brutal
 - «Trash can» — bazz4r, CC Attribution, https://sketchfab.com/3d-models/trash-can-3836ff67877248c2a820e6a969984aac → sf_dumpster_a, sf_dumpster_b, sf_dumpster_tipped

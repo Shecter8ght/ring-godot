@@ -1,5 +1,5 @@
 {
- "_comment": "Снаряжение ИИ (см. docs/design/weapons.md, п.9): списки [пресет/предмет, вес]; \"\" — ничего. primary/secondary — пресеты оружия (data/weapons.json → presets), spare_mags — запасных магазинов к основному [мин, макс] (снаряжены тем же патроном), armor/plates/helmet/headset — предметы, meds — [id, шанс, [мин, макс]], dur — износ оружия и брони (перекрывает пресет), loot_table — прочий лут на теле, skill — меткость ×. Тип ИИ → снаряжение: Balance.AI_ARCHETYPES.loadout. backpack — рюкзак (bp_*), выпадает с тела. Веса брони, шлемов и рюкзаков — схема docs/design/npc_gear_by_type.md п. 3 (2026-10-24); visor — забрало на тяжёлом шлеме.",
+ "_comment": "Снаряжение ИИ (см. docs/design/weapons.md, п.9): списки [пресет/предмет, вес]; \"\" — ничего. primary/secondary — пресеты оружия (data/weapons.json → presets), spare_mags — запасных магазинов к основному [мин, макс] (снаряжены тем же патроном), armor/plates/helmet — предметы, meds — [id, шанс, [мин, макс]], dur — износ оружия и брони (перекрывает пресет), loot_table — прочий лут на теле, skill — меткость ×. Тип ИИ → снаряжение: Balance.AI_ARCHETYPES.loadout. backpack — рюкзак (bp_*), выпадает с тела. Веса брони, шлемов и рюкзаков — схема docs/design/npc_gear_by_type.md п. 3 (2026-10-24); visor — забрало на тяжёлом шлеме.",
  "loadouts": {
   "civilian": {
    "name": "Мирный",
@@ -39,12 +39,6 @@
     ]
    ],
    "helmet": [
-    [
-     "",
-     1
-    ]
-   ],
-   "headset": [
     [
      "",
      1
@@ -139,12 +133,6 @@
     [
      "helmet_simple",
      0.15
-    ]
-   ],
-   "headset": [
-    [
-     "",
-     1
     ]
    ],
    "meds": [
@@ -263,16 +251,6 @@
     ],
     [
      "helmet_mid",
-     0.15
-    ]
-   ],
-   "headset": [
-    [
-     "",
-     0.85
-    ],
-    [
-     "headset_passive",
      0.15
     ]
    ],
@@ -403,20 +381,6 @@
      0.5
     ]
    ],
-   "headset": [
-    [
-     "",
-     0.5
-    ],
-    [
-     "headset_passive",
-     0.3
-    ],
-    [
-     "headset_active",
-     0.2
-    ]
-   ],
    "meds": [
     [
      "bandage",
@@ -516,12 +480,6 @@
      0.3
     ]
    ],
-   "headset": [
-    [
-     "",
-     1
-    ]
-   ],
    "meds": [
     [
      "bandage",
@@ -617,16 +575,6 @@
      0.4
     ]
    ],
-   "headset": [
-    [
-     "headset_active",
-     0.7
-    ],
-    [
-     "headset_tactical",
-     0.3
-    ]
-   ],
    "meds": [
     [
      "medkit",
@@ -710,12 +658,6 @@
      1
     ]
    ],
-   "headset": [
-    [
-     "headset_perimeter",
-     1
-    ]
-   ],
    "meds": [
     [
      "medkit",
@@ -791,12 +733,6 @@
      1
     ]
    ],
-   "headset": [
-    [
-     "headset_perimeter",
-     1
-    ]
-   ],
    "meds": [
     [
      "medkit",
@@ -865,12 +801,6 @@
      1
     ]
    ],
-   "headset": [
-    [
-     "headset_perimeter",
-     1
-    ]
-   ],
    "meds": [
     [
      "medkit",
@@ -931,12 +861,6 @@
    "helmet": [
     [
      "helmet_top",
-     1
-    ]
-   ],
-   "headset": [
-    [
-     "headset_perimeter",
      1
     ]
    ],
@@ -1029,16 +953,6 @@
     [
      "helmet_top",
      1.0
-    ]
-   ],
-   "headset": [
-    [
-     "headset_active",
-     0.7
-    ],
-    [
-     "headset_tactical",
-     0.3
     ]
    ],
    "meds": [

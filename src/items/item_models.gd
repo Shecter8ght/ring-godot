@@ -3,7 +3,7 @@ extends RefCounted
 ## Модели предметов для иконок (tools/icon_bake → assets/icons/<id>.png) и, при желании, для
 ## предметов на полу. Оружие — WeaponModels (со штатным обвесом нет — голый ствол), обвесы —
 ## WeaponMods (на пустом узле по точке крепления первого ствола с подходящим интерфейсом),
-## граната — WeaponModels, арсенал (магазины, плиты, жилеты и плитоносцы, шлемы, гарнитуры) — по
+## граната — WeaponModels, арсенал (магазины, плиты, жилеты и плитоносцы, шлемы) — по
 ## данным: размер от ёмкости / класса, цвет от материала и тира; остальное — простые формы из
 ## примитивов с фасками в реальных размерах: бинт — рулон, аптечка — кейс с крестом, патроны —
 ## пачка цвета калибра, деньги — пачка с бандеролью.
@@ -228,7 +228,7 @@ static func _ammo_box(root: Node3D, id: String) -> void:
 
 # ---------------------------------------------------------------- арсенал
 
-## Магазин, плита, жилет / плитоносец, шлем, гарнитура — по данным (data/weapons.json, armor.json).
+## Магазин, плита, жилет / плитоносец, шлем — по данным (data/weapons.json, armor.json).
 static func _arsenal(root: Node3D, id: String) -> bool:
 	var mag := WeaponDb.magazine(id)
 	if not mag.is_empty():
@@ -256,25 +256,9 @@ static func _arsenal(root: Node3D, id: String) -> bool:
 		return true
 	var h := WeaponDb.helmet(id)
 	if not h.is_empty():
-		# армейский шлем — модель Sketchfab; строительная каска — из форм
-		if id != "helmet_hardhat" and _scan(root, "helmet"):
-			return true
 		var tier := int(ItemDb.item(id).get("tier", 1))
 		var col := Color(0.85, 0.72, 0.2) if id == "helmet_hardhat" else ([Color(0.3, 0.32, 0.24), Color(0.25, 0.28, 0.2), Color(0.18, 0.2, 0.22), Color(0.14, 0.15, 0.16), Color(0.1, 0.11, 0.12)][clampi(tier, 0, 4)] as Color)
 		_helmet(root, col, "VISOR" in (h.get("mounts", []) as Array))
-		return true
-	if not WeaponDb.headset(id).is_empty():
-		# активные (тактические) — модель Sketchfab; пассивные «строительные» красные — из форм
-		if id != "headset_passive" and _scan(root, "headset"):
-			return true
-		var shell := _m(Color(0.16, 0.17, 0.15) if id != "headset_passive" else Color(0.55, 0.12, 0.1), 0.6)
-		for sx in [-1.0, 1.0]:
-			_cyl(root, Vector3(sx * 0.08, 0, 0), 0.042, 0.035, shell).rotation.z = PI * 0.5
-			_cyl(root, Vector3(sx * 0.06, 0, 0), 0.036, 0.008, _m(Color(0.08, 0.08, 0.08), 0.9)).rotation.z = PI * 0.5
-		_torus(root, Vector3(0, 0.035, 0), 0.075, 0.085, _m(Color(0.1, 0.1, 0.1), 0.7)).rotation.x = PI * 0.5
-		if id != "headset_passive":
-			var mic := _cyl(root, Vector3(-0.05, -0.04, 0.035), 0.003, 0.08, _m(Color(0.1, 0.1, 0.1), 0.7))
-			mic.rotation = Vector3(0, 0, 1.2)
 		return true
 	return false
 

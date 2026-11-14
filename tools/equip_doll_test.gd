@@ -123,7 +123,7 @@ func _nvg() -> void:
 	var with_nvg := {"eyes": ItemDb.make("nvg", 1)}
 	_check("шлем без площадки поверх ПНВ — нет", ItemDb.pick_slot("helmet_simple", with_nvg) == "")
 	_check("шлем с площадкой поверх ПНВ — можно", ItemDb.pick_slot("helmet_top", with_nvg) == "helmet")
-	_check("крепления тяжёлого шлема", ItemDb.helmet_mounts({"helmet": ItemDb.make("helmet_top", 1)}) == ["NVG", "HEADSET", "LIGHT", "VISOR"])
+	_check("крепления тяжёлого шлема", ItemDb.helmet_mounts({"helmet": ItemDb.make("helmet_top", 1)}) == ["NVG", "LIGHT", "VISOR"])
 
 
 func _stash_index(id: String) -> int:
@@ -159,7 +159,7 @@ func _doll() -> void:
 	for c: Node in doll.get_children():
 		if c is EquipDoll.MountChip:
 			chips += 1
-	_check("тяжёлый шлем — 4 крепления, ПНВ горит", chips == 4)
+	_check("тяжёлый шлем — 3 крепления, ПНВ горит", chips == 3)
 	_check("полоска — 8 мест", doll.places.places() == 8)
 	_check("3D-модели в окне нет", doll.find_children("*", "SubViewport", true, false).is_empty())
 	doll.set_equipment({"helmet": ItemDb.make("helmet_simple", 1)})

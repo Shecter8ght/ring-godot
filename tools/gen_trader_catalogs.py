@@ -23,7 +23,7 @@ CATALOGS = [
                "optic_rd_01", "optic_rd_dt_01", "muzzle_fh_545_01", "grip_vertical_01",
                "stock_fixed_heavy_ak", "stock_fixed_light_ak",
                "stock_fold_ak_01", "tac_flashlight_01", "mount_dozor_p", "mount_riser_01", "mount_rail_ext_01",
-               "belt_pouches", "armor_poor", "plate_steel_homemade", "helmet_simple", "headset_passive",
+               "belt_pouches", "armor_poor", "plate_steel_homemade", "helmet_simple",
                "bandage", "painkillers", "medkit", "water", "canned", "flare", "chemlight", "sunglasses", "bp_daypack",
                "pouch_rifle", "pouch_pistol", "signal_launcher"]},
     {"n": 2, "step": 10, "name": "Полиция и ЧОП",
@@ -32,14 +32,14 @@ CATALOGS = [
                "optic_zorin_k1", "mount_pm_k1", "optic_holo_01", "optic_2x_01", "optic_pso_01", "muzzle_comp_545_01",
                "muzzle_brake_762_01", "muzzle_comp_9_01", "grip_offset_01",
                "stock_tele_ak_01", "stock_tele_ar_01", "tac_laser_01", "mount_offset45_01",
-               "armor_mid", "plate_steel", "helmet_mid", "headset_active", "bp_tourist",
+               "armor_mid", "plate_steel", "helmet_mid", "bp_tourist",
                "grenade", "mag_loader", "pouch_big"]},
     {"n": 3, "step": 20, "name": "Армейское",
      "what": "ГРАНЬ-15 и его глушитель, «Вереск», снайперская трёхлинейка и прицел ПУ к ней. Оптика 4×, глушители, армейская броня и керамика, ПНВ.",
      "items": ["wpn_ar_09", "wpn_smg_05", "wpn_sr_03", "optic_pu_01", "optic_4x_01", "tac_flashlight_hp_01", "tac_flashlight_strobe_01", "tac_combo_01", "muzzle_supp_9_01",
                "muzzle_supp_pm_01", "muzzle_supp_45_01", "muzzle_supp_545_01", "muzzle_supp_gran_01",
                "muzzle_supp_12_01",
-               "armor_top", "plate_composite", "plate_ceramic", "helmet_top", "headset_tactical", "bp_raid",
+               "armor_top", "plate_composite", "plate_ceramic", "helmet_top", "bp_raid",
                "nvg"]},
     {"n": 4, "step": 30, "name": "Спецподразделения",
      "what": "ИЗЛОМ-45, бесшумная «Шорох-9». LPVO, тяжёлые глушители, армейский композит.",
@@ -52,7 +52,7 @@ CATALOGS = [
                "muzzle_supp_338_01"]},
 ]
 # Только с тел ЧВК «Периметр» — у Михалыча этого нет; сигнал снабжения (supply_signal) — не продаётся.
-NEVER = ["plate_perimeter", "headset_perimeter", "stock_perimeter_01", "supply_signal"]
+NEVER = ["plate_perimeter", "stock_perimeter_01", "supply_signal"]
 AP_WORDS = ("бронебой", "API", "СП-6")
 
 
@@ -103,7 +103,7 @@ def main() -> None:
         for sec, k in kind_order.items():
             if i in w[sec]:
                 return k
-        return 4 if i.startswith(("armor_", "belt_", "pouch_", "plate", "helmet", "headset")) else 5
+        return 4 if i.startswith(("armor_", "belt_", "pouch_", "plate", "helmet")) else 5
     stock = sorted(catalog, key=lambda i: (catalog[i], kind(i), i))
     old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     out = {

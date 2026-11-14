@@ -428,12 +428,6 @@ def clothes_rail():
     for x in (-.10,.10):box('Patch pocket',(x,.36,.135),(.12,.11,.018),1,.006)
     export('HangingJacket')
 
-def headset():
-    begin();path('Headset headband',[(-.105,.04,0),(-.10,.17,0),(0,.225,0),(.10,.17,0),(.105,.04,0)],.012,2)
-    for x in (-.105,.105):box('Earcup',(x,.047,0),(.06,.11,.075),1,.025)
-    path('Headset lead',[(.10,.02,.01),(.17,.01,.04),(.23,.01,-.06),(.14,.01,-.11)],.0025,2)
-    export('HearingProtection')
-
 def gloves():
     begin()
     for x in (-.07,.065):
@@ -484,7 +478,7 @@ def exhaust_connection():
 
 tea_corner();book_stack();wall_clock();cushion();maintenance_set();ammo_pack();tools();organizer();toolbox()
 meter_panel();cable_run();generator_detail();extinguisher();cloth_items();carton_variants();sack();trolley()
-clipboard();calculator();scales();clothes_rail();headset();gloves();water_bucket();wall_board()
+clipboard();calculator();scales();clothes_rail();gloves();water_bucket();wall_board()
 tea_station();exhaust_connection()
 
 for o in bpy.context.scene.objects:o.hide_set(False)

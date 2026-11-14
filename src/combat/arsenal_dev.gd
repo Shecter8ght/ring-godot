@@ -5,11 +5,11 @@ extends RefCounted
 ## повредить плиту, выставить износ, показать характеристики. Только хост или соло: состояние
 ## оружия и снаряжения ведёт хост (Gear._bump — владелец перечитает).
 
-const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · spawn rivals [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|headsets|loadouts. Пример: give weapon VERAS54 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
+const HELP := "give <id|код|preset:ID> [n] · mount <точка> <обвес> · unmount <точка> · sight · light · laser · spawn <выкладка|тип> [n] · spawn rivals [n] · plate front|back <урон> · dur <0–100> · stats · list weapons|ammo|magazines|attachments|presets|vests|plates|helmets|loadouts. Пример: give weapon VERAS54 · give ammo 545_AP 120 · give optic LPVO_01 · equip primaryOptic LPVO_01 · equip offsetOptic OFFSET_RED_DOT_01 · equip sideLeft FLASHLIGHT_01 · toggle sight|flashlight|laser · spawn loadout perimeter_marksman · damage plate front 50 · set weapon durability 25"
 ## Точки в записи ТЗ (camelCase) → точки арсенала.
 const MOUNT_ALIAS := {"primaryOptic": "optic_primary", "offsetOptic": "optic_offset", "sideLeft": "side_left", "sideRight": "side_right",
 	"underbarrel": "underbarrel", "muzzle": "muzzle", "stock": "stock"}
-const GIVE_KINDS := ["weapon", "ammo", "optic", "flashlight", "laser", "combo", "armor", "carrier", "vest", "plate", "helmet", "headset", "mag", "magazine",
+const GIVE_KINDS := ["weapon", "ammo", "optic", "flashlight", "laser", "combo", "armor", "carrier", "vest", "plate", "helmet", "mag", "magazine",
 	"muzzle", "grip", "stock", "mod", "item"]
 
 

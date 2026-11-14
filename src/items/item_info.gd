@@ -263,10 +263,6 @@ static func describe(id: String) -> String:
 		out.append("Надевается в слот «Шлем». Класс %d, закрывает %d%% головы — попадание в голову без шлема почти всегда кладёт." % [int(h["class"]), int(float(h.coverage) * 100.0)])
 		out.append(_protects(int(h["class"])))
 		return "\n\n".join(out)
-	var hs := WeaponDb.headset(id)
-	if not hs.is_empty():
-		out.append("Слот «Уши». " + String(hs.get("listening", "Приглушает выстрелы.")))
-		return "\n\n".join(out)
 	out.append(desc if desc != "" else "Товар: продать Михалычу.")
 	var use: Dictionary = it.get("use", {})
 	if not use.is_empty() and desc == "":
