@@ -55,13 +55,19 @@ func _ready() -> void:
 	_check("existing quest anchor moved", _level.get_node("Gameplay/AntonExistingQuestAnchor") is QuestAnchor)
 	var tv: HideoutActivity = _level.get_node("Activities/Tv") as HideoutActivity
 	var radio: HideoutActivity = _level.get_node("Activities/Radio") as HideoutActivity
+	radio.request_use()
+	_check("interact opens the radio panel", radio._radio_panel.is_open() and pl.ui_blocked())
 	for activity: HideoutActivity in [tv,radio]:
 		var channel_count: int = HideoutActivity.TV_CHANNELS.size() if activity == tv else HideoutActivity.RADIO_STATIONS.size()
 		for step: int in range(1, channel_count + 1):
-			activity.request_use()
-			await get_tree().create_timer(.25).timeout
 			var channel: int = step % channel_count
+			if activity == radio:
+				radio._radio_panel.station_selected.emit(channel)
+			else:
+				activity.request_use()
+			await get_tree().create_timer(.25).timeout
 			_check("%s channel %d + shader/audio" % [activity.name, channel], activity.state == channel and (activity._screen_mat != null if activity == tv else activity._sound != null))
+	radio._radio_panel.close_ui()
 	# Дождаться фонового синтеза и убедиться, что воспроизведение реально запущено.
 	radio._switch(1)
 	tv._switch(2)

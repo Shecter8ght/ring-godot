@@ -141,7 +141,7 @@ func _command(label: String,tv: int,radio: int,power: bool) -> void:
 	if label == "without_host":
 		if _mode == "c1":
 			_tv().request_use()
-			_radio().request_use()
+			_radio()._switch(0)
 		await get_tree().create_timer(1.0).timeout
 		_check("without host TV/radio shared",_tv().state==0 and _radio().state==0)
 		_check("power request waits for authority",not _power().can_use())
@@ -150,7 +150,7 @@ func _command(label: String,tv: int,radio: int,power: bool) -> void:
 	if label == "guest_switch":
 		if _mode == "c1":
 			_tv().request_use()
-			_radio().request_use()
+			_radio()._switch(0)
 			var player: Player = get_tree().current_scene.get("_player") as Player
 			player.global_position = _power().global_position + Vector3(0,0,1)
 			await get_tree().create_timer(.35).timeout

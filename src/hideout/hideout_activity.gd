@@ -9,6 +9,7 @@ extends Interactable
 
 enum Kind { TV, RADIO, BEER, SEAT }
 
+const RadioPanel := preload("res://src/hideout/radio_panel.gd")
 const TV_CHANNELS := ["выкл.", "новости", "футбол", "помехи"]
 const RADIO_STATIONS := ["выкл.", "лоуфай", "рок-н-ролл", "вальс под баян", "Мои треки"]
 const CUSTOM_RADIO_STATION := 4
@@ -32,6 +33,8 @@ const MIX := 22050.0
 @export var screen_path: NodePath
 
 var state: int = 0
+var _radio_status: String = ""
+var _radio_panel: RadioPanel
 var _screen_mat: ShaderMaterial
 var _sound: AudioStreamPlayer3D
 var _known: Array[int] = []
@@ -42,6 +45,7 @@ var _radio_files: PackedStringArray
 var _radio_next: int = 0
 var _radio_task: int = -1
 var _radio_revision: int = 0
+var _radio_requested: String = ""
 var _shared_ready: bool = false
 ## ТВ: яркость света от экрана без мерцания и фаза мерцания.
 var _glow_energy: float = 0.0
@@ -97,10 +101,7 @@ func prompt() -> String:
 		Kind.TV:
 			return "телевизор: %s → %s" % [TV_CHANNELS[state], TV_CHANNELS[(state + 1) % TV_CHANNELS.size()]]
 		Kind.RADIO:
-			var current: String = RADIO_STATIONS[state]
-			if state == CUSTOM_RADIO_STATION and _radio_task == -1 and _sound != null and _sound.stream == null:
-				current += " (нет треков в папке radio)"
-			return "магнитола: %s → %s" % [current, RADIO_STATIONS[(state + 1) % RADIO_STATIONS.size()]]
+			return "Магнитола — %s" % RADIO_STATIONS[state]
 		Kind.BEER:
 			return "открыть пиво"
 	return "сесть"
@@ -112,7 +113,13 @@ func request_use() -> void:
 		Kind.TV:
 			_switch((state + 1) % TV_CHANNELS.size())
 		Kind.RADIO:
-			_switch((state + 1) % RADIO_STATIONS.size())
+			if _radio_panel == null:
+				_radio_panel = RadioPanel.new()
+				add_child(_radio_panel)
+				_radio_panel.station_selected.connect(_switch)
+				_radio_panel.track_selected.connect(play_radio_track)
+			_radio_panel.open(RADIO_STATIONS, radio_tracks())
+			_refresh_radio_panel()
 		Kind.BEER:
 			var lvl := get_tree().get_first_node_in_group("hideout_level")
 			if lvl and lvl.has_method("drink"):
@@ -135,29 +142,53 @@ func _local_player() -> Player:
 	return null
 
 
-func _switch(v: int) -> void:
+func _switch(v: int, local_track: String = "") -> void:
 	if Net.is_networked():
 		for peer: int in Net.peer_scene:
 			if peer != multiplayer.get_unique_id() and Net.visible_in(peer,"hideout"):
 				_set_state.rpc_id(peer,v)
-	_set_state(v)
+	_apply_state(v, local_track)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func _set_state(v: int) -> void:
+	_apply_state(v)
+
+
+func _apply_state(v: int, local_track: String = "") -> void:
 	_shared_ready = true
 	_known = _here()
 	var was_custom: bool = kind == Kind.RADIO and state == CUSTOM_RADIO_STATION
+	var previous: int = state
 	state = clampi(v, 0, _channel_count() - 1)
-	Profile.hideout_media["tv" if kind == Kind.TV else "radio"] = state
+	var key: String = "tv" if kind == Kind.TV else "radio"
+	Profile.hideout_media[key] = state
 	Profile.save()
 	if was_custom:
 		if state == CUSTOM_RADIO_STATION:
+			if not local_track.is_empty():
+				_start_radio_tracks(local_track)
 			return
 		_radio_revision += 1
 		_sound.stop()
 		_sound.stream = null
-	_apply()
+	_apply(local_track)
+	if kind == Kind.RADIO and state != previous:
+		_refresh_radio_panel()
+
+
+func _refresh_radio_panel() -> void:
+	if _radio_panel != null:
+		_radio_panel.update_playback(state, _radio_status if state == CUSTOM_RADIO_STATION else "")
+
+
+func play_radio_track(file: String) -> void:
+	if file.is_empty():
+		return
+	if state == CUSTOM_RADIO_STATION:
+		_start_radio_tracks(file)
+	else:
+		_switch(CUSTOM_RADIO_STATION, file)
 
 
 func _channel_count() -> int:
@@ -229,7 +260,7 @@ func _request_media() -> void:
 		_set_state.rpc_id(peer,state)
 
 
-func _apply() -> void:
+func _apply(local_track: String = "") -> void:
 	match kind:
 		Kind.TV:
 			if _screen_mat:
@@ -251,7 +282,7 @@ func _apply() -> void:
 			_loop(["", "news", "crowd", "static"][state])
 		Kind.RADIO:
 			if state == CUSTOM_RADIO_STATION:
-				_start_radio_tracks()
+				_start_radio_tracks(local_track)
 			else:
 				_loop(["", "lofi", "rock", "waltz"][state])
 
@@ -341,35 +372,59 @@ func _build_visual(parent: Node3D) -> void:
 
 # ---------------------------------------------------------------- звук
 
-func _start_radio_tracks() -> void:
-	_loop("")
-	_sound.stream = null
-	_radio_files = PackedStringArray()
-	_radio_next = 0
+func radio_tracks() -> PackedStringArray:
+	var files := PackedStringArray()
 	var folder := DirAccess.open(RADIO_DIR)
 	if folder != null:
 		for file: String in folder.get_files():
 			if file.get_extension().to_lower() in ["mp3", "ogg", "wav"]:
-				_radio_files.append(file)
+				files.append(file)
+	return files
+
+
+func _start_radio_tracks(file: String = "") -> void:
+	_loop("")
+	_sound.stream = null
+	_radio_revision += 1
+	_radio_files = radio_tracks()
+	_radio_next = 0
+	_radio_requested = file
+	_radio_status = ""
+	if not file.is_empty():
+		_radio_next = _radio_files.find(file)
+		if _radio_next == -1:
+			_radio_requested = ""
+			_radio_files.clear()
+			_radio_status = "Файл не найден: " + file
+			_refresh_radio_panel()
+			return
 	_load_next_radio_track()
+	if _radio_files.is_empty():
+		_radio_status = "Добавьте MP3, OGG или WAV в папку radio."
+		_refresh_radio_panel()
 
 
 func _load_next_radio_track() -> void:
-	if state != CUSTOM_RADIO_STATION or _radio_task != -1 or _radio_files.is_empty():
+	if state != CUSTOM_RADIO_STATION or _radio_files.is_empty():
+		return
+	_radio_status = "Загрузка трека…"
+	_refresh_radio_panel()
+	if _radio_task != -1:
 		return
 	_sound.stream = null
 	# Читаем по одному треку в фоне, чтобы большие WAV не задерживали кадр.
 	var files: PackedStringArray = _radio_files
 	var start: int = _radio_next
 	var revision: int = _radio_revision
+	var attempts: int = files.size() if _radio_requested.is_empty() else 1
 	_radio_task = WorkerThreadPool.add_task(func() -> void:
-		for offset: int in files.size():
+		for offset: int in attempts:
 			var index: int = (start + offset) % files.size()
 			var stream := Audio.load_audio_file(RADIO_DIR.path_join(files[index]))
 			if stream != null and stream.get_length() > 0.0:
 				_radio_track_loaded.call_deferred(revision, stream, offset)
 				return
-		_radio_track_loaded.call_deferred(revision, null, files.size()))
+		_radio_track_loaded.call_deferred(revision, null, attempts))
 
 
 func _radio_track_loaded(revision: int, stream: AudioStream, skipped: int) -> void:
@@ -387,14 +442,20 @@ func _radio_track_loaded(revision: int, stream: AudioStream, skipped: int) -> vo
 	for _skipped in skipped:
 		_radio_next %= _radio_files.size()
 		_radio_files.remove_at(_radio_next)
+	var requested: String = _radio_requested
+	_radio_requested = ""
 	if stream == null:
-		_sound.stream = null
+		_radio_status = "Нет доступных треков." if requested.is_empty() else "Не удалось воспроизвести: " + requested
+		_refresh_radio_panel()
 		return
 	if stream is AudioStreamWAV:
 		stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+	_radio_next %= _radio_files.size()
+	_radio_status = "Играет: " + _radio_files[_radio_next]
 	_radio_next = (_radio_next + 1) % _radio_files.size()
 	_sound.stream = stream
 	_sound.play()
+	_refresh_radio_panel()
 
 
 func _loop(key: String) -> void:
