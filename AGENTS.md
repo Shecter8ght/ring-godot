@@ -917,6 +917,20 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   на крышке, втулки в корпусе газовой трубки) и съёмные кронштейны с планками Picatinny — part_mounts.py
 #   (две коллекции «Кронштейн — …», выключены по умолчанию: планка на крышку под прицел, цевьё с нижней и боковыми
 #   планками; их пересечения проверять с --show «имена коллекций»)
+# «Частокол», текстуры этап 1 (заводская отделка; образец — refs/owner/01–06, интервью и выбор — finish-spec.json в папке модели,
+#   слоты — python -X utf8 tools/pkp/tex_spec.py, страница выбора — tools/asset_kit/finish/catalog_server.py --spec "<папка модели>/finish-spec.json"):
+#   опись формы — blender -b <форма v03> --factory-startup --python tools/pkp/tex_dump.py -- <json>; наборы текстур и проекты Painter — tools/pkp/tex_sets.py
+#   (13 наборов: коробка, крышка, коробки для ленты — 8K, остальное 4K; три проекта body / front / box);
+#   развёртка — по набору на процесс: blender -b <форма v03> --factory-startup --python-exit-code 1 --python tools/pkp/tex_uv.py -- <набор>
+#   (→ _asset_src/pkp/tex/uv/<набор>.npz; все наборы по 4 процесса — bash _asset_src/pkp/tex/uv/run_all.sh, ~12 мин), затем
+#   blender -b <форма v03> … --python tools/pkp/tex_uv_apply.py → «Частокол_развёртка_v01.blend» (геометрия и риг те же);
+#   маски маркировки — blender -b <развёртка> … --python tools/pkp/tex_geo_dump.py -- <папка geo> Trigger_Housing Rear_Sight_Leaf Pistol_Grip
+#   Belt_Round_00:Case_lacquer@local … и python -X utf8 tools/pkp/tex_marks.py («ОГОНЬ» и шкала прицела белым, клеймо «ЧК» / «27», красный лак,
+#   насечка рукоятки); FBX проекта — blender -b <развёртка> … --python tools/pkp/sp_export.py -- <body|front|box> <fbx>;
+#   Painter — FINISH_SP_JOBS=_asset_src/pkp/tex/sp_jobs python -X utf8 tools/asset_kit/finish/sp_run.py start, затем -c
+#   "import sys; sys.path.insert(0, r'E:/Games/RING-godot/tools/pkp'); import sp_pkp; print(sp_pkp.create('body'))" / bake() / stack() / export(<папка>)
+#   (метки _project_ready / _bake_done / _stack_done / _export_done.txt; слои — в 4K, карты — в разрешении набора);
+#   файл просмотра со студией — blender -b <развёртка> … --python tools/pkp/tex_review.py -- apply <папка карт> <out.blend> | shots <папка> [samples] [виды]
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
