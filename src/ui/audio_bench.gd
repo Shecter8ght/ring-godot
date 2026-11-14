@@ -174,7 +174,7 @@ func _build() -> void:
 	position_row.add_child(_label("Расстояние, м"))
 	_distance = SpinBox.new()
 	_distance.min_value = 0.2
-	_distance.max_value = 300.0
+	_distance.max_value = float(Balance.SONORA_AUDIO.shot["max"])
 	_distance.step = 0.2
 	_distance.value = 1.0
 	position_row.add_child(_distance)
@@ -448,6 +448,9 @@ func _play() -> void:
 			_step_repeat.start()
 	else:
 		_add_preview(_id, _play_position(), _variants.selected, _loop.button_pressed)
+		if _players.is_empty() and Audio._bus_for(_id) == &"Shots":
+			_status.text = "На этой дистанции выстрел уже не слышен."
+			return
 	_status.text = "Играет: " + _title.text
 
 

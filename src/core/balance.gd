@@ -4455,7 +4455,10 @@ const AUDIO_EVENT_PROFILES: Dictionary = {
 }
 
 const SONORA_AUDIO: Dictionary = {
- "shot": {"db": 2.0, "unit": 10.0, "max": 900.0, "far": true, "occlude": true},
+ # У обычного выстрела после 30 м уровень падает медленнее; дальний хлопок остаётся слышен через квартал.
+ "shot": {"db": 2.0, "unit": 10.0, "max": 900.0, "far": true, "occlude": true,
+	"rolloff_from_m": 30.0, "far_rolloff": 0.45},
+ "shot_suppressed": {"db": 2.0, "unit": 10.0, "max": 250.0, "far": true, "occlude": true},
  "weapon_action": {"db": -8.0, "unit": 3.0, "max": 24.0, "occlude": true},
  "world": {"db": -6.0, "unit": 4.0, "max": 40.0, "occlude": true},
  "ambient_db": -22.0,

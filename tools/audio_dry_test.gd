@@ -37,6 +37,11 @@ func _ready() -> void:
 		check(float(measurement.late) < 0.000001, String(item.name) + ": движок не добавляет хвост")
 	check(float(recordings.far.gain) < float(recordings.near.gain), "Расстояние уменьшает громкость")
 	await _test_propagation()
+	var far_shot := await _capture("ordinary_625m", 625.0, "outdoor", false, true)
+	var near_shot := await _capture("ordinary_25m", 25.0, "outdoor", false)
+	var range_loss := linear_to_db(_tone(far_shot, 200.0) / maxf(0.000001, _tone(near_shot, 200.0)))
+	print("SHOT_RANGE ordinary_625m_relative_to_25m_db=%.2f" % range_loss)
+	check(range_loss > -27.0 and range_loss < -15.0, "Дальний выстрел сохраняет низ и заметно тише ближнего")
 	Audio.play("wpn_hg_02_shot", Vector3(0, 0, -1), 0.0, 0.72)
 	var pitched: AudioStreamPlayer3D = find_children("*", "AudioStreamPlayer3D", true, false).back() as AudioStreamPlayer3D
 	check(pitched.pitch_scale == 1.0, "Прежний параметр pitch не меняет готовую запись")

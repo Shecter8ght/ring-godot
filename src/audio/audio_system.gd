@@ -273,6 +273,10 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 	get_tree().current_scene.add_child(player)
 	player.global_position = pos
 	_setup_sound_path(player, bus, bool(spec.get("occlude", true)), preview, follow)
+	if spec.has("rolloff_from_m"):
+		var distance: float = _listener_pos().distance_to(player.global_position)
+		var ratio: float = maxf(1.0, distance / float(spec.rolloff_from_m))
+		player.unit_size *= pow(ratio, 1.0 - float(spec.far_rolloff))
 	if underfoot:
 		player.set_meta("underfoot", true)
 		_apply_footstep_height(player, _listener_pos())
@@ -288,7 +292,7 @@ func _is_weapon_shot(hook: String) -> bool:
 
 func _kind_spec(hook: String) -> Dictionary:
 	if _is_weapon_shot(hook):
-		return Balance.SONORA_AUDIO.shot
+		return Balance.SONORA_AUDIO.shot_suppressed if hook.ends_with("_sup") else Balance.SONORA_AUDIO.shot
 	var event: Dictionary = _events.get(resolve_event(hook), {}) as Dictionary
 	var profile: String = String(event.get("profile", ""))
 	if profile in ["shell_hard", "shell_metal"]:
@@ -298,7 +302,10 @@ func _kind_spec(hook: String) -> Dictionary:
 	if profile.begins_with("osoka_"):
 		return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.SONORA_AUDIO.world)
 	if String(event.get("weapon", "")) != "":
-		if String(event.get("action", "")).begins_with("shot"):
+		var action: String = String(event.get("action", ""))
+		if action.begins_with("shot_sup"):
+			return Balance.SONORA_AUDIO.shot_suppressed
+		if action.begins_with("shot"):
 			return Balance.SONORA_AUDIO.shot
 		return Balance.SONORA_AUDIO.weapon_action
 	return Balance.AUDIO_EVENT_PROFILES.get(profile, Balance.AUDIO_EVENT_PROFILES.get(hook, Balance.SONORA_AUDIO.world)) as Dictionary
@@ -639,6 +646,8 @@ func preview_event(id: String, pos: Vector3, variant: int = -1, looped: bool = f
 	var stream: AudioStream = records[clampi(variant, 0, records.size() - 1)] if variant >= 0 else _pick_from(records, id)
 	var spec: Dictionary = _kind_spec(id)
 	var bus := _bus_for(id)
+	if bus == &"Shots" and _has_ears() and _listener_pos().distance_to(pos) >= float(spec["max"]):
+		return null
 	if bus in [&"Ambient", &"Radio", Settings.INTERFACE_BUS] or id in ["osoka_seeker_track", "osoka_seeker_lock"]:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.stream = stream
