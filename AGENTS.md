@@ -582,6 +582,9 @@ tools/godot.cmd --headless res://tools/loot_stats.tscn         # замер лу
                                                               # категории и штуки ключевых вещей за рейд (LOOT_STATS_N=3000, LOOT_STATS_OUT=<json>, LOOT_STATS_MAP=<узел → таблица> — расчёт до внесения в сцену);
                                                               # числа до / после — docs/design/data/loot_stats_{before,after}.{json,txt}
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/loot_kinds_perf.tscn # «Проспект»: кадры в секунду с моделями контейнеров и без них (склад «Яруса», вокзал, гаражи, паркинг −1, разгрузка)
+tools/godot.cmd --headless res://tools/loot_collision_test.tscn # коллизия моделей контейнеров лута (LootContainerVisual, Balance.LOOT_COLLISION): тело по порогу высоты (≥ 0,55 м и настенные), коробка по габариту
+                                                              # закрытой модели, слой world, поверхность из каталога, пуля спереди даёт «металл», идущий в шкаф останавливается, обыск с фасада, раскрытый шкаф — без коллизий створкам, тела не в выпечке навигации (не nav_source)
+tools/godot.cmd --headless res://tools/loot_nav_probe.tscn    # «Проспект»: сколько контейнеров с телом выступают в проходимую навигацию глубже 0,3 м, мельче — списком с глубиной (после правки мест лута или выпечки навигации)
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn # свет «Проспекта» в рейде глазами игрока (привыкание глаза,
                                                               # «объектив»): день, закат, ночь, пасмурно, дождь с трёх точек → user://prospekt_raid_shots
                                                               # (PROSPEKT_OUTPUT, PROSPEKT_CASES=day,night; PROSPEKT_CLEAN=1 — своей камерой, чистый свет сцены; PROSPEKT_OPEN=Loot_1,Loot_2 — эти контейнеры лута открыты)
