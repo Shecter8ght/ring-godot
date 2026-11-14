@@ -464,9 +464,6 @@ func update(pl: Player, delta: float) -> void:
 		_eject = false
 		var empty: bool = r_empty
 		var role: String = "reload_empty" if empty else "reload"
-		if empty and pl.slide_closed_empty and _base_clip("reload_empty_rack") != "":
-			# затвор закрыт на пустом патроннике (последний выстрел — без магазина): вставить и передёрнуть
-			role = "reload_empty_rack"
 		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
 		_reload_old = pl.weapon_mag
 		_reload_new = "*" if ext else pl.reload_next_mag()
@@ -570,8 +567,8 @@ func update(pl: Player, delta: float) -> void:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
 	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
-	# без магазина рычаг задержки поднять нечему (его поднимает подаватель) — затвор после последнего выстрела впереди
-	var lockable: bool = bool(config.get("hold_open", false)) and not pl.slide_closed_empty
+	# после последнего патрона затвор всегда встаёт на задержку (решение владельца 2026-11-14 — и без магазина)
+	var lockable: bool = bool(config.get("hold_open", false))
 	var held: bool = lockable and pl.ammo <= 0 and _clip == "" and not jammed
 	if lockable and pl.ammo <= 0 and not jammed and _clip != "" and _clip == shot_clip:
 		# последний выстрел: клип отводит затвор — с этого кадра он остаётся сзади, на задержке

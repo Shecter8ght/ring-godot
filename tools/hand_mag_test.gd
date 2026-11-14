@@ -240,8 +240,7 @@ func _player_cases() -> void:
 
 
 ## Пистолет с патронником (владелец 2026-11-14): быстрая перезарядка (двойное R) — при любом остатке в магазине, старый
-## падает на землю, патрон в стволе остаётся; последний выстрел без магазина — затвор закрыт, вставить и передёрнуть
-## (своё время stats.reload_empty_rack).
+## падает на землю, патрон в стволе остаётся; последний выстрел без магазина — затвор на задержке, как всегда.
 func _pistol_fast_cases(actor: Player, host: StateHost) -> void:
 	_reset(actor, _weapon(5, 1), [17])
 	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
@@ -264,27 +263,19 @@ func _pistol_fast_cases(actor: Player, host: StateHost) -> void:
 	actor._try_fast_reload()
 	_check("пистолет: быстрая и с полным магазином", actor._reload_fast)
 	actor.cancel_weapon_action()
-	# последний выстрел без магазина: затвор закрыт, а не на задержке
+	# последний выстрел без магазина: затвор, как всегда, на задержке (владелец 2026-11-14) — вставить и отпустить затвор
 	_reset(actor, _weapon(0, 1, false), [17])
 	actor.weapon_mag = ""
 	actor.ammo = 1
 	actor.weapon_obstruction = 0.0
 	actor._fire(actor.spec())
-	_check("пистолет без магазина: последний выстрел — затвор закрыт на пустом патроннике", actor.ammo == 0 and actor.slide_closed_empty)
-	var raw: Dictionary = WeaponDb.weapon(GUN).stats
-	# в пустую шахту — «только вставить» (Balance.HAND_MAG.in_k) от времени с передёргиванием
-	var want: float = float(actor.spec().reload_empty) * float(raw.reload_empty_rack) / float(raw.reload_empty) * float(Balance.HAND_MAG.in_k)
+	var want: float = float(actor.spec().reload_empty) * float(Balance.HAND_MAG.in_k)
 	var why: String = actor.hand_mag_insert("backpack", 0)
-	_check("вставить: с передёргиванием — своё время", why == "" and absf(float(actor._pm_action.get("remaining", 0.0)) - want) < 0.05,
+	_check("пистолет без магазина, последний выстрел: вставить с досылом — время полной", actor.ammo == 0 and why == ""
+		and actor._weapon_rig._empty_reload and absf(float(actor._pm_action.get("remaining", 0.0)) - want) < 0.05,
 		"%.2f с, ждали %.2f" % [float(actor._pm_action.get("remaining", 0.0)), want])
 	_finish(actor)
-	_check("после досыла затвор снова как обычно", actor.ammo == 17 and not actor.slide_closed_empty, "в оружии %d" % actor.ammo)
-	# с магазином последний выстрел ставит на задержку
-	_reset(actor, _weapon(0, 1), [17])
-	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
-	actor.ammo = 1
-	actor._fire(actor.spec())
-	_check("с магазином последний выстрел — на задержку", actor.ammo == 0 and not actor.slide_closed_empty)
+	_check("дослан: 16 + 1", actor.ammo == 17, "в оружии %d" % actor.ammo)
 
 
 ## Довести перезарядку, начатую из окна рюкзака (кадры игры при открытом окне).
