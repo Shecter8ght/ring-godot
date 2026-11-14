@@ -560,6 +560,14 @@ python -X utf8 tools/gen_loot_containers.py                    # каталог 
                                                               # опоры под кассу «Проспекта» (форма без текстур, в игру не внесены): прилавок торговый ПТ_ (ЛДСП 16 мм, 1500 × 600 × 900, ящик на телескопах)
                                                               # и кассовый бокс супермаркета КБ_ (транспортёр, сканер, накопитель, стол кассира, стойка с номером); у каждого socket_register — место кассы;
                                                               # детали — counters.py; для масштаба — касса партии 1 и фигура 1,75 м; check — габариты, пересечения, нормали, касса на опоре
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Loot_Containers/models/RING_Loot_Counters_v01.blend" --python-exit-code 1 --python tools/loot_containers/counters_uv.py
+                                                              # опоры под кассу, отделка v01 (заводская и износ сразу): развёртка — набор на предмет 2K, FBX → _asset_src/loot_containers/sp_counters;
+                                                              # затем blender -b <…_uv_v01.blend> --python tools/loot_containers/counters_bake.py (положение, нормаль, деталь, кромки из 3D узлом Bevel),
+                                                              # python -X utf8 -I tools/loot_containers/counters_zones.py (места износа) и counters_prints.py (табличка «3», инвентарник); фото-основы CC0 —
+                                                              # counters_fetch.py; Painter — tools/loot_containers/counters_start.cmd (TEMP на E: — на C: мало места, Painter стоит на окне «DISK SPACE»),
+                                                              # python -X utf8 tools/loot_containers/counters_sp.py projects|stack|quit (стек counters_stacks.py поверх помощников lc3_stacks.py) → _asset_src/loot_containers/maps_counters;
+                                                              # просмотр — blender -b <…_uv_v01.blend> --factory-startup --python tools/loot_containers/counters_review.py -- <textures/counters_v01> <…_finish_v01.blend> shots <папка>;
+                                                              # замер цвета плоскостей — python -X utf8 -I tools/loot_containers/counters_measure.py
 tools/godot.cmd --headless res://tools/loot_stats.tscn         # замер лута по настоящему ItemDb.roll: по таблице — среднее, медиана, p90, пустые %; по «Проспекту» — ожидаемая стоимость Loot_N (схроны × 4/12),
                                                               # категории и штуки ключевых вещей за рейд (LOOT_STATS_N=3000, LOOT_STATS_OUT=<json>, LOOT_STATS_MAP=<узел → таблица> — расчёт до внесения в сцену);
                                                               # числа до / после — docs/design/data/loot_stats_{before,after}.{json,txt}
