@@ -11,6 +11,8 @@ const OPEN_SEC: float = 0.6
 const CATALOG_PATH: String = "res://data/loot_containers.json"
 ## Суффикс узлов упрощённой сетки (LOD1) у моделей с расстоянием смены «lod» в каталоге.
 const LOD_SUFFIX: String = "_lod1"
+## Имя тела-коллизии у модели (постоянное).
+const BODY_NAME: String = "Collision"
 
 static var _catalog: Dictionary = {}
 static var _indexes: Dictionary = {}
@@ -130,7 +132,7 @@ static func model_spec(model: String) -> Dictionary:
 
 ## Модель контейнера вида kind (model_id — своя вместо модели вида): закрытый узел, открытый — лениво. variant_seed
 ## выбирает вариант отделки (устойчиво по имени узла). null — модели нет или файла нет: остаётся прежний вид.
-static func create(kind: String, model_id: String, variant_seed: int) -> LootContainerVisual:
+static func create(kind: String, model_id: String, variant_seed: int, solid: bool = true) -> LootContainerVisual:
 	var model: String = model_id if model_id != "" else kind_model(kind)
 	if model == "":
 		return null
@@ -154,6 +156,9 @@ static func create(kind: String, model_id: String, variant_seed: int) -> LootCon
 	var vis: LootContainerVisual = LootContainerVisual.new()
 	vis.name = "Модель"
 	vis.add_child(closed_node)
+	var body: StaticBody3D = _make_body(spec) if solid else null
+	if body != null:
+		vis.add_child(body)
 	var open_id: String = String(spec.get("open", ""))
 	if open_id == "":
 		vis.setup(closed_node, null, {}, {})
@@ -165,6 +170,33 @@ static func create(kind: String, model_id: String, variant_seed: int) -> LootCon
 				n.name = "Открыт"
 			return n, info)
 	return vis
+
+
+## Тело для пуль и ног: одна коробка по габариту ЗАКРЫТОЙ модели (створки, ящики и клапан коллизии не получают — открытая
+## дверца не запирает игрока). Только у моделей выше Balance.LOOT_COLLISION.min_height и у настенных (аптечка держит пулю);
+## мелочь не цепляет ноги. Слой world, поверхность — из каталога ("surface"). В выпечку навигации тела не входят (nav_source): коробки у стен покрыты запасом радиуса агента, а кэш навигации «Проспекта» привязан к хэшу источников.
+## Создаётся у каждого игрока локально из данных, синхронизации нет.
+static func _make_body(spec: Dictionary) -> StaticBody3D:
+	var rules: Dictionary = Balance.LOOT_COLLISION
+	if not bool(rules.on) or not spec.has("aabb"):
+		return null
+	var box: Dictionary = spec.aabb as Dictionary
+	var size: Vector3 = Vector3(float(box.size[0]), float(box.size[1]), float(box.size[2]))
+	if size.y < float(rules.min_height) and not bool(spec.get("wall", false)):
+		return null
+	var body: StaticBody3D = StaticBody3D.new()
+	body.name = BODY_NAME
+	body.collision_layer = Hitscan.LAYER_WORLD
+	body.collision_mask = 0
+	body.set_meta("surface", String(spec.get("surface", "metal")))
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	shape.name = "Box"
+	var bs: BoxShape3D = BoxShape3D.new()
+	bs.size = size
+	shape.shape = bs
+	shape.position = Vector3(float(box.center[0]), float(box.center[1]), float(box.center[2]))
+	body.add_child(shape)
+	return body
 
 
 ## Индекс моделей источника (furniture.json общежития или loot_containers_models.json): движки, габариты, подвижное.

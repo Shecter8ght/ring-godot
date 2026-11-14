@@ -37,6 +37,10 @@ LOOT_MODELS = {
 }
 SUPPORT_MODELS = {"lc_cash"}   # стоят только на опоре (прилавок, стол): подгонка без опоры оставляет бокс (Balance.LOOT_SUPPORT_RANGE)
 WALL_MODELS = {"lc_aid"}   # висят на стене: подгонка ищет стену и высоту Balance.LOOT_WALL_HEIGHT
+# поверхность попаданий и шагов (Surfaces): металл, дерево, картон, ткань, пластик
+SURFACE = {"it_ammo": "wood", "it_zip": "wood", "it_trunk": "metal", "it_toolbox": "metal", "it_suitcase": "plastic",
+           "it_duffel": "fabric", "it_carton": "cardboard", "it_pc": "plastic", "lc_medbag": "fabric", "lc_safe": "metal",
+           "lc_gun": "metal", "lc_file": "metal", "lc_cash": "plastic", "lc_aid": "metal", "lc_cell": "metal"}
 LOD_DIST = 14.0   # дальше — узлы *_lod1 (≈ ¼ треугольников)
 # вид -> модель по умолчанию ("" — модели пока нет)
 KINDS = {
@@ -65,6 +69,8 @@ for m, (op, variants) in LOOT_MODELS.items():
         models[m]["wall"] = True
     if m in SUPPORT_MODELS:
         models[m]["support"] = True
+for m in models:
+    models[m]["surface"] = SURFACE[m]
 out = {"version": 1, "dir": "res://assets/models/dorm/furniture", "index": "res://assets/models/dorm/furniture/furniture.json",
        "far": 45.0, "models": models, "kinds": {k: {"model": v} for k, v in KINDS.items()}}
 open(ROOT / "data/loot_containers.json", "w", encoding="utf8", newline="\n").write(json.dumps(out, ensure_ascii=False, indent=1) + "\n")

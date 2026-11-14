@@ -45,6 +45,8 @@ enum Look { NONE, SAFE, RACK, BODY, BAG, CRATE }
 ## Сдвиг модели по полу (x, z; настенные — к стене) — подгонка по физике.
 @export var model_shift: Vector2 = Vector2.ZERO
 @export var model_off: bool = false
+## Тела-коллизии у модели нет (контейнер стоит на ступенях и т. п.: коробка перегородила бы лестницу) — подгонка по физике.
+@export var body_solid: bool = true
 
 ## Содержимое брошено — ящик обыскан (у всех peer: rolled реплицируется); модель контейнера открывает крышку.
 signal opened
@@ -158,6 +160,11 @@ func reachable_from(player: Player) -> bool:
 	var eye: Vector3 = player.eye_position()
 	var target: Vector3 = global_position + Vector3.UP * 0.08
 	var query := PhysicsRayQueryParameters3D.create(eye, target, Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR)
+	# собственное тело модели (коллизия контейнера) обзор не закрывает
+	if _model != null and is_instance_valid(_model):
+		var own: CollisionObject3D = _model.get_node_or_null(LootContainerVisual.BODY_NAME) as CollisionObject3D
+		if own != null:
+			query.exclude = [own.get_rid()]
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 
@@ -247,7 +254,7 @@ func _on_opened() -> void:
 func _build_visual(parent: Node3D) -> void:
 	_model = null
 	if kind != "" and not model_off:
-		_model = LootContainerVisual.create(kind, model_id, absi(String(name).hash()))
+		_model = LootContainerVisual.create(kind, model_id, absi(String(name).hash()), body_solid)
 		if _model != null:
 			_model.position = Vector3(model_shift.x, -floor_drop, model_shift.y)
 			_model.rotation_degrees = Vector3(0.0, model_yaw, 0.0)
