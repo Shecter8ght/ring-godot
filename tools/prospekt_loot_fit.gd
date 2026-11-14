@@ -25,6 +25,11 @@ func _ready() -> void:
 		await get_tree().process_frame
 	for i in range(30):
 		await get_tree().physics_frame
+	# тела-коллизии самих контейнеров подгонке не мешают (место ищется по миру, без самих ящиков)
+	for n: Node in get_tree().get_nodes_in_group("loot_containers"):
+		var own: CollisionObject3D = n.find_child(LootContainerVisual.BODY_NAME, true, false) as CollisionObject3D
+		if own != null:
+			own.collision_layer = 0
 	var space: PhysicsDirectSpaceState3D = (level as Node3D).get_world_3d().direct_space_state
 	var out: Dictionary = {}
 	var total: int = 0
@@ -139,6 +144,21 @@ func _fit_wall(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Diction
 	return {"ok": false, "why": "не помещается: стена занята", "yaw": 0.0, "drop": snappedf(pos.y - hang, 0.01)}
 
 
+## Под местом ступени или пандус: по прямой через место высота пола растёт в одну сторону (с обеих сторон от места
+## выше / ниже самого места больше чем на 0,08 м) — места на лестнице. Край прилавка или стена такой картины не дают.
+func _on_steps(space: PhysicsDirectSpaceState3D, pos: Vector3, floor_y: float) -> bool:
+	for k in range(4):
+		var a: float = float(k) * PI * 0.25
+		var d := Vector3(cos(a), 0, sin(a)) * 0.7
+		var y1: float = _floor(space, pos + d)
+		var y2: float = _floor(space, pos - d)
+		if y1 == INF or y2 == INF:
+			continue
+		if (y1 - floor_y > 0.08 and floor_y - y2 > 0.08) or (y2 - floor_y > 0.08 and floor_y - y1 > 0.08):
+			return true
+	return false
+
+
 func _fit(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Dictionary) -> Dictionary:
 	var pos: Vector3 = c.global_position
 	var floor_y: float = _floor(space, pos)
@@ -203,6 +223,10 @@ func _fit(space: PhysicsDirectSpaceState3D, c: LootContainer, spec: Dictionary) 
 			candidates.append(seed_yaw + 45.0 * float(k))
 	for yaw: float in candidates:
 		if _fits(space, pos, floor_y, yaw, box):
-			return {"ok": true, "why": "у стены" if best_dir != Vector2.ZERO else "на свободном месте", "yaw": snappedf(wrapf(yaw, -180.0, 180.0), 0.1), "drop": snappedf(drop, 0.01)}
+			var res: Dictionary = {"ok": true, "why": "у стены" if best_dir != Vector2.ZERO else "на свободном месте", "yaw": snappedf(wrapf(yaw, -180.0, 180.0), 0.1), "drop": snappedf(drop, 0.01)}
+			if _on_steps(space, pos, floor_y):
+				res["solid"] = false   # на ступенях тело-коллизия перегородила бы лестницу
+				res["why"] += " (на ступенях: без коллизии)"
+			return res
 	return {"ok": false, "why": "не помещается: стена, стеллаж или проход", "yaw": 0.0, "drop": snappedf(drop, 0.01),
 		"hit": _blocker(space, pos, floor_y, candidates[0], box), "box": str(box.size)}

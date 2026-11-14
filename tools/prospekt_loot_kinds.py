@@ -202,6 +202,8 @@ def main() -> None:
         entry = {"kind": kind, "table": kind if kind else table, "why": why, "was": was, "note": rec["note"]}
         if model:
             entry["model"] = model
+        if old.get(name, {}).get("solid") is False:
+            entry["solid"] = False
         result[name] = entry
     MAP.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf8", newline="\n")
     cnt = collections.Counter(v["kind"] or "(без изменений)" for v in result.values())
@@ -218,6 +220,11 @@ def main() -> None:
         out.append(scene[pos:m.start(3)])
         body = m.group(3)
         info = result[m.group(2)]
+        body = re.sub(r"^body_solid = .*\n?", "", body, flags=re.M)
+        fit_now = fit.get(m.group(2))
+        # без коллизии: подгонка нашла ступени под местом или в таблице вида стоит "solid": false (контейнер на лестнице / в проходе ботов)
+        if info["kind"] and (info.get("solid") is False or (fit_now is not None and fit_now.get("ok") and fit_now.get("solid") is False)):
+            body = set_prop(body, "body_solid", "false")
         if info["kind"]:
             body = set_prop(body, "table", '"%s"' % info["table"])
             body = set_prop(body, "kind", '"%s"' % info["kind"])
@@ -225,6 +232,10 @@ def main() -> None:
                 body = set_prop(body, "model_id", '"%s"' % info["model"])
             f = fit.get(m.group(2))
             if f is not None:
+                # удачная подгонка заменяет прежнюю целиком: иначе «не помещается» от старого прогона остаётся при новой удачной
+                # (у «не помещается» модели нет — прежние поворот и высота не действуют, их не трогаем)
+                if f["ok"]:
+                    body = re.sub(r"^(model_yaw|floor_drop|model_off|model_shift) = .*\n?", "", body, flags=re.M)
                 body = set_prop(body, "model_yaw", "%g" % f["yaw"]) if f["ok"] and f["yaw"] else body
                 body = set_prop(body, "floor_drop", "%g" % f["drop"]) if f["ok"] and f["drop"] else body
                 body = set_prop(body, "model_off", "true") if not f["ok"] else body

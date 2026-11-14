@@ -3991,6 +3991,7 @@ table = "weapon_locker"
 search_s = 3
 look = 2
 kind = "weapon_locker"
+body_solid = false
 model_yaw = -90
 floor_drop = 0.6
 
