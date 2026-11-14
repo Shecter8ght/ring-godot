@@ -123,21 +123,26 @@ HANDLE_RECIPE = [
     ("вытерта до светлой стали", "gun scratch edge", dict(color=(0.64, 0.65, 0.66), rough=0.24, metal=1.0), 0.9,
      "edge", None),
 ]
-GREASE_POS = 0.5
+GREASE_POS = 0.75         # шире: при 0,5 отпечатков почти не оставалось (владелец к v03: «не вижу вообще отпечатков»)
+# отпечатки и пятна по материалу: на глянцевом пластике след пальца — матовая светлая дымка, на металле — жирный блеск
+PRINT = {
+    "plastic": dict(color=(0.11, 0.11, 0.11), rough=0.5, color_op=0.45, rough_op=0.8, stain_rough=0.42, stain_op=0.5),
+    "metal": dict(color=(0.6, 0.6, 0.6), rough=0.1, color_op=0.3, rough_op=0.85, stain_rough=0.15, stain_op=0.6),
+}
+PLASTIC_PARTS = {"Pistol_Grip", "Stock"}
+# группа кистью владельца — над износом, скриптом не пересобирается (build() её не трогает)
+HAND_GROUP = "Этап 2 — кистью (владелец)"
 # особые места по деталям (владелец 2026-11-14, к износу v02): (детали, имя, умная маска, каналы, непрозрачность,
 # место wear_place.py, порог). Детали — объекты формы; слой ложится на их сетки в наборе, место — карта набора.
 SPECIAL = [
     # 2 — пятки сошек, где касаются земли
     ({"Bipod_Foot_L", "Bipod_Foot_R"}, "земля на пятках сошек", "dirt variation",
      dict(color=(0.20, 0.16, 0.11), rough=0.92, metal=0.0), 0.9, "feet", None),
-    # 3 — задняя кромка крышки (левое, верхнее, правое рёбра) и кнопка: на разную длину к дулу
-    ({"Top_Cover", "Cover_Latch"}, "задняя кромка крышки — краска до металла", "edge damage",
-     dict(color=(0.62, 0.63, 0.64), rough=0.25, metal=1.0), 1.0, "cover_rear", 0.8),
-    ({"Top_Cover", "Cover_Latch"}, "задняя кромка крышки — сильные царапины", "gun scratch storng",
-     dict(color=(0.56, 0.57, 0.58), rough=0.28, metal=1.0), 0.9, "cover_rear", 0.8),
+    # 3 — задняя кромка крышки: владелец рисует кистью сам (группа HAND_GROUP; процедурный вариант v03 «как
+    # трафаретом» — отвергнут)
     # 5 — вдоль хода рукоятки перезаряжания
     ({"Receiver"}, "царапины вдоль хода рукоятки перезаряжания", "gun scratch edge",
-     dict(color=(0.60, 0.61, 0.62), rough=0.25, metal=1.0), 1.0, "charge_path", 0.75),
+     dict(color=(0.60, 0.61, 0.62), rough=0.25, metal=1.0), 0.85, "charge_path", None),
     # 6 — низ коробки для ленты и соседние рёбра и углы
     ({"Box100_Body", "Box200_Body"}, "низ коробки — сколы", "hard damage",
      dict(color=(0.48, 0.49, 0.50), rough=0.4, metal=1.0), 0.95, "box_bottom", None),
@@ -167,7 +172,7 @@ def _group(set_name):
     import sp_lib
     st = sp_lib.stack_by_name(set_name)
     for n in L.get_root_layer_nodes(st):
-        if n.get_name() == GROUP:
+        if n.get_name() == GROUP:          # группу кисти владельца (HAND_GROUP) не трогать
             L.delete_node(n)
     top = [n for n in L.get_root_layer_nodes(st) if n.get_name() == sp_finish.GROUP][0]
     g = L.insert_group(L.InsertPosition.above_node(top))
@@ -269,34 +274,52 @@ def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, position=N
     return lay
 
 
-def touch_layers(group, meshes, scene_mm, set_name):
-    """Хват: засаленные отпечатки («finger print») и пятна блеска («stain roughness») по месту touch."""
+def touch_layers(group, meshes_by_kind, scene_mm, set_name):
+    """Хват: отпечатки («finger print») и пятна («stain roughness») по месту touch — по материалу (PRINT)."""
     import sp_lib
-    lay = grease_layer(group, meshes, scene_mm)
-    place(lay, "touch", set_name)
-    st = sp_lib.fill("пятна блеска от рук", L.InsertPosition.inside_node(group, L.NodeStack.Substack), rough=0.16)
-    st.set_opacity(0.55, sp_lib.CH.SpecularRoughness)
-    sp_lib.only_meshes(st, meshes)
-    st.add_mask(L.MaskBackground.Black)
-    L.insert_smart_mask(L.InsertPosition.inside_node(st, L.NodeStack.Mask), smart_mask("stain roughness"))
-    to_triplanar(st, scene_mm)
-    place(st, "touch", set_name)
-    return lay
+    for kind, meshes in meshes_by_kind.items():
+        if not meshes:
+            continue
+        pr = PRINT[kind]
+        lay = sp_lib.fill(f"отпечатки пальцев ({'пластик' if kind == 'plastic' else 'металл'})",
+                          L.InsertPosition.inside_node(group, L.NodeStack.Substack), color=pr["color"], rough=pr["rough"])
+        if kind == "metal":
+            lay.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
+        lay.set_opacity(pr["color_op"], sp_lib.CH.BaseColor)
+        lay.set_opacity(pr["rough_op"], sp_lib.CH.SpecularRoughness)
+        sp_lib.only_meshes(lay, meshes)
+        lay.add_mask(L.MaskBackground.Black)
+        L.insert_smart_mask(L.InsertPosition.inside_node(lay, L.NodeStack.Mask), smart_mask("finger print"))
+        to_triplanar(lay, scene_mm)
+        scan(lay, GREASE_POS)
+        place(lay, "touch", set_name)
+        st = sp_lib.fill(f"пятна от рук ({'пластик' if kind == 'plastic' else 'металл'})",
+                         L.InsertPosition.inside_node(group, L.NodeStack.Substack), rough=pr["stain_rough"])
+        st.set_opacity(pr["stain_op"], sp_lib.CH.SpecularRoughness)
+        sp_lib.only_meshes(st, meshes)
+        st.add_mask(L.MaskBackground.Black)
+        L.insert_smart_mask(L.InsertPosition.inside_node(st, L.NodeStack.Mask), smart_mask("stain roughness"))
+        to_triplanar(st, scene_mm)
+        place(st, "touch", set_name)
 
 
-def grease_layer(group, meshes, scene_mm):
-    """Засаленные следы пальцев: только блеск и чуть темнее, рисунок — «finger print»."""
+def hand_group(set_name, title, ch):
+    """Группа для кисти владельца над износом (если нет) и в ней слой: заливка ch, маска чёрная — рисовать белым."""
     import sp_lib
-    lay = sp_lib.fill("засаленные следы пальцев", L.InsertPosition.inside_node(group, L.NodeStack.Substack),
-                      color=(0.5, 0.5, 0.5), rough=0.14)
-    lay.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
-    lay.set_opacity(0.25, sp_lib.CH.BaseColor)
-    lay.set_blending_mode(L.BlendingMode.Subtract, sp_lib.CH.SpecularRoughness)
-    sp_lib.only_meshes(lay, meshes)
+    st = sp_lib.stack_by_name(set_name)
+    roots = L.get_root_layer_nodes(st)
+    g = next((n for n in roots if n.get_name() == HAND_GROUP), None)
+    if g is None:
+        top = next(n for n in roots if n.get_name() == GROUP)
+        g = L.insert_group(L.InsertPosition.above_node(top))
+        g.set_name(HAND_GROUP)
+        for c in st.all_channels():
+            g.set_blending_mode(L.BlendingMode.Passthrough, c)
+    for n in g.sub_layers():
+        if n.get_name() == title:
+            return n
+    lay = sp_lib.fill(title, L.InsertPosition.inside_node(g, L.NodeStack.Substack), **ch)
     lay.add_mask(L.MaskBackground.Black)
-    L.insert_smart_mask(L.InsertPosition.inside_node(lay, L.NodeStack.Mask), smart_mask("finger print"))
-    to_triplanar(lay, scene_mm)
-    scan(lay, GREASE_POS)
     return lay
 
 
@@ -329,10 +352,13 @@ def build_set(set_name, meshes_json, spec, scene_mm):
         if sm:
             wear_layer(g, name, mask, ch, op, sm, scene_mm, position=pos, where=where, set_name=set_name)
             log.append(f"{where}:{len(sm)}")
-    gm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in TOUCH)
-    if gm:
+    gm = {"plastic": sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in TOUCH
+                            and r["obj"] in PLASTIC_PARTS),
+          "metal": sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in TOUCH
+                          and r["obj"] not in PLASTIC_PARTS)}
+    if gm["plastic"] or gm["metal"]:
         touch_layers(g, gm, scene_mm, set_name)
-        log.append(f"хват:{len(gm)}")
+        log.append(f"хват:{len(gm['plastic']) + len(gm['metal'])}")
     return f"{set_name}: " + " ".join(log)
 
 

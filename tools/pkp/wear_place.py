@@ -38,6 +38,7 @@ TOUCH = {"Pistol_Grip", "Rail_Forend", "Trigger", "Charging_Handle", "Bipod_Yoke
 REAR_LEN = (35.0, 190.0)  # задняя кромка крышки: насколько износ тянется к дулу, мм (меняется по сечению крышки)
 CHARGE_TRAVEL = 149.0     # ход рукоятки перезаряжания (tools/pkp/dims.py, CH_TRAVEL)
 CHARGE_MARGIN = 6.0       # путь рукоятки шире её габарита, мм
+CHARGE_LIP = 4.0          # губы прорези: от стебля рукоятки вверх и вниз, мм
 FOOT_MM = 22.0            # пятка сошки: нижние мм
 EDGE_VARY = ((60.0, 0.55), (18.0, 0.3), (6.0, 0.15))   # шум участков кромки: масштаб мм, вес
 TOPS_VARY = ((25.0, 0.7), (9.0, 0.3))                   # шум заклёпок и винтов
@@ -195,13 +196,16 @@ def _save(name, kind, arr):
 
 
 def handle_box():
-    """Габарит рукоятки перезаряжания (мм) в покое — из карт набора bolt."""
+    """Габарит рукоятки перезаряжания (мм) в покое — из карт набора bolt — и высоты её стебля в прорези (точки
+    рукоятки у самого борта)."""
     z = np.load(f"{MAPS}/bolt_maps.npz")
     pos = z["pos"]
     names, obj = ids("bolt", pos.shape[0])
     m = objmask(names, obj, {"Charging_Handle"})
     p = pos[m]
-    return p.min(0), p.max(0)
+    lo, hi = p.min(0), p.max(0)
+    stem = p[p[:, 1] > hi[1] - 3.0]
+    return lo, hi, float(stem[:, 2].min()), float(stem[:, 2].max())
 
 
 def special(name, names, obj, pos, nrm, edge, edge_w, low):
@@ -231,14 +235,16 @@ def special(name, names, obj, pos, nrm, edge, edge_w, low):
         _save(name, "cover_rear", rear)
     # 5 — вдоль хода рукоятки перезаряжания по правому борту ствольной коробки
     if name == "receiver":
-        lo, hi = handle_box()
+        # владелец к v03: нижнее длинное ребро вытерто ровно по всей длине, а с другой стороны целое — так не бывает:
+        # только губы прорези (высота стебля рукоятки ± CHARGE_LIP), фрагментами
+        lo, hi, s0, s1 = handle_box()
         rc = objmask(names, obj, {"Receiver"})
         x, y, zz = pos[..., 0], pos[..., 1], pos[..., 2]
-        zc, zh = 0.5 * (lo[2] + hi[2]), 0.5 * (hi[2] - lo[2]) + CHARGE_MARGIN
         along = (x > lo[0] - CHARGE_TRAVEL - CHARGE_MARGIN) & (x < hi[0] + CHARGE_MARGIN)
-        across = np.clip(1.0 - np.abs(zz - zc) / zh, 0.0, 1.0)
-        side = (y < hi[1] + 3.0) & (nrm[..., 1] < 0.2)
-        path = np.where(rc & along & side, smooth(across, 0.0, 0.6), 0.0)
+        lip = smooth(-np.maximum(s0 - zz, zz - s1), -CHARGE_LIP, -0.5)
+        side = (y < hi[1] + 3.0) & (y > hi[1] - 6.0) & (nrm[..., 1] < 0.2)     # у самого борта, не внутри
+        frag = variation(pos, obj >= 0, ((35.0, 0.6), (10.0, 0.4)), 37, 0.42, 0.6)
+        path = np.where(rc & along & side, lip * frag, 0.0)
         _save(name, "charge_path", path)
     # 2 — пятки сошек, где касаются земли
     if name == "bipod":
