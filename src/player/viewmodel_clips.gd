@@ -67,6 +67,9 @@ var _hold_src: Animation
 var _jam_bone: int = -1
 ## Патронов в патроннике (chamber_capacity ствола): в магазине на виду — Player.ammo без патрона в стволе.
 var _chamber: int = 0
+## Полная перезарядка прошла кадр, где рычаг отпустил затвор: до прихода новых патронов (ответ хоста) затвор не
+## возвращается на задержку — иначе в конце перезарядки он отскакивал назад и снова вперёд.
+var _slide_let_go: bool = false
 ## Действия рук с магазином без таймера перезарядки (пистолеты с патронником: «вынуть / вставить обойму» из
 ## окна рюкзака идут через Player._weapon_action, как у рига модели): что, сколько ещё, с досылом ли, в пустую шахту.
 var _ext_pending: Dictionary = {}
@@ -536,6 +539,7 @@ func equip() -> void:
 	_fast = false
 	_ext_pending.clear()
 	_ext_left = 0.0
+	_slide_let_go = false
 	_play(_clip_name("draw") if String(config.get("mechanism", "")) == "break_action" else _clip_name("idle"), 0.0)
 
 
@@ -586,8 +590,12 @@ func update(pl: Player, delta: float) -> void:
 			_anim.speed_scale = eject_to / maxf(r_timer * float(Balance.HAND_MAG.out_hold), 0.05)
 	elif reloading and _last_reload <= 0.0:
 		_eject = false
+		_slide_let_go = false
 		var empty: bool = r_empty
 		var role: String = "reload_empty" if empty else "reload"
+		if empty and pl.slide_closed_empty() and _base_clip("reload_empty_rack") != "":
+			# затвор отпущен на пустой патронник (пистолет на задержке убирали): вставить и передёрнуть
+			role = "reload_empty_rack"
 		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
 		_reload_old = pl.weapon_mag
 		_reload_new = "*" if ext else pl.reload_next_mag()
@@ -697,13 +705,22 @@ func update(pl: Player, delta: float) -> void:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
 	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
-	# после последнего патрона затвор всегда встаёт на задержку (решение владельца 2026-11-14 — и без магазина)
-	var lockable: bool = bool(config.get("hold_open", false))
-	var held: bool = lockable and pl.ammo <= 0 and _clip == "" and not jammed
-	if lockable and pl.ammo <= 0 and not jammed and _clip != "" and _clip == shot_clip:
-		# последний выстрел: клип отводит затвор — с этого кадра он остаётся сзади, на задержке
-		var back: int = int(config.get("shot_slide_back", 0))
-		held = _anim.current_animation_position * float(config.get("fps", 30)) >= back
+	# после последнего патрона затвор всегда встаёт на задержку (решение владельца 2026-11-14 — и без магазина) и стоит
+	# на ней во всех клипах, пока рука его не отпустит; убрали пистолет на задержке — затвор отпущен вперёд
+	if pl.ammo > 0:
+		_slide_let_go = false
+	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and not jammed and not pl.slide_closed_empty() 		and not _slide_let_go
+	if held and _clip != "":
+		var at_frame: float = _anim.current_animation_position * float(config.get("fps", 30))
+		if _clip == shot_clip:
+			# последний выстрел: клип отводит затвор — с этого кадра он остаётся сзади
+			held = at_frame >= float(config.get("shot_slide_back", 0))
+		else:
+			# полная перезарядка: затвор сзади до кадра, где рычаг его отпускает (config.slide_release); у остальных
+			# клипов (вынуть магазин, проверка, осмотр) — сзади всё время, без хода вперёд-назад на вливании клипа
+			var release: int = int((config.get("slide_release", {}) as Dictionary).get(_clip, -1))
+			held = release < 0 or at_frame < float(release)
+			_slide_let_go = not held
 	_pose_overrides(clampi(shown, 0, 30), delta, jammed and not clear_clip, held)
 	_selector_pose(pl)
 	_inspect_turn(pl, delta)

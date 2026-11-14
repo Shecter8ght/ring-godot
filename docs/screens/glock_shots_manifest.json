@@ -505,6 +505,52 @@
 			"view": "first_person_clips"
 		},
 		{
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_full",
+			"file": "res://docs/screens/glock_clip_locked_reload_start.png",
+			"position": 0.116646895805995,
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips"
+		},
+		{
+			"camera_fov": 50.5340156555176,
+			"camera_position": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"clip": "reload_full",
+			"file": "res://docs/screens/glock_clip_locked_reload_released.png",
+			"position": 3.26611308256785,
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips"
+		},
+		{
+			"camera_fov": 24.0,
+			"camera_position": [
+				0.0350223779678345,
+				0.00600007176399231,
+				-0.2775958776474
+			],
+			"file": "res://docs/screens/glock_clip_slide_closeup.png",
+			"resolution": [
+				1280,
+				720
+			],
+			"view": "first_person_clips_detail"
+		},
+		{
 			"ads": false,
 			"camera_fov": 50.5340156555176,
 			"camera_position": [

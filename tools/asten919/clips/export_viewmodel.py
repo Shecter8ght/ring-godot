@@ -380,6 +380,7 @@ def main():
     gpath = OUT / f"{NAME}.gltf"
     bpy.ops.export_scene.gltf(filepath=str(gpath), export_format="GLTF_SEPARATE", export_texture_dir="",
                               export_keep_originals=True, export_yup=True, export_materials="EXPORT",
+                              export_normals=True, export_tangents=True,
                               export_cameras=False, export_lights=False, export_animations=True,
                               export_animation_mode="NLA_TRACKS", export_skins=True, export_all_influences=True,
                               export_def_bones=False, export_force_sampling=True, export_apply=False)

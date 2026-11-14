@@ -206,6 +206,8 @@ func _clip_shots() -> void:
 	await _clip("clip_spare_slide_rack", "slide_rack", at.call("slide_rack", "pull"))
 	await _clip("clip_spare_finger_trigger", "finger_to_trigger", 1.0)
 	await _hand_mag_clips()
+	await _locked_reload_clips()
+	await _slide_closeup()
 	_vm.queue_free()
 	_vm = null
 	if _wanted("clip_suppressor"):
@@ -275,6 +277,65 @@ func _hand_mag_clips() -> void:
 	await _clip_live("clip_hand_mag_in")
 	pl.queue_free()
 	await _frames(2)
+
+
+## Пистолет на задержке (пусто), полная перезарядка: в начале клипа затвор остаётся сзади (без хода вперёд-назад на
+## вливании клипа), после кадра рычага — впереди. Клипы ведёт ViewmodelClips.update по настоящему Player.
+func _locked_reload_clips() -> void:
+	if not (_wanted("clip_locked_reload_start") or _wanted("clip_locked_reload_released")):
+		return
+	var pl: Player = (load("res://scenes/player/player.tscn") as PackedScene).instantiate() as Player
+	add_child(pl)
+	pl.set_physics_process(false)
+	pl.set_process(false)
+	pl.visible = false
+	pl.combat_enabled = false
+	pl.weapon_id = WEAPON_ID
+	pl.weapon_mag = "*"
+	pl.ammo = 0
+	_vm.equip()
+	var step := func(seconds: float) -> void:
+		var t: float = 0.0
+		while t < seconds:
+			_vm.update(pl, 1.0 / 60.0)
+			t += 1.0 / 60.0
+	step.call(0.2)
+	_vm.weapon_action("reload", true, 2.81)
+	step.call(0.08)
+	await _clip_live("clip_locked_reload_start")
+	step.call(2.81 * 0.8)
+	await _clip_live("clip_locked_reload_released")
+	pl.queue_free()
+	await _frames(2)
+
+
+## Затвор крупно (касательные карты нормалей, гладкость граней) — та же сцена клипов, узкое поле зрения.
+func _slide_closeup() -> void:
+	if not _wanted("clip_slide_closeup"):
+		return
+	_vm.preview_reload("idle", 0.0, "*")
+	_vm_space.transform = Transform3D.IDENTITY
+	_vm.transform = _vm.hip_transform()
+	await _frames(2)
+	var slide: Node3D = _vm.find_child("Part_Slide", true, false) as Node3D
+	if slide == null:
+		_failures += 1
+		push_error("glock_shots: нет Part_Slide")
+		return
+	var arms: Array[Node] = _vm.find_children("FPS_Arms*", "MeshInstance3D", true, false)
+	for m: Node in arms:
+		(m as MeshInstance3D).visible = false
+	# в осях рамы (у рукояти: +X влево, +Y вверх, +Z к дулу): середина затвора и точка сверху-слева-сзади
+	var fr: Transform3D = _vm.frame.global_transform
+	var center: Vector3 = fr * Vector3(0.0, 0.065, 0.05)
+	_camera.near = 0.005
+	_camera.fov = 24.0
+	_camera.position = fr * Vector3(0.16, 0.16, -0.14)
+	_camera.look_at(center, fr.basis.y)
+	await _settle()
+	await _capture("clip_slide_closeup", {"view": "first_person_clips_detail"})
+	for m: Node in arms:
+		(m as MeshInstance3D).visible = true
 
 
 func _clip_live(stage: String) -> void:

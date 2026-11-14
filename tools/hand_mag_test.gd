@@ -61,6 +61,7 @@ func _reset(actor: Player, entry: Dictionary, spare_rounds: Array = [17]) -> voi
 	actor.weapon_slot = ""
 	actor._ws.clear()
 	actor._pm_entries.clear()
+	actor.slide_released.clear()
 	actor._ws_dirty = false
 	actor.stress = 0.0
 	actor.health.alive = true
@@ -276,6 +277,21 @@ func _pistol_fast_cases(actor: Player, host: StateHost) -> void:
 		"%.2f с, ждали %.2f" % [float(actor._pm_action.get("remaining", 0.0)), want])
 	_finish(actor)
 	_check("дослан: 16 + 1", actor.ammo == 17, "в оружии %d" % actor.ammo)
+	# пистолет на задержке убрали и достали — затвор отпущен: полная перезарядка с досыланием, своё время
+	_reset(actor, _weapon(0, 0), [17])
+	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
+	_check("пустой на задержке — затвор не отпущен", actor.ammo == 0 and not actor.slide_closed_empty())
+	actor._holster()
+	actor._switch(SLOT, false)
+	actor._update_hand()
+	_check("убрали и достали — затвор отпущен на пустой патронник", actor.slide_closed_empty())
+	var raw: Dictionary = WeaponDb.weapon(GUN).stats
+	actor._start_reload(actor.spec())
+	var rack_want: float = float(actor.spec().reload_empty) * float(raw.reload_empty_rack) / float(raw.reload_empty)
+	_check("перезарядка с досыланием — своё время", actor._reload_empty and actor.reload_timer >= rack_want * 0.99,
+		"%.2f с, не меньше %.2f" % [actor.reload_timer, rack_want])
+	_finish_reload(actor)
+	_check("после перезарядки затвор снова как обычно", actor.ammo == 17 and not actor.slide_closed_empty(), "в оружии %d" % actor.ammo)
 
 
 ## Довести перезарядку, начатую из окна рюкзака (кадры игры при открытом окне).

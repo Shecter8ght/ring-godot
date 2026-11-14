@@ -101,6 +101,10 @@ var _reload_slot: String = ""
 var _reload_rev: int = -1
 var _reload_wait: float = 0.0
 var _reload_empty: bool = false
+## Слоты, где пустое оружие с патронником убрали или сменили, стоя на затворной задержке: затвор отпущен вперёд на
+## пустой патронник (предложение владельца 2026-11-14). Полная перезарядка такого — вставить и передёрнуть (клип
+## reload_empty_rack, время stats.reload_empty_rack). Слот уходит отсюда, как только в оружии снова есть патроны.
+var slide_released: Dictionary = {}
 ## Быстрая перезарядка (двойное R): старый магазин выбит новым и падает на землю. _reload_age — сколько
 ## идёт текущая перезарядка (второе R считается только в первые Balance.RELOAD_FAST.tap_sec),
 ## _reload_old_mag — какой магазин стоял ({id, rounds}): его и выбросить из рюкзака в конце.
@@ -1801,7 +1805,7 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 	_velcro_at = -1.0
 	var from_pouch: bool = false
 	_reload_insert = mag_out()
-	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
+	var t: float = _empty_reload_time(spec) if _reload_empty else float(spec.reload)
 	var chambered: bool = _has_chamber(weapon_id)
 	if _reload_insert and not chambered:
 		# старый магазин вынимать не надо — только вставить новый и дослать
@@ -1881,6 +1885,28 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 		_reload_audio.mark_played("mag_out")
 	else:
 		_play_weapon_sound(spec, "round_insert", -4.0)
+
+
+## Затвор отпущен на пустом патроннике (оружие на задержке убрали или сменили — slide_released): перезарядка с
+## досыланием рукой.
+func slide_closed_empty() -> bool:
+	return ammo <= 0 and bool(slide_released.get(weapon_slot, false))
+
+
+## Время полной перезарядки: затвор отпущен на пустом патроннике — своё (вставить и передёрнуть, клип длиннее),
+## во столько же раз от полной, во сколько в паспорте ствола (stats.reload_empty_rack, АСТЕН-919).
+func _empty_reload_time(specification: Dictionary) -> float:
+	var t: float = float(specification.get("reload_empty", specification.reload))
+	var raw: Dictionary = WeaponDb.weapon(weapon_id).get("stats", {}) as Dictionary
+	if slide_closed_empty() and raw.has("reload_empty_rack"):
+		t *= float(raw.reload_empty_rack) / maxf(float(raw.get("reload_empty", raw.get("reload", 1.0))), 0.01)
+	return t
+
+
+## Пустое оружие с патронником уходит из рук (убрали, сменили) — затвор с задержки отпускается вперёд.
+func _release_slide() -> void:
+	if weapon_slot != "" and weapon_id != "" and ammo <= 0 and _has_chamber(weapon_id):
+		slide_released[weapon_slot] = true
 
 
 ## Второе R сразу после первого: перезарядка становится быстрой — короче в Balance.RELOAD_FAST.time_k раз,
@@ -2246,7 +2272,7 @@ func hand_mag_insert(role: String, idx: int) -> String:
 	var swap: bool = not mag_out()
 	# патронов нет ни в стволе, ни в магазине — затвор на задержке: новый магазин досылают
 	var charge: bool = ammo <= 0 and int(item.get("rounds", 0)) > 0
-	var duration: float = float(specification.get("reload_empty", specification.reload)) if charge else float(specification.reload)
+	var duration: float = _empty_reload_time(specification) if charge else float(specification.reload)
 	if not swap:
 		duration *= float(Balance.HAND_MAG.in_k)
 	_pm_action_seq += 1
@@ -2463,6 +2489,8 @@ func _accept_pm_result(sequence: int, result: Dictionary) -> void:
 		return
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
+	if ammo > 0:
+		slide_released.erase(weapon_slot)
 	weapon_mods = (weapon_entry().get("mods", {}) as Dictionary).duplicate(true)
 	if _ws.has(weapon_slot):
 		_ws[weapon_slot].jam = false
@@ -2743,6 +2771,7 @@ func _holster() -> void:
 	cancel_weapon_action()
 	_cancel_grenade_prepare()
 	aim_cant = false
+	_release_slide()
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
 	_play_weapon_sound(spec(), "holster", -6.0)
@@ -2768,6 +2797,7 @@ func _switch(key: String, sound: bool = true) -> void:
 	holstered = false
 	cancel_weapon_action()
 	aim_cant = false
+	_release_slide()
 	if weapon_slot != "" and _ws.has(weapon_slot):
 		_send_ws(weapon_slot)
 	if sound and weapon_id != "":

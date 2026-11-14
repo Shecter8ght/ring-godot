@@ -1251,7 +1251,8 @@
      "noise": 60,
      "reliability": 0.985,
      "wear": 0.02,
-     "reload_empty": 2.81
+     "reload_empty": 2.81,
+     "reload_empty_rack": 3.48
     },
     "mounts": {
      "optic_primary": "SLIDE_RMR",
@@ -1422,7 +1423,8 @@
       "check": "mag_check",
       "clear": "jam_clear",
       "inspect": "inspect",
-      "shot": "fire"
+      "shot": "fire",
+      "reload_empty_rack": "reload_full_rack"
      },
      "check_hold": [
       38,
@@ -1431,8 +1433,13 @@
      "swap_frame": {
       "reload_tactical": 36,
       "reload_full": 36,
+      "reload_full_rack": 36,
       "reload_fast": 0,
       "reload_fast_full": 0
+     },
+     "slide_release": {
+      "reload_full": 88,
+      "reload_fast_full": 50
      },
      "drop_frame": {
       "reload_fast": 9,
@@ -1458,7 +1465,6 @@
       0
      ],
      "spare_clips": [
-      "reload_full_rack",
       "slide_rack",
       "finger_to_trigger"
      ]
