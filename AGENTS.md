@@ -960,6 +960,15 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   "import sys; sys.path.insert(0, r'E:/Games/RING-godot/tools/pkp'); import sp_pkp; print(sp_pkp.create('body'))" / bake() / stack() / export(<папка>)
 #   (метки _project_ready / _bake_done / _stack_done / _export_done.txt; слои — в 4K, карты — в разрешении набора);
 #   файл просмотра со студией — blender -b <развёртка> … --python tools/pkp/tex_review.py -- apply <папка карт> <out.blend> | shots <папка> [samples] [виды]
+# «Частокол», этап 2 — износ (образцы refs/owner/01–06; рисунок следа — только умные маски владельца «Маски_АЛЬФА/smart masks»):
+#   места — по кривизне в миллиметрах, не генератором Painter (тот мерит в пикселях развёртки и серебрил оси, спуск, рычаги целиком):
+#   blender -b <развёртка v02> --factory-startup --python-exit-code 1 --python tools/pkp/wear_maps.py -- _asset_src/pkp/tex/wear_maps [набор …]
+#   (положение и нормаль в развёртку 4K) → python -X utf8 tools/pkp/wear_place.py [набор …] [stats] (кромка — скругление меньше ~1 мм, угол —
+#   вогнутое и затенённое этапа 1, edge_wide — скругления до ~20 мм для краски коробок → _asset_src/pkp/tex/wear/<набор>_{edge,edge_wide,cavity}.png); Painter, рабочее разрешение наборов 2K (в 4K стек износа
+#   выедал видеопамять — выгрузка выходила ровной): -c "…import sp_pkp_wear; print(sp_pkp_wear.build())" (группа «Этап 2 — износ» над заводской,
+#   рецепты RECIPES, метка _wear_done.txt; show(False) — выключить), затем sp_pkp.export(<папка>); пробный рендер без сохранения — blender -b
+#   <файл просмотра> … --python tools/pkp/tex_try.py -- <карты> <набор,…> <папка> <вид,…>; порог маски под долю поверхности — python -X utf8
+#   tools/pkp/wear_calib.py <набор> "<маска>:<доля>[:edge|cavity]"
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01

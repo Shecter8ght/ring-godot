@@ -321,8 +321,9 @@ def stack(only=None):
     return " | ".join(log)
 
 
-def export(out_dir, only=None):
-    """Карты наборов (glTF PBR: baseColor, ORM, normal) в разрешении набора SETS в out_dir; итог — _export_done.txt."""
+def export(out_dir, only=None, size=None):
+    """Карты наборов (glTF PBR: baseColor, ORM, normal) в разрешении набора SETS (size — своё, для замеров) в out_dir;
+    итог — _export_done.txt."""
     import substance_painter.export as X
     check_open()
     os.makedirs(out_dir, exist_ok=True)
@@ -332,11 +333,11 @@ def export(out_dir, only=None):
     def run():
         n = 0
         for nm in names:
-            size = T.SETS[nm][0].bit_length() - 1
+            sz = (size or T.SETS[nm][0]).bit_length() - 1
             cfg = {"exportShaderParams": False, "exportPath": out_dir, "defaultExportPreset": pr.url,
                    "exportList": [{"rootPath": nm}],
                    "exportParameters": [{"parameters": {"fileFormat": "png", "bitDepth": "8",
-                                                        "paddingAlgorithm": "infinite", "sizeLog2": size}}]}
+                                                        "paddingAlgorithm": "infinite", "sizeLog2": sz}}]}
             r = X.export_project_textures(cfg)
             n += sum(len(v) for v in r.textures.values())
         for junk in os.listdir(out_dir):          # пресет glTF кладёт и сетку — не нужна
