@@ -35,7 +35,8 @@ CLASS = {"receiver": "steel", "barrel": "steel", "sight": "steel", "bipod": "ste
 # флажок предохранителя)
 GREASE = ["Pistol_Grip", "Charging_Handle", "Cover_Latch", "Carry_Handle", "Safety_Lever"]
 
-# слои по классу снизу вверх: (имя, умная маска, каналы заливки, непрозрачность, место по форме, порог)
+# слои по классу снизу вверх: (имя, умная маска или None, каналы заливки, непрозрачность, место по форме, порог
+# [, {"blend": "multiply"}])
 # Место — карты tools/pkp/wear_place.py (кривизна в 1/мм: «edge» — скругления меньше ~1 мм, «edge_wide» — до ~20 мм
 # (краска коробок), «cavity» — вогнутые и затенённые места), рисунок — умная маска владельца, произведение. Порог (Histogram Scan, Position) — только где
 # следов надо меньше рисунка; None — без порога (мягкий переход). Степень — образцы 01–06: тёмная сталь, тонкие
@@ -43,10 +44,22 @@ GREASE = ["Pistol_Grip", "Charging_Handle", "Cover_Latch", "Carry_Handle", "Safe
 # пятна пыли по плоскостям) отвергнута.
 RECIPES = {
     "steel": [
-        ("пыль в углах и швах", "cavity dirt", dict(color=(0.24, 0.23, 0.21), rough=0.85, metal=0.0), 0.6, "cavity", None),
+        # v02 (сверка с образцами 02, 06): вытертое пятнами воронение на открытых плоскостях, чёрный нагар в швах,
+        # кромка — сплошной светлой линией под рисунком, вытертые до блеска верхушки заклёпок и винтов
+        # отлив воронения (владелец 2026-11-14: «небольшие тональности других цветов», как у АСТЕН-919): крупные мягкие
+        # пятна синевы и тёплого сливово-коричневого в цвете основы — на металле это цвет отражения, под разным светом
+        # сталь чуть уходит в синеву или в тепло; блеск и металл не трогаются
+        ("отлив воронения — синева", "dirt variation", dict(color=(0.18, 0.215, 0.28)), 0.7, None, None),
+        ("отлив воронения — тёплый", "dirt roughness", dict(color=(0.26, 0.21, 0.21)), 0.55, None, None),
+        ("вытертое воронение пятнами", "stain roughness", dict(color=(0.33, 0.34, 0.35), rough=0.42, metal=0.9), 0.45,
+         "open", None),
+        ("чёрный нагар в швах", "AO dirt", dict(color=(0.035, 0.033, 0.03), rough=0.6, metal=0.2), 0.75, "deep", None),
+        ("пыль в углах и швах", "cavity dirt", dict(color=(0.24, 0.23, 0.21), rough=0.85, metal=0.0), 0.45, "cavity", None),
         ("царапины", "micro scratches", dict(color=(0.36, 0.37, 0.38), rough=0.3, metal=1.0), 0.5, None, 0.97),
-        ("кромки вытерты до стали", "gun scratch edge", dict(color=(0.54, 0.55, 0.56), rough=0.27, metal=1.0), 1.0,
+        ("кромки — линия", None, dict(color=(0.62, 0.63, 0.64), rough=0.22, metal=1.0), 0.55, "edge", None),
+        ("кромки вытерты до стали", "gun scratch edge", dict(color=(0.62, 0.63, 0.64), rough=0.24, metal=1.0), 1.0,
          "edge", None),
+        ("верхушки заклёпок и винтов", None, dict(color=(0.60, 0.61, 0.62), rough=0.22, metal=1.0), 0.8, "tops", None),
     ],
     "bolt": [
         ("масло и нагар в углах", "AO dirt", dict(color=(0.10, 0.09, 0.08), rough=0.4, metal=0.5), 0.7, "cavity", None),
@@ -60,10 +73,15 @@ RECIPES = {
         ("потёртые кромки", "gun scratch edge", dict(color=(0.10, 0.10, 0.10), rough=0.45, metal=0.0), 0.6, "edge", None),
     ],
     "paint": [
-        ("грязь пятнами", "dirt", dict(color=(0.13, 0.13, 0.08), rough=0.8, metal=0.0), 0.65, None, None),
+        # v02: эмаль потемнела от грязи (образцы 02, 03: оливковая темнее и гуще; цвет эмали этапа 1 не меняется —
+        # умножение поверх), грязь копится снизу
+        ("эмаль потемнела от грязи", "dirt variation", dict(color=(0.55, 0.62, 0.45)), 1.0, None, None,
+         {"blend": "multiply"}),
+        ("грязь снизу", "dirt", dict(color=(0.10, 0.10, 0.06), rough=0.8, metal=0.0), 0.7, "low", None),
+        ("грязь пятнами", "dirt", dict(color=(0.13, 0.13, 0.08), rough=0.8, metal=0.0), 0.5, None, None),
         ("пыль в углах", "cavity dirt", dict(color=(0.30, 0.28, 0.22), rough=0.85, metal=0.0), 0.6, "cavity", None),
         ("сколы до грунта", "hard damage", dict(color=(0.30, 0.12, 0.08), rough=0.72, metal=0.0), 0.85, "edge_wide", None),
-        ("кромки до металла", "edge damage", dict(color=(0.55, 0.56, 0.57), rough=0.35, metal=1.0), 0.9, "edge_wide", 0.3),
+        ("кромки до металла", "edge damage", dict(color=(0.55, 0.56, 0.57), rough=0.35, metal=1.0), 0.85, "edge_wide", None),
         ("царапины до металла", "micro scratches", dict(color=(0.50, 0.51, 0.52), rough=0.35, metal=1.0), 0.6, None, 0.97),
     ],
     "fabric": [
@@ -187,7 +205,11 @@ def place(layer, kind, set_name):
     return m
 
 
-def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, position=None, where=None, set_name=None):
+def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, position=None, where=None, set_name=None,
+               blend=None):
+    """Слой следа: заливка каналов ch по маске. mask_name — умная маска владельца (рисунок) × место where;
+    None — только место (карта wear_place.py, сплошь: линия кромки, верхушки). blend «multiply» — цвет умножением
+    (потемнение отделки, не новый цвет)."""
     import sp_lib
     lay = sp_lib.fill(name, L.InsertPosition.inside_node(group, L.NodeStack.Substack), **ch)
     sp_lib.only_meshes(lay, meshes)
@@ -196,7 +218,12 @@ def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, position=N
             lay.set_opacity(opacity, c)
         except Exception:      # noqa: BLE001
             pass
+    if blend == "multiply":
+        lay.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
     lay.add_mask(L.MaskBackground.Black)
+    if mask_name is None:
+        sp_finish.bitmap_mask(lay, f"{WEAR_DIR}/{set_name}_{where}.png")
+        return lay
     L.insert_smart_mask(L.InsertPosition.inside_node(lay, L.NodeStack.Mask), smart_mask(mask_name))
     to_triplanar(lay, scene_mm)
     if where:
@@ -237,9 +264,11 @@ def build_set(set_name, meshes_json, spec, scene_mm):
         ms = sorted(set(by_class.get(cls, [])))
         if not ms:
             continue
-        for name, mask, ch, op, where, pos in recipe:
+        for r in recipe:
+            name, mask, ch, op, where, pos = r[:6]
+            ex = r[6] if len(r) > 6 else {}
             wear_layer(g, f"{cls} · {name}", mask, ch, op, ms, scene_mm, position=pos, where=where,
-                       set_name=set_name)
+                       set_name=set_name, blend=ex.get("blend"))
         log.append(f"{cls}:{len(ms)}")
     hm = sorted(n for n, r in meshes_json.items() if r["set"] == set_name and r["obj"] in HANDLE)
     for name, mask, ch, op, where, pos in (HANDLE_RECIPE if hm else []):

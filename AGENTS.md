@@ -964,7 +964,8 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   места — по кривизне в миллиметрах, не генератором Painter (тот мерит в пикселях развёртки и серебрил оси, спуск, рычаги целиком):
 #   blender -b <развёртка v02> --factory-startup --python-exit-code 1 --python tools/pkp/wear_maps.py -- _asset_src/pkp/tex/wear_maps [набор …]
 #   (положение и нормаль в развёртку 4K) → python -X utf8 tools/pkp/wear_place.py [набор …] [stats] (кромка — скругление меньше ~1 мм, угол —
-#   вогнутое и затенённое этапа 1, edge_wide — скругления до ~20 мм для краски коробок → _asset_src/pkp/tex/wear/<набор>_{edge,edge_wide,cavity}.png); Painter, рабочее разрешение наборов 2K (в 4K стек износа
+#   вогнутое и затенённое этапа 1, edge_wide — скругления до ~20 мм для краски коробок, tops — купола заклёпок и винтов, deep — глубокие швы,
+#   open — открытые плоскости, low — низ набора по высоте → _asset_src/pkp/tex/wear/<набор>_<место>.png); Painter, рабочее разрешение наборов 2K (в 4K стек износа
 #   выедал видеопамять — выгрузка выходила ровной): -c "…import sp_pkp_wear; print(sp_pkp_wear.build())" (группа «Этап 2 — износ» над заводской,
 #   рецепты RECIPES, метка _wear_done.txt; show(False) — выключить), затем sp_pkp.export(<папка>); пробный рендер без сохранения — blender -b
 #   <файл просмотра> … --python tools/pkp/tex_try.py -- <карты> <набор,…> <папка> <вид,…>; порог маски под долю поверхности — python -X utf8
