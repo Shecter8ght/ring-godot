@@ -464,6 +464,9 @@ func update(pl: Player, delta: float) -> void:
 		_eject = false
 		var empty: bool = r_empty
 		var role: String = "reload_empty" if empty else "reload"
+		if empty and pl.slide_closed_empty and _base_clip("reload_empty_rack") != "":
+			# затвор закрыт на пустом патроннике (последний выстрел — без магазина): вставить и передёрнуть
+			role = "reload_empty_rack"
 		# клипы — по магазину, который вставят (хват на нём); до подмены в руке виден старый
 		_reload_old = pl.weapon_mag
 		_reload_new = "*" if ext else pl.reload_next_mag()
@@ -530,8 +533,10 @@ func update(pl: Player, delta: float) -> void:
 		var calm: bool = _clip == "" or _clip == shot_clip or _clip == _clip_name("check") \
 			or (_clip != "" and _clip == _clip_name("inspect"))
 		if shot_clip != "" and calm:
-			# свой клип выстрела (АСТЕН-919): спуск, затвор, гильза и отдача в руках — с начала на каждый выстрел
+			# свой клип выстрела (АСТЕН-919): спуск, затвор, гильза и отдача в руках — на каждый выстрел заново, с кадра
+			# нажатия (config.shot_start: звук выстрела уже прозвучал — затвор идёт сразу)
 			_play(shot_clip, 0.03)
+			_anim.seek(float(config.get("shot_start", 0)) / float(config.get("fps", 30)), true)
 		else:
 			_kick = BOLT_KICK_SEC
 			if _clip == _clip_name("check") or (_clip != "" and _clip == _clip_name("inspect")):
@@ -565,8 +570,10 @@ func update(pl: Player, delta: float) -> void:
 		# гильза в окне — пока задержка не устранена; в клипе её выбрасывает сам клип
 		_jam_case.visible = jammed or clear_clip
 	# затворная задержка: пусто — затвор сзади, пока клип перезарядки не дошлёт его
-	var held: bool = bool(config.get("hold_open", false)) and pl.ammo <= 0 and _clip == "" and not jammed
-	if bool(config.get("hold_open", false)) and pl.ammo <= 0 and not jammed and _clip != "" and _clip == shot_clip:
+	# без магазина рычаг задержки поднять нечему (его поднимает подаватель) — затвор после последнего выстрела впереди
+	var lockable: bool = bool(config.get("hold_open", false)) and not pl.slide_closed_empty
+	var held: bool = lockable and pl.ammo <= 0 and _clip == "" and not jammed
+	if lockable and pl.ammo <= 0 and not jammed and _clip != "" and _clip == shot_clip:
 		# последний выстрел: клип отводит затвор — с этого кадра он остаётся сзади, на задержке
 		var back: int = int(config.get("shot_slide_back", 0))
 		held = _anim.current_animation_position * float(config.get("fps", 30)) >= back
@@ -801,6 +808,12 @@ func _advance(pl: Player, delta: float) -> void:
 			_anim.seek(to, true)
 	else:
 		_holding = false
+	var fast: Array = config.get("shot_fast", [])
+	if fast.size() == 3 and _clip != "" and _clip == _clip_name("shot"):
+		# выстрел: ход затвора и вылет гильзы — быстрее записи клипа (кадры fast[0]…fast[1] в fast[2] раз), отдача
+		# в руках после них — в темпе клипа
+		var f: float = _anim.current_animation_position * fps
+		_anim.speed_scale = float(fast[2]) if f < float(fast[1]) else 1.0
 	_anim.advance(delta)
 
 
@@ -981,6 +994,9 @@ func hip_transform() -> Transform3D:
 ## В прицеле: линия прицеливания (у рамы: высота sight_h, вдоль её +Z) — на оси взгляда, рукоятка —
 ## на ads_z перед глазом. Считается по стойке (кэш), чтобы клип не тянул прицел за собой.
 func ads_transform() -> Transform3D:
+	if _sight_cache.is_empty() and bool(config.get("ads_from_pose", false)) and is_inside_tree():
+		# вне дерева клипы к скелету не применяются — считать только в сцене
+		_sight_cache = [_frame_at_pose()]
 	if _sight_cache.is_empty():
 		if not is_inside_tree():
 			return hip_transform()
@@ -998,6 +1014,29 @@ func ads_transform() -> Transform3D:
 	var r: Basis = dst * src.inverse()
 	var az: float = float(frame.get_meta("ads_z", 0.3))
 	return Transform3D(r, Vector3(0, 0, -az) - r * p)
+
+
+## Рама в осях этого узла по позе скелета в стойке (config.ads_from_pose, АСТЕН-919). Узел кости (BoneAttachment3D)
+## обновляется скелетом только в конце кадра, а модель из кэша до показа стоит выключенной: при первом вызове он
+## ещё в позе покоя рига, где пистолет повёрнут иначе, — в прицеле оружие стояло криво. Здесь — поза стойки
+## напрямую из скелета (клип покоя на его первом кадре).
+func _frame_at_pose() -> Transform3D:
+	var att: BoneAttachment3D = frame.get_parent() as BoneAttachment3D
+	var sk: Skeleton3D = att.get_parent() as Skeleton3D if att else null
+	if sk == null or att.bone_idx < 0:
+		return WeaponModels._relative(self, frame)
+	var clip: String = _clip
+	var position: float = _anim.current_animation_position if _anim.current_animation != "" else 0.0
+	var current: String = String(_anim.current_animation)
+	_anim.play(_clip_name("idle"), 0.0)
+	_anim.seek(0.0, true)
+	var at: Transform3D = WeaponModels._relative(self, sk) * sk.get_bone_global_pose(att.bone_idx) * frame.transform
+	if current != "" and current != _clip_name("idle"):
+		# вернуть клип, который шёл (кэш считается один раз — обычно в стойке)
+		_anim.play(current, 0.0)
+		_anim.seek(position, true)
+	_clip = clip
+	return at
 
 
 ## Сбросить кэш линии прицеливания (сменили обвес — пересобирается весь узел, но на всякий случай).

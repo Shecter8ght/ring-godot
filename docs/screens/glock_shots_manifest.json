@@ -408,13 +408,13 @@
 				0.0
 			],
 			"clip": "reload_full_rack",
-			"file": "res://docs/screens/glock_clip_spare_full_rack_pull.png",
+			"file": "res://docs/screens/glock_clip_reload_full_rack_pull.png",
 			"fraction": 0.698630136986301,
 			"resolution": [
 				1280,
 				720
 			],
-			"role": "reload_full_rack",
+			"role": "reload_empty_rack",
 			"state": "",
 			"view": "first_person_clips"
 		},

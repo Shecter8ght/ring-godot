@@ -25,6 +25,18 @@ class StateHost extends Node:
 	func request_reload(slot: String, state: Dictionary) -> void:
 		actor.inventory.reload_slot(slot, state)
 
+	## Сброс вещи на землю (быстрая перезарядка): запомнить, что упало, и убрать из списка.
+	var dropped: Array = []
+
+	func request_drop_entry(where: String, idx: int, _quiet: bool = false) -> void:
+		var list: Array = actor.inventory.list_of(where)
+		if idx >= 0 and idx < list.size():
+			dropped.append((list[idx] as Dictionary).duplicate(true))
+			list.remove_at(idx)
+
+	func request_toss_entry(where: String, idx: int, _data: Dictionary) -> void:
+		request_drop_entry(where, idx)
+
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -222,8 +234,57 @@ func _player_cases() -> void:
 	_check("полный рюкзак: магазин остался в оружии, вещи целы", _snapshot(actor) == before and actor._pm_action.is_empty())
 	# --- чужой слот и не то оружие
 	_check("магазин не того оружия — отказ", actor.hand_mag_insert("backpack", 999) != "")
+	_pistol_fast_cases(actor, host)
 	_rifle_cases(actor)
 	world.queue_free()
+
+
+## Пистолет с патронником (владелец 2026-11-14): быстрая перезарядка (двойное R) — при любом остатке в магазине, старый
+## падает на землю, патрон в стволе остаётся; последний выстрел без магазина — затвор закрыт, вставить и передёрнуть
+## (своё время stats.reload_empty_rack).
+func _pistol_fast_cases(actor: Player, host: StateHost) -> void:
+	_reset(actor, _weapon(5, 1), [17])
+	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
+	host.dropped.clear()
+	actor._start_reload(actor.spec())
+	var normal: float = actor.reload_timer
+	actor._try_fast_reload()
+	_check("пистолет: двойное R — быстрая перезарядка", actor._reload_fast and actor.reload_timer < normal and String(actor._pm_action.get("kind", "")) == "reload",
+		"%.2f → %.2f с" % [normal, actor.reload_timer])
+	_finish_reload(actor)
+	var entry: Dictionary = actor.weapon_entry()
+	var fell: int = int((host.dropped[0] as Dictionary).get("rounds", -1)) if host.dropped.size() == 1 else -1
+	_check("пистолет, быстрая: новый в оружии, патрон в стволе, старый (5) на земле, не в рюкзаке",
+		int((entry.mag as Dictionary).rounds) == 17 and int(entry.chamber) == 1 and fell == 5 and _mags(actor).is_empty(),
+		"магазин %d, упал %d, рюкзак %s" % [int((entry.mag as Dictionary).rounds), fell, str(_mags(actor))])
+	# полный магазин — тоже можно
+	_reset(actor, _weapon(17, 1), [17])
+	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
+	actor._start_reload(actor.spec())
+	actor._try_fast_reload()
+	_check("пистолет: быстрая и с полным магазином", actor._reload_fast)
+	actor.cancel_weapon_action()
+	# последний выстрел без магазина: затвор закрыт, а не на задержке
+	_reset(actor, _weapon(0, 1, false), [17])
+	actor.weapon_mag = ""
+	actor.ammo = 1
+	actor.weapon_obstruction = 0.0
+	actor._fire(actor.spec())
+	_check("пистолет без магазина: последний выстрел — затвор закрыт на пустом патроннике", actor.ammo == 0 and actor.slide_closed_empty)
+	var raw: Dictionary = WeaponDb.weapon(GUN).stats
+	# в пустую шахту — «только вставить» (Balance.HAND_MAG.in_k) от времени с передёргиванием
+	var want: float = float(actor.spec().reload_empty) * float(raw.reload_empty_rack) / float(raw.reload_empty) * float(Balance.HAND_MAG.in_k)
+	var why: String = actor.hand_mag_insert("backpack", 0)
+	_check("вставить: с передёргиванием — своё время", why == "" and absf(float(actor._pm_action.get("remaining", 0.0)) - want) < 0.05,
+		"%.2f с, ждали %.2f" % [float(actor._pm_action.get("remaining", 0.0)), want])
+	_finish(actor)
+	_check("после досыла затвор снова как обычно", actor.ammo == 17 and not actor.slide_closed_empty, "в оружии %d" % actor.ammo)
+	# с магазином последний выстрел ставит на задержку
+	_reset(actor, _weapon(0, 1), [17])
+	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
+	actor.ammo = 1
+	actor._fire(actor.spec())
+	_check("с магазином последний выстрел — на задержку", actor.ammo == 0 and not actor.slide_closed_empty)
 
 
 ## Довести перезарядку, начатую из окна рюкзака (кадры игры при открытом окне).

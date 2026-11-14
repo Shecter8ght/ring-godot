@@ -104,7 +104,20 @@ func _viewmodel() -> void:
 	if not ViewmodelClips.available(GLOCK_ID):
 		return
 	var vm: ViewmodelClips = ViewmodelClips.create(GLOCK_ID, {})
+	# линия прицела считается до того, как узлы костей обновились (в игре — модель из кэша, выключенная до показа):
+	# всё равно прямо
+	vm.process_mode = Node.PROCESS_MODE_DISABLED
 	add_child(vm)
+	var ads_early: Transform3D = vm.ads_transform()
+	vm.process_mode = Node.PROCESS_MODE_INHERIT
+	vm.preview_reload("idle", 0.0, "*")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var actual: Transform3D = vm.global_transform.affine_inverse() * vm.frame.global_transform
+	var along: Vector3 = (ads_early.basis * actual.basis * Vector3(0, 0, 1)).normalized()
+	var upward: Vector3 = (ads_early.basis * actual.basis * Vector3(0, 1, 0)).normalized()
+	_check("клипы рук: в прицеле ствол по оси взгляда и не завален", along.dot(Vector3(0, 0, -1)) > 0.9999 and upward.dot(Vector3.UP) > 0.9999,
+		"ствол %s, верх %s" % [str(along), str(upward)])
 	var muzzle: Vector3 = vm.frame.get_meta("muzzle", Vector3.ZERO)
 	_check("клипы рук: срез в осях рукояти как у модели в мире", muzzle.distance_to(MUZZLE_AT) < 0.004, str(muzzle))
 	_check("клипы рук: высота прицельной линии", absf(float(vm.frame.get_meta("sight_h", 0.0)) - SIGHT_H) < 0.004, str(vm.frame.get_meta("sight_h", 0.0)))
@@ -187,7 +200,7 @@ func _run() -> void:
 	definition["asset"] = asset_path
 	_check("без GLB работает процедурный запасной вариант", fallback != null and fallback.has_meta("muzzle") and WeaponRig.find_on(fallback) == null)
 	fallback.free()
-	_viewmodel()
+	await _viewmodel()
 	# ПМ: своя ветка PM_LOD1 и свой глушитель по-прежнему находятся.
 	var pm: Node3D = WeaponModels.build(PM_ID, {}, 1)
 	add_child(pm)

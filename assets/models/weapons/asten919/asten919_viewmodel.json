@@ -1,6 +1,10 @@
 {
  "source": "E:\\Models Blender\\WEAPONS\\АСТЕН-919\\АСТЕН-919_руки_клипы_v01.blend",
  "source_mtime": 1794598688.7194123,
+ "fire_case_frames": [
+  4,
+  24
+ ],
  "jam_open": 0.3,
  "slide_travel_m": 0.043,
  "parts": [

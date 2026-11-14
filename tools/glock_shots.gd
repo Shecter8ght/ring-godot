@@ -172,7 +172,7 @@ func _clip_shots() -> void:
 	_vm = ViewmodelClips.create(WEAPON_ID, {})
 	# клипы, у которых в игре пока нет случая, — на просмотр отдельными ролями этого экземпляра
 	_vm.config = _vm.config.duplicate(true)
-	for spare: String in ["reload_full_rack", "slide_rack", "finger_to_trigger"]:
+	for spare: String in ["slide_rack", "finger_to_trigger"]:
 		(_vm.config.clips as Dictionary)[spare] = spare
 	_vm_space.add_child(_vm)
 	var at := func(clip: String, mark: String, shift: float = 0.0) -> float:
@@ -202,7 +202,7 @@ func _clip_shots() -> void:
 	await _clip("clip_fire_slide", "shot", at.call("fire", "slide_back"))
 	await _clip("clip_empty_locked", "idle", 0.0, false, "held")
 	await _clip("clip_jammed", "idle", 0.0, false, "jam")
-	await _clip("clip_spare_full_rack_pull", "reload_full_rack", at.call("reload_full_rack", "rack_pull"))
+	await _clip("clip_reload_full_rack_pull", "reload_empty_rack", at.call("reload_full_rack", "rack_pull"))
 	await _clip("clip_spare_slide_rack", "slide_rack", at.call("slide_rack", "pull"))
 	await _clip("clip_spare_finger_trigger", "finger_to_trigger", 1.0)
 	await _hand_mag_clips()

@@ -282,6 +282,9 @@ def main():
     bpy.context.view_layer.update()
     fol_table = follower_table(wr)
     full = baked["reload_full"][1][GUN]            # кадр 1 reload_full: затвор на задержке
+    # клип выстрела: кадры, где гильза видна (масштаб кости Case больше точки) — игра проигрывает их быстрее
+    case = [i + 1 for i, m in enumerate(baked["fire"][1][GUN]["Case"]) if m.to_scale().length > 0.05]
+    report["fire_case_frames"] = [case[0], case[-1]] if case else []
     jam = baked["jam_clear"][1][GUN]               # кадр 1 jam_clear: затвор недозакрыт на гильзе
     back = full["Slide"][0].translation.length
     report["jam_open"] = round(jam["Slide"][0].translation.length / back, 3) if back > 1e-6 else 0.3

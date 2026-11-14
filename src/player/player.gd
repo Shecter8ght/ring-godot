@@ -101,6 +101,10 @@ var _reload_slot: String = ""
 var _reload_rev: int = -1
 var _reload_wait: float = 0.0
 var _reload_empty: bool = false
+## Затвор закрыт на пустом патроннике: последний выстрел был без магазина — рычаг задержки поднять нечему (его
+## поднимает подаватель магазина). Полная перезарядка тогда — вставить и передёрнуть (клип reload_empty_rack, время
+## stats.reload_empty_rack). Сбрасывается, когда патроны снова есть, и при смене оружия.
+var slide_closed_empty: bool = false
 ## Быстрая перезарядка (двойное R): старый магазин выбит новым и падает на землю. _reload_age — сколько
 ## идёт текущая перезарядка (второе R считается только в первые Balance.RELOAD_FAST.tap_sec),
 ## _reload_old_mag — какой магазин стоял ({id, rounds}): его и выбросить из рюкзака в конце.
@@ -1788,7 +1792,7 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 	_velcro_at = -1.0
 	var from_pouch: bool = false
 	_reload_insert = mag_out()
-	var t: float = float(spec.get("reload_empty", spec.reload)) if _reload_empty else float(spec.reload)
+	var t: float = _empty_reload_time(spec) if _reload_empty else float(spec.reload)
 	var chambered: bool = _has_chamber(weapon_id)
 	if _reload_insert and not chambered:
 		# старый магазин вынимать не надо — только вставить новый и дослать
@@ -1812,7 +1816,9 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 		from_pouch = kind == "swap" and pouch_mag
 		var standing: Dictionary = e.get("mag", {}) if e.get("mag") is Dictionary else {}
 		if kind == "swap" and String(standing.get("id", "")) != "":
-			_reload_old_mag = {"id": String(standing.id), "rounds": ammo}
+			# у ствола с патронником патрон в стволе остаётся — в старом магазине на один меньше
+			var in_mag: int = ammo - (int(_ws_state(weapon_slot).get("chamber", 0)) if chambered else 0)
+			_reload_old_mag = {"id": String(standing.id), "rounds": in_mag}
 		_reload_wait = 1.5
 		var st := _ws_state(weapon_slot)
 		if not _reload_pick.is_empty():
@@ -1868,18 +1874,34 @@ func _start_reload(spec: Dictionary, pick: Dictionary = {}) -> void:
 		_play_weapon_sound(spec, "round_insert", -4.0)
 
 
+## Время полной перезарядки: затвор закрыт на пустом патроннике — своё (вставить и передёрнуть, клип длиннее),
+## во столько же раз от полной, во сколько в паспорте ствола (stats.reload_empty_rack, АСТЕН-919).
+func _empty_reload_time(specification: Dictionary) -> float:
+	var t: float = float(specification.get("reload_empty", specification.reload))
+	var raw: Dictionary = WeaponDb.weapon(weapon_id).get("stats", {}) as Dictionary
+	if slide_closed_empty and raw.has("reload_empty_rack"):
+		t *= float(raw.reload_empty_rack) / maxf(float(raw.get("reload_empty", raw.get("reload", 1.0))), 0.01)
+	return t
+
+
 ## Второе R сразу после первого: перезарядка становится быстрой — короче в Balance.RELOAD_FAST.time_k раз,
-## старый магазин падает на землю. Только смена отъёмного магазина (со снаряжением — когда есть запасной).
+## старый магазин падает на землю. Только смена отъёмного магазина (со снаряжением — когда есть запасной), при любом
+## остатке в нём. У ствола с патронником (пистолеты) смена ещё не отправлена хосту — её запрос тот же, хост кладёт
+## старый магазин в рюкзак, а по ответу он падает на землю (_accept_pm_result → _drop_old_mag).
 func _try_fast_reload() -> void:
 	var cfg: Dictionary = Balance.RELOAD_FAST
-	if _reload_fast or _reload_insert or _reload_age > float(cfg.tap_sec) or _reload_kind == "clear" or not _pm_action.is_empty():
+	var pm_reload: bool = not _pm_action.is_empty() and String(_pm_action.kind) == "reload" and not bool(_pm_action.get("sent", false))
+	if _reload_fast or _reload_insert or _reload_age > float(cfg.tap_sec) or _reload_kind == "clear" or (not _pm_action.is_empty() and not pm_reload):
 		return
 	if loadout_mode and _reload_kind != "swap":
 		return
-	if WeaponDb.weapon(weapon_id).has("internal_mag") or _has_chamber(weapon_id):
+	if WeaponDb.weapon(weapon_id).has("internal_mag"):
 		return
 	_reload_fast = true
 	reload_timer = maxf(0.2, (reload_timer + _reload_age) * float(cfg.time_k) - _reload_age)
+	if pm_reload:
+		# модель в руках персонажа (и у напарников) — та же смена на оставшееся время
+		_weapon_action("reload", _reload_empty, reload_timer)
 	_reload_audio.switch_to(weapon_id, _reload_audio.mode(_reload_empty, true), reload_timer, _reload_age)
 	# быстрая: сначала берут новый магазин из подсумка (им же выбивают старый) — липучка сразу
 	if _velcro_at >= 0.0:
@@ -2165,7 +2187,7 @@ func hand_mag_insert(role: String, idx: int) -> String:
 	var swap: bool = not mag_out()
 	# патронов нет ни в стволе, ни в магазине — затвор на задержке: новый магазин досылают
 	var charge: bool = ammo <= 0 and int(item.get("rounds", 0)) > 0
-	var duration: float = float(specification.get("reload_empty", specification.reload)) if charge else float(specification.reload)
+	var duration: float = _empty_reload_time(specification) if charge else float(specification.reload)
 	if not swap:
 		duration *= float(Balance.HAND_MAG.in_k)
 	_pm_action_seq += 1
@@ -2382,11 +2404,16 @@ func _accept_pm_result(sequence: int, result: Dictionary) -> void:
 		return
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
+	if ammo > 0:
+		slide_closed_empty = false
 	weapon_mods = (weapon_entry().get("mods", {}) as Dictionary).duplicate(true)
 	if _ws.has(weapon_slot):
 		_ws[weapon_slot].jam = false
 	if action in ["reload", "mag_out", "mag_in"]:
 		_weapon_action("finish_reload", false, 0.0, ammo)
+	if action == "reload":
+		# быстрая перезарядка ствола с патронником: хост убрал старый магазин в рюкзак — он падает на землю
+		_drop_old_mag()
 	elif action == "signal_shot":
 		# The host broadcasts the accepted visual shot once to all scene peers.
 		pass
@@ -2689,6 +2716,7 @@ func _switch(key: String, sound: bool = true) -> void:
 	if sound and weapon_id != "":
 		_play_weapon_sound(spec(), "holster", -6.0)
 	weapon_slot = key
+	slide_closed_empty = false
 	var e := entry_of(key)
 	weapon_id = String(e.get("id", ""))
 	ammo = Gear.total_rounds(e)
@@ -2741,6 +2769,8 @@ func _fire(spec: Dictionary) -> void:
 	_open_dust_cover(weapon_slot)
 	ammo = _state_rounds(weapon_slot)
 	weapon_rounds = ammo
+	# последний патрон ушёл без магазина в оружии: затвор не встал на задержку, а закрылся на пустом патроннике
+	slide_closed_empty = ammo <= 0 and _has_chamber(weapon_id) and mag_out()
 	_weapon_action("shot", ammo <= 0, 0.0, ammo, false)
 	var worn_entry: Dictionary = entry_of(weapon_slot)
 	WeaponCondition.wear_shots(worn_entry, 1)
