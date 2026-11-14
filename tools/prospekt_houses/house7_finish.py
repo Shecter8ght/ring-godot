@@ -297,13 +297,10 @@ def link_mesh():
     return me
 
 
-def security():
-    """Дом заброшен, вход закрыт дёшево: цепь с навесным замком на ручках дверей, лист-объявление на стекле изнутри,
-    навесной замок на проушинах служебной двери."""
-    import kit
+def chain_frames():
+    """Звенья цепи на ручках дверей вестибюля: 2,5 оборота вокруг обеих ручек-скоб, оба конца свисают; [(центр, поворот, касательная)].
+    Тот же путь берёт игровая версия (house7_game.py)."""
     from mathutils import Matrix
-    asm = bpy.data.collections["Дом7_сборка"]
-    me = link_mesh()
     yc = -12.62
     path = []
     for k in range(401):
@@ -329,6 +326,7 @@ def security():
     pitch = 0.0275
     nl = int(cum[-1] / pitch)
     j = 0
+    out = []
     for i in range(nl):
         sdist = i * pitch
         while j < len(path) - 2 and cum[j + 1] < sdist:
@@ -345,6 +343,24 @@ def security():
             nrm = Vector((0, 1, 0))
         zax = tg.cross(nrm).normalized()
         rot = Matrix(((tg.x, nrm.x, zax.x), (tg.y, nrm.y, zax.y), (tg.z, nrm.z, zax.z)))
+        out.append((p, rot, tg))
+    return out
+
+
+def lock_hang_point(frames):
+    """Точка дужки замка: внутренний нижний конец последнего звена (раньше замок висел на ~5 см ниже звена)."""
+    lp, _rot, ltg = frames[-1]
+    return lp + ltg * (0.0095 + 0.0075 - 0.006)
+
+
+def security():
+    """Дом заброшен, вход закрыт дёшево: цепь с навесным замком на ручках дверей, лист-объявление на стекле изнутри,
+    навесной замок на проушинах служебной двери."""
+    import kit
+    from mathutils import Matrix
+    asm = bpy.data.collections["Дом7_сборка"]
+    me = link_mesh()
+    for i, (p, rot, tg) in enumerate(chain_frames()):
         ob = bpy.data.objects.new("chain_%d" % i, me)
         ob.matrix_world = Matrix.Translation(p) @ rot.to_4x4()
         ob.visible_glossy = False                           # в стекле дверей не отражается чёрным дублем (в игре его тоже нет)
@@ -354,9 +370,7 @@ def security():
     pcol, pbar = load_padlock()
     for pob in pcol.objects:
         pob.visible_glossy = False
-    # дужка — во внутреннем нижнем конце последнего звена (раньше замок висел на конце пути, на ~5 см ниже звена)
-    lp, ltg = last_link
-    tip = lp + ltg * (0.0095 + 0.0075 - 0.006)
+    tip = lock_hang_point([(last_link[0], None, last_link[1])])
     hang_lock(asm, pcol, pbar, Vector((tip.x, tip.y, tip.z)), 0.0, "padlock_chain")
     # лист-объявление А4 в файле: пятиугольник с загнутым углом, скотч, прозрачный файл
     yn = -12.448
@@ -733,4 +747,5 @@ def main():
         render(prev_dir, only, res, samples)
 
 
-main()
+if __name__ == "__main__":          # при import из house7_game.py — только функции
+    main()

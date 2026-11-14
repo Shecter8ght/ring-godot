@@ -32,4 +32,5 @@ assets/models/characters/**/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/models/urban95/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/models/prospekt_vehicles/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/models/prospekt_city/*.bin filter=lfs diff=lfs merge=lfs -text
+assets/models/prospekt_houses/**/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/models/attachments/dozor/*.bin filter=lfs diff=lfs merge=lfs -text
