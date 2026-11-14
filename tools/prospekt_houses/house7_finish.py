@@ -309,6 +309,16 @@ def security():
     for k in range(401):
         th = 5 * math.pi * k / 400.0
         path.append(Vector((-1.0 + 0.19 * math.cos(th), yc + 0.05 * math.sin(th), 1.10 + 0.04 * th / (2 * math.pi))))
+    # начальный конец тоже свисает вниз (раньше торчал горизонтально): дуга радиуса 5 см от витка и вертикальный хвост
+    p0 = path[0]
+    head = []
+    for k in range(1, 9):
+        a = math.pi / 2 * k / 8.0
+        head.append(Vector((p0.x + 0.012 * (1 - math.cos(a)), p0.y - 0.05 * math.sin(a), p0.z - 0.05 * (1 - math.cos(a)))))
+    for k in range(1, 31):
+        t = k / 30.0
+        head.append(Vector((p0.x + 0.012, p0.y - 0.05, p0.z - 0.05 - 0.26 * t)))
+    path = head[::-1] + path
     end = path[-1]
     for k in range(1, 41):                                  # свободный конец свисает вниз
         t = k / 40.0
@@ -337,11 +347,17 @@ def security():
         rot = Matrix(((tg.x, nrm.x, zax.x), (tg.y, nrm.y, zax.y), (tg.z, nrm.z, zax.z)))
         ob = bpy.data.objects.new("chain_%d" % i, me)
         ob.matrix_world = Matrix.Translation(p) @ rot.to_4x4()
+        ob.visible_glossy = False                           # в стекле дверей не отражается чёрным дублем (в игре его тоже нет)
+        last_link = (p, tg)
         asm.objects.link(ob)
     # замок владельца: дужка продета в последнее звено, висит лицом наружу (−Y)
     pcol, pbar = load_padlock()
-    last = path[-1]
-    hang_lock(asm, pcol, pbar, Vector((last.x, last.y, last.z - 0.004)), 0.0, "padlock_chain")
+    for pob in pcol.objects:
+        pob.visible_glossy = False
+    # дужка — во внутреннем нижнем конце последнего звена (раньше замок висел на конце пути, на ~5 см ниже звена)
+    lp, ltg = last_link
+    tip = lp + ltg * (0.0095 + 0.0075 - 0.006)
+    hang_lock(asm, pcol, pbar, Vector((tip.x, tip.y, tip.z)), 0.0, "padlock_chain")
     # лист-объявление А4 в файле: пятиугольник с загнутым углом, скотч, прозрачный файл
     yn = -12.448
     x0, x1, z0, z1, fo = -1.95, -1.74, 1.56, 1.857, 0.04
@@ -639,7 +655,9 @@ def world_and_light():
     sun = bpy.data.objects["sun"]
     sun.data.energy = 2.2
     sun.data.color = (1.0, 0.95, 0.88)
-    sun.data.angle = math.radians(8)
+    sun.data.angle = math.radians(30)                                  # пасмурно: тени мягкие, под козырьком резкой тени нет
+    if os.environ.get("HOUSE7_NOSUN"):
+        sun.data.energy = 0.0
     sun.rotation_euler = (math.radians(58), 0, math.radians(-40))
     sc.render.engine = "CYCLES"
     sc.cycles.device = "CPU"

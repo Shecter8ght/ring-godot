@@ -165,9 +165,10 @@ class NT:
         self.l.new(v, wn.inputs[0])
         return wn.outputs[0]
 
-    def ao(self, dist):
+    def ao(self, dist, local=False):
         a = self.node("ShaderNodeAmbientOcclusion", samples=8)
         a.inputs["Distance"].default_value = dist
+        a.only_local = local
         return a.outputs["AO"]
 
 
@@ -307,10 +308,11 @@ def m_alu(mat):
 def m_steel(mat):
     N = NT(mat)
     col, rough, h = base(N, "metal_light", 0.8)
-    col = N.tint_lum(col, lin((168, 170, 172)), mean_lin("metal_light_albedo.jpg"), 0.5)
-    col, rough = dirt(N, col, N.math("MAXIMUM", N.math("MULTIPLY", rough, 0.9), 0.3), splash=0.5, crev=0.7,
-                      dirt_col=(0.12, 0.11, 0.1))
-    principled(N, col, rough, metal=1.0, bump=h, bump_str=0.1, bump_dist=0.001)
+    col = N.tint_lum(col, lin((120, 122, 124)), mean_lin("metal_light_albedo.jpg"), 0.5)
+    # шлифованная сталь с пылью: не зеркало (шероховатость не ниже 0,5), пыль и брызги заметнее
+    col, rough = dirt(N, col, N.math("MAXIMUM", N.math("MULTIPLY", rough, 0.9), 0.5), splash=0.8, crev=0.8,
+                      dirt_col=(0.16, 0.15, 0.135))
+    principled(N, col, rough, metal=0.85, bump=h, bump_str=0.1, bump_dist=0.001)
 
 
 def m_glass(mat, dark=False):
@@ -322,7 +324,9 @@ def m_glass(mat, dark=False):
     cracked = N.math("LESS_THAN", h, 0.05)                                                    # ~5 % с трещиной
     z = N.pos.outputs[2]
     bottom = N.rng(N.math("FRACT", N.math("DIVIDE", N.math("SUBTRACT", z, 4.5), 3.0)), 0.0, 0.35, 0.8, 0.0)   # сильнее по низу окна
-    corner = N.math("SUBTRACT", 1.0, N.ao(0.25))                                               # и по углам
+    # и по углам рамы: AO только своей сетки и на 8 см — иначе цепь, замок и ручки перед стеклом
+    # «затемняли» его своим чётким силуэтом (чёрный дубль на cam_chain)
+    corner = N.math("SUBTRACT", 1.0, N.ao(0.08, local=True))
     base_dirt = N.math("MULTIPLY", N.rng(dust, 0.3, 0.85, 0.0, 1.0), N.math("ADD", 0.14, N.math("ADD", N.math("MULTIPLY", bottom, 0.22), N.math("MULTIPLY", corner, 0.3))))
     base_dirt = N.math("ADD", base_dirt, N.math("MULTIPLY", N.rng(sp, 0.3, 0.9, 0.0, 1.0), 0.05))
     if dark:
@@ -331,7 +335,8 @@ def m_glass(mat, dark=False):
     cr = N.r(N.tri("masks/m_crack.png", 1.7, "Non-Color", off=(0.22, 0.15)))
     cf = N.math("MULTIPLY", cracked, N.rng(cr, 0.1, 0.5, 0.0, 1.0))
     d = N.math("MINIMUM", N.math("ADD", d, cf), 1.0)
-    rough = N.math("ADD", 0.02, N.math("MULTIPLY", d, 0.3))
+    # грязное стекло вестибюля чуть матовее: отражение ручек и цепи в нём размыто, а не чёрный чёткий дубль
+    rough = N.math("ADD", 0.07 if dark else 0.02, N.math("MULTIPLY", d, 0.3))
     col = N.mixc(d, N.const(lin((128, 136, 134) if dark else (208, 216, 214))), N.const(lin((60, 56, 50) if dark else (92, 88, 80))))
     principled(N, col, rough, extra={"Transmission Weight": 1.0, "IOR": 1.5})
 
