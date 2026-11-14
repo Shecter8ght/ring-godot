@@ -101,12 +101,12 @@ def main() -> None:
                       "overrides": s.get("overrides", {}), "note": s.get("note", "")})
     spec.update({
         "schema": "ring-finish-spec/1", "asset": "Пулемёт «Частокол» (по мотивам ПКП «Печенег»)",
-        "model": "Частокол_геометрия_v03.blend", "stage": "factory", "catalog": "tools/asset_kit/finish/finishes.json",
+        "model": "Частокол_геометрия_v04.blend", "stage": "factory", "catalog": "tools/asset_kit/finish/finishes.json",
         "about": "Заводская отделка (этап 1): слот — группа деталей, finish — код каталога (выбор владельца), "
                  "recommended — предложение агента по интервью, overrides — правки чисел поверх карточки. Пишет "
                  "страница каталога (catalog_server.py) и агент; читают Claude и Codex.",
         "slots": slots, "interview": INTERVIEW})
-    for k, v in (("favorites", []), ("requests", []), ("history", []), ("accepted", False)):
+    for k, v in (("favorites", []), ("requests", []), ("history", []), ("accepted", False)):     # приёмку ставит агент
         spec.setdefault(k, v)
     tmp = SPEC.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
