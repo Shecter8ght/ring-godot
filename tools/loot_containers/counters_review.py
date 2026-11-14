@@ -82,7 +82,9 @@ def main() -> None:
             ob.data.materials.append(mat)
             for p in ob.data.polygons:
                 p.use_smooth = True
-            ob.data.set_sharp_from_angle(angle=math.radians(10))   # крупные плоскости с фасками: при 40° градиент нормалей даёт блики-«диагонали»
+            if "custom_normal" in ob.data.attributes:   # свои нормали Bevel (harden) — волна на плитах с вырезами
+                ob.data.attributes.remove(ob.data.attributes["custom_normal"])
+            ob.data.set_sharp_from_angle(angle=math.radians(30))
         R3.label(coll, TITLES[game], (cx, -1.0, 0.002))
         spots[game] = m.translation.copy()
     # касса партии 1 (закрытая, карты v03) на socket_register: поворот 180°, дисплей покупателя — к покупателю

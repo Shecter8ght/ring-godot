@@ -30,7 +30,29 @@ EDGE_SLOT_TAG = "кромка"
 SCALE = {"ПТ_столешница": 1.5, "ПТ_столешница__кромка": 1.3, "ПТ_накладка_полоса": 1.4, "ПТ_панель_передняя": 1.2,
          "ПТ_наклейка_инвентарник": 4.0, "ПТ_монетница": 1.5, "КБ_стол_кассира": 1.4, "КБ_стол_кассира__кромка": 1.3,
          "КБ_столешница_нержавейка": 1.5, "КБ_столешница_сканер": 1.5, "КБ_лента_транспортёра": 1.5, "КБ_табличка_панели": 4.0,
-         "КБ_борта_пластик": 1.4, "КБ_корпус": 1.1, "КБ_ящик_лицо": 1.0}
+         "КБ_борта_пластик": 1.4, "КБ_корпус": 1.1, "КБ_ящик_лицо": 1.0,
+         # круг 2: узкие полосы кромок крупнее — сколы на них без «лесенки» пикселей
+         "ПТ_столешница__кромка": 3.0, "КБ_стол_кассира__кромка": 2.5}
+EDGE_SCALE = 2.0   # прочие «…__кромка» (торцы ЛДСП 16 мм)
+
+
+def scale_for(name: str) -> float:
+    """Множитель плотности по имени сетки; суффикс «.001» (имя занято объектом формы в том же файле) не мешает."""
+    base = name.rsplit(".", 1)[0] if name.rsplit(".", 1)[-1].isdigit() else name
+    if base in SCALE:
+        return SCALE[base]
+    return EDGE_SCALE if base.endswith("__" + EDGE_SLOT_TAG) else 1.0
+
+
+def clean_normals(me) -> None:
+    """Без своих нормалей: Bevel с «harden normals» оставлял custom_normal, и на треугольниках плиты с вырезами (сканер,
+    кабельные выводы) нормали интерполировались волной — «плавленое» отражение нержавейки. Плоские грани — плоско,
+    острые рёбра по углу 30°."""
+    if "custom_normal" in me.attributes:
+        me.attributes.remove(me.attributes["custom_normal"])
+    for p in me.polygons:
+        p.use_smooth = True
+    me.set_sharp_from_angle(angle=math.radians(30))
 
 # пластинки печати: (набор, имя, центр в осях корня, нормаль, «вправо», ширина мм, высота мм, толщина мм)
 PLATES = {"cn_counter": [("ПТ_наклейка_инвентарник", (-0.75, -0.10, 0.56), (-1, 0, 0), (0, 1, 0), 100, 60, 0.4)]}
@@ -106,6 +128,7 @@ def main() -> None:
                 nm = bpy.data.meshes.new(name)
                 bm.to_mesh(nm)
                 bm.free()
+                clean_normals(nm)
                 o2 = bpy.data.objects.new(name, nm)
                 coll.objects.link(o2)
                 objs.append(o2)
@@ -134,7 +157,7 @@ def main() -> None:
         bpy.ops.uv.average_islands_scale()
         bpy.ops.object.mode_set(mode="OBJECT")
         for ob in objs:
-            k = SCALE.get(ob.name, 1.0)
+            k = scale_for(ob.name)
             if abs(k - 1.0) < 1e-6:
                 continue
             bm = bmesh.new()

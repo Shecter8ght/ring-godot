@@ -41,7 +41,8 @@ COUNTER = {
     "trim": ["ПТ_накладка_полоса"],
     "top": ["ПТ_столешница"],
     "top_edge": ["ПТ_столешница__кромка"],
-    "dark": ["ПТ_цоколь_планка", "ПТ_кабельный_вывод", "ПТ_опоры_пятки", "ПТ_монетница", "ПТ_монетница_коврик"],
+    "skirt": ["ПТ_цоколь_планка"],
+    "dark": ["ПТ_кабельный_вывод", "ПТ_опоры_пятки", "ПТ_монетница", "ПТ_монетница_коврик"],
     "zinc": ["ПТ_штифты_полок", "ПТ_эксцентрики", "ПТ_уголки", "ПТ_опоры_штанги", "ПТ_ящик_рельсы_неподвижные",
              "ПТ_ящик_рельсы_подвижные", "ПТ_ящик_ручка", "ПТ_держатель_пакетов"],
     "plug": ["ПТ_заглушки_конфирматов"],
@@ -50,7 +51,8 @@ COUNTER = {
 }
 CHECKOUT = {
     "paint": ["КБ_корпус", "КБ_полка_корзин", "КБ_подставка_кассы"],
-    "dark": ["КБ_цоколь", "КБ_швы_панелей", "КБ_кабельные_выводы", "КБ_сканер_рамка"],
+    "skirt": ["КБ_цоколь"],
+    "dark": ["КБ_швы_панелей", "КБ_кабельные_выводы", "КБ_сканер_рамка"],
     "ss": ["КБ_столешница_нержавейка", "КБ_столешница_сканер", "КБ_столешница_сканер__кромка", "КБ_ограждение_труба", "КБ_отбойник_труба",
            "КБ_стол_ножка", "КБ_стойка_номера", "КБ_накопитель_бортик"],
     "belt": ["КБ_лента_транспортёра"],
@@ -88,7 +90,7 @@ def photo(name, pos, setname, period, bbox, rot=0.0, color=0.55, rough=0.5, heig
     lay = L.insert_fill(pos)
     lay.set_name(f"{name} · фото {setname}")
     p = f"{TEX}/{setname}"
-    chans = {CH.BaseColor: sp_finish._bitmap(f"{p}/color_2k.jpg")}
+    chans = {CH.BaseColor: sp_finish._bitmap(f"{p}/color_2k.jpg")} if color else {}
     if rough:
         chans[CH.SpecularRoughness] = sp_finish._bitmap(f"{p}/roughness_2k.jpg")
     if height:
@@ -96,8 +98,9 @@ def photo(name, pos, setname, period, bbox, rot=0.0, color=0.55, rough=0.5, heig
     lay.active_channels = set(chans)
     for c, src in chans.items():
         lay.set_source(c, src)
-    lay.set_blending_mode(cmode or (L.BlendingMode.Overlay), CH.BaseColor)
-    lay.set_opacity(color, CH.BaseColor)
+    if color:
+        lay.set_blending_mode(cmode or L.BlendingMode.Overlay, CH.BaseColor)
+        lay.set_opacity(color, CH.BaseColor)
     if rough:
         lay.set_opacity(rough, CH.SpecularRoughness)
     if height:
@@ -131,35 +134,36 @@ def flat(name, pos, color, rough, metal=0.0, height=LEVEL):
 
 
 def base_layers(pos, meshes, bbox, k, kind, game):
-    """Заводская отделка вида: плоский тон + фото-основа (+ крошка / рельеф)."""
+    """Заводская отделка вида: плоский тон + фото-основа (+ рельеф). Круг 2: ламинат — серый высокочастотный декор
+    Wood066_decor поверх ровного тона (печатный декор ЛДСП, без «досок» и розового), краска бокса — тон ровный, от фото
+    Metal029 только шагрень (блеск и рельеф), лента — продольный рельеф от шлифовки Metal009, цоколи — ровный чёрный."""
     made = []
     spec = {
-        "lam": ((0.84, 0.77, 0.64), 0.55, 0.0, "Wood092_oak", 700, 0.0, 0.70, 0.30, 0.03),
-        "trim": ((0.26, 0.17, 0.12), 0.50, 0.0, "Wood066", 600, 0.0, 0.55, 0.25, 0.0),
-        "lam_edge": ((0.74, 0.64, 0.50), 0.40, 0.0, None, 0, 0, 0, 0, 0),
+        "lam": ((0.80, 0.71, 0.56), 0.55, 0.0, "Wood066_decor", 380, 0.0, 0.55, 0.12, 0.02),
+        "trim": ((0.17, 0.11, 0.08), 0.50, 0.0, "Wood066_decor", 300, 0.0, 0.60, 0.12, 0.0),
+        "lam_edge": ((0.74, 0.65, 0.51), 0.40, 0.0, None, 0, 0, 0, 0, 0),
         "top_edge": ((0.15, 0.15, 0.16), 0.40, 0.0, None, 0, 0, 0, 0, 0),
-        "top": ((0.17, 0.175, 0.185), 0.42, 0.0, "Plastic011", 400, 0.0, 0.40, 0.35, 0.0),
-        "dark": ((0.13, 0.13, 0.13), 0.70, 0.0, "Plastic012A", 300, 0.0, 0.40, 0.15, 0.08),
+        "top": ((0.17, 0.175, 0.185), 0.45, 0.0, "Plastic011", 400, 0.0, 0.20, 0.20, 0.0),
+        "dark": ((0.13, 0.13, 0.13), 0.65, 0.0, "Plastic012A", 300, 0.0, 0.25, 0.15, 0.03),
+        "skirt": ((0.115, 0.115, 0.115), 0.62, 0.0, "Plastic012A", 300, 0.0, 0.0, 0.15, 0.02),
         "zinc": ((0.60, 0.61, 0.60), 0.40, 1.0, "Metal014", 300, 0.0, 0.30, 0.25, 0.05),
-        "plug": ((0.70, 0.60, 0.46), 0.45, 0.0, None, 0, 0, 0, 0, 0),
+        "plug": ((0.70, 0.61, 0.48), 0.45, 0.0, None, 0, 0, 0, 0, 0),
         "bags": ((0.84, 0.84, 0.80), 0.35, 0.0, None, 0, 0, 0, 0, 0),
         "label": ((0.85, 0.84, 0.78), 0.70, 0.0, None, 0, 0, 0, 0, 0),
-        "paint": ((0.40, 0.47, 0.52), 0.55, 0.0, "Metal030", 500, 0.0, 0.35, 0.25, 0.08),
+        "paint": ((0.40, 0.47, 0.52), 0.52, 0.0, "Metal029", 150, 0.0, 0.0, 0.12, 0.0),
         "ss": ((0.74, 0.74, 0.73), 0.32, 1.0, "Metal009", 450, 0.0, 0.40, 0.55, 0.0),
-        "belt": ((0.13, 0.13, 0.13), 0.86, 0.0, "Plastic012A", 250, 0.0, 0.40, 0.10, 0.08),
-        "plastic": ((0.66, 0.67, 0.67), 0.48, 0.0, "Plastic018A", 350, 0.0, 0.45, 0.30, 0.08),
-        "glam": ((0.22, 0.23, 0.24), 0.50, 0.0, "Plastic011", 400, 0.0, 0.45, 0.30, 0.10),
-        "white": ((0.86, 0.86, 0.83), 0.35, 0.0, "Plastic018A", 350, 0.0, 0.25, 0.30, 0.05),
+        "belt": ((0.12, 0.12, 0.12), 0.85, 0.0, "Metal009", 220, 0.0, 0.0, 0.20, 0.12),
+        "plastic": ((0.66, 0.67, 0.67), 0.48, 0.0, "Plastic018A", 350, 0.0, 0.30, 0.30, 0.04),
+        "glam": ((0.22, 0.23, 0.24), 0.50, 0.0, "Plastic011", 400, 0.0, 0.30, 0.25, 0.0),
+        "white": ((0.86, 0.86, 0.83), 0.35, 0.0, "Plastic018A", 350, 0.0, 0.20, 0.30, 0.03),
         "glass": ((0.12, 0.14, 0.16), 0.12, 0.0, None, 0, 0, 0, 0, 0),
     }[kind]
     color, rough, metal, pset, period, rot, c, r, h = spec
     f = flat(f"Основа — {kind}", pos, color, rough, metal)
     made.append(_scope(f, meshes))
-    last = f
     if pset:
         p = photo(f"Фото — {kind}", _above(f), pset, period, bbox, rot, c, r, h)
         made.append(_scope(p, meshes))
-        last = p
     return made
 
 
@@ -168,109 +172,217 @@ CORE = "Chipboard001_pale"
 CORE2 = "Chipboard003_pale"
 
 
-def wear_lam(pos, meshes, bbox, k):
-    """ЛДСП: неоднородность тона (мягкие пятна), сердечник из стружки на сбитых кромках и углах, разбухший низ, обувь, пыль, стыки."""
+def _chips_core(pos, meshes, bbox, name="Сколы до ДСП (зона chips)"):
+    """Сколы — мелкие пятна по причине (counters_zones.chip_blobs: углы, кромка у продавца, низ, лицо ящика): в них
+    сердечник ДСП. Маска — карта мест по развёртке целиком, без порога (без «лесенки»)."""
+    c = core_layer(name, pos, CORE, 380, bbox)
+    zone(c, "chips")
+    return _scope(c, meshes)
+
+
+def wear_lam(pos, meshes, bbox, k, trim=False):
+    """ЛДСП: печатный декор почти ровный; сколы до ДСП точками, низ у пола — сырость узкой полосой, следы обуви внизу,
+    грязь в стыках, жир у ручки ящика. Пыли пятнами нет (круглые пятна SI012 владелец не принимает)."""
     made = []
-    t = _layer("Тон ламината — тёмные пятна (SI014)", pos, color=(0.66, 0.62, 0.56), cmode=L.BlendingMode.Multiply, cop=0.85 * k,
-               rough=0.05, rmode="add", rop=0.4)
-    spread(t, S.si(14), 1700, bbox, rot=0.4)
-    made.append(_scope(t, meshes))
-    t2 = _layer("Тон ламината — светлые пятна (SI016)", _above(t), color=(0.80, 0.76, 0.68), cmode=L.BlendingMode.Screen, cop=0.35 * k,
-                rough=-0.04, rmode="add", rop=0.5)
-    spread(t2, S.si(16), 2200, bbox, rot=1.2)
-    made.append(_scope(t2, meshes))
-    last = t2
-    # главный признак: сбитая кромка — светлая ДСП со стружкой, шершавая, без блеска
-    c = core_layer("Сердечник ДСП на кромках (edge × ChipsEdge45)", _above(last), CORE, 450, bbox)
-    zone(c, "edge", _m("ChipsEdge45"), 1100, bbox, rot=0.3, harden=(0.4, 0.6))
-    made.append(_scope(c, meshes))
-    c2 = core_layer("Сердечник — углы пятнами (edgew × ChipsEdge14)", _above(c), CORE2, 400, bbox, rot=0.6)
-    zone(c2, "edgew", _m("ChipsEdge14"), 1200, bbox, rot=1.7, harden=(0.5, 0.6))
-    made.append(_scope(c2, meshes))
-    last = c2
-    # низ у пола: сырость и вспученный ламинат — тёмное, шершавое, из-под него крупными кусками ДСП
-    w = _layer("Низ — сырость (floor × grunge_3)", _above(last), color=(0.52, 0.43, 0.34), cmode=L.BlendingMode.Multiply, cop=0.85 * k,
-               rough=0.85, rop=0.7, metal=0.0, height=0.485)
-    zone(w, "floor", S.sh("grunge_3"), 1500, bbox, rot=0.2)
-    made.append(_scope(w, meshes))
-    sw = core_layer("Вспученный низ — ДСП из-под ламината (floor × ChipsEdge14)", _above(w), CORE, 380, bbox, rot=0.2)
-    zone(sw, "floor", _m("ChipsEdge14"), 1400, bbox, rot=0.9, harden=(0.55, 0.6))
-    made.append(_scope(sw, meshes))
-    r = _layer("Следы обуви (kick × Rubber03)", _above(sw), color=(0.22, 0.20, 0.17), cmode=L.BlendingMode.Multiply, cop=0.6 * k,
-               rough=-0.05, rmode="add", rop=0.5)
-    zone(r, "kick", _m("Rubber03"), 500, bbox, rot=0.4)
-    made.append(_scope(r, meshes))
-    u = _layer("Пыль сверху (up × SI012)", _above(r), color=(0.55, 0.53, 0.50), cop=0.28 * k, rough=0.9, rop=0.4 * k, metal=0.0)
-    zone(u, "up", S.si(12), 1500, bbox, rot=0.7)
-    made.append(_scope(u, meshes))
-    d = _layer("Грязь в стыках (AO × dirt_4)", _above(u), color=(0.20, 0.17, 0.13), cop=0.5 * k, rough=0.88, rop=0.8, metal=0.0, height=0.5)
+    last = None
+    if not trim:
+        t = _layer("Тон декора — мягкие пятна (SI014)", pos, color=(0.86, 0.84, 0.80), cmode=L.BlendingMode.Multiply, cop=0.45 * k,
+                   rough=0.04, rmode="add", rop=0.3)
+        spread(t, S.si(14), 2200, bbox, rot=0.4)
+        made.append(_scope(t, meshes))
+        last = t
+    c = _chips_core(pos if last is None else _above(last), meshes, bbox)
+    made.append(c)
+    last = c
+    d = _layer("Грязь в стыках (AO × dirt_4)", _above(last), color=(0.20, 0.17, 0.13), cop=0.45 * k, rough=0.88, rop=0.8, metal=0.0, height=0.5)
     ao_seams(d, bbox, "dirt_4", 1400)
     made.append(_scope(d, meshes))
-    kn = _layer("Лицо — следы ног и колен (front_knee × Rubber03)", _above(d), color=(0.45, 0.42, 0.38), cmode=L.BlendingMode.Multiply, cop=0.55 * k,
-                rough=-0.05, rmode="add", rop=0.5)
-    zone(kn, "front_knee", _m("Rubber03"), 500, bbox, rot=0.4)
-    made.append(_scope(kn, meshes))
-    d = kn
-    hd = _layer("Ручка ящика — жир (touch × Fingerprints001)", _above(d), color=(0.62, 0.55, 0.45), cmode=L.BlendingMode.Multiply,
-                cop=0.35 * k, rough=-0.1, rmode="add", rop=0.7)
+    last = d
+    if trim:
+        return made
+    w = _layer("Низ — сырость (floor × grunge_3)", _above(last), color=(0.62, 0.55, 0.46), cmode=L.BlendingMode.Multiply, cop=0.55 * k,
+               rough=0.8, rop=0.5, metal=0.0)
+    zone(w, "floor", S.sh("grunge_3"), 1500, bbox, rot=0.2)
+    made.append(_scope(w, meshes))
+    r = _layer("Следы обуви внизу (kick_low × Rubber01)", _above(w), color=(0.40, 0.37, 0.33), cmode=L.BlendingMode.Multiply,
+               cop=0.45 * k, rough=-0.05, rmode="add", rop=0.4)
+    zone(r, "kick_low", _m("Rubber01"), 500, bbox, rot=0.0)
+    made.append(_scope(r, meshes))
+    hd = _layer("Ручка ящика — жир (touch × Fingerprints001)", _above(r), color=(0.66, 0.60, 0.50), cmode=L.BlendingMode.Multiply,
+                cop=0.30 * k, rough=-0.1, rmode="add", rop=0.6)
     zone(hd, "touch", S.fp(1), 600, bbox, rot=0.7)
     made.append(_scope(hd, meshes))
     return made
 
 
-def wear_edge(pos, meshes, bbox, k):
-    """Кромка ПВХ: потёртость и риски, местами отклеилась — под ней ДСП (куски 2–5 см по длине кромки)."""
+def wear_trim(pos, meshes, bbox, k):
+    return wear_lam(pos, meshes, bbox, k, trim=True)
+
+
+def wear_edge(pos, meshes, bbox, k, top=False):
+    """Кромка ПВХ 2 мм: почти целая. Затёртость и светлая полоса истирания по ребру (зона кромки из 3D × SI007),
+    у столешницы — сильнее со стороны продавца; 3–6 мелких сколов 2–8 мм до ДСП по местам (зона chips) с побелевшим
+    пластиком вокруг (chips_halo)."""
     made = []
-    s = _layer("Кромка — риски (Scratches001)", pos, color=(0.80, 0.76, 0.66), cmode=L.BlendingMode.Screen, cop=0.35 * k, rough=-0.1, rmode="add", rop=0.5)
-    spread(s, S.sc(1), 500, bbox, rot=0.5)
-    made.append(_scope(s, meshes))
-    c = core_layer("Кромка отклеилась — ДСП (ChipsEdge14)", _above(s), CORE2, 420, bbox, rot=0.3)
-    S.own(c, _m("ChipsEdge14"), 900, bbox, rot=0.2, pos=0.12, contrast=0.6)
-    made.append(_scope(c, meshes))
-    d = _layer("Кромка — грязь (SI012)", _above(c), color=(0.36, 0.30, 0.23), cmode=L.BlendingMode.Multiply, cop=0.45 * k, rough=0.7, rop=0.5)
-    spread(d, S.si(12), 900, bbox, rot=0.9)
-    made.append(_scope(d, meshes))
+    e = _layer("Истирание по ребру (edge × SI007)", pos, color=(0.55, 0.53, 0.50) if top else (0.86, 0.80, 0.70), cmode=L.BlendingMode.Screen,
+               cop=0.16 * k, rough=0.12, rmode="add", rop=0.6)
+    zone(e, "edge", S.si(7), 500, bbox, rot=0.3)
+    made.append(_scope(e, meshes))
+    last = e
+    if top:
+        rs = _layer("Полоса истирания у продавца (rim_sell × SI007)", _above(last), color=(0.62, 0.60, 0.57), cmode=L.BlendingMode.Screen,
+                    cop=0.30 * k, rough=0.10, rmode="add", rop=0.6)
+        zone(rs, "rim_sell", S.si(7), 400, bbox, rot=1.1)
+        made.append(_scope(rs, meshes))
+        last = rs
+    hl = _layer("Побелевший ПВХ вокруг сколов (chips_halo)", _above(last), color=(0.60, 0.58, 0.55) if top else (0.90, 0.86, 0.78),
+                cmode=L.BlendingMode.Screen, cop=0.35, rough=0.1, rmode="add", rop=0.5)
+    zone(hl, "chips_halo")
+    made.append(_scope(hl, meshes))
+    c = _chips_core(_above(hl), meshes, bbox)
+    made.append(c)
     return made
 
 
+def wear_top_edge(pos, meshes, bbox, k):
+    return wear_edge(pos, meshes, bbox, k, top=True)
+
+
 def wear_top(pos, meshes, bbox, k):
-    """Тёмный постформинг: затёрт до матовости у кассы, кольца от стаканов, царапины монетницы, пыль и грязь."""
+    """Постформинг (столешница, стол кассира): чуть неоднородный матовый пластик; перед кассой и у монетницы затёрто
+    глаже и с бликом (руки, монеты), там же мелкие царапины маской владельца с малой силой; грязь в стыках.
+    Пыли пятнами и «паутины» царапин нет."""
     made = []
-    m = _layer("Затёртость до матового (touch × SI014)", pos, color=(0.50, 0.50, 0.50), cmode=L.BlendingMode.Screen, cop=0.22 * k, rough=0.22,
-               rmode="add", rop=0.7)
-    zone(m, "touch", S.si(14), 1000, bbox, rot=0.3)
+    m = _layer("Неоднородность матового (Smear004, блеск)", pos, rough=0.06, rmode="add", rop=0.6)
+    spread(m, S.sm(4), 1800, bbox, rot=0.3)
     made.append(_scope(m, meshes))
-    cu = _layer("Кольца и следы стаканов (cups × Smear006)", _above(m), color=(0.62, 0.62, 0.60), cmode=L.BlendingMode.Screen, cop=0.20 * k,
-                rough=-0.12, rmode="add", rop=0.6)
-    zone(cu, "cups", S.sm(6), 900, bbox, rot=0.8)
-    made.append(_scope(cu, meshes))
-    sc = _layer("Царапины (cups × Scratches002)", _above(cu), color=(0.55, 0.55, 0.54), cmode=L.BlendingMode.Screen, cop=0.45 * k, rough=0.1,
-                rmode="add", rop=0.5)
-    zone(sc, "cups", S.sc(2), 700, bbox, rot=0.2)
+    g = _layer("Затёрто руками перед кассой (touch × SI014)", _above(m), color=(0.50, 0.50, 0.50), cmode=L.BlendingMode.Screen, cop=0.05 * k,
+               rough=-0.16, rmode="add", rop=0.8)
+    zone(g, "touch", S.si(14), 900, bbox, rot=0.3)
+    made.append(_scope(g, meshes))
+    gc = _layer("Затёрто у монетницы (cups × SI014)", _above(g), color=(0.50, 0.50, 0.50), cmode=L.BlendingMode.Screen, cop=0.05 * k,
+                rough=-0.14, rmode="add", rop=0.8)
+    zone(gc, "cups", S.si(14), 900, bbox, rot=1.2)
+    made.append(_scope(gc, meshes))
+    sc = _layer("Мелкие царапины (touch × Scratches004)", _above(gc), color=(0.42, 0.42, 0.42), cmode=L.BlendingMode.Screen, cop=0.12 * k,
+                rough=-0.04, rmode="add", rop=0.4)
+    zone(sc, "touch", S.sc(4), 700, bbox, rot=0.2)
     made.append(_scope(sc, meshes))
-    ec = _layer("Края стола — затёртость (edge_cust × SI007)", _above(sc), color=(0.52, 0.52, 0.51), cmode=L.BlendingMode.Screen, cop=0.28 * k,
-                rough=0.2, rmode="add", rop=0.6)
-    zone(ec, "edge_cust", S.si(7), 600, bbox, rot=0.5)
-    made.append(_scope(ec, meshes))
-    es = _layer("Края стола у продавца (edge_sell × SI007)", _above(ec), color=(0.52, 0.52, 0.51), cmode=L.BlendingMode.Screen, cop=0.28 * k,
-                rough=0.2, rmode="add", rop=0.6)
-    zone(es, "edge_sell", S.si(7), 600, bbox, rot=1.1)
-    made.append(_scope(es, meshes))
-    u = _layer("Пыль (up × SI012)", _above(es), color=(0.50, 0.49, 0.47), cop=0.10 * k, rough=0.85, rop=0.3 * k)
-    zone(u, "up", S.si(12), 1500, bbox, rot=0.6)
-    made.append(_scope(u, meshes))
-    d = _layer("Грязь в стыках (AO × dirt_4)", _above(u), color=(0.16, 0.14, 0.11), cop=0.45 * k, rough=0.85, rop=0.7)
+    d = _layer("Грязь в стыках (AO × dirt_4)", _above(sc), color=(0.16, 0.14, 0.11), cop=0.30 * k, rough=0.85, rop=0.6)
     ao_seams(d, bbox, "dirt_4", 1200)
     made.append(_scope(d, meshes))
     return made
 
 
+def wear_belt(pos, meshes, bbox, k):
+    """Чёрная резина ленты: продольный рельеф (основа), по ходу ленты затёрто глаже, продольные полосы истирания."""
+    made = []
+    p = _layer("Затёрто по ходу ленты (track)", pos, color=(0.30, 0.30, 0.30), cmode=L.BlendingMode.Screen, cop=0.05 * k,
+               rough=-0.14, rmode="add", rop=0.7)
+    zone(p, "track")
+    made.append(_scope(p, meshes))
+    tr = _layer("Продольные полосы истирания (track × Scratches004)", _above(p), color=(0.34, 0.34, 0.34), cmode=L.BlendingMode.Screen,
+                cop=0.22 * k, rough=-0.08, rmode="add", rop=0.5)
+    zone(tr, "track", S.sc(4), 600, bbox, rot=0.0)
+    made.append(_scope(tr, meshes))
+    return made
+
+
+def wear_plastic(pos, meshes, bbox, k):
+    """Светло-серый пластик бортов: затёртые кромки, тёмные риски, грязь в стыках (без пыли пятнами)."""
+    made = []
+    e = _layer("Затёртые кромки (edge × ChipsEdge50)", pos, color=(0.80, 0.80, 0.79), cmode=L.BlendingMode.Screen, cop=0.25 * k, rough=0.15,
+               rmode="add", rop=0.6)
+    zone(e, "edge", _m("ChipsEdge50"), 520, bbox, rot=0.3, harden=(0.45, 0.5))
+    made.append(_scope(e, meshes))
+    r = _layer("Тёмные риски (Scratches003)", _above(e), color=(0.40, 0.40, 0.40), cmode=L.BlendingMode.Multiply, cop=0.45 * k, rough=0.1,
+               rmode="add", rop=0.4)
+    spread(r, S.sc(3), 800, bbox, rot=0.4)
+    made.append(_scope(r, meshes))
+    d = _layer("Грязь в стыках (AO × dirt_4)", _above(r), color=(0.20, 0.18, 0.15), cop=0.40 * k, rough=0.85, rop=0.7)
+    ao_seams(d, bbox, "dirt_4", 1000)
+    made.append(_scope(d, meshes))
+    return made
+
+
+def wear_paint(pos, meshes, bbox, k):
+    """Порошковая краска бокса: ровная, лёгкая шагрень (основа), неоднородность тона σ 5–8/255 одной мягкой маской;
+    износ только у низа (носки обуви, тележки — пояс 5–25 см, тёмная полоса у пола) и у отбойника; сколы точками
+    до грунта и металла на нижних углах и у фланцев отбойника; грязь в стыках."""
+    made = []
+    t = _layer("Тон краски — мягкая неоднородность (SI014_soft)", pos, color=(0.80, 0.82, 0.85), cmode=L.BlendingMode.Multiply, cop=1.0 * k,
+               rough=0.04, rmode="add", rop=0.3)
+    spread(t, _m("SI014_soft"), 1800, bbox, rot=0.4)   # размытая копия SI014: пятна крупные и мягкие, без «крупы»
+    made.append(_scope(t, meshes))
+    b = _layer("Грунт вокруг сколов (chips_halo)", _above(t), color=S.PRIMER, rough=0.62, metal=0.0, height=0.498)
+    zone(b, "chips_halo")
+    made.append(_scope(b, meshes))
+    c = _layer("Сколы до металла (chips)", _above(b), color=S.STEEL, rough=0.50, metal=0.85, height=0.497)
+    zone(c, "chips")
+    made.append(_scope(c, meshes))
+    f = _layer("Низ у пола темнее (floor_low × grunge_3)", _above(c), color=(0.45, 0.45, 0.44), cmode=L.BlendingMode.Multiply, cop=0.6 * k,
+               rough=0.8, rop=0.5, metal=0.0)
+    zone(f, "floor_low", S.sh("grunge_3"), 1600, bbox, rot=0.2)
+    made.append(_scope(f, meshes))
+    r = _layer("Носки обуви и тележки (kick_low × Rubber01)", _above(f), color=(0.30, 0.30, 0.30), cmode=L.BlendingMode.Multiply,
+               cop=0.5 * k, rough=-0.05, rmode="add", rop=0.4)
+    zone(r, "kick_low", _m("Rubber01"), 450, bbox, rot=0.0)
+    made.append(_scope(r, meshes))
+    rl = _layer("У отбойника — следы тележек (rail × Rubber01)", _above(r), color=(0.32, 0.32, 0.32), cmode=L.BlendingMode.Multiply,
+                cop=0.45 * k, rough=-0.05, rmode="add", rop=0.4)
+    zone(rl, "rail", _m("Rubber01"), 380, bbox, rot=0.1)
+    made.append(_scope(rl, meshes))
+    d = _layer("Грязь в стыках (AO × dirt_4)", _above(rl), color=(0.16, 0.14, 0.11), cop=0.40 * k, rough=0.88, rop=0.7, metal=0.0, height=0.5)
+    ao_seams(d, bbox, "dirt_4", 1400)
+    made.append(_scope(d, meshes))
+    return made
+
+
+def wear_skirt(pos, meshes, bbox, k):
+    """Цоколь — ровный чёрный пластик: потёрт по рёбрам, светлая пыль в нижней кромке у пола."""
+    made = []
+    e = _layer("Потёрто по рёбрам (edge × SI007)", pos, color=(0.34, 0.34, 0.34), cmode=L.BlendingMode.Screen, cop=0.18 * k, rough=0.10,
+               rmode="add", rop=0.5)
+    zone(e, "edge", S.si(7), 500, bbox, rot=0.3)
+    made.append(_scope(e, meshes))
+    # пыль ровной полосой у самого пола (зона без рисунка: облачные dirt_* на чёрном читались «камуфляжем»)
+    f = _layer("Пыль в нижней кромке (floor_low)", _above(e), color=(0.46, 0.44, 0.41), cop=0.30 * k, rough=0.9, rop=0.6, metal=0.0)
+    zone(f, "floor_low")
+    made.append(_scope(f, meshes))
+    return made
+
+
+def wear_dark(pos, meshes, bbox, k):
+    """Прочий чёрный пластик (выводы, рамка сканера, монетница, пятки опор): затёртые рёбра и грязь в углублениях."""
+    made = []
+    e = _layer("Затёртые рёбра (edge × SI007)", pos, color=(0.32, 0.32, 0.32), cmode=L.BlendingMode.Screen, cop=0.20 * k, rough=0.12,
+               rmode="add", rop=0.5)
+    zone(e, "edge", S.si(7), 400, bbox, rot=0.3)
+    made.append(_scope(e, meshes))
+    d = _layer("Грязь в углублениях (AO × dirt_4)", _above(e), color=(0.22, 0.20, 0.17), cop=0.25 * k, rough=0.85, rop=0.4, metal=0.0)
+    ao_seams(d, bbox, "dirt_4", 1000, pos=0.55)
+    made.append(_scope(d, meshes))
+    return made
+
+
+def wear_white(pos, meshes, bbox, k):
+    """Белая пластина таблички и лампа: лёгкое пожелтение."""
+    y = _layer("Пожелтение (SI014)", pos, color=(0.90, 0.84, 0.70), cmode=L.BlendingMode.Multiply, cop=0.30 * k)
+    spread(y, S.si(14), 1800, bbox, rot=0.2)
+    return [_scope(y, meshes)]
+
+
+def wear_misc(pos, meshes, bbox, k):
+    return []
+
+
 def wear_ss(pos, meshes, bbox, k):
     """Нержавейка: тусклая дорожка вдоль бокса, мелкие царапины вдоль движения товара, отпечатки и разводы, пыль в стыках."""
     made = []
-    tr = _layer("Дорожка товаров — тусклее (track × Smear004)", pos, color=(0.62, 0.62, 0.62), cmode=L.BlendingMode.Multiply, cop=0.28 * k,
-                rough=0.20, rmode="add", rop=0.9)
-    zone(tr, "track", S.sm(4), 1100, bbox, rot=0.0)
+    # круг 2: дорожка — только зоной (без пятен Smear: на блике они читались «плавленым» отражением)
+    tr = _layer("Дорожка товаров — тусклее (track)", pos, color=(0.80, 0.80, 0.80), cmode=L.BlendingMode.Multiply, cop=0.25 * k,
+                rough=0.14, rmode="add", rop=0.9)
+    zone(tr, "track")
     made.append(_scope(tr, meshes))
     sc = _layer("Царапины вдоль движения (track × Scratches004)", _above(tr), color=(0.90, 0.90, 0.90), cmode=L.BlendingMode.Screen, cop=0.5 * k,
                 rough=0.18, rmode="add", rop=0.8)
@@ -284,129 +396,29 @@ def wear_ss(pos, meshes, bbox, k):
                 rough=-0.1, rmode="add", rop=0.6)
     spread(fp, S.fp(1), 450, bbox, rot=0.4)
     made.append(_scope(fp, meshes))
-    sm = _layer("Разводы (Smear001)", _above(fp), color=(0.80, 0.80, 0.78), cmode=L.BlendingMode.Multiply, cop=0.12 * k, rough=0.1, rmode="add", rop=0.5)
-    spread(sm, S.sm(1), 1500, bbox, rot=0.3)
-    made.append(_scope(sm, meshes))
-    d = _layer("Грязь в стыках (AO × dirt_4)", _above(sm), color=(0.18, 0.15, 0.12), cop=0.45 * k, rough=0.85, rop=0.7, metal=0.0)
+    d = _layer("Грязь в стыках (AO × dirt_4)", _above(fp), color=(0.18, 0.15, 0.12), cop=0.45 * k, rough=0.85, rop=0.7, metal=0.0)
     ao_seams(d, bbox, "dirt_4", 1000)
     made.append(_scope(d, meshes))
-    return made
-
-
-def wear_belt(pos, meshes, bbox, k):
-    """Чёрная лента: продольные потёртые полосы, пыль, края."""
-    made = []
-    tr = _layer("Продольные потёртые полосы (track × Scratches004)", pos, color=(0.40, 0.40, 0.40), cmode=L.BlendingMode.Screen, cop=0.22 * k,
-                rough=-0.1, rmode="add", rop=0.5)
-    zone(tr, "track", S.sc(4), 600, bbox, rot=0.0)
-    made.append(_scope(tr, meshes))
-    u = _layer("Пыль (SI012)", _above(tr), color=(0.30, 0.29, 0.27), cop=0.18 * k, rough=0.9, rop=0.3)
-    spread(u, S.si(12), 1200, bbox, rot=0.6)
-    made.append(_scope(u, meshes))
-    return made
-
-
-def wear_plastic(pos, meshes, bbox, k):
-    """Светло-серый пластик бортов: потёртость кромок, тёмные риски, пыль."""
-    made = []
-    e = _layer("Затёртые кромки (edge × ChipsEdge50)", pos, color=(0.80, 0.80, 0.79), cmode=L.BlendingMode.Screen, cop=0.30 * k, rough=0.15,
-               rmode="add", rop=0.6)
-    zone(e, "edge", _m("ChipsEdge50"), 520, bbox, rot=0.3, harden=(0.45, 0.7))
-    made.append(_scope(e, meshes))
-    r = _layer("Тёмные риски (Scratches003)", _above(e), color=(0.34, 0.34, 0.34), cmode=L.BlendingMode.Multiply, cop=0.55 * k, rough=0.1,
-               rmode="add", rop=0.4)
-    spread(r, S.sc(3), 800, bbox, rot=0.4)
-    made.append(_scope(r, meshes))
-    u = _layer("Пыль сверху (up × SI012)", _above(r), color=(0.55, 0.54, 0.52), cop=0.30 * k, rough=0.9, rop=0.4)
-    zone(u, "up", S.si(12), 1500, bbox, rot=0.6)
-    made.append(_scope(u, meshes))
-    d = _layer("Грязь в стыках (AO × dirt_4)", _above(u), color=(0.20, 0.18, 0.15), cop=0.45 * k, rough=0.85, rop=0.7)
-    ao_seams(d, bbox, "dirt_4", 1000)
-    made.append(_scope(d, meshes))
-    return made
-
-
-def wear_paint(pos, meshes, bbox, k):
-    """Крашеная сталь бокса (серо-синяя порошковая краска): неоднородность тона мягкими пятнами, тёмный низ с рваной границей, сколы
-    по рёбрам до грунта и металла, углы, пыль, следы обуви и колёс на 5–30 см (нейтральные множители: цвет краски задаёт основа)."""
-    made = []
-    t = _layer("Тон краски — тёмные пятна (SI014)", pos, color=(0.58, 0.60, 0.63), cmode=L.BlendingMode.Multiply, cop=1.0 * k, rough=0.08,
-               rmode="add", rop=0.4 * k)
-    spread(t, S.si(14), 1700, bbox, rot=0.4)
-    made.append(_scope(t, meshes))
-    t2 = _layer("Тон краски — светлые пятна (SI016)", _above(t), color=(0.62, 0.64, 0.66), cmode=L.BlendingMode.Screen, cop=0.22 * k,
-                rough=-0.05, rmode="add", rop=0.5)
-    spread(t2, S.si(16), 2200, bbox, rot=1.2)
-    made.append(_scope(t2, meshes))
-    t3 = _layer("Грязь — крупные пятна (Grunge4)", _above(t2), color=(0.56, 0.57, 0.57), cmode=L.BlendingMode.Multiply, cop=0.5 * k, rough=0.10,
-                rmode="add", rop=0.4)
-    spread(t3, S.sh("Grunge4"), 1900, bbox, rot=0.7)
-    made.append(_scope(t3, meshes))
-    b = _layer("Кайма грунта у сколов (edge × ChipsEdge85)", _above(t3), color=S.PRIMER, rough=0.62, metal=0.0, height=0.498)
-    zone(b, "edge", _m("ChipsEdge85"), 1300, bbox, rot=0.3, harden=(0.35, 0.9))
-    made.append(_scope(b, meshes))
-    c = _layer("Сколы до металла (edge × ChipsEdge85)", _above(b), color=S.STEEL, rough=0.50, metal=0.85, height=0.497)
-    zone(c, "edge", _m("ChipsEdge85"), 1300, bbox, rot=0.3, harden=(0.65, 0.9))
-    made.append(_scope(c, meshes))
-    cp = _layer("Углы — рваные пятна (edgew × ChipsEdge14)", _above(c), color=S.STEEL, rough=0.50, metal=0.85, height=0.497)
-    zone(cp, "edgew", _m("ChipsEdge14"), 1300, bbox, rot=1.7, harden=(0.5, 0.9))
-    made.append(_scope(cp, meshes))
-    f = _layer("Низ темнее (floor × grunge_3)", _above(cp), color=(0.36, 0.35, 0.33), cmode=L.BlendingMode.Multiply, cop=0.85 * k, rough=0.85,
-               rop=0.7, metal=0.0)
-    zone(f, "floor", S.sh("grunge_3"), 1600, bbox, rot=0.2)
-    made.append(_scope(f, meshes))
-    r = _layer("Следы обуви и колёс (kick × Rubber03)", _above(f), color=(0.16, 0.16, 0.15), cmode=L.BlendingMode.Multiply, cop=0.7 * k,
-               rough=-0.05, rmode="add", rop=0.5)
-    zone(r, "kick", _m("Rubber03"), 450, bbox, rot=0.1)
-    made.append(_scope(r, meshes))
-    r2 = _layer("Полосы от колёс (kick × Rubber01)", _above(r), color=(0.14, 0.14, 0.14), cmode=L.BlendingMode.Multiply, cop=0.6 * k)
-    zone(r2, "kick", _m("Rubber01"), 700, bbox, rot=1.57)
-    made.append(_scope(r2, meshes))
-    u = _layer("Пыль сверху (up × SI012)", _above(r2), color=(0.55, 0.55, 0.54), cop=0.30 * k, rough=0.9, rop=0.4 * k, metal=0.0)
-    zone(u, "up", S.si(12), 1500, bbox, rot=0.7)
-    made.append(_scope(u, meshes))
-    d = _layer("Грязь в стыках (AO × dirt_4)", _above(u), color=(0.16, 0.14, 0.11), cop=0.5 * k, rough=0.88, rop=0.8, metal=0.0, height=0.5)
-    ao_seams(d, bbox, "dirt_4", 1400)
-    made.append(_scope(d, meshes))
-    return made
-
-
-def wear_dark(pos, meshes, bbox, k):
-    """Чёрный пластик (цоколь, планка, выводы, монетница): износ lc3_stacks.dark_wear + серая пыль и грязь у пола (цоколь у ног и тележек)."""
-    made = S.dark_wear(pos, meshes, bbox, k)
-    f = _layer("Пыль и грязь у пола (floor × dirt_5)", _above(made[-1]), color=(0.40, 0.38, 0.34), cop=0.35 * k, rough=0.88, rop=0.6, metal=0.0)
-    zone(f, "floor", S.sh("dirt_5"), 900, bbox, rot=0.2)
-    made.append(_scope(f, meshes))
     return made
 
 
 def wear_zinc(pos, meshes, bbox, k):
-    """Оцинковка и хром: налёт, пыль, грязь в углублениях."""
-    made = S.bare_wear(pos, meshes, bbox, k)
-    return made
-
-
-def wear_white(pos, meshes, bbox, k):
-    """Белая пластина таблички и лампа: пожелтение, пыль."""
+    """Оцинковка и хром (ручка, уголки, штифты, держатель): налёт пятнами окисла слабо, пыль в углублениях — у тонких
+    деталей (ручка-скоба) AO почти везде, поэтому грязь слабее, чем в lc3_stacks.bare_wear (ручка выходила чёрной)."""
     made = []
-    y = _layer("Пожелтение (SI014)", pos, color=(0.88, 0.80, 0.62), cmode=L.BlendingMode.Multiply, cop=0.40 * k)
-    spread(y, S.si(14), 1800, bbox, rot=0.2)
-    made.append(_scope(y, meshes))
-    u = _layer("Пыль (SI012)", _above(y), color=(0.50, 0.48, 0.44), cop=0.30 * k, rough=0.85, rop=0.4)
-    spread(u, S.si(12), 1200, bbox, rot=0.6)
-    made.append(_scope(u, meshes))
+    a = _layer("Налёт окисла (SI015)", pos, color=(0.70, 0.68, 0.64), cmode=L.BlendingMode.Multiply, cop=0.25 * k, rough=0.10, rmode="add",
+               rop=0.3)
+    spread(a, S.si(15), 1500, bbox, rot=0.8)
+    made.append(_scope(a, meshes))
+    d = _layer("Грязь в углублениях (AO × dirt_5)", _above(a), color=(0.20, 0.18, 0.15), cop=0.25 * k, rough=0.8, rop=0.5, metal=0.0)
+    ao_seams(d, bbox, "dirt_5", 1000, ao=0.30, pos=0.45)
+    made.append(_scope(d, meshes))
     return made
 
 
-def wear_misc(pos, meshes, bbox, k):
-    u = _layer("Пыль (SI012)", pos, color=(0.45, 0.43, 0.40), cop=0.25 * k, rough=0.85, rop=0.4 * k, metal=0.0)
-    spread(u, S.si(12), 1500, bbox, rot=0.6)
-    return [_scope(u, meshes)]
-
-
-WEAR = {"lam": wear_lam, "glam": wear_top, "trim": wear_lam, "lam_edge": wear_edge, "top_edge": wear_edge, "top": wear_top, "ss": wear_ss,
-        "belt": wear_belt, "plastic": wear_plastic, "paint": wear_paint, "dark": wear_dark, "zinc": wear_zinc, "white": wear_white,
-        "plug": wear_misc, "bags": wear_misc, "label": wear_misc, "glass": wear_misc}
+WEAR = {"lam": wear_lam, "glam": wear_top, "trim": wear_trim, "lam_edge": wear_edge, "top_edge": wear_top_edge, "top": wear_top,
+        "ss": wear_ss, "belt": wear_belt, "plastic": wear_plastic, "paint": wear_paint, "dark": wear_dark, "skirt": wear_skirt,
+        "zinc": wear_zinc, "white": wear_white, "plug": wear_misc, "bags": wear_misc, "label": wear_misc, "glass": wear_misc}
 
 
 def build(setname: str, game: str, bbox: float, k: float = 1.0) -> str:

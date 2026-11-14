@@ -46,6 +46,97 @@ def save(game: str, name: str, a: np.ndarray) -> None:
     cv2.imwrite(str(OUT / f"{game}_{name}.png"), np.clip(a * 255, 0, 255).astype(np.uint8))
 
 
+# ---------------------------------------------------------------------------------------------- круг 2: сколы точками
+# Сколы — не порог маски по пикселям (давал «лесенку» и облупленную краску по всей кромке), а несколько мелких пятен
+# в 3D: расстояние от каждого пикселя (карта положения) до места скола с неровным радиусом и мягким краем в ~1 пиксель.
+# Места — по причине: выступающие углы, кромка со стороны продавца, низ у пола (ноги, тележки), лицо ящика, у поручня.
+# (центр, радиус м); наборы мест по предмету, случайные — из пикселей кромки в заданной области (seed — постоянный).
+
+def chip_blobs(pos, valid, sites, seed: int = 7) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    out = np.zeros(valid.shape, np.float32)
+    ys, xs = np.nonzero(valid)
+    p = pos[ys, xs]
+    for c, r in sites:
+        c = np.asarray(c, np.float32)
+        near = np.abs(p - c).max(1) < r * 2.2
+        if not near.any():
+            continue
+        q = p[near] - c
+        d = np.linalg.norm(q, axis=1)
+        # неровный край: радиус меняется по направлению (сумма синусов от углов в двух плоскостях)
+        a1, a2 = np.arctan2(q[:, 1], q[:, 0]), np.arctan2(q[:, 2], np.hypot(q[:, 0], q[:, 1]))
+        ph = rng.uniform(0, 6.28, 4)
+        rr = r * (1 + 0.28 * np.sin(3 * a1 + ph[0]) + 0.18 * np.sin(5 * a1 + ph[1]) + 0.22 * np.sin(4 * a2 + ph[2]))
+        soft = 0.0009
+        v = np.clip((rr - d) / soft + 0.5, 0, 1)
+        cur = out[ys[near], xs[near]]
+        out[ys[near], xs[near]] = np.maximum(cur, v)
+    return out
+
+
+def pick_sites(pos, cand, k: int, rmin: float, rmax: float, seed: int):
+    rng = np.random.default_rng(seed)
+    ys, xs = np.nonzero(cand)
+    if not len(ys):
+        return []
+    idx = rng.choice(len(ys), size=min(k, len(ys)), replace=False)
+    return [(pos[ys[i], xs[i]], float(rng.uniform(rmin, rmax))) for i in idx]
+
+
+def chips_counter(g, h, valid) -> np.ndarray:
+    pos, edge = g["pos"], g["edge"][..., 0]
+    ZT = 0.899
+    sites = [((-0.75, -0.30, ZT), 0.0035), ((0.75, 0.30, ZT), 0.004), ((-0.75, 0.30, ZT), 0.0025),
+             ((-0.44, 0.30, ZT), 0.002), ((-0.02, 0.30, ZT), 0.0015), ((0.37, 0.30, ZT), 0.0025)]
+    lam = parts(g, "ПТ_боковины", "ПТ_панель_передняя", "ПТ_полки", "ПТ_дно", "ПТ_перегородки", "ПТ_ящик_лицо")
+    e = (edge > 0.7) & lam & valid
+    sites += pick_sites(pos, e & (h < 0.14), 7, 0.002, 0.005, 11)                          # низ у пола: ноги, швабра
+    sites += pick_sites(pos, e & (np.abs(pos[..., 1] + 0.265) < 0.01) & (np.abs(np.abs(pos[..., 0]) - 0.75) < 0.01), 3,
+                        0.002, 0.004, 12)                                                    # передние рёбра боковин
+    sites += pick_sites(pos, e & parts(g, "ПТ_ящик_лицо"), 2, 0.0015, 0.003, 13)            # лицо ящика
+    sites += pick_sites(pos, e & parts(g, "ПТ_полки") & (pos[..., 1] > 0.27), 3, 0.0015, 0.003, 14)  # передние кромки полок
+    return chip_blobs(pos, valid, sites, 21)
+
+
+def chips_checkout(g, h, valid) -> np.ndarray:
+    pos, edge = g["pos"], g["edge"][..., 0]
+    body = parts(g, "КБ_корпус")
+    e = (edge > 0.7) & valid
+    sites = pick_sites(pos, e & body & (h < 0.35) & (h > 0.10), 6, 0.003, 0.007, 31)     # нижние углы корпуса: тележки
+    sites += [((0.30, -0.551, 0.20), 0.008), ((1.10, -0.551, 0.20), 0.007)]               # у фланцев отбойника
+    sites += pick_sites(pos, e & parts(g, "КБ_стол_кассира"), 3, 0.002, 0.004, 32)         # кромка стола кассира
+    sites += pick_sites(pos, e & parts(g, "КБ_стол_торцевая_панель") & (h < 0.15), 2, 0.002, 0.004, 33)
+    return chip_blobs(pos, valid, sites, 41)
+
+
+def extra_zones(game: str, g: dict, h, vert, valid) -> None:
+    """Круг 2: сколы точками и их кайма, полоса истирания по ребру у продавца, низ узкой полосой, пояс ног и тележек,
+    место у поручня."""
+    pos = g["pos"]
+    ch = chips_counter(g, h, valid) if game == "cn_counter" else chips_checkout(g, h, valid)
+    save(game, "chips", ch)
+    halo = cv2.GaussianBlur(cv2.dilate(ch, np.ones((5, 5), np.uint8)), (0, 0), 1.2)
+    save(game, "chips_halo", np.clip(halo * 1.4, 0, 1) * valid)
+    save(game, "floor_low", (1 - smooth(h, 0.004, 0.03)) * valid)
+    save(game, "kick_low", smooth(h, 0.04, 0.07) * (1 - smooth(h, 0.22, 0.30)) * vert * valid)
+    edge = cv2.GaussianBlur(g["edge"][..., 0], (0, 0), 1.0)
+    if game == "cn_counter":
+        rim = smooth(edge, 0.3, 0.8) * (pos[..., 1] > 0.27) * parts(g, "ПТ_столешница") * valid
+    else:
+        rim = smooth(edge, 0.3, 0.8) * parts(g, "КБ_стол_кассира") * (pos[..., 1] > 0.5) * valid
+    save(game, "rim_sell", rim)
+    if game == "cn_checkout":
+        from scipy.spatial import cKDTree
+        rail = parts(g, "КБ_отбойник_труба")
+        d, _ = cKDTree(pos[rail][::3]).query(pos[valid])
+        dist = np.full(valid.shape, 9.0, np.float32)
+        dist[valid] = d
+        save(game, "rail", (1 - smooth(dist, 0.03, 0.15)) * parts(g, "КБ_корпус") * valid)
+    else:
+        save(game, "rail", np.zeros(valid.shape, np.float32))
+
+
 def zones(game: str) -> None:
     g = load(game)
     pos, nrm, pid = g["pos"], g["nrm"], g["pid"]
@@ -59,6 +150,7 @@ def zones(game: str) -> None:
     vert = 1 - smooth(np.abs(nrm[..., 2]), 0.2, 0.5)
     save(game, "kick", (1 - smooth(h, 0.10, 0.30)) * vert * valid)
     save(game, "front_knee", smooth(h, 0.15, 0.25) * (1 - smooth(h, 0.55, 0.65)) * vert * valid)
+    extra_zones(game, g, h, vert, valid)
     if game == "cn_counter":
         hand = parts(g, "ПТ_ящик_ручка")
         from scipy.spatial import cKDTree
