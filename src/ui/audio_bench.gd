@@ -497,6 +497,7 @@ func _stop() -> void:
 
 func _close() -> void:
 	if _reload_panel and not _reload_panel.can_close():
+		(_reload_tab.get_parent() as TabContainer).current_tab = _reload_tab.get_index()
 		return
 	_save()
 	if _dirty:

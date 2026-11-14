@@ -12,6 +12,7 @@ const GUN: String = "wpn_hg_02"
 const MAG: String = "mag_919_17"
 const AMMO: String = "ammo_919_fmj"
 const SLOT: String = "sidearm"
+const ReloadAudio := preload("res://src/audio/reload_audio.gd")
 var _fails: int = 0
 var _checks: int = 0
 
@@ -246,11 +247,28 @@ func _pistol_fast_cases(actor: Player, host: StateHost) -> void:
 	_reset(actor, _weapon(5, 1), [17])
 	actor.weapon_mag = WeaponMods.mag_state(actor.weapon_entry())
 	host.dropped.clear()
+	# Настройки в памяти, чтобы проверить разные звуки вариантов без записи поверх настроек владельца.
+	var saved_config := ReloadAudio._settings()
+	var normal_marks := {"mag_out": {"at": 0.01}, "mag_in": {"at": 0.8}}
+	var fast_marks := {"mag_out": {"at": 0.1}, "mag_in": {"at": 0.4}}
+	ReloadAudio._config = ConfigFile.new()
+	ReloadAudio._config.set_value(GUN, "reload", normal_marks)
+	ReloadAudio._config.set_value(GUN, "reload_fast", fast_marks)
+	var played: Array[String] = []
+	var capture := func(slot: String) -> void: played.append(slot)
+	actor._weapon_rig.sound_event.connect(capture)
 	actor._start_reload(actor.spec())
+	_check("пистолет: одна R использует метки обычной перезарядки", actor._weapon_rig._reload_sound_marks == normal_marks)
+	actor._weapon_rig.advance_action(actor.reload_timer * 0.02)
 	var normal: float = actor.reload_timer
 	actor._try_fast_reload()
 	_check("пистолет: двойное R — быстрая перезарядка", actor._reload_fast and actor.reload_timer < normal and String(actor._pm_action.get("kind", "")) == "reload",
 		"%.2f → %.2f с" % [normal, actor.reload_timer])
+	_check("пистолет: вторая R включает сохранённые метки быстрой", actor._weapon_rig._reload_sound_marks == fast_marks)
+	actor._weapon_rig.advance_action(actor.reload_timer * 0.5)
+	_check("пистолет: смена варианта не повторяет уже сыгравший звук извлечения", played == ["mag_out", "mag_in"], str(played))
+	actor._weapon_rig.sound_event.disconnect(capture)
+	ReloadAudio._config = saved_config
 	_finish_reload(actor)
 	var entry: Dictionary = actor.weapon_entry()
 	var fell: int = int((host.dropped[0] as Dictionary).get("rounds", -1)) if host.dropped.size() == 1 else -1

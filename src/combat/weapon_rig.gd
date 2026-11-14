@@ -219,17 +219,24 @@ func play_shot(rounds_left: int) -> void:
 
 ## part_only — часть перезарядки (обойма из окна рюкзака): "" — вся, "out" — только вынуть магазин (к концу его нет,
 ## рука вернулась), "in" — только вставить в пустую шахту (с досылом, если empty).
-func play_reload(empty: bool, duration: float, part_only: String = "") -> void:
+func play_reload(empty: bool, duration: float, part_only: String = "", fast: bool = false) -> void:
+	var played: Array[String] = []
+	if fast and action == "reload":
+		for event: Dictionary in _events:
+			if bool(event.played):
+				played.append(String(event.slot))
 	cancel_action()
 	_empty_reload = empty and part_only != "out"
 	_reload_part = part_only
 	if part_only == "in":
 		_reveal_magazine()
 	_begin("reload", duration)
-	_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(_empty_reload))
+	_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(_empty_reload, fast))
+	if fast and _reload_sound_marks.is_empty():
+		_reload_sound_marks = ReloadAudio.saved(weapon_id, ReloadAudio.mode(_empty_reload))
 	if not _reload_sound_marks.is_empty():
 		for slot: String in _reload_sound_marks:
-			if bool(_reload_sound_marks[slot].get("enabled", true)):
+			if slot not in played and bool(_reload_sound_marks[slot].get("enabled", true)):
 				_queue_reload_sound(slot, float(_reload_sound_marks[slot].at))
 		_apply_pose()
 		return
@@ -241,7 +248,8 @@ func play_reload(empty: bool, duration: float, part_only: String = "") -> void:
 		_queue_sound("charge", float(phases.get("cock_end", 0.93)))
 		_apply_pose()
 		return
-	_queue_reload_sound("mag_out", float(phases.get("mag_out", 0.0)))
+	if "mag_out" not in played:
+		_queue_reload_sound("mag_out", float(phases.get("mag_out", 0.0)))
 	_queue_reload_sound("mag_in", float(phases.get("mag_in", 1.0)))
 	if _empty_reload:
 		_queue_reload_sound("charge", float(phases.get("charge", 1.0)))

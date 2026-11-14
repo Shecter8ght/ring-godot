@@ -1935,12 +1935,13 @@ func _try_fast_reload() -> void:
 	reload_timer = maxf(0.2, (reload_timer + _reload_age) * float(cfg.time_k) - _reload_age)
 	if pm_reload:
 		# модель в руках персонажа (и у напарников) — та же смена на оставшееся время
-		_weapon_action("reload", _reload_empty, reload_timer)
+		_weapon_action("reload_fast", _reload_empty, reload_timer)
 	_mag_tossed = false
 	# когда магазин вылетит: по кадру сброса клипа рук, а нет его — на доле перезарядки из Balance
 	var by_clip: bool = is_local() and _camera_rig is CameraRig and (_camera_rig as CameraRig).reload_drop_by_clip(_reload_empty)
 	_toss_at = -1.0 if by_clip else (reload_timer + _reload_age) * float(Balance.MAG_TOSS.fallback_at)
-	_reload_audio.switch_to(weapon_id, _reload_audio.mode(_reload_empty, true), reload_timer, _reload_age)
+	if not _weapon_rig:
+		_reload_audio.switch_to(weapon_id, _reload_audio.mode(_reload_empty, true), reload_timer, _reload_age)
 	# быстрая: сначала берут новый магазин из подсумка (им же выбивают старый) — липучка сразу
 	if _velcro_at >= 0.0:
 		_velcro_at = -1.0
@@ -2145,6 +2146,8 @@ func _weapon_action(action: String, flag: bool = false, duration: float = 0.0, r
 				_weapon_rig.play_shot(rounds)
 			"reload":
 				_weapon_rig.play_reload(flag, duration)
+			"reload_fast":
+				_weapon_rig.play_reload(flag, duration, "", true)
 			"mag_out":
 				_weapon_rig.play_reload(false, duration, "out")
 			"mag_in":
@@ -2158,7 +2161,7 @@ func _weapon_action(action: String, flag: bool = false, duration: float = 0.0, r
 			"cancel":
 				_weapon_rig.cancel_action()
 	if is_local() and _camera_rig is CameraRig:
-		(_camera_rig as CameraRig).weapon_action(action, flag, duration, rounds)
+		(_camera_rig as CameraRig).weapon_action("reload" if action == "reload_fast" else action, flag, duration, rounds)
 	if replicate and Net.is_networked() and is_multiplayer_authority():
 		Net.broadcast_scene(self, &"_rpc_weapon_action", [action, flag, duration, rounds], false)
 
