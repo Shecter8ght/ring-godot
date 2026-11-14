@@ -293,6 +293,7 @@ const VIEWMODEL_LAYER := 1 << 1
 ## Создаются у своего игрока при первой надобности.
 var _hands_flash: OmniLight3D
 var _hands_bounce: OmniLight3D
+var _audio_listener: AudioListener3D
 
 @onready var _capsule: CollisionShape3D = $Capsule
 @onready var _body: Node3D = $Body
@@ -354,6 +355,7 @@ func _ready() -> void:
 	# шаги слышно у всех: и свои, и напарника (по синхронизированной позиции и стойке)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
+	steps.body = _body
 	steps.grounded = func() -> bool: return not airborne and _vault_t < 0.0 and not on_ladder
 	# свой — скорость по физике: темп шагов (и покачивания камеры) без ступенек кадра
 	steps.speed_source = func() -> float: return Vector2(velocity.x, velocity.z).length() if is_local() else -1.0
@@ -378,12 +380,13 @@ func _ready() -> void:
 	_hand.name = "Hand"
 	add_child(_hand)
 	_apply_stance()
-	# Слушаем мир из своей позиции, а не из камеры в 28 м над головой.
 	if is_local():
-		var listener := AudioListener3D.new()
-		add_child(listener)
-		listener.position = Vector3(0, 1.5, 0)
-		listener.make_current()
+		_audio_listener = AudioListener3D.new()
+		_audio_listener.name = "Ears"
+		_audio_listener.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+		add_child(_audio_listener)
+		update_audio_listener(Transform3D(Basis(Vector3.UP, body_yaw() + PI), view_eye()))
+		_audio_listener.make_current()
 	if Net.is_networked():
 		_setup_sync()
 		if not is_local():
@@ -1060,6 +1063,12 @@ func view_eye() -> Vector3:
 	if not _eye_tick_ready or _eye_tick_prev.distance_squared_to(now) > 1.0:
 		return now
 	return _eye_tick_prev.lerp(now, clampf(Engine.get_physics_interpolation_fraction(), 0.0, 1.0))
+
+
+## Из глаз слушатель следует взгляду. Вид сверху передаёт только направление камеры.
+func update_audio_listener(ear_transform: Transform3D) -> void:
+	if _audio_listener != null:
+		_audio_listener.global_transform = ear_transform
 
 
 ## Смена стойки: глаз переходит на новую высоту критически затухающей пружиной — без рывка

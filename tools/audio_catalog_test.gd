@@ -228,5 +228,16 @@ func _check_step_layers(camera: Camera3D) -> void:
 	Audio.step(Vector3(8, 0, 0), false, false, 0.0, true)
 	check(heard == ["step_base"], "пустое покрытие оставляет основу")
 	Audio._samples.step_layer_gravel = gravel
+	var foot: Vector3 = Vector3(8, 0, 0)
+	camera.global_position = foot + Vector3.UP * 1.6
+	contacts.clear()
+	Audio.step(foot, false, false, 0.0, true, Vector3.BACK, true, Vector3.RIGHT * 0.25)
+	var takes: Array[Node] = get_tree().get_nodes_in_group("sonora_mixed_players")
+	var step_player: AudioStreamPlayer3D = takes.back() as AudioStreamPlayer3D
+	var expected: Vector3 = foot + Vector3(0.25, 0, -Balance.STEP_FOOT_SIDE_M)
+	check(contacts.size() == 2 and contacts[0].is_equal_approx(expected) and contacts[1].is_equal_approx(expected),
+		"own layers share one world contact with ground height, body axis and stride lead")
+	check(step_player.attenuation_filter_cutoff_hz <= 4500.0 and step_player.attenuation_filter_db < -4.0,
+		"own footstep below the listener has a softer top")
 	Audio.stepped.disconnect(observe_step)
 	Audio.event_played.disconnect(observe)

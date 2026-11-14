@@ -19,6 +19,8 @@ var can_step: Callable
 var _was_airborne: bool = false
 ## Мародёр: тяжёлые ботинки — ниже и чуть громче.
 var ai: bool = false
+## Корпус поворачивается отдельно от корневого узла персонажа. Его +Z направлена вперёд.
+var body: Node3D
 
 ## () -> float: скорость по земле, м/с, если её знает сам персонаж (свой игрок — по физике, без
 ## ступенек кадра); пусто или меньше нуля — по перемещению родителя.
@@ -70,7 +72,8 @@ func _process(delta: float) -> void:
 	if delta <= 0.0:
 		return
 	var pos := (get_parent() as Node3D).global_position
-	var v := Vector2(pos.x - _last.x, pos.z - _last.z).length() / delta
+	var travel := Vector3(pos.x - _last.x, 0.0, pos.z - _last.z)
+	var v := travel.length() / delta
 	_last = pos
 	if can_step.is_valid() and not bool(can_step.call()):
 		_was_airborne = false
@@ -141,7 +144,9 @@ func _process(delta: float) -> void:
 		Audio.play(special, pos, extra)
 		return
 	var run_speed := Balance.AI_STEP_RUN_SPEED if ai else Balance.STEP_RUN_SPEED
-	Audio.step(pos, _speed > run_speed, ai, extra, _left, (get_parent() as Node3D).global_basis.x, _local_steps)
+	var right: Vector3 = -body.global_basis.x if is_instance_valid(body) else (get_parent() as Node3D).global_basis.x
+	var ahead: Vector3 = travel.normalized() * minf(_speed * _interval * 0.32, 0.32)
+	Audio.step(pos, _speed > run_speed, ai, extra, _left, right, _local_steps, ahead)
 
 
 func _read_timing() -> void:

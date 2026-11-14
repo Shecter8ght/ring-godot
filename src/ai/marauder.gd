@@ -355,6 +355,7 @@ func _ready() -> void:
 	# шаги слышны у всех peer (AI считает хост, позицию клиенты получают синхронизатором)
 	var steps := Footsteps.new()
 	steps.name = "Footsteps"
+	steps.body = _body
 	steps.ai = true
 	steps.grounded = func() -> bool: return feet_on_ground
 	steps.can_step = func() -> bool: return _health.alive and not _health.downed and not on_ladder

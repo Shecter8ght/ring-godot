@@ -68,6 +68,7 @@ func _ready() -> void:
 	await get_tree().create_timer(2.0).timeout
 	_check("radio PCM playback", radio._sound.playing and radio._sound.stream != null)
 	_check("TV PCM playback and glow", tv._sound.playing and (_level.get_node("Lights/TvGlow") as Light3D).visible)
+	await _check_radio_pan(pl, radio)
 	Profile.save()
 	Profile.use_file(Profile.path,false)
 	_check("media saved and loaded", int(Profile.hideout_media.get("tv",-1)) == 2 and int(Profile.hideout_media.get("radio",-1)) == 1)
@@ -129,6 +130,50 @@ func _ready() -> void:
 	_level.queue_free()
 	await get_tree().create_timer(.4).timeout
 	get_tree().quit(1 if _fails>0 else 0)
+
+func _check_radio_pan(pl: Player, radio: HideoutActivity) -> void:
+	var rig: CameraRig = _level.get_node("CameraRig") as CameraRig
+	var old_yaw: float = rig._look_yaw
+	var old_pitch: float = rig._look_pitch
+	var old_position: Vector3 = pl.global_position
+	var old_velocity: Vector3 = pl.velocity
+	var old_airborne: bool = pl.airborne
+	var old_body_yaw: float = pl.body_yaw()
+	var source: Vector3 = radio._sound.global_position
+	pl.global_position = Vector3(source.x, 0.05, source.z + 2.0)
+	pl.reset_physics_interpolation()
+	rig._look_pitch = 0.0
+	# Поворот на месте меняет каналы постоянно играющей магнитолы.
+	var ambient: int = AudioServer.get_bus_index("Ambient")
+	var tap: AudioEffectCapture = AudioEffectCapture.new()
+	var tap_index: int = AudioServer.get_bus_effect_count(ambient)
+	AudioServer.add_bus_effect(ambient, tap)
+	var pans: Array[float] = []
+	for yaw: float in [PI * 0.5, -PI * 0.5]:
+		rig._look_yaw = yaw
+		await get_tree().create_timer(0.10).timeout
+		var ears: AudioListener3D = get_viewport().get_audio_listener_3d()
+		var camera: Camera3D = get_viewport().get_camera_3d()
+		_check("listener follows the first-person camera", ears != null and camera != null
+			and ears.global_transform.is_equal_approx(camera.global_transform))
+		tap.clear_buffer()
+		await get_tree().create_timer(0.22).timeout
+		var power: Vector2 = Vector2.ZERO
+		for sample: Vector2 in tap.get_buffer(tap.get_frames_available()):
+			power += sample * sample
+		pans.append((power.x - power.y) / maxf(power.x + power.y, 0.000001))
+	AudioServer.remove_bus_effect(ambient, tap_index)
+	print("RADIO_PAN ", pans)
+	_check("stationary radio moves between left and right when the player turns",
+		pans[0] * pans[1] < -0.04 and radio._sound.global_position.is_equal_approx(source))
+	pl.global_position = old_position
+	pl.velocity = old_velocity
+	pl.airborne = old_airborne
+	pl.face(old_body_yaw)
+	pl.reset_physics_interpolation()
+	rig._look_yaw = old_yaw
+	rig._look_pitch = old_pitch
+
 
 func _profile_data() -> Dictionary:
 	# JSON числа возвращает как float; сравниваем сохранённые значения, а не Variant int/float.

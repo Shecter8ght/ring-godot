@@ -382,13 +382,11 @@ func _step_timing(lab: DevelopmentLab, outside: Vector3) -> void:
 	(timing.find_child("pan_pct", true, false) as SpinBox).value = 0.0
 	Audio.step(outside, false, false, 0.0, true, Vector3.RIGHT, true)
 	Audio.event_played.disconnect(observe)
-	var listener: AudioListener3D = get_viewport().get_audio_listener_3d()
-	var side: Vector3 = listener.global_basis.x
-	side.y = 0.0
-	side = side.normalized() * Balance.STEP_FOOT_SIDE_M
-	_check("own footsteps pan around the listener axis and can be centered", captured.size() == 3
-		and captured[0].is_equal_approx(outside - side) and captured[1].is_equal_approx(outside + side)
-		and captured[2].is_equal_approx(outside))
+	var side: Vector3 = Vector3.RIGHT * Balance.STEP_FOOT_SIDE_M
+	_check("own footsteps use the supplied body axis and can be centered", captured.size() == 3
+		and (captured[0] * Vector3(1, 0, 1)).is_equal_approx((outside - side) * Vector3(1, 0, 1))
+		and (captured[1] * Vector3(1, 0, 1)).is_equal_approx((outside + side) * Vector3(1, 0, 1))
+		and (captured[2] * Vector3(1, 0, 1)).is_equal_approx(outside * Vector3(1, 0, 1)))
 	_select_lab_tab(lab, "Темп")
 	await _shot("step_timing")
 	lab.call("_save_timing")

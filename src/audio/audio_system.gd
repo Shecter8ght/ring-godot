@@ -220,7 +220,7 @@ func _pick_from(records: Array, key: String) -> AudioStream:
 	return records[index] as AudioStream
 
 func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0, emitter: Node = null,
-		recording: AudioStream = null, follow: Node3D = null) -> void:
+		recording: AudioStream = null, follow: Node3D = null, underfoot: bool = false) -> void:
 	if hook == "":
 		return
 	var spec: Dictionary = _kind_spec(hook)
@@ -243,9 +243,9 @@ func play(hook: String, pos: Vector3, extra_db: float = 0.0, _pitch: float = 0.0
 		var scene := get_tree().current_scene
 		get_tree().create_timer(delay).timeout.connect(func() -> void:
 			if is_instance_valid(scene) and get_tree().current_scene == scene:
-				_play_now(hook, id, stream, pos, extra_db, spec))
+				_play_now(hook, id, stream, pos, extra_db, spec, {}, null, underfoot))
 	else:
-		_play_now(hook, id, stream, pos, extra_db, spec, {}, follow)
+		_play_now(hook, id, stream, pos, extra_db, spec, {}, follow, underfoot)
 
 func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 	var ancestor: Node = emitter
@@ -258,7 +258,7 @@ func _matches_object(emitter: Node, binding: Dictionary) -> bool:
 	return false
 
 func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extra_db: float, spec: Dictionary,
-		preview: Dictionary = {}, follow: Node3D = null) -> AudioStreamPlayer3D:
+		preview: Dictionary = {}, follow: Node3D = null, underfoot: bool = false) -> AudioStreamPlayer3D:
 	if get_tree().current_scene == null:
 		return null
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
@@ -273,6 +273,9 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 	get_tree().current_scene.add_child(player)
 	player.global_position = pos
 	_setup_sound_path(player, bus, bool(spec.get("occlude", true)), preview, follow)
+	if underfoot:
+		player.set_meta("underfoot", true)
+		_apply_footstep_height(player, _listener_pos())
 	player.play()
 	event_played.emit(id, hook, pos)
 	if _is_weapon_shot(hook):
@@ -526,6 +529,17 @@ func _update_sound_paths(delta: float) -> void:
 		path.door_share = lerpf(path.door_share, 1.0 if path.via_door else 0.0, blend)
 		player.global_position = _sound_position(ear, path.source, path.door, path.door_share)
 		_apply_sound_path(player, path.profile, ear.distance_to(player.global_position), path.current)
+		if player.has_meta("underfoot"):
+			_apply_footstep_height(player, ear)
+
+
+## Стереопанорама не передаёт высоту. Слегка смягчаем верх у своих шагов ниже ушей.
+func _apply_footstep_height(player: AudioStreamPlayer3D, ear: Vector3) -> void:
+	var toward: Vector3 = ear.direction_to(player.global_position)
+	var below: float = smoothstep(0.25, 0.9, -toward.y)
+	player.attenuation_filter_cutoff_hz = minf(player.attenuation_filter_cutoff_hz,
+		lerpf(float(Balance.SONORA_AUDIO.unfiltered_hz), 4200.0, below))
+	player.attenuation_filter_db -= 5.0 * below
 
 
 ## A/B на стенде: тот же звук и преграда, меняются только частоты.
@@ -874,36 +888,30 @@ func _fade_out(p: AudioStreamPlayer3D, sec: float) -> void:
 
 
 func step(pos: Vector3, run: bool, ai: bool, extra_db: float, left: bool, right: Vector3 = Vector3.ZERO,
-		own: bool = false) -> void:
+		own: bool = false, ahead: Vector3 = Vector3.ZERO) -> void:
 	# дальше, чем слышно бег, — не считаем (24 мародёра шагают всё время)
 	if _has_ears() and _listener_pos().distance_to(pos) > float(Balance.AUDIO_EVENT_PROFILES.step_stone_run["max"]):
 		return
-	var surf: String = step_surface_at(pos, _surface_under(pos))
+	var side_m: float = Balance.STEP_FOOT_SIDE_M
+	if own:
+		side_m *= Balance.lab_number("step_timing", "pan_pct") / 100.0
+	var contact: Vector3 = pos + ahead + Vector3(right.x, 0, right.z).normalized() * side_m * (-1.0 if left else 1.0)
+	var hit: Dictionary = ground_hit(contact)
+	var sound_pos: Vector3 = hit.get("position", contact)
+	var surf: String = step_surface_at(sound_pos, Surfaces.kind_at(hit) if not hit.is_empty() else _surface_under(pos))
 	var takes: Dictionary = _step_preview.get(surf, {}) if not ai else {}
-	var kind: String = String(takes.get("hook", step_kind_at(pos, surf, run)))
+	var kind: String = String(takes.get("hook", step_kind_at(sound_pos, surf, run)))
 	var db := extra_db + (1.5 if ai else 0.0)
 	if run and kind != "step_stone_run":
 		db += 3.0
-	# Записи моно: направление определяют стопа и уши в мире, а не панорама внутри файла.
-	var axis: Vector3 = right
-	var side_m: float = Balance.STEP_FOOT_SIDE_M
-	if own:
-		var listener: Node3D = get_viewport().get_audio_listener_3d()
-		if not listener:
-			listener = get_viewport().get_camera_3d()
-		if listener:
-			axis = listener.global_basis.x
-			axis.y = 0.0
-		side_m *= Balance.lab_number("step_timing", "pan_pct") / 100.0
-	var sound_pos: Vector3 = pos + axis.normalized() * side_m * (-1.0 if left else 1.0)
-	var recording: AudioStream = _step_recording(takes, surf, pos)
+	var recording: AudioStream = _step_recording(takes, surf, sound_pos)
 	var material: String = STEP_MATERIALS.get(kind, "")
 	if material != "" and recording == null and not _preview.has(kind) and has_sound(STEP_BASE):
-		play(STEP_BASE, sound_pos, db)
-		play(material, sound_pos, db)
+		play(STEP_BASE, sound_pos, db, 0.0, null, null, null, own)
+		play(material, sound_pos, db, 0.0, null, null, null, own)
 	else:
-		play(kind, sound_pos, db, 0.0, null, recording)
-	_play_step_layers(pos, sound_pos, kind, db, ai)
+		play(kind, sound_pos, db, 0.0, null, recording, null, own)
+	_play_step_layers(sound_pos, kind, db, ai, own)
 	if run:
 		play("gear_rattle", pos, db - 5.0)
 	stepped.emit(kind, surf, pos)
@@ -925,9 +933,9 @@ func step_layers_at(pos: Vector3) -> Array[Node]:
 	return found
 
 
-func _play_step_layers(pos: Vector3, sound_pos: Vector3, base: String, db: float, ai: bool) -> void:
+func _play_step_layers(sound_pos: Vector3, base: String, db: float, ai: bool, own: bool) -> void:
 	var heard: Dictionary = {}
-	for node: Node in step_layers_at(pos):
+	for node: Node in step_layers_at(sound_pos):
 		var patch: StepLayerPatch = node as StepLayerPatch
 		if not Balance.STEP_LAYERS.has(patch.layer) or Balance.lab_number("step_layers", patch.layer + "_on") < 0.5:
 			continue
@@ -939,9 +947,9 @@ func _play_step_layers(pos: Vector3, sound_pos: Vector3, base: String, db: float
 		var entry: Array = heard[layer]
 		var hook: String = String(entry[0])
 		var key: String = "layer_" + layer
-		var recording: AudioStream = _layer_recording(layer, key, pos, ai)
+		var recording: AudioStream = _layer_recording(layer, key, sound_pos, ai)
 		if recording != null or hook != base:
-			play(hook, sound_pos, db + float(entry[1]), 0.0, null, recording)
+			play(hook, sound_pos, db + float(entry[1]), 0.0, null, recording, null, own)
 
 
 func _layer_recording(layer: String, key: String, pos: Vector3, ai: bool) -> AudioStream:

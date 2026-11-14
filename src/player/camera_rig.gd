@@ -621,6 +621,10 @@ func _process(delta: float) -> void:
 		_process_iso(delta, s)
 		if _hitmarker.visible:
 			_hitmarker.position = get_viewport().get_mouse_position()
+	if pl != null and pl.is_local():
+		var ears: Transform3D = _ads_cam.global_transform if ads_active else Transform3D(
+			Basis(Vector3.UP, _camera.global_rotation.y), pl.view_eye())
+		pl.update_audio_listener(ears)
 	_update_hud(pl)
 	_update_hurt(pl, delta)
 	if _stamina_bar and pl and pl.is_local():
