@@ -9,6 +9,8 @@ var _tracks: ItemList
 var _status: Label
 var _empty: Label
 var _play: Button
+var _volume: HSlider
+var _volume_value: Label
 
 
 func _ready() -> void:
@@ -55,6 +57,22 @@ func _ready() -> void:
 	_station.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_station.item_selected.connect(func(index: int) -> void: station_selected.emit(index))
 	tuning.add_child(_station)
+	var volume_row := HBoxContainer.new()
+	volume_row.add_theme_constant_override("separation", 10)
+	body.add_child(volume_row)
+	var volume_label := Label.new()
+	volume_label.text = "Громкость"
+	volume_row.add_child(volume_label)
+	_volume = HSlider.new()
+	_volume.max_value = 1.0
+	_volume.step = 0.01
+	_volume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_volume.value_changed.connect(_change_volume)
+	volume_row.add_child(_volume)
+	_volume_value = Label.new()
+	_volume_value.custom_minimum_size.x = 56
+	_volume_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	volume_row.add_child(_volume_value)
 	var heading := Label.new()
 	heading.text = "Мои треки"
 	body.add_child(heading)
@@ -101,6 +119,8 @@ func open(stations: Array, files: PackedStringArray) -> void:
 	_tracks.visible = not files.is_empty()
 	_empty.visible = files.is_empty()
 	_play.disabled = true
+	_volume.set_value_no_signal(Settings.shelter_radio_volume)
+	_volume_value.text = "%d %%" % roundi(_volume.value * 100.0)
 	_root.show()
 	if _tracks.visible:
 		_tracks.grab_focus()
@@ -114,6 +134,11 @@ func update_playback(station: int, status: String) -> void:
 
 func _play_track(index: int) -> void:
 	track_selected.emit(_tracks.get_item_text(index))
+
+
+func _change_volume(level: float) -> void:
+	_volume_value.text = "%d %%" % roundi(level * 100.0)
+	Settings.set_shelter_radio_volume(level)
 
 
 func _unhandled_input(event: InputEvent) -> void:

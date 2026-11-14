@@ -81,8 +81,8 @@ func _ready() -> void:
 		if not occupied:
 			state = _saved_state()
 		_sound = AudioStreamPlayer3D.new()
-		_sound.bus = &"Ambient"
-		_sound.volume_db = -6.0 if kind == Kind.RADIO else -10.0
+		_sound.bus = Settings.SHELTER_RADIO_BUS if kind == Kind.RADIO else &"Ambient"
+		_sound.volume_db = -10.0
 		_sound.unit_size = 3.0
 		_sound.max_distance = 24.0
 		add_child(_sound)

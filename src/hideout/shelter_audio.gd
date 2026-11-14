@@ -12,10 +12,6 @@ func _ready() -> void:
 	ventilation.stream = Audio.hum_loop()
 	ventilation.bus = &"Ambient"
 	ventilation.play()
-	for activity: String in ["Tv","Radio"]:
-		var source: HideoutActivity = get_node("../../Activities/"+activity) as HideoutActivity
-		if source._sound:
-			source._sound.bus = &"Ambient"
 
 func _exit_tree() -> void:
 	_generator.stop()

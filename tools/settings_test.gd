@@ -28,6 +28,17 @@ func _ready() -> void:
 		and absf(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Radio")) + 6.02) < 0.1
 		and is_zero_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Voices"))), "")
 	Settings.set_volume("Radio", 1.0)
+	var shelter_radio: int = AudioServer.get_bus_index(Settings.SHELTER_RADIO_BUS)
+	_check("магнитола идёт в окружение через отдельную обработку", AudioServer.get_bus_send(shelter_radio) == &"Ambient"
+		and AudioServer.get_bus_effect_count(shelter_radio) == 3, "")
+	Settings.set_shelter_radio_volume(0.0)
+	_check("ноль глушит магнитолу, рация и окружение слышны", AudioServer.is_bus_mute(shelter_radio)
+		and not AudioServer.is_bus_mute(AudioServer.get_bus_index("Radio"))
+		and not AudioServer.is_bus_mute(AudioServer.get_bus_index("Ambient")), "")
+	Settings.set_shelter_radio_volume(0.5)
+	_check("половина громкости магнитолы — −6 дБ", not AudioServer.is_bus_mute(shelter_radio)
+		and absf(AudioServer.get_bus_volume_db(shelter_radio) + 6.02) < 0.1, "")
+	Settings.set_shelter_radio_volume(Settings.SHELTER_RADIO_DEFAULT_VOLUME)
 	var env := (inst.find_children("*", "WorldEnvironment", true, false)[0] as WorldEnvironment).environment
 	var sdfgi0 := env.sdfgi_enabled
 	# тень солнца по качеству (Balance.SHADOW_QUALITY): на ТЦ в сцене — 260 м и 4 каскада

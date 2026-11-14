@@ -57,6 +57,12 @@ func _ready() -> void:
 	var radio: HideoutActivity = _level.get_node("Activities/Radio") as HideoutActivity
 	radio.request_use()
 	_check("interact opens the radio panel", radio._radio_panel.is_open() and pl.ui_blocked())
+	_check("magnetola and TV use separate buses",
+		radio._sound.bus == Settings.SHELTER_RADIO_BUS and tv._sound.bus == &"Ambient")
+	radio._radio_panel._volume.value = 0.0
+	_check("volume slider mutes only the radio", AudioServer.is_bus_mute(AudioServer.get_bus_index(radio._sound.bus))
+		and not AudioServer.is_bus_mute(AudioServer.get_bus_index(tv._sound.bus)))
+	radio._radio_panel._volume.value = Settings.SHELTER_RADIO_DEFAULT_VOLUME
 	for activity: HideoutActivity in [tv,radio]:
 		var channel_count: int = HideoutActivity.TV_CHANNELS.size() if activity == tv else HideoutActivity.RADIO_STATIONS.size()
 		for step: int in range(1, channel_count + 1):

@@ -61,6 +61,9 @@ var reticle: Dictionary = {"shape": 1, "color": 0, "bold": 1}
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0,
 	"Voices": 1.0, "Radio": 1.0}
 const INTERFACE_BUS := &"Interface"
+const SHELTER_RADIO_BUS := &"ShelterRadio"
+const SHELTER_RADIO_DEFAULT_VOLUME := 0.35
+var shelter_radio_volume: float = SHELTER_RADIO_DEFAULT_VOLUME
 
 ## Чит «бессмертие» (меню Esc → Читы) — раздел cheats; в коопе решает хост.
 var god: bool = false
@@ -146,6 +149,7 @@ func _load() -> void:
 		reticle[key] = int(cfg.get_value("sight", key, reticle[key]))
 	for b in BUSES:
 		volume[b] = clampf(float(cfg.get_value("audio", String(b), 1.0)), 0.0, 1.0)
+	shelter_radio_volume = clampf(float(cfg.get_value("audio", "shelter_radio", SHELTER_RADIO_DEFAULT_VOLUME)), 0.0, 1.0)
 	god = bool(cfg.get_value("cheats", "god", false))
 	all_weapons = bool(cfg.get_value("cheats", "all_weapons", false))
 	shop_loot = bool(cfg.get_value("cheats", "shop_loot", false))
@@ -188,6 +192,7 @@ func save() -> void:
 		cfg.set_value("sight", key, int(reticle[key]))
 	for b in BUSES:
 		cfg.set_value("audio", String(b), float(volume[b]))
+	cfg.set_value("audio", "shelter_radio", shelter_radio_volume)
 	cfg.set_value("cheats", "god", god)
 	cfg.set_value("cheats", "all_weapons", all_weapons)
 	cfg.set_value("cheats", "shop_loot", shop_loot)
@@ -490,27 +495,54 @@ func set_volume(bus: String, v: float) -> void:
 	changed.emit()
 
 
+func set_shelter_radio_volume(level: float) -> void:
+	shelter_radio_volume = clampf(level, 0.0, 1.0)
+	_apply_bus_level(SHELTER_RADIO_BUS, shelter_radio_volume)
+	save()
+
+
 # ---------------------------------------------------------------- звук
 
-## Шины звука (все — в Master): создаются при старте, если их нет в раскладке проекта.
+## Шины звука создаются при старте. Магнитола идёт в «Окружение», остальные — в Master.
 func _make_buses() -> void:
-	for bus: String in BUSES.keys() + [String(INTERFACE_BUS)]:
+	for bus: String in BUSES.keys() + [String(INTERFACE_BUS), String(SHELTER_RADIO_BUS)]:
 		var index: int = AudioServer.get_bus_index(bus)
 		if index < 0:
 			AudioServer.add_bus()
 			index = AudioServer.bus_count - 1
 			AudioServer.set_bus_name(index, bus)
 		if bus != "Master":
-			AudioServer.set_bus_send(index, "Master")
+			AudioServer.set_bus_send(index, "Ambient" if bus == SHELTER_RADIO_BUS else "Master")
 		# Удалить прежние эффекты, если они были в раскладке.
 		for effect_index: int in range(AudioServer.get_bus_effect_count(index) - 1, -1, -1):
 			AudioServer.remove_bus_effect(index, effect_index)
+	_make_shelter_radio_effects()
+
+
+func _make_shelter_radio_effects() -> void:
+	var bus: int = AudioServer.get_bus_index(SHELTER_RADIO_BUS)
+	# Маленький динамик теряет бас и верх, а усилитель слегка перегружается на пиках.
+	var bass_cut := AudioEffectHighPassFilter.new()
+	bass_cut.cutoff_hz = 330.0
+	bass_cut.db = AudioEffectFilter.FILTER_12DB
+	var speaker := AudioEffectDistortion.new()
+	speaker.mode = AudioEffectDistortion.MODE_WAVESHAPE
+	speaker.drive = 0.46
+	speaker.pre_gain = 4.0
+	speaker.post_gain = -11.0
+	speaker.keep_hf_hz = 5000.0
+	var treble_cut := AudioEffectLowPassFilter.new()
+	treble_cut.cutoff_hz = 3100.0
+	treble_cut.db = AudioEffectFilter.FILTER_12DB
+	for effect: AudioEffect in [bass_cut, speaker, treble_cut]:
+		AudioServer.add_bus_effect(bus, effect)
 
 
 func apply_audio() -> void:
 	for bus: String in BUSES:
 		_apply_bus_level(bus, float(volume[bus]))
 	_apply_bus_level(INTERFACE_BUS, float(volume.World))
+	_apply_bus_level(SHELTER_RADIO_BUS, shelter_radio_volume)
 
 
 func _apply_bus_level(bus: StringName, level: float) -> void:
