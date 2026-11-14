@@ -284,6 +284,18 @@ func _spawn_marauder_node(data: Dictionary) -> Node:
 	return m
 
 
+## Форма стоящего бойца из той же сцены, из которой создаются отряды.
+func squad_spawn_clearance() -> PhysicsShapeQueryParameters3D:
+	var prototype := MARAUDER_SCENE.instantiate() as Marauder
+	var capsule := prototype.get_node("Capsule") as CollisionShape3D
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = capsule.shape
+	query.transform = capsule.transform
+	query.collision_mask = prototype.collision_mask
+	prototype.free()
+	return query
+
+
 ## Хост: отряд из archs (типы AI_ARCHETYPES) у точки at. opts: home + home_r — держатся у места
 ## (жильцы, охрана), hostile — жильцы враждебны сразу, target — сразу идут проверить точку (ЧВК к
 ## грузу), loadout — выкладка всем (data/loadouts.json). До готовности навмеша — в очередь.

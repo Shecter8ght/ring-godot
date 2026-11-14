@@ -141,8 +141,11 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 	var size := _prospekt_group_size() if prospekt else _rng.randi_range(int(cfg.size[0]), int(cfg.size[1]))
 	archs.resize(clampi(size, 1, archs.size()))
 	var sq: Squad
+	var patrol := PackedVector3Array()
 	if prospekt and at == Vector3.INF:
-		sq = _spawn_prospekt_squad(archs)
+		var entry: Dictionary = _spawn_prospekt_squad(archs)
+		sq = entry.get("squad") as Squad
+		patrol = entry.get("patrol", patrol)
 	else:
 		if at == Vector3.INF:
 			at = _entry_point(exits)
@@ -153,11 +156,12 @@ func enter(record: Dictionary, at: Vector3 = Vector3.INF, exit_at: Vector3 = Vec
 		return null
 	if at == Vector3.INF:
 		at = sq.members[0].global_position
-	if prospekt:
-		var patrol := _prospekt_patrol(at)
-		if patrol.is_valid():
-			for m: Marauder in sq.members:
-				m.patrol_point_provider = patrol
+	elif prospekt:
+		patrol = _prospekt_patrol(at)
+	if not patrol.is_empty():
+		var choose := func() -> Vector3: return patrol[_rng.randi_range(0, patrol.size() - 1)]
+		for m: Marauder in sq.members:
+			m.patrol_point_provider = choose
 	var exit: Dictionary = {"pos": exit_at, "name": "выход"}
 	if exit_at == Vector3.INF:
 		exit = _pick_exit(exits, at)
@@ -183,20 +187,46 @@ func _prospekt_group_size() -> int:
 	return 1 + _rng.rand_weighted(PackedFloat32Array(weights))
 
 
-func _spawn_prospekt_squad(archs: Array) -> Squad:
+func _spawn_prospekt_squad(archs: Array) -> Dictionary:
 	var pop := level.get_node_or_null("Population") as AIPopulation
 	if pop == null or int(level.get("_marauders_spawned")) <= 0:
-		return null
+		return {}
 	var entries := pop.arrival_points()
-	var opts := {"can_spawn": _hidden_from_players, "spread_inward": true}
+	var world := (level as Node3D).get_world_3d()
+	var clearance: PhysicsShapeQueryParameters3D = level.call("squad_spawn_clearance")
+	var body_offset := clearance.transform
 	while not entries.is_empty():
 		var at: Vector3 = entries.pop_at(_rng.randi_range(0, entries.size() - 1))
-		if not _hidden_from_players(at):
+		var patrol := _prospekt_patrol(at)
+		if patrol.is_empty():
 			continue
+		var street := NavigationServer3D.map_get_closest_point(world.navigation_map, patrol[0])
+		var can_spawn := func(p: Vector3) -> bool:
+			return _hidden_from_players(p) and _prospekt_spawn_clear(world, clearance, body_offset, p, street)
+		if not can_spawn.call(at + Vector3.UP * 0.1):
+			continue
+		var opts := {"can_spawn": can_spawn, "spread_inward": true}
 		var sq := level.call("spawn_squad", at, archs, opts) as Squad
 		if sq and not sq.members.is_empty():
-			return sq
-	return null
+			return {"squad": sq, "patrol": patrol}
+	return {}
+
+
+func _prospekt_spawn_clear(world: World3D, clearance: PhysicsShapeQueryParameters3D, body_offset: Transform3D,
+		at: Vector3, street: Vector3) -> bool:
+	var space := world.direct_space_state
+	clearance.transform = body_offset.translated(at)
+	if not space.intersect_shape(clearance, 1).is_empty():
+		return false
+	# Внутри пустого бокса тело помещается, поэтому отдельно ищем крышу.
+	var roof := PhysicsRayQueryParameters3D.create(at, at + Vector3.UP * RaidAtmosphere.ROOF_RAY_M,
+		Hitscan.LAYER_WORLD | Hitscan.LAYER_ROOF | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS)
+	roof.hit_from_inside = true
+	if not space.intersect_ray(roof).is_empty():
+		return false
+	# Навигация возвращает и обрезанный путь, если ближайший полигон отрезан стеной.
+	var path := NavigationServer3D.map_get_path(world.navigation_map, at, street, true)
+	return not path.is_empty() and path[-1].is_equal_approx(street)
 
 
 func _hidden_from_players(at: Vector3) -> bool:
@@ -216,10 +246,11 @@ func _hidden_from_players(at: Vector3) -> bool:
 	return true
 
 
-## Между обысками отряд выбирает точки ближайшего к месту входа уличного маршрута.
-func _prospekt_patrol(at: Vector3) -> Callable:
+## Точки ближайшего уличного маршрута. Ближайшая точка нужна для проверки пути из места появления.
+func _prospekt_patrol(at: Vector3) -> PackedVector3Array:
 	var route_points := PackedVector3Array()
 	var best := INF
+	var first := Vector3.INF
 	for n: Node in get_tree().get_nodes_in_group("ai_routes"):
 		var route := n as AIRoute
 		if route == null:
@@ -230,9 +261,13 @@ func _prospekt_patrol(at: Vector3) -> Callable:
 			if distance < best:
 				best = distance
 				route_points = points
+				first = p
 	if route_points.is_empty():
-		return Callable()
-	return func() -> Vector3: return route_points[_rng.randi_range(0, route_points.size() - 1)]
+		return route_points
+	var index := route_points.find(first)
+	route_points[index] = route_points[0]
+	route_points[0] = first
+	return route_points
 
 
 func _publish_map_marks() -> void:

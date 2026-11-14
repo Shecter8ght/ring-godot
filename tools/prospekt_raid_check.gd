@@ -3,7 +3,7 @@ extends Node
 ## навигация из кэша, население расставлено слоями — кордон держат ЧВК; точки постов, патрулей, гнёзд и подхода
 ## стоят на навигации; от каждого захода по навигации дойти до выхода; места лута на месте; приёмы EFT —
 ## выходы по стороне захода, условные выходы, подстанция, решётка хранилища, замки, схроны, главарь банка.
-## Чужие отряды: следующий вход после 2–4 минут, отсрочка при занятом входе и лимите групп.
+## Чужие отряды: входы по краям карты, закрытый гараж, задержка при занятом входе и лимите групп.
 ##   tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn
 ## Код выхода — число провалов.
 
@@ -105,8 +105,82 @@ func _ready() -> void:
 	_check("места лута: улица и сценки больше 200, залы зданий — свои", loot > 200 and hall_loot > 40,
 		"улица %d, залы %d" % [loot, hall_loot])
 	_eft_checks(me, pop)
+	await _rival_spawn_checks(me)
 	_rival_checks(me)
 	_finish()
+
+
+func _rival_spawn_checks(me: Player) -> void:
+	var rivals := RivalRaids.current
+	if rivals == null or me == null:
+		_check("уровень готов к проверке входов чужих отрядов", false, "")
+		return
+	var markers := get_tree().get_nodes_in_group("ai_arrivals")
+	var east := _level.get_node_or_null("Gameplay/Population/Arrivals/Arrive_East") as AIArrival
+	_check("восточный вход есть в сцене", east != null, "")
+	if east == null:
+		return
+	rivals.set_process(false)
+	var east_pos := east.global_position
+	var player_pos := me.global_position
+	me.global_position = Vector3(0, -80, 0)
+	# Старый маркер восточного входа стоял в ряду закрытых гаражей.
+	for marker: Node in markers:
+		marker.remove_from_group("ai_arrivals")
+	east.add_to_group("ai_arrivals")
+	east.global_position = Vector3(185.3, 0.08, 100)
+	var archs := ["rival", "rival", "rival_scout"]
+	var before := get_tree().get_nodes_in_group("marauders").size()
+	var blocked := rivals._spawn_prospekt_squad(archs)
+	_check("старый вход в гаражах отклоняется целиком", blocked.is_empty()
+		and get_tree().get_nodes_in_group("marauders").size() == before, "")
+	if blocked.has("squad"):
+		for m: Marauder in (blocked.squad as Squad).members:
+			m.queue_free()
+	east.global_position = east_pos
+	# По одной тройке с каждого реального входа. Проверяем позиции бойцов до первого шага.
+	var failed: Array[StringName] = []
+	var count := 0
+	var world := east.get_world_3d()
+	var mask := Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS | Hitscan.LAYER_ROOF
+	var clearance: PhysicsShapeQueryParameters3D = _level.call("squad_spawn_clearance")
+	var body_offset := clearance.transform
+	clearance.collision_mask = mask
+	east.remove_from_group("ai_arrivals")
+	for marker: Node in markers:
+		marker.add_to_group("ai_arrivals")
+		var entry: Dictionary = {}
+		for attempt in range(4):
+			entry = rivals._spawn_prospekt_squad(archs)
+			if not entry.is_empty():
+				break
+		marker.remove_from_group("ai_arrivals")
+		if entry.is_empty():
+			failed.append(marker.name)
+			continue
+		var sq: Squad = entry.squad
+		var street := NavigationServer3D.map_get_closest_point(world.navigation_map, entry.patrol[0])
+		var valid := sq.members.size() == archs.size()
+		for m: Marauder in sq.members:
+			var at := m.global_position
+			clearance.transform = body_offset.translated(at)
+			var fits := world.direct_space_state.intersect_shape(clearance, 1).is_empty()
+			var roof := PhysicsRayQueryParameters3D.create(at, at + Vector3.UP * RaidAtmosphere.ROOF_RAY_M, mask)
+			roof.hit_from_inside = true
+			var path := NavigationServer3D.map_get_path(world.navigation_map, at, street, true)
+			var outside := world.direct_space_state.intersect_ray(roof).is_empty()
+			var connected := not path.is_empty() and path[-1].is_equal_approx(street)
+			valid = valid and fits and outside and connected
+			m.queue_free()
+		if not valid:
+			failed.append(marker.name)
+		count += sq.members.size()
+		await get_tree().physics_frame
+	for marker: Node in markers:
+		marker.add_to_group("ai_arrivals")
+	me.global_position = player_pos
+	_check("на каждом входе вся тройка на улице с путём к патрулю", markers.size() >= 5 and failed.is_empty(),
+		"бойцов %d, входов %d, ошибки %s" % [count, markers.size(), str(failed)])
 
 
 func _rival_checks(me: Player) -> void:
