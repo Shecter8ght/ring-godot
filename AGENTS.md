@@ -560,6 +560,16 @@ python -X utf8 tools/gen_loot_containers.py                    # каталог 
                                                               # опоры под кассу «Проспекта» (форма без текстур, в игру не внесены): прилавок торговый ПТ_ (ЛДСП 16 мм, 1500 × 600 × 900, ящик на телескопах)
                                                               # и кассовый бокс супермаркета КБ_ (транспортёр, сканер, накопитель, стол кассира, стойка с номером); у каждого socket_register — место кассы;
                                                               # детали — counters.py; для масштаба — касса партии 1 и фигура 1,75 м; check — габариты, пересечения, нормали, касса на опоре
+"D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python-exit-code 1 --python tools/padlock_v01/game.py -- [lp] [bake] [export]
+                                                              # навесной замок Padlock_01 (отделка v05) в игру: lp — щёки заново (лицо — триангуляция контура на куполе с нормалями купола,
+                                                              # стенки лентами, скважина и малое отверстие — колодцы с тёмным дном), обечайка — наружная стенка, дужка — пруток по оси
+                                                              # (12 граней, 20 шагов по дуге), шляпки и штифт схлопыванием; LOD1 щёк той же разметкой; развёртка — укладчик asset_kit, атлас 1K;
+                                                              # bake — Cycles на процессоре с high-poly и карт v05 (лак Coat — в шероховатость); export → assets/models/props/padlock_01
+                                                              # (Body, Shackle — начало на оси ноги, *_lod1; padlock_01.json) и E:/Models Blender/PROPS/Padlock_01/models/padlock_v05_game.blend;
+                                                              # затем --import, python -X utf8 tools/padlock_v01/game_imports.py, --import; сверка с high-poly в одной студии —
+                                                              # blender … --python tools/padlock_v01/game_compare.py -- [front|rear|both] [выборки] → Padlock_01/previews/game_vs_high.png
+tools/godot.cmd --windowed --resolution 1280x720 res://tools/padlock_shots.tscn # замок в движке днём: лицо с 0,4 м, скважина крупно, тыл 3/4,
+                                                              # с 2 м LOD0 и LOD1 рядом, LOD1 вблизи → docs/screens/padlock_*.png (PADLOCK_MODE=albedo | flat — отладка: без света / без нормалей)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background "E:/Models Blender/ENVIRONMENT/RING_Loot_Containers/models/RING_Loot_Counters_v01.blend" --python-exit-code 1 --python tools/loot_containers/counters_uv.py
                                                               # опоры под кассу, отделка v01 (заводская и износ сразу): развёртка — набор на предмет 2K, FBX → _asset_src/loot_containers/sp_counters;
                                                               # затем blender -b <…_uv_v01.blend> --python tools/loot_containers/counters_bake.py (положение, нормаль, деталь, кромки из 3D узлом Bevel),

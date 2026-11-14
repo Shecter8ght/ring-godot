@@ -1,0 +1,61 @@
+{
+ "file": "res://assets/models/props/padlock_01/padlock_01.gltf",
+ "source": "E:/Models Blender/PROPS/Padlock_01/models/padlock_v05_textured.blend (отделка v05)",
+ "triangles": 1482,
+ "triangles_lod1": 400,
+ "nodes_triangles": {
+  "Body": 954,
+  "Shackle": 528,
+  "Body_lod1": 280,
+  "Shackle_lod1": 120
+ },
+ "aabb": {
+  "center": [
+   0.0,
+   0.06,
+   -0.0002
+  ],
+  "size": [
+   0.08,
+   0.12,
+   0.0244
+  ]
+ },
+ "nodes": [
+  "Body",
+  "Shackle",
+  "Body_lod1",
+  "Shackle_lod1"
+ ],
+ "material": "Padlock",
+ "atlas": {
+  "size": 1024,
+  "maps": [
+   "baseColor",
+   "normal",
+   "occlusionRoughnessMetallic"
+  ],
+  "uv_fill": 0.7975,
+  "px_per_mm": 6.34
+ },
+ "axes": "Godot: Y вверх, лицо со скважиной к +Z, ширина по X; начало у основания корпуса; метры, масштаб 1",
+ "shackle": {
+  "node": "Shackle",
+  "pivot_leg": "left",
+  "legs_equal": true,
+  "pivot": [
+   -0.025,
+   0.0702,
+   -0.0
+  ],
+  "axis": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "closed_angle_deg": 0.0,
+  "swing_open_deg": 180.0,
+  "lift_max_m": 0.0104,
+  "note": "начало узла — на оси левой ноги в плоскости верха корпуса (узел Shackle_lod1 — так же); открыть: поднять по +Y на lift_max_m (нога выходит из гнезда), затем повернуть вокруг оси Y; у модели обе ноги одной длины (до z 59,8 мм от основания) — какая нога остаётся в корпусе, решается в игре; механизм не воспроизведён"
+ }
+}
