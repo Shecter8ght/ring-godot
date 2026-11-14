@@ -114,6 +114,14 @@ func _ready() -> void:
 	Audio.mix_save_path = save_path
 	Audio._mix = old_mix
 	Audio._samples.step_wood = originals
+	# Даже назначенная запись общего фона не должна запускаться при чтении каталога без карты.
+	Audio.set_preview({"loop:ambient": [probe]})
+	Audio.reload_events()
+	await get_tree().process_frame
+	check(not Audio.get_children().any(func(node: Node) -> bool:
+		return node is AudioStreamPlayer and (node as AudioStreamPlayer).bus == &"Ambient"),
+		"reloading the sound catalog does not start a global ambience player")
+	Audio.set_preview({})
 	# A map bed follows map lifecycle, not listener distance, and disappears with that map.
 	var map_id: String = "ambient_prospekt"
 	Audio._samples[map_id] = [probe]
@@ -122,8 +130,8 @@ func _ready() -> void:
 	add_child(anchor)
 	Audio._update_map_ambient()
 	check(is_instance_valid(Audio._map_ambient) and Audio._map_ambient.get_parent() == anchor, "map ambience starts on the actual map root")
-	check(Audio._map_ambient.bus == &"Ambient", "map ambience uses the Ambient bus")
 	var ambient: AudioStreamPlayer = Audio._map_ambient
+	check(is_instance_valid(ambient) and ambient.bus == &"Ambient", "map ambience uses the Ambient bus")
 	anchor.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

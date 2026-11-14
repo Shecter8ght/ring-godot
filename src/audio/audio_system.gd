@@ -41,7 +41,6 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _place_cache: Dictionary = {}
 var _shooters: Array[Dictionary] = []
 var _triggered: Dictionary = {}
-var _ambient: AudioStreamPlayer
 var _preview: Dictionary = {}
 var _step_preview: Dictionary = {}
 var _layer_revision: int = -1
@@ -180,17 +179,6 @@ func reload_events() -> void:
 	for node: Node in get_tree().root.find_children("*", "Node3D", true, false):
 		if _map_paths.has(node.scene_file_path) or _local_map_files.has(node.scene_file_path):
 			node.add_to_group("sonora_map_roots")
-	if is_instance_valid(_ambient):
-		_ambient.queue_free()
-	var background: AudioStream = _pick("loop:ambient", Vector3.ZERO)
-	if background != null:
-		make_loop(background)
-		_ambient = AudioStreamPlayer.new()
-		_ambient.stream = background
-		_ambient.bus = &"Ambient"
-		_ambient.volume_db = float(Balance.SONORA_AUDIO.ambient_db)
-		add_child(_ambient)
-		_ambient.play()
 
 func resolve_event(hook: String, place: String = "") -> String:
 	if _is_weapon_shot(hook):

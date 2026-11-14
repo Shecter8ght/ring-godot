@@ -64,6 +64,8 @@ func _ready() -> void:
 	check(Audio.resolve_event("wpn_sp_02_shot", "outdoor") == "", "У встроенного глушителя только заглушённый выстрел")
 	check(Audio._pick("wpn_smg_03_shot_sup", Vector3.ZERO, "room") == null, "Пустой заглушённый слот молчит")
 	check(Audio.resolve_event("wpn_hg_01_shot@far") == "", "Дистанционных записей нет")
-	check(not is_instance_valid(Audio._ambient), "Автоматический ветер отсутствует")
+	check(not Audio.get_children().any(func(node: Node) -> bool:
+		return node is AudioStreamPlayer and (node as AudioStreamPlayer).bus == &"Ambient"),
+		"Фон не запускается глобально без карты")
 	print("SONORA_WEAPON_CONTRACT: checked=%d failed=%d" % [checked, failed])
 	get_tree().quit(1 if failed else 0)
