@@ -21,16 +21,25 @@ YE = -55.0                        # плоскость правого (−Y) т�
 Z_RIM = -95.0                     # верхняя кромка корпуса = линия петли: снимок 13 (нижний ряд колен петли)
 LID_TOP = -59.0                   # верх крышки: снимок 13 (над ним — только ползун крепления)
 T = 1.2                           # лист корпуса и крышки (dims.BOX_SHEET = 1,0 — при шаге 0,15 мм тоньше нельзя)
-R_PLAN = 6.0                      # скругление вертикальных рёбер корпуса
-R_BOT = 5.0                       # скругление нижних рёбер
+# скругления (владелец 2026-11-14: «коробка получилась сильно угловатой, на референсах она более округлая» — было
+# 6 / 5 / 6 мм; на образцах 05, 06 радиусы рёбер около восьмой части толщины коробки)
+R_PLAN = 12.0                     # скругление вертикальных рёбер корпуса
+R_BOT = 10.0                      # скругление нижних рёбер
+R_TOP = 9.0                       # скругление верхних рёбер крышки
+FLAT = HW - R_PLAN                # полуширина прямого участка торцов: петли, заслонка, защёлка — в его пределах
 # шарнир крышки (вдоль X): центр оси и радиус колена
 YH, ZH, RH = -58.5, -94.0, 3.4
 # колена петли по X от середины: (0 — лишь у крышки, 1 — лишь у корпуса); в середине — просвет под ручку
-HINGE = [(-47.9, -34.9, "lid"), (-34.5, -20.5, "body"), (20.5, 34.5, "body"), (34.9, 47.9, "lid")]
+HINGE = [(-35.0, -28.4, "lid"), (-28.0, -20.5, "body"), (20.5, 28.0, "body"), (28.4, 35.0, "lid")]
 HINGE_GAP = 20.1                  # полуширина просвета под ремень
 # шарнир заслонки выхода ленты (на верху крышки у правого торца)
-YF, ZF, RF = -59.1, -63.2, 2.5
-FLAP_SEG = [(-45.0, -27.6, "flap"), (-27.2, -9.4, "lid"), (-9.0, 9.0, "flap"), (9.4, 27.2, "lid"), (27.6, 45.0, "flap")]
+# колено на продолжении дуги плеча крышки (центр (YE − 1,6 + R_TOP; LID_TOP − R_TOP)) под углом 168°, на R_TOP + 2,69
+_A = math.radians(168.0)
+YF = YE - 1.6 + R_TOP + (R_TOP + 2.69) * math.cos(_A)
+ZF = LID_TOP - R_TOP + (R_TOP + 2.69) * math.sin(_A)
+RF = 2.5
+FLAP_SEG = [(-35.0, -21.6, "flap"), (-21.2, -7.4, "lid"), (-7.0, 7.0, "flap"), (7.4, 21.2, "lid"), (21.6, 35.0, "flap")]
+FLAP_HW = 34.5                    # полуширина плиты заслонки
 # щель выхода ленты в крышке (X, Y)
 SLOT_X0, SLOT_X1 = -140.0, -58.0
 SLOT_Y0, SLOT_Y1 = -48.0, -28.0
@@ -40,7 +49,7 @@ SLOT_Y0, SLOT_Y1 = -48.0, -28.0
 # под вертушок; вертушок — на 63 мм ниже оси
 LATCH_DY, LATCH_Z = 5.4, -94.0
 BTN_Z = -157.0
-LATCH_LID_SEG = [(-46.4, -28.8), (30.0, 46.4)]       # колена на крышке (X от середины коробки)
+LATCH_LID_SEG = [(-35.4, -28.8), (30.0, 35.4)]       # колена на крышке (X от середины коробки)
 LATCH_SEG = [(-28.4, -8.8), (11.0, 29.6)]            # колена скобы
 LATCH_SPRING = (-8.2, 10.4)                           # пружина на оси между коленами скобы
 
@@ -100,8 +109,9 @@ def body(pre):
         F.displace(end_emboss, bbox=bb(XC - 29, XC + 29, y0 - 2, y0 + 4, zb + 15, zb + 55), fine=False)
 
         def grooves(X, Y, Z):
-            g = np.maximum(smoothstep((1.7 - np.abs(X - (XC - 38.0))) / 0.9), smoothstep((1.7 - np.abs(X - (XC + 38.0))) / 0.9))
-            zf = smoothstep((Z - (zb + 8.0)) / 3.0) * smoothstep(((Z_RIM - 4.0) - Z) / 3.0)
+            gx = FLAT - 4.0
+            g = np.maximum(smoothstep((1.7 - np.abs(X - (XC - gx))) / 0.9), smoothstep((1.7 - np.abs(X - (XC + gx))) / 0.9))
+            zf = smoothstep((Z - (zb + R_BOT + 3.0)) / 3.0) * smoothstep(((Z_RIM - 4.0) - Z) / 3.0)
             near = smoothstep(((y0 + 2.5) - Y) / 1.2) + smoothstep((Y - (y1 - 2.5)) / 1.2)
             return -0.9 * g * zf * near
         F.displace(grooves, bbox=bb(x0, x1, y0 - 2, y1 + 2, zb, Z_RIM), fine=False)
@@ -121,7 +131,8 @@ def body(pre):
             F.add(cyl("X", (YH, ZH), RH, xa, xb, rim=0.5), 0.0, bbox=bb(xa - 1, xb + 1, YH - 4, YH + 4, ZH - 4, ZH + 4))
             F.add(box((xa, YH, Z_RIM - 5.5), (xb, y0 + 0.6, Z_RIM - 0.2), 0.7), 0.4,
                   bbox=bb(xa - 1, xb + 1, YH - 1, y0 + 2, Z_RIM - 7, Z_RIM + 1))
-        F.sub(cyl("X", (YH, ZH), 1.8, XC - 53, XC + 53), 0.3, bbox=bb(XC - 53, XC + 53, YH - 3.6, YH + 3.6, ZH - 3.6, ZH + 3.6))
+        F.sub(cyl("X", (YH, ZH), 1.8, XC - FLAT - 2, XC + FLAT + 2), 0.3,
+              bbox=bb(XC - FLAT - 3, XC + FLAT + 3, YH - 3.6, YH + 3.6, ZH - 3.6, ZH + 3.6))
         # скобы ремня на правом торце: пластина на двух ножках, под ней ремень идёт вплотную к стенке; заклёпка по центру
         for zt0, zt1 in ((Z_RIM - 21.0, Z_RIM - 9.0), (zb + 4.0, zb + 16.0)):
             F.add(prism2(rect2(XC - 22.5, XC + 22.5, zt0, zt1, 2.0), "XZ", y0 - 4.4, y0 - 3.2, rim=0.35), 0.0,
@@ -153,7 +164,7 @@ def lid(pre):
 
         def solid(X, Y, Z):
             d = i_round(np.abs(X - XC) - (HW + 1.6), np.abs(Y - ym) - (L / 2 + 1.6), R_PLAN + 1.6)
-            return i_round(d, Z - LID_TOP, 6.0)
+            return i_round(d, Z - LID_TOP, R_TOP)
         F.add(solid)
         F.shell(T)
         F.apply(half("Z", zlb, -1), "inter", 0.35, bbox=bb(XC - HW - 4, XC + HW + 4, yl0 - 6, yl1 + 10, zlb - 6, zlb + 1.5))
@@ -169,7 +180,8 @@ def lid(pre):
             else:
                 F.add(cyl("X", (YH, ZH), RH, xa, xb, rim=0.5), 0.0, bbox=bb(xa - 1, xb + 1, YH - 4, YH + 4, ZH - 4, ZH + 4))
                 F.add(box((xa, YH, ZH), (xb, yl0 + 1.0, ZH + RH), 0.7), 0.4, bbox=bb(xa - 1, xb + 1, YH - 1, yl0 + 2, ZH - 1, ZH + RH + 1))
-        F.sub(cyl("X", (YH, ZH), 1.8, XC - 53, XC + 53), 0.3, bbox=bb(XC - 53, XC + 53, YH - 3.6, YH + 3.6, ZH - 3.6, ZH + 3.6))
+        F.sub(cyl("X", (YH, ZH), 1.8, XC - FLAT - 2, XC + FLAT + 2), 0.3,
+              bbox=bb(XC - FLAT - 3, XC + FLAT + 3, YH - 3.6, YH + 3.6, ZH - 3.6, ZH + 3.6))
         # колена заслонки на скруглённом плече крышки у правого торца
         for a, b, who in FLAP_SEG:
             if who != "lid":
@@ -178,29 +190,33 @@ def lid(pre):
             F.add(cyl("X", (YF, ZF), RF, xa, xb, rim=0.4), 0.0, bbox=bb(xa - 1, xb + 1, YF - 3, YF + 3, ZF - 3, ZF + 3))
             F.add(box((xa, YF, ZF - 2.6), (xb, yl0 + 1.2, ZF + 2.2), 0.6), 0.4,
                   bbox=bb(xa - 1, xb + 1, YF - 1, yl0 + 2, ZF - 3.5, ZF + 3))
-        F.sub(cyl("X", (YF, ZF), 1.4, XC - 47, XC + 47), 0.2, bbox=bb(XC - 47, XC + 47, YF - 3, YF + 3, ZF - 3, ZF + 3))
+        F.sub(cyl("X", (YF, ZF), 1.4, XC - FLAT - 1.2, XC + FLAT + 1.2), 0.2,
+              bbox=bb(XC - FLAT - 2, XC + FLAT + 2, YF - 3, YF + 3, ZF - 3, ZF + 3))
         # колена петли защёлки на нижней кромке левого торца крышки
         yb = y1 + LATCH_DY
         ear = union2(rect2(y1 + 0.2, yb, LATCH_Z, LATCH_Z + 7.0, 0.8), circle2((yb, LATCH_Z), 3.3))
         for a0, a1 in LATCH_LID_SEG:
             xa, xb = XC + a0, XC + a1
             F.add(prism2(ear, "YZ", xa, xb, rim=0.4), 0.6, bbox=bb(xa - 1, xb + 1, y1 - 0.5, yb + 4, LATCH_Z - 4, LATCH_Z + 8))
-        F.sub(cyl("X", (yb, LATCH_Z), 1.4, XC - 48, XC + 48), 0.2, bbox=bb(XC - 48, XC + 48, yb - 2, yb + 2, LATCH_Z - 2, LATCH_Z + 2))
+        F.sub(cyl("X", (yb, LATCH_Z), 1.4, XC - FLAT - 1, XC + FLAT + 1), 0.2,
+              bbox=bb(XC - FLAT - 2, XC + FLAT + 2, yb - 2, yb + 2, LATCH_Z - 2, LATCH_Z + 2))
         return F
     return build
 
 
 def hinge_pin(pre):
     def build(h):
-        x0, x1 = XC - 50.2, XC + 49.4
-        prof = [(x0, 0.0), (x0, 2.4), (x0 + 1.4, 2.4), (x0 + 1.4, 1.55), (x1 - 0.5, 1.55), (x1, 1.05), (x1, 0.0)]
+        # ось вровень с крайними коленами крышки, концы расклёпаны (головка 2,4 задевала юбку крышки: прямой участок
+        # торца теперь уже коробки — колена у самого начала скругления)
+        x0, x1 = XC + HINGE[0][0] - 0.3, XC + HINGE[-1][1] + 0.3
+        prof = [(x0, 0.0), (x0, 1.75), (x0 + 0.4, 1.55), (x1 - 0.4, 1.55), (x1, 1.75), (x1, 0.0)]
         return lathe_mesh(prof, seg=32, axis="X", c=(YH, ZH))
     return build
 
 
 def flap_pin(pre):
     def build(h):
-        x0, x1 = XC - 46.6, XC + 46.4
+        x0, x1 = XC - FLAT - 0.7, XC + FLAT + 0.5
         prof = [(x0, 0.0), (x0, 1.7), (x0 + 1.0, 1.7), (x0 + 1.0, 1.15), (x1 - 0.4, 1.15), (x1, 0.8), (x1, 0.0)]
         return lathe_mesh(prof, seg=24, axis="X", c=(YF, ZF))
     return build
@@ -211,12 +227,14 @@ def flap_pin(pre):
 def flap(pre):
     def build(h):
         F = Field(pre + "_Flap", (XC - 48, YF - 3.2, ZF - 3.6), (XC + 48, -23.5, -54.3), h)
-        # плита следует скруглению плеча крышки (центр дуги (−50,6; −65), радиус 6) с зазором 0,4 и идёт по верху
-        pts = [(-57.36, -63.19), (-56.66, -61.5), (-55.55, -60.05), (-54.1, -58.94), (-52.41, -58.24), (-50.6, -58.0), (-25.5, -58.0)]
-        F.add(strip(Path2(pts), "YZ", 1.2, XC - 45.0, XC + 45.0, rim=0.4))
+        # плита следует скруглению плеча крышки (дуга радиуса R_TOP) с зазором 0,4 и идёт по верху
+        cy, cz, rr = YE - 1.6 + R_TOP, LID_TOP - R_TOP, R_TOP + 1.0
+        pts = [(cy + rr * math.cos(math.radians(a)), cz + rr * math.sin(math.radians(a))) for a in range(165, 89, -15)]
+        pts += [(-25.5, LID_TOP + 1.0)]
+        F.add(strip(Path2(pts), "YZ", 1.2, XC - FLAP_HW, XC + FLAP_HW, rim=0.4))
         # отбортовка свободной кромки
-        F.add(box((XC - 44.6, -27.0, -58.6), (XC + 44.6, -25.4, -56.4), 0.5), 0.4,
-              bbox=bb(XC - 45, XC + 45, -28, -24.5, -59, -55.5))
+        F.add(box((XC - FLAP_HW + 0.4, -27.0, -58.6), (XC + FLAP_HW - 0.4, -25.4, -56.4), 0.5), 0.4,
+              bbox=bb(XC - FLAP_HW - 0.5, XC + FLAP_HW + 0.5, -28, -24.5, -59, -55.5))
         # оттиск патрона — куда укладывать ленту (NGIC), остриём к дулу
         x0 = XC - 38.0; yc = (SLOT_Y0 + SLOT_Y1) / 2
         top = [(0, 6.2), (34, 6.2), (39, 4.3), (43, 4.0), (58, 3.9), (68, 2.2), (74, 0.0)]
@@ -235,7 +253,8 @@ def flap(pre):
             else:
                 F.sub(box((xa - 0.4, YF - 3, ZF - 3.4), (xb + 0.4, -55.5, ZF + 3.4), 0.3), 0.3,
                       bbox=bb(xa - 1, xb + 1, YF - 4, -54.5, ZF - 4, ZF + 4))
-        F.sub(cyl("X", (YF, ZF), 1.4, XC - 47, XC + 47), 0.2, bbox=bb(XC - 47, XC + 47, YF - 3, YF + 3, ZF - 3, ZF + 3))
+        F.sub(cyl("X", (YF, ZF), 1.4, XC - FLAT - 1.2, XC + FLAT + 1.2), 0.2,
+              bbox=bb(XC - FLAT - 2, XC + FLAT + 2, YF - 3, YF + 3, ZF - 3, ZF + 3))
         return F
     return build
 
@@ -273,7 +292,7 @@ def latch_pin(pre):
     y1 = _y1(pre)
 
     def build(h):
-        x0, x1 = XC - 48.2, XC + 48.2
+        x0, x1 = XC - FLAT - 0.4, XC + FLAT + 0.4
         prof = [(x0, 0.0), (x0, 1.9), (x0 + 1.0, 1.9), (x0 + 1.0, 1.2), (x1 - 0.8, 1.2), (x1 - 0.8, 1.9), (x1, 1.9), (x1, 0.0)]
         return lathe_mesh(prof, seg=24, axis="X", c=(y1 + LATCH_DY, LATCH_Z))
     return build
@@ -323,7 +342,8 @@ def mount(pre):
         F = Field(pre + "_Mount", (-176, -27, -60.2), (-10, 27, -47.5), h)
         # основание на крышке (клёпаное), стойка-ползун и Т-образная головка в направляющих кронштейна:
         # полость кронштейна — зазор шеи |Y| < 9 и камера |Y| < 12,2 между BOT − 3,6 и BOT − 1,6 (part_receiver.box_bracket)
-        F.add(prism2(rect2(XC - 42, XC + 42, -24, 24, 5.0), "XY", -58.8, -57.6, rim=0.35))
+        # основание — на плоском верху крышки (до начала скругления R_TOP по бокам)
+        F.add(prism2(rect2(XC - 39, XC + 39, -24, 24, 5.0), "XY", -58.8, -57.6, rim=0.35))
         F.add(box((-172.0, -8.6, -57.8), (-14.0, 8.6, -52.0), 0.6), 0.5, bbox=bb(-173, -13, -9.5, 9.5, -58.5, -51.5))
         F.add(box((-160.0, -11.8, -52.2), (-38.0, 11.8, -50.6), 0.5), 0.3, bbox=bb(-161, -37, -12.5, 12.5, -53, -50))
         # упор сзади (за задним торцом кронштейна)

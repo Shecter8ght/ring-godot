@@ -20,7 +20,7 @@ SLOTS = [
       "Cover_Base_R", "Cover_Latch", "Cover_Catch", "Side_Rail", "Sling_Bar", "Box_Bracket", "Feed_Tray", "Cover_Guide",
       "Cover_Lever", "Cover_Lever_Bracket", "Feed_Lever", "Feed_Lever_Guard", "Feed_Pawl_Arm", "Retainer_Pawl",
       "Cartridge_Stop", "Trigger_Housing", "Trigger", "Safety_Lever", "Rest_Hinge", "Shoulder_Rest", "Buttplate",
-      "Ejector"]),
+      "Ejector", "Charging_Handle"]),
     ("barrel", "Ствол, кожух, газовый узел, ручка для переноски, мушка", "OX-BLK-LAC",
      ["Barrel", "Flash_Hider", "Gas_Block", "Gas_Housing", "Gas_Tube", "Front_Sight_Base", "Front_Sight_Post",
       "Shroud", "Shroud_Scoop", "Carry_Handle"]),
@@ -29,8 +29,9 @@ SLOTS = [
       "Rear_Sight_Button"]),
     ("bipod", "Сошки", "OX-BLK-LAC",
      ["Bipod_Yoke", "Bipod_Leg_L", "Bipod_Leg_R", "Bipod_Foot_L", "Bipod_Foot_R"]),
-    ("bolt", "Затворная группа — светлая сталь: рама, затвор, поршень, рукоятка", "ST-WHT-SAT",
-     ["Bolt_Carrier", "Bolt", "Bolt_Extractor", "Gas_Piston", "Charging_Handle", "Cartridge_Gripper", "Gripper_Pin",
+    # рукоятка перезаряжания — чёрная сталь корпуса (владелец 2026-11-14); светлая сталь под краской — на износе
+    ("bolt", "Затворная группа — светлая сталь: рама, затвор, поршень", "ST-WHT-SAT",
+     ["Bolt_Carrier", "Bolt", "Bolt_Extractor", "Gas_Piston", "Cartridge_Gripper", "Gripper_Pin",
       "Piston_Pin"]),
     ("small", "Мелкая сталь: оси, пружины, винты, вертушки и зубья коробок", "OX-BLK-MAT",
      ["Cover_Hinge_Pin", "Cover_Latch_Pin", "Cover_Lever_Pin", "Cover_Lever_Spring", "Feed_Lever_Pin",
@@ -75,6 +76,15 @@ INTERVIEW = [
     {"q": "Маркировка", "a": "Решено при приёмке формы: «ЧАСТОКОЛ» на крышке, «7,62×54» и «ЧК 2714» слева, «ОГОНЬ» "
                              "у флажка, цифры прицела — штамп в сетке; «ОГОНЬ» и цифры прицела залиты белой краской "
                              "(образцы 02, 05), остальное без заливки"},
+    {"q": "Коробки: на странице выбрано BR-OLV-SAT (латунь под оливковым хроматированием) — так и делать?",
+     "a": "Нет: эмаль олива, полуглянец (EN-OLV-SAT)"},
+    {"q": "Сталь на пробе темнее образца 02 — светлее делать?",
+     "a": "Нет: «цвет нашей стали сейчас идеально подходит к этому референсу, просто на нём очень много света выставлено… "
+          "выставь так же на нашей модели» — свет студии как на образце 06, цвет карточки"},
+    {"q": "Замечания к v01 (2026-11-14)", "a": "Рукоятка перезаряжания — чёрная сталь, как корпус; на износе краска "
+                                               "сходит до нынешней светлой стали. Щитки окон — на петлях крышки, коробка "
+                                               "для ленты — круглее (правки формы v04). Опоры на крышке — «под длинную "
+                                               "планку, всё ок»"},
     {"q": "Маски износа (этап 2)", "a": "Только из E:/Models Blender/Маски_АЛЬФА/smart masks (владелец, 2026-11-14)"},
 ]
 

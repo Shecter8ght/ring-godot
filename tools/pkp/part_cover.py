@@ -31,6 +31,14 @@ WIN_HY = 6.2
 CATCH = (-350.6, 3.4)                     # перекладина на ствольной коробке, за которую держится крюк
 CATCH_R = 1.5
 HOOK_X = -354.6                           # низ плеча с крюком: позади перекладины
+# петли щитков (владелец 2026-11-14: щитки «висят в воздухе» — ось держалась только в коленах самого щитка):
+# ось щитка, колена щитка у концов окна, между ними — колено крышки на перемычке к листу (справа — к скосу над
+# окном, слева — к борту под окном); FLAP_KN — длина колена щитка, FLAP_GAP — зазор между коленами
+FEED_AX = (-HWC - 2.4, FEED_Z1 + 1.6)
+EXIT_AX = (HWC + 2.4, EXIT_Z0 - 1.2)
+FEED_KN, EXIT_KN, FLAP_GAP = 12.0, 10.0, 0.4
+FEED_FOOT = (-22.85, 39.37)              # перемычка: на скосе 45° над окном, на 0,2 мм в листе (не выходит внутрь)
+EXIT_FOOT = (HWC - 0.1, EXIT_Z0 - 2.7)   # перемычка: на борту под окном (внутрь крышки не выходит — там лоток)
 
 
 def _ramp(X, x0, x1, a, b):
@@ -75,7 +83,7 @@ def outer(X, Y, Z):
 
 
 def cover(h):
-    F = Field("Top_Cover", (XR - 1.5, -HWC - 3.0, -2.5), (HX + 9.0, HWC + 3.0, TOP_F + 2.0), h)
+    F = Field("Top_Cover", (XR - 1.5, -HWC - 5.5, -2.5), (HX + 9.0, HWC + 5.5, TOP_F + 2.0), h)
     F.add(outer)
     # выштамповки-рёбра жёсткости на бортах: вдоль задней части и наклонно к передней
     rib = Path2(fillet_path([(-328.0, 12.0), (-230.0, 12.0), (-175.0, 28.5)], [10.0]))
@@ -121,6 +129,15 @@ def cover(h):
               bbox=bb(-356, -345, s * HWC - 2.5, s * HWC + 2.5, 8, 18))
     # окно защёлки: клавиша ходит в нём вперёд и утапливается под лист
     F.sub(latch_window, 0.3, bbox=bb(-361.5, -342.0, -7.6, 7.6, 15.5, 34.4))
+    # колена петель щитков на крышке: между коленами щитка, перемычкой к листу, с отверстием под ось щитка
+    for (yc, zc), (x0, x1), kn, foot in ((FEED_AX, (FEED_X0, FEED_X1), FEED_KN, FEED_FOOT),
+                                         (EXIT_AX, (EXIT_X0, EXIT_X1), EXIT_KN, EXIT_FOOT)):
+        xa, xb = x0 + 2.0 + kn + FLAP_GAP, x1 - 2.0 - kn - FLAP_GAP
+        ylo, yhi = min(yc, foot[0]) - 3.0, max(yc, foot[0]) + 3.0
+        zlo, zhi = min(zc, foot[1]) - 3.0, max(zc, foot[1]) + 3.0
+        F.add(cyl("X", (yc, zc), 2.2, xa, xb, rim=0.4), 0.3, bbox=bb(xa - 1, xb + 1, yc - 3, yc + 3, zc - 3, zc + 3))
+        F.add(prism2(seg2((yc, zc), foot, 1.3), "YZ", xa, xb, rim=0.4), 0.6, bbox=bb(xa - 1, xb + 1, ylo, yhi, zlo, zhi))
+        F.sub(cyl("X", (yc, zc), 1.35, xa - 1.0, xb + 1.0), 0.15, bbox=bb(xa - 2, xb + 2, yc - 2, yc + 2, zc - 2, zc + 2))
     return F
 
 
@@ -176,26 +193,32 @@ def cover_catch(h):
 def feed_flap(h):
     """Щиток окна приёмника (справа): пластина на оси вдоль верхней кромки окна; с лентой — поднят горизонтально."""
     F = Field("Feed_Flap", (FEED_X0 - 3, -HWC - 35, FEED_Z1 - 3), (FEED_X1 + 3, -HWC + 1, FEED_Z1 + 5), h)
-    zc = FEED_Z1 + 1.6
-    yc = -HWC - 2.4
+    yc, zc = FEED_AX
+    kn = FEED_KN
     F.add(box((FEED_X0 + 0.5, yc - 30.0, zc - 0.6), (FEED_X1 - 0.5, yc + 0.5, zc + 0.6), 0.4))
     # отбортовка свободной кромки
     F.add(box((FEED_X0 + 0.5, yc - 30.6, zc - 3.6), (FEED_X1 - 0.5, yc - 29.4, zc + 0.6), 0.4), 0.8)
-    F.add(cyl("X", (yc, zc), 1.2, FEED_X0 - 2.0, FEED_X1 + 2.0, rim=0.4), 0.0)
-    for xa, xb in ((FEED_X0 + 2, FEED_X0 + 14), (FEED_X1 - 14, FEED_X1 - 2)):
+    for xa, xb in ((FEED_X0 + 2, FEED_X0 + 2 + kn), (FEED_X1 - 2 - kn, FEED_X1 - 2)):
         F.add(cyl("X", (yc, zc), 2.2, xa, xb, rim=0.4), 0.5, bbox=bb(xa - 1, xb + 1, yc - 3, yc + 3, zc - 3, zc + 3))
+    # вырез пластины у оси между коленами щитка — там колено крышки
+    xa, xb = FEED_X0 + 2 + kn + 0.2, FEED_X1 - 2 - kn - 0.2
+    F.sub(box((xa, yc - 2.95, zc - 1.5), (xb, yc + 1.5, zc + 1.5), 0.0), 0.3, bbox=bb(xa - 1, xb + 1, yc - 4, yc + 2.5, zc - 2.5, zc + 2.5))
+    F.add(cyl("X", (yc, zc), 1.2, FEED_X0 - 2.0, FEED_X1 + 2.0, rim=0.4), 0.0)
     return F
 
 
 def exit_flap(h):
     """Щиток окна выхода ленты (слева): на оси по нижней кромке окна; открыт — откинут вниз-наружу."""
     F = Field("Exit_Flap", (EXIT_X0 - 3, HWC - 1, EXIT_Z0 - 4), (EXIT_X1 + 3, HWC + 29, EXIT_Z0 + 4), h)
-    zc = EXIT_Z0 - 1.2
-    yc = HWC + 2.4
+    yc, zc = EXIT_AX
+    kn = EXIT_KN
     F.add(box((EXIT_X0 + 0.5, yc - 0.5, zc - 0.6), (EXIT_X1 - 0.5, yc + 24.5, zc + 0.6), 0.4))
-    F.add(cyl("X", (yc, zc), 1.2, EXIT_X0 - 2.0, EXIT_X1 + 2.0, rim=0.4), 0.0)
-    for xa, xb in ((EXIT_X0 + 2, EXIT_X0 + 12), (EXIT_X1 - 12, EXIT_X1 - 2)):
+    for xa, xb in ((EXIT_X0 + 2, EXIT_X0 + 2 + kn), (EXIT_X1 - 2 - kn, EXIT_X1 - 2)):
         F.add(cyl("X", (yc, zc), 2.2, xa, xb, rim=0.4), 0.5, bbox=bb(xa - 1, xb + 1, yc - 3, yc + 3, zc - 3, zc + 3))
+    # вырез пластины у оси между коленами щитка — там колено крышки
+    xa, xb = EXIT_X0 + 2 + kn + 0.2, EXIT_X1 - 2 - kn - 0.2
+    F.sub(box((xa, yc - 1.5, zc - 1.5), (xb, yc + 2.95, zc + 1.5), 0.0), 0.3, bbox=bb(xa - 1, xb + 1, yc - 2.5, yc + 4, zc - 2.5, zc + 2.5))
+    F.add(cyl("X", (yc, zc), 1.2, EXIT_X0 - 2.0, EXIT_X1 + 2.0, rim=0.4), 0.0)
     return F
 
 
@@ -207,7 +230,7 @@ def parts():
         dict(name="Cover_Latch_Pin", build=latch_pin, h=0.08, coll="Крышка", mat="Steel_phosphate", parent="Top_Cover"),
         dict(name="Cover_Catch", build=cover_catch, h=0.08, coll="Ствольная коробка", mat="Steel_blued", parent="Receiver"),
         dict(name="Feed_Flap", build=feed_flap, h=0.1, coll="Крышка", mat="Steel_blued", parent="Top_Cover",
-             pivot=[(FEED_X0 + FEED_X1) / 2, -HWC - 2.4, FEED_Z1 + 1.6]),
+             pivot=[(FEED_X0 + FEED_X1) / 2, FEED_AX[0], FEED_AX[1]]),
         dict(name="Exit_Flap", build=exit_flap, h=0.1, coll="Крышка", mat="Steel_blued", parent="Top_Cover",
-             pivot=[(EXIT_X0 + EXIT_X1) / 2, HWC + 2.4, EXIT_Z0 - 1.2]),
+             pivot=[(EXIT_X0 + EXIT_X1) / 2, EXIT_AX[0], EXIT_AX[1]]),
     ]
