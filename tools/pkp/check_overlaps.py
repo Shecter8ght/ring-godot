@@ -1,6 +1,6 @@
 # ПКП: пересечения деталей в собранном .blend во всех позах рига.
 #   blender --background <файл.blend> --python tools/pkp/check_overlaps.py -- [--depth 0.25] [--json отчёт.json]
-#       [--set ползунок=значение,… (своя поза «custom»)] [поза …]
+#       [--set ползунок=значение,… (своя поза «custom»)] [--show коллекция,… (включить выключенные)] [поза …]
 # Для каждой позы (part_rig.POSES, плюс исходная «rest_pose») и каждой пары деталей с пересекающимися габаритами
 # считает вершины одной детали, ушедшие в тело другой глубже depth мм. «Внутри» — по двум признакам сразу: ближайшая
 # точка поверхности смотрит нормалью от вершины И луч из вершины пересекает поверхность нечётное число раз
@@ -28,7 +28,7 @@ ALLOW = {frozenset(p) for p in [
     ("Box200_Handle", "Box200_Lid"), ("Box200_Handle", "Box200_Body"), ("Box200_Flap", "Box200_Flap_Pin"),
     ("Cover_Hinge_Pin", "Receiver"), ("Cover_Hinge_Pin", "Top_Cover"), ("Cover_Hinge_Pin", "Feed_Tray"),
     ("Feed_Lever", "Feed_Pawl_Arm"), ("Rear_Sight_Base", "Top_Cover"), ("Belt_Link_00", "Feed_Tray"),
-    ("Bipod_Spring", "Bipod_Leg_L"), ("Bipod_Spring", "Bipod_Leg_R"), ("Cover_Latch", "Top_Cover"),
+    ("Bipod_Spring", "Bipod_Leg_L"), ("Bipod_Spring", "Bipod_Leg_R"), ("Cover_Catch", "Receiver"),
     ("Bipod_Hinge_Pin_L", "Bipod_Yoke"), ("Bipod_Hinge_Pin_R", "Bipod_Yoke"), ("Bipod_Hinge_Pin_L", "Bipod_Leg_L"),
     ("Bipod_Hinge_Pin_R", "Bipod_Leg_R"), ("Rear_Sight_Pin", "Rear_Sight_Base"), ("Rear_Sight_Pin", "Rear_Sight_Leaf"),
 ]}
@@ -79,11 +79,13 @@ def parity_inside(tree, p):
 
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    depth = 0.25; out = None; only = []; custom = None
+    depth = 0.25; out = None; only = []; custom = None; show = []
     i = 0
     while i < len(argv):
         if argv[i] == "--depth": depth = float(argv[i + 1]); i += 2
         elif argv[i] == "--json": out = argv[i + 1]; i += 2
+        elif argv[i] == "--show":
+            show = argv[i + 1].split(","); i += 2
         elif argv[i] == "--set":
             custom = {kv.split("=")[0]: float(kv.split("=")[1]) for kv in argv[i + 1].split(",")}; i += 2
         else: only.append(argv[i]); i += 1
@@ -94,6 +96,15 @@ def main():
     if custom is not None:
         poses["custom"] = custom; only.append("custom")
     vl = bpy.context.view_layer
+    # выключенные по умолчанию коллекции (съёмные кронштейны, коробка на 200) проверяются по просьбе
+    def walk(lc):
+        yield lc
+        for c in lc.children:
+            yield from walk(c)
+    for lc in walk(vl.layer_collection):
+        if lc.name in show:
+            lc.exclude = False
+    vl.update()
     objs = [o for o in vl.objects if o.type == "MESH" and o.visible_get()]
     rows = []
     base = None

@@ -35,9 +35,13 @@ SC_PITCH = 2.8                             # шаг делений вдоль п
 SC_U1 = 53.0                               # положение «1» вдоль планки (от оси), «15» = SC_U1 − 14·шаг
 SLIDER_N = 3                               # хомутик построен у «3»
 FR_U = 62.7                                # поперечный винт: положение вдоль планки
-FR_W = 4.2                                 # и высота над серединой планки
-NOTCH_BOTTOM_W = 5.0                       # дно прорези целика над серединой планки
-POST_X, POST_TOP = 440.0, 59.0             # мушка (единицы part_barrel: умножаются на U)
+FR_W = 3.1                                 # и высота над серединой планки (образец 13: маховичок с центром на Z ≈ 52)
+SCREW_R = 0.85                             # винт боковых поправок
+NOTCH_TOP_W = 6.75                         # верх пластины целика (образец 13: верх целика на Z ≈ 55,3; здесь 56,0 — под прорезь глубиной 2,2)
+NOTCH_BOTTOM_W = 4.55                      # дно прорези: над отверстием винта
+NOTCH_HW = 1.55                            # полуширина прорези: шире мушки, чтобы по бокам оставался просвет (владелец)
+POST_X = 440.0                             # мушка (единицы part_barrel: умножаются на U)
+POST_R = 1.1
 
 
 def zt(x):
@@ -57,6 +61,11 @@ def tilted(fn):
 def W(u, w):
     """Точка планки (u, w) → мировые (X, Z)."""
     return PX + u * C - w * S, PZ + u * S + w * C
+
+
+# вершина мушки — на высоте верха пластины целика: «ровная мушка» при линии прицеливания, параллельной стволу
+# (у образца 13 мушка тоже ниже верха ограждения; раньше торчала над ним и была выше прорези на 5 мм)
+POST_TOP = W(FR_U, NOTCH_TOP_W)[1] / U
 
 
 def lb(u0, u1, y0, y1, w0, w1):
@@ -131,8 +140,8 @@ def leaf(h):
     # рамка целика: две стойки по краям, в них — отверстия под винт боковых поправок
     for s in (-1, 1):
         y0, y1 = sorted((s * 5.6, s * 7.2))
-        F.add(tilted(box((59.0, y0, 0.0), (66.6, y1, 7.4), 0.65)), 0.5, bbox=lb(58, 67.5, y0 - 1, y1 + 1, -1, 8.4))
-    F.sub(tilted(cyl("Y", (FR_U, FR_W), 1.2, -9, 9)), 0.25, bbox=lb(FR_U - 3, FR_U + 3, -8.5, 8.5, FR_W - 3, FR_W + 3))
+        F.add(tilted(box((59.0, y0, 0.0), (66.6, y1, 5.7), 0.65)), 0.5, bbox=lb(58, 67.5, y0 - 1, y1 + 1, -1, 6.7))
+    F.sub(tilted(cyl("Y", (FR_U, FR_W), SCREW_R + 0.15, -9, 9)), 0.25, bbox=lb(FR_U - 3, FR_U + 3, -8.5, 8.5, FR_W - 3, FR_W + 3))
     # шкала боковых поправок: поперечные риски перед рамкой (деление 1 мм, каждое пятое длиннее)
     ticks = []
     for k in range(-5, 6):
@@ -193,25 +202,29 @@ def notch(h):
     """Целик: пластина с прорезью U-образной формы; скользит вдоль Y по винту (ход ±1,9 мм)."""
     F = lfield("Rear_Sight_Notch", FR_U - 3, FR_U + 3, -4.5, 4.5, 1.0, 9.0, h)
     u0, u1 = FR_U - 2.1, FR_U + 2.1
-    F.add(tilted(box((u0, -3.4, 1.65), (u1, 3.4, 8.0), 0.55)), 0.0, bbox=lb(u0 - 1, u1 + 1, -4, 4, 1, 9))
-    F.sub(tilted(union(box((u0 - 1, -1.05, NOTCH_BOTTOM_W + 1.05), (u1 + 1, 1.05, 10.0)), cyl("X", (0.0, NOTCH_BOTTOM_W + 1.05), 1.05, u0 - 1, u1 + 1))),
-          0.3, bbox=lb(u0 - 2, u1 + 2, -2, 2, NOTCH_BOTTOM_W - 1.5, 9))
-    F.sub(tilted(cyl("Y", (FR_U, FR_W), 1.2, -4.5, 4.5)), 0.2, bbox=lb(FR_U - 3, FR_U + 3, -4.5, 4.5, FR_W - 3, FR_W + 3))
+    F.add(tilted(box((u0, -3.4, 1.65), (u1, 3.4, NOTCH_TOP_W), 0.45)), 0.0, bbox=lb(u0 - 1, u1 + 1, -4, 4, 1, 9))
+    hw = NOTCH_HW
+    F.sub(tilted(union(box((u0 - 1, -hw, NOTCH_BOTTOM_W + hw), (u1 + 1, hw, 10.0)), cyl("X", (0.0, NOTCH_BOTTOM_W + hw), hw, u0 - 1, u1 + 1))),
+          0.2, bbox=lb(u0 - 2, u1 + 2, -hw - 1, hw + 1, NOTCH_BOTTOM_W - 1.0, 9))
+    F.sub(tilted(cyl("Y", (FR_U, FR_W), SCREW_R + 0.15, -4.5, 4.5)), 0.15, bbox=lb(FR_U - 3, FR_U + 3, -4.5, 4.5, FR_W - 3, FR_W + 3))
     return F
+
+
+KNOB_R = 3.0
 
 
 def knob(h):
     """Винт боковых поправок с маховичком справа: стержень с резьбой, головка слева, рифлёный маховичок."""
     F = lfield("Rear_Sight_Knob", FR_U - 4.5, FR_U + 4.5, -13.5, 9.5, FR_W - 4.5, FR_W + 4.5, h)
     c = (FR_U, FR_W)
-    F.add(tilted(cyl("Y", c, 1.0, -7.6, 7.8, rim=0.25)), 0.0)
-    F.add(tilted(cyl("Y", c, 1.8, 7.5, 8.6, rim=0.35)), 0.3, bbox=lb(FR_U - 3, FR_U + 3, 7, 9, FR_W - 3, FR_W + 3))
-    F.add(tilted(cyl("Y", c, 3.4, -12.6, -7.7, rim=0.6, rim1=0.6)), 0.4, bbox=lb(FR_U - 5, FR_U + 5, -13.5, -7, FR_W - 5, FR_W + 5))
+    F.add(tilted(cyl("Y", c, SCREW_R, -7.6, 7.8, rim=0.25)), 0.0)
+    F.add(tilted(cyl("Y", c, 1.6, 7.5, 8.6, rim=0.35)), 0.3, bbox=lb(FR_U - 3, FR_U + 3, 7, 9, FR_W - 3, FR_W + 3))
+    F.add(tilted(cyl("Y", c, KNOB_R, -12.6, -7.7, rim=0.6, rim1=0.6)), 0.4, bbox=lb(FR_U - 5, FR_U + 5, -13.5, -7, FR_W - 5, FR_W + 5))
 
     def serr(u, y, w):
         ang = np.arctan2(w - FR_W, u - FR_U)
-        side = smoothstep((3.5 - np.hypot(u - FR_U, w - FR_W)) / 0.2) * smoothstep((3.4 - np.hypot(u - FR_U, w - FR_W)) / 0.2 + 0.0)
-        near = smoothstep((np.hypot(u - FR_U, w - FR_W) - 2.8) / 0.4)
+        side = smoothstep((KNOB_R + 0.1 - np.hypot(u - FR_U, w - FR_W)) / 0.2) * smoothstep((KNOB_R - np.hypot(u - FR_U, w - FR_W)) / 0.2 + 0.0)
+        near = smoothstep((np.hypot(u - FR_U, w - FR_W) - (KNOB_R - 0.6)) / 0.4)
         k = 0.5 + 0.5 * np.cos(ang * 28.0)
         ring = smoothstep((-y - 8.2) / 0.5) * smoothstep((12.1 + y) / 0.5)
         return 0.32 * k * near * ring
@@ -220,7 +233,7 @@ def knob(h):
 
     def thread(u, y, w):
         r = np.hypot(u - FR_U, w - FR_W)
-        return 0.1 * np.cos(2 * math.pi * y / 0.75) * smoothstep((1.3 - r) / 0.2) * smoothstep((7.0 - np.abs(y - 0.0)) / 0.3) * smoothstep((np.abs(y) - 0.0) / 1.0)
+        return 0.1 * np.cos(2 * math.pi * y / 0.75) * smoothstep((SCREW_R + 0.3 - r) / 0.2) * smoothstep((7.0 - np.abs(y - 0.0)) / 0.3) * smoothstep((np.abs(y) - 0.0) / 1.0)
 
     F.displace(tilted(thread), bbox=lb(FR_U - 1.6, FR_U + 1.6, -7.4, 7.4, FR_W - 1.6, FR_W + 1.6), fine=False)
     return F
@@ -261,7 +274,8 @@ def front_post(h):
         return 0.14 * (0.5 + 0.5 * np.cos(ang * 24.0)) * smoothstep((Z - 45.9) / 0.3) * smoothstep((49.0 - Z) / 0.3)
 
     F.displace(knurl, bbox=bb(POST_X - 4, POST_X + 4, -4, 4, 45.5, 49.5), fine=False)
-    F.add(cyl("Z", c, 1.7, 49.0, POST_TOP, rim=0.8), 0.5, bbox=bb(POST_X - 3, POST_X + 3, -3, 3, 48.5, POST_TOP + 1))
+    # стержень с плоской вершиной: она и есть «ровная мушка» в прорези
+    F.add(cyl("Z", c, POST_R, 49.0, POST_TOP, rim=0.3), 0.5, bbox=bb(POST_X - 3, POST_X + 3, -3, 3, 48.5, POST_TOP + 1))
     # шлиц под отвёртку в торце буртика не нужен (виден сверху у ушей): тонкая прорезь вдоль Y по буртику
     F.sub(box((POST_X - 3.2, -0.3, 48.6), (POST_X + 3.2, 0.3, 49.6), 0.1), 0.12, bbox=bb(POST_X - 4, POST_X + 4, -1, 1, 48, 50))
     return F
@@ -292,10 +306,10 @@ def parts():
 
 
 def check_line():
-    """Расчёт линии прицеливания: дно прорези → вершина мушки; зазор над ручкой для переноски (верх Z = 53·U на X от −15 до 118)."""
-    nx, nz = W(FR_U, NOTCH_BOTTOM_W)
+    """Расчёт линии прицеливания: верх пластины целика → вершина мушки; зазор над ручкой для переноски (верх Z = 53·U на X от −15 до 118)."""
+    nx, nz = W(FR_U, NOTCH_TOP_W)
     px, pz = POST_X * U, POST_TOP * U
-    out = [f"прорезь: X {nx:.1f} Z {nz:.2f}; вершина мушки: X {px:.1f} Z {pz:.2f}"]
+    out = [f"верх целика: X {nx:.1f} Z {nz:.2f} (дно прорези на {NOTCH_TOP_W - NOTCH_BOTTOM_W:.2f} ниже, ширина {2 * NOTCH_HW:.1f}); вершина мушки: X {px:.1f} Z {pz:.2f}, диаметр {2 * POST_R:.1f}; верх ограждения мушки Z {56.5 * U:.2f}"]
     for x in (-15.0, 40.0, 118.0):
         z = nz + (pz - nz) * (x - nx) / (px - nx)
         out.append(f"X {x:6.1f}: линия Z {z:.2f}, верх ручки {53.0 * U:.2f}, запас {z - 53.0 * U:.2f}")

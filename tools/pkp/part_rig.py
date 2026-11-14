@@ -17,6 +17,7 @@ def _deg(a):
 # (имя ползунка, подсказка, значение по умолчанию)
 SLIDERS = [
     ("cover", "Крышка ствольной коробки: 1 — открыта", 0.0),
+    ("cover_latch", "Защёлка крышки: 1 — клавиша сдвинута вперёд, крюк отпущен", 0.0),
     ("tray", "Лоток (основание приёмника): 1 — поднят", 0.0),
     ("charge", "Рукоятка перезаряжания: 1 — отведена назад до упора", 0.0),
     ("carrier", "Затворная рама: 1 — в заднем положении", 0.0),
@@ -37,6 +38,7 @@ SLIDERS = [
 
 COVER_DEG = COVER_OPEN_DEG
 TRAY_DEG = 88.0                # как у крышки: лоток поднимается вплотную к ней
+LATCH_DEG = 14.0               # клавиша уходит вперёд на 2,8 мм и утапливается, крюк отходит назад на 2,9 мм
 PORT_DEG = 100.0
 TRIGGER_DEG = 12.0
 SAFETY_DEG = 75.0              # оценка: на образцах флажок только в положении «огонь»
@@ -61,6 +63,7 @@ def drivers():
     s0 = 5.6 / 39.2
     D = [
         ("Top_Cover", "delta_rotation_euler", 1, f"{_deg(COVER_DEG)}*cover", ["cover"]),
+        ("Cover_Latch", "delta_rotation_euler", 1, f"{_deg(LATCH_DEG)}*cover_latch", ["cover_latch"]),
         ("Feed_Tray", "delta_rotation_euler", 1, f"{_deg(TRAY_DEG)}*tray", ["tray"]),
         ("Charging_Handle", "delta_location", 0, f"-{CH_TRAVEL * MM:.6f}*charge", ["charge"]),
         ("Bolt_Carrier", "delta_location", 0, f"-{CARRIER_TRAVEL * MM:.6f}*max(carrier, charge)", ["carrier", "charge"]),
@@ -97,7 +100,8 @@ def drivers():
 
 # позы для проверочных кадров и проверки пересечений
 POSES = {
-    "open": {"cover": 1.0},
+    "latch": {"cover_latch": 1.0},
+    "open": {"cover": 1.0, "cover_latch": 0.0},
     "open_tray": {"cover": 1.0, "tray": 1.0},
     "charged": {"charge": 1.0, "port_cover": 1.0},
     "fire": {"trigger": 1.0},

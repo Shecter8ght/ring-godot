@@ -1,7 +1,7 @@
 # ПКП «Частокол»: места под кронштейны и сами кронштейны с планками (замечание владельца 2026-11-14).
 # На пулемёте: две опоры «ласточкин хвост» с поперечным пазом на крышке (Cover_Base_F / R) и две втулки под
 # поперечные болты в корпусе газовой трубки (part_barrel.gas_housing; места — dims.FOREND_BOLT_*).
-# Съёмное (коллекция «Кронштейны»): планка на крышку под прицел (Rail_Cover — надевается на опоры сзади, стягивается
+# Съёмное (две коллекции «Кронштейн — …», выключены по умолчанию): планка на крышку под прицел (Rail_Cover — надевается на опоры сзади, стягивается
 # двумя поперечными винтами через пазы опор) и цевьё с нижней и двумя боковыми планками под рукоятку, ЛЦУ и фонарь
 # (Rail_Forend — надевается снизу на корпус газовой трубки, два сквозных болта, спереди ложемент под трубку).
 # Планки — профиль MIL-STD-1913 (Picatinny): ширина 21,2, паз 5,23 × 3,0, шаг 10,0076; на них встаёт и Weaver.
@@ -14,7 +14,9 @@ from dims import *
 from sdf import *
 from part_cover import TOP_F
 
-K = "Кронштейны"
+# в игре пулемёт без обвеса: кронштейны докупаются отдельно — их коллекции в файле выключены (владелец, 2026-11-14)
+K_COVER = "Кронштейн — планка на крышку"
+K_FOREND = "Кронштейн — цевьё"
 
 # ---------- планка Picatinny ----------
 PIC_W, PIC_NECK_W = 21.2, 15.6
@@ -232,10 +234,10 @@ def parts():
     return [
         dict(name="Cover_Base_F", build=cover_base(True), h=0.08, coll="Крышка", mat="Steel_blued", parent="Top_Cover"),
         dict(name="Cover_Base_R", build=cover_base(False), h=0.08, coll="Крышка", mat="Steel_blued", parent="Top_Cover"),
-        dict(name="Rail_Cover", build=rail_cover, h=0.1, coll=K, mat="Alu_anodized", parent="Top_Cover", adapt=0.05),
-        dict(name="Rail_Cover_Screw_R", build=cover_screw(0), h=0.06, coll=K, mat="Steel_phosphate", parent="Rail_Cover"),
-        dict(name="Rail_Cover_Screw_F", build=cover_screw(1), h=0.06, coll=K, mat="Steel_phosphate", parent="Rail_Cover"),
-        dict(name="Rail_Forend", build=rail_forend, h=0.12, coll=K, mat="Alu_anodized", parent="Barrel", adapt=0.05),
-        dict(name="Forend_Bolt_A", build=forend_bolt(0), h=0.06, coll=K, mat="Steel_phosphate", parent="Rail_Forend"),
-        dict(name="Forend_Bolt_B", build=forend_bolt(1), h=0.06, coll=K, mat="Steel_phosphate", parent="Rail_Forend"),
+        dict(name="Rail_Cover", build=rail_cover, h=0.1, coll=K_COVER, coll_hidden=True, mat="Alu_anodized", parent="Top_Cover", adapt=0.05),
+        dict(name="Rail_Cover_Screw_R", build=cover_screw(0), h=0.06, coll=K_COVER, coll_hidden=True, mat="Steel_phosphate", parent="Rail_Cover"),
+        dict(name="Rail_Cover_Screw_F", build=cover_screw(1), h=0.06, coll=K_COVER, coll_hidden=True, mat="Steel_phosphate", parent="Rail_Cover"),
+        dict(name="Rail_Forend", build=rail_forend, h=0.12, coll=K_FOREND, coll_hidden=True, mat="Alu_anodized", parent="Barrel", adapt=0.05),
+        dict(name="Forend_Bolt_A", build=forend_bolt(0), h=0.06, coll=K_FOREND, coll_hidden=True, mat="Steel_phosphate", parent="Rail_Forend"),
+        dict(name="Forend_Bolt_B", build=forend_bolt(1), h=0.06, coll=K_FOREND, coll_hidden=True, mat="Steel_phosphate", parent="Rail_Forend"),
     ]

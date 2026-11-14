@@ -21,11 +21,37 @@ FEED_X0, FEED_X1 = -141.0, XF - TS - 0.1    # окно приёмника дох
 FEED_Z1 = 38.5
 EXIT_X0, EXIT_X1 = -126.0, -80.0
 EXIT_Z0, EXIT_Z1 = 13.5, 37.0
+# защёлка крышки на заднем скосе
+SLOPE_N = (-0.629, 0.777)                 # нормаль заднего скоса: через (−363, 15) и (−339, 34.5)
+LATCH_C = (-352.0, 24.3)                  # середина клавиши (образец 13: выступ на скосе у X −360 … −352)
+LATCH_AXIS = (-350.5, 13.0)               # ось защёлки — по бобышкам на бортах
+KEY_HU, KEY_HY = 5.0, 5.5                 # полуразмеры клавиши вдоль скоса и поперёк
+WIN_U = (-5.7, 8.4)                       # окно в скосе вдоль него от середины клавиши: впереди клавиши — её ход
+WIN_HY = 6.2
+CATCH = (-350.6, 3.4)                     # перекладина на ствольной коробке, за которую держится крюк
+CATCH_R = 1.5
+HOOK_X = -354.6                           # низ плеча с крюком: позади перекладины
 
 
 def _ramp(X, x0, x1, a, b):
     t = np.clip((X - x0) / (x1 - x0), 0.0, 1.0)
     return a + (b - a) * t
+
+
+def _slope(X, Z):
+    """Координаты заднего скоса у защёлки: вдоль скоса вперёд-вверх и от скоса наружу."""
+    nx, nz = SLOPE_N
+    return (X - LATCH_C[0]) * nz - (Z - LATCH_C[1]) * nx, (X - LATCH_C[0]) * nx + (Z - LATCH_C[1]) * nz
+
+
+def latch_window(X, Y, Z):
+    """Окно защёлки в заднем скосе: прямоугольник со скруглёнными углами, насквозь через лист."""
+    u, v = _slope(X, Z)
+    r = 1.0
+    q1 = np.abs(u - (WIN_U[0] + WIN_U[1]) / 2) - ((WIN_U[1] - WIN_U[0]) / 2 - r)
+    q2 = np.abs(Y) - (WIN_HY - r)
+    d2 = np.hypot(np.maximum(q1, 0), np.maximum(q2, 0)) + np.minimum(np.maximum(q1, q2), 0) - r
+    return np.maximum(d2, np.abs(v) - 4.0)
 
 
 def outer(X, Y, Z):
@@ -93,22 +119,57 @@ def cover(h):
     for s in (-1, 1):
         F.add(cyl("Y", (-350.5, 13.0), 3.7, s * (HWC - 0.3), s * (HWC + 1.5), rim=0.6), 0.3,
               bbox=bb(-356, -345, s * HWC - 2.5, s * HWC + 2.5, 8, 18))
+    # окно защёлки: клавиша ходит в нём вперёд и утапливается под лист
+    F.sub(latch_window, 0.3, bbox=bb(-361.5, -342.0, -7.6, 7.6, 15.5, 34.4))
     return F
 
 
 def cover_latch(h):
-    """Защёлка крышки: рифлёная клавиша на заднем скосе."""
-    F = Field("Cover_Latch", (-362, -8, 15), (-342, 8, 32), h)
-    nx, nz = -0.629, 0.777
-    c = (-352.0, 24.3)
+    """Защёлка крышки — двуплечий рычаг на оси у задних бобышек (у настоящего ПКП так же: фото B03/14, образец 13).
+    Клавиша с рифлением выходит в окно заднего скоса, крюк внизу держится за перекладину на ствольной коробке
+    (Cover_Catch). Клавишу толкают вперёд: она идёт по окну и утапливается, крюк отходит назад из-под перекладины
+    (угол — part_rig.LATCH_DEG)."""
+    ax, az = LATCH_AXIS
+    nx, nz = SLOPE_N
+    F = Field("Cover_Latch", (-361.5, -6.6, -0.8), (-343.0, 6.6, 30.8), h)
+    F.add(cyl("Y", (ax, az), 3.3, -4.2, 4.2, rim=0.6))
+    # плечо к клавише и сама клавиша
+    kb = (LATCH_C[0] - 2.2 * nx, LATCH_C[1] - 2.2 * nz)
+    F.add(prism2(seg2((ax, az), kb, 2.0), "XZ", -3.2, 3.2, rim=0.6), 0.8)
 
     def key(X, Y, Z):
-        u = (X - c[0]) * nz - (Z - c[1]) * nx          # вдоль скоса
-        v = (X - c[0]) * nx + (Z - c[1]) * nz          # от скоса наружу
-        q1 = np.abs(u) - 5.0; q2 = np.abs(Y) - 5.5
-        base = i_round(np.maximum(q1, q2), np.abs(v - 0.6) - 1.4, 0.5)
+        u, v = _slope(X, Z)
+        q1 = np.abs(u) - KEY_HU; q2 = np.abs(Y) - KEY_HY
+        base = i_round(i_round(q1, q2, 0.8), np.abs(v + 0.6) - 2.6, 0.5)
         return base - 0.35 * (np.cos(u * 2 * math.pi / 1.4) * 0.5 + 0.5) * smoothstep((v - 1.2) / 0.5)
-    F.add(key)
+    F.add(key, 0.6, bbox=bb(-359.5, -344.5, -6.6, 6.6, 17.0, 30.8))
+    # плечо с крюком: зуб смотрит вперёд и заходит под перекладину
+    F.add(prism2(seg2((ax, az), (HOOK_X, 2.2), 1.7), "XZ", -3.0, 3.0, rim=0.5), 0.8)
+    F.add(box((HOOK_X - 1.0, -3.0, 0.2), (CATCH[0] + 0.6, 3.0, CATCH[1] - CATCH_R - 0.25), 0.5), 0.6,
+          bbox=bb(HOOK_X - 2.5, CATCH[0] + 1.6, -4, 4, -0.5, 4.5))
+    # отверстие под ось
+    F.sub(cyl("Y", (ax, az), 1.55, -7, 7), 0.25, bbox=bb(ax - 2.5, ax + 2.5, -5, 5, az - 2.5, az + 2.5))
+    return F
+
+
+def latch_pin(h):
+    """Ось защёлки: стержень между бортами крышки (снаружи на бортах — бобышки)."""
+    ax, az = LATCH_AXIS
+    yw = HWC - TS - 0.15
+    F = Field("Cover_Latch_Pin", (ax - 2.5, -yw - 0.5, az - 2.5), (ax + 2.5, yw + 0.5, az + 2.5), h)
+    F.add(cyl("Y", (ax, az), 1.45, -yw, yw, rim=0.3))
+    return F
+
+
+def cover_catch(h):
+    """Перекладина защёлки на заднем блоке ствольной коробки: пруток в двух ушках, под него заходит зуб крюка."""
+    cx, cz = CATCH
+    F = Field("Cover_Catch", (cx - 4.2, -8.6, -2.2), (cx + 4.2, 8.6, cz + 3.6), h)
+    ear = Poly(fillet_poly([(cx - 2.6, -1.6), (cx + 2.6, -1.6), (cx + 2.6, cz + 2.4), (cx - 2.6, cz + 2.4)], [0, 0, 2.2, 2.2]))
+    for s in (-1, 1):
+        y0, y1 = sorted((s * 4.6, s * 7.4))
+        F.add(prism(ear, "XZ", y0, y1, rim=0.5), 0.0, bbox=bb(cx - 4, cx + 4, y0 - 1, y1 + 1, -2.2, cz + 3.4))
+    F.add(cyl("Y", (cx, cz), CATCH_R, -7.9, 7.9, rim=0.35), 0.3)
     return F
 
 
@@ -141,7 +202,10 @@ def exit_flap(h):
 def parts():
     return [
         dict(name="Top_Cover", build=cover, h=0.15, coll="Крышка", mat="Steel_blued", adapt=0.1, pivot=[HX, 0.0, HZ]),
-        dict(name="Cover_Latch", build=cover_latch, h=0.08, coll="Крышка", mat="Steel_phosphate", parent="Top_Cover"),
+        dict(name="Cover_Latch", build=cover_latch, h=0.08, coll="Крышка", mat="Steel_phosphate", parent="Top_Cover",
+             pivot=[LATCH_AXIS[0], 0.0, LATCH_AXIS[1]]),      # качается на оси Y; нажата — part_rig.LATCH_DEG
+        dict(name="Cover_Latch_Pin", build=latch_pin, h=0.08, coll="Крышка", mat="Steel_phosphate", parent="Top_Cover"),
+        dict(name="Cover_Catch", build=cover_catch, h=0.08, coll="Ствольная коробка", mat="Steel_blued", parent="Receiver"),
         dict(name="Feed_Flap", build=feed_flap, h=0.1, coll="Крышка", mat="Steel_blued", parent="Top_Cover",
              pivot=[(FEED_X0 + FEED_X1) / 2, -HWC - 2.4, FEED_Z1 + 1.6]),
         dict(name="Exit_Flap", build=exit_flap, h=0.1, coll="Крышка", mat="Steel_blued", parent="Top_Cover",
