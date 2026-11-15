@@ -288,6 +288,40 @@ func remove_mod(weapon_slot: String, mount: String) -> bool:
 	return strip_equipped(weapon_slot, "mod:" + mount)
 
 
+static func inspect_mod_block(mount: String, in_raid: bool) -> String:
+	if in_raid:
+		return "Приклад меняется на верстаке в убежище" if WeaponBuild.top_mount(mount) == "stock" else ""
+	return Profile.mod_block("", mount)
+
+
+## Снять, поставить или заменить обвес из осмотра. Хост проверяет именно тот экземпляр
+## оружия и ту запись инвентаря, которые игрок видел в списке.
+func change_inspected_mod(slot: String, mount: String, state: Dictionary, source: Dictionary, in_raid: bool) -> String:
+	var before: Dictionary = equipment.get(slot, {})
+	if before.is_empty() or not _weapon_state_matches(before, state) \
+			or String(before.get("_equip_generation", "")) != String(state.get("generation", "")):
+		return "Оружие уже изменилось"
+	if WeaponBuild.point(String(before.id), before.get("mods", {}), mount).is_empty():
+		return "На оружии нет этой точки крепления"
+	var locked: String = inspect_mod_block(mount, in_raid)
+	if locked != "":
+		return locked
+	if source.is_empty():
+		if not (before.get("mods", {}) as Dictionary).has(mount):
+			return "На креплении ничего нет"
+		apply_weapon_state(slot, state)
+		return "" if remove_mod(slot, mount) else "В рюкзаке нет места для снятого обвеса"
+	var role: String = String(source.get("role", ""))
+	var index: int = int(source.get("index", -1))
+	if role not in ["backpack", "pocket"] or not (index >= 0 and index < list_of(role).size()):
+		return "Детали уже нет в инвентаре"
+	var item: Dictionary = list_of(role)[index]
+	if item != source.get("entry") or WeaponDb.attachment(String(item.get("id", ""))).is_empty():
+		return "Детали уже нет в инвентаре"
+	apply_weapon_state(slot, state)
+	return install_mod(slot, role, index, mount)
+
+
 ## Снять часть с предмета в рюкзаке items[idx] — в рюкзак же (хост).
 func strip_item(idx: int, part: String) -> bool:
 	return strip_in("backpack", idx, part)

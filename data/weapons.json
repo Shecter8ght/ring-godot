@@ -1446,7 +1446,10 @@
       "reload_fast_full": 9
      },
      "jam_open": 0.3,
-     "inspect_sec": 6.23,
+     "inspect_hold": [
+      35,
+      126
+     ],
      "hold_open": true,
      "hands_fixed": true,
      "muzzle_own": true,
@@ -1557,7 +1560,10 @@
       "reload_full": 38
      },
      "jam_open": 0.3,
-     "inspect_sec": 4.0,
+     "inspect_hold": [
+      81,
+      33
+     ],
      "hold_open": true,
      "hands_fixed": true,
      "ads_z": 0.17,

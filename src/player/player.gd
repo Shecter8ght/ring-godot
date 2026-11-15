@@ -137,8 +137,8 @@ var _reload_ui: bool = false
 ## inspect_turn — поворот кисти с магазином мышью, доли −1…1 (вбок, вверх-вниз).
 var mag_inspect: bool = false
 var inspect_turn: Vector2 = Vector2.ZERO
-## Осмотр оружия (клавиша I): сколько ещё идёт клип осмотра (ViewmodelClips, viewmodel.inspect_sec ствола), с.
-var weapon_inspect_t: float = 0.0
+## Клик в окне осмотра не становится выстрелом, даже если окно закрыли с зажатой кнопкой.
+var _inspect_click: bool = false
 ## Дыхание в прицеле: запас воздуха 0…1, задержано ли сейчас (держат «бег» в прицеле), сколько ещё
 ## длится одышка после полной задержки, с.
 var breath: float = 1.0
@@ -472,14 +472,14 @@ func carry_stamina_k() -> float:
 
 
 ## Открыто окно (рюкзак, лут, убежище, меню) — мышь и клавиши у окна, не у персонажа.
-func ui_blocked() -> bool:
+func ui_blocked(except: Node = null) -> bool:
 	if PauseMenu.shown or (Raid.current and Raid.current.ui_open()):
 		return true
 	# набирают текст (надпись гравировки, ник, чат) — клавиши идут в поле, а не в действия
 	if UiTheme.typing():
 		return true
 	for n in get_tree().get_nodes_in_group("esc_windows"):
-		if n.has_method("is_open") and bool(n.call("is_open")):
+		if n != except and n.has_method("is_open") and bool(n.call("is_open")):
 			return true
 	return false
 
@@ -951,6 +951,20 @@ func flush_weapon_state() -> void:
 		_send_ws(weapon_slot)
 
 
+## Состояние и правку обвеса передаём вместе: ранняя смена ревизии не потеряет последний выстрел.
+func request_inspect_mod(mount: String, revision: int, generation: String, source: Dictionary) -> void:
+	var host: Node = items_host()
+	if not loadout_mode or not is_alive() or is_downed() or host == null or not host.has_method("request_inspect_mod"):
+		return
+	var entry: Dictionary = weapon_entry()
+	if int(entry.get("rev", -1)) != revision or String(entry.get("_equip_generation", "")) != generation:
+		_say("Оружие уже изменилось")
+		return
+	var state: Dictionary = _ws_state(weapon_slot)
+	state["generation"] = generation
+	host.call("request_inspect_mod", weapon_slot, mount, state, source)
+
+
 ## Кто ведёт вещи игрока: рейд (хост) или убежище (профиль) — одни и те же просьбы: перезарядка,
 ## состояние оружия, расход, сообщение (notify, request_reload, request_weapon_state, request_consume).
 func items_host() -> Node:
@@ -1242,6 +1256,13 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_local() or not is_alive():
 		return
+	if _camera_rig is CameraRig:
+		var rig := _camera_rig as CameraRig
+		_inspect_click = Input.is_action_pressed("fire") and (_inspect_click or rig.inspection_open())
+		rig.read_inspect_input(self)
+		if rig.inspection_open():
+			_fire_queue = 0.0
+			_burst_left = 0
 	# глаз до этого тика — от него камера ведёт глаз к новому положению (view_eye)
 	_eye_tick_prev = eye_position()
 	_eye_tick_ready = true
@@ -1683,12 +1704,6 @@ func _combat(delta: float) -> void:
 		_tick_reload(delta, spec, true)
 		return
 	ammo_check_t = maxf(0.0, ammo_check_t - delta)
-	# осмотр оружия (I): у ствола со своими клипами рук — клип осмотра; прицел, бег, выстрел, перезарядка — прерывают
-	weapon_inspect_t = maxf(0.0, weapon_inspect_t - delta)
-	if weapon_inspect_t > 0.0 and (aiming or sprint_held() or Input.is_action_pressed("fire") or Input.is_action_just_pressed("reload")):
-		weapon_inspect_t = 0.0
-	if InputMap.has_action("inspect_weapon") and Input.is_action_just_pressed("inspect_weapon") and weapon_inspect_t <= 0.0 			and not aiming and not mag_inspect and ViewmodelClips.available(weapon_id):
-		weapon_inspect_t = float((WeaponDb.weapon(weapon_id).get("viewmodel", {}) as Dictionary).get("inspect_sec", 0.0))
 	# проверка магазина: пока R держат — магазин в руке перед глазами; отпустили (или выстрел) — убрать
 	if mag_inspect:
 		if Input.is_action_pressed("reload") and not Input.is_action_pressed("fire"):
@@ -1730,7 +1745,7 @@ func _combat(delta: float) -> void:
 		cycle_fire_mode()
 	# режим огня: АВ — пока держат спуск; ОД — по нажатию; «2» — нажатие даёт очередь из двух
 	var mode := fire_mode()
-	var trigger := Input.is_action_pressed("fire") if mode == "auto" else Input.is_action_just_pressed("fire")
+	var trigger := not _inspect_click and (Input.is_action_pressed("fire") if mode == "auto" else Input.is_action_just_pressed("fire"))
 	# ствол опущен «наискосок» (стойка или бег): нажатие поднимает оружие, выстрел — когда поднялось
 	_fire_queue = maxf(0.0, _fire_queue - delta)
 	if weapon_lowered > float(Balance.WEAPON_CARRY.fire_max):

@@ -4,7 +4,7 @@
   weapon.viewmodel — сцена рук с клипами, роли клипов (ViewmodelClips), кадры фаз из меток владельца: подмена магазина
     (swap_frame — mag_hidden; у быстрой — с начала: новый магазин уже в левой), сброс старого (drop_frame — mag_out),
     удержание проверки (check_hold — hold_start…hold_end), затвор остаётся на задержке после последнего выстрела
-    (shot_slide_back — slide_back клипа Fire), время осмотра (inspect_sec — длина клипа);
+    (shot_slide_back — slide_back клипа Fire), кадры остановки осмотра (inspect_hold — левый и правый бок);
   weapon.rig.reload / rig.reload_empty — доли фаз модели в руках персонажа и звуков перезарядки по умолчанию: у неполной —
     по Reload_Tactical, у полной — по Reload_Full (рычаг задержки — charge).
 
@@ -31,6 +31,7 @@ ROLES = {"idle": "idle", "reload": "reload_tactical", "reload_empty": "reload_fu
 SPARE = ["slide_rack", "finger_to_trigger"]
 RELOAD_SPEED = 1.4         # перезарядка в игре быстрее записи клипов во столько раз (владелец 2026-11-14: «слишком медлительный»)
 SHOT_FAST_K = 3.0          # ход затвора и вылет гильзы в клипе выстрела — во столько раз быстрее записи (владелец 2026-11-14)
+INSPECT_HOLD = [35, 126]   # ракурсы в выгруженном клипе; старые метки правого бока остались у начала поворота
 
 
 def phases(clip, charge=None):
@@ -65,7 +66,7 @@ def main():
                           "reload_fast_full": fast_full["marks"]["slide_release"]},
         "drop_frame": {"reload_fast": fast["marks"]["mag_out"], "reload_fast_full": fast_full["marks"]["mag_out"]},
         "jam_open": rep.get("jam_open", 0.3),
-        "inspect_sec": round(clips["inspect"]["seconds"], 2),
+        "inspect_hold": INSPECT_HOLD,
         "hold_open": True,
         "hands_fixed": True,
         "muzzle_own": True,

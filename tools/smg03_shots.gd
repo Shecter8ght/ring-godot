@@ -126,12 +126,16 @@ func _iron_action() -> void:
 		await _shot("iron_check")
 		Input.action_release("reload")
 		await get_tree().create_timer(2.5).timeout
-		_player.weapon_inspect_t = float((WeaponDb.weapon(ID).get("viewmodel", {}) as Dictionary).get("inspect_sec", 4.0))
-		await get_tree().create_timer(1.0).timeout
-		await _shot("iron_inspect_right")
-		await get_tree().create_timer(1.4).timeout
+		Input.action_press("inspect_weapon")
+		await get_tree().create_timer(0.1).timeout
+		Input.action_release("inspect_weapon")
+		await get_tree().create_timer(1.5).timeout
 		await _shot("iron_inspect_left")
-		await get_tree().create_timer(2.0).timeout
+		Input.action_press("inspect_weapon")
+		await get_tree().create_timer(0.1).timeout
+		Input.action_release("inspect_weapon")
+		await get_tree().create_timer(1.7).timeout
+		await _shot("iron_inspect_right")
 
 
 func _bolt_off() -> float:

@@ -490,6 +490,19 @@ func request_weapon_state(slot: String, state: Dictionary) -> void:
 	_to_profile()
 
 
+func request_inspect_mod(slot: String, mount: String, state: Dictionary, source: Dictionary) -> void:
+	var why: String = _player.inventory.change_inspected_mod(slot, mount, state, source, false)
+	if why != "":
+		notify(why)
+		return
+	_to_profile()
+	Audio.play("mod_fit", _player.global_position, -6.0)
+	if not source.is_empty():
+		var warnings: Array[String] = WeaponBuild.sight_warnings(_player.inventory.equipment.get(slot, {}))
+		if not warnings.is_empty():
+			notify(warnings[0])
+
+
 ## Граната, ракета, химсвет — из рюкзака.
 func request_consume(id: String, n: int) -> void:
 	_player.inventory.remove(id, n)

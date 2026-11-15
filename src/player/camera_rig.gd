@@ -11,6 +11,9 @@ extends Node3D
 @export var target_path: NodePath
 
 const DetectionIndicator = preload("res://src/ui/detection_indicator.gd")
+const WeaponInspect = preload("res://src/ui/weapon_inspect.gd")
+
+var _inspect: WeaponInspect
 
 var ads_active: bool = false
 ## Игра только от первого лица (решение владельца 2026-10-07): камера всегда в глазах, ПКМ — прицел.
@@ -288,7 +291,18 @@ func focus_point() -> Vector3:
 
 
 func set_target(node: Node3D) -> void:
+	if is_instance_valid(_inspect) and _target != node:
+		_inspect.close()
 	_target = node
+
+
+func inspection_open() -> bool:
+	return is_instance_valid(_inspect) and _inspect.is_open()
+
+
+func read_inspect_input(pl: Player) -> void:
+	if ads_active and _target == pl:
+		_inspect.read_input(pl, _viewmodel as ViewmodelClips)
 
 
 ## Первый вид из глаз и обе модели оружия готовятся, пока мир ещё закрыт экраном загрузки.
@@ -597,12 +611,15 @@ func _process(delta: float) -> void:
 	if _target == null:
 		_target = get_tree().get_first_node_in_group("players") as Node3D
 		if _target == null:
+			_inspect.close()
 			return
 	var pl := _target as Player
 	load_settings()
 	_warm_weapon_models(pl)
 	# режим от первого лица (V) — и в рейде, и в убежище (в том числе сидя на диване)
 	var want_ads := pl != null and pl.is_local() and pl.is_alive() and (pl.aiming or first_person_mode)
+	if not want_ads:
+		_inspect.close()
 	if want_ads != ads_active:
 		_set_ads(want_ads, pl)
 	_shake = maxf(0.0, _shake - Balance.SHAKE_DECAY * _shake * delta - 0.01 * delta)
@@ -1013,7 +1030,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if clips:
 		# сцена уже в осях камеры: у бедра — поза из Blender, в прицеле — линия прицеливания на оси взгляда;
 		# поверх — раскачка при ходьбе, подброс и откат при выстреле
-		clips.update(pl, delta)
+		clips.update(pl, delta, _inspect.advance_clip(delta))
 	# Импортированная поза может иметь свои оси: поворачиваем её линию, сохраняя готовые клипы.
 	if _viewmodel.has_method("ads_transform") and _viewmodel.has_method("hip_transform"):
 		var primary_ads: Transform3D = _viewmodel.call("ads_transform")
@@ -1076,6 +1093,8 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 	if scope_active:
 		# подсветка центра сетки (у оптики с подсветкой) — той же клавишей, что фонарь (T)
 		_update_scope(float(spec.get("zoom", 4.0)), pl.light_on and _viewmodel.has_meta("reticle_illum"))
+	if inspection_open():
+		_inspect.present(_ads_cam, _vm_frame())
 
 
 ## Стойка «наискосок» (Balance.WEAPON_CARRY): ствол вниз-влево вокруг правой кисти. Бегом — всегда, на ходу
@@ -2190,6 +2209,8 @@ func _build_hud() -> void:
 	_gate_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
 	_gate_hint.add_theme_constant_override("outline_size", 8)
 	_gate_hint.hide()
+	_inspect = WeaponInspect.new()
+	layer.add_child(_inspect)
 
 
 ## План рейда сверху, с положением игрока и вошедших чужих отрядов.

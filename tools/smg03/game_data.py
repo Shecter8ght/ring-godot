@@ -30,7 +30,8 @@ VIEWMODEL = {'scene': 'res://assets/models/weapons/smg03/smg03_viewmodel.gltf', 
              'clips': {'idle': 'idle', 'reload': 'reload_tactical', 'reload_empty': 'reload_full', 'check': 'mag_check',
                        'clear': 'jam_clear', 'inspect': 'inspect'},
              'check_hold': [38, 56], 'swap_frame': {'reload_tactical': 38, 'reload_full': 38}, 'jam_open': 0.3,
-             'inspect_sec': 4.0, 'hold_open': True, 'hands_fixed': True, 'ads_z': ADS_Z,
+             # Кадры показа слева и справа. Исходный клип идёт в обратном порядке.
+             'inspect_hold': [81, 33], 'hold_open': True, 'hands_fixed': True, 'ads_z': ADS_Z,
              'hip_offset': [round(HIP_POSE[0] - 0.14, 3), round(HIP_POSE[1] + 0.165, 3), round(HIP_POSE[2] + 0.343, 3)],
              'hip_pose': HIP_POSE}
 # свободные участки верхней планки (оси игры z от хвата): за основанием целика (X −205 мм исходника) до середины коробки

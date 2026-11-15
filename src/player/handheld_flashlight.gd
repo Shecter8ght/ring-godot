@@ -53,8 +53,10 @@ func stow() -> void:
 		actor.handheld_light_on = false
 		actor.handheld_flashlight_requested.emit(actor.handheld_light_id, false)
 	_clear_model()
-	for weapon: Node3D in [_fps_weapon, _world_weapon]:
-		if is_instance_valid(weapon): DozorHandGrip.apply(weapon, false, actor.weapon_id)
+	if is_instance_valid(_fps_weapon):
+		DozorHandGrip.apply(_fps_weapon, false, actor.weapon_id)
+	if is_instance_valid(_world_weapon):
+		DozorHandGrip.apply(_world_weapon, false, actor.weapon_id)
 
 
 func emitting() -> bool:

@@ -1978,6 +1978,32 @@ func _remove_mod(peer_id: int, weapon_slot: String, mod_slot: String) -> void:
 			notify("Некуда положить — освободи место в рюкзаке")
 
 
+func request_inspect_mod(slot: String, mount: String, state: Dictionary, source: Dictionary) -> void:
+	if _is_host():
+		_inspect_mod(multiplayer.get_unique_id(), slot, mount, state, source)
+	else:
+		_rpc_inspect_mod.rpc_id(1, slot, mount, state, source)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_inspect_mod(slot: String, mount: String, state: Dictionary, source: Dictionary) -> void:
+	if multiplayer.is_server():
+		_inspect_mod(multiplayer.get_remote_sender_id(), slot, mount, state, source)
+
+
+func _inspect_mod(peer_id: int, slot: String, mount: String, state: Dictionary, source: Dictionary) -> void:
+	var pl: Player = player_of(peer_id)
+	if pl == null or not pl.is_alive() or pl.is_downed() or has_left(peer_id):
+		return
+	var why: String = pl.inventory.change_inspected_mod(slot, mount, state, source, true)
+	if why != "":
+		_tell(peer_id, why)
+		return
+	Audio.play("mod_fit", pl.global_position, -6.0)
+	if not source.is_empty():
+		_warn_sight_fit(peer_id, pl.inventory.equipment.get(slot, {}))
+
+
 ## Надеть / взять в руки предмет из рюкзака (индекс в items).
 func request_equip(idx: int) -> void:
 	if _is_host():

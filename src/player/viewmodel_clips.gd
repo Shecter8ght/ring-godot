@@ -18,7 +18,7 @@ extends Node3D
 ## jam_clear: правая отводит затвор, гильза выпадает.
 ## Патроны в магазине — узлы Round_NN (1 — верхний), подаватель — по счёту (служебный клип
 ## follower_by_rounds). Обвесы и метки — у узла WeaponFrame (оси игры у пистолетной рукоятки).
-## Осмотр оружия (Player.weapon_inspect_t, клавиша I): клип clips.inspect на время осмотра; выстрел — в стойку.
+## Осмотр оружия (I): камера ведёт clips.inspect до двух заданных кадров и держит позу у меню обвеса.
 ## Затворная задержка (config.hold_open, ИЗЛОМ-45): после последнего патрона затвор стоит сзади (таблица bolt_travel),
 ## пока клип перезарядки не дошлёт его. Кисти, исправленные в исходнике (config.hands_fixed), игра не уменьшает.
 ## Переводчик огня (кость Selector) стоит по режиму Player.fire_mode (служебный клип selector_by_mode: запись на
@@ -57,7 +57,6 @@ var _rounds_after: int = 0
 var _swap_frame: int = -1
 var _last_reload: float = 0.0
 var _last_check: float = 0.0
-var _last_inspect: float = 0.0
 var _last_ammo: int = -1
 var _kick: float = 0.0
 ## Пистолет (АСТЕН-919): кости затвора без кости Bolt — те, что ведёт таблица bolt_travel (Slide, Barrel);
@@ -543,9 +542,22 @@ func equip() -> void:
 	_play(_clip_name("draw") if String(config.get("mechanism", "")) == "break_action" else _clip_name("idle"), 0.0)
 
 
+## Время начала, левой и правой позы в секундах. Если исходный клип с правой стороны, идём с конца.
+func inspect_poses() -> Vector3:
+	var clip: String = _clip_name("inspect")
+	var frames: Array = config.get("inspect_hold", [])
+	if frames.size() != 2 or not _anim.has_animation(clip):
+		return Vector3(-1, -1, -1)
+	var length: float = _anim.get_animation(clip).length
+	var fps: float = float(config.get("fps", 30))
+	var left: float = float(frames[0]) / fps
+	var right: float = float(frames[1]) / fps
+	return Vector3(0.0 if left < right else length, left, right)
+
+
 ## Опрос состояния игрока: перезарядка (начало по фронту таймера, отмена — в стойку), проверка
 ## магазина, выстрелы (затвор), счёт патронов на виду. Затем шаг клипа и затвор/подаватель поверх.
-func update(pl: Player, delta: float) -> void:
+func update(pl: Player, delta: float, inspect_at: float = -1.0) -> void:
 	_hand_pose.restore()
 	if String(config.get("mechanism", "")) == "break_action":
 		_update_signal(pl, delta)
@@ -648,15 +660,14 @@ func update(pl: Player, delta: float) -> void:
 		_swap_frame = -1
 		_play(_clip_name("check"), BLEND_IN)
 	_last_check = pl.ammo_check_t
-	# осмотр оружия: клип на время осмотра; кончился или прервали — в стойку
-	if pl.weapon_inspect_t > _last_inspect + 0.5 and _clip == "" and _base_clip("inspect") != "":
+	var inspect_clip: String = _clip_name("inspect")
+	if inspect_at >= 0.0 and inspect_clip != "" and _clip != inspect_clip:
 		_rounds_before = _in_mag(pl.ammo)
 		_rounds_after = _rounds_before
 		_swap_frame = -1
-		_play(_clip_name("inspect"), BLEND_IN, pl.weapon_inspect_t)
-	elif pl.weapon_inspect_t <= 0.0 and _last_inspect > 0.0 and _clip != "" and _clip == _clip_name("inspect"):
+		_play(inspect_clip, 0.0)
+	elif inspect_at < 0.0 and _clip != "" and _clip == inspect_clip:
 		_play(_clip_name("idle"), BLEND_OUT)
-	_last_inspect = pl.weapon_inspect_t
 	# переводчик: большой палец правой руки переводит рычаг (клип своего перехода, растянут на время щелчка)
 	if pl.fire_mode_switch_t > _last_switch + 0.05 and (_clip == "" or _clip.begins_with("fire_mode_")):
 		var modes: Array[String] = WeaponDb.fire_modes(weapon_id)
@@ -679,9 +690,13 @@ func update(pl: Player, delta: float) -> void:
 				_play(_clip_name("idle"), 0.1)
 	_last_ammo = pl.ammo
 	_restore_arm()
-	_advance(pl, delta)
-	if _clip != "" and not _anim.is_playing():
-		_play(_clip_name("idle"), BLEND_OUT)
+	if inspect_at >= 0.0 and _clip != "" and _clip == inspect_clip:
+		# При замене обвеса CameraRig достаёт другую сборку. Она сразу получает ту же позу.
+		_anim.seek(inspect_at, true)
+	else:
+		_advance(pl, delta)
+		if _clip != "" and not _anim.is_playing():
+			_play(_clip_name("idle"), BLEND_OUT)
 	var shown: int = _in_mag(pl.ammo)
 	var after_swap: bool = false
 	if _clip != "":
