@@ -23,10 +23,12 @@ var sector_id: String = ""
 var squads: Array[RivalSquad] = []
 ## Снимок для временных меток в рейде, обновляется у всех игроков.
 var map_marks: Array = []
-## Ждут входа: [{t, record}] по возрастанию t.
+## Расписание входов на остальных картах: [{t, record}] по возрастанию t.
 var _queue: Array = []
-## Очерёдность чужих групп на «Проспекте»: каждый позывной заходит один раз за рейд.
+## Очерёдность чужих групп «Проспекта». После перебора состава выбираем снова.
 var _prospekt_roster: Array = []
+var _prospekt_retry_at: float = 0.0
+var _last_prospekt_entry: Vector3 = Vector3.INF
 var _t: float = 0.0
 var _tick: float = 0.0
 var _ready_host: bool = false
@@ -66,15 +68,12 @@ func _process(delta: float) -> void:
 		if int(level.get("_marauders_spawned")) <= 0:
 			return
 		_ready_host = true
-		if active():
+		if sector_id != "prospekt" and active():
 			_plan()
 	_t += delta
-	if sector_id == "prospekt":
-		_advance_prospekt_arrivals()
-	else:
-		while not _queue.is_empty() and float(_queue[0].t) <= _t:
-			var next: Dictionary = _queue.pop_front()
-			enter(next.record)
+	while not _queue.is_empty() and float(_queue[0].t) <= _t:
+		var next: Dictionary = _queue.pop_front()
+		enter(next.record)
 	_tick -= delta
 	if _tick > 0.0:
 		return
@@ -83,16 +82,14 @@ func _process(delta: float) -> void:
 		var changed: int = s.tick(0.5)
 		if changed >= 0:
 			_on_phase(s, changed)
+	if sector_id == "prospekt" and active():
+		_fill_prospekt_squads()
 	_publish_map_marks()
 
 
 ## Расписание рейда: сколько отрядов и когда входят.
 func _plan() -> void:
 	var cfg: Dictionary = Balance.RIVALS
-	if sector_id == "prospekt":
-		_prospekt_roster = RivalRoster.pick(RivalRoster.squads().size(), _rng)
-		_plan_prospekt_arrival(cfg.enter_sec)
-		return
 	# сколько отрядов — под число игроков
 	var by_party: Array = cfg.squads[AIPopulation.party_size() - 1]
 	var n := _rng.randi_range(int(by_party[0]), int(by_party[1]))
@@ -102,30 +99,36 @@ func _plan() -> void:
 	print("rivals: отрядов %d, входы %s" % [_queue.size(), _queue.map(func(q: Dictionary) -> String: return "%s@%d" % [q.record.name, int(q.t)])])
 
 
-func _plan_prospekt_arrival(window: Array) -> void:
-	if not _prospekt_roster.is_empty():
-		_queue.append({"t": _t + _rng.randf_range(float(window[0]), float(window[1])),
-			"record": _prospekt_roster.pop_front()})
-
-
 func _active_squads() -> Array[RivalSquad]:
 	return squads.filter(func(s: RivalSquad) -> bool:
 		return s.phase == RivalSquad.Phase.LOOT or s.phase == RivalSquad.Phase.EXTRACT)
 
 
-func _advance_prospekt_arrivals() -> void:
-	if _queue.is_empty() or float(_queue[0].t) > _t:
-		return
-	if Raid.current and Raid.current.over:
-		_queue.clear()
+## После обновления фаз свободны места и выбитых групп, и тех, кто дошёл до эвакуации.
+func _fill_prospekt_squads() -> void:
+	if _t < _prospekt_retry_at or (Raid.current and Raid.current.over):
 		return
 	var cfg: Dictionary = Balance.PROSPEKT_RIVALS
-	var next: Dictionary = _queue[0]
-	if _active_squads().size() >= int(cfg.max_active) or enter(next.record) == null:
-		next["t"] = _t + float(cfg.retry_sec)
-		return
-	_queue.pop_front()
-	_plan_prospekt_arrival(cfg.interval_sec)
+	var present := _active_squads()
+	var ids: Array[String] = []
+	for s: RivalSquad in present:
+		ids.append(s.id)
+	for i in range(int(cfg.active_squads) - present.size()):
+		var record := _next_prospekt_record(ids)
+		var entered := enter(record) if not record.is_empty() else null
+		if entered == null:
+			_prospekt_retry_at = _t + float(cfg.retry_sec)
+			return
+		_prospekt_roster.pop_front()
+		ids.append(entered.id)
+
+
+func _next_prospekt_record(present_ids: Array[String]) -> Dictionary:
+	var available := func(record: Dictionary) -> bool: return String(record.id) not in present_ids
+	_prospekt_roster = _prospekt_roster.filter(available)
+	if _prospekt_roster.is_empty():
+		_prospekt_roster = RivalRoster.pick(RivalRoster.squads().size(), _rng).filter(available)
+	return {} if _prospekt_roster.is_empty() else _prospekt_roster[0]
 
 
 ## Отряд входит с края карты на «Проспекте» или у дальней точки эвакуации на других картах.
@@ -192,11 +195,15 @@ func _spawn_prospekt_squad(archs: Array) -> Dictionary:
 	if pop == null or int(level.get("_marauders_spawned")) <= 0:
 		return {}
 	var entries := pop.arrival_points()
+	entries.shuffle()
+	if entries.has(_last_prospekt_entry):
+		# На старте две группы по возможности входят с разных сторон.
+		entries.erase(_last_prospekt_entry)
+		entries.append(_last_prospekt_entry)
 	var world := (level as Node3D).get_world_3d()
 	var clearance: PhysicsShapeQueryParameters3D = level.call("squad_spawn_clearance")
 	var body_offset := clearance.transform
-	while not entries.is_empty():
-		var at: Vector3 = entries.pop_at(_rng.randi_range(0, entries.size() - 1))
+	for at: Vector3 in entries:
 		var patrol := _prospekt_patrol(at)
 		if patrol.is_empty():
 			continue
@@ -208,6 +215,7 @@ func _spawn_prospekt_squad(archs: Array) -> Dictionary:
 		var opts := {"can_spawn": can_spawn, "spread_inward": true}
 		var sq := level.call("spawn_squad", at, archs, opts) as Squad
 		if sq and not sq.members.is_empty():
+			_last_prospekt_entry = at
 			return {"squad": sq, "patrol": patrol}
 	return {}
 

@@ -3,7 +3,7 @@ extends Node
 ## навигация из кэша, население расставлено слоями — кордон держат ЧВК; точки постов, патрулей, гнёзд и подхода
 ## стоят на навигации; от каждого захода по навигации дойти до выхода; места лута на месте; приёмы EFT —
 ## выходы по стороне захода, условные выходы, подстанция, решётка хранилища, замки, схроны, главарь банка.
-## Чужие отряды: входы по краям карты, закрытый гараж, задержка при занятом входе и лимите групп.
+## Чужие отряды: входы по краям карты, закрытый гараж, две группы со старта и замена выбывших.
 ##   tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn
 ## Код выхода — число провалов.
 
@@ -185,71 +185,88 @@ func _rival_spawn_checks(me: Player) -> void:
 
 func _rival_checks(me: Player) -> void:
 	var rivals := RivalRaids.current
-	var idle := rivals != null and rivals._queue.is_empty()
-	_check("без рейда чужие отряды не запланированы", idle, "")
+	var idle := rivals != null and rivals.squads.is_empty()
+	_check("при прямом запуске чужие отряды не появляются", idle, "")
 	if not idle or me == null:
 		return
 	rivals.set_process(false)
 	RivalRoster.use_file("user://prospekt_raid_check_rivals.json", true)
 	rivals._rng.seed = 29
-	rivals._ready_host = false
 	Profile.pending_raid = true
-	rivals._process(0.0)
-	_check("в обычном рейде запланирован первый чужой отряд", rivals._queue.size() == 1, str(rivals._queue))
-	if rivals._queue.is_empty():
-		return
-	var first: Dictionary = rivals._queue[0]
-	rivals._t = float(first.t) - 1.0
 	rivals._process(0.5)
-	_check("до назначенного времени отряд не входит", rivals.squads.is_empty(), "")
+	var starters := rivals._active_squads()
+	_check("в начале обычного рейда входят два разных отряда",
+		starters.size() == 2 and starters[0].id != starters[1].id, str(rivals.results()))
+	if starters.size() != 2:
+		return
+	var ready := true
+	for s: RivalSquad in starters:
+		var living := s.alive()
+		ready = ready and living.size() >= 1 and living.size() <= 3 and s._patrol.is_valid()
+		for m: Marauder in living:
+			ready = ready and rivals._hidden_from_players(m.global_position)
+	_check("в отряде 1–3 бойца вне видимости игрока, у группы есть маршрут", ready, "")
+	rivals._process(0.5)
+	_check("пока обе группы на карте, третий отряд не входит", rivals.squads.size() == 2, "")
+
+	var lost := starters[0]
+	for m: Marauder in lost.alive():
+		m.state = Marauder.State.DEAD
+		m.collision_layer = 0
+	rivals._process(0.5)
+	var after_loss := rivals._active_squads()
+	_check("погибший отряд заменён на том же шаге", lost.phase == RivalSquad.Phase.WIPED
+		and rivals.squads.size() == 3 and after_loss.size() == 2 and starters[1] in after_loss, str(rivals.results()))
+	if after_loss.size() != 2:
+		return
+
+	var leaving := starters[1]
+	var exit := leaving.alive()[0].global_position
+	for m: Marauder in leaving.alive():
+		m.global_position = exit
+	leaving.set_exit({"pos": exit})
+	leaving.phase = RivalSquad.Phase.EXTRACT
+	rivals._process(0.5)
+	_check("отряд по пути к выходу занимает своё место", rivals.squads.size() == 3
+		and rivals._active_squads().size() == 2, "")
+	rivals._prospekt_roster.clear()
+	leaving._wait = float(Balance.RIVALS.extract_sec)
+	rivals._process(0.5)
+	var after_exit := rivals._active_squads()
+	_check("после эвакуации сразу приходит новая группа, даже если состав перебрали",
+		leaving.phase == RivalSquad.Phase.OUT and rivals.squads.size() == 4
+		and after_exit.size() == 2 and after_exit[0].id != after_exit[1].id, str(rivals.results()))
+	if after_exit.size() != 2:
+		return
+	for s: RivalSquad in after_exit:
+		for m: Marauder in s.alive():
+			m.state = Marauder.State.DEAD
+			m.collision_layer = 0
 
 	var entries := get_tree().get_nodes_in_group("ai_arrivals")
-	_check("есть точки входа чужих отрядов", not entries.is_empty(), "")
 	if entries.is_empty():
+		_check("есть точки входа для проверки отсрочки", false, "")
 		return
 	var hold := me.global_position
 	me.global_position = (entries[0] as Node3D).global_position
 	for n: Node in entries.slice(1):
 		n.remove_from_group("ai_arrivals")
 	rivals._process(0.5)
-	_check("единственный вход рядом с игроком: тот же отряд ждёт", rivals.squads.is_empty()
-		and rivals._queue.size() == 1 and rivals._queue[0] == first and float(first.t) > rivals._t, "")
+	_check("если единственный вход рядом с игроком, новые группы ждут", rivals._active_squads().is_empty()
+		and rivals._prospekt_retry_at > rivals._t, "")
 	for n: Node in entries.slice(1):
 		n.add_to_group("ai_arrivals")
 	me.global_position = hold
-	rivals._t = float(first.t)
-	rivals._process(0.0)
-	_check("после освобождения входа отряд пришёл и запланирован следующий",
-		rivals.squads.size() == 1 and rivals._queue.size() == 1, str(rivals.results()))
-	if rivals.squads.size() != 1 or rivals._queue.is_empty():
-		return
-	var all_hidden := true
-	for m: Marauder in rivals.squads[0].alive():
-		all_hidden = all_hidden and rivals._hidden_from_players(m.global_position)
-	var n := rivals.squads[0].alive().size()
-	_check("вошли 1–3 бойца, все вне видимости, у группы есть маршрут", n >= 1 and n <= 3 and all_hidden
-		and rivals.squads[0]._patrol.is_valid(), "%d бойцов" % n)
-	var gap: float = float(rivals._queue[0].t) - rivals._t
-	_check("от успешного входа до следующего 120–240 с", gap >= 120.0 and gap <= 240.0, "%0.1f с" % gap)
+	rivals._process(float(Balance.PROSPEKT_RIVALS.retry_sec))
+	var replacements := rivals._active_squads()
+	_check("после освобождения входов снова две группы", replacements.size() == 2, str(rivals.results()))
 
-	rivals._t = float(rivals._queue[0].t)
-	rivals._process(0.0)
-	_check("на карте могут быть два разных отряда", rivals.squads.size() == 2 and rivals.squads[0].id != rivals.squads[1].id, str(rivals.results()))
-	if rivals.squads.size() != 2 or rivals._queue.is_empty():
-		return
-	var third: Dictionary = rivals._queue[0]
-	var due := float(third.t)
-	rivals._t = due
-	rivals._process(0.0)
-	_check("при двух отрядах третий ждёт", rivals.squads.size() == 2 and float(third.t) > due, "")
-	var lost: RivalSquad = rivals.squads[0]
-	for m: Marauder in lost.alive():
-		m.state = Marauder.State.DEAD
+	Raid.current.over = true
+	for s: RivalSquad in replacements:
+		for m: Marauder in s.alive():
+			m.state = Marauder.State.DEAD
 	rivals._process(0.5)
-	rivals._t = float(third.t)
-	rivals._process(0.0)
-	_check("выбитую группу сменил третий отряд", lost.phase == RivalSquad.Phase.WIPED
-		and rivals.squads.size() == 3 and rivals.squads[2].id == String(third.record.id), str(rivals.results()))
+	_check("после окончания рейда группы больше не входят", rivals._active_squads().is_empty(), "")
 
 
 ## Приёмы EFT (docs/design/prospekt_eft_mechanics.md, владелец 2026-10-29: «делай всё»): выходы по стороне захода
