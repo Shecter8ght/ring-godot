@@ -251,7 +251,14 @@ func _play_now(hook: String, id: String, stream: AudioStream, pos: Vector3, extr
 		return null
 	var player: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 	player.stream = stream
-	_tag_mix(player, id, stream, float(spec.db) + extra_db)
+	var base_db: float = float(spec.db) + extra_db
+	if spec.has("far_gain_k"):
+		var distance: float = _listener_pos().distance_to(pos)
+		# Как и затухание в дБ, прибавка зависит от отношения дистанций.
+		var start: float = float(spec.rolloff_from_m)
+		var blend: float = smoothstep(0.0, log(float(spec.far_gain_full_m) / start), log(maxf(1.0, distance / start)))
+		base_db += linear_to_db(lerpf(1.0, float(spec.far_gain_k), blend))
+	_tag_mix(player, id, stream, base_db)
 	player.unit_size = float(spec.unit)
 	player.max_distance = float(spec["max"])
 	player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE

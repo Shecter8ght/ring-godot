@@ -38,6 +38,12 @@ func _ready() -> void:
 	check(float(recordings.far.gain) < float(recordings.near.gain), "Расстояние уменьшает громкость")
 	await _test_propagation()
 	var far_shot := await _capture("ordinary_625m", 625.0, "outdoor", false, true)
+	var original_profile: Dictionary = Balance.SONORA_AUDIO.shot.duplicate()
+	original_profile.erase("far_gain_k")
+	var far_original := await _capture("ordinary_625m_original", 625.0, "outdoor", false, true, original_profile)
+	var far_gain: float = _tone(far_shot, 200.0) / maxf(0.000001, _tone(far_original, 200.0))
+	print("SHOT_RANGE far_amplitude_ratio=%.3f" % far_gain)
+	check(absf(far_gain - 2.0) < 0.08, "Микшер удваивает амплитуду дальнего выстрела")
 	var near_shot := await _capture("ordinary_25m", 25.0, "outdoor", false)
 	var range_loss := linear_to_db(_tone(far_shot, 200.0) / maxf(0.000001, _tone(near_shot, 200.0)))
 	print("SHOT_RANGE ordinary_625m_relative_to_25m_db=%.2f" % range_loss)
@@ -94,7 +100,8 @@ func _make_probe() -> AudioStreamWAV:
 	stream.data = data
 	return stream
 
-func _capture(label: String, distance: float, place: String, direct: bool, filtered: bool = false) -> PackedVector2Array:
+func _capture(label: String, distance: float, place: String, direct: bool, filtered: bool = false,
+		profile: Dictionary = {}) -> PackedVector2Array:
 	# Захват только читает отсчёты; в игровом пути этого эффекта нет.
 	var master: int = AudioServer.get_bus_index("Master")
 	var tap: AudioEffectCapture = AudioEffectCapture.new()
@@ -114,7 +121,8 @@ func _capture(label: String, distance: float, place: String, direct: bool, filte
 		var key: Vector3i = Vector3i(roundi(pos.x / cell), roundi(pos.y / cell), roundi(pos.z / cell))
 		Audio._place_cache[key] = {"place":place,"t":Time.get_ticks_msec() * 0.001}
 		if distance > float(Balance.AUDIO_FAR.delay_from_m):
-			Audio._play_now("wpn_hg_02_shot", "wpn_hg_02_shot_outdoor", probe, pos, 0.0, Balance.SONORA_AUDIO.shot)
+			Audio._play_now("wpn_hg_02_shot", "wpn_hg_02_shot_outdoor", probe, pos, 0.0,
+				Balance.SONORA_AUDIO.shot if profile.is_empty() else profile)
 		else:
 			Audio.play("wpn_hg_02_shot", pos)
 		var players: Array[Node] = find_children("*", "AudioStreamPlayer3D", true, false)
