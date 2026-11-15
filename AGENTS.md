@@ -974,6 +974,15 @@ python -X utf8 tools/asten919/build.py <папка полей> [деталь …
 #   E:\RING_tmp_painter: на C: мало места, Painter встаёт на окне «DISK SPACE»)
 #   группа «Этап 2 — кистью (владелец)» над износом — рисует владелец кистью (задняя кромка крышки), build() её не пересобирает;
 #   слой под кисть — sp_pkp_wear.hand_group(<набор>, <имя>, <каналы>)
+# «Частокол», игровая версия (сетка на просмотре владельца; импорт в Godot, data/weapons.json и клипы рук — после его слова):
+#   "D:/ПРОГРАММЫ/Blender 5/blender.exe" -b -y --factory-startup --python-exit-code 1 --python tools/pkp/game_lp.py [-- --novis | --uv-only]
+#   (сетка с принятой формы v04: упрощение по бюджету детали, пружины трубками, узлы — по приводам PKP_Controls, видимость лучами в позах рига,
+#   атласы Body / Front / Box 4K, LOD1 → _asset_src/pkp/game/lp; --uv-only — развёртка и LOD1 заново с промежуточного файла после лучей) →
+#   то же с tools/pkp/game_bake.py [-- атлас …] (адреса переноса — набор исходника, точка развёртки, поворот базиса; один раз на сетку,
+#   ~25 мин на процессоре → _asset_src/pkp/game/bake) → «перенеси на игровую»: python -X utf8 tools/pkp/game_transfer.py ["<папка выгрузки
+#   Painter>" …] [--only Body,Front,Box] (~1 мин, без Blender и видеокарты; набор — из последней папки, где он есть) → «игровая_версия/карты»
+#   в папке модели; файл просмотра со студией и сверкой с подробной — tools/pkp/game_review.py [-- <папка карт> <out.blend> --ref <подробная>]
+#   → «игровая_версия/Частокол_игровая_v01.blend»
 python tools/trace_flare_gun_claude.py                        # ракетница Claude: контуры с фото владельца → _asset_src/flare_gun_claude/trace (ещё аргумент overlay — сверка рендера с фото)
 "D:/ПРОГРАММЫ/Blender 5/blender.exe" --background --factory-startup --python tools/build_flare_gun_claude.py [-- render] # ракетница Claude и два патрона → assets/models/weapons/flare_gun_claude; render — превью в _asset_src/flare_gun_claude/Просмотр
 python tools/flare_gun_claude_wear_masks.py                    # ракетница Claude: собственные маски износа → _asset_src/flare_gun_claude/textures/worn_v01
