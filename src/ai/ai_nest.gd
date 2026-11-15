@@ -11,6 +11,8 @@ extends Marker3D
 @export_range(20.0, 180.0, 1.0) var sector_deg: float = 75.0
 ## Отходит от точки не дальше, м (на краю плиты — меньше).
 @export_range(0.0, 12.0, 0.5) var radius: float = 3.0
+## Выкладка из data/loadouts.json. Пустая строка оставляет обычную выкладку снайпера.
+@export var loadout: String = ""
 
 
 func _ready() -> void:

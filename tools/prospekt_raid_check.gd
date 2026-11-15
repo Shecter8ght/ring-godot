@@ -3,6 +3,7 @@ extends Node
 ## навигация из кэша, население расставлено слоями — кордон держат ЧВК; точки постов, патрулей, гнёзд и подхода
 ## стоят на навигации; от каждого захода по навигации дойти до выхода; места лута на месте; приёмы EFT —
 ## выходы по стороне захода, условные выходы, подстанция, решётка хранилища, замки, схроны, главарь банка.
+## Посты меняются между рейдами и занимают разные районы; на обоих окнах эстакады есть путь и обзор.
 ## Чужие отряды: входы по краям карты, закрытый гараж, две группы со старта и замена выбывших.
 ##   tools/godot.cmd --headless res://tools/prospekt_raid_check.tscn
 ## Код выхода — число провалов.
@@ -105,9 +106,94 @@ func _ready() -> void:
 	_check("места лута: улица и сценки больше 200, залы зданий — свои", loot > 200 and hall_loot > 40,
 		"улица %d, залы %d" % [loot, hall_loot])
 	_eft_checks(me, pop)
+	_post_distribution_check(pop)
+	_overpass_checks(pop)
 	await _rival_spawn_checks(me)
 	_rival_checks(me)
 	_finish()
+
+
+func _post_distribution_check(pop: AIPopulation) -> void:
+	var old_spawn: Vector3 = _level.call("spawn_pos")
+	var rng_state := pop._rng.state
+	var spread := bool(pop.cfg().get("spread_posts_by_district", false))
+	var fewest_layouts := 8
+	var bad: Array[String] = []
+	for sp: SpawnPoint in get_tree().get_nodes_in_group("spawn_points"):
+		if not sp.entry:
+			continue
+		_level.set("_spawn", sp.global_position)
+		var layouts := {}
+		for roll in range(8):
+			pop._rng.seed = roll
+			var want := pop.group_count("posts")
+			var posts := pop._choose_posts(want, spread)
+			var districts := {}
+			var exclusive := {}
+			var no_duplicates := true
+			var names: Array[String] = []
+			for post in posts:
+				districts[post.district] = true
+				names.append(String(post.name))
+				if post.exclusive != "":
+					no_duplicates = no_duplicates and not exclusive.has(post.exclusive)
+					exclusive[post.exclusive] = true
+			if want != 4 or districts.size() != want or districts.has("") or not names.has("Cordon_PMC") or not no_duplicates:
+				bad.append("%s %d: %s" % [sp.display_name, roll, str(names)])
+			names.sort()
+			layouts["/".join(names)] = true
+		fewest_layouts = mini(fewest_layouts, layouts.size())
+	_level.set("_spawn", old_spawn)
+	pop._rng.state = rng_state
+	_check("соло: четыре поста в разных районах, набор меняется от рейда к рейду", bad.is_empty() and fewest_layouts > 1,
+		"от %d вариантов на заход, ошибки %s" % [fewest_layouts, str(bad)])
+
+
+func _overpass_checks(pop: AIPopulation) -> void:
+	var old_spawn: Vector3 = _level.call("spawn_pos")
+	var old_nests: Array = pop.placed.nests
+	var nests := get_tree().get_nodes_in_group("ai_nests")
+	for n in nests:
+		n.remove_from_group("ai_nests")
+	_level.set("_spawn", Vector3.ZERO)
+	var world := (_level as Node3D).get_world_3d()
+	var clearance: PhysicsShapeQueryParameters3D = _level.call("squad_spawn_clearance")
+	var capsule := clearance.transform
+	clearance.collision_mask = Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS
+	for slot in ["Nest_RingSite", "Nest_RingPostal"]:
+		var nest := _level.get_node_or_null("Gameplay/Population/Nests/" + slot) as AINest
+		if nest == null:
+			_check("точка на эстакаде существует", false, slot)
+			continue
+		nest.add_to_group("ai_nests")
+		pop.placed.nests = []
+		var count := pop._spawn_nests(1)
+		nest.remove_from_group("ai_nests")
+		if count != 1:
+			_check("на точке появляется один снайпер", false, slot)
+			continue
+		var shooter := get_tree().get_nodes_in_group("marauders").back() as Marauder
+		var weapon: Dictionary = shooter.equipment.get("primary", {})
+		var optic: Dictionary = weapon.get("mods", {}).get("optic_primary", {})
+		var configured: bool = shooter.archetype == "sniper" and weapon.get("id") == "wpn_sr_03" and optic.get("id") == "optic_pu_01"
+		var at := shooter.global_position
+		clearance.transform = capsule.translated(at)
+		var fits := world.direct_space_state.intersect_shape(clearance, 1).is_empty()
+		var target := Vector3(-165.3, 1.3, nest.global_position.z)
+		var line := PhysicsRayQueryParameters3D.create(shooter._gun_pos(), target, clearance.collision_mask)
+		var sees := shooter.watch_dir.dot((target - at).normalized()) > 0.9 and world.direct_space_state.intersect_ray(line).is_empty()
+		var approaches := 0
+		for z in [201.0, 213.0]:
+			var path := NavigationServer3D.map_get_path(world.navigation_map, pop._ground(Vector3(-219.2, 0.1, z)), at, true)
+			if not path.is_empty() and path[-1].distance_to(at) < 0.5:
+				approaches += 1
+		_check("эстакада: Мосинка с ПУ, свободное окно и оба схода", configured and fits and sees and approaches == 2,
+			"%s · выкладка %s, место %s, обзор %s, сходов %d" % [nest.title, configured, fits, sees, approaches])
+		shooter.queue_free()
+	for n in nests:
+		n.add_to_group("ai_nests")
+	pop.placed.nests = old_nests
+	_level.set("_spawn", old_spawn)
 
 
 func _rival_spawn_checks(me: Player) -> void:

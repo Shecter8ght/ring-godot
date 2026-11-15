@@ -109,6 +109,7 @@ required_switch = "prospekt_ktp"
 
 [node name="Cordon_PMC" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-203, 0.08, -15.65)
+district = "west"
 radius = 10
 group_size = Vector2i(3, 4)
 weight = 1
@@ -117,6 +118,7 @@ always_from = 1
 
 [node name="Camp_PMC" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(157.5, 0.06, -0.5)
+district = "east"
 radius = 16
 group_size = Vector2i(3, 4)
 weight = 3
@@ -124,6 +126,7 @@ arch = "pmc"
 
 [node name="Bank_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-21, 0.12, -75.3)
+district = "north"
 radius = 12
 group_size = Vector2i(2, 3)
 weight = 3
@@ -131,6 +134,7 @@ exclusive = "bank"
 
 [node name="Bank_Vault" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-30, -3.2, -77.3)
+district = "north"
 radius = 8
 group_size = Vector2i(1, 2)
 weight = 2
@@ -138,78 +142,94 @@ exclusive = "bank"
 
 [node name="Yarus_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-104, 0.05, 72)
+district = "center"
 radius = 18
 group_size = Vector2i(2, 4)
 weight = 3
+exclusive = "yarus"
 
 [node name="Yarus_Dock" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-100, 0.02, 106)
+district = "center"
 radius = 12
 group_size = Vector2i(2, 3)
 weight = 1.5
+exclusive = "yarus"
 
 [node name="Station_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-116, 0.12, 226)
+district = "southwest"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 2
 
 [node name="Tower_Court" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-14, 0.1, 45)
+district = "center"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1.5
 
 [node name="Square" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-14, 0.1, 82)
+district = "center"
 radius = 16
 group_size = Vector2i(2, 3)
 weight = 1.5
 
 [node name="Train_Wreck" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-6, 0.12, 222)
+district = "southeast"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 2
 
 [node name="Parking" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-128, -7.2, -91.3)
+district = "north"
 radius = 20
 group_size = Vector2i(2, 3)
 weight = 2
 
 [node name="Site" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-108, 0.05, 148)
+district = "southwest"
 radius = 16
 group_size = Vector2i(2, 3)
 weight = 1.5
 
 [node name="Corpus3_Lot" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(117.3, 0.05, 150)
+district = "southeast"
 radius = 16
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="Vershina_Plaza" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(81.3, 0.1, -43.3)
+district = "east"
 radius = 16
 group_size = Vector2i(2, 3)
 weight = 1.5
+exclusive = "vershina"
 
 [node name="Yard_ZhK" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-150, 0.05, -131.3)
+district = "north"
 radius = 16
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="House7_Yard" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-190, 0.05, 85)
+district = "west"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="Bank_Boss" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-21, 0.12, -77.3)
+district = "north"
 radius = 14
 group_size = Vector2i(3, 4)
 weight = 0
@@ -221,18 +241,23 @@ lead_arch = "bank_boss"
 
 [node name="Vershina_Court" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(112, 0.1, -92)
+district = "east"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
+exclusive = "vershina"
 
 [node name="Vershina_Lobby" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(74, 0.1, -70)
+district = "east"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
+exclusive = "vershina"
 
 [node name="Under_Blockpost" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-233, 0.08, -17)
+district = "west"
 radius = 14
 group_size = Vector2i(3, 4)
 weight = 2
@@ -240,6 +265,7 @@ arch = "pmc"
 
 [node name="Under_Barrier" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-238, 0.08, 204)
+district = "southwest"
 radius = 8
 group_size = Vector2i(2, 2)
 weight = 1
@@ -247,64 +273,101 @@ arch = "pmc"
 
 [node name="Yarus_Catwalk" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-110, 6.02, 89.5)
+district = "center"
 radius = 9
 group_size = Vector2i(2, 2)
 weight = 0.8
+exclusive = "yarus"
 
 [node name="Yarus_Security" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-100, 6.02, 84)
+district = "center"
 radius = 8
 group_size = Vector2i(2, 2)
 weight = 0.8
+exclusive = "yarus"
 
 [node name="Vokzal_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(146, 0.1, 232)
+district = "southeast"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1.5
+exclusive = "vokzal"
 
 [node name="Vokzal_Concourse" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(146, 7.62, 244)
+district = "southeast"
 radius = 12
 group_size = Vector2i(2, 2)
 weight = 1
+exclusive = "vokzal"
 
 [node name="BusStation" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(170, 0.1, 172)
+district = "southeast"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="Under_Market" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-234, 0.08, 85)
+district = "west"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="Police_Hall" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-192, 0.1, 19)
+district = "west"
 radius = 8
 group_size = Vector2i(2, 2)
 weight = 1
+exclusive = "police"
 
 [node name="Police_Upper" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-195, 3.52, 22)
+district = "west"
 radius = 8
 group_size = Vector2i(2, 2)
 weight = 0.8
+exclusive = "police"
 
 [node name="Garages" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-190, 0.05, 125)
+district = "southwest"
 radius = 14
 group_size = Vector2i(2, 3)
 weight = 1
 
 [node name="Ring_Stop" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
 position = Vector3(-228, 12.7, 207)
+district = "southwest"
 radius = 10
 group_size = Vector2i(2, 2)
 weight = 1
 chance = 0.5
+
+[node name="Lombard_Street" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(19, 0.12, 81)
+district = "center"
+radius = 7
+group_size = Vector2i(1, 1)
+weight = 1.2
+
+[node name="Postal_Yard" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(-178, 0.12, 232)
+district = "southwest"
+radius = 12
+group_size = Vector2i(2, 3)
+weight = 1.5
+
+[node name="Meridian_Drive" parent="Gameplay/Population/Posts" instance=ExtResource("8")]
+position = Vector3(123.8, 0.12, 181)
+district = "southeast"
+radius = 10
+group_size = Vector2i(1, 2)
+weight = 1.2
 
 [node name="Routes" type="Node3D" parent="Gameplay/Population"]
 
@@ -417,6 +480,22 @@ sector_deg = 90
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -222, 9.02, -15)
 sector_deg = 90
 title = "Объездная: гнездо над кордоном"
+
+[node name="Nest_RingSite" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -221.3, 10, 163)
+title = "Эстакада: окно над стройкой"
+weight = 2.5
+sector_deg = 50
+radius = 0.5
+loadout = "scav_mosin"
+
+[node name="Nest_RingPostal" parent="Gameplay/Population/Nests" instance=ExtResource("10")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -221.3, 14.45, 231)
+title = "Эстакада: окно над почтовым двором"
+weight = 2.5
+sector_deg = 50
+radius = 0.5
+loadout = "scav_mosin"
 
 [node name="Arrivals" type="Node3D" parent="Gameplay/Population"]
 

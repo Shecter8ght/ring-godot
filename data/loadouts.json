@@ -507,6 +507,43 @@
     ]
    ]
   },
+  "scav_mosin": {
+   "name": "Мародёр с Мосинкой",
+   "primary": [
+    [
+     "MOSIN_PU_BASE",
+     1
+    ]
+   ],
+   "secondary": [
+    [
+     "HG_01_BASE",
+     1
+    ]
+   ],
+   "armor": [
+    [
+     "belt_pouches",
+     1
+    ]
+   ],
+   "meds": [
+    [
+     "bandage",
+     0.6,
+     [
+      1,
+      2
+     ]
+    ]
+   ],
+   "loot_table": "marauder",
+   "dur": [
+    45,
+    85
+   ],
+   "skill": 1.0
+  },
   "scav_leader": {
    "name": "Главарь мародёров",
    "primary": [

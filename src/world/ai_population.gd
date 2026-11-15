@@ -156,33 +156,11 @@ func spawn_start() -> int:
 	return count
 
 
-## Посты: сперва обязательные (always_from), потом по весу; взаимоисключающие — не больше одного.
+## Поставить гарнизоны на выбранных постах.
 func _spawn_posts(want: int) -> int:
-	var all: Array = get_tree().get_nodes_in_group("ai_posts").filter(func(n: Node) -> bool: return n is AIPost)
-	var party := party_size()
-	var chosen: Array[AIPost] = []
-	var tags: Dictionary = {}
-	# пост «не каждый рейд» (главарь): не выпал — в этом рейде его нет вовсе
-	all = all.filter(func(p: AIPost) -> bool: return p.chance >= 1.0 or _rng.randf() < p.chance)
-	if posts_only:
-		all = all.filter(func(p: AIPost) -> bool: return String(p.name) in keep_posts)
-	for p: AIPost in all:
-		if p.always_from > 0 and party >= p.always_from and _post_ok(p, tags):
-			chosen.append(p)
-			if p.exclusive != "":
-				tags[p.exclusive] = true
-	var rest: Array = all.filter(func(p: AIPost) -> bool: return not chosen.has(p))
-	while chosen.size() < want and not rest.is_empty():
-		var p := _pick_weighted(rest) as AIPost
-		rest.erase(p)
-		if not _post_ok(p, tags):
-			continue
-		chosen.append(p)
-		if p.exclusive != "":
-			tags[p.exclusive] = true
 	var count := 0
 	var c := cfg()
-	for p in chosen:
+	for p: AIPost in _choose_posts(want, bool(c.get("spread_posts_by_district", false))):
 		var size: Vector2i = p.group_size
 		if size == Vector2i.ZERO:
 			size = Vector2i(int(c.post_group[0]), int(c.post_group[1]))
@@ -199,6 +177,50 @@ func _spawn_posts(want: int) -> int:
 		count += squad.members.size()
 		(placed.posts as Array).append(String(p.name))
 	return count
+
+
+## Обязательные посты занимают первыми. Остальные выбирают по весу и правилам карты.
+func _choose_posts(want: int, spread_by_district: bool) -> Array[AIPost]:
+	var all: Array = get_tree().get_nodes_in_group("ai_posts").filter(func(n: Node) -> bool: return n is AIPost)
+	var party := party_size()
+	var chosen: Array[AIPost] = []
+	var tags: Dictionary = {}
+	var by_district: Dictionary = {}
+	# пост «не каждый рейд» (главарь): не выпал — в этом рейде его нет вовсе
+	all = all.filter(func(p: AIPost) -> bool: return p.chance >= 1.0 or _rng.randf() < p.chance)
+	if posts_only:
+		all = all.filter(func(p: AIPost) -> bool: return String(p.name) in keep_posts)
+	for p: AIPost in all:
+		if p.always_from > 0 and party >= p.always_from and _post_ok(p, tags):
+			chosen.append(p)
+			by_district[p.district] = int(by_district.get(p.district, 0)) + 1
+			if p.exclusive != "":
+				tags[p.exclusive] = true
+	var rest: Array = all.filter(func(p: AIPost) -> bool: return not chosen.has(p))
+	while chosen.size() < want and not rest.is_empty():
+		var candidates: Array = _least_occupied_districts(rest, by_district) if spread_by_district else rest
+		var p := _pick_weighted(candidates) as AIPost
+		rest.erase(p)
+		if not _post_ok(p, tags):
+			continue
+		chosen.append(p)
+		by_district[p.district] = int(by_district.get(p.district, 0)) + 1
+		if p.exclusive != "":
+			tags[p.exclusive] = true
+	return chosen
+
+
+func _least_occupied_districts(posts: Array, by_district: Dictionary) -> Array[AIPost]:
+	var candidates: Array[AIPost] = []
+	var fewest := INF
+	for p: AIPost in posts:
+		var count := int(by_district.get(p.district, 0))
+		if count < fewest:
+			fewest = count
+			candidates.clear()
+		if count == fewest:
+			candidates.append(p)
+	return candidates
 
 
 ## Пост годится: не занят его метка, стоит на навигации, не у точки появления и не на виду у неё.
@@ -278,7 +300,10 @@ func _spawn_nests(want: int) -> int:
 		var at := _ground(nest.global_position)
 		if at == Vector3.INF or not _safe_start(at):
 			continue
-		var m: Marauder = level.call("spawn_marauder", at, _holds_archetype(), {}) as Marauder
+		var opts := {}
+		if nest.loadout != "":
+			opts["loadout"] = nest.loadout
+		var m: Marauder = level.call("spawn_marauder", at, _holds_archetype(), opts) as Marauder
 		var squad := Squad.new()
 		squad.add(m)
 		m.watch_dir = nest.watch_dir()
