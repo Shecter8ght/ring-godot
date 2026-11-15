@@ -6,6 +6,10 @@ extends Node3D
 @export var width: float = 1.0
 @export var height: float = 2.2
 @export var thickness: float = 0.05
+## Смещение центра полотна относительно обычной створки, если модель имеет собственный отступ от петли.
+@export var leaf_offset: Vector3 = Vector3.ZERO
+## В тесном помещении зону можно укоротить, чтобы F у лестницы не задевала дверь.
+@export_range(0.3, 5.0) var interaction_depth: float = 3.0
 ## Заперта для тех, у кого в рюкзаке нет этого ключа (data/items.json); пусто — обычная дверь.
 ## Мародёры открывают любые двери — у них свои ключи; чужим отрядам (RivalRaids) нужен тот же ключ.
 @export var required_key: String = ""
@@ -29,7 +33,7 @@ func _ready() -> void:
 	var box := BoxMesh.new()
 	box.size = Vector3(width, height, thickness)
 	_mesh.mesh = box
-	_mesh.position = Vector3(width * 0.5, height * 0.5, 0.0)
+	_mesh.position = Vector3(width * 0.5, height * 0.5, 0.0) + leaf_offset
 	_mesh.material_override = SectorMaterials.get_material("metal_plate")
 	_leaf.collision_layer = Hitscan.LAYER_DOOR
 	_leaf.collision_mask = 0
@@ -38,7 +42,7 @@ func _ready() -> void:
 	_shape.shape = col
 	_shape.position = _mesh.position
 	var zone := BoxShape3D.new()
-	zone.size = Vector3(width + 1.6, height, 3.0)
+	zone.size = Vector3(width + 1.6, height, interaction_depth)
 	_zone_shape.shape = zone
 	_zone_shape.position = Vector3(width * 0.5, height * 0.5, 0.0)
 	_zone.collision_layer = 0

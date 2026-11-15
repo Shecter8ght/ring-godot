@@ -42,6 +42,13 @@ const BRACKET_STEP := 1.8
 	set(v):
 		standoff = clampf(v, 0.0, 0.6)
 		queue_build()
+## У лестницы с готовой моделью остаются те же точки подъёма и коллизия стоек.
+@export var generate_visual: bool = true:
+	set(v):
+		generate_visual = v
+		queue_build()
+## При ненулевом значении точки F требуют прямого доступа и подхода ближе этого радиуса.
+@export_range(0.0, 1.8) var access_radius: float = 0.0
 @export var color: Color = Color(0.3, 0.34, 0.29):
 	set(v):
 		color = v
@@ -99,10 +106,30 @@ func _build() -> void:
 	add_child(_gen)
 	var total := height + extend
 	var sx := width * 0.5 + STILE.x * 0.5
+	var stile_size := Vector3(STILE.x, total, STILE.y)
+	if generate_visual:
+		_build_mesh(stile_size, sx)
+	# стойки — препятствие для тела и пуль; перекладины не мешают
+	_body = StaticBody3D.new()
+	_body.name = "Body"
+	_body.collision_layer = Hitscan.LAYER_WORLD
+	_body.collision_mask = 0
+	_gen.add_child(_body)
+	for side: float in [-1.0, 1.0]:
+		var cs := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = stile_size
+		cs.shape = box
+		cs.position = Vector3(side * sx, total * 0.5, 0.0)
+		_body.add_child(cs)
+
+
+func _build_mesh(stile_size: Vector3, sx: float) -> void:
+	var total := stile_size.y
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var stile := BoxMesh.new()
-	stile.size = Vector3(STILE.x, total, STILE.y)
+	stile.size = stile_size
 	for side: float in [-1.0, 1.0]:
 		st.append_from(stile, 0, Transform3D(Basis(), Vector3(side * sx, total * 0.5, 0.0)))
 	var rung := CylinderMesh.new()
@@ -132,19 +159,6 @@ func _build() -> void:
 	mat.roughness = 0.6
 	mi.material_override = mat
 	_gen.add_child(mi)
-	# стойки — препятствие для тела и пуль; перекладины не мешают
-	_body = StaticBody3D.new()
-	_body.name = "Body"
-	_body.collision_layer = Hitscan.LAYER_WORLD
-	_body.collision_mask = 0
-	_gen.add_child(_body)
-	for side: float in [-1.0, 1.0]:
-		var cs := CollisionShape3D.new()
-		var box := BoxShape3D.new()
-		box.size = stile.size
-		cs.shape = box
-		cs.position = Vector3(side * sx, total * 0.5, 0.0)
-		_body.add_child(cs)
 
 
 ## Куда смотрит лезущий (к лестнице), по горизонтали.

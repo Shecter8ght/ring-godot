@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/props/cordon_tower/cordon_tower.gltf" id="1_tower"]
+[ext_resource type="PackedScene" path="res://assets/models/props/cordon_tower/cordon_tower_door.gltf" id="2_leaf"]
+[ext_resource type="PackedScene" path="res://scenes/world/ladder.tscn" id="3_ladder"]
+[ext_resource type="Script" path="res://src/world/door.gd" id="4_door"]
+
+[sub_resource type="BoxShape3D" id="Box_base"]
+size = Vector3(3.68, 0.03, 3.68)
+
+[sub_resource type="BoxShape3D" id="Box_side"]
+size = Vector3(0.23, 6.79, 3.68)
+
+[sub_resource type="BoxShape3D" id="Box_front"]
+size = Vector3(3.22, 6.79, 0.23)
+
+[sub_resource type="BoxShape3D" id="Box_jamb"]
+size = Vector3(1.065, 6.79, 0.23)
+
+[sub_resource type="BoxShape3D" id="Box_lintel"]
+size = Vector3(1.09, 4.645, 0.23)
+
+[sub_resource type="BoxShape3D" id="Box_sill"]
+size = Vector3(1.09, 0.0735, 0.23)
+
+[sub_resource type="BoxShape3D" id="Box_deck_front"]
+size = Vector3(4, 0.26, 2.315)
+
+[sub_resource type="BoxShape3D" id="Box_deck_rear"]
+size = Vector3(4, 0.26, 0.455)
+
+[sub_resource type="BoxShape3D" id="Box_deck_left"]
+size = Vector3(0.895, 0.26, 1.23)
+
+[sub_resource type="BoxShape3D" id="Box_deck_right"]
+size = Vector3(1.915, 0.26, 1.23)
+
+[sub_resource type="BoxShape3D" id="Box_parapet_cross"]
+size = Vector3(4.11, 1.1, 0.255)
+
+[sub_resource type="BoxShape3D" id="Box_parapet_side"]
+size = Vector3(0.255, 1.1, 3.6)
+
+[sub_resource type="BoxShape3D" id="Box_post"]
+size = Vector3(0.37, 1.55, 0.37)
+
+[sub_resource type="BoxShape3D" id="Box_roof"]
+size = Vector3(4.4, 0.29, 4.4)
+
+[node name="CordonTower" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_tower")]
+
+[node name="Concrete" type="StaticBody3D" parent="." groups=["nav_source"]]
+collision_mask = 0
+metadata/surface = "concrete"
+
+[node name="GroundFloor" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 0.015, 0)
+shape = SubResource("Box_base")
+
+[node name="LeftWall" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.725, 3.395, 0)
+shape = SubResource("Box_side")
+
+[node name="RightWall" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.725, 3.395, 0)
+shape = SubResource("Box_side")
+
+[node name="FrontWall" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 3.395, 1.725)
+shape = SubResource("Box_front")
+
+[node name="LeftJamb" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.0775, 3.395, -1.725)
+shape = SubResource("Box_jamb")
+
+[node name="RightJamb" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.0775, 3.395, -1.725)
+shape = SubResource("Box_jamb")
+
+[node name="Lintel" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 4.4675, -1.725)
+shape = SubResource("Box_lintel")
+
+[node name="Threshold" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 0.03675, -1.76)
+shape = SubResource("Box_sill")
+
+[node name="DeckFront" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 6.86, 0.8425)
+shape = SubResource("Box_deck_front")
+
+[node name="DeckRear" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 6.86, -1.7725)
+shape = SubResource("Box_deck_rear")
+
+[node name="DeckLeft" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.5525, 6.86, -0.93)
+shape = SubResource("Box_deck_left")
+
+[node name="DeckRight" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.0425, 6.86, -0.93)
+shape = SubResource("Box_deck_right")
+
+[node name="ParapetFront" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 7.25, 1.9275)
+shape = SubResource("Box_parapet_cross")
+
+[node name="ParapetRear" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 7.25, -1.9275)
+shape = SubResource("Box_parapet_cross")
+
+[node name="ParapetLeft" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.9275, 7.25, 0)
+shape = SubResource("Box_parapet_side")
+
+[node name="ParapetRight" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.9275, 7.25, 0)
+shape = SubResource("Box_parapet_side")
+
+[node name="PostFrontLeft" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.857, 8.575, 1.857)
+shape = SubResource("Box_post")
+
+[node name="PostFrontRight" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.857, 8.575, 1.857)
+shape = SubResource("Box_post")
+
+[node name="PostRearLeft" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(-1.857, 8.575, -1.857)
+shape = SubResource("Box_post")
+
+[node name="PostRearRight" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(1.857, 8.575, -1.857)
+shape = SubResource("Box_post")
+
+[node name="Roof" type="CollisionShape3D" parent="Concrete"]
+position = Vector3(0, 9.495, 0)
+shape = SubResource("Box_roof")
+
+[node name="Door" type="Node3D" parent="."]
+position = Vector3(0.472, 0.072, -1.839)
+rotation = Vector3(0, 3.14159265, 0)
+script = ExtResource("4_door")
+width = 0.918
+height = 1.98
+thickness = 0.06
+leaf_offset = Vector3(0.013, 0, -0.036)
+interaction_depth = 0.95
+
+[node name="Leaf" type="StaticBody3D" parent="Door"]
+metadata/surface = "metal"
+
+[node name="Mesh" type="MeshInstance3D" parent="Door/Leaf"]
+visible = false
+
+[node name="Shape" type="CollisionShape3D" parent="Door/Leaf"]
+
+[node name="Finish" parent="Door/Leaf" instance=ExtResource("2_leaf")]
+
+[node name="Zone" type="Area3D" parent="Door"]
+
+[node name="Shape" type="CollisionShape3D" parent="Door/Zone"]
+
+[node name="Ladder" parent="." instance=ExtResource("3_ladder")]
+position = Vector3(-0.51, 0.03, -0.395)
+rotation = Vector3(0, 3.14159265, 0)
+height = 6.96
+width = 0.524
+rung_step = 0.30
+extend = 0.71
+standoff = 0.0
+generate_visual = false
+access_radius = 0.78
+
+[node name="RecessLight" type="OmniLight3D" parent="."]
+position = Vector3(0.33, 2.49, -1.48)
+light_color = Color(1, 0.89, 0.69, 1)
+light_energy = 0.36
+omni_range = 3.5
+omni_attenuation = 1.2
+shadow_enabled = true
+
+[node name="EquipmentAnchor" type="Marker3D" parent="."]
+position = Vector3(0, 6.99, 1.08)
