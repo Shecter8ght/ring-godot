@@ -1519,7 +1519,7 @@ const VAULT := {"min_h": 0.35, "max_h": 1.7, "reach": 1.3, "max_thick": 1.6, "se
 ## обойти не дольше detour_m; связки не ближе spacing_m друг к другу; цена пути по связке.
 const VAULT_LINKS := {"step": 1.5, "detour_m": 7.0, "spacing_m": 2.5, "travel_cost": 2.0}
 ## Общий клип тела → отдельные руки у камеры: разворот к взгляду и посадка плеч в кадр.
-const FPS_TRAVERSAL := {"root_yaw_deg": 180.0, "root_offset": Vector3(0.0, -1.2, -0.9), "root_scale": 0.65}
+const FPS_TRAVERSAL := {"root_yaw_deg": 180.0, "root_scale": 0.8, "shoulder_center": Vector3(0.0, -0.1, -0.25)}
 ## Залезть наверх (Пробел у того, на что можно встать: машина, ящик, край платформы; Climb): высота
 ## от VAULT.min_h до max_h, м, с полным перегрузом — до max_h_loaded; дотянуться — reach от ног, м.
 ## Тоньше vault_thick, м (пол сразу за преградой), — перелезает через (VAULT), толще — залезает на неё.

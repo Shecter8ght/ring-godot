@@ -55,7 +55,7 @@ func _ready() -> void:
 func play_vault(duration: float) -> void:
 	if skeleton == null:
 		return
-	_model.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(Balance.FPS_TRAVERSAL.root_yaw_deg))).scaled(Vector3.ONE * float(Balance.FPS_TRAVERSAL.root_scale)), Balance.FPS_TRAVERSAL.root_offset as Vector3)
+	_seat_traversal()
 	if _traversal == null:
 		var library := load(CharacterAnimator.CLIPS) as AnimationLibrary
 		if library == null or not library.has_animation("vault"):
@@ -116,9 +116,20 @@ func set_hand_target(side: String, target: Node3D, weight: float) -> void:
 		_actions[side] = {"target": target, "weight": clampf(weight, 0.0, 1.0)}
 
 
+func _seat_traversal() -> void:
+	if skeleton == null:
+		return
+	var basis := Basis(Vector3.UP, deg_to_rad(float(Balance.FPS_TRAVERSAL.root_yaw_deg))).scaled(Vector3.ONE * float(Balance.FPS_TRAVERSAL.root_scale))
+	var left := skeleton.get_bone_global_pose(_bone("LeftShoulder")).origin
+	var right := skeleton.get_bone_global_pose(_bone("RightShoulder")).origin
+	var center := Balance.FPS_TRAVERSAL.shoulder_center as Vector3
+	_model.transform = Transform3D(basis, center - basis * ((left + right) * 0.5))
+
+
 func update_pose() -> void:
 	if _traversal:
 		_traversal.advance(get_process_delta_time())
+		_seat_traversal()
 		visible = true
 		return
 	visible = skeleton != null and is_instance_valid(_weapon) and _grips.size() == 2
