@@ -24,6 +24,9 @@ var grip_profiles: Dictionary = {}
 var _hand_pose: HandGripPose = HandGripPose.new()
 var _model: Node3D
 var _traversal: AnimationPlayer
+## На время перелезания из сетки убираются плечи и плечевые сегменты, остаются локти, предплечья и кисти.
+var _full_meshes: Dictionary = {}
+var _hand_meshes: Dictionary = {}
 
 
 func _ready() -> void:
@@ -55,7 +58,7 @@ func _ready() -> void:
 func play_vault(duration: float) -> void:
 	if skeleton == null:
 		return
-	_seat_traversal()
+	_elbows_only(true)
 	if _traversal == null:
 		var library := load(CharacterAnimator.CLIPS) as AnimationLibrary
 		if library == null or not library.has_animation("vault"):
@@ -75,10 +78,14 @@ func play_vault(duration: float) -> void:
 		_traversal.add_animation_library("", animations)
 		_traversal.speed_scale = clip.length / maxf(duration, 0.05)
 		_traversal.play("vault")
+		_traversal.seek(clip.length * float(Balance.FPS_TRAVERSAL.reference_at), true)
+		_seat_traversal()
+		_traversal.seek(0.0, true)
 	visible = true
 
 
 func stop_vault() -> void:
+	_elbows_only(false)
 	if _traversal:
 		_traversal.queue_free()
 		_traversal = null
@@ -86,6 +93,67 @@ func stop_vault() -> void:
 	if skeleton:
 		skeleton.reset_bone_poses()
 	visible = false
+
+
+func _elbows_only(on: bool) -> void:
+	for raw: Node in _model.find_children("*", "MeshInstance3D", true, false):
+		var mi := raw as MeshInstance3D
+		if on:
+			if not _full_meshes.has(mi):
+				_full_meshes[mi] = mi.mesh
+			mi.mesh = _forearms_mesh(_full_meshes[mi] as Mesh)
+		elif _full_meshes.has(mi):
+			mi.mesh = _full_meshes[mi] as Mesh
+
+
+## Сохраняем только треугольники, ведущая кость которых — предплечье, кисть или её потомки.
+func _forearms_mesh(source: Mesh) -> Mesh:
+	if _hand_meshes.has(source):
+		return _hand_meshes[source] as Mesh
+	var allowed: Dictionary = {}
+	for side: String in ["Left", "Right"]:
+		var stack: Array[int] = [_bone(side + "ForeArm")]
+		while not stack.is_empty():
+			var bone: int = stack.pop_back()
+			allowed[bone] = true
+			for child: int in skeleton.get_bone_children(bone):
+				stack.append(child)
+	var result := ArrayMesh.new()
+	for surface in range(source.get_surface_count()):
+		var arrays: Array = source.surface_get_arrays(surface)
+		var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var bones := arrays[Mesh.ARRAY_BONES] as PackedInt32Array
+		var weights := arrays[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
+		var source_indices := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		var indices := PackedInt32Array()
+		if source_indices.is_empty():
+			for i in range(vertices.size()):
+				indices.append(i)
+		else:
+			indices = source_indices
+		var kept := PackedInt32Array()
+		for i in range(0, indices.size() - 2, 3):
+			var keep := true
+			for corner in range(3):
+				var vertex: int = indices[i + corner]
+				var dominant: int = -1
+				var strongest: float = -1.0
+				for channel in range(4):
+					var at := vertex * 4 + channel
+					if at < weights.size() and weights[at] > strongest:
+						strongest = weights[at]
+						dominant = bones[at]
+				if not allowed.has(dominant):
+					keep = false
+			if keep:
+				kept.append(indices[i])
+				kept.append(indices[i + 1])
+				kept.append(indices[i + 2])
+		arrays[Mesh.ARRAY_INDEX] = kept
+		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		result.surface_set_material(surface, source.surface_get_material(surface))
+	_hand_meshes[source] = result
+	return result
 
 
 func unbind_weapon() -> void:
@@ -120,16 +188,15 @@ func _seat_traversal() -> void:
 	if skeleton == null:
 		return
 	var basis := Basis(Vector3.UP, deg_to_rad(float(Balance.FPS_TRAVERSAL.root_yaw_deg))).scaled(Vector3.ONE * float(Balance.FPS_TRAVERSAL.root_scale))
-	var left := skeleton.get_bone_global_pose(_bone("LeftShoulder")).origin
-	var right := skeleton.get_bone_global_pose(_bone("RightShoulder")).origin
-	var center := Balance.FPS_TRAVERSAL.shoulder_center as Vector3
+	var left := skeleton.get_bone_global_pose(_bone("LeftHand")).origin
+	var right := skeleton.get_bone_global_pose(_bone("RightHand")).origin
+	var center := Balance.FPS_TRAVERSAL.hand_center as Vector3
 	_model.transform = Transform3D(basis, center - basis * ((left + right) * 0.5))
 
 
 func update_pose() -> void:
 	if _traversal:
 		_traversal.advance(get_process_delta_time())
-		_seat_traversal()
 		visible = true
 		return
 	visible = skeleton != null and is_instance_valid(_weapon) and _grips.size() == 2
