@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djp02qy3n2f2b"
-path.s3tc="res://.godot/imported/ct_concrete_orm.png-4cea52761ace1d585d4c40fd4135cecc.s3tc.ctex"
+path.bptc="res://.godot/imported/ct_concrete_orm.png-4cea52761ace1d585d4c40fd4135cecc.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -12,12 +12,12 @@ metadata={
 [deps]
 
 source_file="res://assets/models/props/cordon_tower/ct_concrete_orm.png"
-dest_files=["res://.godot/imported/ct_concrete_orm.png-4cea52761ace1d585d4c40fd4135cecc.s3tc.ctex"]
+dest_files=["res://.godot/imported/ct_concrete_orm.png-4cea52761ace1d585d4c40fd4135cecc.bptc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

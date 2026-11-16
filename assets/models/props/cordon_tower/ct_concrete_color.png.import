@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tfl33n4maecd"
-path.s3tc="res://.godot/imported/ct_concrete_color.png-bb86960a433b8e7f97355421037a378f.s3tc.ctex"
+path.bptc="res://.godot/imported/ct_concrete_color.png-bb86960a433b8e7f97355421037a378f.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -12,12 +12,12 @@ metadata={
 [deps]
 
 source_file="res://assets/models/props/cordon_tower/ct_concrete_color.png"
-dest_files=["res://.godot/imported/ct_concrete_color.png-bb86960a433b8e7f97355421037a378f.s3tc.ctex"]
+dest_files=["res://.godot/imported/ct_concrete_color.png-bb86960a433b8e7f97355421037a378f.bptc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -160,7 +160,16 @@ func _mesh_count(node: Node) -> int:
 func _pbr_ready(node: Node) -> bool:
 	if node is MeshInstance3D:
 		var model := node as MeshInstance3D
-		var mat := model.get_active_material(0) as BaseMaterial3D
+		var material := model.get_active_material(0)
+		if material is ShaderMaterial:
+			var concrete := material as ShaderMaterial
+			for channel in [&"albedo_map", &"normal_map", &"orm_map", &"pore_detail"]:
+				var texture := concrete.get_shader_parameter(channel) as Texture2D
+				var resolution := 1024 if channel == &"pore_detail" else 4096
+				if texture == null or texture.get_size() != Vector2(resolution, resolution):
+					return false
+			return true
+		var mat := material as BaseMaterial3D
 		if not mat or not mat.albedo_texture or not mat.normal_texture:
 			return false
 		if mat is ORMMaterial3D:

@@ -4,6 +4,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/props/cordon_tower/cordon_tower_door.gltf" id="2_leaf"]
 [ext_resource type="PackedScene" path="res://scenes/world/ladder.tscn" id="3_ladder"]
 [ext_resource type="Script" path="res://src/world/door.gd" id="4_door"]
+[ext_resource type="Shader" path="res://assets/models/props/cordon_tower/concrete_surface.gdshader" id="5_surface"]
+[ext_resource type="Texture2D" path="res://assets/models/props/cordon_tower/ct_concrete_color.png" id="6_color"]
+[ext_resource type="Texture2D" path="res://assets/models/props/cordon_tower/ct_concrete_normal.png" id="7_normal"]
+[ext_resource type="Texture2D" path="res://assets/models/props/cordon_tower/ct_concrete_orm.png" id="8_orm"]
+[ext_resource type="Texture2D" path="res://assets/models/props/cordon_tower/ct_concrete_detail.png" id="9_detail"]
+
+[sub_resource type="ShaderMaterial" id="Mat_concrete"]
+shader = ExtResource("5_surface")
+shader_parameter/albedo_map = ExtResource("6_color")
+shader_parameter/normal_map = ExtResource("7_normal")
+shader_parameter/orm_map = ExtResource("8_orm")
+shader_parameter/pore_detail = ExtResource("9_detail")
 
 [sub_resource type="BoxShape3D" id="Box_base"]
 size = Vector3(3.68, 0.03, 3.68)
@@ -50,6 +62,9 @@ size = Vector3(4.4, 0.29, 4.4)
 [node name="CordonTower" type="Node3D"]
 
 [node name="Model" parent="." instance=ExtResource("1_tower")]
+
+[node name="Concrete" parent="Model" index="0"]
+material_override = SubResource("Mat_concrete")
 
 [node name="Concrete" type="StaticBody3D" parent="." groups=["nav_source"]]
 collision_mask = 0
@@ -184,3 +199,5 @@ shadow_enabled = true
 
 [node name="EquipmentAnchor" type="Marker3D" parent="."]
 position = Vector3(0, 6.99, 1.08)
+
+[editable path="Model"]
