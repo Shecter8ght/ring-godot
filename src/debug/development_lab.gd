@@ -253,10 +253,14 @@ func _process(delta: float) -> void:
 		DayCycle.current._tick(delta, false)
 	if editing:
 		player._tick_stance_eye(delta)
+	_check_player_position()
+	_lab_tick(delta)
+
+
+func _check_player_position() -> void:
 	if player.position.y < -4.0:
 		player.position = Vector3(0, 0.03, -6)
 		player.velocity = Vector3.ZERO
-	_lab_tick(delta)
 
 
 func _lab_tick(_delta: float) -> void:

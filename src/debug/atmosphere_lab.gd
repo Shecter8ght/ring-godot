@@ -1,17 +1,43 @@
 class_name AtmosphereLab
 extends DevelopmentLab
-## Свет на настоящем цикле суток и погоде игры; часы и лампа — условия осмотра стенда. Ползунки — той схемы света,
+## Свет на «Проспекте» с игровым циклом суток и погодой. Ползунки — той схемы света,
 ## что выбрана («Свет и небо»): у света Road to Vostok свой набор (LAB_RULES.atmosphere_tod), у прежнего — свой.
 
-var _lamp: OmniLight3D
+const AREA_HALF_SIZE := Vector2(25.0, 25.0)
+const AREAS := [
+	{"title": "Сквер", "center": Vector2(-14, 88), "spawn": Vector3(-20, 0.08, 66), "yaw": 0.12},
+	{"title": "Стройка", "center": Vector2(-105, 152), "spawn": Vector3(-105, 0.08, 131), "yaw": -0.45},
+	{"title": "Проспект у «Зерна»", "center": Vector2(-184, -35), "spawn": Vector3(-184, 0.08, -28), "yaw": PI},
+]
+
+@export var map_scene: PackedScene
+
+var _area_index: int = 0
+var _bounds: Rect2
 var _sky_mode_before: String = "tod"
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_SCENE_INSTANTIATED:
+		_load_map()
 
 
 func _ready() -> void:
 	_sky_mode_before = Settings.sky_mode
 	lab_domain = TodLight.LAB_DOMAIN if TodLight.active() else "atmosphere"
 	super._ready()
-	_build_samples()
+	leave_overview_to_play = true
+	var world: Node3D = $World
+	for batch_root: Node in get_tree().get_nodes_in_group("urban_prop_batches"):
+		if world.is_ancestor_of(batch_root):
+			PropBatcher.batch(batch_root as Node3D, float(Balance.URBAN_WORLD.batch_cell), float(Balance.URBAN_WORLD.prop_distance))
+	var area_names: Array[String] = []
+	for area: Dictionary in AREAS:
+		area_names.append(area.title)
+	var area_picker := panel.option("Площадка на «Проспекте» · 50 × 50 м", area_names, _move_location)
+	area_picker.name = "AreaSelector"
+	panel.action("К началу площадки", func() -> void: _move_location(_area_index))
+	_move_location(0)
 	start_atmosphere(16.0)
 	panel.option("Погода для просмотра", ["Ясно", "Пасмурно", "Дождь", "Туман", "Жара"], set_weather)
 	var names: Array[String] = []
@@ -20,11 +46,8 @@ func _ready() -> void:
 	var sky_mode: OptionButton = panel.option("Свет и небо", names, _set_light_model)
 	sky_mode.select(maxi(0, Settings.SKY_MODES.find(Settings.sky_mode)))
 	panel.number("Часы · 0–24 (условие просмотра)", 16.0, 0.0, 23.95, 0.1, set_hour)
-	panel.number("Лампа в комнате · яркость", 4.0, 0.0, 16.0, 0.1,
-		func(value: float) -> void: _lamp.light_energy = value)
-	panel.action("Перенести игрока: улица / комната", _move_location)
 	weapon_selector()
-	panel.label(panel.context, "Общий профиль всех рейдовых карт, включая будущие. Во вкладке «Варианты» включи «Применять на всех картах» и сохрани. Часы, погода и лампа — только условия осмотра.", 14)
+	panel.label(panel.context, "F6 — пройтись по площадке. F7 — сравнить свет в той же точке. Часы и погода действуют во всех трёх местах стенда.", 14)
 	panel.use_in_game.text = "Применять на всех картах после сохранения"
 	if LabTuning.names(lab_domain).is_empty():
 		panel.use_in_game.set_pressed_no_signal(true)
@@ -51,39 +74,55 @@ func _update_status() -> void:
 	panel.status.text = "Общий свет всех карт · свет Road to Vostok (их числа по часам)." if TodLight.active() else "Общий свет всех карт · прежний профиль Проспекта."
 
 
-func _build_samples() -> void:
-	var samples: Node3D = $Samples
-	box(samples, "RoomBack", Vector3(7, 1.7, 9), Vector3(7, 3.4, 0.25), Color(0.5, 0.48, 0.43))
-	box(samples, "RoomLeft", Vector3(3.5, 1.7, 5.5), Vector3(0.25, 3.4, 7), Color(0.45, 0.46, 0.45))
-	box(samples, "RoomRight", Vector3(10.5, 1.7, 5.5), Vector3(0.25, 3.4, 7), Color(0.45, 0.46, 0.45))
-	box(samples, "RoomRoof", Vector3(7, 3.5, 5.5), Vector3(7.2, 0.25, 7.2), Color(0.5, 0.5, 0.5))
-	text_3d(samples, "КОМНАТА · ЛАМПА", Vector3(7, 3.8, 2))
-	for index: int in range(4):
-		var color: Color = [Color(0.8, 0.8, 0.78), Color(0.35, 0.38, 0.42), Color(0.45, 0.27, 0.12), Color(0.06, 0.065, 0.07)][index]
-		box(samples, "Material_%d" % index, Vector3(-4.5 + index * 1.5, 0.65, 4), Vector3(1, 1.3, 1), color, "metal" if index == 1 else "wood")
-	text_3d(samples, "БЕЛОЕ · МЕТАЛЛ · ДЕРЕВО · ТЁМНОЕ", Vector3(-2.25, 2.1, 4))
-	box(samples, "RoomTable", Vector3(7, 0.45, 6), Vector3(2.2, 0.9, 1.2), Color(0.28, 0.32, 0.35), "metal")
-	_lamp = OmniLight3D.new()
-	_lamp.name = "TestLamp"
-	_lamp.position = Vector3(7, 2.7, 6)
-	_lamp.omni_range = 7.0
-	_lamp.light_energy = 4.0
-	_lamp.light_color = Color(1.0, 0.8, 0.55)
-	_lamp.shadow_enabled = true
-	samples.add_child(_lamp)
-	for distance: int in [10, 20, 40, 60]:
-		box(samples, "Distance_%d" % distance, Vector3(-10, 1.5, distance), Vector3(0.3, 3, 0.3), Color(0.65, 0.65, 0.62))
-		text_3d(samples, "%d м" % distance, Vector3(-10, 3.5, distance))
+func _load_map() -> void:
+	# Подключаем геометрию и свет до входа в дерево, чтобы не запускать сценарий рейда.
+	var level: Node3D = map_scene.instantiate() as Node3D
+	for node: Node in [$Ground, $Sun, $WorldEnvironment]:
+		node.free()
+	var world: Node3D = level.get_node("World") as Node3D
+	var sun: DirectionalLight3D = level.get_node("Sun") as DirectionalLight3D
+	var environment_node: WorldEnvironment = level.get_node("WorldEnvironment") as WorldEnvironment
+	world.get_node("WorldEnvironment").free()
+	for node: Node in [world, sun, environment_node]:
+		node.owner = null
+		level.remove_child(node)
+		add_child(node)
+	level.free()
 
 
-func _move_location() -> void:
-	player.position = Vector3(7, 0.03, 3.5) if player.position.x < 3.0 else Vector3(0, 0.03, -6)
+func _move_location(index: int) -> void:
+	_area_index = index
+	var area: Dictionary = AREAS[index]
+	var center: Vector2 = area.center
+	_bounds = Rect2(center - AREA_HALF_SIZE, AREA_HALF_SIZE * 2.0)
+	player.position = area.spawn
+	player.reset_physics_interpolation()
 	player.velocity = Vector3.ZERO
 	player._eye_tick_ready = false
-	rig._look_yaw = 0.0
+	player.face(area.yaw)
+	rig._look_yaw = area.yaw
 	rig._look_pitch = 0.0
+	observer.position = Vector3(center.x, 100.0, center.y)
+	observer.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	observer.fov = 38.0
 	if atmosphere:
 		atmosphere._indoor_cache.clear()
+
+
+func _check_player_position() -> void:
+	if player.position.y < -20.0:
+		_move_location(_area_index)
+		return
+	var position_xz := Vector2(player.position.x, player.position.z)
+	var bounded := position_xz.clamp(_bounds.position, _bounds.end)
+	if bounded != position_xz:
+		player.position = Vector3(bounded.x, player.position.y, bounded.y)
+
+
+func set_editing(enabled: bool) -> void:
+	super.set_editing(enabled)
+	$Interface/Telemetry.visible = enabled
+	$Interface/Hint.visible = enabled
 
 
 func _settings_changed() -> void:
@@ -107,8 +146,9 @@ func _exit_tree() -> void:
 func _lab_tick(_delta: float) -> void:
 	var environment: Environment = world_environment.environment
 	var sun: DirectionalLight3D = $Sun
-	telemetry.text = "СВЕТ И АТМОСФЕРА\nВремя: %s · погода: %s\nСолнце / Луна: %.3f · рассеянный свет: %.3f\nЭкспозиция: %.2f · туман: %.4f\n%s\n%s" % [
+	telemetry.text = "%s · 50 × 50 м\nВремя: %s · погода: %s\nСолнце / Луна: %.3f · рассеянный свет: %.3f\nЭкспозиция: %.2f · туман: %.4f\n%s\n%s" % [
+		AREAS[_area_index].title,
 		DayCycle.current.clock_text() if DayCycle.current else "—", String(RaidConditions.spec("weather").get("name", RaidConditions.current.weather)),
 		sun.light_energy, environment.ambient_light_energy, environment.tonemap_exposure, environment.fog_density,
-		"Игрок в комнате" if atmosphere and atmosphere.is_indoor(player.position) else "Игрок на улице",
+		"Игрок под крышей" if atmosphere and atmosphere.is_indoor(player.position) else "Игрок на улице",
 		"СРАВНЕНИЕ: исходный свет" if panel.compare.button_pressed else "Предпросмотр выбранного варианта"]

@@ -2,8 +2,10 @@
 
 [ext_resource type="PackedScene" path="res://scenes/debug/development_lab_base.tscn" id="1_base"]
 [ext_resource type="Script" path="res://src/debug/atmosphere_lab.gd" id="2_lab"]
+[ext_resource type="PackedScene" path="res://scenes/levels/prospekt.tscn" id="3_prospekt"]
 
 [node name="AtmosphereLab" instance=ExtResource("1_base")]
 script = ExtResource("2_lab")
 lab_domain = "atmosphere"
 lab_title = "Свет и атмосфера"
+map_scene = ExtResource("3_prospekt")

@@ -37,6 +37,7 @@ func _ready() -> void:
 	var atmosphere: AtmosphereLab = _lab as AtmosphereLab
 	_check("atmosphere uses real day cycle", DayCycle.current != null and RaidWeather.current != null)
 	_check("panel blocks player controls", atmosphere.player.ui_blocked() and not atmosphere.player.is_physics_processing())
+	await _atmosphere_areas(atmosphere)
 	var sun: DirectionalLight3D = atmosphere.get_node("Sun") as DirectionalLight3D
 	if DisplayServer.get_name() != "headless" and DayCycle.current and DayCycle.current._calc:
 		for attempt: int in range(120):
@@ -188,6 +189,45 @@ func _ready() -> void:
 	DirAccess.remove_absolute("user://development_labs_profile_test.json")
 	print("DEVELOPMENT_LABS_TEST checks=%d failures=%d" % [_checks, _fails])
 	get_tree().quit(1 if _fails > 0 else 0)
+
+
+func _atmosphere_areas(lab: AtmosphereLab) -> void:
+	_check("light lab uses the Prospekt world", lab.has_node("World/West/Coffee") and not lab.has_node("Ground"))
+	var picker: OptionButton = lab.panel.context.get_node("AreaSelector") as OptionButton
+	_check("light lab offers three locations", picker.item_count == 3)
+	lab.set_hour(17.0)
+	lab.set_weather(1)
+	for index: int in range(picker.item_count):
+		picker.select(index)
+		picker.item_selected.emit(index)
+		var start: Vector3 = lab.player.position
+		_check("%s: 50 x 50 m, with an outdoor spawn" % picker.get_item_text(index),
+			lab._bounds.size == Vector2(50, 50) and lab._bounds.has_point(Vector2(start.x, start.z))
+			and not lab.atmosphere.is_indoor(start))
+		_check("changing area preserves the time and weather", is_equal_approx(DayCycle.current.hour, 17.0)
+			and RaidConditions.current.weather == "overcast")
+		lab.set_editing(false)
+		for frame: int in range(12):
+			await get_tree().physics_frame
+		_check("%s: player stands on map collision" % picker.get_item_text(index), lab.player.is_on_floor())
+		Input.action_press("move_forward")
+		for frame: int in range(60):
+			await get_tree().physics_frame
+		Input.action_release("move_forward")
+		_check("%s: player can walk from spawn" % picker.get_item_text(index),
+			Vector2(lab.player.position.x - start.x, lab.player.position.z - start.z).length() > 1.0)
+		await _shot("atmosphere_area_%d" % index)
+		lab.set_editing(true)
+	lab.player.position.x = lab._bounds.position.x - 1.0
+	await _frames(2)
+	_check("light lab keeps the player on the selected plot", is_equal_approx(lab.player.position.x, lab._bounds.position.x))
+	lab.player.position.y = -21.0
+	await _frames(2)
+	_check("out of world resets to selected plot", lab.player.position.is_equal_approx(AtmosphereLab.AREAS[2].spawn))
+	picker.select(0)
+	picker.item_selected.emit(0)
+	lab.set_hour(16.0)
+	lab.set_weather(0)
 
 
 func _menu_routes() -> void:
