@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/models/props/bc5_meeting203/meeting_glazing_damaged.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "Трещины и осколки витража 203"
+shader = ExtResource("1_shader")
+shader_parameter/glass_tint = Color(0.88, 0.95, 0.97, 1.0)
+shader_parameter/glass_opacity = 0.08
+shader_parameter/glass_fresnel = 0.68
+shader_parameter/glass_roughness = 0.085

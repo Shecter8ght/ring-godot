@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/models/props/bc5_meeting203/carafe.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "BC5_203_Carafe"
+shader = ExtResource("1_shader")

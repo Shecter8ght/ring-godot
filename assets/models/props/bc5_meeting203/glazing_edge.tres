@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "BC5_203_GlassEdge"
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.56, 0.72, 0.74, 0.62)
+metallic = 0.08
+metallic_specular = 0.82
+roughness = 0.074

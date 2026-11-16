@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dm5s4xa823qya"
-path="res://.godot/imported/room203_map_5.jpg-b849068318d68f70106c7757860a0bda.ctex"
+uid="uid://87up64gkhatn"
+path="res://.godot/imported/room203_подтёк.png-9e9921bda1a4e121acbafe72919827c3.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "5e088370b9558ba1ec7a0b5ffdb0970e"
+"md5": "53df921cf51fe35b4b40a9926c91fb25"
 }
 
 [deps]
 
-source_file="res://assets/models/props/bc5_meeting203/room203_map_5.jpg"
-dest_files=["res://.godot/imported/room203_map_5.jpg-b849068318d68f70106c7757860a0bda.ctex"]
+source_file="res://assets/models/props/bc5_meeting203/room203_подтёк.png"
+dest_files=["res://.godot/imported/room203_подтёк.png-9e9921bda1a4e121acbafe72919827c3.ctex"]
 
 [params]
 

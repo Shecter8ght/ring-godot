@@ -39,7 +39,35 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={}
+_subresources={
+"materials": {
+"BC5_203_Carafe": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/props/bc5_meeting203/carafe.tres",
+"use_external/path": "res://assets/models/props/bc5_meeting203/carafe.tres"
+},
+"BC5_203_Carpet": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/props/bc5_meeting203/finish/carpet.tres",
+"use_external/path": "res://assets/models/props/bc5_meeting203/finish/carpet.tres"
+},
+"BC5_203_Ceiling": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/props/bc5_meeting203/finish/ceiling.tres",
+"use_external/path": "res://assets/models/props/bc5_meeting203/finish/ceiling.tres"
+},
+"BC5_203_GlassEdge": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/props/bc5_meeting203/glazing_edge.tres",
+"use_external/path": "res://assets/models/props/bc5_meeting203/glazing_edge.tres"
+},
+"BC5_203_Walls": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/props/bc5_meeting203/finish/walls.tres",
+"use_external/path": "res://assets/models/props/bc5_meeting203/finish/walls.tres"
+}
+}
+}
 gltf/naming_version=2
 gltf/embedded_image_handling=1
 gltf/texture_map_mode=1

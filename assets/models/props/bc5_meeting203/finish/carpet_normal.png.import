@@ -2,33 +2,31 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqc4b6lt4ccfq"
-path="res://.godot/imported/room203_map_4.png-e5bf65dffd978bb54a83584e5b4ac84a.ctex"
+uid="uid://plamthbacuf2"
+path.bptc="res://.godot/imported/carpet_normal.png-19963e4379662456c0777f8e2bce496c.bptc.ctex"
 metadata={
-"vram_texture": false
-}
-generator_parameters={
-"md5": "50d67130f1590dae1f879c880cdfbb9b"
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/models/props/bc5_meeting203/room203_map_4.png"
-dest_files=["res://.godot/imported/room203_map_4.png-e5bf65dffd978bb54a83584e5b4ac84a.ctex"]
+source_file="res://assets/models/props/bc5_meeting203/finish/carpet_normal.png"
+dest_files=["res://.godot/imported/carpet_normal.png-19963e4379662456c0777f8e2bce496c.bptc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
+roughness/mode=1
 roughness/src_normal=""
 process/channel_remap/red=0
 process/channel_remap/green=1
@@ -40,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://tools/bc5_meeting203/meeting203.gd" id="1_scene"]
 [ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/room203.glb" id="2_room"]
@@ -7,11 +7,76 @@
 [ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="5_door"]
 [ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno_door.gd" id="6_door_pivot"]
 [ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/door203.glb" id="7_door_leaf"]
+[ext_resource type="Texture2D" path="res://assets/sky/kloofendal_overcast_puresky.hdr" id="8_sky"]
+
+[sub_resource type="PanoramaSkyMaterial" id="Panorama203"]
+panorama = ExtResource("8_sky")
+energy_multiplier = 0.64
+
+[sub_resource type="Sky" id="Sky203"]
+sky_material = SubResource("Panorama203")
+
+[sub_resource type="Environment" id="Day203"]
+background_mode = 2
+sky = SubResource("Sky203")
+ambient_light_source = 2
+ambient_light_color = Color(0.91, 0.9, 0.87, 1)
+ambient_light_energy = 0.26
+reflected_light_source = 2
+tonemap_mode = 4
+ssao_enabled = true
+ssao_radius = 0.52
+ssao_intensity = 2.3
+ssao_power = 1.5
+ssao_light_affect = 0.45
+ssil_enabled = true
+ssil_radius = 1.6
+ssil_intensity = 1.05
 
 [node name="Meeting203" type="Node3D"]
 script = ExtResource("1_scene")
 
 [node name="Room203" parent="." instance=ExtResource("2_room")]
+
+[node name="Daylight" type="Node3D" parent="."]
+
+[node name="OvercastSky" type="WorldEnvironment" parent="Daylight"]
+environment = SubResource("Day203")
+
+[node name="StreetSun" type="DirectionalLight3D" parent="Daylight"]
+rotation_degrees = Vector3(-34, -19, 0)
+light_color = Color(1, 0.905, 0.795, 1)
+light_energy = 0.29
+light_angular_distance = 2.2
+shadow_enabled = true
+
+[node name="SkyThroughWindow" type="AreaLight3D" parent="Daylight"]
+position = Vector3(0.6, 2.17, 7.41)
+rotation_degrees = Vector3(-12.93, -3.23, 0)
+light_color = Color(0.91, 0.945, 1, 1)
+light_energy = 1.19
+light_specular = 0.36
+light_size = 0.72
+shadow_enabled = true
+area_size = Vector2(6.99, 1.62)
+area_range = 11.4
+area_attenuation = 1.1
+area_normalize_energy = false
+
+[node name="FloorBounce" type="OmniLight3D" parent="Daylight"]
+position = Vector3(0.55, 0.56, 6.1)
+light_color = Color(0.95, 0.93, 0.85, 1)
+light_energy = 0.15
+light_specular = 0.0
+omni_range = 5.4
+omni_attenuation = 1.65
+
+[node name="RoomReflections" type="ReflectionProbe" parent="Daylight"]
+position = Vector3(-0.15, 1.7, 3.85)
+size = Vector3(10.5, 4, 8.5)
+box_projection = true
+intensity = 0.57
+enable_shadows = true
 
 [node name="Furniture" type="Node3D" parent="."]
 

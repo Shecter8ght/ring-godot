@@ -2,33 +2,31 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nkwfnqn1hrot"
-path="res://.godot/imported/room203_map_3.jpg-e4fef49ce49a06fd1c92c97e5b47c894.ctex"
+uid="uid://caiapg3dv4u4i"
+path.bptc="res://.godot/imported/ceiling_normal.png-79b7bca6fb1b0e48c9065bfca82713b4.bptc.ctex"
 metadata={
-"vram_texture": false
-}
-generator_parameters={
-"md5": "64a2a3bfef943fa442e96b8137a2d168"
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/models/props/bc5_meeting203/room203_map_3.jpg"
-dest_files=["res://.godot/imported/room203_map_3.jpg-e4fef49ce49a06fd1c92c97e5b47c894.ctex"]
+source_file="res://assets/models/props/bc5_meeting203/finish/ceiling_normal.png"
+dest_files=["res://.godot/imported/ceiling_normal.png-79b7bca6fb1b0e48c9065bfca82713b4.bptc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
+roughness/mode=1
 roughness/src_normal=""
 process/channel_remap/red=0
 process/channel_remap/green=1
@@ -40,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

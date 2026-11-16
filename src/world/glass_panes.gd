@@ -36,6 +36,7 @@ var _rng := RandomNumberGenerator.new()
 ## "pending": попадания, ещё не нарисованные, "creep": до следующего потрескивания, с}.
 var _damaged: Dictionary = {}
 var _flush_queued: bool = false
+var _damage_finish: ShaderMaterial
 
 static var _cube_material: StandardMaterial3D
 
@@ -52,16 +53,18 @@ void fragment() {
 """
 
 
-## Собрать панели (SectorBuilder, до входа в дерево).
-func setup(specs: Array) -> void:
+## Собрать панели до входа в дерево. У материала повреждения те же параметры трещин, что у DAMAGED_SHADER.
+func setup(specs: Array, finish: ShaderMaterial = null, damage_finish: ShaderMaterial = null) -> void:
 	name = "GlassPanes"
 	add_to_group("glass_panes")
 	panes = specs
 	_rng.seed = 7331
-	var sh := Shader.new()
-	sh.code = GLASS_SHADER
-	var gm := ShaderMaterial.new()
-	gm.shader = sh
+	_damage_finish = damage_finish
+	if finish == null:
+		var sh := Shader.new()
+		sh.code = GLASS_SHADER
+		finish = ShaderMaterial.new()
+		finish.shader = sh
 	_glass_mm = MultiMesh.new()
 	_glass_mm.transform_format = MultiMesh.TRANSFORM_3D
 	var box := BoxMesh.new()
@@ -123,7 +126,7 @@ func setup(specs: Array) -> void:
 	var gi := MultiMeshInstance3D.new()
 	gi.name = "GlassMesh"
 	gi.multimesh = _glass_mm
-	gi.material_override = gm
+	gi.material_override = finish
 	gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(gi)
 	var si := MultiMeshInstance3D.new()
@@ -300,8 +303,9 @@ func _ensure_damaged(idx: int) -> Dictionary:
 	var xf: Transform3D = p.xf
 	var sz: Vector2 = p.size
 	var cracks: GlassCracks = GlassCracks.new(sz)
-	var material: ShaderMaterial = ShaderMaterial.new()
-	material.shader = DAMAGED_SHADER
+	var material: ShaderMaterial = _damage_finish.duplicate() as ShaderMaterial if _damage_finish else ShaderMaterial.new()
+	if material.shader == null:
+		material.shader = DAMAGED_SHADER
 	material.set_shader_parameter("crack_tex", cracks.texture)
 	material.set_shader_parameter("texel", Vector2(1.0 / float(cracks.texture.get_width()), 1.0 / float(cracks.texture.get_height())))
 	material.set_shader_parameter("pane_size", sz)
