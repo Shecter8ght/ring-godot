@@ -1,0 +1,69 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://tools/bc5_meeting203/meeting203.gd" id="1_scene"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/room203.glb" id="2_room"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/table203.glb" id="3_table"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/chair203.glb" id="4_chair"]
+[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="5_door"]
+[ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno_door.gd" id="6_door_pivot"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/door203.glb" id="7_door_leaf"]
+
+[node name="Meeting203" type="Node3D"]
+script = ExtResource("1_scene")
+
+[node name="Room203" parent="." instance=ExtResource("2_room")]
+
+[node name="Furniture" type="Node3D" parent="."]
+
+[node name="Table203" parent="Furniture" instance=ExtResource("3_table")]
+position = Vector3(0.17, 0.00800037, 4.53)
+
+[node name="Chairs" type="Node3D" parent="Furniture"]
+
+[node name="Chair01" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(-0.97, 0.00800037, 3.535)
+rotation = Vector3(0, 3.01942, 0)
+metadata/has_armrests = false
+
+[node name="Chair02" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(0.18, 0.00800037, 3.468)
+rotation = Vector3(0, 3.1765, 0)
+
+[node name="Chair03" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(1.31, 0.00800037, 3.563)
+rotation = Vector3(0, 3.33358, 0)
+
+[node name="Chair04" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(-0.98, 0.00800037, 5.5)
+rotation = Vector3(0, 0.10472, 0)
+metadata/has_armrests = false
+
+[node name="Chair05" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(0.22, 0.00800037, 5.5)
+rotation = Vector3(0, -0.244346, 0)
+
+[node name="Chair06" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(1.38, 0.00800037, 5.58)
+rotation = Vector3(0, -0.0698132, 0)
+
+[node name="Chair07" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(-1.96, 0.00800037, 4.46)
+rotation = Vector3(0, -1.71042, 0)
+metadata/has_armrests = false
+
+[node name="Chair08" parent="Furniture/Chairs" instance=ExtResource("4_chair")]
+position = Vector3(2.35, 0.00800037, 4.77)
+rotation = Vector3(0, 1.36136, 0)
+
+[node name="OfficeDoor203" parent="." instance=ExtResource("5_door")]
+position = Vector3(-0.537, 0, -0)
+script = ExtResource("6_door_pivot")
+width = 1.07
+height = 2.151
+thickness = 0.046
+leaf_offset = Vector3(0, 0.01, 0)
+interaction_depth = 2.1
+
+[node name="Finish" parent="OfficeDoor203/Leaf" index="2" instance=ExtResource("7_door_leaf")]
+
+[editable path="OfficeDoor203"]

@@ -1,0 +1,44 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dtx6ts1w2rcw7"
+path.s3tc="res://.godot/imported/table203_BC5_Table_normal.png-ebc3e21166ba69fdaa25a9809d46ab52.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "f6edc25e7969ea66c8e53724c1beedb1"
+}
+
+[deps]
+
+source_file="res://assets/models/props/bc5_meeting203/table203_BC5_Table_normal.png"
+dest_files=["res://.godot/imported/table203_BC5_Table_normal.png-ebc3e21166ba69fdaa25a9809d46ab52.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=1
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

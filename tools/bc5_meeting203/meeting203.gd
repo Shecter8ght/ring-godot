@@ -1,0 +1,395 @@
+extends Node3D
+## Отдельная переговорная для проверки вещей, света, штатной двери и остекления.
+## --check проверяет физику. --shots снимает вид на высоте глаз. Без аргументов — прогулка.
+
+const ASSETS := "res://assets/models/props/bc5_meeting203/"
+const PLAYER := preload("res://scenes/player/player.tscn")
+const RIG := preload("res://scenes/player/camera_rig.tscn")
+const SKY := preload("res://assets/sky/kloofendal_overcast_puresky.hdr")
+const BIRCH := "res://assets/models/plants/birch_b_lod0.glb"
+const BIRCH_MATERIALS := "res://assets/models/plants/materials"
+const X_MIN := -4.968
+const X_MAX := 4.618
+const EDGE_A := -4.89
+const EDGE_B := 4.54
+const GLASS_Z := 7.773
+const GLASS_LOW := 1.149
+const GLASS_HIGH := 3.373
+const INITIAL_OPEN_PANE := 4
+const PANE_COUNT := 6
+
+var _glass: GlassPanes
+var _solid: StaticBody3D
+var _chairs: Array[Node3D] = []
+var _player: Player
+var _decal_count := 0
+var _failures := 0
+
+@onready var _door: Door = $OfficeDoor203
+@onready var _table: Node3D = $Furniture/Table203
+
+
+func _ready() -> void:
+	RaidEvents.enabled = false
+	var args := OS.get_cmdline_user_args()
+	var headless := DisplayServer.get_name() == "headless"
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ASSETS + "room203_layout.json"))
+	_build(raw)
+	if not headless and args.has("--shots"):
+		await _shots()
+		return
+	Profile.use_file("user://profile_bc5_meeting203.json", true)
+	_player = PLAYER.instantiate() as Player
+	_player.name = "Player_1"
+	add_child(_player)
+	_player.global_position = Vector3(.02, .018, -1.0)
+	_player.cursor_ground = Vector3(.02, 0, 3.0)
+	await _ticks(14)
+	if headless or args.has("--check"):
+		await _check_room()
+		get_tree().quit(1 if _failures > 0 else 0)
+		return
+	var movement_camera := RIG.instantiate() as CameraRig
+	add_child(movement_camera)
+	movement_camera.set_target(_player)
+	movement_camera._look_yaw = 0.0
+	var ui := CanvasLayer.new()
+	add_child(ui)
+	var help := Label.new()
+	help.position = Vector2(24, 20)
+	help.text = "Переговорная 203   ·   WASD — ходьба   ·   F — дверь   ·   U — разбить стекло под прицелом"
+	help.add_theme_font_size_override("font_size", 18)
+	help.add_theme_color_override("font_shadow_color", Color.BLACK)
+	help.add_theme_constant_override("shadow_offset_x", 2)
+	help.add_theme_constant_override("shadow_offset_y", 2)
+	ui.add_child(help)
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey or not event.pressed or event.echo or event.physical_keycode != KEY_U:
+		return
+	var camera := get_viewport().get_camera_3d()
+	if camera and _break_aimed_pane(camera):
+		get_viewport().set_input_as_handled()
+
+
+func _break_aimed_pane(camera: Camera3D) -> bool:
+	var p := camera.global_position
+	var hit := _ray(p, p - camera.global_basis.z * 13.0,
+		Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS)
+	var pane := GlassPanes.pane_of(hit)
+	if pane.size() != 2 or pane[0] != _glass:
+		return false
+	_glass.impact(int(pane[1]), 250.0, hit.position)
+	return true
+
+
+func _v(a: Array) -> Vector3:
+	return Vector3(float(a[0]), float(a[1]), float(a[2]))
+
+
+func _build(layout: Dictionary) -> void:
+	_solid = StaticBody3D.new()
+	_solid.name = "SlabWallsFurniture"
+	_solid.collision_layer = Hitscan.LAYER_WORLD
+	_solid.collision_mask = 0
+	add_child(_solid)
+	_shell()
+	_daylight()
+	_street()
+	_box(Vector3(0, .739, 0) + _table.position, Vector3(3.50, .049, 1.26), null, true)
+	for x in [-1.16, 1.16]:
+		_box(Vector3(x, .347, 0) + _table.position, Vector3(.125, .686, .68), null, true)
+	for chair: Node3D in $Furniture/Chairs.get_children():
+		var arm := chair.find_child("ChairArms", true, false) as Node3D
+		if arm:
+			arm.visible = bool(chair.get_meta("has_armrests", true))
+		_box(chair.position + Vector3(0, .247, 0), Vector3(.51, .49, .53), null, true, "cloth")
+		_chairs.append(chair)
+	_door.set("swing_degrees", -85.0)
+	_windows()
+	for d: Dictionary in layout.decals:
+		_add_decal(d)
+
+
+func _mat(rgb: Color, rough: float) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = rgb
+	material.roughness = rough
+	return material
+
+
+func _box(at: Vector3, size: Vector3, material: Material = null, solid := false, surface := "concrete") -> void:
+	if material:
+		var mesh := BoxMesh.new()
+		mesh.size = size
+		var visual := MeshInstance3D.new()
+		visual.mesh = mesh
+		visual.material_override = material
+		visual.position = at
+		add_child(visual)
+	if solid:
+		var shape := BoxShape3D.new()
+		shape.size = size
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		collision.position = at
+		collision.set_meta("surface", surface)
+		_solid.add_child(collision)
+
+
+func _shell() -> void:
+	var graphite := _mat(Color(.175, .182, .175), .53)
+	var corridor := _mat(Color(.48, .49, .45), .73)
+	var corridor_floor := _mat(Color(.375, .382, .358), .15)
+	var thin_slab := _mat(Color(.28, .282, .265), .9)
+	_box(Vector3(-.175, -.13, 3.775), Vector3(9.80, .26, 7.82), null, true, "cloth")
+	_box(Vector3(-.175, 3.262, 3.77), Vector3(9.92, .29, 7.98), thin_slab, true)
+	_box(Vector3(X_MIN-.081, 1.67, 3.8), Vector3(.16, 3.36, 7.85), null, true)
+	_box(Vector3(X_MAX+.08, 1.67, 3.8), Vector3(.16, 3.36, 7.85), null, true)
+	_box(Vector3((X_MIN-.6)*.5, 1.67, 0), Vector3(-.6-X_MIN, 3.36, .16), null, true)
+	_box(Vector3((X_MAX+.6)*.5, 1.67, 0), Vector3(X_MAX-.6, 3.36, .16), null, true)
+	_box(Vector3(0, 2.765, 0), Vector3(1.20, 1.09, .16), null, true)
+	for x in [-.57, .57]:
+		_box(Vector3(x, 1.11, 0), Vector3(.06, 2.22, .19), graphite, true, "metal")
+	_box(Vector3(0, 2.193, 0), Vector3(1.08, .055, .21), graphite, true, "metal")
+	_box(Vector3(0, .006, 0), Vector3(1.08, .012, .17), graphite, false)
+	_box(Vector3(.01, -.105, -1.62), Vector3(8.9, .21, 3.25), corridor_floor, true)
+	_box(Vector3(.01, 1.599, -3.22), Vector3(9.08, 3.2, .17), corridor, true)
+	for x in [-4.43, 4.46]:
+		_box(Vector3(x, 1.599, -1.66), Vector3(.16, 3.2, 3.2), corridor, true)
+	_box(Vector3(.015, 3.09, -1.61), Vector3(9.12, .15, 3.36), thin_slab, true)
+	_box(Vector3(-2.67, 1.65, -.116), Vector3(4.13, 3.30, .11), corridor)
+	_box(Vector3(2.54, 1.65, -.116), Vector3(3.98, 3.30, .11), corridor)
+	_box(Vector3(0, 2.725, -.118), Vector3(1.2, 1.005, .11), corridor)
+	var sign := Label3D.new()
+	sign.text = "203   ПЕРЕГОВОРНАЯ"
+	sign.font_size = 40
+	sign.pixel_size = .00140
+	sign.position = Vector3(.994, 1.68, -.180)
+	sign.rotation.y = PI
+	sign.modulate = Color(.78,.81,.74)
+	sign.outline_size = 3
+	add_child(sign)
+
+
+func _windows() -> void:
+	var frame := _mat(Color(.154, .16, .156), .48)
+	frame.metallic = .31
+	var count := PANE_COUNT
+	var step := (EDGE_B - EDGE_A) / count
+	var center := (X_MIN + X_MAX) * .5
+	_box(Vector3(center, .543, 7.795), Vector3(X_MAX-X_MIN, 1.083, .32), null, true)
+	_box(Vector3(center, 1.12, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
+	_box(Vector3(center, 3.402, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
+	for index in range(count + 1):
+		var x := EDGE_A + step * index
+		_box(Vector3(x, 2.263, GLASS_Z), Vector3(.074, 2.24, .114), frame, true, "metal")
+	var list: Array = []
+	for index in range(count):
+		var x := EDGE_A + step * (index + .5)
+		# Отключаем связку через фасад второго этажа. Подоконник и стойки имеют собственные коллизии.
+		list.append({"xf": Transform3D(Basis.IDENTITY, Vector3(x, (GLASS_HIGH+GLASS_LOW)*.5, GLASS_Z)),
+			"size": Vector2(step-.074, GLASS_HIGH-GLASS_LOW), "floor_y": .008, "sill": Vector3(.002,.002,.002),
+			"broken":index==INITIAL_OPEN_PANE, "tempered":false, "walk_through":false})
+	_glass = GlassPanes.new()
+	_glass.setup(list)
+	_glass.name = "OfficeWindows203"
+	var panes := _glass.get_node("GlassMesh") as MultiMeshInstance3D
+	var pane_color := _mat(Color(.54, .65, .66, .088), .22)
+	pane_color.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pane_color.cull_mode = BaseMaterial3D.CULL_DISABLED
+	panes.material_override = pane_color
+	_glass.get_node("SillMesh").hide()
+	add_child(_glass)
+
+
+func _add_decal(d: Dictionary) -> void:
+	var tex := load(ASSETS + "decals/" + String(d.texture)) as Texture2D
+	var normal := _v(d.normal)
+	var across := Vector3.UP.cross(normal).normalized()
+	var stamp := Decal.new()
+	stamp.texture_albedo = tex
+	stamp.size = Vector3(float(d.size[0]), .047, float(d.size[1]))
+	stamp.modulate = Color(1.0, 1.0, 1.0, float(d.opacity))
+	stamp.upper_fade = .1
+	stamp.lower_fade = .1
+	stamp.normal_fade = .35
+	stamp.transform = Transform3D(Basis(across,normal,Vector3.DOWN),_v(d.position)+normal*.006)
+	add_child(stamp)
+	if tex:
+		_decal_count += 1
+
+
+func _daylight() -> void:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	var sky := Sky.new()
+	var panorama := PanoramaSkyMaterial.new()
+	panorama.panorama = SKY
+	panorama.energy_multiplier = .67
+	sky.sky_material = panorama
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(.85, .866, .895)
+	env.ambient_light_energy = .46
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.ssao_enabled = true
+	env.ssao_intensity = .63
+	var world := WorldEnvironment.new()
+	world.environment = env
+	add_child(world)
+	var sun := DirectionalLight3D.new()
+	sun.name = "Дневной свет с проспекта"
+	sun.light_energy = 1.24
+	sun.light_color = Color(1.0, .905, .795)
+	sun.shadow_enabled = true
+	sun.rotation_degrees = Vector3(-34, -19, 0)
+	add_child(sun)
+	var bounce := OmniLight3D.new()
+	bounce.name = "Отражение света от окна"
+	bounce.position = Vector3(.22, 1.90, 6.70)
+	bounce.omni_range = 6.4
+	bounce.omni_attenuation = 1.46
+	bounce.light_energy = .42
+	bounce.light_color = Color(.935, .966, 1.0)
+	add_child(bounce)
+
+
+func _street() -> void:
+	var pavement := _mat(Color(.33,.34,.331), .84)
+	var siding := _mat(Color(.58,.592,.571), .74)
+	var bands := _mat(Color(.49,.50,.48), .77)
+	var window := _mat(Color(.145,.181,.209), .31)
+	_box(Vector3(0,-4.28,26),Vector3(92,.18,49),pavement, true, "concrete")
+	for offset in [-21.0, 2.5, 24.7]:
+		_box(Vector3(offset,4.64,33),Vector3(20.6,17.7,6),siding)
+		for row in range(5):
+			var y := -2.48 + row * 3.04
+			_box(Vector3(offset,y-.56,29.979),Vector3(20.6,.28,.19),bands)
+			for i in range(9):
+				var wx: float = float(offset) - 8.7 + i * 2.14
+				_box(Vector3(wx,y+.29,29.90),Vector3(1.48,1.52,.17),window)
+	var tree := MeshInstance3D.new()
+	tree.name = "BirchAcrossTheWindow"
+	tree.mesh = TreeSpot._mesh(BIRCH, BIRCH_MATERIALS)
+	tree.position = Vector3(4.3,-4.20,17.02)
+	add_child(tree)
+
+
+func _ray(a: Vector3, b: Vector3, mask: int) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(a,b,mask)
+	return get_world_3d().direct_space_state.intersect_ray(query)
+
+
+func _hits_leaf() -> bool:
+	return _ray(Vector3(.06,1.2,-.41),Vector3(.06,1.2,.42),Hitscan.LAYER_DOOR).get("collider") == _door.get_node("Leaf")
+
+
+func _pane_hit(i: int) -> bool:
+	var p: Dictionary = _glass.panes[i]
+	var center: Vector3 = p.xf.origin
+	var hit := _ray(center+Vector3(0,0,-.24),center+Vector3(0,0,.20),Hitscan.LAYER_GLASS)
+	var panel := GlassPanes.pane_of(hit)
+	return panel.size()==2 and panel[0]==_glass and int(panel[1])==i
+
+
+func _check(label: String, ok: bool) -> void:
+	print(("OK " if ok else "FAIL ") + label)
+	if not ok:
+		_failures += 1
+
+
+func _ticks(n: int) -> void:
+	for i in range(n):
+		await get_tree().physics_frame
+
+
+func _interact() -> void:
+	await get_tree().process_frame
+	Input.action_press("interact")
+	await get_tree().process_frame
+	Input.action_release("interact")
+	await _ticks(48)
+
+
+func _textured(root: Node) -> bool:
+	var meshes := root.find_children("*", "MeshInstance3D", true, false)
+	if meshes.is_empty():
+		return false
+	for node in meshes:
+		var m: Material = (node as MeshInstance3D).get_active_material(0)
+		if not m is BaseMaterial3D:
+			return false
+		var material := m as BaseMaterial3D
+		if not (material.albedo_texture and material.normal_enabled and material.normal_texture
+			and material.roughness_texture and material.metallic_texture):
+			return false
+	return true
+
+
+func _check_room() -> void:
+	_check("Стол и кресла загружены с PBR-картами Painter",_textured(_table) and _textured(_chairs[0]))
+	_check("Восемь кресел в исходных позициях",_chairs.size()==8)
+	_check("Декали переговорной загрузились",_decal_count==4)
+	_check("Игрок появился перед дверью на полу",_player.is_on_floor() and _player.position.z < -.65)
+	_check("Закрытая дверь держит коллизию",_hits_leaf())
+	await _interact()
+	_check("F открывает штатную дверь",_door.is_open and not _hits_leaf())
+	_check("Створка повернулась внутрь",absf((_door.get_node("Leaf") as Node3D).rotation_degrees.y+85.0)<1.0)
+	if _door.is_open:
+		for i in range(22):
+			var contact := _player.move_and_collide(Vector3(0,0,.075))
+			if contact != null:
+				print("Контакт у порога ",contact.get_collider(), " ",contact.get_normal(),
+					" в ",contact.get_position())
+				break
+			await _ticks(1)
+	_check("Игрок физически прошёл в помещение",_player.position.z>.54)
+	await _interact()
+	_check("F закрывает ту же створку",not _door.is_open and _hits_leaf())
+	_check("По одному коллайдеру у каждой целой секции",_pane_hit(0) and _pane_hit(1) and _pane_hit(2) and _pane_hit(3) and _pane_hit(5))
+	_check("Стартовый выбитый пролёт свободен",bool(_glass.panes[INITIAL_OPEN_PANE].broken) and not _pane_hit(INITIAL_OPEN_PANE))
+	var target: Dictionary = _glass.panes[2]
+	var probe := Camera3D.new()
+	probe.position = Vector3(-1.9, 1.66, 6.55)
+	add_child(probe)
+	probe.look_at(target.xf.origin, Vector3.UP)
+	_check("Луч проверки попал в нужную панель", _break_aimed_pane(probe))
+	probe.queue_free()
+	await _ticks(16)
+	_check("Целевая панель осыпалась и сняла коллизию",bool(target.broken) and not _pane_hit(2))
+	_check("Соседние панели остались целыми",_pane_hit(1) and _pane_hit(3))
+	_check("Осколки созданы штатным GlassShatter",_glass.get_node_or_null("Shards_2") is GlassShatter)
+	_check("Оконная стойка сохранила коллизию",not _ray(Vector3(EDGE_A,2,7.55),Vector3(EDGE_A,2,8.0),Hitscan.LAYER_WORLD).is_empty())
+	_check("Связь навигации через окно отсутствует",_glass.get_node_or_null("Gap_2")==null)
+	print("BC5_MEETING203: %d failures" % _failures)
+
+
+func _shots() -> void:
+	var path := OS.get_environment("BC5_MEETING_SHOTS")
+	if path.is_empty():
+		path = "user://bc5_meeting203"
+	DirAccess.make_dir_recursive_absolute(path)
+	var snapshot := Camera3D.new()
+	snapshot.near = .035
+	snapshot.fov = 65.0
+	add_child(snapshot)
+	snapshot.current = true
+	for view: Array in [
+		["meeting203",Vector3(-2.91,1.65,1.62),Vector3(.87,1.28,5.36),65.0],
+		["door203",Vector3(.13,1.65,-1.88),Vector3(.26,1.36,2.15),63.0],
+	]:
+		if view[0] == "door203":
+			_door.toggle(Vector3(0,0,-1))
+			await _ticks(55)
+		snapshot.position = view[1]
+		snapshot.look_at(view[2],Vector3.UP)
+		snapshot.fov = view[3]
+		await _ticks(26)
+		await RenderingServer.frame_post_draw
+		var f := path.path_join(view[0]+".png")
+		var err := get_viewport().get_texture().get_image().save_png(f)
+		_check("Сохранён вид "+f,err==OK)
+	get_tree().quit(1 if _failures else 0)

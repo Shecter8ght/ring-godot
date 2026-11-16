@@ -1194,3 +1194,12 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 из `step_concrete_01…04.wav`, `step_layer_gravel_01…04.wav` и `step_layer_water_01…04.wav` — из одноимённых
 исходных шагов по гравию и лужам (без `layer`). Обработка: полосовой фильтр, выравнивание начала удара,
 короткое затухание и выравнивание пиков. Скрипт — `tools/build_step_layer_pilot.py`.
+
+## БЦ «Проспект, 5», переговорная 203 (2026-11-16)
+
+Модели, слои загрязнения, рисунки и печать созданы для RING. В `assets/models/props/bc5_meeting203` входят запечённые материалы кресла и стола и текстуры отделки из принятого второго этажа.
+
+- Oak Veneer 01, Jenelle van Heerden, Poly Haven, CC0. Основа цвета и шероховатости шпона. Текстура подогнана к размеру и направлению волокон столешницы. [Источник](https://polyhaven.com/a/oak_veneer_01)
+- Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Цвет и нормали штукатурки масштабированы и упакованы для импорта уровня. [Источник](https://polyhaven.com/a/painted_plaster_wall)
+- Carpet 001 и Cardboard 002, ambientCG, CC0. Карты пола и картона, цвет Carpet 001 также использован в основе мебельной ткани. Карты отделки уменьшены до 1536 пикселей по длинной стороне. [Carpet 001](https://ambientcg.com/view?id=Carpet001) · [Cardboard 002](https://ambientcg.com/view?id=Cardboard002)
+- Для самостоятельного просмотра сцена повторно использует небо Kloofendal Overcast (Pure Sky) и берёзу из RING. [Небо Poly Haven, Greg Zaal, CC0](https://polyhaven.com/a/kloofendal_overcast_puresky) · [Основа атласа листьев Leaf Set 024, ambientCG, CC0](https://ambientcg.com/view?id=LeafSet024)

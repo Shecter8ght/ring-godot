@@ -21,7 +21,8 @@ const STEP_LAYER: Script = preload("res://src/audio/step_layer_patch.gd")
 
 ## Панели: {xf: Transform3D (центр, X — вдоль, Z — нормаль), size: Vector2 (ширина, высота),
 ## floor_y, sill: Vector3 (размер подоконника, центр — под панелью), hp, broken, tempered,
-## hits — сколько попаданий, side — куда полетят куски (+1 — по нормали)}.
+## hits — сколько попаданий, side — куда полетят куски (+1 — по нормали).
+## walk_through: false у окон без пешеходного маршрута с обеих сторон}.
 var panes: Array = []
 var _glass_mm: MultiMesh
 var _body: StaticBody3D
@@ -337,6 +338,8 @@ func _shatter(idx: int) -> void:
 	Audio.play("glass_break", xf.origin)
 	Audio.play("glass_shards", xf.origin, -5.0)
 	NoiseBus.emit(xf.origin, float(Balance.GLASS.noise_m), "glass")
+	if not bool(p.get("walk_through", true)):
+		return
 	# проём — ИИ проходит: связка навигации с одной стороны на другую
 	var link := NavigationLink3D.new()
 	link.name = "Gap_%d" % idx
