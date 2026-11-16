@@ -7,6 +7,8 @@ const PLAYER := preload("res://scenes/player/player.tscn")
 const RIG := preload("res://scenes/player/camera_rig.tscn")
 const GLAZING := preload(ASSETS + "glazing.tres")
 const GLAZING_CRACKED := preload(ASSETS + "glazing_cracked.tres")
+const DISPLAY_GLASS := preload(ASSETS + "tv_glass.tres")
+const DISPLAY_REFLECTION_LAYER := 1 << 11
 const FINISH_MATERIALS := ["BC5_203_Walls", "BC5_203_Carpet", "BC5_203_Ceiling"]
 const BIRCH := "res://assets/models/plants/birch_b_lod0.glb"
 const BIRCH_MATERIALS := "res://assets/models/plants/materials"
@@ -85,6 +87,11 @@ func _break_aimed_pane(camera: Camera3D) -> bool:
 
 
 func _build() -> void:
+	# Стекло экрана получает отдельное отражение комнаты.
+	for node: MeshInstance3D in $Room203.find_children("*", "MeshInstance3D", true, false):
+		if node.get_active_material(0) == DISPLAY_GLASS:
+			node.layers = DISPLAY_REFLECTION_LAYER
+			break
 	_solid = StaticBody3D.new()
 	_solid.name = "SlabWallsFurniture"
 	_solid.collision_layer = Hitscan.LAYER_WORLD
@@ -287,10 +294,20 @@ func _native_room_finish() -> bool:
 	return found.size() == FINISH_MATERIALS.size() and not found.values().has(false)
 
 
+func _glossy_display() -> bool:
+	for node: MeshInstance3D in $Room203.find_children("*", "MeshInstance3D", true, false):
+		if node.get_active_material(0) == DISPLAY_GLASS:
+			return (node.layers == $Daylight/DisplayReflection.reflection_mask
+				and DISPLAY_GLASS.roughness < .15 and DISPLAY_GLASS.clearcoat_enabled
+				and not DISPLAY_GLASS.emission_enabled)
+	return false
+
+
 func _check_room() -> void:
 	_check("Стол и кресла загружены с PBR-картами Painter",_textured(_table) and _textured(_chairs[0]))
 	_check("Восемь кресел в исходных позициях",_chairs.size()==8)
 	_check("Отделка v02, затенение примыканий и рельеф плит подключены", _native_room_finish())
+	_check("Телевизор отражает свет через отдельный глянцевый материал", _glossy_display())
 	_check("Игрок появился перед дверью на полу",_player.is_on_floor() and _player.position.z < -.65)
 	_check("Закрытая дверь держит коллизию",_hits_leaf())
 	await _interact()
@@ -347,14 +364,20 @@ func _shots() -> void:
 	snapshot.near = .032
 	add_child(snapshot)
 	snapshot.current = true
+	var requested := OS.get_environment("BC5_MEETING_ONLY").split(",", false)
 	for view: Array in [
 		["meeting203", Vector3(-2.91,1.65,1.62), Vector3(.87,1.28,5.36), 52.69273],
 		["table203_detail", Vector3(-1.79,.99,3.11), Vector3(-.23,.789,4.56), 36.79],
 		["glass203_detail", Vector3(-1.27, 1.72, 6.29), Vector3(2.1, 2.0, 7.77), 48.0],
 		["ceiling203_detail", Vector3(-2.91, 1.65, 1.62), Vector3(.73, 3.1, 5.65), 40.0],
 		["glass203_cracked", Vector3(-.78, 1.72, 5.93), Vector3(.61, 2.27, 7.77), 43.0],
+		["chair203_leather", Vector3(-1.75, 1.25, 3.95), Vector3(-.97, .67, 3.56), 46.0],
+		["seat203_leather", Vector3(-1.79, 1.52, 6.15), Vector3(-.96, .57, 5.45), 44.0],
+		["tv203_gloss", Vector3(3.41, 1.58, 2.54), Vector3(4.5, 1.52, 4.4), 37.0],
 		["door203",Vector3(.13,1.65,-1.88),Vector3(.26,1.36,2.15),63.0],
 	]:
+		if not requested.is_empty() and not requested.has(view[0]):
+			continue
 		if view[0] == "glass203_cracked":
 			var panel: Dictionary = _glass.panes[3]
 			_glass.impact(3, 4.0, panel.xf.origin)

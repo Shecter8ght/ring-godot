@@ -1205,3 +1205,5 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 - Для самостоятельного просмотра сцена повторно использует небо Kloofendal Overcast (Pure Sky) и берёзу из RING. [Небо Poly Haven, Greg Zaal, CC0](https://polyhaven.com/a/kloofendal_overcast_puresky) · [Основа атласа листьев Leaf Set 024, ambientCG, CC0](https://ambientcg.com/view?id=LeafSet024)
 
 При доводке переговорной 203 исходные материалы Painted Plaster Wall, Carpet 001 и Oak Veneer 01 запечены с принятых графов Blender v02 на игровые развёртки. Карта глубины потолка получена из материала плит. Затенение примыканий запечено с геометрии того же помещения. Карты `finish/` упакованы по схеме «цвет, нормали, затенение и шероховатость». Источники и условия CC0 приведены выше.
+
+В креслах переговорной 203 использован фотоскан Fabric Leather 02, Rob Tuytel, Poly Haven, CC0. Зерно материала перенесено на игровую развёртку. Формы заломов и маска пыли сделаны для сцены. [Источник](https://polyhaven.com/a/fabric_leather_02)
