@@ -195,11 +195,15 @@ func _atmosphere_areas(lab: AtmosphereLab) -> void:
 	_check("light lab uses the Prospekt world", lab.has_node("World/West/Coffee") and not lab.has_node("Ground"))
 	var picker: OptionButton = lab.panel.context.get_node("AreaSelector") as OptionButton
 	_check("light lab offers three locations", picker.item_count == 3)
+	_check("first launch places the player on the square before changing the selector",
+		lab.player.position.distance_to(AtmosphereLab.AREAS[0].spawn) < 1.0 and not Audio.ground_hit(lab.player.position).is_empty())
 	lab.set_hour(17.0)
 	lab.set_weather(1)
 	for index: int in range(picker.item_count):
 		picker.select(index)
 		picker.item_selected.emit(index)
+		await get_tree().physics_frame
+		await get_tree().physics_frame
 		var start: Vector3 = lab.player.position
 		_check("%s: 50 x 50 m, with an outdoor spawn" % picker.get_item_text(index),
 			lab._bounds.size == Vector2(50, 50) and lab._bounds.has_point(Vector2(start.x, start.z))
@@ -218,12 +222,35 @@ func _atmosphere_areas(lab: AtmosphereLab) -> void:
 			Vector2(lab.player.position.x - start.x, lab.player.position.z - start.z).length() > 1.0)
 		await _shot("atmosphere_area_%d" % index)
 		lab.set_editing(true)
-	lab.player.position.x = lab._bounds.position.x - 1.0
-	await _frames(2)
-	_check("light lab keeps the player on the selected plot", is_equal_approx(lab.player.position.x, lab._bounds.position.x))
-	lab.player.position.y = -21.0
-	await _frames(2)
-	_check("out of world resets to selected plot", lab.player.position.is_equal_approx(AtmosphereLab.AREAS[2].spawn))
+	var anchor: Vector3 = AtmosphereLab.AREAS[2].spawn
+	var wall_hit := KinematicCollision3D.new()
+	var near_edge := Vector3(lab._bounds.end.x - 1.0, 65.0, anchor.z)
+	_check("light lab boundary stops the player with a collision",
+		lab.player.test_move(Transform3D(Basis.IDENTITY, near_edge), Vector3.RIGHT * 2.0, wall_hit)
+		and wall_hit.get_collider() == lab._boundary)
+	lab.player.position = Vector3(anchor.x + 1.5, -1.6, anchor.z)
+	await _frames(6)
+	_check("shallow fall below solid ground returns to selected start", lab.player.position.distance_to(anchor) < 0.15)
+	picker.select(1)
+	picker.item_selected.emit(1)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	lab.player.position = Vector3(-111.0, -3.8, 169.0)
+	await _frames(6)
+	_check("legitimate map cutouts are kept", is_equal_approx(lab.player.position.y, -3.8))
+	picker.select(2)
+	picker.item_selected.emit(2)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	lab.player.stance = Player.Stance.PRONE
+	lab.player._apply_stance()
+	lab.set_editing(false)
+	await _key(KEY_F9)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_check("F9 resets position and stance during play", lab.player.position.distance_to(anchor) < 0.15
+		and lab.player.stance == Player.Stance.STAND and not lab.player.ui_blocked())
+	lab.set_editing(true)
 	picker.select(0)
 	picker.item_selected.emit(0)
 	lab.set_hour(16.0)

@@ -4,6 +4,8 @@ extends DevelopmentLab
 ## что выбрана («Свет и небо»): у света Road to Vostok свой набор (LAB_RULES.atmosphere_tod), у прежнего — свой.
 
 const AREA_HALF_SIZE := Vector2(25.0, 25.0)
+const BOUNDARY_LAYER := 1 << 30
+const SPAWN_OFFSETS := [Vector3.ZERO, Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]
 const AREAS := [
 	{"title": "Сквер", "center": Vector2(-14, 88), "spawn": Vector3(-20, 0.08, 66), "yaw": 0.12},
 	{"title": "Стройка", "center": Vector2(-105, 152), "spawn": Vector3(-105, 0.08, 131), "yaw": -0.45},
@@ -14,6 +16,9 @@ const AREAS := [
 
 var _area_index: int = 0
 var _bounds: Rect2
+var _boundary: StaticBody3D
+var _ground_holes: Array[Rect2] = []
+var _spawn_pending := false
 var _sky_mode_before: String = "tod"
 
 
@@ -28,6 +33,11 @@ func _ready() -> void:
 	super._ready()
 	leave_overview_to_play = true
 	var world: Node3D = $World
+	var plan: Dictionary = world.get_node("Landscape").get("plan")
+	for hole: Array in plan.get("ground_holes", []):
+		var corner := Vector2(hole[0], hole[1])
+		_ground_holes.append(Rect2(corner, Vector2(hole[2], hole[3]) - corner))
+	_build_boundary()
 	for batch_root: Node in get_tree().get_nodes_in_group("urban_prop_batches"):
 		if world.is_ancestor_of(batch_root):
 			PropBatcher.batch(batch_root as Node3D, float(Balance.URBAN_WORLD.batch_cell), float(Balance.URBAN_WORLD.prop_distance))
@@ -36,7 +46,7 @@ func _ready() -> void:
 		area_names.append(area.title)
 	var area_picker := panel.option("Площадка на «Проспекте» · 50 × 50 м", area_names, _move_location)
 	area_picker.name = "AreaSelector"
-	panel.action("К началу площадки", func() -> void: _move_location(_area_index))
+	panel.action("К началу площадки · F9", _request_spawn)
 	_move_location(0)
 	start_atmosphere(16.0)
 	panel.option("Погода для просмотра", ["Ясно", "Пасмурно", "Дождь", "Туман", "Жара"], set_weather)
@@ -95,28 +105,108 @@ func _move_location(index: int) -> void:
 	var area: Dictionary = AREAS[index]
 	var center: Vector2 = area.center
 	_bounds = Rect2(center - AREA_HALF_SIZE, AREA_HALF_SIZE * 2.0)
-	player.position = area.spawn
+	_boundary.position = Vector3(center.x, 0.0, center.y)
+	observer.position = Vector3(center.x, 100.0, center.y)
+	observer.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	observer.fov = 38.0
+	_request_spawn()
+
+
+func _build_boundary() -> void:
+	# Край площадки участвует только в движении игрока, поэтому не влияет на свет и физические лучи карты.
+	_boundary = StaticBody3D.new()
+	_boundary.name = "AreaBoundary"
+	_boundary.collision_layer = BOUNDARY_LAYER
+	_boundary.collision_mask = 0
+	for outward: Vector3 in [Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
+		var wall := CollisionShape3D.new()
+		var box_shape := BoxShape3D.new()
+		box_shape.size = Vector3(1.0, 160.0, 52.0) if outward.x != 0.0 else Vector3(52.0, 160.0, 1.0)
+		wall.shape = box_shape
+		wall.position = outward * (AREA_HALF_SIZE.x + 0.5)
+		_boundary.add_child(wall)
+	add_child(_boundary)
+	player.collision_mask |= BOUNDARY_LAYER
+
+
+func _request_spawn() -> void:
+	_spawn_pending = true
+
+
+func _physics_process(_delta: float) -> void:
+	if not _spawn_pending:
+		return
+	_spawn_pending = false
+	var area: Dictionary = AREAS[_area_index]
+	var destination := _safe_spawn(area.spawn)
+	if not destination.is_finite():
+		panel.status.text = "На площадке нет свободной точки появления. Выбери другую площадку."
+		set_editing(true)
+		return
+	if player.ladder != null:
+		player._release_ladder(Vector3.ZERO)
+	player._vault_t = -1.0
+	player._vault_then = ""
+	player._vault_stumble = false
+	player._dive_t = -1.0
+	player._draw_after_traversal()
+	player.seated = false
+	player.stance = Player.Stance.STAND
+	player._apply_stance()
+	player._eye_dy = 0.0
+	player._stance_eye = -1.0
+	player.position = destination
 	player.reset_physics_interpolation()
 	player.velocity = Vector3.ZERO
 	player._eye_tick_ready = false
 	player.face(area.yaw)
 	rig._look_yaw = area.yaw
 	rig._look_pitch = 0.0
-	observer.position = Vector3(center.x, 100.0, center.y)
-	observer.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
-	observer.fov = 38.0
 	if atmosphere:
 		atmosphere._indoor_cache.clear()
 
 
+func _safe_spawn(anchor: Vector3) -> Vector3:
+	var space := player.get_world_3d().direct_space_state
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = Balance.CAPSULE_RADIUS
+	capsule.height = float(Balance.STANCE_HEIGHT.stand)
+	var clearance := PhysicsShapeQueryParameters3D.new()
+	clearance.shape = capsule
+	clearance.collision_mask = player.collision_mask
+	clearance.exclude = [player.get_rid()]
+	for offset: Vector3 in SPAWN_OFFSETS:
+		var at := anchor + offset
+		var ray := PhysicsRayQueryParameters3D.create(at + Vector3.UP * 1.5, at + Vector3.DOWN, Hitscan.LAYER_WORLD)
+		var hit := space.intersect_ray(ray)
+		if hit.is_empty() or (hit.normal as Vector3).y < cos(player.floor_max_angle):
+			continue
+		var feet: Vector3 = hit.position + Vector3.UP * 0.06
+		clearance.transform.origin = feet + Vector3.UP * capsule.height * 0.5
+		if space.intersect_shape(clearance, 1).is_empty():
+			return feet
+	return Vector3.INF
+
+
 func _check_player_position() -> void:
-	if player.position.y < -20.0:
-		_move_location(_area_index)
-		return
 	var position_xz := Vector2(player.position.x, player.position.z)
-	var bounded := position_xz.clamp(_bounds.position, _bounds.end)
-	if bounded != position_xz:
-		player.position = Vector3(bounded.x, player.position.y, bounded.y)
+	if player.position.y < -9.0 or not _bounds.grow(0.1).has_point(position_xz):
+		_request_spawn()
+		return
+	if player.position.y >= -0.6:
+		return
+	for hole: Rect2 in _ground_holes:
+		if hole.grow(Balance.CAPSULE_RADIUS).has_point(position_xz):
+			return
+	_request_spawn()
+
+
+func _input(event: InputEvent) -> void:
+	if not PauseMenu.shown and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F9:
+		_request_spawn()
+		get_viewport().set_input_as_handled()
+		return
+	super._input(event)
 
 
 func set_editing(enabled: bool) -> void:
