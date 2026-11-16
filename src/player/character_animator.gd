@@ -17,9 +17,9 @@ const GAIT := "res://data/character_gait.json"
 ## (data/weapon_sockets.json, tools/bake_weapon_sockets.gd). Модель вешают Player / Marauder.
 const SOCKETS := "res://data/weapon_sockets.json"
 ## На время этих клипов оружие прячется: рука занята (бросок, подобрать с пола).
-const HIDE_WEAPON := ["grenade_throw", "pickup", "prone_throw"]
+const HIDE_WEAPON := ["grenade_throw", "pickup", "prone_throw", "vault"]
 ## В этих клипах левая рука уходит с цевья (магазин, граната, достать / убрать) — ИК отпускает её.
-const FREE_LEFT_HAND := ["pistol_reload", "rifle_reload", "prone_reload", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster"]
+const FREE_LEFT_HAND := ["pistol_reload", "rifle_reload", "prone_reload", "grenade_throw", "prone_throw", "pickup", "rifle_draw", "pistol_draw", "rifle_holster", "vault"]
 const DIRS8 := ["f", "fl", "l", "bl", "b", "br", "r", "fr"]
 ## Действия верхом тела поверх ходьбы и стойки и действия всем телом (стоя на месте).
 const UPPER_ACTS := ["rifle_reload", "pistol_reload", "pistol_draw", "rifle_draw", "rifle_holster", "grenade_throw", "pickup"]
@@ -29,7 +29,7 @@ const FULL_ACTS := ["pickup", "grenade_throw"]
 const POSES := ["prone_aim", "prone_move_b", "prone_crawl_f", "prone_fire", "prone_reload", "prone_throw",
 	"downed_fall", "downed_fall_still", "jump_loop", "death", "death_front", "death_back", "death_right",
 	"death_head_front", "death_head_back", "death_crouch", "death_crouch_head", "death_prone", "death_blast",
-	"pistol_idle", "rifle_idle", "rifle_aim", "r8_idle", "r8_idle_aim", "unarmed_idle"]
+	"pistol_idle", "rifle_idle", "rifle_aim", "r8_idle", "r8_idle_aim", "unarmed_idle", "vault"]
 const LOOP_POSES := ["prone_aim", "prone_move_b", "prone_crawl_f", "jump_loop"]
 const POSE_CLIP := {"prone_crawl_f": "prone_move_b"}
 
@@ -198,6 +198,7 @@ static func _set_specs() -> Dictionary:
 		return out
 	return {
 		"rifle": {"idle": "r8_idle", "aim": "r8_idle_aim", "rings": [r8.call("r8_walk_"), r8.call("r8_run_"), r8.call("r8_sprint_")], "ring_names": ["walk", "run", "sprint"]},
+		"rifle_patrol": {"idle": "r8_idle", "rings": [["rifle_walk_calm"]], "ring_names": ["patrol"]},
 		"rifle_crouch": {"idle": "r8_crouch_idle", "aim": "r8_crouch_idle_aim", "rings": [r8.call("r8_crouch_walk_")], "ring_names": ["crouch_walk"]},
 		"pistol": {"idle": "pistol_idle", "rings": [["pistol_walk_f", "pistol_walk_b", "pistol_walk_l", "pistol_walk_r"], ["pistol_run_f", "pistol_run_b", "pistol_walk_l", "pistol_walk_r"]], "ring_names": ["walk", "run"]},
 		"pistol_crouch": {"idle": "pistol_crouch_idle", "rings": [r8.call("r8_crouch_walk_")], "ring_names": ["crouch_walk"], "arms": "pistol_idle"},
@@ -547,6 +548,8 @@ func _process(delta: float) -> void:
 	var lean: float = 0.0
 	var event_seq: int = 0
 	var event_name: String = ""
+	var traversal: String = ""
+	var traversal_sec: float = Balance.VAULT.sec
 	if _actor is Player:
 		var person: Player = _actor as Player
 		var weapon_class: String = String(WeaponDb.weapon(person.weapon_id).get("class", "")) if person.weapon_id != "" else ""
@@ -563,6 +566,9 @@ func _process(delta: float) -> void:
 		lean = person.lean
 		event_seq = person.animation_event_seq
 		event_name = person.animation_event
+		traversal_sec = maxf(person._vault_sec, 0.05)
+		if person.is_vaulting():
+			traversal = "vault"
 	elif _actor is Marauder:
 		var enemy: Marauder = _actor as Marauder
 		family = "pistol" if String(enemy._spec.get("class", "")) == "PISTOL" else "rifle"
@@ -573,6 +579,8 @@ func _process(delta: float) -> void:
 		look_pitch = enemy.look_pitch
 		event_seq = enemy.animation_event_seq
 		event_name = enemy.animation_event
+		if enemy._vault_t >= 0.0:
+			traversal = "vault"
 	elif _actor.has_method("anim_state"):
 		# любое другое тело (стенд, будущие NPC): состояние словарём с теми же полями
 		var st: Dictionary = _actor.call("anim_state")
@@ -594,7 +602,7 @@ func _process(delta: float) -> void:
 		_one_shot = ""
 		_one_shot_kind = ""
 	if _grip:
-		_grip.visible = not HIDE_WEAPON.has(_one_shot)
+		_grip.visible = not HIDE_WEAPON.has(_one_shot) and traversal == ""
 	if _collision_ik:
 		_collision_ik.enabled_for_pose = not downed and not _dead and family != "unarmed"
 	if _support:
@@ -645,6 +653,12 @@ func _process(delta: float) -> void:
 		# подняли — обратно к обычным клипам
 		_downed_clip = ""
 		_downed_lay = false
+	if traversal != "" and _has(traversal):
+		if _pose != traversal or _mode == "live":
+			_pose_to(traversal)
+		if traversal == "vault":
+			_set_pose_rate(_act_length("vault") / traversal_sec)
+		return
 	if prone:
 		# лёжа: перезарядка и бросок — позой целиком, пока доигрывают
 		if _one_shot_kind == "pose":
@@ -716,6 +730,8 @@ func _update_live(delta: float, family: String, crouched: bool, aiming: bool, hu
 			var smooth: float = float(a.dir_smooth_sec) * clampf(speed / 1.5, 0.15, 1.0)
 			_phi = lerp_angle(_phi, want, 1.0 - exp(-delta / smooth))
 	var set_name: String = family + ("_crouch" if crouched else "")
+	if _actor is Marauder and family == "rifle" and not crouched and (_actor as Marauder).state == Marauder.State.PATROL and _has("rifle_walk_calm"):
+		set_name = "rifle_patrol"
 	if hurt and family != "rifle" and not crouched and speed > float(a.move_min) and absf(_phi) < PI * 0.25 and _has("injured_walk"):
 		set_name = "hurt"
 	if _mode != "live":

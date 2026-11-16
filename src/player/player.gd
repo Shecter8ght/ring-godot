@@ -251,12 +251,12 @@ var _vault_t: float = -1.0
 ## Что сделать, когда путь _vault пройден: "ladder" — повис на лестнице, "off" — сошёл с неё наверх.
 var _vault_then: String = ""
 ## Лестница (Ladder), на которой висит (null — не на лестнице), и высота ног над её низом, м. on_ladder
-## видят все peer — стук перекладин у каждого (_tick_rung_sound). Оружие на время подъёма убрано:
-## _ladder_slot — какой слот достать, сойдя. Схватиться снова — не раньше _ladder_cd.
+## видят все peer — стук перекладин у каждого (_tick_rung_sound). На перелезании и лестнице оружие убрано:
+## _stowed_slot — какой слот достать после действия. Схватиться снова — не раньше _ladder_cd.
 var ladder: Ladder = null
 var on_ladder: bool = false
 var _ladder_y: float = 0.0
-var _ladder_slot: String = ""
+var _stowed_slot: String = ""
 var _ladder_cd: float = 0.0
 var _ladder_noise_y: float = 0.0
 var _rung_sound_y: float = 0.0
@@ -3702,6 +3702,7 @@ func _try_vault() -> void:
 		return
 	if path.is_empty():
 		return
+	_stow_for_traversal()
 	_vault = path
 	_vault_t = 0.0
 	_vault_then = ""
@@ -3736,6 +3737,7 @@ func _start_climb(onto: Dictionary) -> void:
 	var d: Vector3 = (onto.land as Vector3) - global_position
 	if not ads:
 		_body.rotation.y = atan2(d.x, d.z)
+	_stow_for_traversal()
 	_start_scripted_move(onto, _climb_sec(top), "")
 	stamina = maxf(0.0, stamina - lerpf(float(c.stamina_low), float(c.stamina_high), _climb_k(top)) * carry_stamina_k())
 	_rest_t = Balance.STAMINA_REGEN_DELAY
@@ -3776,7 +3778,9 @@ func _end_scripted_move() -> void:
 		_ladder_y = clampf(ladder.feet_at(global_position), 0.0, ladder.feet_top())
 		_ladder_noise_y = _ladder_y
 	elif then == "off":
-		_draw_after_ladder()
+		_draw_after_traversal()
+	else:
+		_draw_after_traversal()
 
 
 ## Пробел у низа лестницы, лицом к ней — схватиться.
@@ -3815,7 +3819,7 @@ func grab_ladder(l: Ladder, from_top: bool) -> bool:
 		var y := clampf(l.feet_at(global_position), 0.0, l.feet_top())
 		path = {"pts": PackedVector3Array([global_position, l.line_point(y)])}
 	path["yaw"] = l.facing_yaw()
-	_stow_for_ladder()
+	_stow_for_traversal()
 	if stance != Stance.STAND:
 		stance = Stance.STAND
 		_apply_stance()
@@ -3910,28 +3914,28 @@ func _release_ladder(push: Vector3) -> void:
 	on_ladder = false
 	_ladder_cd = float(Balance.LADDER.cooldown)
 	velocity = push
-	_draw_after_ladder()
+	_draw_after_traversal()
 
 
-## Лезть — обе руки на перекладинах: оружие и бросаемое убрать (слот запомнить).
-func _stow_for_ladder() -> void:
-	_ladder_slot = ""
+## Перелезание и лестница — руки заняты: оружие и бросаемое убрать (слот запомнить).
+func _stow_for_traversal() -> void:
+	_stowed_slot = ""
 	aiming = false
 	aim_cant = false
 	if grenade_equipped:
 		grenade_equipped = false
 		grenade_in_hand = false
 		_cancel_grenade_prepare()
-		_ladder_slot = weapon_slot
+		_stowed_slot = weapon_slot
 	elif weapon_id != "":
-		_ladder_slot = weapon_slot
+		_stowed_slot = weapon_slot
 		_holster()
 
 
-## Сошёл с лестницы — убранное на время подъёма оружие снова в руки.
-func _draw_after_ladder() -> void:
-	var slot := _ladder_slot
-	_ladder_slot = ""
+## Закончилось перелезание или подъём — убранное оружие снова в руки.
+func _draw_after_traversal() -> void:
+	var slot := _stowed_slot
+	_stowed_slot = ""
 	if slot == "" or weapon_id != "" or grenade_equipped or is_downed() or not slot in allowed_weapons():
 		return
 	if loadout_mode and _base_entry(slot).is_empty():

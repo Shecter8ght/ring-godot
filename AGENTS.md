@@ -1069,7 +1069,7 @@ tools/godot.cmd --headless -s res://tools/measure_gait.gd   # шаг клипо�
 tools/godot.cmd --headless res://tools/coop_quest_host.tscn  # + coop_quest_client.tscn через 3 с: общий сюжет группы (взял задание, осмотр, зачёт обоим)
 tools/godot.cmd --headless res://tools/templates_test.tscn  # шаблоны снаряжения: сохранить, собрать из тайника, докупить, причины «нет»
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/trader_ui_test.tscn # Михалыч «Купить»: закреплённая шапка, поиск, группы, количество руками, чит «лут в продаже», готовые комплекты; снимки trader_*
-tools/godot.cmd --headless res://tools/vehicle_test.tscn   # транспорт: одна коллизия на модель, навмеш под машинами вырезан (и под автобусом, и повёрнутым)
+tools/godot.cmd --headless res://tools/vehicle_test.tscn   # транспорт: одно статичное тело, точные формы деталей, навмеш под машинами вырезан (и под автобусом, и повёрнутым)
 tools/godot.cmd --headless res://tools/god_test.tscn       # чит «бессмертие»: голова, граната, очередь — жив; лёжа — встал; выключил — урон проходит
 tools/godot.cmd --headless res://tools/unlock_test.tscn    # чит «открыть всё» (Настройки / консоль unlock): каталоги, модули, верстак, станок гравировки; выключил — прогресс прежний
 tools/godot.cmd --headless res://tools/stress_test.tscn    # стресс: пули рядом, спад в тишине, пороги, адреналин, обезболивающее

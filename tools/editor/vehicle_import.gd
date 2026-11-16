@@ -1,9 +1,9 @@
 @tool
 extends EditorScenePostImport
 ## Импорт транспорта RING (assets/models/ring_vehicles/*.gltf; в .import — root_type StaticBody3D и
-## этот скрипт). Коллизия «родительская»: корень модели — одно статичное тело на всю машину (или
-## дверь), внутри — одна выпуклая оболочка по всем мешам, а не тело на каждую деталь. Корень — в
-## группе nav_source: навмеш её обходит (мародёры объезжают), пули и перелезание в неё упираются.
+## этот скрипт). Корень модели — одно статичное тело, внутри — формы статичных сеток LOD0, а не тело
+## на каждую деталь и не выпуклая оболочка. Поэтому пули и зрение проходят там, где нет геометрии,
+## а Climb находит настоящие капот и крышу. Корень — в группе nav_source.
 ## Навмеш печётся по поверхностям, не по объёму: под корпусом выше роста (автобус, грузовик) пол
 ## остался бы «проходимым». Поэтому ещё препятствие навигации (NavigationObstacle3D) по следу
 ## машины на земле — оно вырезает навмеш на всю высоту корпуса.
@@ -16,27 +16,37 @@ func _post_import(scene: Node) -> Object:
 	if root == null:
 		return scene
 	var pts := PackedVector3Array()
+	var count: int = 0
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if mi.mesh == null:
+		if mi.mesh == null or String(mi.name).contains("_LOD1") or String(mi.name).contains("_LOD2"):
 			continue
-		var xf := _to_root(mi, root)
-		# упрощённая оболочка каждой детали — точек мало, общая оболочка считается по ним
-		var hull := mi.mesh.create_convex_shape(true, true)
-		for p in hull.points:
-			pts.append(xf * p)
-	if pts.size() < 4:
+		pts.append_array(_mesh_points(mi, _to_root(mi, root)))
+		var shape := mi.mesh.create_trimesh_shape() as ConcavePolygonShape3D
+		shape.backface_collision = true
+		var cs := CollisionShape3D.new()
+		cs.name = "Collision_%d" % count
+		cs.shape = shape
+		cs.transform = _to_root(mi, root)
+		root.add_child(cs)
+		cs.owner = root
+		count += 1
+	if pts.size() < 4 or count == 0:
 		return scene
-	var shape := ConvexPolygonShape3D.new()
-	shape.points = pts
-	var cs := CollisionShape3D.new()
-	cs.name = "Collision"
-	cs.shape = shape
-	root.add_child(cs)
-	cs.owner = root
 	_add_nav_block(root, pts)
 	root.add_to_group("nav_source", true)
 	return scene
+
+
+## Все точки ближней сетки в координатах корня — для следа навигации.
+func _mesh_points(mi: MeshInstance3D, xf: Transform3D) -> PackedVector3Array:
+	var pts := PackedVector3Array()
+	for surface in range(mi.mesh.get_surface_count()):
+		var arrays: Array = mi.mesh.surface_get_arrays(surface)
+		var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		for p in vertices:
+			pts.append(xf * p)
+	return pts
 
 
 ## След машины на земле (выпуклая оболочка точек в плане) — препятствие при выпечке навмеша.

@@ -243,13 +243,16 @@ func _marauder_case(pl: Player, _ladder: Ladder) -> void:
 	_check("мародёр спустился по лестнице", used and m.global_position.y < 0.3, "%.1f с, %s" % [t, str(m.global_position)])
 
 
-## Габарит машины по её коллизии (выпуклая оболочка) в своих осях.
+## Габарит машины по всем статичным формам деталей в её осях.
 func _car_box(car: Node3D) -> AABB:
-	var cs := car.get_node("Collision") as CollisionShape3D
-	var pts := (cs.shape as ConvexPolygonShape3D).points
-	var box := AABB(pts[0], Vector3.ZERO)
-	for p in pts:
-		box = box.expand(p)
+	var box := AABB()
+	var first := true
+	for raw: Node in car.find_children("Collision_*", "CollisionShape3D", true, false):
+		var cs := raw as CollisionShape3D
+		for p: Vector3 in (cs.shape as ConcavePolygonShape3D).get_faces():
+			var point := cs.transform * p
+			box = AABB(point, Vector3.ZERO) if first else box.expand(point)
+			first = false
 	return box
 
 

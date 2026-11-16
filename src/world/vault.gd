@@ -2,8 +2,9 @@ class_name Vault
 extends RefCounted
 ## Перелезание через низкие преграды — одна проверка для игрока и ИИ.
 ##  find — можно ли от ног p перелезть в сторону dir: преграда по пояс (Balance.VAULT min_h…max_h)
-##  в пределах reach, над ней свободно, за ней — пол на той же высоте (не обрыв, не помост), место
-##  для тела. Возвращает путь {p, up, over, land, top, thick} или {}. Залезть на преграду — Climb.
+##  в пределах reach, над ней свободно, за ней — место для тела. Пол ниже берётся до max_drop; если его
+##  нет (парапет крыши), игрок всё равно перемещается за край и дальше падает уже обычной физикой.
+##  Возвращает путь {p, up, over, land, top, thick, air} или {}. Залезть на преграду — Climb.
 ##  pos_at — точка на этом пути в доле t (0…1): подъём на край, через верх, спуск.
 ##  build_links — связки навигации «перелезть» для мародёров: вдоль краёв навмеша, где за
 ##  преградой по пояс тоже навмеш, а обход долгий (Balance.VAULT_LINKS).
@@ -31,35 +32,33 @@ static func find(space: PhysicsDirectSpaceState3D, p: Vector3, dir: Vector3, exc
 	if not _ray(space, p + Vector3.UP * clear_y, p + Vector3.UP * clear_y + dir * (d0 + float(v.max_thick) + 0.6), exclude).is_empty():
 		return {}
 	# 3. верх преграды
-	var top_hit := _ray(space, p + dir * (d0 + 0.12) + Vector3.UP * clear_y, p + dir * (d0 + 0.12) + Vector3.UP * 0.02, exclude)
+	var top_hit := _ray(space, p + dir * (d0 + 0.01) + Vector3.UP * clear_y, p + dir * (d0 + 0.01) + Vector3.UP * 0.02, exclude)
 	if top_hit.is_empty():
 		return {}
 	var top := float(top_hit.position.y) - p.y
 	if top < min_h or top > max_h:
 		return {}
-	# 4. дальний край: сверху вниз, пока не найдём пол на нашей высоте
+	# 4. дальний край: толстая преграда продолжается наверху, за тонкой — пол на нашем уровне или спуск
 	var k := d0 + 0.2
 	var far := -1.0
 	while k <= d0 + float(v.max_thick) + 0.3:
 		var h := _ray(space, p + dir * k + Vector3.UP * clear_y, p + dir * k + Vector3.DOWN * 1.0, exclude)
 		if h.is_empty():
-			return {}
-		var y := float(h.position.y) - p.y
-		if absf(y) < 0.3:
 			far = k
 			break
-		if y < -0.3:
-			# обрыв за преградой — не прыгаем вниз
-			return {}
+		var y := float(h.position.y) - p.y
+		if absf(y) < 0.3 or y < -0.3:
+			far = k
+			break
 		k += 0.1
 	if far < 0.0:
 		return {}
-	# 5. место для тела за преградой
+	# 5. место для тела за преградой; пол ниже max_drop не ищем — после пути тело начнёт падать
 	var land := p + dir * (far + 0.45)
-	var floor_hit := _ray(space, land + Vector3.UP * 0.6, land + Vector3.DOWN * 0.6, exclude)
-	if floor_hit.is_empty() or absf(float(floor_hit.position.y) - p.y) > 0.3:
+	var floor_hit := _ray(space, land + Vector3.UP * 0.6, land + Vector3.DOWN * float(v.max_drop), exclude)
+	if not floor_hit.is_empty() and float(floor_hit.position.y) - p.y > 0.3:
 		return {}
-	land.y = float(floor_hit.position.y)
+	land.y = float(floor_hit.position.y) if not floor_hit.is_empty() else p.y
 	var shape := CapsuleShape3D.new()
 	shape.radius = 0.3
 	shape.height = 1.6
@@ -73,7 +72,7 @@ static func find(space: PhysicsDirectSpaceState3D, p: Vector3, dir: Vector3, exc
 	var top_y := p.y + top + 0.15
 	# thick — толщина преграды: толстую, на которую можно встать, игрок не перелезает, а залезает (Climb)
 	return {"p": p, "up": Vector3(p.x, top_y, p.z) + dir * maxf(0.0, d0 - 0.15), "over": Vector3(p.x, top_y, p.z) + dir * far,
-		"land": land, "top": top, "thick": far - d0}
+		"land": land, "top": top, "thick": far - d0, "air": floor_hit.is_empty()}
 
 
 ## Точка пути перелезания в доле t: плавная дуга (Катмулл — Ром через начало, край, дальний край

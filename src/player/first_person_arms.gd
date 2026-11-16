@@ -1,6 +1,6 @@
 class_name FirstPersonArms
 extends Node3D
-## Кисти и рукава ВЕРАС-54 для оружия без собственных клипов рук.
+## Кисти и рукава ВЕРАС-54 для оружия без собственных клипов рук и для клипа перелезания.
 ## Отдельный рабочий скелет сохраняет прежние профили хвата и двухзвенную ИК локтей.
 ## Отдельная сцена исключает голову и торс из камеры, сохраняя полный персонаж для теней.
 
@@ -22,18 +22,20 @@ var collision_exclude: Array[RID] = []
 var grip_preview: bool = false
 var grip_profiles: Dictionary = {}
 var _hand_pose: HandGripPose = HandGripPose.new()
+var _model: Node3D
+var _traversal: AnimationPlayer
 
 
 func _ready() -> void:
 	if not ResourceLoader.exists(MODEL):
 		return
-	var model: Node3D = (load(MODEL) as PackedScene).instantiate() as Node3D
-	add_child(model)
+	_model = (load(MODEL) as PackedScene).instantiate() as Node3D
+	add_child(_model)
 	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MODEL.get_basename() + ".json")) as Dictionary
 	_palm_offsets = profile.get("palm_offsets", {}) as Dictionary
 	hands_fixed = profile.has("hands_fix")
-	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-	for mesh: Node in model.find_children("*", "MeshInstance3D", true, false):
+	skeleton = _model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	for mesh: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
 		instance.layers = 2
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -46,6 +48,43 @@ func _ready() -> void:
 		across = (across - forward * across.dot(forward)).normalized()
 		_frames[side] = Basis(across, forward, across.cross(forward))
 	_hand_pose.configure(skeleton, false)
+	visible = false
+
+
+## Перелезание: общий Mixamo-клип на тех же костях, но только руки — торс в камеру не попадает.
+func play_vault(duration: float) -> void:
+	if skeleton == null:
+		return
+	_model.transform = Transform3D(Basis(Vector3.UP, deg_to_rad(float(Balance.FPS_TRAVERSAL.root_yaw_deg))).scaled(Vector3.ONE * float(Balance.FPS_TRAVERSAL.root_scale)), Balance.FPS_TRAVERSAL.root_offset as Vector3)
+	if _traversal == null:
+		var library := load(CharacterAnimator.CLIPS) as AnimationLibrary
+		if library == null or not library.has_animation("vault"):
+			return
+		var clip := library.get_animation("vault").duplicate() as Animation
+		var skel_path := String(_model.get_path_to(skeleton))
+		for i in range(clip.get_track_count()):
+			var bone := String(clip.track_get_path(i).get_subname(0))
+			clip.track_set_path(i, NodePath("%s:%s" % [skel_path, bone]))
+		var animations := AnimationLibrary.new()
+		animations.add_animation("vault", clip)
+		_traversal = AnimationPlayer.new()
+		_traversal.name = "Vault"
+		_traversal.root_node = NodePath("..")
+		_traversal.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		_model.add_child(_traversal)
+		_traversal.add_animation_library("", animations)
+		_traversal.speed_scale = clip.length / maxf(duration, 0.05)
+		_traversal.play("vault")
+	visible = true
+
+
+func stop_vault() -> void:
+	if _traversal:
+		_traversal.queue_free()
+		_traversal = null
+	_model.transform = Transform3D.IDENTITY
+	if skeleton:
+		skeleton.reset_bone_poses()
 	visible = false
 
 
@@ -78,6 +117,10 @@ func set_hand_target(side: String, target: Node3D, weight: float) -> void:
 
 
 func update_pose() -> void:
+	if _traversal:
+		_traversal.advance(get_process_delta_time())
+		visible = true
+		return
 	visible = skeleton != null and is_instance_valid(_weapon) and _grips.size() == 2
 	if not visible:
 		return

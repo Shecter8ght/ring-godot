@@ -8,7 +8,7 @@
 assets/models/prospekt_vehicles/PV_<класс>[_open|_wreck|_burnt].gltf, карты — в textures/ рядом (имя с классом и семьёй:
 у открытого те же карты, что у целого, — файл один). Габарит в игровых осях (Y вверх, лицо машины — +Z) и треугольники —
 в общий индекс моделей карты data/urban95_models.json (записи PV_*; чужие записи не трогаются) вместе с группами «вперемешку»
-(variants — MallFiller выбирает модель по позиции). LOD — импорт Godot, коллизия на карте — бокс по габариту.
+(variants — MallFiller выбирает модель по позиции). LOD — импорт Godot, коллизия на карте — точная статичная сетка LOD0.
 """
 from __future__ import annotations
 
@@ -169,14 +169,15 @@ def export_class(cls: str, index: dict) -> None:
             "aabb": {"center": [round((lo[i] + hi[i]) * 0.5, 4) for i in range(3)],
                      "size": [round(hi[i] - lo[i], 4) for i in range(3)]},
             "root_offset": [0, 0, 0],
+            "collision": "mesh",
             # пачки MallFiller по клеткам 24 м (по умолчанию у крупных — 160 м): уровень детализации выбирается на пачку,
             # и в большой клетке дальние машины рисовались полными; на «Проспекте» 182 → 210 к/с (prospekt_vehicles_perf)
             "cell": 24.0}
         print(f"vehicles: {mid} — {tris} треуг., материалов {len(ob.material_slots)}, габарит "
               f"{index['models'][mid]['aabb']['size']}")
         bpy.data.objects.remove(ob, do_unlink=True)
-    # открытый вариант: коллизия — коробка кузова закрытого (габарит открытого захватывал распахнутые двери и багажник —
-    # непроходимый лишний объём, навык godot-asset-preparation); solids — в осях модели, как у MallFiller
+    # Прежняя коробка закрытого кузова остаётся только в старых данных; при collision = "mesh"
+    # MallFiller использует фактическую сетку открытого варианта и это поле игнорирует.
     closed, opened = index["models"].get(f"PV_{cls}"), index["models"].get(f"PV_{cls}_open")
     if closed and opened:
         opened["solids"] = [[closed["aabb"]["center"], closed["aabb"]["size"]]]

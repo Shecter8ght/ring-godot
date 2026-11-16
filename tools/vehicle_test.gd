@@ -1,5 +1,5 @@
 extends Node3D
-## Транспорт (assets/models/ring_vehicles): у модели одна коллизия на корне, без тел на деталях;
+## Транспорт (assets/models/ring_vehicles): одно статичное тело на корне, точные формы деталей внутри;
 ## пуля упирается в машину; навмеш под машиной вырезан на всю высоту корпуса (и у автобуса выше
 ## роста), в том числе у повёрнутой машины — а рядом с ней проходимо.
 ## godot --headless --path . res://tools/vehicle_test.tscn
@@ -32,12 +32,17 @@ func _ready() -> void:
 	for car in cars:
 		var shapes := car.find_children("*", "CollisionShape3D", false, false)
 		var bodies := car.find_children("*", "CollisionObject3D", true, false)
-		one = one and car is StaticBody3D and shapes.size() == 1 and bodies.is_empty() and car.get_node_or_null("NavBlock") != null
-	_check("у каждой машины одна коллизия на корне и след для навмеша", one, "")
+		one = one and car is StaticBody3D and not shapes.is_empty() and bodies.is_empty() and car.get_node_or_null("NavBlock") != null
+	_check("у каждой машины статичное тело с формами деталей и след для навмеша", one, "")
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state
 	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-30, 1.0, 0), Vector3(-2, 1.0, 0)))
 	_check("пуля упирается в автобус", not hit.is_empty() and hit.collider == cars[0], str(hit.get("collider")))
+	var sedan := cars[2]
+	var above := space.intersect_ray(PhysicsRayQueryParameters3D.create(sedan.to_global(Vector3(0, 1.2, 3.0)), sedan.to_global(Vector3(0, 1.2, 1.0))))
+	_check("над капотом седана нет невидимого объёма", above.is_empty(), str(above))
+	var metal := space.intersect_ray(PhysicsRayQueryParameters3D.create(sedan.to_global(Vector3(0, 0.75, 3.0)), sedan.to_global(Vector3(0, 0.75, 1.0))))
+	_check("в кузов седана луч попадает", not metal.is_empty() and metal.collider == sedan, str(metal.get("collider")))
 	var region := NavigationRegion3D.new()
 	var nm := NavigationMesh.new()
 	nm.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS

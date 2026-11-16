@@ -2466,7 +2466,8 @@
      "triangles": 5229
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_sedan_open": {
    "id": "PV_sedan_open",
@@ -2523,7 +2524,8 @@
      "triangles": 5290
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_sedan_burnt": {
    "id": "PV_sedan_burnt",
@@ -2566,7 +2568,8 @@
      "triangles": 3626
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_sedan": {
    "id": "PV_sedan",
@@ -2609,7 +2612,8 @@
      "triangles": 4842
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_car": {
    "id": "PV_car",
@@ -2784,7 +2788,8 @@
      "triangles": 5531
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_hatch_open": {
    "id": "PV_hatch_open",
@@ -2841,7 +2846,8 @@
      "triangles": 5604
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_hatch_burnt": {
    "id": "PV_hatch_burnt",
@@ -2884,7 +2890,8 @@
      "triangles": 3401
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_hatch": {
    "id": "PV_hatch",
@@ -2927,7 +2934,8 @@
      "triangles": 5169
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_wagon_wreck": {
    "id": "PV_wagon_wreck",
@@ -2970,7 +2978,8 @@
      "triangles": 5661
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_wagon_open": {
    "id": "PV_wagon_open",
@@ -3027,7 +3036,8 @@
      "triangles": 5688
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_wagon_burnt": {
    "id": "PV_wagon_burnt",
@@ -3070,7 +3080,8 @@
      "triangles": 3704
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_wagon": {
    "id": "PV_wagon",
@@ -3113,7 +3124,8 @@
      "triangles": 5274
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_suv_wreck": {
    "id": "PV_suv_wreck",
@@ -3156,7 +3168,8 @@
      "triangles": 5930
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_suv_open": {
    "id": "PV_suv_open",
@@ -3213,7 +3226,8 @@
      "triangles": 5903
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_suv_burnt": {
    "id": "PV_suv_burnt",
@@ -3256,7 +3270,8 @@
      "triangles": 3446
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_suv": {
    "id": "PV_suv",
@@ -3299,7 +3314,8 @@
      "triangles": 5510
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_gazel_open": {
    "id": "PV_gazel_open",
@@ -3356,7 +3372,8 @@
      "triangles": 10409
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_gazel": {
    "id": "PV_gazel",
@@ -3399,7 +3416,8 @@
      "triangles": 8746
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_paz_open": {
    "id": "PV_paz_open",
@@ -3456,7 +3474,8 @@
      "triangles": 10558
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_paz": {
    "id": "PV_paz",
@@ -3499,7 +3518,8 @@
      "triangles": 10356
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_bus12_open": {
    "id": "PV_bus12_open",
@@ -3556,7 +3576,8 @@
      "triangles": 12812
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_bus12": {
    "id": "PV_bus12",
@@ -3599,7 +3620,8 @@
      "triangles": 12452
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_bus_city": {
    "id": "PV_bus_city",
@@ -6108,7 +6130,8 @@
      "triangles": 5399
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_taxi_open": {
    "id": "PV_taxi_open",
@@ -6165,7 +6188,8 @@
      "triangles": 5451
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_taxi": {
    "id": "PV_taxi",
@@ -6208,7 +6232,8 @@
      "triangles": 5019
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_police_wreck": {
    "id": "PV_police_wreck",
@@ -6251,7 +6276,8 @@
      "triangles": 5321
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_police_open": {
    "id": "PV_police_open",
@@ -6308,7 +6334,8 @@
      "triangles": 5372
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_police": {
    "id": "PV_police",
@@ -6351,7 +6378,8 @@
      "triangles": 4935
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_van_open": {
    "id": "PV_van_open",
@@ -6408,7 +6436,8 @@
      "triangles": 9753
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_van": {
    "id": "PV_van",
@@ -6451,7 +6480,8 @@
      "triangles": 8078
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_ambulance_open": {
    "id": "PV_ambulance_open",
@@ -6508,7 +6538,8 @@
      "triangles": 10503
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_ambulance": {
    "id": "PV_ambulance",
@@ -6551,7 +6582,8 @@
      "triangles": 8732
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_bus12_over": {
    "id": "PV_bus12_over",
@@ -6594,7 +6626,8 @@
      "triangles": 15414
     }
    ],
-   "lod_fade": false
+   "lod_fade": false,
+   "collision": "mesh"
   },
   "PV_taxi_any": {
    "id": "PV_taxi_any",
@@ -6751,7 +6784,8 @@
      "end": 520.0,
      "triangles": 17763
     }
-   ]
+   ],
+   "collision": "mesh"
   }
  }
 }

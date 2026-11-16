@@ -757,7 +757,7 @@ const KITS: Dictionary = {
 		["box", Vector3(0, 1.05, 0.5), Vector3(0.025, 1.9, 0.025), "black"],
 		["box", Vector3(0, 1.05, 0.75), Vector3(0.025, 1.9, 0.025), "black"],
 		["box", Vector3(0, 1.05, 1), Vector3(0.025, 1.9, 0.025), "black"]],
-		"solid": [[Vector3(0, 1, 0), Vector3(0.1, 2, 2.5)]], "range": 260},
+		"solid_parts": true, "range": 260},
 	"body_sheet": {"parts": [["dome", Vector3(0, 0.13, 0), Vector3(0.7, 0.28, 1.9), "paint_white"],
 		["dome", Vector3(0, 0.11, 0.95), Vector3(0.42, 0.22, 0.36), "paint_white"]], "range": 140, "shadow": false},
 	"body_pmc": {"parts": [["box", Vector3(0, 0.13, 0.15), Vector3(0.5, 0.26, 0.85), "olive"],
@@ -986,6 +986,8 @@ var _water: StandardMaterial3D
 var _model_index: Dictionary = {}
 var _kit_models: Dictionary = {}
 var _model_meshes: Dictionary = {}
+## Точные статичные формы моделей, если в индексе collision = "mesh" (транспорт): одна общая на все экземпляры.
+var _model_collision: Dictionary = {}
 ## Сетки по файлу (уровни детализации растений), уже с материалами из materials_dir.
 var _file_meshes: Dictionary = {}
 ## Модели без коллизии по габариту: лестницы, пролом, кабель, рельсы — коробка закрыла бы проход.
@@ -1158,8 +1160,12 @@ func _items(filler: Dictionary) -> void:
 			var choices: Array = VARY[kit.vary]
 			color = choices[absi(int(x * 7.0) + int(z * 13.0)) % choices.size()]
 		_group(groups, kit_id, xform, color)
-		for solid: Array in kit.get("solid", []):
-			_solid(xform, solid[0] as Vector3, solid[1] as Vector3, s)
+		if bool(kit.get("solid_parts", false)):
+			for part: Array in kit.parts:
+				_solid(xform, part[1] as Vector3, part[2] as Vector3, s)
+		else:
+			for solid: Array in kit.get("solid", []):
+				_solid(xform, solid[0] as Vector3, solid[1] as Vector3, s)
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	for patch: Array in filler.get("weeds", []):
 		rng.seed = int(patch[4])
@@ -1292,6 +1298,14 @@ func _solid(xform: Transform3D, center: Vector3, size: Vector3, s: float) -> voi
 	body.add_child(shape)
 
 
+## Коллизия по готовой форме: поворот и равномерный масштаб экземпляра сохраняются.
+func _solid_shape(xform: Transform3D, shape: Shape3D) -> void:
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	collision.transform = xform
+	body.add_child(collision)
+
+
 # ---------------------------------------------------------------- модели вместо серых форм
 
 func _load_models(filler: Dictionary) -> void:
@@ -1403,10 +1417,14 @@ func _place_model(groups: Dictionary, model_id: String, item: Array, yaw_offset:
 		lift = -low
 	var xform: Transform3D = Transform3D(basis.scaled(Vector3.ONE * s), Vector3(x, landscape.ground(x, z) + dy + lift * s, z))
 	_group(groups, "model:" + model_id, xform, Color.WHITE)
-	# коллизия — по габариту, если предмет выше щиколотки (плиты и решётки под ногами — нет); solids в индексе —
-	# свой список коробок [центр, размер] в осях модели (дерево — ствол, куст — без коллизии)
-	var solids: Array = (_model_index[model_id] as Dictionary).get("solids", [null]) as Array
-	if solids.is_empty() or solids[0] != null:
+	# collision = "mesh" — точная статичная сетка (машина: капот ниже крыши); solids в индексе —
+	# свой список коробок [центр, размер] в осях модели (дерево — ствол, куст — без коллизии).
+	# Без них — габарит, если предмет выше щиколотки (плиты и решётки под ногами — нет).
+	var entry: Dictionary = _model_index[model_id]
+	var solids: Array = entry.get("solids", [null]) as Array
+	if String(entry.get("collision", "")) == "mesh":
+		_solid_shape(xform, _mesh_collision(model_id))
+	elif solids.is_empty() or solids[0] != null:
 		for solid: Array in solids:
 			_solid(xform, Vector3(float(solid[0][0]), float(solid[0][1]), float(solid[0][2])),
 				Vector3(float(solid[1][0]), float(solid[1][1]), float(solid[1][2])), s)
@@ -1414,6 +1432,16 @@ func _place_model(groups: Dictionary, model_id: String, item: Array, yaw_offset:
 		_solid(xform, Vector3(0.0, aabb.size.y * 0.5, 0.0), Vector3(0.3, aabb.size.y, 0.3), s)
 	elif aabb.size.y * s > 0.3 and not _model_nosolid.has(model_id):
 		_solid(xform, aabb.get_center(), aabb.size, s)
+
+
+## Одна точная форма на модель, общая для всех машин этого вида. LOD0 нужен и для попаданий,
+## и для высоты капота при Climb: выпуклая оболочка поднимала его до крыши.
+func _mesh_collision(model_id: String) -> Shape3D:
+	if not _model_collision.has(model_id):
+		var shape := _model_mesh(model_id).create_trimesh_shape() as ConcavePolygonShape3D
+		shape.backface_collision = true
+		_model_collision[model_id] = shape
+	return _model_collision[model_id] as Shape3D
 
 
 func _batch_model(model_id: String, transforms: Array) -> void:

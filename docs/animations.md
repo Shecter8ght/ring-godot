@@ -14,7 +14,7 @@ rest-ориентациями, свой рост (таз из клипов по�
 
 ```
 assets/animations/**/*.fbx (Mixamo, локально, не в git)
-        │  tools/character_clips.json — какой файл каким клипом (101 клип)
+        │  tools/character_clips.json — какой файл каким клипом (104 клипа)
         ▼
 tools/bake_character_clips.gd  → assets/models/characters/persona_clips.res (AnimationLibrary)
         │  ключи по именам костей; таз — из осей FBX (Z вверх, масштаб 100) в оси Persona,
@@ -44,7 +44,8 @@ res://tools/bake_weapon_sockets.gd`, `anim_test` и замер стенда (н�
 ## Передвижение
 
 - **Наборы** (`CharacterAnimator._set_specs`): `rifle`, `rifle_crouch` — пак Mixamo «Rifle 8-Way Locomotion»
-  (`r8_*`: 8 направлений ходьбы, бега, спринта и ходьбы вприсядку); `pistol`, `unarmed` — 4 направления;
+  (`r8_*`: 8 направлений ходьбы, бега, спринта и ходьбы вприсядку); `rifle_patrol` — спокойная ходьба NPC
+  из `assets/animations/Ходьба с винтовками/Rifle Walk.fbx`, только в `Marauder.State.PATROL`; `pistol`, `unarmed` — 4 направления;
   `pistol_crouch`, `unarmed_crouch` — ноги автоматной ходьбы вприсядку, руки — своей позы (фильтр костей рук);
   `hurt` — прихрамывание.
 - **Смешивание.** Шаг, бег и спринт — точки одного пространства смешивания: направление и радиус по скорости
@@ -135,6 +136,11 @@ res://tools/bake_weapon_sockets.gd`, `anim_test` и замер стенда (н�
 | Лежит | prone_move_b (стоп-кадр) | prone_aim | prone_aim |
 | Ползёт назад / вперёд | prone_move_b / он же обратным ходом | то же | то же |
 | Тяжело ранен | downed_fall (с разбега) / downed_fall_still, последний кадр | то же | то же |
+| Перелезание | vault | vault | vault |
+
+Перелезание использует `jump away/Jumping Over Into Combat.fbx`, растянутый на время физического пути. У своего
+игрока тот же клип играет на отдельном скелете `FirstPersonArms`: видны только руки, положение модели у камеры —
+`Balance.FPS_TRAVERSAL`; оружие на это время убирается и затем возвращается.
 
 Одиночные клипы (событие от Player / Marauder):
 
@@ -160,8 +166,8 @@ death_crouch / death_crouch_head; в голову — death_head_front / death_h
 - **Переходы стоек:** `Pistol_Handgun Locomotion Pack/pistol stand to kneel`, `… kneel to stand`,
   `Crouch weapons/Crouch To Prone`, `Prone To Crouch Transition`, `Rifle/Rifle Kneel To Prone`,
   `Rifle Prone To Kneel` — сейчас стойка меняется сменой клипа с плавным переходом 0.16 с.
-- **Перелезание, «залезть наверх» и бросок на землю** (механика есть — `Vault`, `Climb`, `_try_dive`, анимации нет):
-  `jump away/Jump low with rifle Forward`, `Jumping Over Into Combat`, `Jump Away`.
+- **Бросок на землю и варианты перелезания** (механика есть — `Vault`, `Climb`, `_try_dive`):
+  `jump away/Jump low with rifle Forward`, `Jump Away`. Основной `Jumping Over Into Combat` уже подключён.
 - **Лёжа:** `prone/Prone Left Turn`, `Prone Right Turn`, `Rifle/Rifle Prone Hit Reaction`,
   `prone/Moving Backward In Crawl Position`.
 - **Бросок гранаты на бегу:** `run grenades/Run And Throw Grenade`.

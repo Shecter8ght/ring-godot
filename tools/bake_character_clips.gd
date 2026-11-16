@@ -90,8 +90,8 @@ func _initialize() -> void:
 						skeleton.get_bone_rest(skeleton.find_bone(bone)).origin, _to_root(skeleton, root))
 				else:
 					_remove_root_drift(clip, i, skeleton.get_bone_rest(skeleton.find_bone(bone)).origin)
-				if name == "jump_loop":
-					# Высоту прыжка задаёт физическое тело; клип сгибает ноги без второго root-подскока.
+				if name in ["jump_loop", "vault"]:
+					# Высоту задаёт физическое тело; клип сгибает ноги без второго root-подскока.
 					var rest_y: float = skeleton.get_bone_rest(skeleton.find_bone(bone)).origin.y
 					for key_index: int in range(clip.track_get_key_count(i)):
 						var value: Vector3 = clip.track_get_key_value(i, key_index) as Vector3

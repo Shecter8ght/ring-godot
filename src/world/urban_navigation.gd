@@ -154,6 +154,16 @@ func _prepare() -> void:
 		synchronization_frames += 1
 	# ковры и связки лестниц (Balance.STAIR_NAV): сетка из кэша их не содержит, по крутым маршам без них не пройти
 	await StairNavigation.build(self, map)
+	# Низкие ограждения — связки «перелезть» у каждого тайла. Кэш содержит только поверхности,
+	# поэтому связки строятся заново по физике уровня и только с посадкой на навигацию.
+	var vault_links: int = 0
+	for child: Node in get_children():
+		var region := child as NavigationRegion3D
+		if region:
+			vault_links += await Vault.build_links(region, region)
+	if vault_links > 0:
+		await NavigationServer3D.map_changed
+	print("навигация: связок «перелезть» %d" % vault_links)
 	ready_for_agents.emit()
 
 

@@ -53,8 +53,15 @@ static func find(space: PhysicsDirectSpaceState3D, p: Vector3, dir: Vector3, exc
 			return {}
 		lip = maxf(lip, float(h.position.y))
 		if (h.normal as Vector3).y >= floor_y:
-			stand_k = k
-			break
+			# Первой горизонтальной грани может быть рамка окна: за ней пусто. Ищем дальше,
+			# пока и центр тела, и точка впереди него не стоят на полу.
+			var probe := p + dir * (k + radius + 0.05)
+			var ph := _down(space, probe, p.y + over_y, low, exclude)
+			var pf := _down(space, probe + dir * 0.25, p.y + over_y, low, exclude)
+			if not ph.is_empty() and (ph.normal as Vector3).y >= floor_y and not pf.is_empty() \
+				and absf(float(pf.position.y) - float(ph.position.y)) <= 0.3:
+				stand_k = k
+				break
 		k += 0.1
 	if stand_k < 0.0:
 		return {}
