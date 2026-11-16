@@ -67,7 +67,7 @@ func _ready() -> void:
 	_face(pl, Vector3(0, 0, 1))
 	await _press("vault", 3)
 	await get_tree().create_timer(0.3).timeout
-	_check("клип перелезания играет, оружие убрано", String((pl.get("_animator") as CharacterAnimator).get("_current")) == "vault" and pl.weapon_id == "", pl.weapon_id)
+	_check("клип перелезания у персонажа, оружие убрано", String((pl.get("_animator") as CharacterAnimator).get("_current")) == "vault" and pl.weapon_id == "", pl.weapon_id)
 	_save("vault_mid")
 	await get_tree().create_timer(0.9).timeout
 	_check("перелез через преграду по пояс", pl.global_position.z > 0.5 and pl.global_position.y < 0.3, str(pl.global_position))
@@ -130,7 +130,7 @@ func _ready() -> void:
 		animated = animated or (float(m.get("_vault_t")) >= 0.0 and String((m.get_node("CharacterAnimator") as CharacterAnimator).get("_current")) == "vault")
 		if m.global_position.z > 3.0:
 			break
-	_check("мародёр перелез по связке, а не обошёл", used and animated and m.global_position.z > 1.0 and t < 8.0, "%.1f с, %s" % [t, str(m.global_position)])
+	_check("мародёр перелез по связке с клипом, а не обошёл", used and animated and m.global_position.z > 1.0 and t < 8.0, "%.1f с, %s" % [t, str(m.global_position)])
 	print("vault_test: провалено %d" % _fails)
 	get_tree().quit(1 if _fails > 0 else 0)
 

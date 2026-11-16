@@ -136,11 +136,10 @@ res://tools/bake_weapon_sockets.gd`, `anim_test` и замер стенда (н�
 | Лежит | prone_move_b (стоп-кадр) | prone_aim | prone_aim |
 | Ползёт назад / вперёд | prone_move_b / он же обратным ходом | то же | то же |
 | Тяжело ранен | downed_fall (с разбега) / downed_fall_still, последний кадр | то же | то же |
-| Перелезание | vault | vault | vault |
+| Перелезание (боты и напарники) | vault | vault | vault |
 
-Перелезание использует `jump away/Jump low with rifle Forward.fbx` (0,9 с), растянутый на время физического пути. У своего
-игрока тот же клип играет на отдельном скелете `FirstPersonArms`: видны только руки, положение модели у камеры —
-`Balance.FPS_TRAVERSAL`; оружие на это время убирается и затем возвращается.
+Перелезание использует `jump away/Jump low with rifle Forward.fbx` (0,9 с) у ботов и видимых напарников.
+Отдельного клипа от первого лица нет: локальный игрок просто убирает оружие на время действия.
 
 Одиночные клипы (событие от Player / Marauder):
 
@@ -167,7 +166,8 @@ death_crouch / death_crouch_head; в голову — death_head_front / death_h
   `Crouch weapons/Crouch To Prone`, `Prone To Crouch Transition`, `Rifle/Rifle Kneel To Prone`,
   `Rifle Prone To Kneel` — сейчас стойка меняется сменой клипа с плавным переходом 0.16 с.
 - **Бросок на землю и варианты перелезания** (механика есть — `Vault`, `Climb`, `_try_dive`):
-  `jump away/Jumping Over Into Combat`, `Jump Away`. Основной `Jump low with rifle Forward` уже подключён.
+  `Jumping Over Into Combat`, `Jump Away`. `Jump low with rifle Forward` играет только у ботов и напарников;
+  от первого лица специальный клип отключён владельцем.
 - **Лёжа:** `prone/Prone Left Turn`, `Prone Right Turn`, `Rifle/Rifle Prone Hit Reaction`,
   `prone/Moving Backward In Crawl Position`.
 - **Бросок гранаты на бегу:** `run grenades/Run And Throw Grenade`.

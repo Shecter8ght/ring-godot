@@ -860,10 +860,6 @@ func _set_ads(on: bool, pl: Player) -> void:
 
 
 func _process_ads(pl: Player, delta: float, s: float) -> void:
-	if pl.is_vaulting():
-		_arms.play_vault(maxf(pl._vault_sec, 0.05))
-	else:
-		_arms.stop_vault()
 	var wid: String = pl.held_model_id()
 	var spec: Dictionary = pl.spec() if pl.weapon_id != "" and not pl.grenade_equipped else {}
 	# с завалом в оптику не смотрят: вид и чувствительность — как с открытым прицелом
@@ -1090,7 +1086,7 @@ func _process_ads(pl: Player, delta: float, s: float) -> void:
 		if not _arms.arms_clear:
 			_viewmodel.visible = false
 			pl.weapon_obstruction = 1.0
-		_arms.visible = _arms.visible and (_viewmodel.visible or pl.is_vaulting())
+		_arms.visible = _arms.visible and _viewmodel.visible
 	_straighten_lights()
 	_hide_near_parts()
 	_set_scope(scoped and _viewmodel.has_meta("ocular") and pl.aiming and aim_t > 0.85 and absf(sroll) < 0.05 and pl.weapon_obstruction <= float(Balance.WEAPON_CLEARANCE.fire_threshold))
