@@ -29,6 +29,8 @@ const GLASS_HIGH := 3.373
 const INITIAL_OPEN_PANE := 4
 const PANE_COUNT := 6
 
+@export var entry: Marker3D
+
 var _glass: GlassPanes
 var _solid: StaticBody3D
 var _chairs: Array[Node3D] = []
@@ -57,8 +59,9 @@ func _ready() -> void:
 	_player = PLAYER.instantiate() as Player
 	_player.name = "Player_1"
 	add_child(_player)
-	_player.global_position = Vector3(.02, .018, -1.0)
-	_player.cursor_ground = Vector3(.02, 0, 3.0)
+	var facing := -entry.global_basis.z if entry else Vector3.BACK
+	_player.global_position = entry.global_position if entry else Vector3(.02, .018, -1.0)
+	_player.cursor_ground = _player.global_position + facing * 4.0
 	await _ticks(14)
 	if headless or args.has("--check"):
 		await _check_room()
@@ -69,7 +72,7 @@ func _ready() -> void:
 	add_child(movement_camera)
 	movement_camera.get_node("AdsCamera/ViewmodelFill").hide()
 	movement_camera.set_target(_player)
-	movement_camera._look_yaw = 0.0
+	movement_camera._look_yaw = atan2(facing.x, facing.z)
 	if args.has("--quality-ab") or args.has("--quality-shots") or args.has("--quality-details") or args.has("--quality-views"):
 		await QualityCapture.new().run(self, movement_camera, _player, _shot_path(), args)
 		return
@@ -106,8 +109,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _update_help(condition: String = "Ясный день") -> void:
-	_help.text = ("Переговорная 203  ·  %s\n" % condition
+	_help.text = ("%s  ·  %s\n" % [_view_title(), condition]
 		+ "F1–F7 — свет и погода   F8 — солнце   F — дверь   U — стекло")
+
+
+func _view_title() -> String:
+	return "Переговорная 203"
 
 
 func _break_aimed_pane(camera: Camera3D) -> bool:
@@ -115,9 +122,10 @@ func _break_aimed_pane(camera: Camera3D) -> bool:
 	var hit := _ray(p, p - camera.global_basis.z * 13.0,
 		Hitscan.LAYER_WORLD | Hitscan.LAYER_DOOR | Hitscan.LAYER_GLASS)
 	var pane := GlassPanes.pane_of(hit)
-	if pane.size() != 2 or pane[0] != _glass:
+	if pane.size() != 2:
 		return false
-	_glass.impact(int(pane[1]), 250.0, hit.position)
+	var glazing: GlassPanes = pane[0]
+	glazing.impact(int(pane[1]), 250.0, hit.position)
 	return true
 
 
@@ -225,8 +233,6 @@ func _box(at: Vector3, size: Vector3, material: Material = null, solid := false,
 
 func _shell() -> void:
 	var graphite := _mat(Color(.175, .182, .175), .53)
-	var corridor := _mat(Color(.48, .49, .45), .73)
-	var corridor_floor := _mat(Color(.375, .382, .358), .15)
 	var thin_slab := _mat(Color(.28, .282, .265), .9)
 	var wall_core := _mat(Color(.36, .35, .32), .92)
 	_box(Vector3(-.175, -.13, 3.775), Vector3(9.80, .26, 7.82), null, true, "cloth")
@@ -244,6 +250,13 @@ func _shell() -> void:
 		_box(Vector3(x, 1.11, 0), Vector3(.06, 2.22, .19), graphite, true, "metal")
 	_box(Vector3(0, 2.193, 0), Vector3(1.08, .055, .21), graphite, true, "metal")
 	_box(Vector3(0, .006, 0), Vector3(1.08, .012, .17), graphite, false)
+	_build_entry()
+
+
+func _build_entry() -> void:
+	var corridor := _mat(Color(.48, .49, .45), .73)
+	var corridor_floor := _mat(Color(.375, .382, .358), .15)
+	var thin_slab := _mat(Color(.28, .282, .265), .9)
 	_box(Vector3(.01, -.105, -1.62), Vector3(8.9, .21, 3.25), corridor_floor, true)
 	_box(Vector3(.01, 1.599, -3.22), Vector3(9.08, 3.2, .17), corridor, true)
 	for x in [-4.43, 4.46]:

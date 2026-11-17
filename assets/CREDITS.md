@@ -1225,3 +1225,9 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 - Weed Plant 02 — Rob Tuytel (фотография), Rico Cilliers (модель), Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/weed_plant_02). Два варианта широколистного сорняка, два LOD, атлас 2K с альфой и заполнением кромки.
 
 Скрипты преобразования — `tools/prospekt_grass/`. Ветер, приминание и дальний переход используют существующий `DistrictGrass`. Кандидаты Fab на момент этой записи не скачаны и в производные не входят.
+
+## БЦ «Проспект, 5», коридор второго этажа (2026-11-17)
+
+- Terrazzo 005, ambientCG, CC0. Из упакованного исходника Blender взяты карты цвета и шероховатости, уменьшены до 1536 × 1536. Игровые файлы в `assets/models/props/bc5_route203`. [Terrazzo 005](https://ambientcg.com/view?id=Terrazzo005)
+- Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Использованы имеющиеся карты `assets/textures/painted_plaster_wall`. [Painted Plaster Wall](https://polyhaven.com/a/painted_plaster_wall)
+- Геометрия, таблички и декали перенесены из принятой сборки второго этажа RING v02. Голубь на лестнице создан для RING встроенным ImageGen.

@@ -1,0 +1,62 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tools/bc5_meeting203/meeting203.tscn" id="1_room"]
+[ext_resource type="Script" path="res://tools/bc5_route203/route203.gd" id="2_route"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_route203/route203.glb" id="3_hall"]
+[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="4_door"]
+[ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno_door.gd" id="5_leaf"]
+
+[node name="Bc5Floor2" node_paths=PackedStringArray("entry") instance=ExtResource("1_room")]
+script = ExtResource("2_route")
+entry = NodePath("LandingSpawn")
+
+[node name="Hallway" parent="." index="4" instance=ExtResource("3_hall")]
+
+[node name="LandingSpawn" type="Marker3D" parent="." index="5"]
+position = Vector3(3.07, 0.02, -6.32)
+rotation_degrees = Vector3(0, -62, 0)
+
+[node name="StairDoor" parent="." index="6" instance=ExtResource("4_door")]
+position = Vector3(4.463, 0, -7.12)
+script = ExtResource("5_leaf")
+width = 1.07
+height = 2.171
+thickness = 0.046
+leaf_offset = Vector3(0, 0.01, 0)
+interaction_depth = 2.05
+
+[node name="HallReflection" type="ReflectionProbe" parent="." index="7"]
+position = Vector3(-5.27, 1.62, -1.66)
+size = Vector3(38.4, 3.30, 3.46)
+box_projection = true
+max_distance = 42.0
+intensity = 0.75
+interior = true
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 0.94
+
+[node name="LiftReflection" type="ReflectionProbe" parent="." index="8"]
+position = Vector3(9.03, 1.55, -6.95)
+size = Vector3(9.38, 3.30, 5.90)
+box_projection = true
+max_distance = 20.0
+intensity = 0.66
+interior = true
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 0.82
+
+[node name="StairReflection" type="ReflectionProbe" parent="." index="9"]
+position = Vector3(4.10, -0.54, -4.30)
+size = Vector3(4.50, 8.10, 5.75)
+box_projection = true
+max_distance = 13.0
+intensity = 0.40
+interior = true
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 0.72

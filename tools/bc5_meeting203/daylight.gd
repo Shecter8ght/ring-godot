@@ -175,9 +175,12 @@ func _apply_light(update_sky: bool) -> void:
 		aperture.light_color = window_color
 		aperture.light_energy = window_energy
 		aperture.visible = window_energy > .001
-	var room_probe := reflections[0]
-	room_probe.ambient_color = window_color.lerp(Color(.95, .91, .85), .40)
-	room_probe.ambient_color_energy = lerpf(.0005, .20, twilight) * (1.0 - .49 * fog_k)
+	var bounce_color := window_color.lerp(Color(.95, .91, .85), .40)
+	var bounce_energy := lerpf(.0005, .20, twilight) * (1.0 - .49 * fog_k)
+	for probe in reflections:
+		if probe.ambient_mode == ReflectionProbe.AMBIENT_COLOR:
+			probe.ambient_color = bounce_color
+			probe.ambient_color_energy = bounce_energy * float(probe.get_meta("sky_bounce_scale", 1.0))
 	environment.ambient_light_energy = lerpf(.21, .49, twilight) * (1.0 - .39 * fog_k)
 	_sky.set_shader_parameter("sky_color", sky_color * sky_gain)
 	_sky.set_shader_parameter("horizon_color", sky_color * .8 * sky_gain)
