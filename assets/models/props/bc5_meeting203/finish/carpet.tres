@@ -7,14 +7,14 @@
 [resource]
 resource_name = "BC5_203_Carpet"
 albedo_texture = ExtResource("1_color")
-metallic_specular = 0.27
-roughness = 0.95
+metallic_specular = 0.19
+roughness = 1.0
 ao_enabled = true
-ao_light_affect = 0.3
+ao_light_affect = 0.2
 ao_texture = ExtResource("2_orm")
 roughness_texture = ExtResource("2_orm")
 roughness_texture_channel = 1
 normal_enabled = true
-normal_scale = 0.74
+normal_scale = 0.82
 normal_texture = ExtResource("3_normal")
 texture_filter = 5

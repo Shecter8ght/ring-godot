@@ -162,6 +162,8 @@ var _sight_to: Vector3 = Vector3.ZERO
 var _scope_vp: SubViewport
 ## Вид «как с камеры»: экспозиция глаза, объектив, зерно, размытие (CameraLook).
 var _look: CameraLook
+## Профиль экспозиции для проверки материалов без фильтров объектива.
+var neutral_camera_attributes: CameraAttributesPractical
 var _scope_cam: Camera3D
 var _scope_view: TextureRect
 # своя сетка оптики-модели (meta reticle_tex у модели в руках); пусто — общая сетка шейдера
@@ -236,7 +238,7 @@ func _ready() -> void:
 	_look = CameraLook.new()
 	_look.name = "Look"
 	add_child(_look)
-	_look.setup(_ads_cam, [_camera, _scope_cam])
+	_look.setup(_ads_cam, [_camera, _scope_cam], neutral_camera_attributes)
 	# в изометрии отсечения за стенами нет (см. _set_ads)
 	get_viewport().use_occlusion_culling = false
 

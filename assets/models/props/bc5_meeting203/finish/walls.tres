@@ -8,13 +8,14 @@
 resource_name = "BC5_203_Walls"
 cull_mode = 2
 albedo_texture = ExtResource("1_color")
-metallic_specular = 0.5
-roughness = 0.89
+metallic_specular = 0.36
+roughness = 0.98
 ao_enabled = true
-ao_light_affect = 0.36
+ao_light_affect = 0.21
 ao_texture = ExtResource("2_orm")
 roughness_texture = ExtResource("2_orm")
 roughness_texture_channel = 1
 normal_enabled = true
+normal_scale = 0.63
 normal_texture = ExtResource("3_normal")
 texture_filter = 5

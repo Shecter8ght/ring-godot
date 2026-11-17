@@ -5,9 +5,11 @@ extends Node3D
 const ASSETS := "res://assets/models/props/bc5_meeting203/"
 const PLAYER := preload("res://scenes/player/player.tscn")
 const RIG := preload("res://scenes/player/camera_rig.tscn")
+const Daylight203 := preload("res://tools/bc5_meeting203/daylight.gd")
 const GLAZING := preload(ASSETS + "glazing.tres")
 const GLAZING_CRACKED := preload(ASSETS + "glazing_cracked.tres")
 const DISPLAY_GLASS := preload(ASSETS + "tv_glass.tres")
+const CHAIR_VARIANT_B := preload(ASSETS + "chair_variant_b/material.tres")
 const DISPLAY_REFLECTION_LAYER := 1 << 11
 const FINISH_MATERIALS := ["BC5_203_Walls", "BC5_203_Carpet", "BC5_203_Ceiling"]
 const BIRCH := "res://assets/models/plants/birch_b_lod0.glb"
@@ -27,9 +29,11 @@ var _solid: StaticBody3D
 var _chairs: Array[Node3D] = []
 var _player: Player
 var _failures := 0
+var _help: Label
 
 @onready var _door: Door = $OfficeDoor203
 @onready var _table: Node3D = $Furniture/Table203
+@onready var _daylight: Daylight203 = $Daylight
 
 
 func _ready() -> void:
@@ -37,6 +41,12 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	var headless := DisplayServer.get_name() == "headless"
 	_build()
+	if not headless:
+		get_viewport().msaa_3d = Viewport.MSAA_2X
+		get_viewport().use_taa = true
+	if not headless and args.has("--daylight-shots"):
+		await _daylight_shots()
+		return
 	if not headless and args.has("--shots"):
 		await _shots()
 		return
@@ -52,27 +62,39 @@ func _ready() -> void:
 		get_tree().quit(1 if _failures > 0 else 0)
 		return
 	var movement_camera := RIG.instantiate() as CameraRig
+	movement_camera.neutral_camera_attributes = _daylight.camera_attributes
 	add_child(movement_camera)
 	movement_camera.set_target(_player)
 	movement_camera._look_yaw = 0.0
 	var ui := CanvasLayer.new()
 	add_child(ui)
-	var help := Label.new()
-	help.position = Vector2(24, 20)
-	help.text = "Переговорная 203   ·   WASD — ходьба   ·   F — дверь   ·   U — разбить стекло под прицелом"
-	help.add_theme_font_size_override("font_size", 18)
-	help.add_theme_color_override("font_shadow_color", Color.BLACK)
-	help.add_theme_constant_override("shadow_offset_x", 2)
-	help.add_theme_constant_override("shadow_offset_y", 2)
-	ui.add_child(help)
+	_help = Label.new()
+	_help.position = Vector2(24, 20)
+	_help.add_theme_font_size_override("font_size", 18)
+	_help.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_help.add_theme_constant_override("shadow_offset_x", 2)
+	_help.add_theme_constant_override("shadow_offset_y", 2)
+	ui.add_child(_help)
+	_update_help()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed or event.echo or event.physical_keycode != KEY_U:
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var preset: int = event.physical_keycode - KEY_F1
+	if preset >= 0 and preset < Daylight203.PRESETS.size():
+		var choice: Array = Daylight203.PRESETS[preset]
+		_daylight.set_conditions(choice[1], choice[2])
+		_update_help(choice[3])
+		get_viewport().set_input_as_handled()
 		return
 	var camera := get_viewport().get_camera_3d()
-	if camera and _break_aimed_pane(camera):
+	if event.physical_keycode == KEY_U and camera and _break_aimed_pane(camera):
 		get_viewport().set_input_as_handled()
+
+
+func _update_help(condition: String = "Ясный день") -> void:
+	_help.text = "Переговорная 203   ·   %s   ·   F1–F7 — свет и погода   ·   F — дверь   ·   U — стекло" % condition
 
 
 func _break_aimed_pane(camera: Camera3D) -> bool:
@@ -89,9 +111,13 @@ func _break_aimed_pane(camera: Camera3D) -> bool:
 func _build() -> void:
 	# Стекло экрана получает отдельное отражение комнаты.
 	for node: MeshInstance3D in $Room203.find_children("*", "MeshInstance3D", true, false):
-		if node.get_active_material(0) == DISPLAY_GLASS:
+		var material := node.get_active_material(0) as BaseMaterial3D
+		if material == DISPLAY_GLASS:
 			node.layers = DISPLAY_REFLECTION_LAYER
-			break
+		elif material and material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+			node.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+			if material.resource_name.ends_with("дуб горизонтальный"):
+				_satin_finish(node, .91, .42)
 	_solid = StaticBody3D.new()
 	_solid.name = "SlabWallsFurniture"
 	_solid.collision_layer = Hitscan.LAYER_WORLD
@@ -102,14 +128,38 @@ func _build() -> void:
 	_box(Vector3(0, .739, 0) + _table.position, Vector3(3.50, .049, 1.26), null, true)
 	for x in [-1.16, 1.16]:
 		_box(Vector3(x, .347, 0) + _table.position, Vector3(.125, .686, .68), null, true)
+	var arm_finish: Material
 	for chair: Node3D in $Furniture/Chairs.get_children():
-		var arm := chair.find_child("ChairArms", true, false) as Node3D
+		var arm := chair.find_child("ChairArms", true, false) as MeshInstance3D
 		if arm:
 			arm.visible = bool(chair.get_meta("has_armrests", true))
+			if arm_finish == null:
+				arm_finish = _satin_finish(arm, .91, .42)
+			arm.set_surface_override_material(0, arm_finish)
+		if chair.get_meta("alternate_upholstery", false):
+			var body := chair.find_child("ChairBody", true, false) as MeshInstance3D
+			body.set_surface_override_material(0, CHAIR_VARIANT_B)
 		_box(chair.position + Vector3(0, .247, 0), Vector3(.51, .49, .53), null, true, "cloth")
 		_chairs.append(chair)
+	for node: MeshInstance3D in $Furniture.find_children("*", "MeshInstance3D", true, false):
+		node.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+	for node: MeshInstance3D in _table.find_children("*", "MeshInstance3D", true, false):
+		_satin_finish(node, .90, .51)
+	for node: MeshInstance3D in _door.find_children("*", "MeshInstance3D", true, false):
+		var material := node.get_active_material(0) as BaseMaterial3D
+		if material and material.resource_name == "203 Brushed stainless":
+			var steel := _satin_finish(node, .34, .50)
+			steel.metallic = .74
 	_door.set("swing_degrees", -85.0)
 	_windows()
+
+
+func _satin_finish(node: MeshInstance3D, roughness: float, specular: float) -> BaseMaterial3D:
+	var material := node.get_active_material(0).duplicate() as BaseMaterial3D
+	material.roughness = roughness
+	material.metallic_specular = specular
+	node.set_surface_override_material(0, material)
+	return material
 
 
 func _mat(rgb: Color, rough: float) -> StandardMaterial3D:
@@ -127,6 +177,7 @@ func _box(at: Vector3, size: Vector3, material: Material = null, solid := false,
 		visual.mesh = mesh
 		visual.material_override = material
 		visual.position = at
+		visual.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 		add_child(visual)
 	if solid:
 		var shape := BoxShape3D.new()
@@ -143,10 +194,15 @@ func _shell() -> void:
 	var corridor := _mat(Color(.48, .49, .45), .73)
 	var corridor_floor := _mat(Color(.375, .382, .358), .15)
 	var thin_slab := _mat(Color(.28, .282, .265), .9)
+	var wall_core := _mat(Color(.36, .35, .32), .92)
 	_box(Vector3(-.175, -.13, 3.775), Vector3(9.80, .26, 7.82), null, true, "cloth")
 	_box(Vector3(-.175, 3.262, 3.77), Vector3(9.92, .29, 7.98), thin_slab, true)
 	_box(Vector3(X_MIN-.081, 1.67, 3.8), Vector3(.16, 3.36, 7.85), null, true)
 	_box(Vector3(X_MAX+.08, 1.67, 3.8), Vector3(.16, 3.36, 7.85), null, true)
+	# Толщина за чистовыми плоскостями закрывает торцы плит от косого солнца.
+	_box(Vector3(-.175, -.155, 3.81), Vector3(10.10, .30, 8.05), wall_core)
+	for x in [X_MIN - .164, X_MAX + .164]:
+		_box(Vector3(x, 1.62, 3.8), Vector3(.32, 3.49, 8.0), wall_core)
 	_box(Vector3((X_MIN-.6)*.5, 1.67, 0), Vector3(-.6-X_MIN, 3.36, .16), null, true)
 	_box(Vector3((X_MAX+.6)*.5, 1.67, 0), Vector3(X_MAX-.6, 3.36, .16), null, true)
 	_box(Vector3(0, 2.765, 0), Vector3(1.20, 1.09, .16), null, true)
@@ -180,6 +236,9 @@ func _windows() -> void:
 	var step := (EDGE_B - EDGE_A) / count
 	var center := (X_MIN + X_MAX) * .5
 	_box(Vector3(center, .543, 7.795), Vector3(X_MAX-X_MIN, 1.083, .32), null, true)
+	var spandrel := _mat(Color(.30, .29, .26), .88)
+	_box(Vector3(center, .529, 7.863), Vector3(X_MAX-X_MIN+.18, 1.15, .39), spandrel)
+	_box(Vector3(center, 3.268, 7.82), Vector3(X_MAX-X_MIN+.18, .48, .44), spandrel)
 	_box(Vector3(center, 1.12, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
 	_box(Vector3(center, 3.402, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
 	for index in range(count + 1):
@@ -222,6 +281,7 @@ func _street() -> void:
 	tree.mesh = TreeSpot._mesh(BIRCH, BIRCH_MATERIALS)
 	tree.position = Vector3(2.4,-4.20,16.72)
 	tree.scale = Vector3.ONE * 0.95
+	tree.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 	add_child(tree)
 
 
@@ -270,8 +330,12 @@ func _textured(root: Node) -> bool:
 		if not m is BaseMaterial3D:
 			return false
 		var material := m as BaseMaterial3D
-		if not (material.albedo_texture and material.normal_enabled and material.normal_texture
-			and material.roughness_texture and material.metallic_texture):
+		if not (material.albedo_texture and material.normal_enabled and material.normal_texture):
+			return false
+		if material is ORMMaterial3D:
+			if not (material as ORMMaterial3D).orm_texture:
+				return false
+		elif not (material.roughness_texture and material.metallic_texture):
 			return false
 	return true
 
@@ -304,8 +368,37 @@ func _glossy_display() -> bool:
 
 
 func _check_room() -> void:
+	_daylight.running = false
+	_daylight.set_conditions(9.0, "clear")
+	var morning := _daylight.sun.global_basis.z
+	_daylight.set_conditions(12.0, "clear")
+	_check("Солнце меняет высоту и направление", morning.angle_to(_daylight.sun.global_basis.z) > .30
+		and _daylight.sun.visible and _daylight.sun.shadow_enabled)
+	var toward_sun := _daylight.sun.global_basis.z * 5.0
+	var through_pane := Vector3(.34, .23, 6.16)
+	var toward_frame := Vector3((EDGE_A + EDGE_B) * .5, .23, 6.16)
+	_check("Прямой свет проходит через проём и перекрывается стойкой",
+		_ray(through_pane, through_pane + toward_sun, Hitscan.LAYER_WORLD).is_empty()
+		and not _ray(toward_frame, toward_frame + toward_sun, Hitscan.LAYER_WORLD).is_empty())
+	_daylight.set_conditions(12.0, "overcast")
+	_check("Под сплошными облаками прямое солнце гаснет", not _daylight.sun.visible)
+	var overcast_light := _daylight.sky_aperture.light_energy
+	_daylight.set_conditions(12.0, "fog")
+	_check("Густой туман гасит свет из окна", _daylight.environment.fog_enabled
+		and _daylight.sky_aperture.light_energy < overcast_light and not _daylight.sun.visible)
+	_daylight.set_conditions(1.5, "clear")
+	_check("Ночью только слабое естественное освещение", _daylight.sun.light_energy < .02
+		and _daylight.sky_aperture.light_energy < .01 and _daylight.sky_aperture.position.z > GLASS_Z
+		and _daylight.reflections[0].interior and _daylight.reflections[0].ambient_mode == ReflectionProbe.AMBIENT_DISABLED
+		and _daylight.find_children("*", "Light3D", true, false).size() == 2)
+	_daylight.set_conditions(15.55, "clear")
 	_check("Стол и кресла загружены с PBR-картами Painter",_textured(_table) and _textured(_chairs[0]))
 	_check("Восемь кресел в исходных позициях",_chairs.size()==8)
+	var alt := _chairs[2].find_child("ChairBody", true, false) as MeshInstance3D
+	var primary := _chairs[0].find_child("ChairBody", true, false) as MeshInstance3D
+	_check("В креслах два разных атласа обивки", _textured(_chairs[2])
+		and alt.get_active_material(0) == CHAIR_VARIANT_B
+		and CHAIR_VARIANT_B.normal_texture != (primary.get_active_material(0) as BaseMaterial3D).normal_texture)
 	_check("Отделка v02, затенение примыканий и рельеф плит подключены", _native_room_finish())
 	_check("Телевизор отражает свет через отдельный глянцевый материал", _glossy_display())
 	_check("Игрок появился перед дверью на полу",_player.is_on_floor() and _player.position.z < -.65)
@@ -353,10 +446,8 @@ func _check_room() -> void:
 
 
 func _shots() -> void:
-	var path := OS.get_environment("BC5_MEETING_SHOTS")
-	if path.is_empty():
-		path = "user://bc5_meeting203"
-	DirAccess.make_dir_recursive_absolute(path)
+	_daylight.running = false
+	var path := _shot_path()
 	var window := get_window()
 	window.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	window.size = Vector2i(1680, 1040)
@@ -387,10 +478,83 @@ func _shots() -> void:
 		snapshot.position = view[1]
 		snapshot.look_at(view[2],Vector3.UP)
 		snapshot.fov = view[3]
-		for frame in range(40):
+		for frame in range(105):
 			await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		var f := path.path_join(view[0]+".png")
 		var err := get_viewport().get_texture().get_image().save_png(f)
 		_check("Сохранён вид "+f,err==OK)
 	get_tree().quit(1 if _failures else 0)
+
+
+
+func _shot_path() -> String:
+	var path := OS.get_environment("BC5_MEETING_SHOTS")
+	if path.is_empty():
+		path = "user://bc5_meeting203"
+	DirAccess.make_dir_recursive_absolute(path)
+	return path
+
+
+func _daylight_shots() -> void:
+	_daylight.running = false
+	var path := _shot_path()
+	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
+	get_window().size = Vector2i(1680, 1040)
+	var camera := Camera3D.new()
+	camera.near = .04
+	camera.fov = 52.69273
+	camera.cull_mask &= ~RainOcclusion.LAYER
+	camera.position = Vector3(-2.91, 1.65, 1.62)
+	add_child(camera)
+	camera.look_at(Vector3(.87, 1.28, 5.36))
+	camera.make_current()
+	var viewport_rid := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(viewport_rid, true)
+	var requested := OS.get_environment("BC5_MEETING_ONLY").split(",", false)
+	var report := []
+	for preset: Array in Daylight203.PRESETS:
+		if not requested.is_empty() and not requested.has(preset[0]):
+			continue
+		_daylight.set_conditions(preset[1], preset[2])
+		await get_tree().create_timer(1.85).timeout
+		var elapsed := PackedFloat32Array()
+		var gpu := PackedFloat32Array()
+		for frame in range(45):
+			var begin := Time.get_ticks_usec()
+			await RenderingServer.frame_post_draw
+			elapsed.append((Time.get_ticks_usec() - begin) / 1000.0)
+			gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid))
+		elapsed.sort()
+		gpu.sort()
+		var shot := path.path_join("%s.png" % preset[0])
+		_check("Сохранён вид " + shot, get_viewport().get_texture().get_image().save_png(shot) == OK)
+		var from_sun := _daylight.sun.global_basis.z
+		report.append({"id": preset[0], "hour": preset[1], "weather": preset[2],
+			"sun_energy": _daylight.sun.light_energy, "light_direction": [from_sun.x, from_sun.y, from_sun.z],
+			"median_frame_ms": snappedf(elapsed[22], .01), "p95_frame_ms": snappedf(elapsed[42], .01),
+			"median_gpu_ms": snappedf(gpu[22], .01), "p95_gpu_ms": snappedf(gpu[42], .01)})
+	if requested.is_empty() or requested.has("exposure"):
+		await _exposure_shots(camera, path)
+	var file := FileAccess.open(path.path_join("daylight.json"), FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(report, "  "))
+	get_tree().quit(1 if _failures > 0 else 0)
+
+
+func _exposure_shots(camera: Camera3D, path: String) -> void:
+	_daylight.set_conditions(12.0, "clear")
+	var frame := camera.transform
+	camera.position = Vector3(-.22, 1.64, -1.17)
+	camera.look_at(Vector3(.6, 1.42, -3.0))
+	await get_tree().create_timer(2.5).timeout
+	camera.transform = frame
+	await RenderingServer.frame_post_draw
+	var first := get_viewport().get_texture().get_image()
+	await get_tree().create_timer(2.5).timeout
+	await RenderingServer.frame_post_draw
+	var settled := get_viewport().get_texture().get_image()
+	_check("Снимок при переводе взгляда к витражу",
+		first.save_png(path.path_join("08_exposure_turn.png")) == OK)
+	_check("Снимок после адаптации экспозиции",
+		settled.save_png(path.path_join("09_exposure_settled.png")) == OK)

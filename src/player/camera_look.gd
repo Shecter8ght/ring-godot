@@ -53,6 +53,7 @@ void fragment() {
 
 var _cams: Array[Camera3D] = []
 var _attr: CameraAttributesPractical
+var _neutral := false
 var _layer: CanvasLayer
 var _lens: ColorRect
 var _blur: MotionBlurEffect
@@ -83,10 +84,11 @@ var _lighting_revision: int = -1
 
 
 ## Основная камера — главная: по ней размытие в движении; остальные (оптика) получают ту же экспозицию.
-func setup(main: Camera3D, others: Array[Camera3D] = []) -> void:
+func setup(main: Camera3D, others: Array[Camera3D] = [], neutral_attributes: CameraAttributesPractical = null) -> void:
 	_cams = [main]
 	_cams.append_array(others)
-	_attr = CameraAttributesPractical.new()
+	_neutral = neutral_attributes != null
+	_attr = neutral_attributes if _neutral else CameraAttributesPractical.new()
 	_attr.dof_blur_far_enabled = false
 	_blur = MotionBlurEffect.new()
 	_compositor = Compositor.new()
@@ -114,12 +116,13 @@ func setup(main: Camera3D, others: Array[Camera3D] = []) -> void:
 
 
 func apply_settings() -> void:
-	var on: bool = Settings.lens_fx
+	var on: bool = Settings.lens_fx and not _neutral
 	var L: Dictionary = Balance.LOOK
 	_lens.visible = on
 	_flare.visible = on
 	_flare.reference = float(L.flare_ref)
-	_attr.auto_exposure_enabled = on
+	if not _neutral:
+		_attr.auto_exposure_enabled = on
 	if on:
 		_attr.auto_exposure_speed = float(L.adapt_speed)
 		_apply_exposure()
@@ -194,9 +197,9 @@ func _process(delta: float) -> void:
 		_raid = Raid.current != null
 		apply_settings()
 	var L: Dictionary = Balance.LOOK
-	if RaidAtmosphere.current and _lighting_revision != LabTuning.revision:
+	if not _neutral and RaidAtmosphere.current and _lighting_revision != LabTuning.revision:
 		_apply_exposure()
-	if _raid and Settings.lens_fx:
+	if _raid and _lens.visible:
 		_ctx_t -= delta
 		if _ctx_t <= 0.0 and RaidAtmosphere.current:
 			_ctx_t = float(L.context_sec)
@@ -221,7 +224,7 @@ func _process(delta: float) -> void:
 		mat.set_shader_parameter("aberration", float(L.aberration) * free_k)
 	# у лица в прицеле — ствольная коробка, приклад, задний целик: глаз смотрит вдаль, они мягкие
 	var dof: float = float(L.dof_amount) * aim_k * (float(L.dof_iron_k) if iron else 1.0)
-	_attr.dof_blur_near_enabled = Settings.lens_fx and dof > 0.002
+	_attr.dof_blur_near_enabled = _lens.visible and dof > 0.002
 	_attr.dof_blur_near_distance = float(L.dof_near_m)
 	_attr.dof_blur_near_transition = float(L.dof_transition_m)
 	_attr.dof_blur_amount = dof
@@ -234,4 +237,4 @@ func _process(delta: float) -> void:
 		cut = cut or rad_to_deg(_prev_xf.basis.z.angle_to(xf.basis.z)) > float(L.blur_cut_deg)
 	_prev_xf = xf
 	_has_prev = true
-	_blur.strength = 0.0 if cut or not Settings.motion_blur else float(L.blur_shutter)
+	_blur.strength = 0.0 if cut or _neutral or not Settings.motion_blur else float(L.blur_shutter)
