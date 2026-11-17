@@ -110,7 +110,26 @@ def raid() -> None:
     sheet.save(folder / "raid_conditions.jpg", quality=95)
 
 
+def refinement() -> None:
+    before, after = OUT / "map_candidate_c", OUT / "map_after"
+    if not (before / "close.png").exists() or not (after / "close.png").exists():
+        return
+    views = [("lawn", "исходный кадр"), *VIEWS]
+    width, height = 800, 450
+    sheet = Image.new("RGB", (1600, len(views) * 500 + 50), (20, 23, 19))
+    draw = ImageDraw.Draw(sheet)
+    draw.text((12, 8), "C · ДО УПЛОТНЕНИЯ", font=font(28), fill=(238, 240, 228))
+    draw.text((812, 8), "C · ПОСЛЕ УПЛОТНЕНИЯ", font=font(28), fill=(238, 240, 228))
+    for row, (view, label) in enumerate(views):
+        y = 50 + row * 500
+        sheet.paste(tile(before / f"{view}.png", (width, height)), (0, y))
+        sheet.paste(tile(after / f"{view}.png", (width, height)), (800, y))
+        draw.text((12, y + 454), label, font=font(24), fill=(215, 221, 204))
+    sheet.save(OUT / "refine_comparison.jpg", quality=95)
+
+
 if __name__ == "__main__":
     probe()
     maps()
     raid()
+    refinement()

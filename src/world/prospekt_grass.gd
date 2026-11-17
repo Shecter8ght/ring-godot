@@ -64,14 +64,14 @@ static func make_scatter(label: String, density: Texture2D, map_origin: Vector2,
 		grass.lod1_models = model_paths(BASE_ASSETS, 1)
 		grass.weed_models = PackedStringArray()
 		grass.weed_lod1_models = PackedStringArray()
-		grass.per_m2 = 24.0
-		grass.scale_range = Vector2(0.8, 1.25)
+		grass.per_m2 = 28.0
+		grass.scale_range = Vector2(0.9, 1.35)
 	else:
 		grass.models = model_paths(CLUMP_ASSETS)
 		grass.weed_models = model_paths(WEED_ASSETS)
 		grass.model_weights = PackedFloat32Array([0.48, 0.44, 0.08])
-		grass.per_m2 = 1.2
-		grass.scale_range = Vector2(0.8, 1.2)
+		grass.per_m2 = 1.55
+		grass.scale_range = Vector2(0.9, 1.35)
 	return grass
 
 
