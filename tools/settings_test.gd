@@ -19,6 +19,9 @@ func _ready() -> void:
 	for b in Settings.BUSES:
 		ok_bus = ok_bus and AudioServer.get_bus_index(String(b)) >= 0
 	_check("шины звука есть", ok_bus and Settings.bus_for("shot_rifle") == &"Shots" and Settings.bus_for("step_stone") == &"Steps", "")
+	var voice_radio: int = AudioServer.get_bus_index(Settings.RADIO_VOICE_BUS)
+	_check("голос рации идёт через свой фильтр с громкостью рации", voice_radio >= 0
+		and AudioServer.get_bus_send(voice_radio) == &"Radio" and AudioServer.get_bus_effect_count(voice_radio) == 3, "")
 	Settings.set_volume("Shots", 0.5)
 	_check("громкость выстрелов 50 % — −6 дБ", absf(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Shots")) + 6.02) < 0.1, "%.1f дБ" % AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Shots")))
 	Settings.set_volume("Shots", 1.0)

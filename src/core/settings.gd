@@ -61,6 +61,7 @@ var reticle: Dictionary = {"shape": 1, "color": 0, "bold": 1}
 var volume: Dictionary = {"Master": 1.0, "Shots": 1.0, "Steps": 1.0, "World": 1.0, "Ambient": 1.0,
 	"Voices": 1.0, "Radio": 1.0}
 const INTERFACE_BUS := &"Interface"
+const RADIO_VOICE_BUS := &"RadioVoice"
 const SHELTER_RADIO_BUS := &"ShelterRadio"
 const SHELTER_RADIO_DEFAULT_VOLUME := 0.35
 var shelter_radio_volume: float = SHELTER_RADIO_DEFAULT_VOLUME
@@ -503,20 +504,41 @@ func set_shelter_radio_volume(level: float) -> void:
 
 # ---------------------------------------------------------------- звук
 
-## Шины звука создаются при старте. Магнитола идёт в «Окружение», остальные — в Master.
+## Шины звука создаются при старте. Магнитола идёт в «Окружение», голос рации — через фильтр в «Рацию», остальные — в Master.
 func _make_buses() -> void:
-	for bus: String in BUSES.keys() + [String(INTERFACE_BUS), String(SHELTER_RADIO_BUS)]:
+	for bus: String in BUSES.keys() + [String(INTERFACE_BUS), String(RADIO_VOICE_BUS), String(SHELTER_RADIO_BUS)]:
 		var index: int = AudioServer.get_bus_index(bus)
 		if index < 0:
 			AudioServer.add_bus()
 			index = AudioServer.bus_count - 1
 			AudioServer.set_bus_name(index, bus)
 		if bus != "Master":
-			AudioServer.set_bus_send(index, "Ambient" if bus == SHELTER_RADIO_BUS else "Master")
+			var send := "Ambient" if bus == SHELTER_RADIO_BUS else ("Radio" if bus == RADIO_VOICE_BUS else "Master")
+			AudioServer.set_bus_send(index, send)
 		# Удалить прежние эффекты, если они были в раскладке.
 		for effect_index: int in range(AudioServer.get_bus_effect_count(index) - 1, -1, -1):
 			AudioServer.remove_bus_effect(index, effect_index)
+	_make_radio_voice_effects()
 	_make_shelter_radio_effects()
+
+
+func _make_radio_voice_effects() -> void:
+	var bus: int = AudioServer.get_bus_index(RADIO_VOICE_BUS)
+	var cfg: Dictionary = Balance.VOICE_UI
+	var bass_cut := AudioEffectHighPassFilter.new()
+	bass_cut.cutoff_hz = float(cfg.radio_high_hz)
+	bass_cut.db = AudioEffectFilter.FILTER_12DB
+	var speaker := AudioEffectDistortion.new()
+	speaker.mode = AudioEffectDistortion.MODE_WAVESHAPE
+	speaker.drive = float(cfg.radio_drive)
+	speaker.pre_gain = float(cfg.radio_pre_gain)
+	speaker.post_gain = float(cfg.radio_post_gain)
+	speaker.keep_hf_hz = float(cfg.radio_keep_hf_hz)
+	var treble_cut := AudioEffectLowPassFilter.new()
+	treble_cut.cutoff_hz = float(cfg.radio_low_hz)
+	treble_cut.db = AudioEffectFilter.FILTER_12DB
+	for effect: AudioEffect in [bass_cut, speaker, treble_cut]:
+		AudioServer.add_bus_effect(bus, effect)
 
 
 func _make_shelter_radio_effects() -> void:

@@ -1138,6 +1138,7 @@ src/combat/    weapon_models.gd (процедурное оружие; в рук�
 src/audio/     audio_system.gd — только явные назначения data/audio_events.json; пустое действие молчит.
                Стенд — Sonora Studio 1.3, действия моделей — data/weapon_sound_slots.json; общих семейств и синтеза нет.
                Постэффекты Godot запрещены решением владельца 2026-10-21: обработка в готовой записи; в игре — выбор и 3D-громкость.
+               Исключение с 2026-11-17 по просьбе владельца: голос рации идёт через `RadioVoice` с срезом низа/верха и лёгкой перегрузкой (`Balance.VOICE_UI`).
 src/world/     сборка сектора из данных, коллизии, навигация, шум/зрение
 src/net/       network.gd (autoload `Net` — host/join, `Net.is_networked()`), lobby.gd
 src/ui/        HUD, инвентарь, убежище

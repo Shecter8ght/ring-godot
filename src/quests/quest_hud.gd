@@ -157,6 +157,7 @@ func clear_subtitles() -> void:
 	_sub_queue.clear()
 	_sub_t = 0.0
 	_subs.visible = false
+	Audio.stop_ui_voice_lines()
 
 
 ## Подсказка-обучение: «{reload}» в тексте — клавиша действия reload по текущим привязкам; "" — погасить.
@@ -197,6 +198,7 @@ func _show_line() -> void:
 	var l: Array = _dlg_lines[_dlg_i]
 	var me := String(l[0]) == "player"
 	if l.size() > 1:
+		Audio.stop_ui_voice_lines()
 		Audio.play_voice_line(String(l[0]), String(l[1]))
 	_dlg_who.text = PLAYER_WHO if me else String(l[0])
 	_dlg_text.text = String(l[1]) if l.size() > 1 else ""
@@ -223,9 +225,11 @@ func _next_sub() -> void:
 		return
 	var e: Variant = _sub_queue.pop_front()
 	var color := DESC_COLOR
+	var voice_sec := 0.0
 	if e is Array and (e as Array).size() >= 2:
 		var me := String(e[0]) == "player"
 		var radio: bool = (e as Array).size() >= 3 and String(e[2]) == "radio"
+		voice_sec = Audio.voice_line_duration(String(e[0]), String(e[1]))
 		Audio.play_voice_line(String(e[0]), String(e[1]), Vector3.INF, radio)
 		var speaker := String(e[3]) if e.size() >= 4 else String(e[0])
 		_subs.text = "%s: %s" % [PLAYER_WHO if me else speaker, String(e[1])]
@@ -234,8 +238,8 @@ func _next_sub() -> void:
 		_subs.text = String(e)
 	_subs.add_theme_color_override("font_color", color)
 	_subs.visible = true
-	# длинную фразу — дольше
-	_sub_t = maxf(SUB_SEC, _subs.text.length() * 0.055)
+	# Следующая строка ждёт и чтение текста, и окончание самой длинной записи этой реплики.
+	_sub_t = maxf(maxf(SUB_SEC, _subs.text.length() * 0.055), voice_sec + float(Balance.VOICE_UI.queue_gap_sec))
 
 
 # ---------------------------------------------------------------- кадр и ввод

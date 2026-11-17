@@ -67,6 +67,7 @@ var _near_sound_doors: Array[Node] = []
 var _sound_doors_frame: int = -1
 var _sound_path_frame: int = -1
 var _sound_path_samples: Dictionary = {}
+var _ui_voice_players: Array[AudioStreamPlayer] = []
 
 
 func _load_voice_lines() -> void:
@@ -100,8 +101,46 @@ func play_voice_line(speaker: String, text: String, pos: Vector3 = Vector3.INF, 
 	if pos.is_finite():
 		play(event_id, pos, 0.0, 0.0, null, null, follow)
 	else:
-		play_ui(event_id, 0.0, &"Radio" if radio else &"")
+		return _play_ui_voice(event_id, radio) != null
 	return true
+
+
+func _play_ui_voice(event_id: String, radio: bool) -> AudioStreamPlayer:
+	var stream := _pick(event_id, _listener_pos())
+	if stream == null:
+		return null
+	var player := AudioStreamPlayer.new()
+	player.stream = stream
+	_tag_mix(player, event_id, stream, 0.0)
+	var bus := &"Radio" if radio else _bus_for(event_id)
+	player.bus = Settings.RADIO_VOICE_BUS if bus == &"Radio" else bus
+	player.finished.connect(player.queue_free)
+	player.finished.connect(func() -> void: _ui_voice_players.erase(player))
+	_ui_voice_players.append(player)
+	add_child(player)
+	player.play()
+	event_played.emit(event_id, event_id, _listener_pos())
+	return player
+
+
+## Самый длинный вариант реплики: очередь не обрежет голос независимо от случайного выбора записи.
+func voice_line_duration(speaker: String, text: String) -> float:
+	var event_id := voice_event_for(speaker, text)
+	var longest := 0.0
+	for value: Variant in _samples.get(event_id, []):
+		var stream := value as AudioStream
+		if stream != null:
+			longest = maxf(longest, stream.get_length())
+	return longest
+
+
+## Перезапуск эпизода или ручной переход разговора не оставляет прежний голос играть поверх нового.
+func stop_ui_voice_lines() -> void:
+	for player: AudioStreamPlayer in _ui_voice_players:
+		if is_instance_valid(player):
+			player.stop()
+			player.queue_free()
+	_ui_voice_players.clear()
 
 
 func _ready() -> void:

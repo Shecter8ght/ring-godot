@@ -4695,3 +4695,7 @@ func lab_sparks(kind: String) -> Dictionary:
 	config.life = (config.life as Vector2) * lab_number("impact:" + kind, "sparks_life")
 	config.speed = (config.speed as Vector2) * lab_number("impact:" + kind, "speed")
 	return config
+## Реплики интерфейса: пауза после записи перед следующей строкой; радиоканал срезает низ и верх,
+## лёгкая перегрузка оставляет ощущение маленького динамика.
+const VOICE_UI := {"queue_gap_sec": 0.18, "radio_high_hz": 330.0, "radio_low_hz": 3100.0,
+	"radio_drive": 0.46, "radio_pre_gain": 4.0, "radio_post_gain": -11.0, "radio_keep_hf_hz": 5000.0}
