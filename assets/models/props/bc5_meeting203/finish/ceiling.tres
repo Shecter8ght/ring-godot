@@ -9,8 +9,8 @@
 [resource]
 resource_name = "BC5_203_Ceiling"
 albedo_texture = ExtResource("1_color")
-metallic_specular = 0.24
-roughness = 1.0
+metallic_specular = 0.52
+roughness = 0.68
 ao_enabled = true
 ao_light_affect = 0.13
 ao_texture = ExtResource("2_orm")

@@ -12,6 +12,7 @@ const GLAZING_CRACKED := preload(ASSETS + "glazing_cracked.tres")
 const DISPLAY_GLASS := preload(ASSETS + "tv_glass.tres")
 const CHAIR_VARIANT_B := preload(ASSETS + "chair_variant_b/material.tres")
 const CABINET_OAK := preload(ASSETS + "finish/cabinet_oak.tres")
+const TABLE_VARNISH := preload(ASSETS + "finish/table_varnish.png")
 const DISPLAY_REFLECTION_LAYER := 1 << 11
 const SKY_BLOCKER_LAYER := 1 << 13
 const FINISH_MATERIALS := ["BC5_203_Walls", "BC5_203_Carpet", "BC5_203_Ceiling"]
@@ -155,7 +156,11 @@ func _build() -> void:
 			node.layers |= SKY_BLOCKER_LAYER
 	for node: MeshInstance3D in _table.find_children("*", "MeshInstance3D", true, false):
 		if not _daylight.table_lantern.is_ancestor_of(node):
-			_satin_finish(node, .90, .51)
+			var varnished := _satin_finish(node, .90, .51)
+			varnished.clearcoat_enabled = true
+			varnished.clearcoat = .22
+			varnished.clearcoat_roughness = .40
+			varnished.clearcoat_texture = TABLE_VARNISH
 	for node: MeshInstance3D in _door.find_children("*", "MeshInstance3D", true, false):
 		node.layers |= SKY_BLOCKER_LAYER
 		var material := node.get_active_material(0) as BaseMaterial3D
@@ -452,7 +457,10 @@ func _check_room() -> void:
 	_check("Трещина сохраняет оптику секции и коллизию", optics != null and _pane_hit(2)
 		and optics.shader == GLAZING_CRACKED.shader
 		and is_equal_approx(float(optics.get_shader_parameter("glass_fresnel")),
-			float(GLAZING.get_shader_parameter("glass_fresnel"))))
+			float(GLAZING.get_shader_parameter("glass_fresnel")))
+		and is_equal_approx(float(optics.get_shader_parameter("transmission_warp")),
+			float(GLAZING.get_shader_parameter("transmission_warp")))
+		and optics.get_shader_parameter("transmission_dust_mask") == GLAZING.get_shader_parameter("transmission_dust_mask"))
 	var probe := Camera3D.new()
 	probe.position = Vector3(-1.9, 1.66, 6.55)
 	add_child(probe)

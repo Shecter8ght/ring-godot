@@ -24,10 +24,13 @@ void fragment() {
 	float facing = clamp(abs(dot(normalize(NORMAL), VIEW)), 0.0, 1.0);
 	float grazing = pow(1.0 - facing, 5.0);
 	float reflection = glass_opacity + glass_fresnel * grazing;
-	vec3 behind = transmitted_window(SCREEN_UV, NORMAL, transmission_blur);
-	ALBEDO = mix(vec3(0.022, 0.029, 0.032), vec3(0.10, 0.17, 0.19), edge);
-	ROUGHNESS = mix(glass_roughness, 0.041, edge);
+	vec2 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xy;
+	float dust = window_dust(surface);
+	vec3 behind = transmitted_window(SCREEN_UV, NORMAL, surface, transmission_blur, dust);
+	vec3 pane = mix(vec3(0.022, 0.029, 0.032), vec3(0.17, 0.16, 0.145), dust);
+	ALBEDO = mix(pane, vec3(0.10, 0.17, 0.19), edge);
+	ROUGHNESS = mix(glass_roughness + 0.31 * dust, 0.041, edge);
 	SPECULAR = mix(0.76, 0.94, edge);
-	EMISSION = behind * mix(vec3(1.0), glass_tint, 0.16) * (1.0 - 0.54 * reflection - 0.18 * edge);
-	ALPHA = clamp(0.78 + 0.22 * grazing + 0.11 * edge, 0.0, 1.0);
+	EMISSION = behind * mix(vec3(1.0), glass_tint, 0.16) * (1.0 - 0.54 * reflection - 0.18 * edge - 0.18 * dust);
+	ALPHA = clamp(0.85 + 0.13 * grazing + 0.11 * edge + 0.14 * dust, 0.0, 1.0);
 }

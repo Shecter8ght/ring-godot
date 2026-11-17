@@ -126,10 +126,14 @@ void fragment() {
 	ALPHA = clamp(mix(opacity, 0.9, k), 0.0, 1.0);
 #ifdef TRANSMITTING_WINDOW
 	if (!fall) {
-		vec3 behind = transmitted_window(SCREEN_UV, NORMAL, transmission_blur + 1.1 * k);
-		EMISSION = behind * mix(vec3(1.0), glass_tint, 0.16) * (1.0 - 0.54 * opacity - 0.49 * k);
-		ALBEDO = mix(vec3(0.022, 0.029, 0.032), vec3(0.69, 0.74, 0.77), k);
-		ALPHA = clamp(0.78 + 0.22 * (opacity - glass_opacity) + 0.15 * k, 0.0, 1.0);
+		vec2 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xy;
+		float dust = window_dust(surface);
+		vec3 behind = transmitted_window(SCREEN_UV, NORMAL, surface, transmission_blur + 1.1 * k, dust);
+		EMISSION = behind * mix(vec3(1.0), glass_tint, 0.16) * (1.0 - 0.54 * opacity - 0.49 * k - 0.18 * dust);
+		vec3 pane = mix(vec3(0.022, 0.029, 0.032), vec3(0.17, 0.16, 0.145), dust);
+		ALBEDO = mix(pane, vec3(0.69, 0.74, 0.77), k);
+		ROUGHNESS = min(1.0, ROUGHNESS + 0.31 * dust);
+		ALPHA = clamp(0.85 + 0.13 * (opacity - glass_opacity) + 0.15 * k + 0.14 * dust, 0.0, 1.0);
 	}
 #endif
 }

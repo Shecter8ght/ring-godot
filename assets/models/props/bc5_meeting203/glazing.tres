@@ -1,6 +1,7 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
 
 [ext_resource type="Shader" path="res://assets/models/props/bc5_meeting203/meeting_glazing.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/textures/dorm_decals/dust_patches_albedo.png" id="2_dust"]
 
 [resource]
 resource_name = "Витраж 203"
@@ -8,4 +9,8 @@ shader = ExtResource("1_shader")
 shader_parameter/glass_tint = Color(0.88, 0.95, 0.97, 1.0)
 shader_parameter/glass_opacity = 0.08
 shader_parameter/glass_fresnel = 0.68
-shader_parameter/glass_roughness = 0.085
+shader_parameter/glass_roughness = 0.12
+shader_parameter/transmission_blur = 2.05
+shader_parameter/transmission_dust_mask = ExtResource("2_dust")
+shader_parameter/transmission_dust_strength = 0.62
+shader_parameter/transmission_warp = 0.0021

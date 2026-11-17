@@ -20,6 +20,10 @@ const DETAILS := [
 	["13_ceiling", 1, Vector3(-2.64, 1.66, 1.64), Vector3(.78, 3.15, 5.99), 50.0],
 	["14_glazing", 1, Vector3(-1.30, 1.70, 6.15), Vector3(1.48, 1.83, 7.77), 49.0],
 	["16_night_lantern", 6, Vector3(-1.36, 1.53, 3.20), Vector3(.58, .91, 4.86), 43.0],
+	["17_window_morning", 0, Vector3(-3.46, 1.58, .80), Vector3(.04, 1.33, 4.49), 49.0],
+	["18_window_noon", 1, Vector3(-3.46, 1.58, .80), Vector3(.04, 1.33, 4.49), 49.0],
+	["19_window_sunset", 3, Vector3(-3.46, 1.58, .80), Vector3(.04, 1.33, 4.49), 49.0],
+	["20_blinds_noon", 1, Vector3(3.75, 1.65, 3.07), Vector3(2.9, .08, 4.65), 43.0],
 ]
 const TOWARD_WINDOWS := ["15_fps_windows", 1, Vector3(-2.22, 1.64, 5.52), 173.0, -7.0]
 const MOTION_START := Vector3(-1.54, .018, 1.3)
