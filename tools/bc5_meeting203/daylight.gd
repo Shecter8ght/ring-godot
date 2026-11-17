@@ -14,6 +14,8 @@ const APERTURE_CENTERS := [-3.28, .58, 3.72]
 const LANTERN_LAYER := 1 << 12
 const LANTERN_ENERGY := .72
 const LANTERN_EMISSION := 2.1
+const REFLECTION_INTERVAL := 4.0
+const SUN_REFLECTION_DELAY := .25
 
 @export var table_lantern: Node3D
 
@@ -25,6 +27,8 @@ var _sky: ShaderMaterial
 var _sky_time := 0.0
 var _reflection_time := 0.0
 var _moonlit := true
+var _manual_sun := false
+var _manual_angles := Vector2.ZERO
 var sky_apertures: Array[AreaLight3D] = []
 var _lantern_level := -1.0
 var _lantern_diffuser: BaseMaterial3D
@@ -99,9 +103,7 @@ func set_conditions(at_hour: float, condition: String, moonlit := true) -> void:
 	hour = fposmod(at_hour, 24.0)
 	weather = condition
 	_moonlit = moonlit
-	_sky_time = 0.0
-	_apply_light(true)
-	_refresh_reflections()
+	reset_sun_angles()
 	if DisplayServer.get_name() != "headless":
 		if weather == "rain" and _rain == null:
 			_rain = RainFx.new()
@@ -110,13 +112,33 @@ func set_conditions(at_hour: float, condition: String, moonlit := true) -> void:
 			_rain.set_amount(1.0 if weather == "rain" else 0.0)
 
 
+## x — высота над горизонтом, y — азимут по часовой стрелке от севера, в градусах.
+func sun_angles() -> Vector2:
+	return _manual_angles if _manual_sun else DayCycle.sun_at(hour)
+
+
+func set_sun_angles(angles: Vector2) -> void:
+	_manual_sun = true
+	_manual_angles = Vector2(clampf(angles.x, -90.0, 90.0), clampf(angles.y, 0.0, 360.0))
+	_apply_light(true)
+	# Обновляем отражения, когда пользователь перестаёт двигать ползунок.
+	_reflection_time = REFLECTION_INTERVAL - SUN_REFLECTION_DELAY
+
+
+func reset_sun_angles() -> void:
+	_manual_sun = false
+	_apply_light(true)
+	_refresh_reflections()
+
+
 func _process(delta: float) -> void:
 	if running:
 		hour = fposmod(hour + delta / float(Balance.DAY_CYCLE.hour_sec), 24.0)
 		_sky_time += delta
 		_apply_light(_sky_time >= .75)
+	if running or _manual_sun:
 		_reflection_time += delta
-		if _reflection_time >= 4.0:
+		if _reflection_time >= REFLECTION_INTERVAL:
 			_refresh_reflections()
 	if _rain and weather == "rain":
 		var camera := get_viewport().get_camera_3d()
@@ -124,7 +146,7 @@ func _process(delta: float) -> void:
 
 
 func _apply_light(update_sky: bool) -> void:
-	var solar := DayCycle.sun_at(hour)
+	var solar := sun_angles()
 	_set_lantern(float(DayCycle.weights(solar.x).night))
 	var lunar := DayCycle.moon_at(hour)
 	var solar_dir := DayCycle.dir_from(solar.x, solar.y)

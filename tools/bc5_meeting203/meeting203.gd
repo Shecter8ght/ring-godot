@@ -6,6 +6,7 @@ const ASSETS := "res://assets/models/props/bc5_meeting203/"
 const PLAYER := preload("res://scenes/player/player.tscn")
 const RIG := preload("res://scenes/player/camera_rig.tscn")
 const Daylight203 := preload("res://tools/bc5_meeting203/daylight.gd")
+const SunControls := preload("res://tools/bc5_meeting203/sun_controls.gd")
 const QualityCapture := preload("res://tools/bc5_meeting203/quality_capture.gd")
 const GLAZING := preload(ASSETS + "glazing.tres")
 const GLAZING_CRACKED := preload(ASSETS + "glazing_cracked.tres")
@@ -34,6 +35,7 @@ var _chairs: Array[Node3D] = []
 var _player: Player
 var _failures := 0
 var _help: Label
+var _sun_controls: SunControls
 
 @onready var _door: Door = $OfficeDoor203
 @onready var _table: Node3D = $Furniture/Table203
@@ -74,31 +76,38 @@ func _ready() -> void:
 	var ui := CanvasLayer.new()
 	add_child(ui)
 	_help = Label.new()
-	_help.position = Vector2(24, 20)
-	_help.add_theme_font_size_override("font_size", 18)
+	_help.position = Vector2(24, 14)
+	_help.add_theme_font_size_override("font_size", 16)
 	_help.add_theme_color_override("font_shadow_color", Color.BLACK)
 	_help.add_theme_constant_override("shadow_offset_x", 2)
 	_help.add_theme_constant_override("shadow_offset_y", 2)
 	ui.add_child(_help)
+	_sun_controls = SunControls.new()
+	_sun_controls.name = "SunControls"
+	_sun_controls.daylight = _daylight
+	_sun_controls.hide()
+	ui.add_child(_sun_controls)
 	_update_help()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed or event.echo:
+	if _sun_controls == null or PauseMenu.shown or not event is InputEventKey or not event.pressed or event.echo:
 		return
 	var preset: int = event.physical_keycode - KEY_F1
 	if preset >= 0 and preset < Daylight203.PRESETS.size():
 		_daylight.set_preset(preset)
+		_sun_controls.sync()
 		_update_help(Daylight203.PRESETS[preset][3])
 		get_viewport().set_input_as_handled()
 		return
 	var camera := get_viewport().get_camera_3d()
-	if event.physical_keycode == KEY_U and camera and _break_aimed_pane(camera):
+	if event.physical_keycode == KEY_U and not _sun_controls.is_open() and camera and _break_aimed_pane(camera):
 		get_viewport().set_input_as_handled()
 
 
 func _update_help(condition: String = "Ясный день") -> void:
-	_help.text = "Переговорная 203   ·   %s   ·   F1–F7 — свет и погода   ·   F — дверь   ·   U — стекло" % condition
+	_help.text = ("Переговорная 203  ·  %s\n" % condition
+		+ "F1–F7 — свет и погода   F8 — солнце   F — дверь   U — стекло")
 
 
 func _break_aimed_pane(camera: Camera3D) -> bool:
@@ -125,8 +134,11 @@ func _build() -> void:
 			if material.resource_name.ends_with("дуб горизонтальный") or material.resource_name.ends_with("фанера на торце"):
 				node.set_surface_override_material(0, CABINET_OAK)
 			elif material.resource_name.ends_with("профиль потолка"):
-				var grid := _satin_finish(node, .44, .48)
-				grid.metallic = .34
+				var grid := _satin_finish(node, .14, .68)
+				grid.metallic = .57
+				grid.clearcoat_enabled = true
+				grid.clearcoat = .65
+				grid.clearcoat_roughness = .15
 	_solid = StaticBody3D.new()
 	_solid.name = "SlabWallsFurniture"
 	_solid.collision_layer = Hitscan.LAYER_WORLD
@@ -286,18 +298,7 @@ func _windows() -> void:
 
 func _street() -> void:
 	var pavement := _mat(Color(.33,.34,.331), .84)
-	var siding := _mat(Color(.58,.592,.571), .74)
-	var bands := _mat(Color(.49,.50,.48), .77)
-	var window := _mat(Color(.145,.181,.209), .31)
 	_box(Vector3(0,-4.28,26),Vector3(92,.18,49),pavement, true, "concrete")
-	for offset in [-21.0, 2.5, 24.7]:
-		_box(Vector3(offset,4.64,33),Vector3(20.6,17.7,6),siding)
-		for row in range(5):
-			var y := -2.48 + row * 3.04
-			_box(Vector3(offset,y-.56,29.979),Vector3(20.6,.28,.19),bands)
-			for i in range(9):
-				var wx: float = float(offset) - 8.7 + i * 2.14
-				_box(Vector3(wx,y+.29,29.90),Vector3(1.48,1.52,.17),window)
 	var tree := MeshInstance3D.new()
 	tree.name = "BirchAcrossTheWindow"
 	tree.mesh = TreeSpot._mesh(BIRCH, BIRCH_MATERIALS)
@@ -403,7 +404,21 @@ func _check_room() -> void:
 	_check("Прямой свет проходит через проём и перекрывается стойкой",
 		_ray(through_pane, through_pane + toward_sun, Hitscan.LAYER_WORLD).is_empty()
 		and not _ray(toward_frame, toward_frame + toward_sun, Hitscan.LAYER_WORLD).is_empty())
+	_daylight.set_sun_angles(Vector2(24, 160))
+	var raised := DayCycle.dir_from(38, 160)
+	_daylight.set_sun_angles(Vector2(38, 160))
+	_check("Ручная высота меняет направление солнечного света", _daylight.sun.global_basis.z.is_equal_approx(raised))
+	var rotated := DayCycle.dir_from(38, 215)
+	_daylight.set_sun_angles(Vector2(38, 215))
+	var sky_material := _daylight.environment.sky.sky_material as ShaderMaterial
+	var sky_direction: Vector3 = sky_material.get_shader_parameter("sun_dir")
+	_check("По ручному азимуту поворачиваются и свет, и солнце на небе",
+		_daylight.sun.global_basis.z.is_equal_approx(rotated) and sky_direction.is_equal_approx(rotated))
+	_daylight.reset_sun_angles()
+	_check("Сброс возвращает положение солнца по часам",
+		_daylight.sun.global_basis.z.is_equal_approx(toward_sun.normalized()) and _daylight.weather == "clear")
 	_daylight.set_conditions(12.0, "overcast")
+	_daylight.set_sun_angles(Vector2(36, 190))
 	_check("Под сплошными облаками прямое солнце гаснет", not _daylight.sun.visible)
 	var overcast_light := _daylight.sky_aperture.light_energy
 	_daylight.set_conditions(12.0, "fog")
@@ -414,6 +429,8 @@ func _check_room() -> void:
 		and _daylight.reflections[0].ambient_color_energy < .001)
 	_check("Ночью фонарь даёт свет и светится рассеиватель", _daylight.lantern_is_lit()
 		and _daylight.lantern_light.shadow_enabled and _daylight.table_lantern.get_parent() == _table)
+	_daylight.set_sun_angles(Vector2(35, 180))
+	_check("При ручном восходе фонарь гаснет", _daylight.sun.visible and not _daylight.lantern_light.visible)
 	_check("Рассеянный свет идёт через витраж снаружи", _daylight.sky_apertures.size() == 3
 		and _daylight.sky_apertures.all(func(aperture: AreaLight3D) -> bool:
 			return (aperture.position.z > GLASS_Z and aperture.shadow_enabled
