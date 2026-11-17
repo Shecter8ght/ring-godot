@@ -11,6 +11,7 @@ const PANE_CENTERS := [
 	Vector3(13.623, 2.2615, -9.13),
 ]
 const STAIR_THRESHOLD := Vector3(5.04, 0, -6.58)
+const LOWER_HINGE := Vector3(4.463, -4.20, -7.12)
 const HALL_PATH := [
 	Vector3(5.04, 0, -8.14), Vector3(12.48, 0, -8.14),
 	Vector3(12.48, 0, -.765), Vector3(0, 0, -.765),
@@ -46,6 +47,8 @@ func _build_entry() -> void:
 	$Hallway.remove_child(collider)
 	collider.queue_free()
 
+	var lower_leaf: MeshInstance3D = $Hallway/LowerStairLeaf
+	_build_lower_stair(lower_leaf)
 	var leaf: MeshInstance3D = $Hallway/UpperStairLeaf
 	leaf.reparent(_stair.get_node("Leaf"), false)
 	_stair.set("swing_degrees", 97.0)
@@ -89,6 +92,11 @@ func _build_entry() -> void:
 	add_child(_hall_glass)
 
 
+func _build_lower_stair(leaf: MeshInstance3D) -> void:
+	leaf.position = LOWER_HINGE
+	_box(LOWER_HINGE + Vector3(.538, 1.096, 0), Vector3(1.07, 2.171, .046), null, true, "metal")
+
+
 func _walk_segment(point: Vector3) -> bool:
 	var start := _player.global_position
 	var direction := point - start
@@ -108,7 +116,8 @@ func _walk_segment(point: Vector3) -> bool:
 func _check_room() -> void:
 	_daylight.running = false
 	_daylight.set_preset(1)
-	_check("Игрок на полу верхней площадки", _player.is_on_floor() and _player.position.distance_to(entry.position) < .06)
+	_check("Игрок на полу верхней площадки", _player.is_on_floor()
+		and _player.position.distance_to($LandingSpawn.position) < .10)
 	_check("Подход с площадки к лестничной двери",
 		_walk_segment(Vector3(3.07, 0, -6.58)) and _walk_segment(STAIR_THRESHOLD))
 	_check("Лестничная дверь закрыта при входе", not _stair.is_open)

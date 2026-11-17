@@ -311,7 +311,9 @@ func _windows() -> void:
 
 func _street() -> void:
 	var pavement := _mat(Color(.33,.34,.331), .84)
-	_box(Vector3(0,-4.28,26),Vector3(92,.18,49),pavement, true, "concrete")
+	var street_start := _street_start_z()
+	_box(Vector3(0, -4.28, (street_start + 50.5) * .5),
+		Vector3(92, .18, 50.5 - street_start), pavement, true, "concrete")
 	var tree := MeshInstance3D.new()
 	tree.name = "BirchAcrossTheWindow"
 	tree.mesh = TreeSpot._mesh(BIRCH, BIRCH_MATERIALS)
@@ -319,6 +321,10 @@ func _street() -> void:
 	tree.scale = Vector3.ONE * 0.95
 	tree.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 	add_child(tree)
+
+
+func _street_start_z() -> float:
+	return 1.5
 
 
 func _ray(a: Vector3, b: Vector3, mask: int) -> Dictionary:

@@ -1233,3 +1233,9 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 - Terrazzo 005, ambientCG, CC0. Из упакованного исходника Blender взяты карты цвета и шероховатости, уменьшены до 1536 × 1536. Игровые файлы в `assets/models/props/bc5_route203`. [Terrazzo 005](https://ambientcg.com/view?id=Terrazzo005)
 - Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Использованы имеющиеся карты `assets/textures/painted_plaster_wall`. [Painted Plaster Wall](https://polyhaven.com/a/painted_plaster_wall)
 - Геометрия, таблички и декали перенесены из принятой сборки второго этажа RING v02. Голубь на лестнице создан для RING встроенным ImageGen.
+
+## БЦ «Проспект, 5», лобби игрового стенда (2026-11-17)
+
+- Terrazzo 005, Lennart Demes, ambientCG, CC0. Игровой пол лобби использует общие карты цвета и шероховатости в `assets/models/props/bc5_route203`. [Источник](https://ambientcg.com/view?id=Terrazzo005)
+- Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Цветовой рисунок облицовочных плит использует общую карту `assets/textures/painted_plaster_wall/albedo.jpg`. Глянец и потёртости заданы в шейдере. [Источник](https://polyhaven.com/a/painted_plaster_wall)
+- Геометрия, таблички и маски следов взяты из утверждённой сборки лобби RING в мастере БЦ v02.

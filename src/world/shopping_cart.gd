@@ -224,7 +224,7 @@ func _hit_glass(state: PhysicsDirectBodyState3D, body: CollisionObject3D, shape:
 	if _glass_hits.has(key):
 		return
 	_glass_hits[key] = true
-	var normal: Vector3 = (p.xf as Transform3D).basis.z.normalized()
+	var normal: Vector3 = glass.pane_world_transform(idx).basis.z.normalized()
 	if absf(approach.dot(normal)) > absf(incoming.dot(normal)):
 		incoming = approach
 	var speed: float = absf(incoming.dot(normal))

@@ -1,0 +1,79 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://tools/bc5_route203/route203.tscn" id="1_route"]
+[ext_resource type="Script" path="res://tools/bc5_lobby203/lobby203.gd" id="2_lobby"]
+[ext_resource type="PackedScene" path="res://assets/models/props/bc5_lobby203/lobby.glb" id="3_model"]
+[ext_resource type="PackedScene" path="res://scenes/props/door.tscn" id="4_door"]
+[ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno_door.gd" id="5_leaf"]
+
+[node name="Bc5Lobby203" node_paths=PackedStringArray("entry") instance=ExtResource("1_route")]
+script = ExtResource("2_lobby")
+entry = NodePath("StreetSpawn")
+
+[node name="Lobby" parent="." index="10" instance=ExtResource("3_model")]
+
+[node name="StreetSpawn" type="Marker3D" parent="." index="11"]
+position = Vector3(11.4, -4.17, 10.65)
+
+[node name="EntryLeft" parent="." index="12" instance=ExtResource("4_door")]
+position = Vector3(10.463, -4.2, 7.72)
+script = ExtResource("5_leaf")
+width = 0.927
+height = 2.481
+interaction_depth = 2.25
+
+[node name="EntryRight" parent="." index="13" instance=ExtResource("4_door")]
+position = Vector3(12.337, -4.2, 7.72)
+rotation_degrees = Vector3(0, 180, 0)
+script = ExtResource("5_leaf")
+width = 0.927
+height = 2.481
+interaction_depth = 2.25
+
+[node name="GroundStairDoor" parent="." index="14" instance=ExtResource("4_door")]
+position = Vector3(4.463, -4.2, -7.12)
+script = ExtResource("5_leaf")
+width = 1.07
+height = 2.171
+thickness = 0.046
+leaf_offset = Vector3(0.003, 0.01, 0)
+interaction_depth = 2.60
+
+[node name="VestibuleReflection" type="ReflectionProbe" parent="." index="15"]
+position = Vector3(11.3, -2.45, 3.10)
+size = Vector3(4.99, 4.36, 9.78)
+origin_offset = Vector3(0.08, -0.28, 1.02)
+blend_distance = 0.42
+box_projection = true
+max_distance = 20.0
+intensity = 1.57
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 2.60
+
+[node name="PassageReflection" type="ReflectionProbe" parent="." index="16"]
+position = Vector3(12.45, -2.52, -3.13)
+size = Vector3(2.21, 3.59, 7.14)
+box_projection = true
+max_distance = 16.0
+intensity = 0.89
+interior = true
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 1.92
+
+[node name="GroundLiftsReflection" type="ReflectionProbe" parent="." index="17"]
+position = Vector3(9.0, -2.59, -6.70)
+size = Vector3(12.65, 4.24, 4.82)
+origin_offset = Vector3(0.22, -0.1, -0.04)
+blend_distance = 0.39
+box_projection = true
+max_distance = 18.0
+intensity = 0.94
+interior = true
+ambient_mode = 2
+enable_shadows = true
+cull_mask = 4097
+metadata/sky_bounce_scale = 1.94

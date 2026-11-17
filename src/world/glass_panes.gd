@@ -23,6 +23,7 @@ const STEP_LAYER: Script = preload("res://src/audio/step_layer_patch.gd")
 ## floor_y, sill: Vector3 (размер подоконника, центр — под панелью), hp, broken, tempered,
 ## hits — сколько попаданий, side — куда полетят куски (+1 — по нормали).
 ## walk_through: false у окон без пешеходного маршрута с обеих сторон}.
+## xf и floor_y заданы в осях GlassPanes. Точки ударов и направления приходят из мира.
 var panes: Array = []
 var _glass_mm: MultiMesh
 var _body: StaticBody3D
@@ -147,12 +148,22 @@ static func pane_of(hit: Dictionary) -> Array:
 	return [body.get_parent(), int(owner_node.get_meta("pane"))]
 
 
+func pane_world_transform(index: int) -> Transform3D:
+	return global_transform * (panes[index].xf as Transform3D)
+
+
+func _world_floor(pane: Dictionary) -> Vector3:
+	var center: Vector3 = (pane.xf as Transform3D).origin
+	center.y = float(pane.floor_y)
+	return to_global(center)
+
+
 ## Пуля попала в панель (у любого peer) в точку at, летела по dir: урон копит хост; трещины —
 ## от каждого попадания, куски потом полетят по ходу пули.
 func bullet(idx: int, damage: float, at: Vector3 = Vector3.INF, dir: Vector3 = Vector3.ZERO) -> void:
 	var dmg := damage * float(Balance.GLASS.bullet_k)
 	var uv := Vector2(-1, -1)
-	var xf: Transform3D = panes[idx].xf
+	var xf: Transform3D = pane_world_transform(idx)
 	if at != Vector3.INF:
 		var l: Vector3 = xf.affine_inverse() * at
 		var sz: Vector2 = panes[idx].size
@@ -173,7 +184,7 @@ func impact(idx: int, energy_j: float, at: Vector3) -> void:
 	var p: Dictionary = panes[idx]
 	if bool(p.broken):
 		return
-	var local: Vector3 = (p.xf as Transform3D).affine_inverse() * at
+	var local: Vector3 = pane_world_transform(idx).affine_inverse() * at
 	var sz: Vector2 = p.size
 	var uv: Vector2 = Vector2(clampf(local.x / sz.x + 0.5, 0.05, 0.95), clampf(local.y / sz.y + 0.5, 0.05, 0.95))
 	_apply(idx, HP * energy_j / float(Balance.CART.glass_break_j), uv, -signf(local.z))
@@ -185,7 +196,7 @@ func blast(pos: Vector3, radius: float) -> void:
 		var p: Dictionary = panes[i]
 		if bool(p.broken):
 			continue
-		var xf: Transform3D = p.xf
+		var xf: Transform3D = pane_world_transform(i)
 		var d := xf.origin.distance_to(pos)
 		if d < radius:
 			_apply(i, HP * 2.5 * (1.0 - d / radius) + 20.0, Vector2(-1, -1), signf((xf.origin - pos).dot(xf.basis.z)))
@@ -247,7 +258,7 @@ func _tick_creep(delta: float) -> void:
 		var interval: Vector2 = g.creep_sec
 		state.creep = _rng.randf_range(interval.x, interval.y)
 		if (state.cracks as GlassCracks).creep(_rng.randi()) and _rng.randf() < 0.45:
-			Audio.play("glass_crack", Vector3((p.xf as Transform3D).origin), -9.0)
+			Audio.play("glass_crack", pane_world_transform(idx).origin, -9.0)
 
 
 ## Состояние панели у всех: прочность, точка попадания (трещины), куда полетят куски; 0 — осыпалась.
@@ -271,7 +282,7 @@ func _rpc_state(idx: int, hp: float, uv: Vector2 = Vector2(-1, -1), side: float 
 			if float(material.get_shader_parameter("crazed")) < 0.5:
 				material.set_shader_parameter("hit_uv", Vector2(uv.x, 1.0 - uv.y))
 			material.set_shader_parameter("crazed", 1.0)
-		Audio.play("glass_crack", Vector3(p.xf.origin))
+		Audio.play("glass_crack", pane_world_transform(idx).origin)
 		if not _flush_queued:
 			_flush_queued = true
 			_flush.call_deferred()
@@ -329,16 +340,17 @@ func _ensure_damaged(idx: int) -> Dictionary:
 func _shatter(idx: int) -> void:
 	var p: Dictionary = panes[idx]
 	p["broken"] = true
-	var xf: Transform3D = p.xf
+	var xf: Transform3D = pane_world_transform(idx)
+	var floor_pos: Vector3 = _world_floor(p)
 	var state: Dictionary = _ensure_damaged(idx)
 	# попадания этого же кадра — только в узор кусков, рисовать уже нечего
 	_draw_pending(idx, false)
 	_shapes[idx].set_deferred("disabled", true)
 	_sill_shapes[idx].set_deferred("disabled", true)
 	if bool(p.tempered):
-		_crumble(idx, state)
+		_crumble(idx, state, xf, floor_pos.y)
 	else:
-		_break_apart(idx, state)
+		_break_apart(idx, state, xf, floor_pos.y)
 	Audio.play("glass_break", xf.origin)
 	Audio.play("glass_shards", xf.origin, -5.0)
 	NoiseBus.emit(xf.origin, float(Balance.GLASS.noise_m), "glass")
@@ -348,34 +360,33 @@ func _shatter(idx: int) -> void:
 	var link := NavigationLink3D.new()
 	link.name = "Gap_%d" % idx
 	link.bidirectional = true
-	var fl := Vector3(xf.origin.x, float(p.floor_y), xf.origin.z)
-	var nrm := xf.basis.z.normalized()
+	var nrm := (p.xf as Transform3D).basis.z.normalized()
 	add_child(link)
-	link.global_position = fl
+	link.global_position = floor_pos
 	link.start_position = nrm * 0.9
 	link.end_position = -nrm * 0.9
 
 
 ## Обычное стекло: куски по узору трещин (GlassShatter) вместо панели.
-func _break_apart(idx: int, state: Dictionary) -> void:
+func _break_apart(idx: int, state: Dictionary, xf: Transform3D, floor_y: float) -> void:
 	var p: Dictionary = panes[idx]
-	var xf: Transform3D = p.xf
 	var shatter: GlassShatter = GlassShatter.new()
 	shatter.name = "Shards_%d" % idx
+	# Осыпавшееся стекло остаётся у места удара, в том числе после движения створки.
+	shatter.top_level = true
 	add_child(shatter)
-	shatter.transform = xf
+	shatter.global_transform = xf
 	var cracks: GlassCracks = state.cracks
-	var floor_local: float = float(p.floor_y) - xf.origin.y
+	var floor_local: float = floor_y - xf.origin.y
 	shatter.build(p.size, cracks.hits, float(p.side), floor_local, idx * 92821 + int(p.hits) * 31, (state.material as ShaderMaterial).duplicate() as ShaderMaterial)
 	(state.mesh as MeshInstance3D).queue_free()
-	get_tree().create_timer(1.0).timeout.connect(_pile.bind(xf, p.size, float(p.floor_y), false))
+	get_tree().create_timer(1.0).timeout.connect(_pile.bind(xf, p.size, floor_y, false))
 
 
 ## Закалённое: сетка кубиков исчезает волной от точки удара, кубики сыплются той же волной.
-func _crumble(idx: int, state: Dictionary) -> void:
+func _crumble(idx: int, state: Dictionary, xf: Transform3D, floor_y: float) -> void:
 	var g: Dictionary = Balance.GLASS
 	var p: Dictionary = panes[idx]
-	var xf: Transform3D = p.xf
 	var sz: Vector2 = p.size
 	var material: ShaderMaterial = state.material
 	var hit_uv: Vector2 = material.get_shader_parameter("hit_uv")
@@ -408,7 +419,7 @@ func _crumble(idx: int, state: Dictionary) -> void:
 	process.set_shader_parameter("emit_box", Vector3(sz.x * 0.5, sz.y * 0.5, 0.004))
 	process.set_shader_parameter("release_from", xf * Vector3(hit_local.x, hit_local.y, 0.0))
 	process.set_shader_parameter("release_speed", wave)
-	process.set_shader_parameter("plane_b", Vector4(0.0, 1.0, 0.0, float(p.floor_y)))
+	process.set_shader_parameter("plane_b", Vector4(0.0, 1.0, 0.0, floor_y))
 	process.set_shader_parameter("color_ramp", ImpactBurst._ramp("debris"))
 	process.set_shader_parameter("tint", Color(0.82, 0.9, 0.93))
 	process.set_shader_parameter("tint_alt", Color(0.95, 0.98, 1.0))
@@ -420,15 +431,16 @@ func _crumble(idx: int, state: Dictionary) -> void:
 	cubes.explosiveness = 1.0
 	cubes.local_coords = false
 	cubes.fixed_fps = 0
-	cubes.visibility_aabb = AABB(Vector3(-sz.x - 2.0, float(p.floor_y) - xf.origin.y - 1.0, -3.0), Vector3(sz.x * 2.0 + 4.0, sz.y + 4.0, 6.0))
+	cubes.visibility_aabb = AABB(Vector3(-sz.x - 2.0, floor_y - xf.origin.y - 1.0, -3.0), Vector3(sz.x * 2.0 + 4.0, sz.y + 4.0, 6.0))
 	cubes.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	cubes.draw_pass_1 = ImpactBurst._mesh("pebble")
 	cubes.material_override = _cubes_material()
+	cubes.top_level = true
 	add_child(cubes)
-	cubes.transform = xf
+	cubes.global_transform = xf
 	cubes.emitting = true
 	get_tree().create_timer(cubes.lifetime + 0.5).timeout.connect(cubes.queue_free)
-	get_tree().create_timer(life.x + reach / wave).timeout.connect(_pile.bind(xf, sz, float(p.floor_y), true))
+	get_tree().create_timer(life.x + reach / wave).timeout.connect(_pile.bind(xf, sz, floor_y, true))
 
 
 ## Материалы повреждённого стекла (трещины, куски, кубики, мелочь на полу) — для разогрева шейдеров.
@@ -494,6 +506,7 @@ func _pile(xf: Transform3D, size: Vector2, floor_y: float, cubes: bool) -> void:
 		mm.set_instance_transform(i, Transform3D(b.scaled(Vector3.ONE * scale), p))
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm
+	mi.top_level = true
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if cubes:
 		mi.material_override = _cubes_material()
