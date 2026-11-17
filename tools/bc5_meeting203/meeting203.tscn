@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://tools/bc5_meeting203/meeting203.gd" id="1_scene"]
 [ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/room203.glb" id="2_room"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scenes/levels/prospekt/zerno/zerno_door.gd" id="6_door_pivot"]
 [ext_resource type="PackedScene" path="res://assets/models/props/bc5_meeting203/door203.glb" id="7_door_leaf"]
 [ext_resource type="Script" path="res://tools/bc5_meeting203/daylight.gd" id="8_light"]
+[ext_resource type="PackedScene" path="res://assets/models/dorm/props/found_lantern.gltf" id="9_lantern"]
 
 [sub_resource type="CameraAttributesPractical" id="Eye203"]
 resource_local_to_scene = true
@@ -34,33 +35,36 @@ tonemap_mode = 4
 tonemap_agx_white = 3.2
 tonemap_agx_contrast = 1.15
 ssao_enabled = true
-ssao_radius = 0.33
-ssao_intensity = 1.85
-ssao_power = 1.42
-ssao_light_affect = 0.25
+ssao_radius = 0.26
+ssao_intensity = 1.38
+ssao_power = 1.16
+ssao_light_affect = 0.18
 ssil_enabled = true
-ssil_radius = 1.15
-ssil_intensity = 0.72
+ssil_radius = 0.82
+ssil_intensity = 0.36
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_read_sky_light = true
 sdfgi_cascades = 4
 sdfgi_min_cell_size = 0.125
 sdfgi_bounce_feedback = 0.36
-sdfgi_energy = 1.05
+sdfgi_energy = 1.85
 fog_mode = 1
 fog_depth_begin = 8.9
 fog_depth_end = 34.0
 fog_depth_curve = 1.0
 fog_sky_affect = 0.0
+metadata/authored_lighting = true
+metadata/ssr_allowed = false
 
 [node name="Meeting203" type="Node3D"]
 script = ExtResource("1_scene")
 
 [node name="Room203" parent="." instance=ExtResource("2_room")]
 
-[node name="Daylight" type="Node3D" parent="."]
+[node name="Daylight" type="Node3D" parent="." node_paths=PackedStringArray("table_lantern")]
 script = ExtResource("8_light")
+table_lantern = NodePath("../Furniture/Table203/TableLantern")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Daylight"]
 environment = SubResource("Day203")
@@ -79,16 +83,18 @@ directional_shadow_blend_splits = true
 directional_shadow_max_distance = 56.0
 
 [node name="SkyAperture" type="AreaLight3D" parent="Daylight"]
-position = Vector3(-0.16, 2.46, 8.16)
+position = Vector3(-3.28, 2.46, 7.98)
 rotation_degrees = Vector3(-8, 0, 0)
 light_energy = 0.0
-light_specular = 0.08
-light_cull_mask = 1046525
-light_size = 1.28
+light_specular = 0.16
+light_cull_mask = 1046527
+light_size = 0.0
 shadow_enabled = true
 shadow_bias = 0.08
 shadow_normal_bias = 0.58
-area_size = Vector2(9.35, 2.34)
+shadow_blur = 3.1
+area_size = Vector2(3.28, 2.34)
+shadow_caster_mask = 8192
 area_range = 12.8
 area_attenuation = 0.78
 area_normalize_energy = false
@@ -99,9 +105,11 @@ size = Vector3(10.5, 4, 8.5)
 box_projection = true
 intensity = 0.57
 interior = true
-ambient_mode = 0
+ambient_mode = 2
+ambient_color_energy = 0.0
 enable_shadows = true
 max_distance = 44.0
+cull_mask = 4097
 reflection_mask = 1046527
 
 [node name="DisplayReflection" type="ReflectionProbe" parent="Daylight"]
@@ -114,13 +122,36 @@ intensity = 1.82
 ambient_mode = 0
 enable_shadows = true
 max_distance = 44.0
-cull_mask = 1
+cull_mask = 4097
 reflection_mask = 2048
 
 [node name="Furniture" type="Node3D" parent="."]
 
 [node name="Table203" parent="Furniture" instance=ExtResource("3_table")]
 position = Vector3(0.17, 0.00800037, 4.53)
+
+[node name="TableLantern" type="Node3D" parent="Furniture/Table203"]
+position = Vector3(0.48, 0.7735, 0.33)
+rotation_degrees = Vector3(0, -23, 0)
+
+[node name="Model" parent="Furniture/Table203/TableLantern" instance=ExtResource("9_lantern")]
+
+[node name="Light" type="OmniLight3D" parent="Furniture/Table203/TableLantern"]
+position = Vector3(0, 0.128, 0)
+visible = false
+light_color = Color(1, 0.87, 0.71, 1)
+light_energy = 0.0
+light_specular = 0.38
+light_bake_mode = 2
+light_size = 0.0
+shadow_enabled = true
+shadow_bias = 0.011
+shadow_normal_bias = 0.003
+shadow_blur = 2.6
+shadow_caster_mask = 1044479
+omni_range = 4.65
+omni_attenuation = 1.42
+omni_shadow_mode = 1
 
 [node name="Chairs" type="Node3D" parent="Furniture"]
 

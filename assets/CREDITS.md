@@ -1209,3 +1209,5 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 В креслах переговорной 203 использован фотоскан Fabric Leather 02, Rob Tuytel, Poly Haven, CC0. Зерно материала перенесено на игровую развёртку. Формы заломов и маска пыли сделаны для сцены. [Источник](https://polyhaven.com/a/fabric_leather_02)
 
 При доводке переговорной 203 микрорельеф окрашенных стен дополнен данными высот Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Оба варианта кожи используют тот же скан Fabric Leather 02, Rob Tuytel, CC0. Швы, заломы, следы пыли и вариации плит созданы для сцены. [Штукатурка](https://polyhaven.com/a/painted_plaster_wall) · [Кожа](https://polyhaven.com/a/fabric_leather_02)
+
+В текущей отделке 203 использованы Terlenka для тканевых кресел и Dirty Carpet для петли ковровой плитки. Terlenka сняли colormass и обработал Rico Cilliers. Dirty Carpet создал Rohit Seervi. Обе карты Poly Haven распространяются по CC0. Цвета, UV-маски, швы и вариации подготовлены для RING. [Terlenka](https://polyhaven.com/a/terlenka) · [Dirty Carpet](https://polyhaven.com/a/dirty_carpet)

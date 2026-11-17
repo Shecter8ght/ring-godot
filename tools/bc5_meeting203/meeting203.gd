@@ -6,11 +6,14 @@ const ASSETS := "res://assets/models/props/bc5_meeting203/"
 const PLAYER := preload("res://scenes/player/player.tscn")
 const RIG := preload("res://scenes/player/camera_rig.tscn")
 const Daylight203 := preload("res://tools/bc5_meeting203/daylight.gd")
+const QualityCapture := preload("res://tools/bc5_meeting203/quality_capture.gd")
 const GLAZING := preload(ASSETS + "glazing.tres")
 const GLAZING_CRACKED := preload(ASSETS + "glazing_cracked.tres")
 const DISPLAY_GLASS := preload(ASSETS + "tv_glass.tres")
 const CHAIR_VARIANT_B := preload(ASSETS + "chair_variant_b/material.tres")
+const CABINET_OAK := preload(ASSETS + "finish/cabinet_oak.tres")
 const DISPLAY_REFLECTION_LAYER := 1 << 11
+const SKY_BLOCKER_LAYER := 1 << 13
 const FINISH_MATERIALS := ["BC5_203_Walls", "BC5_203_Carpet", "BC5_203_Ceiling"]
 const BIRCH := "res://assets/models/plants/birch_b_lod0.glb"
 const BIRCH_MATERIALS := "res://assets/models/plants/materials"
@@ -41,9 +44,6 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	var headless := DisplayServer.get_name() == "headless"
 	_build()
-	if not headless:
-		get_viewport().msaa_3d = Viewport.MSAA_2X
-		get_viewport().use_taa = true
 	if not headless and args.has("--daylight-shots"):
 		await _daylight_shots()
 		return
@@ -64,8 +64,12 @@ func _ready() -> void:
 	var movement_camera := RIG.instantiate() as CameraRig
 	movement_camera.neutral_camera_attributes = _daylight.camera_attributes
 	add_child(movement_camera)
+	movement_camera.get_node("AdsCamera/ViewmodelFill").hide()
 	movement_camera.set_target(_player)
 	movement_camera._look_yaw = 0.0
+	if args.has("--quality-ab") or args.has("--quality-shots") or args.has("--quality-details") or args.has("--quality-views"):
+		await QualityCapture.new().run(self, movement_camera, _player, _shot_path(), args)
+		return
 	var ui := CanvasLayer.new()
 	add_child(ui)
 	_help = Label.new()
@@ -83,9 +87,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	var preset: int = event.physical_keycode - KEY_F1
 	if preset >= 0 and preset < Daylight203.PRESETS.size():
-		var choice: Array = Daylight203.PRESETS[preset]
-		_daylight.set_conditions(choice[1], choice[2])
-		_update_help(choice[3])
+		_daylight.set_preset(preset)
+		_update_help(Daylight203.PRESETS[preset][3])
 		get_viewport().set_input_as_handled()
 		return
 	var camera := get_viewport().get_camera_3d()
@@ -116,8 +119,13 @@ func _build() -> void:
 			node.layers = DISPLAY_REFLECTION_LAYER
 		elif material and material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 			node.gi_mode = GeometryInstance3D.GI_MODE_STATIC
-			if material.resource_name.ends_with("дуб горизонтальный"):
-				_satin_finish(node, .91, .42)
+			if FINISH_MATERIALS.has(material.resource_name):
+				node.layers |= SKY_BLOCKER_LAYER
+			if material.resource_name.ends_with("дуб горизонтальный") or material.resource_name.ends_with("фанера на торце"):
+				node.set_surface_override_material(0, CABINET_OAK)
+			elif material.resource_name.ends_with("профиль потолка"):
+				var grid := _satin_finish(node, .44, .48)
+				grid.metallic = .34
 	_solid = StaticBody3D.new()
 	_solid.name = "SlabWallsFurniture"
 	_solid.collision_layer = Hitscan.LAYER_WORLD
@@ -143,13 +151,19 @@ func _build() -> void:
 		_chairs.append(chair)
 	for node: MeshInstance3D in $Furniture.find_children("*", "MeshInstance3D", true, false):
 		node.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+		if not _daylight.table_lantern.is_ancestor_of(node):
+			node.layers |= SKY_BLOCKER_LAYER
 	for node: MeshInstance3D in _table.find_children("*", "MeshInstance3D", true, false):
-		_satin_finish(node, .90, .51)
+		if not _daylight.table_lantern.is_ancestor_of(node):
+			_satin_finish(node, .90, .51)
 	for node: MeshInstance3D in _door.find_children("*", "MeshInstance3D", true, false):
+		node.layers |= SKY_BLOCKER_LAYER
 		var material := node.get_active_material(0) as BaseMaterial3D
 		if material and material.resource_name == "203 Brushed stainless":
-			var steel := _satin_finish(node, .34, .50)
-			steel.metallic = .74
+			var steel := _satin_finish(node, .39, .50)
+			steel.metallic = .79
+		elif material and material.resource_name == "203 Pale office":
+			_satin_finish(node, .83, .25)
 	_door.set("swing_degrees", -85.0)
 	_windows()
 
@@ -169,7 +183,8 @@ func _mat(rgb: Color, rough: float) -> StandardMaterial3D:
 	return material
 
 
-func _box(at: Vector3, size: Vector3, material: Material = null, solid := false, surface := "concrete") -> void:
+func _box(at: Vector3, size: Vector3, material: Material = null, solid := false,
+		surface := "concrete", blocks_sky := true) -> void:
 	if material:
 		var mesh := BoxMesh.new()
 		mesh.size = size
@@ -178,6 +193,8 @@ func _box(at: Vector3, size: Vector3, material: Material = null, solid := false,
 		visual.material_override = material
 		visual.position = at
 		visual.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+		if blocks_sky:
+			visual.layers |= SKY_BLOCKER_LAYER
 		add_child(visual)
 	if solid:
 		var shape := BoxShape3D.new()
@@ -239,11 +256,11 @@ func _windows() -> void:
 	var spandrel := _mat(Color(.30, .29, .26), .88)
 	_box(Vector3(center, .529, 7.863), Vector3(X_MAX-X_MIN+.18, 1.15, .39), spandrel)
 	_box(Vector3(center, 3.268, 7.82), Vector3(X_MAX-X_MIN+.18, .48, .44), spandrel)
-	_box(Vector3(center, 1.12, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
-	_box(Vector3(center, 3.402, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal")
+	_box(Vector3(center, 1.12, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal", false)
+	_box(Vector3(center, 3.402, GLASS_Z), Vector3(X_MAX-X_MIN, .066, .115), frame, true, "metal", false)
 	for index in range(count + 1):
 		var x := EDGE_A + step * index
-		_box(Vector3(x, 2.263, GLASS_Z), Vector3(.074, 2.24, .114), frame, true, "metal")
+		_box(Vector3(x, 2.263, GLASS_Z), Vector3(.074, 2.24, .114), frame, true, "metal", false)
 	# Откосы закрывают зазор между рамой и плоскостями боковых стен.
 	for bounds: Vector2 in [Vector2(X_MIN, EDGE_A - .023), Vector2(EDGE_B + .023, X_MAX)]:
 		_box(Vector3((bounds.x + bounds.y) * .5, 2.261, 7.701),
@@ -371,6 +388,7 @@ func _check_room() -> void:
 	_daylight.running = false
 	_daylight.set_conditions(9.0, "clear")
 	var morning := _daylight.sun.global_basis.z
+	_check("Утром фонарь на столе выключен", not _daylight.lantern_light.visible)
 	_daylight.set_conditions(12.0, "clear")
 	_check("Солнце меняет высоту и направление", morning.angle_to(_daylight.sun.global_basis.z) > .30
 		and _daylight.sun.visible and _daylight.sun.shadow_enabled)
@@ -386,12 +404,17 @@ func _check_room() -> void:
 	_daylight.set_conditions(12.0, "fog")
 	_check("Густой туман гасит свет из окна", _daylight.environment.fog_enabled
 		and _daylight.sky_aperture.light_energy < overcast_light and not _daylight.sun.visible)
-	_daylight.set_conditions(1.5, "clear")
-	_check("Ночью только слабое естественное освещение", _daylight.sun.light_energy < .02
-		and _daylight.sky_aperture.light_energy < .01 and _daylight.sky_aperture.position.z > GLASS_Z
-		and _daylight.reflections[0].interior and _daylight.reflections[0].ambient_mode == ReflectionProbe.AMBIENT_DISABLED
-		and _daylight.find_children("*", "Light3D", true, false).size() == 2)
+	_daylight.set_preset(Daylight203.PRESETS.size() - 1)
+	_check("В безлунную ночь солнце и луна выключены", not _daylight.sun.visible
+		and _daylight.reflections[0].ambient_color_energy < .001)
+	_check("Ночью фонарь даёт свет и светится рассеиватель", _daylight.lantern_is_lit()
+		and _daylight.lantern_light.shadow_enabled and _daylight.table_lantern.get_parent() == _table)
+	_check("Рассеянный свет идёт через витраж снаружи", _daylight.sky_apertures.size() == 3
+		and _daylight.sky_apertures.all(func(aperture: AreaLight3D) -> bool:
+			return (aperture.position.z > GLASS_Z and aperture.shadow_enabled
+				and is_zero_approx(aperture.light_size))))
 	_daylight.set_conditions(15.55, "clear")
+	_check("При возвращении дня фонарь гаснет", not _daylight.lantern_light.visible and not _daylight.lantern_is_lit())
 	_check("Стол и кресла загружены с PBR-картами Painter",_textured(_table) and _textured(_chairs[0]))
 	_check("Восемь кресел в исходных позициях",_chairs.size()==8)
 	var alt := _chairs[2].find_child("ChairBody", true, false) as MeshInstance3D
@@ -399,7 +422,7 @@ func _check_room() -> void:
 	_check("В креслах два разных атласа обивки", _textured(_chairs[2])
 		and alt.get_active_material(0) == CHAIR_VARIANT_B
 		and CHAIR_VARIANT_B.normal_texture != (primary.get_active_material(0) as BaseMaterial3D).normal_texture)
-	_check("Отделка v02, затенение примыканий и рельеф плит подключены", _native_room_finish())
+	_check("Карты отделки, затенение примыканий и рельеф плит подключены", _native_room_finish())
 	_check("Телевизор отражает свет через отдельный глянцевый материал", _glossy_display())
 	_check("Игрок появился перед дверью на полу",_player.is_on_floor() and _player.position.z < -.65)
 	_check("Закрытая дверь держит коллизию",_hits_leaf())
@@ -513,10 +536,11 @@ func _daylight_shots() -> void:
 	RenderingServer.viewport_set_measure_render_time(viewport_rid, true)
 	var requested := OS.get_environment("BC5_MEETING_ONLY").split(",", false)
 	var report := []
-	for preset: Array in Daylight203.PRESETS:
+	for i in Daylight203.PRESETS.size():
+		var preset: Array = Daylight203.PRESETS[i]
 		if not requested.is_empty() and not requested.has(preset[0]):
 			continue
-		_daylight.set_conditions(preset[1], preset[2])
+		_daylight.set_preset(i)
 		await get_tree().create_timer(1.85).timeout
 		var elapsed := PackedFloat32Array()
 		var gpu := PackedFloat32Array()

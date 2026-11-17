@@ -8,8 +8,14 @@ const PRESETS := [
 	["04_sunset", 18.65, "clear", "Закат"],
 	["05_fog", 12.0, "fog", "Сильный туман"],
 	["06_rain", 12.0, "rain", "Дождь под облаками"],
-	["07_night", 1.5, "clear", "Ночь"],
+	["07_night", 1.5, "clear", "Безлунная ночь"],
 ]
+const APERTURE_CENTERS := [-3.28, .58, 3.72]
+const LANTERN_LAYER := 1 << 12
+const LANTERN_ENERGY := .72
+const LANTERN_EMISSION := 2.1
+
+@export var table_lantern: Node3D
 
 var hour := 15.55
 var weather := "clear"
@@ -18,15 +24,31 @@ var _rain: RainFx
 var _sky: ShaderMaterial
 var _sky_time := 0.0
 var _reflection_time := 0.0
+var _moonlit := true
+var sky_apertures: Array[AreaLight3D] = []
+var _lantern_level := -1.0
+var _lantern_diffuser: BaseMaterial3D
 
 @onready var sun: DirectionalLight3D = $Sun
 @onready var sky_aperture: AreaLight3D = $SkyAperture
 @onready var environment: Environment = $WorldEnvironment.environment
 @onready var camera_attributes: CameraAttributesPractical = $WorldEnvironment.camera_attributes
 @onready var reflections: Array[ReflectionProbe] = [$RoomReflections, $DisplayReflection]
+@onready var lantern_light: OmniLight3D = table_lantern.get_node("Light")
 
 
 func _ready() -> void:
+	_prepare_lantern()
+	# Каждый участок неба освещает через свою часть окна. Одна карта теней
+	# в центре большого витража преувеличивает тень ближайшего импоста.
+	sky_apertures.append(sky_aperture)
+	for i in range(1, APERTURE_CENTERS.size()):
+		var section := sky_aperture.duplicate() as AreaLight3D
+		section.name = "SkyAperture%d" % (i + 1)
+		add_child(section)
+		sky_apertures.append(section)
+	for i in APERTURE_CENTERS.size():
+		sky_apertures[i].position.x = APERTURE_CENTERS[i]
 	_sky = TodLight.sky_material()
 	environment.sky.sky_material = _sky
 	# Свет неба рассчитывается по отдельной карте отражений. Диск солнца освещает только через Sun.
@@ -35,9 +57,48 @@ func _ready() -> void:
 	_apply_light(true)
 
 
-func set_conditions(at_hour: float, condition: String) -> void:
+func _prepare_lantern() -> void:
+	var model := table_lantern.get_node("Model")
+	var meshes := model.find_children("*", "MeshInstance3D", true, false)
+	if model is MeshInstance3D:
+		meshes.append(model)
+	for mesh: MeshInstance3D in meshes:
+		mesh.layers = LANTERN_LAYER
+		# Источник внутри рассеивателя. Корпус не должен перегораживать весь свет.
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		for surface in mesh.mesh.get_surface_count():
+			var material := mesh.get_active_material(surface) as BaseMaterial3D
+			if material and material.resource_name.ends_with("_свет"):
+				_lantern_diffuser = material.duplicate() as BaseMaterial3D
+				_lantern_diffuser.emission = lantern_light.light_color
+				mesh.set_surface_override_material(surface, _lantern_diffuser)
+
+
+func _set_lantern(level: float) -> void:
+	if is_equal_approx(level, _lantern_level):
+		return
+	_lantern_level = level
+	lantern_light.light_energy = LANTERN_ENERGY * level
+	lantern_light.visible = level > .001
+	if _lantern_diffuser:
+		_lantern_diffuser.emission_enabled = lantern_light.visible
+		_lantern_diffuser.emission_energy_multiplier = LANTERN_EMISSION * level
+
+
+func lantern_is_lit() -> bool:
+	return (lantern_light.visible and lantern_light.light_energy > .001
+		and _lantern_diffuser != null and _lantern_diffuser.emission_enabled)
+
+
+func set_preset(index: int) -> void:
+	var choice: Array = PRESETS[index]
+	set_conditions(choice[1], choice[2], choice[0] != "07_night")
+
+
+func set_conditions(at_hour: float, condition: String, moonlit := true) -> void:
 	hour = fposmod(at_hour, 24.0)
 	weather = condition
+	_moonlit = moonlit
 	_sky_time = 0.0
 	_apply_light(true)
 	_refresh_reflections()
@@ -64,6 +125,7 @@ func _process(delta: float) -> void:
 
 func _apply_light(update_sky: bool) -> void:
 	var solar := DayCycle.sun_at(hour)
+	_set_lantern(float(DayCycle.weights(solar.x).night))
 	var lunar := DayCycle.moon_at(hour)
 	var solar_dir := DayCycle.dir_from(solar.x, solar.y)
 	var lunar_dir := DayCycle.dir_from(lunar.x, lunar.y)
@@ -71,7 +133,7 @@ func _apply_light(update_sky: bool) -> void:
 	var cloud := float(TodLight.weather(weather).overcast)
 	var twilight := smoothstep(-8.0, 2.0, solar.x)
 	var day_energy := TodLight.value_at("sunEnergy", t) * smoothstep(-.4, 4.0, solar.x)
-	var moon_energy := .017 * smoothstep(1.0, 12.0, lunar.x) * (1.0 - twilight)
+	var moon_energy := .017 * smoothstep(1.0, 12.0, lunar.x) * (1.0 - twilight) if _moonlit else 0.0
 	var to := solar_dir if day_energy >= moon_energy else lunar_dir
 	sun.global_basis = Basis.looking_at(-to, Vector3.UP if absf(to.y) < .99 else Vector3.FORWARD)
 	sun.light_energy = (day_energy + moon_energy) * (1.0 - cloud)
@@ -85,9 +147,15 @@ func _apply_light(update_sky: bool) -> void:
 	var sky_gain := lerpf(.33, 1.0, twilight)
 	var fog_k := {"clear": .0, "overcast": .0, "fog": .92, "rain": .40}.get(weather, .0) as float
 	# Рассеянная часть того же неба. Источник снаружи витража, рамы и перекрытия отсекают его свет.
-	sky_aperture.light_color = Color(.78, .86, 1).lerp(sky_color, .66).lerp(Color(.87, .9, .93), cloud * .58)
-	sky_aperture.light_energy = lerpf(.0038, lerpf(.61, .53, cloud), twilight) * (1.0 - .44 * fog_k)
-	sky_aperture.visible = sky_aperture.light_energy > .001
+	var window_color := Color(.86, .89, .96).lerp(sky_color, .47).lerp(Color(.87, .90, .93), cloud * .58)
+	var window_energy := lerpf(.0021, lerpf(.48, .40, cloud), twilight) * (1.0 - .44 * fog_k)
+	for aperture in sky_apertures:
+		aperture.light_color = window_color
+		aperture.light_energy = window_energy
+		aperture.visible = window_energy > .001
+	var room_probe := reflections[0]
+	room_probe.ambient_color = window_color.lerp(Color(.95, .91, .85), .40)
+	room_probe.ambient_color_energy = lerpf(.0005, .20, twilight) * (1.0 - .49 * fog_k)
 	environment.ambient_light_energy = lerpf(.21, .49, twilight) * (1.0 - .39 * fog_k)
 	_sky.set_shader_parameter("sky_color", sky_color * sky_gain)
 	_sky.set_shader_parameter("horizon_color", sky_color * .8 * sky_gain)
@@ -96,7 +164,7 @@ func _apply_light(update_sky: bool) -> void:
 	_sky.set_shader_parameter("sun_dir", solar_dir)
 	_sky.set_shader_parameter("moon_dir", lunar_dir)
 	_sky.set_shader_parameter("sun_color", TodLight.color_at("sunColor", t))
-	_sky.set_shader_parameter("moon_color", Color(.53, .60, .73) * (1.0 - twilight))
+	_sky.set_shader_parameter("moon_color", Color(.53, .60, .73) * (1.0 - twilight) if _moonlit else Color.BLACK)
 	_sky.set_shader_parameter("overcast", cloud)
 	_sky.set_shader_parameter("clouds_shift", fposmod(hour * float(Balance.TOD_LIGHT.clouds_drift), 1.0))
 	environment.fog_enabled = fog_k > .001
