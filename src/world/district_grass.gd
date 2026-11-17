@@ -19,6 +19,15 @@ const SCAN_SHADER := preload("res://src/world/grass_scan.gdshader")
 @export var origin: Vector2 = Vector2.ZERO
 @export var models: PackedStringArray = PackedStringArray()
 @export var weed_models: PackedStringArray = PackedStringArray()
+## Необязательный средний LOD для каждого пути выше; пустой путь — использовать ближнюю сетку.
+@export var lod1_models: PackedStringArray = PackedStringArray()
+@export var weed_lod1_models: PackedStringArray = PackedStringArray()
+## Веса моделей травы; пустой массив — равная вероятность, как прежде.
+@export var model_weights: PackedFloat32Array = PackedFloat32Array()
+@export var lod_switch_m: float = 10.0
+@export var lod_margin_m: float = 2.0
+@export_range(0.0, 1.0) var scan_dryness: float = 1.0
+@export_range(0.05, 1.0) var alpha_cut: float = 0.4
 @export_dir var materials_dir: String = "res://assets/zone01/materials"
 @export var tint: Color = Color(0.8, 0.76, 0.66)
 ## Пучков-сканов на м² при плотности 1.
@@ -41,6 +50,8 @@ var _density: Image
 var _terrain: Node
 var _meshes: Array[Mesh] = []
 var _weeds: Array[Mesh] = []
+var _meshes_lod1: Array[Mesh] = []
+var _weeds_lod1: Array[Mesh] = []
 var _scan_mats: Array[ShaderMaterial] = []
 var _cells: Dictionary = {}
 var _lawn_cells: Dictionary = {}
@@ -68,10 +79,12 @@ func _ready() -> void:
 	_height_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 	_height_noise.frequency = 0.09
 	_height_noise.seed = 7151
-	for path in models:
-		_add_scan(path, _meshes)
-	for path in weed_models:
-		_add_scan(path, _weeds)
+	for i: int in range(models.size()):
+		var lod1: String = lod1_models[i] if i < lod1_models.size() else ""
+		_add_scan(models[i], _meshes, _meshes_lod1, lod1)
+	for i: int in range(weed_models.size()):
+		var lod1: String = weed_lod1_models[i] if i < weed_lod1_models.size() else ""
+		_add_scan(weed_models[i], _weeds, _weeds_lod1, lod1)
 	if lawn:
 		_build_lawn_meshes()
 	if GrassTrample.current == null or not is_instance_valid(GrassTrample.current):
@@ -98,7 +111,7 @@ func _make_wind_noise() -> NoiseTexture2D:
 	return t
 
 
-func _add_scan(path: String, into: Array[Mesh]) -> void:
+func _add_scan(path: String, into: Array[Mesh], into_lod1: Array[Mesh], lod1_path: String = "") -> void:
 	if not ResourceLoader.exists(path):
 		return
 	var inst: Node = (load(path) as PackedScene).instantiate()
@@ -111,11 +124,27 @@ func _add_scan(path: String, into: Array[Mesh]) -> void:
 		if src:
 			m.set_shader_parameter("albedo_tex", src.albedo_texture)
 		m.set_shader_parameter("tint", tint)
+		m.set_shader_parameter("alpha_cut", alpha_cut)
 		m.set_shader_parameter("mesh_height", maxf(mesh.get_aabb().end.y, 0.02))
 		m.set_shader_parameter("wind_noise", _wind_noise)
 		into.append(mesh)
+		var lod1_mesh: Mesh = _load_scan_mesh(lod1_path) if lod1_path != "" else null
+		into_lod1.append(lod1_mesh if lod1_mesh != null else mesh)
 		_scan_mats.append(m)
 	inst.free()
+
+
+func _load_scan_mesh(path: String) -> Mesh:
+	if not ResourceLoader.exists(path):
+		return null
+	var packed := load(path) as PackedScene
+	if packed == null:
+		return null
+	var inst: Node = packed.instantiate()
+	var found: Array[Node] = inst.find_children("*", "MeshInstance3D", true, false)
+	var mesh: Mesh = (found[0] as MeshInstance3D).mesh if not found.is_empty() else null
+	inst.free()
+	return mesh
 
 
 ## Куртины густого яруса: несколько раскладок, ближняя (полные травинки) и дальняя (реже, шире).
@@ -242,6 +271,22 @@ func _update_grid(cells: Dictionary, size: float, r: float, p: Vector3, build: C
 		cells[todo[i]] = build.call(todo[i])
 
 
+func _pick_grass(rng: RandomNumberGenerator) -> int:
+	if model_weights.size() != _meshes.size():
+		return rng.randi_range(0, _meshes.size() - 1)
+	var total: float = 0.0
+	for weight: float in model_weights:
+		total += maxf(weight, 0.0)
+	if total <= 0.0:
+		return rng.randi_range(0, _meshes.size() - 1)
+	var roll: float = rng.randf() * total
+	for i: int in range(model_weights.size()):
+		roll -= maxf(model_weights[i], 0.0)
+		if roll <= 0.0:
+			return i
+	return _meshes.size() - 1
+
+
 func _build_cell(c: Vector2i) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cell_%d_%d" % [c.x, c.y]
@@ -259,7 +304,7 @@ func _build_cell(c: Vector2i) -> Node3D:
 		var roll: float = rng.randf()
 		var idx: int = -1
 		if roll < d.r:
-			idx = rng.randi_range(0, _meshes.size() - 1)
+			idx = _pick_grass(rng)
 		elif roll < d.r + d.g * 0.15 and not _weeds.is_empty():
 			idx = _meshes.size() + rng.randi_range(0, _weeds.size() - 1)
 		if idx < 0:
@@ -272,22 +317,34 @@ func _build_cell(c: Vector2i) -> Node3D:
 		var list: Array = per_mesh[i]
 		if list.is_empty():
 			continue
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = _meshes[i] if i < _meshes.size() else _weeds[i - _meshes.size()]
-		mm.instance_count = list.size()
-		for k in range(list.size()):
-			mm.set_instance_transform(k, list[k][0])
-			var v: float = float(list[k][1])
-			# r — яркость, g — сколько в соломенный оттенок
-			mm.set_instance_custom_data(k, Color(0.8 + 0.3 * fposmod(v * 7.3, 1.0), v, 0.0, 0.0))
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.material_override = _scan_mats[i]
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-		root.add_child(mmi)
+		var near_mesh: Mesh = _meshes[i] if i < _meshes.size() else _weeds[i - _meshes.size()]
+		var far_mesh: Mesh = _meshes_lod1[i] if i < _meshes.size() else _weeds_lod1[i - _meshes.size()]
+		var lod_count: int = 2 if far_mesh != near_mesh else 1
+		for lod: int in range(lod_count):
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.use_custom_data = true
+			mm.mesh = near_mesh if lod == 0 else far_mesh
+			mm.instance_count = list.size()
+			for k in range(list.size()):
+				mm.set_instance_transform(k, list[k][0])
+				var v: float = float(list[k][1])
+				# r — яркость, g — сколько в соломенный оттенок
+				mm.set_instance_custom_data(k, Color(0.8 + 0.3 * fposmod(v * 7.3, 1.0), v * scan_dryness, 0.0, 0.0))
+			var mmi := MultiMeshInstance3D.new()
+			mmi.multimesh = mm
+			mmi.material_override = _scan_mats[i]
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+			if lod_count == 2:
+				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				if lod == 0:
+					mmi.visibility_range_end = lod_switch_m
+					mmi.visibility_range_end_margin = lod_margin_m
+				else:
+					mmi.visibility_range_begin = lod_switch_m
+					mmi.visibility_range_begin_margin = lod_margin_m
+			root.add_child(mmi)
 	return root
 
 

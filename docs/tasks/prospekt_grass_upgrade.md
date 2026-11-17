@@ -204,7 +204,7 @@ tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/gra
 
 ```bash
 PROSPEKT_OUTPUT=res://docs/screens/prospekt_grass/raid \
-PROSPEKT_CASES=day,dusk,rain PROSPEKT_CLEAN=1 \
+PROSPEKT_CASES=day,dusk,day_rain PROSPEKT_CLEAN=1 \
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/prospekt_raid_shots.tscn
 ```
 

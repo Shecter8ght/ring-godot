@@ -1211,3 +1211,17 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 При доводке переговорной 203 микрорельеф окрашенных стен дополнен данными высот Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Оба варианта кожи используют тот же скан Fabric Leather 02, Rob Tuytel, CC0. Швы, заломы, следы пыли и вариации плит созданы для сцены. [Штукатурка](https://polyhaven.com/a/painted_plaster_wall) · [Кожа](https://polyhaven.com/a/fabric_leather_02)
 
 В текущей отделке 203 использованы Terlenka для тканевых кресел и Dirty Carpet для петли ковровой плитки. Terlenka сняли colormass и обработал Rico Cilliers. Dirty Carpet создал Rohit Seervi. Обе карты Poly Haven распространяются по CC0. Цвета, UV-маски, швы и вариации подготовлены для RING. [Terlenka](https://polyhaven.com/a/terlenka) · [Dirty Carpet](https://polyhaven.com/a/dirty_carpet)
+
+
+## «Проспект» — стенд земли и травы (2026-11-17)
+
+Игровые производные — `assets/textures/prospekt_grass/` и `assets/models/prospekt_grass/`. Исходники, даты загрузки, API-метаданные и SHA-256 — `_asset_src/prospekt_grass/`; исходные файлы не изменены.
+
+- Leafy Grass — Charlotte Baglioni, Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/leafy_grass). Карты 8K уменьшены до игровых 4K; две выборки против повтора, регулируемые нормаль и параллакс по высоте, приглушение цвета и смешение с проплешинами.
+- Grass Ground — Charlotte Baglioni, Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/grass_ground). Производные карты 4K из исходного набора 16K; только второй слой почвы и проплешин.
+- Grass 001 — ambientCG / Lennart Demes, [CC0 1.0](https://docs.ambientcg.com/license/), [источник](https://ambientcg.com/a/Grass001). Карты 8K уменьшены до 4K; AO и шероховатость упакованы в ARM.
+- Grass Bermuda 01 — Rico Cilliers, Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/grass_bermuda_01). Из отдельных листьев собраны три низких ковра; исходная сфера Geometry Nodes не экспортируется. Два LOD, зелёный атлас 2K с альфой и заполнением прозрачной кромки.
+- Grass Medium 01 — Rob Tuytel (фотография), Rico Cilliers (модель), Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/grass_medium_01). Использованы готовые низкие LOD отдельных куртин, зелёная (не сухая) карта 2K с альфой; полный разброс Geometry Nodes не экспортируется.
+- Weed Plant 02 — Rob Tuytel (фотография), Rico Cilliers (модель), Poly Haven, [CC0 1.0](https://polyhaven.com/license), [источник](https://polyhaven.com/a/weed_plant_02). Два варианта широколистного сорняка, два LOD, атлас 2K с альфой и заполнением кромки.
+
+Скрипты преобразования — `tools/prospekt_grass/`. Ветер, приминание и дальний переход используют существующий `DistrictGrass`. Кандидаты Fab на момент этой записи не скачаны и в производные не входят.
