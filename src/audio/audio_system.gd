@@ -505,7 +505,8 @@ func _update_sound_paths(delta: float) -> void:
 	for index in range(_sound_paths.size() - 1, -1, -1):
 		var path := _sound_paths[index]
 		var player := path.player
-		if not is_instance_valid(player) or player.is_queued_for_deletion() or player.has_meta("sound_path_fading"):
+		# При смене сцены источник ещё может существовать, но уже вышел из дерева.
+		if not is_instance_valid(player) or not player.is_inside_tree() or player.is_queued_for_deletion() or player.has_meta("sound_path_fading"):
 			_sound_paths.remove_at(index)
 			continue
 		if is_instance_valid(path.follow):
