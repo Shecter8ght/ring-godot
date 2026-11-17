@@ -15,8 +15,9 @@ const VARIANTS: Array = [
 	{"id": "leafy", "title": "A · Leafy Grass + Bermuda / Medium / Weed", "ground": "leafy", "mixed": false},
 	{"id": "grass001", "title": "B · Grass 001 + тот же покров", "ground": "grass001", "mixed": false},
 	{"id": "mixed", "title": "C · Leafy Grass + Grass Ground, проплешины", "ground": "leafy", "mixed": true},
+	{"id": "broad", "title": "D · Широкие куртины, дальность 70 м", "ground": "leafy", "mixed": true},
 ]
-const MODEL_LINEUP: PackedStringArray = ["grass_bermuda_01_a", "grass_medium_01_a", "grass_medium_01_tall", "weed_plant_02_a"]
+const MODEL_LINEUP: PackedStringArray = ["grass_bermuda_01_a", "grass_medium_01_a", "grass_medium_01_tall", "weed_plant_02_a", "grass_broad_01_a"]
 
 var _roots: Array[Node3D] = []
 var _scatters: Array = []
@@ -126,7 +127,8 @@ func _build_variants() -> void:
 			root.add_child(grass)
 			scatters.append(grass)
 		else:
-			var base: DistrictGrass = PG.make_scatter("BaseGrass", _density(x, 1.0, 0.0), _origin(x), "base")
+			var base_mode: String = "broad" if String(spec.id) == "broad" else "base"
+			var base: DistrictGrass = PG.make_scatter("BaseGrass", _density(x, 1.0, 0.0), _origin(x), base_mode)
 			root.add_child(base)
 			scatters.append(base)
 			var accents: DistrictGrass = PG.make_scatter("AccentGrass", _density(x, 0.75, 1.0), _origin(x), "accents")
@@ -165,7 +167,7 @@ func _build_lineup() -> void:
 		inst.position = Vector3(x, GROUND_Y, 30.0)
 		_label(_lineup, Vector3(x, 0.48, 30.15), asset.replace("grass_", "").replace("weed_plant_02", "Weed 02"), 30)
 		x += 1.5
-	_label(_lineup, Vector3(6.4, 0.5, 30.0), "Fab Grass Clumps / Wild Grass\nожидают штатной загрузки", 30)
+	_label(_lineup, Vector3(7.0, 0.5, 30.0), "Fab Grass Clumps / Wild Grass\nожидают штатной загрузки", 30)
 
 
 func _first_mesh(root: Node) -> MeshInstance3D:
@@ -179,7 +181,7 @@ func _label(parent: Node3D, at: Vector3, text: String, font_size: int) -> void:
 	var label := Label3D.new()
 	label.text = text
 	label.font_size = font_size
-	label.pixel_size = 0.006
+	label.pixel_size = 0.0045
 	label.outline_size = 8
 	label.modulate = Color(0.95, 0.96, 0.9)
 	label.outline_modulate = Color(0.03, 0.035, 0.025)
@@ -230,7 +232,7 @@ func _build_hud() -> void:
 
 func _update_hud() -> void:
 	if _hud:
-		_hud.text = "Трава «Проспекта» · день 13:00, ясно · %s\nF5…F8 — варианты · F9 — модели · F4 — рельеф: %s · WASD и мышь — прогулка" % [VARIANTS[maxi(_active, 0)].title, "вкл" if _relief_on else "выкл"]
+		_hud.text = "Трава «Проспекта» · день 13:00, ясно · %s\nF5…F8 — варианты · F9 — D · F10 — модели · F4 — рельеф: %s · WASD и мышь — прогулка" % [VARIANTS[maxi(_active, 0)].title, "вкл" if _relief_on else "выкл"]
 
 
 func _set_relief(enabled: bool) -> void:
@@ -271,8 +273,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key.keycode >= KEY_F5 and key.keycode <= KEY_F8:
 		_goto(int(key.keycode - KEY_F5))
 	elif key.keycode == KEY_F9:
+		_goto(VARIANTS.size() - 1)
+	elif key.keycode == KEY_F10:
 		_activate(-1)
-		_player.position = Vector3(2.2, GROUND_Y + 0.1, 26.8)
+		_player.position = Vector3(3.2, GROUND_Y + 0.1, 26.8)
 		_player.face(0.0)
 		_rig.set("_look_yaw", 0.0)
 		_rig.set("_look_pitch", -0.12)
@@ -303,6 +307,8 @@ func _shots() -> void:
 			["close", Vector3(x - 1.2, GROUND_Y + 0.5, -1.8), Vector3(x, GROUND_Y + 0.03, 0.4)],
 			["far", Vector3(x, GROUND_Y + 1.62, -17.0), Vector3(x, 0.22, 2.0)],
 		]
+		if id in ["mixed", "broad"]:
+			views.append(["distant", Vector3(x, GROUND_Y + 1.62, -55.0), Vector3(x, 0.22, 2.0)])
 		for view: Array in views:
 			_camera.global_position = view[1]
 			_camera.look_at(view[2], Vector3.UP)
@@ -333,8 +339,8 @@ func _shots() -> void:
 		for grass: DistrictGrass in _scatters[3]:
 			grass.show()
 	_activate(-1)
-	_camera.global_position = Vector3(2.2, 1.05, 25.7)
-	_camera.look_at(Vector3(2.2, 0.22, 30.0), Vector3.UP)
+	_camera.global_position = Vector3(3.2, 1.05, 24.8)
+	_camera.look_at(Vector3(3.2, 0.22, 30.0), Vector3.UP)
 	_camera.make_current()
 	await _frames(30)
 	await RenderingServer.frame_post_draw
@@ -364,7 +370,10 @@ func _check() -> void:
 	if not PG.map_files_ready():
 		print("ПРОВАЛ: не все игровые файлы импортированы")
 		fails += 1
-	for assets: PackedStringArray in [PG.BASE_ASSETS, PG.CLUMP_ASSETS, PG.WEED_ASSETS]:
+	if not PG.broad_files_ready():
+		print("ПРОВАЛ: не все широкие куртины импортированы")
+		fails += 1
+	for assets: PackedStringArray in [PG.BASE_ASSETS, PG.CLUMP_ASSETS, PG.WEED_ASSETS, PG.BROAD_ASSETS]:
 		for asset: String in assets:
 			var previous: int = 0
 			for lod: int in range(2):
@@ -388,9 +397,29 @@ func _check() -> void:
 			print("ПРОВАЛ: пустой покров ", grass.name)
 			fails += 1
 		print("ПОКРОВ ", grass.name, ": ", JSON.stringify(stats))
-	GrassTrample.hit(Vector3(PLOT_STEP, GROUND_Y, 0), 0.4)
+	var broad_index: int = VARIANTS.size() - 1
+	_activate(broad_index)
+	_camera.global_position = Vector3(float(broad_index) * PLOT_STEP, 1.7, -4)
+	await _frames(400)
+	var broad: DistrictGrass = _scatters[broad_index][0] as DistrictGrass
+	if int(broad.stats().scan_instances) <= 0:
+		print("ПРОВАЛ: пустой широкий покров")
+		fails += 1
+	if not broad.dynamic_alpha or broad.override_scan_radius < 70.0:
+		print("ПРОВАЛ: не включены динамическая альфа/дальность D")
+		fails += 1
+	var has_shadow: bool = false
+	for cell: Variant in (broad.get("_cells") as Dictionary).values():
+		for child: Node in (cell as Node).get_children():
+			if child is MultiMeshInstance3D and (child as MultiMeshInstance3D).cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON:
+				has_shadow = true
+	if not has_shadow:
+		print("ПРОВАЛ: у D нет тени ближнего LOD")
+		fails += 1
+	print("ПОКРОВ D: ", JSON.stringify(broad.stats()))
+	GrassTrample.hit(Vector3(float(broad_index) * PLOT_STEP, GROUND_Y, 0), 0.4)
 	await get_tree().create_timer(0.15).timeout
-	if GrassTrample.current == null or GrassTrample.current.pressed_at(Vector3(PLOT_STEP, GROUND_Y, 0)) < 0.5:
+	if GrassTrample.current == null or GrassTrample.current.pressed_at(Vector3(float(broad_index) * PLOT_STEP, GROUND_Y, 0)) < 0.5:
 		print("ПРОВАЛ: приминание не записано")
 		fails += 1
 	print("grass_probe: проверок завершено, провалов ", fails)

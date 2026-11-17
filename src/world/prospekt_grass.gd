@@ -8,6 +8,7 @@ const MODEL: String = "res://assets/models/prospekt_grass/%s_lod%d.gltf"
 const BASE_ASSETS: PackedStringArray = ["grass_bermuda_01_a", "grass_bermuda_01_b", "grass_bermuda_01_c"]
 const CLUMP_ASSETS: PackedStringArray = ["grass_medium_01_a", "grass_medium_01_b", "grass_medium_01_tall"]
 const WEED_ASSETS: PackedStringArray = ["weed_plant_02_a", "weed_plant_02_b"]
+const BROAD_ASSETS: PackedStringArray = ["grass_broad_01_a", "grass_broad_01_b", "grass_broad_01_c"]
 
 static var _cache: Dictionary = {}
 
@@ -36,6 +37,14 @@ static func map_files_ready() -> bool:
 	return true
 
 
+static func broad_files_ready() -> bool:
+	for asset: String in BROAD_ASSETS:
+		for lod: int in range(2):
+			if not ResourceLoader.exists(model_path(asset, lod)):
+				return false
+	return true
+
+
 static func make_scatter(label: String, density: Texture2D, map_origin: Vector2, mode: String) -> DistrictGrass:
 	var grass := DistrictGrass.new()
 	grass.name = label
@@ -59,7 +68,24 @@ static func make_scatter(label: String, density: Texture2D, map_origin: Vector2,
 	grass.radius = 32.0
 	grass.scan_dryness = 0.14
 	grass.tint = Color(1.2, 1.28, 1.1)
-	if mode == "base":
+	if mode == "broad":
+		grass.models = model_paths(BROAD_ASSETS)
+		grass.lod1_models = model_paths(BROAD_ASSETS, 1)
+		grass.weed_models = PackedStringArray()
+		grass.weed_lod1_models = PackedStringArray()
+		grass.per_m2 = 7.0
+		grass.scale_range = Vector2(0.9, 1.25)
+		grass.tint = Color(0.75, 0.84, 0.72)
+		grass.scan_dryness = 0.08
+		grass.dynamic_alpha = true
+		grass.alpha_cut = 0.18
+		grass.far_alpha_cut = 0.035
+		grass.alpha_clip_distance = 24.0
+		grass.override_scan_radius = 70.0
+		grass.lod_switch_m = 14.0
+		grass.lod_margin_m = 3.0
+		grass.cast_grass_shadows = true
+	elif mode == "base":
 		grass.models = model_paths(BASE_ASSETS)
 		grass.lod1_models = model_paths(BASE_ASSETS, 1)
 		grass.weed_models = PackedStringArray()

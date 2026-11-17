@@ -28,6 +28,13 @@ const SCAN_SHADER := preload("res://src/world/grass_scan.gdshader")
 @export var lod_margin_m: float = 2.0
 @export_range(0.0, 1.0) var scan_dryness: float = 1.0
 @export_range(0.05, 1.0) var alpha_cut: float = 0.4
+## Для широких карточек: снижать порог до far_alpha_cut к alpha_clip_distance м, чтобы мипы не съедали листья.
+@export var dynamic_alpha: bool = false
+@export_range(0.001, 1.0) var far_alpha_cut: float = 0.04
+@export var alpha_clip_distance: float = 24.0
+## 0 — обычный радиус по качеству; больше нуля — отдельная дальность этого покрова.
+@export var override_scan_radius: float = 0.0
+@export var cast_grass_shadows: bool = false
 @export_dir var materials_dir: String = "res://assets/zone01/materials"
 @export var tint: Color = Color(0.8, 0.76, 0.66)
 ## Пучков-сканов на м² при плотности 1.
@@ -125,6 +132,9 @@ func _add_scan(path: String, into: Array[Mesh], into_lod1: Array[Mesh], lod1_pat
 			m.set_shader_parameter("albedo_tex", src.albedo_texture)
 		m.set_shader_parameter("tint", tint)
 		m.set_shader_parameter("alpha_cut", alpha_cut)
+		m.set_shader_parameter("dynamic_alpha", dynamic_alpha)
+		m.set_shader_parameter("far_alpha_cut", far_alpha_cut)
+		m.set_shader_parameter("clip_distance", alpha_clip_distance)
 		m.set_shader_parameter("mesh_height", maxf(mesh.get_aabb().end.y, 0.02))
 		m.set_shader_parameter("wind_noise", _wind_noise)
 		into.append(mesh)
@@ -218,7 +228,7 @@ func _density_texture() -> Texture2D:
 
 
 func _scan_radius() -> float:
-	return minf(radius, float(_q.get("scan", radius)))
+	return override_scan_radius if override_scan_radius > 0.0 else minf(radius, float(_q.get("scan", radius)))
 
 
 func _density_at(x: float, z: float) -> Color:
@@ -334,7 +344,7 @@ func _build_cell(c: Vector2i) -> Node3D:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
 			mmi.material_override = _scan_mats[i]
-			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_grass_shadows and lod == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 			if lod_count == 2:
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF

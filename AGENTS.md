@@ -106,7 +106,7 @@ tools/godot.cmd --headless res://tools/far_grass_test.tscn   # «трава из
                                                               # и отрезок, где травинки уходят в землю, по качеству графики; снимки — grass_shots GRASS_ONLY=eye
 PROSPEKT_GRASS_PROBE.cmd                                           # двойной щелчок: стенд земли и травы «Проспекта»; путь к проекту берётся из расположения файла
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_grass_probe.tscn -- shots # стенд земли и травы «Проспекта»: текущая / Leafy Grass / Grass 001 / смесь с проплешинами,
-                                                              # F5…F8 — варианты, F9 — модели, F4 — параллакс; --headless … -- check — ассеты, LOD, покров, приминание
+                                                              # F5…F8 — варианты 0/A/B/C, F9 — широкие куртины D, F10 — модели, F4 — параллакс; --headless … -- check — ассеты, LOD, покров, приминание
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_grass_map.tscn -- before|after # один газон рощи на настоящей карте: снимки и FPS/GPU;
                                                               # --headless … -- check — только один участок и остальные газоны; PROSPEKT_GRASS_TEST=0 — прежний вид
 tools/godot.cmd --windowed --resolution 1600x900 res://tools/scale_probe.tscn # стенд масштаба (вопрос владельца 2026-10-24 «реальные размеры мелкие»):

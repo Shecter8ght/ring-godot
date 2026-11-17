@@ -66,6 +66,9 @@ def probe() -> None:
         for key, label in VARIANTS:
             row = data.get(key, {})
             lines.append(f"{label} | {row.get('fps', 0):.1f} | {row.get('gpu_ms', 0):.3f} | {row.get('triangles', 0)}")
+        if "broad" in data:
+            row = data["broad"]
+            lines.append(f"D — широкие куртины | {row.get('fps', 0):.1f} | {row.get('gpu_ms', 0):.3f} | {row.get('triangles', 0)}")
         (folder / "performance.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -128,8 +131,26 @@ def refinement() -> None:
     sheet.save(OUT / "refine_comparison.jpg", quality=95)
 
 
+def broad() -> None:
+    folder = OUT / "probe"
+    if not (folder / "broad_distant.png").exists():
+        return
+    views = [("eye", "глаза"), ("close", "0,5 м"), ("far", "17 м"), ("distant", "55 м")]
+    sheet = Image.new("RGB", (1600, len(views) * 500 + 50), (20, 23, 19))
+    draw = ImageDraw.Draw(sheet)
+    draw.text((12, 8), "C", font=font(28), fill=(238, 240, 228))
+    draw.text((812, 8), "D · ШИРОКИЕ КУРТИНЫ", font=font(28), fill=(238, 240, 228))
+    for row, (view, label) in enumerate(views):
+        y = 50 + row * 500
+        sheet.paste(tile(folder / f"mixed_{view}.png", (800, 450)), (0, y))
+        sheet.paste(tile(folder / f"broad_{view}.png", (800, 450)), (800, y))
+        draw.text((12, y + 454), label, font=font(24), fill=(215, 221, 204))
+    sheet.save(folder / "d_comparison.jpg", quality=95)
+
+
 if __name__ == "__main__":
     probe()
     maps()
     raid()
     refinement()
+    broad()
