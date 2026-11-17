@@ -104,6 +104,7 @@ tools/godot.cmd --headless res://tools/tree_shadows_test.tscn # тени дер�
                                                               # «Проспекта» с тенью; треугольники деревьев в тени было / стало (зона 1, «Проспект»)
 tools/godot.cmd --headless res://tools/far_grass_test.tscn   # «трава издали» (Balance.GRASS.far_look): рельеф зоны 1 берёт карту густоты травы
                                                               # и отрезок, где травинки уходят в землю, по качеству графики; снимки — grass_shots GRASS_ONLY=eye
+PROSPEKT_GRASS_PROBE.cmd                                           # двойной щелчок: стенд земли и травы «Проспекта»; путь к проекту берётся из расположения файла
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_grass_probe.tscn -- shots # стенд земли и травы «Проспекта»: текущая / Leafy Grass / Grass 001 / смесь с проплешинами,
                                                               # F5…F8 — варианты, F9 — модели, F4 — параллакс; --headless … -- check — ассеты, LOD, покров, приминание
 tools/godot.cmd --windowed --resolution 1600x900 --disable-vsync res://tools/prospekt_grass_map.tscn -- before|after # один газон рощи на настоящей карте: снимки и FPS/GPU;
