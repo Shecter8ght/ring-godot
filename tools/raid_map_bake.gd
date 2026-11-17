@@ -1,5 +1,5 @@
 extends Node
-## Карты маршрутов для окна «План рейда» (владелец 2026-10-31: «переработать, чтобы там карту было видно»): каждая
+## Карты маршрутов для окна «План рейда» и полноэкранной карты на M: каждая
 ## рейдовая сцена маршрута (data/floors.json, scene) снимается сверху ортокамерой днём, без тумана и пределов
 ## дальности — assets/maps/<id>.webp; метки — выходы (имя, условие: ключ, рубильник, «не каждый рейд», без рюкзака)
 ## и заходы с края (SpawnPoint.entry) — data/raid_maps.json в мировых XZ, границы снимка — bounds сектора.
@@ -27,7 +27,7 @@ func _ready() -> void:
 		if scene == "" or (not only.is_empty() and not String(f.id) in only):
 			continue
 		await _bake(String(f.id), scene)
-	var out := {"_comment": "Карты маршрутов для окна «План рейда»: снимок сверху (image), его границы в мировых XZ (bounds: x0, z0, x1, z1), "
+	var out := {"_comment": "Карты маршрутов для окна «План рейда» и карты на M: снимок сверху (image), его границы в мировых XZ (bounds: x0, z0, x1, z1), "
 		+ "граница участка (boundary), выходы и заходы с края. Север (-Z) вверху. Собирает tools/raid_map_bake.tscn.", "maps": _maps}
 	var fa := FileAccess.open(OUT_JSON, FileAccess.WRITE)
 	fa.store_string(JSON.stringify(out, " ", false) + "\n")

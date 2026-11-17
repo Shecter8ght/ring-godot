@@ -1,18 +1,25 @@
 extends Node
 ## Снимки окон: карта на M (обзор и приближение), меню на Esc с раскладкой управления.
 ## godot --path . res://tools/ui_shots.tscn → docs/screens/ui_*.png
+## UI_MAP=zone01|mall|prospekt — только карта выбранного рейда (ui_map[_маршрут]*.png).
 
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var inst: Node = load("res://scenes/levels/mall_map.tscn").instantiate()
+	var map_id := OS.get_environment("UI_MAP")
+	var scene_path := "res://scenes/levels/mall_map.tscn"
+	var suffix := ""
+	if map_id != "":
+		scene_path = String(Floors.find(map_id).get("scene", scene_path))
+		suffix = "" if map_id == "mall" else "_" + map_id
+	var inst: Node = load(scene_path).instantiate()
 	get_tree().root.add_child(inst)
 	get_tree().current_scene = inst
 	for i in range(90):
 		await get_tree().physics_frame
 	_press("map")
 	await _frames(6)
-	_save("ui_map")
+	_save("ui_map" + suffix)
 	var map := inst.get_node("Map") as MapView
 	var e := InputEventMouseButton.new()
 	e.button_index = MOUSE_BUTTON_WHEEL_UP
@@ -20,7 +27,18 @@ func _ready() -> void:
 	for i in range(4):
 		map.call("_on_gui_input", e)
 	await _frames(4)
-	_save("ui_map_zoom")
+	_save("ui_map" + suffix + "_zoom")
+	if map_id != "":
+		var ok := map.is_open() and map.get("_photo") != null
+		print("ui_shots: %s — карта по M и детализированный снимок: %s" % [map_id, "PASS" if ok else "FAIL"])
+		while not bool(inst.get("_nav_baked")):
+			await _frames(1)
+		await _frames(30)
+		get_tree().current_scene = null
+		inst.queue_free()
+		await _frames(3)
+		get_tree().quit(0 if ok else 1)
+		return
 	_press("map")
 	await _frames(4)
 	_press("pause")

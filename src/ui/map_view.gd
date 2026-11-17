@@ -1,9 +1,9 @@
 class_name MapView
 extends CanvasLayer
-## Карта этажа на M: план из данных сектора (помещения кольца и полосы аллеи), постройки сцены,
-## эскалаторы, точки эвакуации с названиями, свой игрок стрелкой и напарники точками. Врагов,
-## лута и ключей на карте нет. В плейтесте можно включить метки чужих отрядов. Север (-Z) вверху.
-## Колесо — приблизить к себе, Esc или M — закрыть.
+## Карта на M: детализированный снимок уровня из assets/maps, точки эвакуации с названиями,
+## свой игрок стрелкой и напарники точками. Врагов, лута и ключей на карте нет. В плейтесте можно
+## включить метки чужих отрядов. Если снимка нет, рисуется прежний план из данных сектора.
+## Север (-Z) вверху. Колесо — приблизить к себе, Esc или M — закрыть.
 
 const FILL := {
 	"atrium": Color(0.36, 0.43, 0.48), "gallery": Color(0.4, 0.4, 0.38), "retail": Color(0.5, 0.44, 0.33),
@@ -30,6 +30,8 @@ var _width_of: Dictionary = {}
 ## Мировые XZ, в которые вписывается карта: открытая часть, постройки, точки эвакуации.
 var _bounds: Rect2 = Rect2()
 var _urban: Dictionary = {}
+var _photo: Texture2D
+var _photo_bounds := Rect2()
 
 
 func setup(rooms: Array, ring: Dictionary, open_angle: Vector2) -> void:
@@ -72,6 +74,7 @@ func _collect_scene() -> void:
 	var scene := get_tree().current_scene
 	if scene == null:
 		return
+	_load_photo(scene)
 	for n in scene.find_children("*", "Node3D", true, false):
 		if n is BlockoutBuilding:
 			var b := n as BlockoutBuilding
@@ -102,6 +105,23 @@ func _collect_scene() -> void:
 		for p in pts:
 			_bounds = _bounds.expand(p)
 		_bounds = _bounds.grow(12.0)
+
+
+func _load_photo(scene: Node) -> void:
+	var map_id := Profile.floor
+	for route: Dictionary in Floors.all():
+		if String(route.get("scene", "")) == scene.scene_file_path:
+			map_id = String(route.id)
+			break
+	var definition := RaidMapPreview.data(map_id)
+	var path := String(definition.get("image", ""))
+	if path == "" or not ResourceLoader.exists(path):
+		return
+	var bounds: Array = definition.get("bounds", [])
+	if bounds.size() != 4:
+		return
+	_photo = load(path) as Texture2D
+	_photo_bounds = Rect2(float(bounds[0]), float(bounds[1]), float(bounds[2]) - float(bounds[0]), float(bounds[3]) - float(bounds[1]))
 
 
 static func _corners(xf: Transform3D, w: float, d: float) -> PackedVector2Array:
@@ -170,65 +190,10 @@ func _draw_map() -> void:
 	_center = fit.get_center()
 	if _zoom > 1.0 and me:
 		_center = Vector2(me.global_position.x, me.global_position.z)
-	# закрытая часть кольца — бледный силуэт: видно, что здание продолжается
-	if _urban.is_empty():
-		var outer := float(_ring.get("outer_r", 100.0))
-		_canvas.draw_colored_polygon(_arc_poly(_open_angle.y, _open_angle.x + 360.0, 0.0, outer), Color(0.16, 0.165, 0.17))
+	if _photo:
+		_draw_photo()
 	else:
-		_draw_urban()
-	# сначала улица, потом здание, поверх — полосы аллеи
-	var order := _rooms.duplicate()
-	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return _rank(a) < _rank(b))
-	for room in order:
-		if room.has("rect"):
-			continue
-		var poly := _room_poly(room)
-		if poly.size() < 3:
-			continue
-		var col: Color = FILL.get(String(room.get("type", "")), Color(0.4, 0.4, 0.4))
-		_canvas.draw_colored_polygon(poly, col)
-		var closed := poly.duplicate()
-		closed.append(poly[0])
-		_canvas.draw_polyline(closed, LINE, 1.0)
-	for b in _buildings:
-		var poly := PackedVector2Array()
-		for p in b[0]:
-			poly.append(_to_screen(p))
-		_canvas.draw_colored_polygon(poly, Color(0.3, 0.33, 0.35))
-		var closed := poly.duplicate()
-		closed.append(poly[0])
-		_canvas.draw_polyline(closed, Color(0.6, 0.62, 0.6), 1.2)
-		if String(b[1]) != "" and (_urban.is_empty() or _zoom > 2.0):
-			_label(_poly_center(poly), String(b[1]), 13, Color(0.85, 0.87, 0.85))
-	for e in _escalators:
-		var poly := PackedVector2Array()
-		for p in e:
-			poly.append(_to_screen(p))
-		_canvas.draw_colored_polygon(poly, Color(0.45, 0.4, 0.6))
-	# подписи магазинов и крупных помещений
-	for room in _rooms:
-		if room.has("rect"):
-			continue
-		var t := String(room.get("type", ""))
-		if t in ["corridor", "yard", "parking"] and not bool(room.get("outdoor", false)):
-			continue
-		var id := String(room.get("id", ""))
-		if not _label_at.has(id):
-			_label_at[id] = _label_point(room)
-		var at: Vector2 = _label_at[id]
-		if at == Vector2.INF:
-			continue
-		# подпись — только если помещается в помещение на экране (приближение открывает остальные)
-		var fs := 13
-		var title := String(room.get("name", ""))
-		if not _width_of.has(id):
-			_width_of[id] = _room_width(room)
-		var room_w := float(_width_of[id]) * _scale
-		var room_h := (float(room.r[1]) - float(room.r[0])) * _scale
-		if room_w < _font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x * 0.9 or room_h < fs * 1.4:
-			continue
-		_label(_to_screen(at), title, fs, Color(0.92, 0.9, 0.84, 0.9))
+		_draw_schematic()
 	# точки эвакуации
 	if not _urban.is_empty() and _zoom <= 2.0:
 		for district in _urban.get("districts", []):
@@ -292,8 +257,79 @@ func _draw_map() -> void:
 		var r := Vector2(f.y, -f.x)
 		_canvas.draw_colored_polygon(PackedVector2Array([s + f * 14.0, s - f * 8.0 + r * 8.0, s - f * 4.0, s - f * 8.0 - r * 8.0]), Color(1.0, 0.85, 0.3))
 	# рамка: название этажа, север, подсказки
+	_canvas.draw_rect(Rect2(Vector2.ZERO, Vector2(size.x, 90.0)), Color(0.04, 0.045, 0.05, 0.82))
 	_canvas.draw_string(_font, Vector2(30, 46), _floor_title(), HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color(1.0, 0.86, 0.6))
 	_canvas.draw_string(_font, Vector2(30, 74), "С ↑   ·   колесо — приблизить к себе   ·   M / Esc — закрыть", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(0.7, 0.72, 0.7))
+
+
+func _draw_photo() -> void:
+	var top_left := _to_screen(_photo_bounds.position)
+	var bottom_right := _to_screen(_photo_bounds.end)
+	_canvas.draw_texture_rect(_photo, Rect2(top_left, bottom_right - top_left), false)
+	if not _urban.is_empty():
+		_draw_urban_frame()
+
+
+func _draw_schematic() -> void:
+	# закрытая часть кольца — бледный силуэт: видно, что здание продолжается
+	if _urban.is_empty():
+		var outer := float(_ring.get("outer_r", 100.0))
+		_canvas.draw_colored_polygon(_arc_poly(_open_angle.y, _open_angle.x + 360.0, 0.0, outer), Color(0.16, 0.165, 0.17))
+	else:
+		_draw_urban()
+	# сначала улица, потом здание, поверх — полосы аллеи
+	var order := _rooms.duplicate()
+	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return _rank(a) < _rank(b))
+	for room in order:
+		if room.has("rect"):
+			continue
+		var poly := _room_poly(room)
+		if poly.size() < 3:
+			continue
+		var col: Color = FILL.get(String(room.get("type", "")), Color(0.4, 0.4, 0.4))
+		_canvas.draw_colored_polygon(poly, col)
+		var closed := poly.duplicate()
+		closed.append(poly[0])
+		_canvas.draw_polyline(closed, LINE, 1.0)
+	for b in _buildings:
+		var poly := PackedVector2Array()
+		for p in b[0]:
+			poly.append(_to_screen(p))
+		_canvas.draw_colored_polygon(poly, Color(0.3, 0.33, 0.35))
+		var closed := poly.duplicate()
+		closed.append(poly[0])
+		_canvas.draw_polyline(closed, Color(0.6, 0.62, 0.6), 1.2)
+		if String(b[1]) != "" and (_urban.is_empty() or _zoom > 2.0):
+			_label(_poly_center(poly), String(b[1]), 13, Color(0.85, 0.87, 0.85))
+	for e in _escalators:
+		var poly := PackedVector2Array()
+		for p in e:
+			poly.append(_to_screen(p))
+		_canvas.draw_colored_polygon(poly, Color(0.45, 0.4, 0.6))
+	# подписи магазинов и крупных помещений
+	for room in _rooms:
+		if room.has("rect"):
+			continue
+		var t := String(room.get("type", ""))
+		if t in ["corridor", "yard", "parking"] and not bool(room.get("outdoor", false)):
+			continue
+		var id := String(room.get("id", ""))
+		if not _label_at.has(id):
+			_label_at[id] = _label_point(room)
+		var at: Vector2 = _label_at[id]
+		if at == Vector2.INF:
+			continue
+		# подпись — только если помещается в помещение на экране (приближение открывает остальные)
+		var fs := 13
+		var title := String(room.get("name", ""))
+		if not _width_of.has(id):
+			_width_of[id] = _room_width(room)
+		var room_w := float(_width_of[id]) * _scale
+		var room_h := (float(room.r[1]) - float(room.r[0])) * _scale
+		if room_w < _font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x * 0.9 or room_h < fs * 1.4:
+			continue
+		_label(_to_screen(at), title, fs, Color(0.92, 0.9, 0.84, 0.9))
 
 
 func _floor_title() -> String:
@@ -304,13 +340,6 @@ func _floor_title() -> String:
 
 
 func _draw_urban() -> void:
-	var boundary := PackedVector2Array()
-	for point in _urban.get("boundary", []):
-		boundary.append(_to_screen(Vector2(float(point[0]), float(point[1]))))
-	if boundary.size() >= 3:
-		_canvas.draw_colored_polygon(boundary, Color(0.22, 0.29, 0.22))
-		boundary.append(boundary[0])
-		_canvas.draw_polyline(boundary, Color(0.6, 0.7, 0.72), 2.0)
 	var river: Dictionary = _urban.get("river", {})
 	var water := PackedVector2Array()
 	for point in river.get("points", []):
@@ -334,6 +363,18 @@ func _draw_urban() -> void:
 		_canvas.draw_rect(pitch, Color(0.27, 0.4, 0.27))
 		_canvas.draw_rect(pitch.grow(-2.0), Color(0.65, 0.73, 0.65), false, 1.0)
 		_canvas.draw_line(Vector2(pitch.get_center().x, pitch.position.y), Vector2(pitch.get_center().x, pitch.end.y), Color(0.65, 0.73, 0.65), 1.0)
+	_draw_urban_frame()
+
+
+func _draw_urban_frame() -> void:
+	var boundary := PackedVector2Array()
+	for point in _urban.get("boundary", []):
+		boundary.append(_to_screen(Vector2(float(point[0]), float(point[1]))))
+	if boundary.size() >= 3:
+		if _photo == null:
+			_canvas.draw_colored_polygon(boundary, Color(0.22, 0.29, 0.22))
+		boundary.append(boundary[0])
+		_canvas.draw_polyline(boundary, Color(0.75, 0.82, 0.84), 2.0)
 	var scale_m: float = 100.0
 	var left := Vector2(32, _canvas.size.y - 35)
 	_canvas.draw_line(left, left + Vector2(scale_m * _scale, 0), Color.WHITE, 2)

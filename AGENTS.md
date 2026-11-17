@@ -659,7 +659,8 @@ tools/godot.cmd --headless res://tools/sector_stats.tscn -- res://data/sectors/m
                                                               # снять до и после правки SectorBuilder — старые уровни не должны меняться
 tools/godot.cmd res://tools/quest_shots.tscn                  # снимки сюжета: разговор, места этапов, несёшь Антона
 python tools/import_model.py <id>                              # модель из _asset_src/<id> (+license.txt) в assets/models/props, CREDITS
-tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: карта (M), меню (Esc), управление, рюкзак и лут
+tools/godot.cmd res://tools/ui_shots.tscn                    # снимки: детализированная карта (M), меню (Esc), управление, рюкзак и лут
+                                                              # UI_MAP=zone01|mall|prospekt — только карта выбранного рейда и её приближение
 tools/godot.cmd --disable-vsync res://tools/perf_test.tscn   # FPS / вызовы отрисовки в изометрии и в прицеле по точкам
 tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейда: рубильник, ключи, запертая дверь, эвакуация, итог
 tools/godot.cmd res://tools/loadout_test.tscn                # убежище → рейд со снаряжением → эвакуация → убежище (тестовый профиль)
