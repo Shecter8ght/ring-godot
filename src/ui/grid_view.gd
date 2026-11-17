@@ -123,7 +123,13 @@ func _draw() -> void:
 	var lt := LightUi.inside(self)
 	var bg := Rect2(Vector2.ZERO, Vector2(grid) * CELL)
 	draw_rect(bg, LightUi.CELL_BG if lt else Color(0.05, 0.055, 0.06, 0.9))
-	var cell_line := LightUi.CELL_LINE if lt else Color(1, 1, 1, 0.07)
+	if not lt:
+		for y in range(grid.y):
+			for x in range(grid.x):
+				if (x + y) % 2 == 0:
+					draw_rect(Rect2(Vector2(x, y) * CELL, Vector2.ONE * CELL), Color(1, 1, 1, 0.014))
+		draw_rect(bg, Color(1.0, 0.86, 0.6, 0.2), false, 1.0)
+	var cell_line := LightUi.CELL_LINE if lt else Color(1, 1, 1, 0.13)
 	for x in range(grid.x + 1):
 		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, grid.y * CELL), cell_line)
 	for y in range(grid.y + 1):

@@ -145,6 +145,74 @@ func _raid() -> void:
 	loot.items[1].n = 19
 	ui._build_loot(me)
 	_check(loot_grid == ui._existing_grid(ui._loot_list, "loot") and int(loot_grid.items[1].n) == 19, "ящик обновляется без удаления сетки")
+	await _layout_and_quick(me, ui, loot)
+
+
+func _layout_and_quick(me: Player, ui: InventoryUI, loot: LootContainer) -> void:
+	loot.require_line_of_sight = false
+	loot.global_position = me.global_position
+	loot.rolled = true
+	ui._looting = loot
+	me.inventory.equipment = {}
+	me.inventory.items = []
+	me.inventory.pocket = []
+	me.inventory.pocket_grid = Vector2i(2, 2)
+	ui._bp_sig = ""
+	ui._refresh_lists(me)
+	await get_tree().process_frame
+	_check(ui._bp_grid.grid == Balance.CARRY_GRID, "без рюкзака — сетка карманов")
+	me.inventory.equipment = {"backpack": ItemDb.make("bp_tourist", 1)}
+	ui._bp_sig = ""
+	ui._refresh_lists(me)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var pocket: GridView = ui._existing_grid(ui._bp_list, "pocket")
+	_check(ui._bp_grid.grid == me.inventory.backpack_grid(), "новый рюкзак перестраивает свою сетку")
+	_check(pocket != null and pocket.position.y >= ui._bp_grid.position.y + ui._bp_grid.size.y, "защищённый карман смещается ниже нового рюкзака")
+	# Свободный слот оружия имеет приоритет; занятые слоты двойной клик не вытесняет.
+	me.inventory.equipment = {}
+	me.inventory.items = []
+	loot.items = [ItemDb.make("wpn_ar_09", 1)]
+	ui._build_loot(me)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.double_click = true
+	click.position = Vector2(8, 8)
+	ui._existing_grid(ui._loot_list, "loot")._gui_input(click)
+	_check(me.inventory.equipment.has("primary") and loot.items.is_empty(), "двойной клик из ящика — в свободный слот оружия")
+	me.inventory.equipment["secondary"] = ItemDb.make("wpn_ar_09", 1)
+	loot.items = [ItemDb.make("wpn_ar_09", 1)]
+	ui._quick_item(me, "loot", 0)
+	_check(me.inventory.items.size() == 1 and String(me.inventory.equipment.primary.id) == "wpn_ar_09", "занятое оружие не заменяется — вещь идёт в рюкзак")
+	# Магазин сначала попадает в подсумок своего вида.
+	var armor := ItemDb.make("armor_mid", 1)
+	ItemDb.attach_pouch(armor, "pouch_rifle", 1)
+	me.inventory.equipment = {"armor": armor}
+	me.inventory.items = []
+	loot.items = [ItemDb.make("mag_545_30", 1)]
+	ui._quick_item(me, "loot", 0)
+	_check(me.inventory.list_of("rig").size() == 1 and loot.items.is_empty(), "двойной клик по магазину — в подходящий подсумок")
+	# Полный рюкзак не мешает взять мелочь в защищённый карман.
+	me.inventory.equipment = {}
+	me.inventory.items = []
+	for y in range(Balance.CARRY_GRID.y):
+		for x in range(Balance.CARRY_GRID.x):
+			var e := ItemDb.make("ammo_545_std", ItemDb.stack("ammo_545_std"))
+			e.x = x
+			e.y = y
+			me.inventory.items.append(e)
+	me.inventory.pocket = []
+	loot.items = [ItemDb.make("bandage", 1)]
+	ui._quick_item(me, "loot", 0)
+	_check(me.inventory.pocket.size() == 1 and loot.items.is_empty(), "при полном рюкзаке двойной клик находит защищённый карман")
+	me.inventory.items.remove_at(0)
+	ui._quick_item(me, "pocket", 0)
+	_check(me.inventory.pocket.is_empty() and me.inventory.items.any(func(e: Dictionary) -> bool: return String(e.id) == "bandage"), "двойной клик из кармана — в освободившийся рюкзак")
+	me.inventory.pocket = []
+	me.inventory.items = [ItemDb.make("bandage", 1)]
+	ui._quick_item(me, "backpack", 0)
+	_check(me.inventory.pocket.size() == 1 and me.inventory.items.is_empty(), "двойной клик из своего рюкзака — в свободный карман")
 
 
 func _check(ok: bool, label: String) -> void:

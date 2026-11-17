@@ -475,9 +475,9 @@ func _build_equipment(me: Player) -> void:
 			box.add_child(gv)
 			_wire_grid(gv)
 			gv.context.connect(func(idx: int, at: Vector2) -> void: _item_menu(me, role, idx, at))
-			# двойной клик / Ctrl+клик — в рюкзак
-			gv.activated.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
-			gv.quick_move.connect(func(idx: int) -> void: Raid.current.request_grid_move(role, idx, "backpack", -1, -1, false))
+			# двойной клик / Ctrl+клик — в первое подходящее место игрока
+			gv.activated.connect(func(idx: int) -> void: _quick_item(me, role, idx))
+			gv.quick_move.connect(func(idx: int) -> void: _quick_item(me, role, idx))
 	else:
 		var no_rig := _row_label("Подсумков на броне нет: магазины достаются из рюкзака — перезарядка дольше. Подсумок — перетащи на броню.", Color(0.6, 0.6, 0.56))
 		no_rig.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -493,26 +493,35 @@ func _build_backpack(me: Player) -> void:
 	var existing: GridView = _existing_grid(_bp_list, "backpack")
 	var pocket: GridView = _existing_grid(_bp_list, "pocket")
 	var pocket_matches: bool = (pocket == null and me.inventory.pocket_grid == Vector2i.ZERO) or (pocket != null and pocket.grid == me.inventory.pocket_grid)
-	if existing != null and pocket_matches:
+	if existing != null and existing.grid == me.inventory.backpack_grid() and pocket_matches:
 		existing.set_items(me.inventory.items)
 		if pocket != null:
 			pocket.set_items(me.inventory.pocket)
 		return
 	_clear(_bp_list)
-	# разложить по порядку — освободить место
-	_bp_list.add_child(InventoryUI.sort_button(func() -> void: Raid.current.request_sort("backpack")))
-	_bp_grid = GridView.new(me.inventory.backpack_grid(), "backpack")
+	var toolbar := HBoxContainer.new()
+	toolbar.add_theme_constant_override("separation", 10)
+	_bp_list.add_child(toolbar)
+	var bg: Vector2i = me.inventory.backpack_grid()
+	var bag_label := _row_label("%s   ·   %d × %d" % ["РЮКЗАК" if me.inventory.equipment.has("backpack") else "КАРМАНЫ", bg.x, bg.y], Color(0.82, 0.84, 0.8))
+	bag_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bag_label.add_theme_font_size_override("font_size", 13)
+	toolbar.add_child(bag_label)
+	var sort := InventoryUI.sort_button(func() -> void: Raid.current.request_sort("backpack"))
+	sort.custom_minimum_size = Vector2(150, 32)
+	toolbar.add_child(sort)
+	_bp_grid = GridView.new(bg, "backpack")
 	_bp_grid.set_items(me.inventory.items)
 	_bp_list.add_child(_bp_grid)
-	var hint := _row_label("Тащи мышью · R — повернуть · двойной клик — надеть / лечиться · правая кнопка — действия · патроны на магазин — снарядить", Color(0.6, 0.62, 0.6))
+	var hint := _row_label("Тащи мышью · R — повернуть · двойной клик — в свободное место / надеть / лечиться · правая кнопка — действия", Color(0.6, 0.62, 0.6))
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size", 13)
 	_bp_list.add_child(hint)
 	var grids: Array[GridView] = [_bp_grid]
-	# защищённый карман: что в нём — не выпадет при смерти
+	# Карман идёт следом за фактической высотой сетки и при смене рюкзака перестраивается вместе с ней.
 	if me.inventory.pocket_grid != Vector2i.ZERO:
-		var pl := _row_label("Защищённый карман — не теряется при смерти", Color(0.95, 0.82, 0.6))
-		pl.add_theme_font_size_override("font_size", 14)
+		var pl := _row_label("ЗАЩИЩЁННЫЙ КАРМАН   ·   %d × %d   ·   не теряется при смерти" % [me.inventory.pocket_grid.x, me.inventory.pocket_grid.y], Color(0.95, 0.82, 0.6))
+		pl.add_theme_font_size_override("font_size", 13)
 		_bp_list.add_child(pl)
 		var pk := GridView.new(me.inventory.pocket_grid, "pocket")
 		pk.set_items(me.inventory.pocket)
@@ -524,10 +533,16 @@ func _build_backpack(me: Player) -> void:
 		_wire_grid(g)
 		var role := g.role
 		g.context.connect(func(idx: int, at: Vector2) -> void: _item_menu(me, role, idx, at))
-	_bp_grid.activated.connect(func(idx: int) -> void: _use_item(me, idx))
-	_bp_grid.quick_move.connect(func(idx: int) -> void:
-		if _looting:
-			Raid.current.request_put(_looting, idx))
+		g.activated.connect(func(idx: int) -> void:
+			if role == "backpack":
+				_use_item(me, idx)
+			else:
+				_quick_item(me, role, idx))
+		g.quick_move.connect(func(idx: int) -> void:
+			if _looting and role in ["backpack", "pocket"]:
+				Raid.current.request_put(_looting, idx, role)
+			else:
+				_quick_item(me, role, idx))
 
 
 ## Ящик / труп: сетка с клетками (LootContainer.grid) — класть в нужную клетку, двигать внутри.
@@ -551,7 +566,7 @@ func _build_loot(me: Player) -> void:
 	lg.set_meta("container_id", c.get_instance_id())
 	lg.set_items(c.items)
 	_loot_list.add_child(lg)
-	var hint := _row_label("Двойной клик — в рюкзак · правая кнопка — разрядить, вынуть плиты, снять часть (в этот ящик или в буфер) · тащи прямо в слот, в рюкзак, на магазин", Color(0.6, 0.62, 0.6))
+	var hint := _row_label("Двойной клик — в свободный слот, подсумок, рюкзак или карман · правая кнопка — действия · тащи прямо в нужное место", Color(0.6, 0.62, 0.6))
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size", 13)
 	_loot_list.add_child(hint)
@@ -589,8 +604,8 @@ func _refresh_buffer(me: Player) -> void:
 	hint.custom_minimum_size.x = float(Balance.BUFFER_GRID.x) * GridView.CELL
 	_buf_list.add_child(hint)
 	_wire_grid(g)
-	g.activated.connect(func(idx: int) -> void: Raid.current.request_grid_move("buffer", idx, "backpack", -1, -1, false))
-	g.quick_move.connect(func(idx: int) -> void: Raid.current.request_grid_move("buffer", idx, "backpack", -1, -1, false))
+	g.activated.connect(func(idx: int) -> void: _quick_item(me, "buffer", idx))
+	g.quick_move.connect(func(idx: int) -> void: _quick_item(me, "buffer", idx))
 	g.context.connect(func(idx: int, at: Vector2) -> void: _item_menu(me, "buffer", idx, at))
 
 
@@ -738,11 +753,72 @@ func _check_mag(role: String, idx: int, it: Dictionary) -> void:
 
 
 func _take_one(c: LootContainer, idx: int) -> void:
-	if idx < c.items.size():
-		Raid.current.request_take_idx(c, idx)
+	var me := Raid.current.local_player() if Raid.current else null
+	if me and idx < c.items.size():
+		_quick_item(me, "loot", idx)
 
 
-## Двойной клик по предмету рюкзака: лечиться / надеть / взять в руки.
+## Первый свободный слот, в который предмет действительно встаёт. Занятый не вытесняем: замена остаётся
+## осознанным перетаскиванием на конкретный слот.
+func _free_slot(me: Player, id: String) -> String:
+	for slot: String in Inventory.SLOTS:
+		var old: Variant = me.inventory.equipment.get(slot)
+		if old is Dictionary and not (old as Dictionary).is_empty():
+			continue
+		if ItemDb.slot_ok(id, slot) and ItemDb.slot_block(id, slot, me.inventory.equipment) == "":
+			return slot
+	return ""
+
+
+## Есть ли место в сетке назначения без изменения настоящего инвентаря.
+func _quick_fits(me: Player, entry: Dictionary, dst: String) -> bool:
+	if me.inventory.grid_of(dst) == Vector2i.ZERO or not ItemDb.grid_accepts(dst, entry):
+		return false
+	if dst == "rig":
+		var eq := me.inventory.equipment.duplicate(true)
+		return ItemDb.rig_add(eq, me.inventory.list_of("rig").duplicate(true), entry) > 0
+	return ItemDb.room_in(me.inventory.list_of(dst), entry, me.inventory.grid_of(dst)) > 0
+
+
+## Двойной клик: сначала свободный слот снаряжения, магазину — подсумок, затем рюкзак и карман.
+## Из своего рюкзака обычная вещь перекладывается в карман; обратно — в рюкзак. Если стопка влезает
+## только частично, хост перенесёт доступную часть, остаток останется на прежнем месте.
+func _quick_item(me: Player, role: String, idx: int) -> void:
+	var list := _list_of(me, role)
+	if idx < 0 or idx >= list.size():
+		return
+	var entry: Dictionary = list[idx]
+	if PhoneGear.personal(entry):
+		return
+	var id := String(entry.id)
+	if ItemDb.pouch_cost(id) > 0.0:
+		var armor: Dictionary = me.inventory.equipment.get("armor", {})
+		if not armor.is_empty() and ItemDb.pouch_free_at(armor, id) > 0:
+			Raid.current.request_equip_from(role, idx, _looting if role == "loot" else null)
+			return
+	else:
+		var slot := _free_slot(me, id)
+		if slot != "":
+			Raid.current.request_equip_from(role, idx, _looting if role == "loot" else null, slot)
+			return
+	var destinations: Array[String] = []
+	if entry.has("rounds") and role != "rig":
+		destinations.append("rig")
+	for dst: String in ["backpack", "pocket"]:
+		if dst != role:
+			destinations.append(dst)
+	for dst: String in destinations:
+		if not _quick_fits(me, entry, dst):
+			continue
+		if role == "loot" and _looting:
+			Raid.current.request_take_to(_looting, idx, -1, -1, false, dst)
+		else:
+			Raid.current.request_grid_move(role, idx, dst, -1, -1, false)
+		return
+	Raid.current.notify("Нет свободного места вне рюкзака" if role == "backpack" else "Нет свободного подходящего места у игрока")
+
+
+## Двойной клик по предмету рюкзака: особое действие, иначе — в свободное место игрока.
 func _use_item(me: Player, idx: int) -> void:
 	if idx >= me.inventory.items.size():
 		return
@@ -753,8 +829,8 @@ func _use_item(me: Player, idx: int) -> void:
 		Raid.current.request_supply_signal()
 	elif ItemDb.item(id).has("use"):
 		_try_heal_with(me, id)
-	elif not ItemDb.equip(id).is_empty():
-		Raid.current.request_equip(idx)
+	else:
+		_quick_item(me, "backpack", idx)
 
 
 ## Правая кнопка по слоту: снять в рюкзак, выбросить, снять обвес / магазин / плиты.

@@ -12,8 +12,10 @@ func _ready() -> void:
 	Profile.use_file("user://rig_shots.json", true)
 	Profile.money = 900000
 	Profile.trust = 49
-	for id: String in ["wpn_ar_09", "wpn_hg_02", "armor_top", "helmet_mid", "bp_tourist", "nvg"]:
+	Profile.modules["pocket"] = 2
+	for id: String in ["wpn_ar_09", "wpn_hg_02", "armor_top", "helmet_mid", "bp_raid", "nvg"]:
 		Profile.buy(id, 1, "stash", true)
+	_check("рейдовый рюкзак встал в слот", Profile.equip_from("stash", _find_stash("bp_raid"), "backpack") and Profile.grid_of("backpack") == Vector2i(6, 10), str(Profile.grid_of("backpack")))
 	# подсумки — на места брони половинками (equip_doll_v2): два пистолетных делят место 1, автоматный — место 2,
 	# большой — 3+4, автоматный — 5
 	for pair: Array in [["pouch_pistol", 1], ["pouch_pistol", 2], ["pouch_rifle", 3], ["pouch_big", 5], ["pouch_rifle", 9]]:
