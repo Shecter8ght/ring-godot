@@ -60,6 +60,8 @@ const SURFACES: Dictionary = {
 	"gravel": {"set": "gravel_stones", "tile": 2.0, "tint": Color(1.25, 1.24, 1.2), "saturation": 0.5,
 		"macro_var": 0.18, "macro_m": 12.0, "grime": 0.15, "grime_m": 3.0, "rough_add": 0.05,
 		"fallback": Color(0.42, 0.41, 0.39), "grain": 0.3, "grain_m": 0.025},
+	"gravel_023": {"set": "Gravel023", "tile": 1.5, "tint": Color(0.85, 0.83, 0.78), "saturation": 0.45,
+		"height": true, "normal_strength": 1.2, "fallback": Color(0.38, 0.34, 0.29), "grain": 0.2},
 	# грунт: тропы, грунтовки, колеи, площадки, пашня под колосьями
 	"path": {"set": "mud_forest", "tile": 3.0, "tint": Color(1.12, 1.06, 1.0), "saturation": 0.8,
 		"macro_var": 0.2, "macro_m": 10.0, "fallback": Color(0.3, 0.25, 0.19), "grain": 0.2},

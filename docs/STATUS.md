@@ -15466,3 +15466,9 @@ aliases` (прежние `vest_light` и т. п. перенацелены); со
 - Финальный парный замер на восьми камерах не дал просадок: +0,1 %, +16,0 %, +6,9 %, +5,2 %, +0,7 %, +25,2 %, +4,1 %, +0,9 % FPS. Это один прогон, не доказательство общего ускорения. Числа — `docs/screens/prospekt_grass/map_full_performance.txt`.
 - Проверки: `compile_check`, стенд, все 40 участков с D и с `PROSPEKT_GRASS_TEST=0`, `prospekt_surfaces_test` 14/14, `far_grass_test`, полный `prospekt_raid_check` — 0 провалов. Коллизии, навигация, звук шагов, дороги, тротуары, интерьеры и общий свет не изменялись. Другие карты не затронуты.
 - Сравнение районов — `map_full_comparison.jpg`; рейдовый свет — `raid_d_full/raid_conditions.jpg` и `raid_d_full/districts.jpg`. При отсутствии производных работает прежний процедурный вариант. Fab Grass Clumps / Wild Grass в выбранный D не входят и не скачаны.
+
+## 2026-11-18 — собственная текстура покрытия без помощи агента
+
+- Владелец скачал ambientCG **Gravel023** 4K-JPG (CC0). `tools/prepare_ambientcg_texture.py <ID>` теперь сам находит Color / NormalGL / Roughness / AO / Displacement даже во вложенной папке, собирает ARM, пишет импорт Godot, материал и источник в `assets/CREDITS.md`.
+- Материал `gravel_023` зарегистрирован в `MallGround`: плитка 1,5 м, нормаль ×1,2, приглушённый тёплый тон. В `ProspektLandscape.SURFACE_BY_MAT` назначен тип `gravel`. Настоящая сцена Godot подтвердила загрузку четырёх карт 4096 × 4096 и тип поверхности; `compile_check` — 0 ошибок.
+- Порядок для следующих наборов Poly Haven / ambientCG записан в `docs/level_editing.md`, «Своя текстура покрытия». Сам пандус в сцене пока не изменён: выбор `mat=gravel_023` делает владелец.

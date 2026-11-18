@@ -53,6 +53,8 @@
 - `assets/textures/rubberized_track/` — Rubberized Track, Charlotte Baglioni, CC0 1.0, https://polyhaven.com/a/rubberized_track — «Проспект»: резиновая крошка детской площадки
 - `assets/textures/asphalt_track/` — Asphalt Track, Dimitrios Savva, CC0 1.0, https://polyhaven.com/a/asphalt_track — «Проспект»: зерно асфальта дороги вблизи — чёткие камешки без трещин (мелкий слой)
 
+- `assets/textures/Gravel023/` — Gravel 023, ambientCG; фотоскан rubberduck / blendswap, CC0 1.0, https://ambientcg.com/a/Gravel023 — щебень насыпи «Проспекта»
+
 ## Общежитие · материалы v03 (assets/textures/dorm_v3)
 
 Карты — свои (генераторы tools/dorm_modules/gen_*_v3.py, перенос — godot_textures.py); фотосканы внутри них и рядом:

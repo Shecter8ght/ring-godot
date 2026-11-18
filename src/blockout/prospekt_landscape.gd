@@ -277,7 +277,7 @@ const PAVING_SURFACE: Dictionary = {"walk_a": "concrete", "plaza_ab2": "concrete
 const BOX_SURFACE: Dictionary = {"walk": "concrete", "road": "asphalt"}
 const SURFACE_BY_MAT: Dictionary = {"concrete": "concrete", "wall": "concrete", "slab": "concrete", "dark": "concrete",
 	"accent": "concrete", "pit_floor": "concrete", "ground": "dirt", "steel": "metal", "rust": "metal",
-	"tray": "metal", "wood": "wood", "timber": "wood", "glass": "glass", "grass": "grass", "mud": "mud", "rock": "gravel",
+	"tray": "metal", "wood": "wood", "timber": "wood", "glass": "glass", "grass": "grass", "mud": "mud", "rock": "gravel", "gravel_023": "gravel",
 	"fountain_tile": "tile", "stripe": "concrete", "tunnel_floor": "tile", "tunnel_tile": "tile",
 	"tunnel_ceiling": "concrete", "rail_steel": "metal"}
 ## Люки и решётки (металл поверх покрытия): [середина xz, полуразмеры, поворот].
