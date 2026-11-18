@@ -50,6 +50,10 @@ POSE_RU = dict(grip="ХВАТ", frame="П: указательный вдоль �
 POSE_VARIANT = dict(light=dict(light=True), varn_v1=dict(grip="varn_v1"), varn_v2=dict(grip="varn_v2"),
                     mag45=dict(mag="45"), drum60=dict(mag="60"))
 GUN_REF = ("mag", "hook", "check", "supp")            # кадры поз, где стоит и положение автомата
+# Ключ клипа может совпасть сразу с несколькими позами: у «пальцы перед рукояткой» (31) кисть, плечо, локоть и автомат —
+# копия «крюка» (36), а генератор ставит их ключи от «крюка». Поэтому при совпадении «крюк» проверяется раньше.
+EXACT_ORDER = tuple(sorted(POSE_FRAMES, key=lambda n: (n == "hook_pre", POSE_FRAMES[n])))
+ARM_FOLLOW = ("upper_arm", "pole")                    # плечо и локоть берутся из той позы, по которой стоит кисть на кадре
 GUN_NEAR_DEG, GUN_NEAR_M = 14.0, 0.05                 # ключ автомата «возле позы»: ближе этого
 GRIPS = (("", "без рукоятки"), ("varn_v1", "ВАРН V1"), ("varn_v2", "ВАРН V2"))
 MAGS = (("30", "магазин 30"), ("45", "магазин 45"), ("60", "барабан 60"))
@@ -281,9 +285,16 @@ SHIFTABLE = {"ik_hand.L": ("grip", "mag", "pre", "free", "check", "light", "supp
              "ik_hand.R": ("grip", "hook", "hook_pre", "r_open", "sel_down", "sel_up")}
 
 
-def reference(bone, K, OLD):
-    """К какой позе относится ключ клипа: имя позы или None (ключ свой — не трогать)."""
-    for name in POSE_FRAMES:
+def reference(bone, K, OLD, hand=None):
+    """К какой позе относится ключ клипа: имя позы или None (ключ свой — не трогать). hand — поза, по которой на этом
+    кадре стоит кисть той же руки (для плеча и локтя: в «крюке» они те же, что в «хвате», и без подсказки ушли бы
+    к «хвату» — правка локтя в позе на кадрах клипа не появилась бы)."""
+    if hand is not None:
+        if close(K, OLD[hand][bone]):
+            return hand, True
+        if bone.split(".")[0] in ARM_FOLLOW:         # плечо подано ключом (рука не дотягивалась) — едет вслед за позой
+            return hand, False
+    for name in EXACT_ORDER:
         if close(K, OLD[name][bone]):
             return name, True
     if bone in SHIFTABLE:                             # кисть стоит «как в позе», но сдвинута (магазин идёт в шахте и т. п.)
@@ -303,18 +314,34 @@ def reference(bone, K, OLD):
 def remap(act, arms, OLD, NEW):
     """Ключи действия, стоящие «по позам» OLD, переводятся на позы NEW. → сколько ключей поправлено."""
     cv_all = bone_curves(bag_of(act, arms))
+
+    def key_frames(cv, pb):
+        rp = rot_prop(pb)
+        return sorted({round(kp.co[0], 3) for (prop, _i), fc in cv.items() if prop in ("location", rp)
+                       for kp in fc.keyframe_points})
+
+    hand_ref = {}                                     # по какой позе стоит кисть на каждом её ключе (до любой записи)
+    for s in ("L", "R"):
+        pb, cv = arms.pose.bones.get(f"ik_hand.{s}"), cv_all.get(f"ik_hand.{s}")
+        hand_ref[s] = {f: reference(pb.name, read(cv, pb, f), OLD)[0] for f in key_frames(cv, pb)} if pb and cv else {}
+
+    def hand_at(side, f):
+        """Поза кисти на кадре; ключа кисти на нём нет — по ближайшему её ключу."""
+        refs = hand_ref.get(side) or {}
+        if f in refs or not refs:
+            return refs.get(f)
+        return refs[min(refs, key=lambda k: (abs(k - f), k))]
+
     n = 0
     for pb in arms.pose.bones:
         cv = cv_all.get(pb.name)
         if not cv:
             continue
-        rp = rot_prop(pb)
-        frames = sorted({round(kp.co[0], 3) for (prop, _i), fc in cv.items() if prop in ("location", rp)
-                         for kp in fc.keyframe_points})
+        side = pb.name.rsplit(".", 1)[-1] if pb.name.split(".")[0] in ARM_FOLLOW else None
         plan = []                                     # сначала всё прочитать, потом писать: запись сдвигает кривые
-        for f in frames:
+        for f in key_frames(cv, pb):
             K = read(cv, pb, f)
-            ref, exact = reference(pb.name, K, OLD)
+            ref, exact = reference(pb.name, K, OLD, hand_at(side, f) if side else None)
             if ref is None:
                 continue
             Po, Pn = OLD[ref][pb.name], NEW[ref][pb.name]
