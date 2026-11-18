@@ -864,6 +864,30 @@ func _stair_marks(start: Vector3, finish: Vector3, width: float, count: int) -> 
 		StreetPaving.paint_node(generated, "yellow", Vector3(at.x, top + 0.004, at.z), Vector2(width - 0.1, STAIR_STRIPE_M), yaw)
 
 
+## Свой размер/поворот текстуры у одного пандуса: материал-копия, общий материал других кусков не меняется.
+func _custom_ground_material(g: RefCounted, key: String, entry: Dictionary) -> String:
+	var tile: float = float(entry.get("texture_tile_m", 0.0))
+	var turn: float = float(entry.get("texture_rotation_deg", 0.0))
+	if tile <= 0.0 and is_zero_approx(turn):
+		return key
+	var source: Material = g.palette.get(key) as Material
+	if source == null:
+		return key
+	var shader: Shader = (source as ShaderMaterial).shader if source is ShaderMaterial else null
+	if shader == null or shader != MallGround.SHADER:
+		return key
+	var material := (source as ShaderMaterial).duplicate() as ShaderMaterial
+	if tile > 0.0:
+		material.set_shader_parameter("tile_m", tile)
+	material.set_shader_parameter("texture_rotation", deg_to_rad(turn))
+	material.set_shader_parameter("texture_origin", Vector2((float(entry.x0) + float(entry.x1)) * 0.5,
+		(float(entry.z0) + float(entry.z1)) * 0.5))
+	var custom_key: String = "%s__custom_%d" % [key, absi(hash(entry))]
+	g.palette[custom_key] = material
+	MallGround._cache[custom_key] = material
+	return custom_key
+
+
 ## Пандус вдоль Z: наклонная плита (вид — четырёхугольники, физика — выпуклая призма), как у лестниц.
 func _ramps(g: RefCounted) -> void:
 	for r: Dictionary in plan.ramps:
@@ -873,7 +897,7 @@ func _ramps(g: RefCounted) -> void:
 		var z1: float = float(r.z1)
 		var y0: float = float(r.y0)
 		var y1: float = float(r.y1)
-		var key: String = String(r.get("mat", "concrete"))
+		var key: String = _custom_ground_material(g, String(r.get("mat", "concrete")), r)
 		var t: float = 0.3
 		g.quad(Vector3(x0, y0, z0), Vector3(x1, y0, z0), Vector3(x1, y1, z1), Vector3(x0, y1, z1), key)
 		g.quad(Vector3(x0, y1 - t, z1), Vector3(x1, y1 - t, z1), Vector3(x1, y0 - t, z0), Vector3(x0, y0 - t, z0), key)

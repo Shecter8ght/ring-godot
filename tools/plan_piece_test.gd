@@ -27,6 +27,7 @@ func _ready() -> void:
 	var holed: PlanPiece = _first(pieces.surfaces as Array, func(p: PlanPiece) -> bool: return not (p.data.get("holes", []) as Array).is_empty())
 	var lamp: PlanPiece = (pieces.lamps as Array)[0]
 	var ramp: PlanPiece = (pieces.ramps as Array)[0]
+	var textured_ramp: PlanPiece = _first(pieces.ramps as Array, func(p: PlanPiece) -> bool: return p.order == 8)
 	var stair: PlanPiece = (pieces.stairs as Array)[0]
 	var w0: Dictionary = wall.data.duplicate(true)
 	var w1: Dictionary = wall_turn.data.duplicate(true)
@@ -36,6 +37,7 @@ func _ready() -> void:
 	var r0: Dictionary = ramp.data.duplicate(true)
 	var s0: Dictionary = stair.data.duplicate(true)
 	var lamp0: Array = (lamp.data.a as Array).duplicate()
+	var has_textured_ramp: bool = textured_ramp != null
 	# правки — как в редакторе: сдвиг, поворот, растяжение, глазок, копия
 	wall.position += Vector3(3.0, 0.0, 0.0)
 	wall_turn.rotate_y(PI * 0.5)
@@ -45,6 +47,10 @@ func _ready() -> void:
 	if holed:
 		holed.rotate_y(PI * 0.5)
 	ramp.rotate_y(PI)
+	if textured_ramp:
+		textured_ramp.data["mat"] = "gravel_023"
+		textured_ramp.texture_tile_m = 0.75
+		textured_ramp.texture_rotation_deg = 25.0
 	stair.position += Vector3(0.0, 1.0, 0.0)
 	var copy: PlanPiece = lamp.duplicate() as PlanPiece
 	copy.position += Vector3(0.0, 0.0, 5.0)
@@ -95,6 +101,10 @@ func _ready() -> void:
 	var rp: Dictionary = plan.ramps[0]
 	_check("пандус развёрнут: верх и низ поменялись местами", _near(rp.z0, float(r0.z1)) and _near(rp.z1, float(r0.z0))
 		and _near(rp.y0, r0.y0) and _near(rp.y1, r0.y1))
+	_check("у пандуса есть индивидуальные настройки текстуры", has_textured_ramp)
+	var tex_entry: Dictionary = _find(plan.ramps as Array, func(e: Dictionary) -> bool: return _near(e.get("texture_tile_m", 0.0), 0.75))
+	_check("размер и поворот текстуры сохранены в плане", not tex_entry.is_empty() and _near(tex_entry.get("texture_rotation_deg", 0.0), 25.0))
+	_check("собранная сетка получила свой материал с размером и поворотом", _custom_material_found(world, 0.75, 25.0))
 	var st: Dictionary = plan.stairs[0]
 	_check("лестница поднята на 1 м", _near((st.from as Array)[1], float((s0.from as Array)[1]) + 1.0)
 		and _near((st.to as Array)[1], float((s0.to as Array)[1]) + 1.0))
@@ -170,6 +180,27 @@ func _center(r: Array) -> Vector2:
 
 func _near(a: Variant, b: Variant) -> bool:
 	return absf(float(a) - float(b)) < 0.005
+
+
+func _custom_material_found(world: Node3D, tile: float, degrees: float) -> bool:
+	for node: Node in world.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var materials: Array[Material] = []
+		if mi.material_override != null:
+			materials.append(mi.material_override)
+		if mi.mesh != null:
+			for index: int in range(mi.mesh.get_surface_count()):
+				materials.append(mi.mesh.surface_get_material(index))
+		for material: Material in materials:
+			if not material is ShaderMaterial:
+				continue
+			var tile_value: Variant = (material as ShaderMaterial).get_shader_parameter("tile_m")
+			var rotation_value: Variant = (material as ShaderMaterial).get_shader_parameter("texture_rotation")
+			if tile_value == null or rotation_value == null:
+				continue
+			if _near(tile_value, tile) and _near(rad_to_deg(float(rotation_value)), degrees):
+				return true
+	return false
 
 
 func _check(what: String, ok: bool) -> void:

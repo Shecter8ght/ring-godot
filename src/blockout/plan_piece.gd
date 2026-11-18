@@ -26,7 +26,30 @@ const HOLE_FRAME_M: Vector2 = Vector2(0.3, 0.12)
 @export var pick_size: Vector3 = Vector3.ONE
 @export var pick_center: Vector3 = Vector3.ZERO
 
+@export_group("Текстура покрытия")
+## 0 — размер из материала. Значение больше нуля — размер повторения в метрах только у этого куска.
+@export_range(0.0, 20.0, 0.05) var texture_tile_m: float = 0.0:
+	set(value):
+		texture_tile_m = maxf(value, 0.0)
+		_set_texture_setting("texture_tile_m", texture_tile_m)
+## Поворот рисунка вокруг середины куска, градусы; 0 — обычное направление.
+@export_range(-180.0, 180.0, 1.0) var texture_rotation_deg: float = 0.0:
+	set(value):
+		texture_rotation_deg = value
+		_set_texture_setting("texture_rotation_deg", texture_rotation_deg)
+
 static var _pick_material: StandardMaterial3D
+
+
+func _set_texture_setting(key: String, value: float) -> void:
+	if not data.has("mat"):
+		return
+	if is_zero_approx(value):
+		data.erase(key)
+	else:
+		data[key] = value
+	if is_inside_tree():
+		_notify_landscape()
 
 
 func _enter_tree() -> void:

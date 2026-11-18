@@ -22,6 +22,9 @@ uniform bool has_height = false;
 group_uniforms look;
 // размер плитки текстуры, м (реальный размер набора)
 uniform float tile_m = 4.0;
+// поворот рисунка отдельного куска вокруг texture_origin; 0 — прежнее поведение
+uniform float texture_rotation = 0.0;
+uniform vec2 texture_origin = vec2(0.0);
 // множитель цвета набора (линейный, не цвет)
 uniform vec3 tint = vec3(1.0);
 uniform float saturation : hint_range(0.0, 1.5) = 1.0;
@@ -173,7 +176,10 @@ void vertex() {
 }
 
 void fragment() {
-	vec2 xz = wpos.xz;
+	float tc = cos(texture_rotation);
+	float ts = sin(texture_rotation);
+	mat2 texture_turn = mat2(vec2(tc, ts), vec2(-ts, tc));
+	vec2 xz = texture_origin + texture_turn * (wpos.xz - texture_origin);
 	float dist = length(CAMERA_POSITION_WORLD - wpos);
 	float far = smoothstep(detail_fade.x, detail_fade.y, dist);
 	// размер пикселя на земле, м: сглаживание швов, заплат и трещин (вне ветвлений по пикселю)
@@ -265,6 +271,8 @@ void fragment() {
 		float nz = vnoise(g + vec2(0.0, 0.5)) - vnoise(g - vec2(0.0, 0.5));
 		nxy = vec2(nx, -nz) * grain * 2.5 * (1.0 - far);
 	}
+	// поворот рисунка поворачивает и его нормали, иначе свет не совпадал бы с камешками
+	nxy = transpose(texture_turn) * nxy;
 
 	// крупные пятна тона — разные участки укладки, выгоревшее и затёртое
 	float macro = mix(n_low, vnoise(xz / macro_m + 3.1), 0.6);
@@ -362,7 +370,7 @@ void fragment() {
 		field += (vnoise(xz * 1.3 + 7.0) - 0.5) * 0.12;
 		// в швах плит и заплат вода держится раньше
 		field += joint * 0.25 + pat_seam * 0.15;
-		float open = step(occ_h(xz), wpos.y + 0.2);
+		float open = step(occ_h(wpos.xz), wpos.y + 0.2);
 		float w = wetness * open;
 		film = clamp((w * 1.35 - (1.0 - field)) / 0.25, 0.0, 1.0);
 		film = max(film, smoothstep(0.85, 1.0, w));
@@ -387,6 +395,7 @@ void fragment() {
 	AO_LIGHT_AFFECT = 0.25;
 
 	// рельеф: в плёнке слабее, в луже — гладь с рябью
+	rp = transpose(texture_turn) * rp;
 	float ns = normal_strength * mix(1.0, 0.55, film) * (1.0 - pud) * mix(1.0, 0.35, far);
 	vec2 slope = nxy * ns;
 	float nz = sqrt(max(1.0 - dot(nxy, nxy), 0.04));
