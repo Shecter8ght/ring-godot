@@ -4,6 +4,8 @@ const MODEL_PATH := "res://assets/models/unfinished_building/%s.gltf"
 const SURFACE_PATH := "res://assets/textures/unfinished_building/%s/%s_4K_%s.jpg"
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CAMERA_SCENE := preload("res://scenes/player/camera_rig.tscn")
+const PUDDLE_SHADER := preload("res://tools/unfinished_building/puddle.gdshader")
+const PUDDLE_WATER_SHADER := preload("res://tools/unfinished_building/puddle_water.gdshader")
 const COLUMN_IDS := ["ujjleixga", "ujikdbrva", "ujjmecwba", "ukigcctfa"]
 const BEAM_IDS := ["ujymbbdba", "ujlkbd1ga", "ujoqec3ga", "uknlcbaqx"]
 const DEBRIS_IDS := ["tl0kcdmiw", "tl0mbbihw", "tl1gdgyhw", "tmclbcpiw", "tmclcaeiw", "tmjgderjw", "uc1iccejw", "uc1jagbjw", "uc1jagnjw"]
@@ -70,13 +72,6 @@ func _surface(id: String, tile_m: float, relief_m: float) -> StandardMaterial3D:
 	material.uv1_scale = Vector3.ONE / tile_m
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	_materials[id] = material
-	return material
-
-
-func _plain(color: Color, roughness: float) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = roughness
 	return material
 
 
@@ -250,11 +245,10 @@ func _puddle_mesh(at: Vector3, radius: Vector2, seed_value: int, material: Mater
 
 
 func _build_puddles() -> void:
-	var wet_edge := _plain(Color(0.035, 0.037, 0.032), 0.24)
-	wet_edge.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var water := _plain(Color(0.012, 0.018, 0.019), 0.08)
-	water.metallic_specular = 0.72
-	water.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var edge := ShaderMaterial.new()
+	edge.shader = PUDDLE_SHADER
+	var water := ShaderMaterial.new()
+	water.shader = PUDDLE_WATER_SHADER
 	var puddles := [
 		[Vector3(-2.8, 0.008, 2.0), Vector2(2.2, 0.85)],
 		[Vector3(0.4, 0.008, 0.8), Vector2(1.4, 0.72)],
@@ -266,9 +260,9 @@ func _build_puddles() -> void:
 		var entry: Array = puddles[i]
 		var at: Vector3 = entry[0]
 		var radius: Vector2 = entry[1]
-		_puddle_mesh(at, radius * 1.13, 900 + i, wet_edge)
-		at.y += 0.002
 		_puddle_mesh(at, radius, 900 + i, water)
+		at.y += 0.001
+		_puddle_mesh(at, radius * 1.14, 900 + i, edge)
 
 
 func _spawn_player() -> void:
