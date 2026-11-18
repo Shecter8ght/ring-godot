@@ -1,0 +1,117 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tools/unfinished_building/unfinished_building.gd" id="1_scene"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.46, 0.56, 0.68, 1)
+sky_horizon_color = Color(0.83, 0.85, 0.84, 1)
+ground_bottom_color = Color(0.70, 0.72, 0.69, 1)
+ground_horizon_color = Color(0.82, 0.84, 0.81, 1)
+sky_energy_multiplier = 1.0
+ground_energy_multiplier = 0.45
+
+[sub_resource type="Sky" id="Sky"]
+radiance_size = 3
+process_mode = 3
+sky_material = SubResource("SkyMaterial")
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.72, 0.78, 0.86, 1)
+ambient_light_energy = 0.24
+ambient_light_sky_contribution = 1.0
+reflected_light_source = 2
+tonemap_mode = 4
+tonemap_agx_white = 3.2
+tonemap_agx_contrast = 1.20
+ssao_enabled = true
+ssao_radius = 0.52
+ssao_intensity = 1.45
+ssao_power = 1.18
+ssao_light_affect = 0.16
+ssil_enabled = true
+ssil_radius = 0.9
+ssil_intensity = 0.32
+ssr_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_read_sky_light = true
+sdfgi_cascades = 4
+sdfgi_min_cell_size = 0.18
+sdfgi_bounce_feedback = 0.42
+sdfgi_energy = 1.15
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.007
+volumetric_fog_albedo = Color(0.72, 0.75, 0.77, 1)
+volumetric_fog_anisotropy = 0.18
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributes"]
+exposure_multiplier = 1.0
+auto_exposure_enabled = false
+
+[node name="UnfinishedBuilding" type="Node3D"]
+script = ExtResource("1_scene")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+camera_attributes = SubResource("CameraAttributes")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-31, -28, 0)
+light_color = Color(1, 0.97, 0.91, 1)
+light_energy = 2.0
+light_angular_distance = 0.48
+shadow_enabled = true
+shadow_bias = 0.035
+shadow_normal_bias = 0.3
+directional_shadow_split_1 = 0.1
+directional_shadow_split_2 = 0.28
+directional_shadow_split_3 = 0.55
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 65.0
+
+[node name="RearSky" type="AreaLight3D" parent="."]
+position = Vector3(-3, 1.55, -8.65)
+rotation_degrees = Vector3(0, 180, 0)
+light_color = Color(0.82, 0.88, 1, 1)
+light_energy = 2.1
+light_specular = 0.35
+light_size = 0.0
+shadow_enabled = true
+shadow_bias = 0.08
+shadow_normal_bias = 0.55
+shadow_blur = 3.0
+area_size = Vector2(6.4, 2.35)
+area_range = 16.0
+area_attenuation = 0.8
+area_normalize_energy = false
+
+[node name="LeftSky" type="AreaLight3D" parent="."]
+position = Vector3(-9.65, 1.55, -1.0)
+rotation_degrees = Vector3(0, -90, 0)
+light_color = Color(0.86, 0.9, 1, 1)
+light_energy = 1.10
+light_specular = 0.28
+light_size = 0.0
+shadow_enabled = true
+shadow_bias = 0.08
+shadow_normal_bias = 0.55
+shadow_blur = 3.0
+area_size = Vector2(7.2, 2.3)
+area_range = 15.0
+area_attenuation = 0.82
+area_normalize_energy = false
+
+[node name="InteriorReflections" type="ReflectionProbe" parent="."]
+position = Vector3(0, 1.45, 0.5)
+size = Vector3(18.4, 3.15, 17.5)
+box_projection = true
+intensity = 0.85
+interior = true
+ambient_mode = 2
+ambient_color = Color(0.50, 0.55, 0.60, 1)
+ambient_color_energy = 0.12
+enable_shadows = true
+max_distance = 35.0

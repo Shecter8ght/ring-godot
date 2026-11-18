@@ -1234,6 +1234,12 @@ https://elevenlabs.io/terms. 44 реплики Сергея и Антона в �
 - Painted Plaster Wall, Amal Kumar, Poly Haven, CC0. Использованы имеющиеся карты `assets/textures/painted_plaster_wall`. [Painted Plaster Wall](https://polyhaven.com/a/painted_plaster_wall)
 - Геометрия, таблички и декали перенесены из принятой сборки второго этажа RING v02. Голубь на лестнице создан для RING встроенным ImageGen.
 
+## Unfinished Building — Quixel Megascans / Fab (2026-11-18)
+
+- Unfinished Building, Quixel Megascans / Epic Games, Fab Standard License. [Страница набора](https://www.fab.com/listings/25f2e7e5-5cca-48a5-99a3-35c38b8240ac) · [Fab EULA](https://www.fab.com/eula).
+- Использованы 37 исходных FBX и шесть наборов сканированных покрытий 4K в отдельном стенде `tools/unfinished_building/unfinished_building.tscn`. FBX конвертированы в glTF без изменения формы; подключены цвет, нормали, шероховатость и AO. Геометрия зала, расстановка, лужи и освещение собраны для RING.
+- Игровые производные: `assets/models/unfinished_building/` и `assets/textures/unfinished_building/`. Исходный архив, его SHA-256, лицензия и состояние: `_asset_src/unfinished_building/` (не в git). Сырые исходники отдельно не распространяются.
+
 ## БЦ «Проспект, 5», лобби игрового стенда (2026-11-17)
 
 - Terrazzo 005, Lennart Demes, ambientCG, CC0. Игровой пол лобби использует общие карты цвета и шероховатости в `assets/models/props/bc5_route203`. [Источник](https://ambientcg.com/view?id=Terrazzo005)

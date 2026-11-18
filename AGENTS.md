@@ -671,6 +671,8 @@ tools/godot.cmd res://tools/raid_test.tscn                   # цикл рейд
 tools/godot.cmd res://tools/loadout_test.tscn                # убежище → рейд со снаряжением → эвакуация → убежище (тестовый профиль)
 tools/godot.cmd --headless res://tools/arsenal_test.tscn     # арсенал, CASE 1–20 ТЗ: прицелы (FPS/изометрия), фонарь+ЛЦУ, пробитие, плиты, ИИ-патроны, снятие с трупа, сохранение
 tools/godot.cmd --headless res://tools/compile_check.tscn    # все скрипты собираются (с автозагрузками) — после больших правок
+UNFINISHED_BUILDING.cmd                                      # отдельный проходимый стенд Quixel Unfinished Building (Fab Standard): зал, лестница, лужи, свет;
+                                                              # --headless res://tools/unfinished_building/unfinished_building.tscn -- --check; с окном -- --shots → docs/screens/unfinished_building
 tools/godot.cmd --windowed --resolution 1280x720 res://tools/raid_map_bake.tscn [-- id …] # карты маршрутов для окна «План рейда»: каждая рейдовая сцена
                                                               # (data/floors.json) сверху ортокамерой днём → assets/maps/<id>.webp, выходы (условия) и заходы с края
                                                               # → data/raid_maps.json; затем --import (после правки уровня — снять заново)
