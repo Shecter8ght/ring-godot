@@ -150,7 +150,7 @@ func _lawn_grass_upgrade(rect: Rect2, top: float, origin: Vector2, w: int, h: in
 	var ground := MeshInstance3D.new()
 	ground.name = "Ground"
 	ground.mesh = StreetPaving.surface_mesh(rect, top + 0.004, Color(0, 0, 0, 0))
-	ground.material_override = GRASS_UPGRADE.ground_material("leafy", true)
+	ground.material_override = GRASS_UPGRADE.ground_material("broad", true)
 	root.add_child(ground)
 	var base_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	base_img.fill(Color(0, 0, 0, 1))

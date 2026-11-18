@@ -1,6 +1,6 @@
 extends Node3D
 ## Сравнительный стенд земли и травы «Проспекта» (docs/tasks/prospekt_grass_upgrade.md).
-## Свет и камеры одинаковые; полная карта здесь не изменяется. F5…F8 — варианты, F9 — ряд моделей.
+## Свет и камеры одинаковые; полная карта здесь не изменяется. F5…F8 — варианты, F9 — D, F10 — модели.
 ## -- shots: docs/screens/prospekt_grass/probe; -- check: ассеты, LOD, покров и приминание.
 
 const PG = preload("res://src/world/prospekt_grass.gd")
@@ -15,7 +15,7 @@ const VARIANTS: Array = [
 	{"id": "leafy", "title": "A · Leafy Grass + Bermuda / Medium / Weed", "ground": "leafy", "mixed": false},
 	{"id": "grass001", "title": "B · Grass 001 + тот же покров", "ground": "grass001", "mixed": false},
 	{"id": "mixed", "title": "C · Leafy Grass + Grass Ground, проплешины", "ground": "leafy", "mixed": true},
-	{"id": "broad", "title": "D · Широкие куртины, дальность 70 м", "ground": "leafy", "mixed": true},
+	{"id": "broad", "title": "D · Нормаль ×2, без параллакса", "ground": "broad", "mixed": true},
 ]
 const MODEL_LINEUP: PackedStringArray = ["grass_bermuda_01_a", "grass_medium_01_a", "grass_medium_01_tall", "weed_plant_02_a", "grass_broad_01_a"]
 
@@ -232,13 +232,13 @@ func _build_hud() -> void:
 
 func _update_hud() -> void:
 	if _hud:
-		_hud.text = "Трава «Проспекта» · день 13:00, ясно · %s\nF5…F8 — варианты · F9 — D · F10 — модели · F4 — рельеф: %s · WASD и мышь — прогулка" % [VARIANTS[maxi(_active, 0)].title, "вкл" if _relief_on else "выкл"]
+		_hud.text = "Трава «Проспекта» · день 13:00, ясно · %s\nF5…F8 — варианты · F9 — D · F10 — модели · F4 — параллакс A–C: %s · WASD и мышь — прогулка" % [VARIANTS[maxi(_active, 0)].title, "вкл" if _relief_on else "выкл"]
 
 
 func _set_relief(enabled: bool) -> void:
 	_relief_on = enabled
 	for spec: Dictionary in VARIANTS:
-		if String(spec.ground) == "current":
+		if String(spec.ground) in ["current", "broad"]:
 			continue
 		var material: ShaderMaterial = PG.ground_material(String(spec.ground), bool(spec.mixed)) as ShaderMaterial
 		material.set_shader_parameter("parallax_scale", (0.035 if String(spec.ground) == "leafy" else 0.022) if enabled else 0.0)

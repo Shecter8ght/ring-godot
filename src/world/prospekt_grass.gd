@@ -111,7 +111,7 @@ static func ground_material(candidate: String, mixed: bool = false) -> Material:
 		return _cache[cache_key] as Material
 	var material := ShaderMaterial.new()
 	material.shader = GROUND_SHADER
-	var source: String = "leafy" if candidate in ["leafy", "mixed", "mega"] else candidate
+	var source: String = "leafy" if candidate in ["leafy", "mixed", "mega", "broad"] else candidate
 	var has_maps: bool = ResourceLoader.exists(TEX % [source, "albedo"])
 	material.set_shader_parameter("use_maps", has_maps)
 	if has_maps:
@@ -123,8 +123,8 @@ static func ground_material(candidate: String, mixed: bool = false) -> Material:
 	material.set_shader_parameter("tile_m", 1.4 if source == "grass001" else 2.0)
 	material.set_shader_parameter("saturation", 0.76 if mixed else 0.86)
 	material.set_shader_parameter("macro_var", 0.14)
-	material.set_shader_parameter("normal_strength", 1.0)
-	material.set_shader_parameter("parallax_scale", 0.035 if source == "leafy" else 0.022)
+	material.set_shader_parameter("normal_strength", 2.0 if candidate == "broad" else 1.0)
+	material.set_shader_parameter("parallax_scale", 0.0 if candidate == "broad" else (0.035 if source == "leafy" else 0.022))
 	material.set_shader_parameter("tint", Color(0.5, 0.62, 0.64) if source == "leafy" else Color(0.8, 0.75, 0.85))
 	if mixed:
 		material.set_shader_parameter("tint", Color(0.48, 0.6, 0.62))

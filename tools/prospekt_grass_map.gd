@@ -103,8 +103,11 @@ func _check(world: Node3D) -> void:
 		fails += 1
 	var ground: MeshInstance3D = root.find_child("Ground", true, false) as MeshInstance3D
 	var material: ShaderMaterial = ground.material_override as ShaderMaterial if ground else null
-	if material == null or not bool(material.get_shader_parameter("use_soil")) or float(material.get_shader_parameter("parallax_scale")) <= 0.0:
-		print("ПРОВАЛ: земля пробы не использует проплешины/рельеф")
+	if material == null or not bool(material.get_shader_parameter("use_soil")):
+		print("ПРОВАЛ: земля пробы не использует проплешины")
+		fails += 1
+	elif absf(float(material.get_shader_parameter("parallax_scale"))) > 0.0001 or not is_equal_approx(float(material.get_shader_parameter("normal_strength")), 2.0):
+		print("ПРОВАЛ: у D должны быть нормаль ×2 и нулевой параллакс")
 		fails += 1
 	_camera.global_position = Vector3(-10, 1.74, 194)
 	_camera.look_at(Vector3(-10, 0.22, 202), Vector3.UP)
