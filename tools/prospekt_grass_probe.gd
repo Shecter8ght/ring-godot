@@ -2,6 +2,7 @@ extends Node3D
 ## Сравнительный стенд земли и травы «Проспекта» (docs/tasks/prospekt_grass_upgrade.md).
 ## Свет и камеры одинаковые; полная карта здесь не изменяется. F5…F8 — варианты, F9 — D, F10 — модели.
 ## -- shots: docs/screens/prospekt_grass/probe; -- check: ассеты, LOD, покров и приминание.
+## GRASS_PROBE_LOW=1 — съёмка с высоты 18 см над землёй.
 
 const PG = preload("res://src/world/prospekt_grass.gd")
 const PLAYER_SCENE: String = "res://scenes/player/player.tscn"
@@ -302,9 +303,10 @@ func _shots() -> void:
 			continue
 		_activate(i)
 		var x: float = float(i) * PLOT_STEP
+		var close_height: float = 0.18 if OS.get_environment("GRASS_PROBE_LOW") == "1" else 0.5
 		var views: Array = [
 			["eye", Vector3(x, GROUND_Y + 1.62, -7.0), Vector3(x, 0.28, 2.0)],
-			["close", Vector3(x - 1.2, GROUND_Y + 0.5, -1.8), Vector3(x, GROUND_Y + 0.03, 0.4)],
+			["close", Vector3(x - 1.2, GROUND_Y + close_height, -1.8), Vector3(x, GROUND_Y + 0.03, 0.4)],
 			["far", Vector3(x, GROUND_Y + 1.62, -17.0), Vector3(x, 0.22, 2.0)],
 		]
 		if id in ["mixed", "broad"]:

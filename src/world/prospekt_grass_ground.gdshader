@@ -7,19 +7,20 @@ global uniform float rain_wet;
 
 uniform bool use_maps = true;
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D arm_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform sampler2D height_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform bool has_height = false;
 uniform bool use_soil = false;
 uniform sampler2D soil_albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D soil_normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D soil_normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D soil_arm_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform float tile_m = 2.0;
 uniform float soil_tile_m = 2.5;
 uniform float soil_amount : hint_range(0.0, 1.0) = 0.0;
 uniform vec3 tint : source_color = vec3(1.0);
 uniform float saturation : hint_range(0.0, 1.5) = 0.8;
+uniform float albedo_contrast : hint_range(0.0, 1.5) = 1.0;
 uniform float macro_var : hint_range(0.0, 0.5) = 0.12;
 uniform float normal_strength : hint_range(0.0, 2.0) = 0.85;
 // Глубина рельефа по карте высот, м; с дальностью параллакс плавно выключается.
@@ -136,6 +137,8 @@ void fragment() {
 		arm = mix(arm, soil_arm, bare);
 		nxy = mix(nxy, soil_n, bare);
 	}
+	float flat_lum = dot(alb, vec3(0.3, 0.59, 0.11));
+	alb = vec3(flat_lum) + (alb - vec3(flat_lum)) * albedo_contrast;
 	float macro = fbm(xz * 0.065 + 3.1);
 	alb *= 1.0 + (macro - 0.5) * 2.0 * macro_var;
 	alb *= 1.0 - 0.2 * rain_wet;
