@@ -121,8 +121,9 @@ def write(cv, pb, f, M, bag=None, insert=False):
             cv[key] = fc
         kp = next((k for k in fc.keyframe_points if abs(k.co[0] - f) < 1e-3), None)
         if kp is None:
-            if insert:
-                fc.keyframe_points.insert(f, v, options={"REPLACE"})
+            if insert:                                # без options: «REPLACE» только заменяет имеющиеся ключи, новых не ставит
+                fc.keyframe_points.insert(f, v)
+                fc.update()
             continue
         d = v - kp.co[1]
         kp.co[1] = v
