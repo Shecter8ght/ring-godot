@@ -19,6 +19,8 @@ uniform float mesh_height = 0.3;
 uniform vec3 translucency : source_color = vec3(0.22, 0.2, 0.08);
 uniform float fade_start = 28.0;
 uniform float fade_end = 32.0;
+uniform float rain_roughness = 0.45;
+uniform float rain_specular = 0.45;
 
 varying float v_f;
 varying float v_camera_distance;
@@ -52,8 +54,8 @@ void fragment() {
 	float cut = dynamic_alpha ? mix(alpha_cut, far_alpha_cut, clamp(v_camera_distance / clip_distance, 0.0, 1.0)) : alpha_cut;
 	ALPHA_SCISSOR_THRESHOLD = cut;
 	ALBEDO = a.rgb * tint * v_var * (1.0 - 0.2 * rain_wet) * mix(0.55, 1.0, smoothstep(0.0, 0.5, v_f)) * mix(1.0, 0.75, v_flat);
-	ROUGHNESS = mix(1.0, 0.45, rain_wet);
-	SPECULAR = mix(0.12, 0.45, rain_wet);
+	ROUGHNESS = mix(1.0, rain_roughness, rain_wet);
+	SPECULAR = mix(0.12, rain_specular, rain_wet);
 	BACKLIGHT = translucency * (0.3 + 0.7 * v_f);
 	if (!FRONT_FACING) {
 		NORMAL = -NORMAL;

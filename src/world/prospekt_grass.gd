@@ -85,6 +85,8 @@ static func make_scatter(label: String, density: Texture2D, map_origin: Vector2,
 		grass.lod_switch_m = 14.0
 		grass.lod_margin_m = 3.0
 		grass.cast_grass_shadows = true
+		grass.rain_roughness = 0.8
+		grass.rain_specular = 0.14
 	elif mode == "base":
 		grass.models = model_paths(BASE_ASSETS)
 		grass.lod1_models = model_paths(BASE_ASSETS, 1)

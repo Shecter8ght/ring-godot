@@ -93,7 +93,7 @@ func _lawn_grass() -> void:
 	var origin := Vector2(floor(float(b[0])), floor(float(b[1])))
 	var w: int = int(ceil(float(b[2]) - origin.x)) + 1
 	var h: int = int(ceil(float(b[3]) - origin.y)) + 1
-	var upgrade: bool = OS.get_environment("PROSPEKT_GRASS_TEST") != "0" and GRASS_UPGRADE.map_files_ready()
+	var upgrade: bool = OS.get_environment("PROSPEKT_GRASS_TEST") != "0" and GRASS_UPGRADE.map_files_ready() and GRASS_UPGRADE.broad_files_ready()
 	var upgrade_rect := Rect2()
 	var upgrade_top: float = 0.0
 	if upgrade:
@@ -143,6 +143,7 @@ func _lawn_grass_upgrade(rect: Rect2, top: float, origin: Vector2, w: int, h: in
 	var root := Node3D.new()
 	root.name = "GrassUpgrade_Grove"
 	root.set_meta("test_only", true)
+	root.set_meta("candidate", "D")
 	root.set_meta("site", GRASS_UPGRADE_SITE)
 	root.set_meta("lawn_rect", rect)
 	generated.add_child(root)
@@ -161,7 +162,7 @@ func _lawn_grass_upgrade(rect: Rect2, top: float, origin: Vector2, w: int, h: in
 			if rect.has_point(p):
 				base_img.set_pixel(px, pz, Color(1, 0, 0, 1))
 				accent_img.set_pixel(px, pz, Color(0.75, 1, 0, 1))
-	var base: DistrictGrass = GRASS_UPGRADE.make_scatter("UpgradeBase", ImageTexture.create_from_image(base_img), origin, "base")
+	var base: DistrictGrass = GRASS_UPGRADE.make_scatter("UpgradeBase", ImageTexture.create_from_image(base_img), origin, "broad")
 	root.add_child(base)
 	var accents: DistrictGrass = GRASS_UPGRADE.make_scatter("UpgradeAccents", ImageTexture.create_from_image(accent_img), origin, "accents")
 	root.add_child(accents)

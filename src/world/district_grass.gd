@@ -35,6 +35,8 @@ const SCAN_SHADER := preload("res://src/world/grass_scan.gdshader")
 ## 0 — обычный радиус по качеству; больше нуля — отдельная дальность этого покрова.
 @export var override_scan_radius: float = 0.0
 @export var cast_grass_shadows: bool = false
+@export_range(0.0, 1.0) var rain_roughness: float = 0.45
+@export_range(0.0, 1.0) var rain_specular: float = 0.45
 @export_dir var materials_dir: String = "res://assets/zone01/materials"
 @export var tint: Color = Color(0.8, 0.76, 0.66)
 ## Пучков-сканов на м² при плотности 1.
@@ -135,6 +137,8 @@ func _add_scan(path: String, into: Array[Mesh], into_lod1: Array[Mesh], lod1_pat
 		m.set_shader_parameter("dynamic_alpha", dynamic_alpha)
 		m.set_shader_parameter("far_alpha_cut", far_alpha_cut)
 		m.set_shader_parameter("clip_distance", alpha_clip_distance)
+		m.set_shader_parameter("rain_roughness", rain_roughness)
+		m.set_shader_parameter("rain_specular", rain_specular)
 		m.set_shader_parameter("mesh_height", maxf(mesh.get_aabb().end.y, 0.02))
 		m.set_shader_parameter("wind_noise", _wind_noise)
 		into.append(mesh)

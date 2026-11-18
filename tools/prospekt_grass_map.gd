@@ -98,8 +98,8 @@ func _check(world: Node3D) -> void:
 		get_tree().quit(fails)
 		return
 	var root := found[0] as Node3D
-	if String(root.get_meta("site", "")) != "grove_lawn_n":
-		print("ПРОВАЛ: неверный участок")
+	if String(root.get_meta("site", "")) != "grove_lawn_n" or String(root.get_meta("candidate", "")) != "D":
+		print("ПРОВАЛ: неверный участок или кандидат")
 		fails += 1
 	var ground: MeshInstance3D = root.find_child("Ground", true, false) as MeshInstance3D
 	var material: ShaderMaterial = ground.material_override as ShaderMaterial if ground else null
@@ -116,7 +116,11 @@ func _check(world: Node3D) -> void:
 			fails += 1
 		else:
 			print("СЛОЙ ", name, ": ", JSON.stringify(grass.stats()))
-	print("grass_map check: один участок, провалов ", fails)
+	var broad_base: DistrictGrass = root.find_child("UpgradeBase", true, false) as DistrictGrass
+	if broad_base != null and (not broad_base.dynamic_alpha or broad_base.override_scan_radius < 70.0):
+		print("ПРОВАЛ: на газоне не включены возможности D")
+		fails += 1
+	print("grass_map check: один участок D, провалов ", fails)
 	get_tree().quit(fails)
 
 

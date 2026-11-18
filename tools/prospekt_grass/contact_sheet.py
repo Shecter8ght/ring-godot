@@ -98,8 +98,8 @@ def maps() -> None:
     (OUT / "map_performance.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def raid() -> None:
-    folder = OUT / "raid"
+def raid(folder_name: str = "raid") -> None:
+    folder = OUT / folder_name
     conditions = [("day", "ДЕНЬ"), ("dusk", "ЗАКАТ"), ("day_rain", "ДОЖДЬ")]
     if not all((folder / f"{key}__lawn_eye.png").exists() for key, _label in conditions):
         return
@@ -148,9 +148,36 @@ def broad() -> None:
     sheet.save(folder / "d_comparison.jpg", quality=95)
 
 
+def map_d() -> None:
+    before, candidate_c, after = OUT / "map_before", OUT / "map_after", OUT / "map_d"
+    if not (after / "performance.json").exists():
+        return
+    views = [("lawn", "исходный кадр"), *VIEWS]
+    sheet = Image.new("RGB", (1600, len(views) * 500 + 50), (20, 23, 19))
+    draw = ImageDraw.Draw(sheet)
+    draw.text((12, 8), "C · ТОТ ЖЕ ГАЗОН", font=font(28), fill=(238, 240, 228))
+    draw.text((812, 8), "D · ТОТ ЖЕ ГАЗОН", font=font(28), fill=(238, 240, 228))
+    for row, (view, label) in enumerate(views):
+        y = 50 + row * 500
+        sheet.paste(tile(candidate_c / f"{view}.png", (800, 450)), (0, y))
+        sheet.paste(tile(after / f"{view}.png", (800, 450)), (800, y))
+        draw.text((12, y + 454), label, font=font(24), fill=(215, 221, 204))
+    sheet.save(OUT / "map_c_d_comparison.jpg", quality=95)
+    old = json.loads((before / "performance.json").read_text(encoding="utf-8"))
+    new = json.loads((after / "performance.json").read_text(encoding="utf-8"))
+    lines = ["Кадр | FPS исходный | FPS D | изменение | GPU исходный, мс | GPU D, мс"]
+    for view, _label in views:
+        a, b = old[view], new[view]
+        delta = (b["fps"] / a["fps"] - 1.0) * 100.0
+        lines.append(f"{view} | {a['fps']:.1f} | {b['fps']:.1f} | {delta:+.1f}% | {a['gpu_ms']:.3f} | {b['gpu_ms']:.3f}")
+    (OUT / "map_d_performance.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 if __name__ == "__main__":
     probe()
     maps()
     raid()
+    raid("raid_d")
     refinement()
     broad()
+    map_d()
