@@ -81,7 +81,7 @@ static func make_scatter(label: String, density: Texture2D, map_origin: Vector2,
 		grass.alpha_cut = 0.18
 		grass.far_alpha_cut = 0.035
 		grass.alpha_clip_distance = 24.0
-		grass.override_scan_radius = 70.0
+		grass.override_scan_radius = 50.0
 		grass.lod_switch_m = 14.0
 		grass.lod_margin_m = 3.0
 		grass.cast_grass_shadows = true

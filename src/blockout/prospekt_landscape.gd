@@ -10,7 +10,6 @@ const PROSPEKT_PLAN: String = "res://data/blockouts/prospekt.json"
 ## Снимок плана по узлам сцены (улицы, вещи, постройки) — для схемы левел-дизайна tools/prospekt_ld_plan.py.
 const SNAPSHOT_PATH: String = "res://data/blockouts/prospekt_snapshot.json"
 const GRASS_UPGRADE = preload("res://src/world/prospekt_grass.gd")
-const GRASS_UPGRADE_SITE: String = "grove_lawn_n"
 
 
 func load_plan() -> void:
@@ -52,9 +51,9 @@ func write_snapshot() -> void:
 	f.close()
 
 
-## Газоны (разделительные, газон рощи, приподнятые газоны сквера) — некошеная два года трава травяным покровом зоны 1
-## (DistrictGrass: густые травинки и пучки высокой травы, бурьян, одуванчики — растительность Poly Haven) по карте
-## плотности 1 пиксель = 1 м; верх газона — узел LawnGround (группа district_terrain, как у двора убежища).
+## Все газоны используют выбранный D при наличии его производных: земля Leafy Grass / Grass Ground,
+## широкие куртины и редкие акценты Poly Haven. PROSPEKT_GRASS_TEST=0 или отсутствие файлов возвращает прежний покров.
+## Карта плотности 1 пиксель = 1 м; верх газона — LawnGround (группа district_terrain), коллизии не меняются.
 const LAWN_GRASS: PackedStringArray = ["res://assets/zone01/models/ug_grass_tall_a.glb", "res://assets/zone01/models/ug_grass_tall_b.glb",
 	"res://assets/zone01/models/ug_grass_small.glb", "res://assets/zone01/models/ug_grass_mid_b.glb", "res://assets/zone01/models/ug_grass2_c.glb"]
 const LAWN_WEEDS: PackedStringArray = ["res://assets/zone01/models/ug_weed_a.glb", "res://assets/zone01/models/ug_weed_b.glb",
@@ -94,20 +93,15 @@ func _lawn_grass() -> void:
 	var w: int = int(ceil(float(b[2]) - origin.x)) + 1
 	var h: int = int(ceil(float(b[3]) - origin.y)) + 1
 	var upgrade: bool = OS.get_environment("PROSPEKT_GRASS_TEST") != "0" and GRASS_UPGRADE.map_files_ready() and GRASS_UPGRADE.broad_files_ready()
-	var upgrade_rect := Rect2()
-	var upgrade_top: float = 0.0
-	if upgrade:
-		for s: Dictionary in plan.surfaces:
-			if String(s.get("id", "")) != GRASS_UPGRADE_SITE or String(s.get("mat", "")) != "grass":
-				continue
-			var r: Array = s.rect
-			upgrade_rect = Rect2(float(r[0]), float(r[1]), float(r[2]) - float(r[0]), float(r[3]) - float(r[1]))
-			upgrade_top = float(s.get("y", 0.0)) + float(s.get("t", 0.08))
-			upgrade = (s.get("holes", []) as Array).is_empty()
-			break
-		upgrade = upgrade and upgrade_rect.has_area()
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 1))
+	var base_img: Image = null
+	var accent_img: Image = null
+	if upgrade:
+		base_img = Image.create(w, h, false, Image.FORMAT_RGBA8)
+		base_img.fill(Color(0, 0, 0, 1))
+		accent_img = Image.create(w, h, false, Image.FORMAT_RGBA8)
+		accent_img.fill(Color(0, 0, 0, 1))
 	for lawn: Array in _lawns:
 		var c: Vector2 = lawn[0]
 		var half: Vector2 = lawn[1]
@@ -115,11 +109,13 @@ func _lawn_grass() -> void:
 		for pz: int in range(maxi(0, int(c.y - reach - origin.y)), mini(h, int(c.y + reach - origin.y) + 2)):
 			for px: int in range(maxi(0, int(c.x - reach - origin.x)), mini(w, int(c.x + reach - origin.x) + 2)):
 				var p := Vector2(origin.x + float(px) + 0.5, origin.y + float(pz) + 0.5)
-				if _in_lawn(p, lawn):
-					if upgrade and upgrade_rect.has_point(p):
-						img.set_pixel(px, pz, Color(0, 0, 0, 1))
-					else:
-						img.set_pixel(px, pz, Color(1.0, LAWN_WEED_SHARE, 0.0, 1.0))
+				if not _in_lawn(p, lawn):
+					continue
+				if upgrade:
+					base_img.set_pixel(px, pz, Color(1, 0, 0, 1))
+					accent_img.set_pixel(px, pz, Color(0.75, 1, 0, 1))
+				else:
+					img.set_pixel(px, pz, Color(1.0, LAWN_WEED_SHARE, 0.0, 1.0))
 	var ground := LawnGround.new()
 	ground.name = "LawnGround"
 	ground.landscape = self
@@ -134,34 +130,31 @@ func _lawn_grass() -> void:
 	grass.tint = LAWN_TINT
 	generated.add_child(grass)
 	if upgrade:
-		_lawn_grass_upgrade(upgrade_rect, upgrade_top, origin, w, h)
+		_lawn_grass_upgrade(origin, base_img, accent_img)
 
 
-## Единственный пробный газон из задания. Коллизия и тип поверхности остаются у исходного куска плана;
-## поверх него — новая земля и два слоя штатного DistrictGrass. Остальные газоны используют прежнюю карту плотности.
-func _lawn_grass_upgrade(rect: Rect2, top: float, origin: Vector2, w: int, h: int) -> void:
+## Все газоны карты используют выбранный D. Коллизия и тип поверхности остаются у исходных кусков плана;
+## поверх них — новая земля и два слоя штатного DistrictGrass с общей картой плотности.
+func _lawn_grass_upgrade(origin: Vector2, base_img: Image, accent_img: Image) -> void:
 	var root := Node3D.new()
-	root.name = "GrassUpgrade_Grove"
-	root.set_meta("test_only", true)
+	root.name = "GrassUpgrade_All"
 	root.set_meta("candidate", "D")
-	root.set_meta("site", GRASS_UPGRADE_SITE)
-	root.set_meta("lawn_rect", rect)
+	root.set_meta("scope", "all_lawns")
+	root.set_meta("lawn_count", _lawns.size())
 	generated.add_child(root)
-	var ground := MeshInstance3D.new()
-	ground.name = "Ground"
-	ground.mesh = StreetPaving.surface_mesh(rect, top + 0.004, Color(0, 0, 0, 0))
-	ground.material_override = GRASS_UPGRADE.ground_material("broad", true)
-	root.add_child(ground)
-	var base_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	base_img.fill(Color(0, 0, 0, 1))
-	var accent_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	accent_img.fill(Color(0, 0, 0, 1))
-	for pz: int in range(maxi(0, floori(rect.position.y - origin.y)), mini(h, ceili(rect.end.y - origin.y) + 1)):
-		for px: int in range(maxi(0, floori(rect.position.x - origin.x)), mini(w, ceili(rect.end.x - origin.x) + 1)):
-			var p := Vector2(origin.x + float(px) + 0.5, origin.y + float(pz) + 0.5)
-			if rect.has_point(p):
-				base_img.set_pixel(px, pz, Color(1, 0, 0, 1))
-				accent_img.set_pixel(px, pz, Color(0.75, 1, 0, 1))
+	var material: Material = GRASS_UPGRADE.ground_material("broad", true)
+	for i: int in range(_lawns.size()):
+		var lawn: Array = _lawns[i]
+		var c: Vector2 = lawn[0]
+		var half: Vector2 = lawn[1]
+		var top: float = float(lawn[3])
+		var ground := MeshInstance3D.new()
+		ground.name = "Ground_%03d" % i
+		ground.mesh = StreetPaving.surface_mesh(Rect2(-half, half * 2.0), 0.0, Color(0, 0, 0, 0))
+		ground.position = Vector3(c.x, top + 0.004, c.y)
+		ground.rotation.y = float(lawn[2])
+		ground.material_override = material
+		root.add_child(ground)
 	var base: DistrictGrass = GRASS_UPGRADE.make_scatter("UpgradeBase", ImageTexture.create_from_image(base_img), origin, "broad")
 	root.add_child(base)
 	var accents: DistrictGrass = GRASS_UPGRADE.make_scatter("UpgradeAccents", ImageTexture.create_from_image(accent_img), origin, "accents")

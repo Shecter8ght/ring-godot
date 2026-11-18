@@ -1,6 +1,7 @@
 extends Node3D
-## Снимки и замер одного газона «Проспекта» на настоящей карте.
-## -- before | after: docs/screens/prospekt_grass/map_<режим>; PROSPEKT_GRASS_TEST=0 отключает пробу.
+## Снимки и замер газонов «Проспекта» на настоящей карте.
+## -- before | after: docs/screens/prospekt_grass/map_<режим>; PROSPEKT_GRASS_TEST=0 возвращает прежний покров.
+## GRASS_MAP_VIEW=имя:x:y:z:куда_x:куда_y:куда_z;… — свои камеры.
 
 const LEVEL: String = "res://scenes/levels/prospekt_study.tscn"
 const VIEWS: Array = [
@@ -37,7 +38,15 @@ func _ready() -> void:
 	var vp: RID = get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	var report: Dictionary = {}
-	for view: Array in VIEWS:
+	var views: Array = VIEWS.duplicate()
+	if OS.get_environment("GRASS_MAP_VIEW") != "":
+		views.clear()
+		for spec: String in OS.get_environment("GRASS_MAP_VIEW").split(";", false):
+			var p: PackedStringArray = spec.split(":")
+			if p.size() == 7:
+				views.append([p[0], Vector3(p[1].to_float(), p[2].to_float(), p[3].to_float()),
+					Vector3(p[4].to_float(), p[5].to_float(), p[6].to_float())])
+	for view: Array in views:
 		_camera.global_position = view[1]
 		_camera.look_at(view[2], Vector3.UP)
 		await _frames(360)
@@ -68,62 +77,85 @@ func _measure(vp: RID) -> Dictionary:
 func _check(world: Node3D) -> void:
 	var want_on: bool = OS.get_environment("PROSPEKT_GRASS_TEST") != "0"
 	var fails: int = 0
-	var found: Array[Node] = world.find_children("GrassUpgrade_Grove", "Node3D", true, false)
+	var found: Array[Node] = world.find_children("GrassUpgrade_All", "Node3D", true, false)
 	var original: DistrictGrass = world.find_child("LawnGrass", true, false) as DistrictGrass
-	if original == null:
-		print("ПРОВАЛ: прежний покров не найден")
+	var landscape: Node3D = world.find_child("Landscape", true, false) as Node3D
+	var lawns: Array = landscape.get("_lawns") as Array if landscape else []
+	if original == null or lawns.is_empty():
+		print("ПРОВАЛ: прежний покров или список газонов не найден")
 		fails += 1
-	else:
-		var inside: Color = _density_at(original, Vector2(-10, 199))
-		var outside: Color = _density_at(original, Vector2(-100, -15.6))
-		if want_on and inside.r > 0.001:
-			print("ПРОВАЛ: прежний покров остался внутри пробы")
-			fails += 1
-		if not want_on and inside.r < 0.99:
-			print("ПРОВАЛ: отключение пробы не вернуло прежний покров")
-			fails += 1
-		if outside.r < 0.99:
-			print("ПРОВАЛ: изменился другой газон")
-			fails += 1
+	for lawn: Array in lawns:
+		var c: Vector2 = lawn[0]
+		if original != null:
+			var density: Color = _density_at(original, c)
+			if want_on and density.r > 0.001:
+				print("ПРОВАЛ: прежний покров остался в ", c)
+				fails += 1
+			if not want_on and density.r < 0.99:
+				print("ПРОВАЛ: при отключении прежний покров не на месте в ", c)
+				fails += 1
 	if not want_on:
 		if not found.is_empty():
-			print("ПРОВАЛ: узел пробы существует при отключении")
+			print("ПРОВАЛ: новый покров существует при отключении")
 			fails += 1
-		print("grass_map check: отключение, провалов ", fails)
+		print("grass_map check: прежние газоны, участков ", lawns.size(), ", провалов ", fails)
 		get_tree().quit(fails)
 		return
 	if found.size() != 1:
-		print("ПРОВАЛ: пробных участков ", found.size(), ", ожидался один")
+		print("ПРОВАЛ: узлов полного покрова ", found.size(), ", ожидался один")
 		fails += 1
 		get_tree().quit(fails)
 		return
 	var root := found[0] as Node3D
-	if String(root.get_meta("site", "")) != "grove_lawn_n" or String(root.get_meta("candidate", "")) != "D":
-		print("ПРОВАЛ: неверный участок или кандидат")
+	if String(root.get_meta("candidate", "")) != "D" or String(root.get_meta("scope", "")) != "all_lawns":
+		print("ПРОВАЛ: неверный кандидат или охват")
 		fails += 1
-	var ground: MeshInstance3D = root.find_child("Ground", true, false) as MeshInstance3D
-	var material: ShaderMaterial = ground.material_override as ShaderMaterial if ground else null
-	if material == null or not bool(material.get_shader_parameter("use_soil")):
-		print("ПРОВАЛ: земля пробы не использует проплешины")
+	var grounds: Array[Node] = root.find_children("Ground_*", "MeshInstance3D", true, false)
+	if grounds.size() != lawns.size() or int(root.get_meta("lawn_count", 0)) != lawns.size():
+		print("ПРОВАЛ: земля покрывает ", grounds.size(), " из ", lawns.size())
 		fails += 1
-	elif absf(float(material.get_shader_parameter("parallax_scale"))) > 0.0001 or not is_equal_approx(float(material.get_shader_parameter("normal_strength")), 2.0) or not is_equal_approx(float(material.get_shader_parameter("albedo_contrast")), 0.5):
-		print("ПРОВАЛ: у D должны быть нормаль ×2, контраст альбедо 0,5 и нулевой параллакс")
-		fails += 1
+	var base: DistrictGrass = root.find_child("UpgradeBase", true, false) as DistrictGrass
+	var accents: DistrictGrass = root.find_child("UpgradeAccents", true, false) as DistrictGrass
+	for lawn: Array in lawns:
+		var c: Vector2 = lawn[0]
+		var top: float = float(lawn[3])
+		var expected := Vector3(c.x, top + 0.004, c.y)
+		var matched: bool = false
+		for ground_node: Node in grounds:
+			var ground := ground_node as MeshInstance3D
+			if ground.position.distance_to(expected) < 0.001 and absf(wrapf(ground.rotation.y - float(lawn[2]), -PI, PI)) < 0.001:
+				matched = true
+				break
+		if not matched:
+			print("ПРОВАЛ: нет земли с нужной высотой/поворотом в ", c)
+			fails += 1
+		if base != null and _density_at(base, c).r < 0.99:
+			print("ПРОВАЛ: нет основы D в ", c)
+			fails += 1
+		if accents != null and _density_at(accents, c).r < 0.5:
+			print("ПРОВАЛ: нет акцентов D в ", c)
+			fails += 1
+	if not grounds.is_empty():
+		var material: ShaderMaterial = (grounds[0] as MeshInstance3D).material_override as ShaderMaterial
+		if material == null or not bool(material.get_shader_parameter("use_soil")):
+			print("ПРОВАЛ: земля D не использует проплешины")
+			fails += 1
+		elif absf(float(material.get_shader_parameter("parallax_scale"))) > 0.0001 or not is_equal_approx(float(material.get_shader_parameter("normal_strength")), 2.0) or not is_equal_approx(float(material.get_shader_parameter("albedo_contrast")), 0.5):
+			print("ПРОВАЛ: у D должны быть нормаль ×2, контраст альбедо 0,5 и нулевой параллакс")
+			fails += 1
 	_camera.global_position = Vector3(-10, 1.74, 194)
 	_camera.look_at(Vector3(-10, 0.22, 202), Vector3.UP)
 	await _frames(360)
-	for name: String in ["UpgradeBase", "UpgradeAccents"]:
-		var grass: DistrictGrass = root.find_child(name, true, false) as DistrictGrass
+	for grass: DistrictGrass in [base, accents]:
 		if grass == null or int(grass.stats().scan_instances) <= 0:
-			print("ПРОВАЛ: пустой слой ", name)
+			print("ПРОВАЛ: пустой слой")
 			fails += 1
 		else:
-			print("СЛОЙ ", name, ": ", JSON.stringify(grass.stats()))
-	var broad_base: DistrictGrass = root.find_child("UpgradeBase", true, false) as DistrictGrass
-	if broad_base != null and (not broad_base.dynamic_alpha or broad_base.override_scan_radius < 70.0):
-		print("ПРОВАЛ: на газоне не включены возможности D")
+			print("СЛОЙ ", grass.name, ": ", JSON.stringify(grass.stats()))
+	if base != null and (not base.dynamic_alpha or base.override_scan_radius < 50.0):
+		print("ПРОВАЛ: на газонах не включены возможности D")
 		fails += 1
-	print("grass_map check: один участок D, провалов ", fails)
+	print("grass_map check: все газоны D, участков ", lawns.size(), ", провалов ", fails)
 	get_tree().quit(fails)
 
 

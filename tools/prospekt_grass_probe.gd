@@ -407,7 +407,7 @@ func _check() -> void:
 	if int(broad.stats().scan_instances) <= 0:
 		print("ПРОВАЛ: пустой широкий покров")
 		fails += 1
-	if not broad.dynamic_alpha or broad.override_scan_radius < 70.0:
+	if not broad.dynamic_alpha or broad.override_scan_radius < 50.0:
 		print("ПРОВАЛ: не включены динамическая альфа/дальность D")
 		fails += 1
 	var has_shadow: bool = false
