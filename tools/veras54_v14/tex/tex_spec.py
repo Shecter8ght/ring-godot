@@ -36,7 +36,7 @@ STEEL_PALETTE = [[round(int(h[i:i + 2], 16) / 255.0, 4) for i in (0, 2, 4)] for 
 def _steel(hue):
     return {"base": {"color": STEEL_PALETTE[0]},
             "gradients": {"color": 0.04, "rough": 0.05, "scale": 1.7, "hue_mm": 255.0, "hue": hue,
-                          "palette": STEEL_PALETTE[1:], "palette_mm": 160.0, "palette_cover": 0.38},
+                          "palette": STEEL_PALETTE[1:], "palette_mm": 120.0, "palette_cover": 0.5},  # подобрано на модели (v03)
             "layers": _MOTTLE_STEEL}
 
 
@@ -113,6 +113,7 @@ def main() -> None:
         "interview": [{"q": q, "a": a} for q, a in INTERVIEW],
         "favorites": old.get("favorites", []), "requests": old.get("requests", []),
         "history": old.get("history", []), "accepted": old.get("accepted", False),
+        **({"wear": old["wear"]} if "wear" in old else {}),
     }
     SPEC.parent.mkdir(parents=True, exist_ok=True)
     SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
