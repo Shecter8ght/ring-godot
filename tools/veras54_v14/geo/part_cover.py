@@ -126,8 +126,6 @@ def trough(X, Y, Z):
 def cover(h):
     F = Field("Dust_Cover", (X0 - 1.5, -HW - 2.5, BOT - 1.5), (X1 + 1.0, HW + 2.5, TOP_Z + 1.5), h)
     F.add(outer)
-    # желоб — до превращения в лист: изнутри повторяется вогнутостью
-    F.sub(trough, 0.5, bbox=bb(TR_X0 - 2, TR_X1 + 2, -HW - 2, -10, 15, 33))
     # утопленная полоса по низу бортов: сзади ниже Z 7,2, слева от X 203 вперёд — ниже Z 10,3 (ступенька)
     band_l = Poly(fillet_poly([(X0 - 5, BOT - 5), (X1 + 5, BOT - 5), (X1 + 5, STEP_Z_FRONT), (STEP_X, STEP_Z_FRONT),
                                (STEP_X - 1.2, STEP_Z_REAR), (X0 - 5, STEP_Z_REAR)], [0, 0, 0, 1.8, 1.8, 0]))
@@ -141,10 +139,15 @@ def cover(h):
     F.apply(half("Z", BOT, -1), "inter", 0.3)
     F.apply(half("X", X1, 1), "inter", 0.25, bbox=bb(X1 - 2, X1 + 1, -HW - 2, HW + 2, BOT - 1, TOP_Z + 1))
     # вырез справа: подъём кромки под ограждением переводчика, дальше окно затворной рамы до переднего торца
-    win = Poly(fillet_poly([(SLOT_X0 - 20, BOT - 5), (X1 + 5, BOT - 5), (X1 + 5, WIN_TOP), (WIN_X0, WIN_TOP),
-                            (WIN_X0 - 0.8, SLOT_Z), (SLOT_X1, SLOT_Z), (SLOT_X0, BOT + 0.6), (SLOT_X0 - 20, BOT + 0.6)],
-                           [0, 0, 0, 0.6, 0.6, 4.0, 3.0, 0]))
-    F.sub(prism(win, "XZ", -HW - 4, -HW + 4.5), 0.3, bbox=bb(SLOT_X0 - 2, X1 + 1, -HW - 3, -HW + 4, BOT - 1, WIN_TOP + 2))
+    # одно большое окно: внизу до переднего торца (кромка Z 17,7), выше — до кромки Z 30 по контуру выборки рамы,
+    # что видна в окне (передний угол R 3, задний верхний — дуга R 13,5); за окном — щель хода рукоятки
+    ax_, az_ = TR_X0 + TR_R, SLOT_Z
+    rear_arc = [(ax_ + TR_R * math.cos(math.radians(a)), az_ + TR_R * math.sin(math.radians(a))) for a in range(90, 181, 5)]
+    head_ = fillet_poly([(SLOT_X0 - 20, BOT - 5), (X1 + 5, BOT - 5), (X1 + 5, WIN_TOP), (TR_X1, WIN_TOP), (TR_X1, az_ + TR_R),
+                         (ax_, az_ + TR_R)], [0, 0, 0, 1.0, TR_RF, 0])
+    tail_ = fillet_poly([(TR_X0, SLOT_Z), (SLOT_X1, SLOT_Z), (SLOT_X0, BOT + 0.6), (SLOT_X0 - 20, BOT + 0.6)], [0, 4.0, 3.0, 0])
+    win = Poly(head_ + rear_arc[1:-1] + tail_)
+    F.sub(prism(win, "XZ", -HW - 4, -HW + 5.5), 0.35, bbox=bb(SLOT_X0 - 2, X1 + 1, -HW - 3, -HW + 5, BOT - 1, az_ + TR_R + 2))
     # отверстие под кнопку на верху
     bx0, bx1, bhw = BTN
     F.sub(prism2(rect2(bx0 - 0.25, bx1 + 0.25, -bhw - 0.25, bhw + 0.25, 1.4), "XY", TOP_Z - 4, TOP_Z + 2), 0.25,

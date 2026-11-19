@@ -26,7 +26,12 @@ def xs(x):
 
 
 # ---------- ствол ----------
-BREECH_X = 240.0                   # казённый срез (к нему примыкает затвор v13)
+BREECH_X = 222.0                   # казённый срез: ствол входит во вкладыш глубоко, как у АК (владелец — патрон заходит «по рельсам»)
+BREECH_JOIN = 232.0                # стык казённой части (поле) с телом вращения — по плоскости, r 10
+# паз под зуб выбрасывателя на срезе: константы part_bolt (EXT_PSI 165°, зуб X 240,85…241,4, r 4,1…8,25, ±1,7 поперёк),
+# сдвинутые на −18 мм к новому срезу; зазор 0,3…0,4
+EXT_PSI = 165.0
+EXT_SLOT = (BREECH_X - 1.0, 223.8, 3.6, 8.7, 2.5)   # X0, X1, r0, r1, полуширина
 MUZZLE_X = 606.0                   # передний торец ствола (внутри дульного устройства)
 BORE_R = 2.8                       # канал
 BUSH_X = (428.3, xs(419.0))        # поясок у переднего торца цевья: образец X 412…419, r 8,1 (R_x0.185)
@@ -37,24 +42,53 @@ SEAT_R = 7.1                       # шейка под дульное устро
 PIN_X = (xs(482.5), xs(507.5))     # поперечные пазы ствола под вертикальные штифты газовой камеры (U_x0.245: X 482,5 и 507,5)
 GROOVE_R = 6.25                    # дно паза: штифт r 1,35 на |Y| 7,75 проходит над ним с зазором 0,15
 # патронник 5,45×39 от казённого среза: гильза 39,6, дно r 5,0, скат к шейке r 3,15, пульный вход к каналу
-CHAMBER = [(42.2, BORE_R), (39.8, 3.18), (33.5, 3.18), (31.4, 4.66), (0.9, 5.03), (0.0, 5.45)]
+# заходный конус на срезе: от r 5,03 до r 7,2 на глубине 2,2 — по нему носик пули заходит в патронник
+CHAMBER = [(42.2, BORE_R), (39.8, 3.18), (33.5, 3.18), (31.4, 4.66), (2.2, 5.03), (0.0, 7.2)]
+
+
+def _chamber_r(d):
+    """Радиус патронника на глубине d от среза (между точками CHAMBER — линейно)."""
+    pts = sorted(CHAMBER)
+    return float(np.interp(d, [a for a, _ in pts], [b for _, b in pts]))
 
 
 def barrel(h):
     """Ствол — тело вращения сеткой: казённая часть r 10 до цевья, поясок, тонкая передняя часть с пазами под штифты
     газовой камеры, посадочная шейка под дульное устройство; внутри — патронник и канал."""
-    top = [(BREECH_X, 9.35), (BREECH_X + 0.65, BARREL_R), (BUSH_X[0], BARREL_R), (BUSH_X[0] + 1.2, BUSH_R),
+    # казённая часть X 222…232 — отдельной деталью Barrel_Breech (паз выбрасывателя телом вращения не сделать)
+    top = [(BREECH_JOIN, BARREL_R), (BUSH_X[0], BARREL_R), (BUSH_X[0] + 1.2, BUSH_R),
            (BUSH_X[1], BUSH_R), (BUSH_X[1] + 0.6, FRONT_R)]
-    rad = [0.0, 0.3, 0.5, 0.4, 0.3, 0.4]
+    rad = [0.0, 0.5, 0.4, 0.3, 0.4]
     for px in PIN_X:
         top += [(px - 1.6, FRONT_R), (px - 1.45, GROOVE_R), (px + 1.45, GROOVE_R), (px + 1.6, FRONT_R)]
         rad += [0.12, 0.3, 0.3, 0.12]
     top += [(SEAT_X, FRONT_R), (SEAT_X + 0.45, SEAT_R), (MUZZLE_X - 0.4, SEAT_R), (MUZZLE_X, SEAT_R - 0.4),
             (MUZZLE_X, BORE_R + 0.6), (MUZZLE_X - 0.5, BORE_R)]
     rad += [0.2, 0.2, 0.15, 0.15, 0.25, 0.15]
-    bore = [(BREECH_X + d, r) for d, r in CHAMBER]
-    rad += [0.5, 0.4, 0.3, 0.6, 0.3, 0.0]
+    dj = BREECH_JOIN - BREECH_X
+    bore = [(BREECH_X + d, r) for d, r in CHAMBER if d > dj] + [(BREECH_JOIN, _chamber_r(dj))]
+    rad += [0.5, 0.4, 0.3, 0.6][:len(bore) - 1] + [0.0]
     return lathe_mesh(fillet_poly(top + bore, rad, seg=4), seg=96, closed=True)
+
+
+def breech(h):
+    """Казённая часть ствола X 222…232: срез с фаской, заходный конус патронника, паз под зуб выбрасывателя."""
+    F = Field("Barrel_Breech", (BREECH_X - 1.0, -BARREL_R - 1.0, -BARREL_R - 1.0), (BREECH_JOIN + 1.0, BARREL_R + 1.0, BARREL_R + 1.0), h)
+    out = Poly(fillet_poly([(BREECH_X, 0.0), (BREECH_X, 9.35), (BREECH_X + 0.65, BARREL_R), (BREECH_JOIN + 2.0, BARREL_R),
+                            (BREECH_JOIN + 2.0, 0.0)], [0, 0.35, 0.35, 0, 0], seg=8))
+    F.add(revolve(out, "X", (0.0, 0.0)))
+    dj = BREECH_JOIN - BREECH_X
+    # патронник с заходным конусом; изнутри без скругления у стыка (плоскость X 232)
+    pts = [(BREECH_X - 2.0, 0.0), (BREECH_X - 2.0, 7.2)] + [p for p in sorted(
+        [(BREECH_X + d, r) for d, r in CHAMBER if d <= dj + 3.0] + [(BREECH_X + dj + 3.0, _chamber_r(dj + 3.0))])] + [(BREECH_X + dj + 3.0, 0.0)]
+    F.sub(revolve(Poly(fillet_poly(pts, [0, 0, 0.5, 0.8] + [0.6] * (len(pts) - 4), seg=8)), "X", (0.0, 0.0)), 0.3, bbox=bb(BREECH_X - 1, BREECH_JOIN + 1, -8.5, 8.5, -8.5, 8.5))
+    # паз под зуб выбрасывателя (задан справа, ψ 180°, и повёрнут на место выбрасывателя)
+    x0, x1, r0, r1, hw = EXT_SLOT
+    F.sub(rot(box_e((x0, -r1, -hw), (x1, -r0, hw), rx=0.3, rz=0.6), "X", (0.0, 0.0, 0.0), EXT_PSI - 180.0), 0.3,
+          bbox=bb(x0 - 1, x1 + 1, -BARREL_R - 1, 0, -6, 6))
+    # стык с телом вращения — по плоскости
+    F.apply(half("X", BREECH_JOIN, 1), "inter", 0.0, bbox=bb(BREECH_JOIN - 1, BREECH_JOIN + 1, -BARREL_R - 1, BARREL_R + 1, -BARREL_R - 1, BARREL_R + 1))
+    return F
 
 
 # ---------- газовая трубка ----------
@@ -342,6 +376,7 @@ def parts():
     C = "Ствол и газовый узел"
     return [
         dict(name="Barrel", build=barrel, coll=C, mat="Steel_blued", sharp=40),
+        dict(name="Barrel_Breech", build=breech, h=0.05, coll=C, mat="Steel_blued", parent="Barrel", adapt=0.01),
         dict(name="Gas_Tube", build=gas_tube, h=0.1, coll=C, mat="Steel_blued", parent="Barrel", adapt=0.05),
         dict(name="Gas_Tube_Pins", build=tube_pins, h=0.05, coll=C, mat="Steel_bare", parent="Gas_Tube"),
         dict(name="Gas_Block", build=gas_block, h=0.09, coll=C, mat="Steel_blued", parent="Barrel", adapt=0.05),
