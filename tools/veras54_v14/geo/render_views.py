@@ -2,7 +2,7 @@
 #   blender -b <файл.blend> --factory-startup --python tools/veras54_v14/geo/render_views.py -- <папка> [кадр,кадр…]
 #       [--res 2400x1350] [--samples 128] [--cpu]
 # Кадры: right, left, q_front, q_rear, fp_grip (рукоятка с крючком глазами стрелка), open (рама отведена: видно
-# магазин и патронник), open_in (взгляд через окно на патронник и верх магазина). Материалы без текстур: цвета просмотра из assemble.MATS,
+# магазин и патронник), open_in (взгляд через окно на патронник и верх магазина), fold_* — приклад сложен. Материалы без текстур: цвета просмотра из assemble.MATS,
 # приглушённые — чтобы под студийным светом читалась форма, а не чёрная воронёная сталь.
 import math
 import os
@@ -25,6 +25,13 @@ SHOTS = {
     "q_rear": ((-1500, -1650, 640), (215, 0, -50), 13.0, {}, -40),
     # глаз стрелка: позади и чуть левее-выше оружия, взгляд вдоль него на рукоятку и крючок
     "fp_grip": ((-105, 175, 5), (88, 0, -66), 30.0, dict(AB), 150),
+    # приклад сложен влево вдоль коробки
+    "fold_left": ((350, 2600, 20), (350, 0, -52), 11.5, {"stock_fold": 1.0, "hinge_latch": 1.0}, 180),
+    "fold_right": ((350, -2600, 20), (350, 0, -52), 11.5, {"stock_fold": 1.0, "hinge_latch": 1.0}, 0),
+    "fold_q_rear": ((-1250, 1500, 620), (300, 15, -45), 12.5, {"stock_fold": 1.0, "hinge_latch": 1.0}, 140),
+    "fold_q_front": ((1800, 1450, 600), (340, 15, -45), 12.0, {"stock_fold": 1.0, "hinge_latch": 1.0}, 210),
+    "fold_top": ((350, 1, 2600), (350, 6, 0), 11.5, {"stock_fold": 1.0, "hinge_latch": 1.0}, 90),
+    "fold_hinge": ((-170, 210, 95), (40, 22, -12), 26.0, {"stock_fold": 1.0, "hinge_latch": 1.0}, 150),
     "open": ((150, -265, 215), (196, -2, -4), 26.0, dict(AB, cycle=0.5), 10),
     "open_in": ((100, -110, 70), (222, -3, -3), 30.0, dict(AB, cycle=0.5), -30),
 }
@@ -139,7 +146,10 @@ def main():
             if l is not None:
                 bpy.data.objects.remove(l, do_unlink=True)
         # свет привязан к камере: ключевой сверху-сбоку, заполняющий с другой стороны, контровой сзади-сверху
-        view = (t - e).normalized(); side = view.cross(Vector((0, 0, 1))).normalized(); up = Vector((0, 0, 1))
+        view = (t - e).normalized(); up = Vector((0, 0, 1))
+        if abs(view.z) > 0.95:        # вид сверху / снизу: свет раскладывается вдоль оружия и вбок
+            up = Vector((1, 0, 0))
+        side = view.cross(up).normalized()
         dist = max(0.5, (t - e).length * 0.55)
         tm = Vector(tgt)
         kp = (t - view * dist * 0.7 + side * dist * 0.75 + up * dist * 0.8) / MM
