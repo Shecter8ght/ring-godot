@@ -37,12 +37,18 @@ SLOTS = {
     "corpus": ("Корпус — сталь под чёрной оружейной краской, атлас", "GP-BLK-SAT",
                ["Receiver", "Dust_Cover", "Top_Rail", "Cover_Rear_Block", "Front_Block", "Gas_Block", "Gas_Tube",
                 "Rear_Sight_Base", "Rear_Sight_Yoke", "Rear_Sight_Leaf", "Rear_Sight_Slider", "Trigger_Guard",
-                "Selector_Lever", "Hinge_Base", "Stock_Knuckle", "Mag_Catch", "Hinge_Latch"], _steel(0.35), ""),
+                "Selector_Lever", "Hinge_Base", "Stock_Knuckle", "Mag_Catch", "Hinge_Latch"],
+               {**_steel(0.35), "base": {"color": [0.044, 0.044, 0.050], "rough": 0.16, "metal": 1.0}},
+               "Владелец 2026-11-19 (после приёмки v01, по кадру образца): «альбедо как будто не металлический, крышка очень "
+               "поглощает свет… хочется немного глянцевости добавить, как на скрине» — основа корпуса глаже (0,40 → 0,30) "
+               "и металлическая. Числа основы владелец подобрал сам на глаз в Painter на крышке (копия проекта "
+               "VERAS_body_gloss_try.spp): цвет 0,044 / 0,044 / 0,050, шероховатость 0,16, металл 1,0."),
     "dark": ("Ствол, дульное устройство и мелкая сталь — чёрный фосфат, мат", "PH-BLK-MAT",
              ["Barrel", "Barrel_Breech", "Barrel_Collar", "Muzzle_Body", "Muzzle_Collar", "Muzzle_Tip",
               "Front_Sight_Post", "Rear_Sight_Button_L", "Rear_Sight_Button_R", "Rear_Sight_Drum", "Rear_Sight_Knob",
               "Cover_Button", "Handguard_Latch", "Side_Rail_Screws", "Sling_Stud", "Stock_Screws", "Trigger",
-              "Gas_Block_Pins", "Gas_Tube_Pins", "Hinge_Pin", "Mag_Catch_Axle", "Rear_Sight_Axle", "Ejector"], _steel(0.25), ""),
+              "Gas_Block_Pins", "Gas_Tube_Pins", "Hinge_Pin", "Mag_Catch_Axle", "Rear_Sight_Axle", "Ejector"],
+             {**_steel(0.25), "base": {"rough": 0.48}}, "Чуть глаже карточки (0,60 → 0,48) — тем же замечанием владельца о блеске."),
     "carrier": ("Затворная рама с рукояткой — чёрное оксидирование, мат", "OX-BLK-MAT",
                 ["Bolt_Carrier", "Charging_Handle"], _steel(0.25),
                 "Владелец: рама чёрная, как корпус. Краска на трущейся детали не держится — оксид того же тона."),
