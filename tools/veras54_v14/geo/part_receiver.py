@@ -61,14 +61,14 @@ def receiver(h):
 
     def stamp(X, Y, Z):
         return -0.9 * smoothstep(-pill(X, Z) / 1.4) * smoothstep((np.abs(Y) - (HW - 5.0)) / 2.0)
-    F.displace(stamp, bbox=bb(px0 - 3, px1 + 3, -HW - 1, HW + 1, pz0 - 3, pz1 + 3), fine=False)
+    F.displace(stamp, bbox=bb(px0 - 3, px1 + 3, -HW - 1, HW + 1, pz0 - 3, pz1 + 3), fine=True)
     # лунки фиксатора переводчика (правый борт): короткие овалы
     for x, z in DETENTS:
         ov = rect2(x - 2.6, x + 2.6, z - 1.0, z + 1.0, 0.95)
 
         def det(X, Y, Z, ov=ov):
             return -0.6 * smoothstep(-ov(X, Z) / 0.7) * smoothstep((-Y - (HW - 4.0)) / 2.0)
-        F.displace(det, bbox=bb(x - 4, x + 4, -HW - 1, -HW + 3, z - 3, z + 3), fine=False)
+        F.displace(det, bbox=bb(x - 4, x + 4, -HW - 1, -HW + 3, z - 3, z + 3), fine=True)
     # 3. лист
     F.shell(T)
     # клейма (вымышленные) — гравировкой уже по листу и только снаружи (область правки не доходит до изнанки:
@@ -125,16 +125,16 @@ def receiver(h):
     bx, bz, br = PAD_BTN
     F.sub(cyl("Y", (bx, bz), br + 0.25, -HW - 2, -HW - 0.55), 0.15, bbox=bb(bx - 5, bx + 5, -HW - 1.6, -HW, bz - 5, bz + 5))
     F.add(cyl("Y", (bx, bz), br, -HW - 1.25, -HW - 0.4, rim=0.3), 0.0, bbox=bb(bx - 5, bx + 5, -HW - 1.8, -HW, bz - 5, bz + 5))
-    # 7. заклёпки и торцы осей
-    for x, z in DOME_R:
+    # 7. заклёпки и торцы осей (VERAS_PLAIN — без них: головки до ~1 мм уходят в карту нормалей)
+    for x, z in ([] if PLAIN else DOME_R):
         F.add(dome(x, z, -1), 0.2, bbox=bb(x - 3.5, x + 3.5, -HW - 2, -HW + 0.5, z - 3.5, z + 3.5))
-    for x, z in DOME_L:
+    for x, z in ([] if PLAIN else DOME_L):
         F.add(dome(x, z, 1), 0.2, bbox=bb(x - 3.5, x + 3.5, HW - 0.5, HW + 2, z - 3.5, z + 3.5))
-    for lst, s in ((FLAT_R, -1), (FLAT_L, 1)):
+    for lst, s in (() if PLAIN else ((FLAT_R, -1), (FLAT_L, 1))):
         for x, z, r in lst:
             y0, y1 = sorted((s * (HW - 0.3), s * (HW + 0.45)))
             F.add(cyl("Y", (x, z), r, y0, y1, rim=0.3), 0.12, bbox=bb(x - r - 1, x + r + 1, y0 - 0.5, y1 + 0.5, z - r - 1, z + r + 1))
-    for lst, s in ((RING_R, -1), (RING_L, 1)):
+    for lst, s in (() if PLAIN else ((RING_R, -1), (RING_L, 1))):
         for x, z, r in lst:
             # отверстие в борту с фаской и торец оси чуть ниже поверхности
             y0, y1 = sorted((s * (HW - 2.0), s * (HW + 1.0)))
@@ -147,7 +147,7 @@ def receiver(h):
           bbox=bb(sx - 3, sx + 3, -HW - 1, -HW + 2.2, sz - 4.5, sz + 3.5))
     F.add(cyl("Y", (sx, sz - 1.4), 1.75, -HW + 0.25, -HW + 2.0, rim=0.2), 0.0, bbox=bb(sx - 3, sx + 3, -HW, -HW + 2.3, sz - 4, sz + 1))
     # 8. оси УСМ слева: плоская головка и проволочный фиксатор — «ушки» проволоки вокруг головки
-    for x, z, r, angs in AXLES_L:
+    for x, z, r, angs in ([] if PLAIN else AXLES_L):
         F.add(cyl("Y", (x, z), r, HW - 0.3, HW + 0.9, rim=0.35), 0.12, bbox=bb(x - r - 1, x + r + 1, HW - 0.5, HW + 1.4, z - r - 1, z + r + 1))
         for a in angs:
             ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))

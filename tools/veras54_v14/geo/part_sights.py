@@ -165,7 +165,7 @@ def leaf(h):
     F.sub(box_e((63.0, -0.45, z1 - 0.35), (104.5, 0.45, z1 + 2), rx=0.2, rz=0.4), 0.12,
           bbox=bb(62, 105.5, -1.5, 1.5, z1 - 1, z1 + 0.5))
     # насечка по бокам — фиксация хомутика
-    for k in range(NOTCH_N):
+    for k in range(0 if PLAIN else NOTCH_N):
         x = NOTCH_X0 + NOTCH_PITCH * k
         for s in (-1, 1):
             y0, y1 = sorted((s * (LEAF_HW - 0.35), s * (LEAF_HW + 1.0)))
@@ -177,7 +177,7 @@ def leaf(h):
     # шкала: риски поперёк и цифры дальности (читаются стрелком сзади: верх цифры — к дулу)
     for bars, s in ((BARS_UP, 1), (BARS_LO, -1)):
         y0, y1 = sorted((s * ROW[0], s * ROW[1]))
-        for bx in bars:
+        for bx in ([] if PLAIN else bars):
             F.sub(box_e((bx - 0.2, y0, z1 - 0.15), (bx + 0.2, y1, z1 + 1), rz=0.1), 0.05,
                   bbox=bb(bx - 1, bx + 1, y0 - 0.5, y1 + 0.5, z1 - 0.5, z1 + 0.3))
     yc = (ROW[0] + ROW[1]) / 2
@@ -279,7 +279,7 @@ def knob(h):
         rr = np.hypot(X - cx, Z - cz)
         band = smoothstep((Y - (KNOB_Y[0] + 0.45)) / 0.35) * smoothstep(((KNOB_Y[1] - 0.35) - Y) / 0.35)
         return g * band * smoothstep((rr - (KNOB_R - 0.8)) / 0.4)
-    F.displace(knurl, bbox=bb(cx - KNOB_R - 1, cx + KNOB_R + 1, KNOB_Y[0] - 0.5, KNOB_Y[1] + 0.5, cz - KNOB_R - 1, cz + KNOB_R + 1), fine=False)
+    F.displace(knurl, bbox=bb(cx - KNOB_R - 1, cx + KNOB_R + 1, KNOB_Y[0] - 0.5, KNOB_Y[1] + 0.5, cz - KNOB_R - 1, cz + KNOB_R + 1), fine=True)
     F.sub(cyl("Y", DC, 3.95, KNOB_Y[0] - 1, KNOB_Y[0] + 0.25), 0.25, bbox=bb(cx - 5, cx + 5, KNOB_Y[0] - 1, KNOB_Y[0] + 0.6, cz - 5, cz + 5))
     F.add(cyl("Y", DC, 1.9, KNOB_Y[0] + 0.1, KNOB_Y[0] + 0.5, rim=0.15), 0.2, bbox=bb(cx - 3, cx + 3, KNOB_Y[0] - 0.5, KNOB_Y[0] + 1, cz - 3, cz + 3))
     # гайка слева: канавка по лицу, выпуклый центр с плоским торцом, фиксатор-шарик сверху сзади
@@ -333,7 +333,7 @@ def button(side):
             g = 0.13 * (0.5 - 0.5 * np.cos(2 * math.pi * u / 0.7))
             rr = np.hypot(X - sx, Z - sz)
             return g * smoothstep((side * Y - (BTN_Y[1] - 0.3)) / 0.15) * smoothstep(((BTN_R - 0.6) - rr) / 0.5)
-        F.displace(ribs, bbox=bb(sx - BTN_R, sx + BTN_R, yf - 0.6, yf + 0.6, sz - BTN_R, sz + BTN_R), fine=False)
+        F.displace(ribs, bbox=bb(sx - BTN_R, sx + BTN_R, yf - 0.6, yf + 0.6, sz - BTN_R, sz + BTN_R), fine=True)
         return F
     return build
 

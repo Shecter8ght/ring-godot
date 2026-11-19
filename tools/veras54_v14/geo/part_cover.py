@@ -362,7 +362,7 @@ def front_block(h):
             F.add(prism(pl, "XZ", y0, y1, rim=0.0, rim1=0.3) if s > 0 else prism(pl, "XZ", y0, y1, rim=0.3, rim1=0.0), 0.2,
                   bbox=bb(FB_X0, FB_X1, y0 - 0.5, y1 + 0.5, BOT, FB_TOP))
         # заклёпки: верхняя полукруглая, ось шарнира — плоская головка
-        for (cx, cz), kind in ((FB_RIVET, "dome"), (FB_PIN, "flat")):
+        for (cx, cz), kind in (() if PLAIN else ((FB_RIVET, "dome"), (FB_PIN, "flat"))):
             yb = yo + s * 0.6
             if kind == "dome":
                 hgt, r = 1.15, 2.5
@@ -378,7 +378,7 @@ def front_block(h):
                 F.add(cyl("Y", (cx, cz), 3.0, y0, y1, rim=0.3), 0.15, bbox=bb(cx - 4, cx + 4, y0 - 1, y1 + 1, cz - 4, cz + 4))
     # сварной шов: выпуклый валик смещением поверхности щеки, чешуйки внахлёст, кратеры на концах
     F.displace(weld, bbox=bb(WELD_P0[0] - 3, FB_X1 + 0.5, -FB_HW - 1.5, FB_HW + 1.5,
-                             WELD_P1[1] - 4, WELD_P0[1] + 4), fine=False)
+                             WELD_P1[1] - 4, WELD_P0[1] + 4), fine=True)
     return F
 
 

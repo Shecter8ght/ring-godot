@@ -147,7 +147,7 @@ def grip(h):
         pts = [(80.0, zt), (cx + 8.0, (zt + cz + r) / 2)] + arc(cx, cz, r, 90, 270, 24) + [(xr, zr), (80.0, zr)]
         tp = Poly(smooth_closed(pts, step=0.25, sigma=0.8))
         x0 = cx - r - 3; z0 = zr - 3; z1 = zt + 3
-        F.displace(recess(tp, TONGUE_DEPTH, 1.3), bbox=bb(x0, 74, -HW - 2, HW + 2, z0, z1), fine=False)
+        F.displace(recess(tp, TONGUE_DEPTH, 1.3), bbox=bb(x0, 74, -HW - 2, HW + 2, z0, z1), fine=TONGUE_DEPTH < 1.2)
     # лунки кнопок с обеих сторон: чаша с плоским дном и отверстие под кнопку
     cx, cz = BTN_C
 

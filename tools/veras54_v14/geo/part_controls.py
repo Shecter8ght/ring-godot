@@ -190,7 +190,7 @@ def selector(h):
     # 5. заклёпки-купола на поле рычага, под куполом — тонкая шайба
     rr, rh = 2.15, 1.0
     rs = (rr ** 2 + rh ** 2) / (2 * rh)
-    for x, z in SEL_RIVETS:
+    for x, z in ([] if PLAIN else SEL_RIVETS):
         F.add(_sel(cyl("Y", (x, z), 2.55, SEL_Y_OUT - 0.18, SEL_Y_OUT + 0.2, rim=0.12, rim1=0.0)), 0.1,
               bbox=_sel_bb(x - 3.5, x + 3.5, SEL_Y_OUT - 0.6, SEL_Y_OUT + 0.4, z - 3.5, z + 3.5))
         y0 = SEL_Y_OUT - 0.18
@@ -249,7 +249,7 @@ def trigger_guard(h):
     F.sub(box((tx0, -thw, bz - 2), (tx1, thw, PL_TOP + 2), 0.6), 0.3,
           bbox=bb(tx0 - 1, tx1 + 1, -thw - 1, thw + 1, bz - 1, PL_TOP + 0.5))
     # 5. заклёпки снизу широкой части
-    for x, y in PAD_RIVETS:
+    for x, y in ([] if PLAIN else PAD_RIVETS):
         F.add(_dome_down(x, y, PLATE_BOT), 0.2, bbox=bb(x - 3, x + 3, y - 3, y + 3, PLATE_BOT - 1.5, PLATE_BOT + 0.5))
     # 6. литьевая шероховатость ленты скобы (образец: «пупырчатая» лицевая сторона на P11)
 

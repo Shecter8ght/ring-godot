@@ -297,7 +297,7 @@ def _side_pattern(F, s):
         return -rec * m
     z_top = _pt(300.0, 7.0)[1]; z_bot = _pt(290.0, 34.5)[1]
     y0, y1 = (-HW - 1.0, -HW + 2.0) if s < 0 else (HW - 2.0, HW + 1.0)
-    F.displace(shingle, bbox=bb(_pt(305, 7.0)[0] - 2, _pt(285, 34.5)[0] + 4, y0, y1, z_bot - 2, z_top + 2), fine=False)
+    F.displace(shingle, bbox=bb(_pt(305, 7.0)[0] - 2, _pt(285, 34.5)[0] + 4, y0, y1, z_bot - 2, z_top + 2), fine=True)
     font = font_path(False)
     for k, top, bot, du in _rows():
         rb = _row_bb(k, top, bot, s)
@@ -305,11 +305,13 @@ def _side_pattern(F, s):
         shapes = _pockets2(k, top, bot, du)
         if k < 5:
             shapes.append(_channel2(k))
-        F.sub(_recess(union2(*shapes), s, D_POCKET), 0.35, bbox=rb)
+        if not PLAIN:               # VERAS_PLAIN: «вафли» 0,9 мм, дорожки и цифры — целиком в карту нормалей
+            F.sub(_recess(union2(*shapes), s, D_POCKET), 0.35, bbox=rb)
         # 3. дорожка от «вафли» с цифрой к окну
         vc = (bot - 1.75) * KV
         conn = seg2((WIN_U[1] - 0.6, vc), (POCKET_U[2][0] + du + 1.0, vc), 0.45)
-        F.sub(_recess(conn, s, 0.55, draft=0.3, rf=0.2), 0.25, bbox=rb)
+        if not PLAIN:
+            F.sub(_recess(conn, s, 0.55, draft=0.3, rf=0.2), 0.25, bbox=rb)
         # 4. окно — насквозь в полость
         win = _win2(top)
 
@@ -319,7 +321,7 @@ def _side_pattern(F, s):
             return i_round(win(U, V) - 0.12 * (w - CAV_HW), (CAV_HW - 1.2) - w, 0.0)
         F.sub(wfn, 0.35, bbox=rb)
         # 5. цифры остатка — выпуклые на дне «вафли» (на левом боку читаются слева)
-        if NUMS[k]:
+        if NUMS[k] and not PLAIN:
             f2, wt = text2(NUMS[k], font, DIGIT_H, track=0.15)
             rc = 310.0 + du
             pc = bot - 1.45
@@ -400,7 +402,8 @@ def body(h):
         df = np.sqrt((X - CF[0]) ** 2 + (Z - CF[1]) ** 2)
         d = np.maximum(np.maximum(np.abs(Y) - 0.35, (RF - 0.22) - df), df - (RF + 0.6))
         return np.maximum(d, np.maximum(-178.0 - Z, Z + 43.0))
-    F.add(seam, 0.15, bbox=bb(212.0, 272.0, -1.5, 1.5, -178.0, -42.0))
+    if not PLAIN:
+        F.add(seam, 0.15, bbox=bb(212.0, 272.0, -1.5, 1.5, -178.0, -42.0))
     # 7. пазы на передней грани вверху («рёбра спереди»), открыты в стороны
     for zc, wd in FRONT_SLOTS:
         th = math.asin((CF[1] - zc) / RF)

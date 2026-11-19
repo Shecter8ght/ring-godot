@@ -340,7 +340,7 @@ def latch(h):
     F.add(box((xa + 0.2, y_out - 0.35, za + 0.6), (xa + 2.0, y_out + 0.5, zb - 0.6), 0.3), 0.3,
           bbox=bb(xa - 1, xa + 3, y_out - 1, y_out + 1, za, zb))
     # рифление — три поперечных ребра
-    for k in range(3):
+    for k in range(0 if PLAIN else 3):
         xr = xa + 3.0 + k * 1.3
         F.add(cyl("Z", (xr, y_out + 0.1), 0.32, za + 1.0, zb - 1.0, rim=0.25), 0.2,
               bbox=bb(xr - 1, xr + 1, y_out - 1, y_out + 1, za, zb))
