@@ -731,6 +731,22 @@ python -X utf8 tools/asset_kit/roughness_imports.py [--fix]   # фильтр ш�
 #   → game_rig.py (риг рук v13 в библиотеке)
 #   → bash tools/veras54_v13/clips/build_all.sh (18 клипов, «Клипы v13») → export_veras54.py → --import → python -X utf8 tools/veras54_v13/game_imports.py → --import;
 #   сверка запекания с исходником в его студии — tools/veras54_v13/bake_compare.py, гильза задержки — clips/jam_check.py
+# ВЕРАС-54 v14 (новая версия по образцу АК-12, 2026-11-18…19; в игру ещё НЕ выведена — сначала перенос клипов рук, по слову владельца):
+#   форма неявными поверхностями — tools/veras54_v14/geo (памятка HELPERS.md): [VERAS_TAG=метка] bash tools/veras54_v14/geo/go.sh <k> "<модули>" "<виды>"
+#   (k = 2 черновик, 1 чистовой; VERAS_PLAIN=1 — детали без мелкого рельефа, источник упрощения игровой сетки) → _asset_src/veras54_v14_geo/work/v14_k<k>.blend;
+#   проверки на сборке — check_overlaps.py, measure.py; показные рендеры — render_views.py -- <папка> [кадры]; принятая форма —
+#   «Геометрия v14/ВЕРАС-54_геометрия_v14_04.blend» в папке модели.
+#   Игровая сетка: blender -b -y --factory-startup --python-exit-code 1 --python tools/veras54_v14/game/game_lp.py (упрощение, узлы по ригу, LOD1) →
+#   game_uv.py (окончательная развёртка: Body / Front 4096, Mag 2048) → game_bake.py (адреса с подробной модели, ~16 мин на процессоре) →
+#   python -X utf8 tools/veras54_v14/game/game_transfer.py [<папка карт> …] (перенос любой выгрузки Painter, 35 с) → «Игровая версия/Карты v14»;
+#   файл просмотра и кадры сверки — game_review_tex.py -- build | shots, листы — game_review_sheets.py; RizomUV пробовали (rz_*.py) — проиграл.
+#   Текстуры на подробной модели (как у «Частокола»): tools/veras54_v14/tex — tex_dump.py, tex_sets.py, tex_uv.py (наборы; bash _asset_src/veras54_v14/tex/uv/run_all.sh),
+#   tex_uv_apply.py → «Карты v14/ВЕРАС-54_развёртка_v14_01.blend»; python -X utf8 tools/veras54_v14/tex/tex_spec.py → «Карты v14/finish-spec.json»
+#   (слоты, палитра стали владельца); Painter своим экземпляром (FINISH_SP_JOBS=_asset_src/veras54_v14/tex/sp_jobs, TEMP и TMP на E:) — sp_veras.py
+#   create | bake | stack | export; износ — wear_maps.py, wear_place.py (места по форме, мм), wear_places.json (места и штампы владельца числами),
+#   python -X utf8 tools/veras54_v14/tex/wear_all.py "<Карты v14>/Износ vNN" body,front,rear ver=2 [k=…] [only=набор] [factory=<папка>] [fresh];
+#   файл просмотра — tex_review.py -- apply <карты> <out.blend> | shots <папка> (VERAS_LIGHT_K=0.45 VERAS_HDRI_K=1.0), крупные планы — wear_review.py,
+#   проба цвета корпуса без Painter — tex_variant.py, вид мест без Painter — wear_view.py <набор> <место,…> rear|right|top.
 # Магазины ВЕРАС-54 на 45 и барабан на 60 в игру: sh tools/veras54_mags/chain.sh [m45] [d60] (mags_game_lp → bake → pack → export:
 #   атлас 4096, .gltf «в руках» и _world, маски _coat — assets/models/weapons/veras54_mags; файл для Blender — «Игровая версия»
 #   в библиотеке) → --import → python -X utf8 tools/veras54_mags/mags_game_imports.py → --import
