@@ -33,7 +33,7 @@ def main():
     dg = bpy.context.evaluated_depsgraph_get()
     vis = [o for o in vl.objects if o.type == "MESH" and o.visible_get()]
     lo, hi = bounds(vis, dg)
-    barrel = [o for o in vis if o.name.startswith("Barrel •")]
+    barrel = [o for o in vis if o.name == "Barrel"]
     blo, bhi = bounds(barrel, dg) if barrel else (lo, hi)
     nomag = [o for o in vis if not o.name.startswith(MAG)]
     nlo, nhi = bounds(nomag, dg)
@@ -42,7 +42,7 @@ def main():
         ("Задний торец затыльника, X", lo[0], -235.0),
         ("Дульный срез, X", hi[0], 705.0),
         ("Ствол от казённого среза до дульного среза (с дульным устройством)", hi[0] - blo[0], None),
-        ("Ствол, деталь v13 (X 240…606)", bhi[0] - blo[0], 366.0),
+        ("Ствол (казённый срез X 240 — торец X 606)", bhi[0] - blo[0], 366.0),
         ("Высота с магазином", hi[2] - lo[2], None),
         ("Высота без магазина", nhi[2] - nlo[2], None),
         ("Ширина (с рукояткой затвора)", hi[1] - lo[1], None),

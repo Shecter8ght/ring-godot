@@ -14,18 +14,24 @@ from dims import *
 from sdf import *
 
 # ---------------- переводчик ----------------
+# Снят в положении «предохранитель», как у образца (плитки R/T/U_x-0.152_…_f0.7, 0,115 мм на пиксель: trace/ctrl/s3_*),
+# в модели повёрнут вокруг SELECTOR_AXIS в «АВ» на SEL_AB_DEG.
+# Два слоя: рычаг (наружный, штамповка с бортом-ребром вдоль верхней кромки, две заклёпки, ступица с головкой оси)
+# и нижняя пластина у коробки — видна полосой под рычагом: охватывает ступицу сзади-снизу, несёт козырёк под палец,
+# за козырьком уступ вниз, дальше прямой скос к носу; нос выходит из-под рычага вперёд и наружу.
 import os
 SAX, SAZ = SELECTOR_AXIS
-SEL_AB_DEG = float(os.environ.get("VERAS_SEL_DEG", "9.0"))   # от снятого положения (предохранитель) к «АВ»: конец вниз
-# два слоя (образец P04, s2_sel): нижняя широкая пластина с полочкой у коробки и верхняя полоса-рычаг поверх неё
-SEL_Y_IN = -(RECV_HW + 1.25)      # внутренняя грань нижней пластины: зазор 0,45 мм до юбки крышки (COVER_HW 17,3)
-SEL_T1 = 1.4                      # нижняя пластина (оценка)
-SEL_T2 = 1.8                      # верхняя полоса (оценка; ступенька между слоями читается на P04 / Q01)
-SEL_Y_MID = SEL_Y_IN - SEL_T1
-SEL_Y_OUT = SEL_Y_MID - SEL_T2
-SEL_HUB_R = 9.6                   # ступица полосы (s2_sel: край X 50,4)
-SEL_LOBE_R = 12.8                 # прилив нижней пластины вокруг ступицы снизу-сзади (s2_sel: дуга до Z −21,5)
-# граница слоёв: нижняя кромка полосы — прямая (s2_sel: (67; −14,6) … (117; −3,2))
+SEL_AB_DEG = float(os.environ.get("VERAS_SEL_DEG", "9.0"))   # от предохранителя к «АВ»: передний конец вниз
+SEL_Y_IN = -(RECV_HW + 1.2)       # внутренняя грань нижней пластины: зазор 0,4 мм до юбки крышки (COVER_HW 17,3)
+SEL_Y_MID = SEL_Y_IN - 0.8        # нижняя пластина 0,8 (T_x-0.152: весь пакет до поля рычага −19,5)
+SEL_Y_OUT = SEL_Y_MID - 1.0       # поле рычага −19,5
+SEL_RIB_H = 0.55                  # борт-ребро над полем: верх −20,05 (T_x-0.152)
+SEL_RIB_W = 2.2                   # ширина борта (s4_ref_riv: полоса Z 11,8…13,4 над заклёпками)
+SEL_HUB_R = 9.0                   # ушко рычага вокруг оси (s4_ref_hub: верх 0,7 при оси −8,3)
+SEL_LOBE_R = 10.6                 # охват ушка нижней пластиной сзади-снизу (s4_ref_hub: дуга Z −18,5)
+SEL_COLLAR = (7.3, 1.2)           # буртик-шайба оси: радиус, высота над полем (s4_ref_hub, T_x-0.152)
+SEL_HEAD = (4.1, 1.0)             # головка оси: радиус, высота над буртиком; плоский торец r 3,6 с фаской
+# нижняя кромка рычага — прямая (s3_r, s3_rf2: (67; −14,6) … (161; 5,7))
 SEL_D0, SEL_DK = (67.0, -14.6), 0.2155
 
 
@@ -33,22 +39,26 @@ def _sel_d(x):
     return SEL_D0[1] + SEL_DK * (x - SEL_D0[0])
 
 
-# верхняя полоса (положение «предохранитель»): верх, излом вверх к заклёпкам, верхний пояс, конец, прямая нижняя кромка
-SEL_STRIP = [(61.0, 0.95), (81.6, 0.25), (91.6, 11.7), (94.6, 13.35), (150.5, 13.45), (157.7, 8.6), (157.5, 5.2),
-             (155.2, _sel_d(155.2)), (67.0, -14.6), (61.0, -15.5)]
-SEL_STRIP_R = [0.0, 3.0, 3.0, 2.5, 4.5, 3.5, 1.2, 1.5, 0.0, 0.0]
-SEL_TOP_EDGE = [(63.0, 0.9), (81.6, 0.25), (91.6, 11.7), (94.6, 13.35), (150.5, 13.45)]   # пояс вдоль верхней кромки
-# корень полочки — дуга, выгнутая вверх (s2_sel: светлая кромка гиба)
-SEL_SHELF_ROOT = [(84.5, -16.6), (86.5, -15.6), (90.0, -14.6), (95.0, -14.0), (100.0, -13.9), (104.0, -14.1), (106.6, -14.6)]
-# нижняя пластина: верх спрятан под полосой (граница + 2,5), передний конец дугой вниз к полочке, полочка, прямая
-# нижняя кромка к ступице
-SEL_PLATE = ([(61.0, -4.0), (111.5, _sel_d(111.5) + 2.5), (111.0, -4.6), (109.0, -7.5), (107.2, -11.0)]
-             + SEL_SHELF_ROOT[::-1] + [(63.0, -18.1)])
-SEL_PLATE_R = [0.0, 1.5, 1.5, 4.0, 3.0, 1.2, 0, 0, 0, 0, 0, 1.0, 0.0]
-SEL_SHELF_X = (84.3, 106.8)
-SEL_SHELF_OUT = -25.0             # отгиб наружу до Y ≈ −25 (вид сверху t_sel_a, снизу my_u_mid)
-SEL_SHELF_DEG = 32.0              # отгиб вниз от горизонтали (оценка: тень под полочкой на s2_sel)
-SEL_RIVETS = [(93.2, 9.5), (101.0, 9.5)]     # заклёпки полосы (s2_sel)
+# рычаг: верх у ступицы, излом вверх к заклёпкам, верх, скошенный передний торец, прямая нижняя кромка
+SEL_LEVER = [(61.0, 0.8), (80.8, 0.8), (91.4, 12.7), (93.0, 13.5), (159.4, 13.7), (162.0, 6.2), (161.0, _sel_d(161.0)),
+             (67.0, -14.6), (61.0, -15.5)]
+SEL_LEVER_R = [0.0, 2.5, 2.5, 1.5, 1.2, 1.0, 0.8, 0.0, 0.0]
+# средняя линия борта: дугой по ступице сверху-сзади, вдоль верхней кромки, до переднего торца
+SEL_RIB = [(63.0, 0.8 - SEL_RIB_W / 2), (80.4, 0.8 - SEL_RIB_W / 2), (91.0, 13.5 - SEL_RIB_W / 2),
+           (158.6, 13.7 - SEL_RIB_W / 2)]
+# нижняя пластина (видна ниже рычага): корень козырька — дуга вверх, уступ, скос к носу
+SEL_SHELF_ROOT = [(84.3, -16.9), (86.5, -15.9), (90.0, -14.9), (95.0, -14.3), (100.0, -14.2), (104.0, -14.5), (106.4, -15.3)]
+SEL_L2 = (108.0, -9.4, 0.258)     # скос к носу: точка и наклон (s3_r: (108; −9,4), s3_rf2: (158; 3,5))
+SEL_PLATE = ([(61.0, -4.0), (161.0, _sel_d(161.0) + 1.0), (161.2, 4.6), (159.0, 3.6), (108.0, -9.4), (107.4, -12.5)]
+             + SEL_SHELF_ROOT[::-1] + [(63.5, -17.9)])
+SEL_PLATE_R = [0.0, 0.0, 1.2, 1.0, 1.0, 0.8, 0.6, 0, 0, 0, 0, 0, 0.8, 0.0]
+SEL_NOSE_X = 137.5                # нос пластины наружу от X 136,5 (T_x-0.152: уступ до Y −21,8)
+SEL_NOSE_Y = -21.8
+SEL_SHELF_X = (84.0, 106.6)       # козырёк: длина 22,6 (T_x-0.152)
+SEL_SHELF_OUT = -26.8             # вынос (T_x-0.152)
+SEL_SHELF_T = 1.5
+SEL_SHELF_DEG = 20.0              # отгиб вниз от горизонтали (оценка: кромка козырька на s3_r)
+SEL_RIVETS = [(94.6, 7.0), (101.7, 7.0)]      # заклёпки-купола в поле ниже борта (s4_ref_riv: Ø 4,3)
 SEL_POS = {"safe": -SEL_AB_DEG, "АВ": 0.0, "2": 3.6, "ОД": 7.3}   # углы вокруг Y от «АВ» (плюс — передний конец вниз)
 
 # ---------------- накладка, скоба, стойка защёлки ----------------
@@ -116,67 +126,80 @@ def _sel_bb(x0, x1, y0, y1, z0, z1):
 
 
 def selector(h):
-    F = Field("Selector_Lever", (47.0, SEL_SHELF_OUT - 2.5, -29.0), (162.0, -15.5, 11.0), h)
-    hb = bb(SAX - 14, SAX + 14, SEL_Y_OUT - 4, -16.0, SAZ - 14, SAZ + 14)
-    # 1. нижняя пластина: тело, прилив вокруг ступицы снизу-сзади
+    F = Field("Selector_Lever", (45.0, SEL_SHELF_OUT - 2.5, -30.0), (165.0, -15.8, 17.0), h)
+    hb = bb(SAX - 14, SAX + 14, SEL_Y_OUT - 4.0, -16.0, SAZ - 14, SAZ + 14)
+    # 1. нижняя пластина с охватом ступицы
     plate = Poly(fillet_poly(SEL_PLATE, SEL_PLATE_R, seg=10))
     lobe = minus2(circle2((SAX, SAZ), SEL_LOBE_R), union2(rect2(SAX + 4.5, SAX + 30, SAZ - 30, SAZ + 30),
                                                            rect2(SAX - 30, SAX + 30, SAZ + 3.5, SAZ + 30)), r=2.5)
     low2 = union2(lambda U, V: plate.sd(U, V), lobe, circle2((SAX, SAZ), SEL_HUB_R), r=2.5)
-    F.add(_sel(prism2(low2, "XZ", SEL_Y_MID, SEL_Y_IN, rim=0.45)))
-    # 2. верхняя полоса со ступицей — поверх пластины, кромки скруглены (ступенька между слоями)
-    strip_p = Poly(fillet_poly(SEL_STRIP, SEL_STRIP_R, seg=10))
-    up2 = union2(lambda U, V: strip_p.sd(U, V), circle2((SAX, SAZ), SEL_HUB_R), r=3.0)
-    F.add(_sel(prism2(up2, "XZ", SEL_Y_OUT, SEL_Y_MID + 0.2, rim=0.5, rim1=0.0)))
-    # 3. полочка: отбортовка вниз-наружу по дуге корня, концы сходят на нет (серп в плане), гладкая
+    F.add(_sel(prism2(low2, "XZ", SEL_Y_MID + 0.05, SEL_Y_IN, rim=0.35)))
+    # нос: часть пластины под рычагом впереди отогнута наружу (ступенька на виде сверху)
+    nose = minus2(minus2(lambda U, V: plate.sd(U, V), lambda U, V: U - SEL_NOSE_X, r=1.5),
+                  lambda U, V: (SEL_D0[1] + SEL_DK * (U - SEL_D0[0]) - 0.1) - V, r=0.0)
+    F.add(_sel(prism2(nose, "XZ", SEL_NOSE_Y, SEL_Y_MID + 0.3, rim=0.45, rim1=0.0)), 0.6,
+          bbox=_sel_bb(SEL_NOSE_X - 8, 164, SEL_NOSE_Y - 1, SEL_Y_MID + 0.5, -2.0, 8.0))
+    # 2. рычаг: толстый лист со скруглёнными кромками
+    lever = Poly(fillet_poly(SEL_LEVER, SEL_LEVER_R, seg=10))
+    up2 = union2(lambda U, V: lever.sd(U, V), circle2((SAX, SAZ), SEL_HUB_R), r=3.0)
+    F.add(_sel(prism2(up2, "XZ", SEL_Y_OUT, SEL_Y_MID + 0.15, rim=0.5, rim1=0.0)))
+    # борт-ребро вдоль верхней кромки: коробчатое сечение (плоский верх, скругления), по ступице — дугой
+    rib = Path2(fillet_path(SEL_RIB, [2.5, 2.5], seg=8))
+
+    def rib_f(X, Y, Z):
+        d2 = rib.dist(X, Z) - SEL_RIB_W / 2
+        d2 = np.maximum(d2, up2(X, Z) + 0.15)                   # не выходит за кромку рычага
+        return i_round(d2, np.abs(Y - (SEL_Y_OUT - SEL_RIB_H / 2 + 0.4)) - (SEL_RIB_H / 2 + 0.4), 0.45)
+    F.add(_sel(rib_f), 0.5, bbox=_sel_bb(48.0, 162.0, SEL_Y_OUT - SEL_RIB_H - 0.6, SEL_Y_OUT + 0.6, -6.0, 15.0))
+    # 3. козырёк под палец: от дуги корня вниз-наружу, толстый, концы скруглены; насечка «вафлей» на верхней грани
     rx = np.array([q[0] for q in SEL_SHELF_ROOT]); rz = np.array([q[1] for q in SEL_SHELF_ROOT])
     y0 = (SEL_Y_IN + SEL_Y_MID) / 2
     ca, sa = math.cos(math.radians(SEL_SHELF_DEG)), math.sin(math.radians(SEL_SHELF_DEG))
-    L0 = (y0 - SEL_SHELF_OUT) / ca
+    L0 = (y0 - SEL_SHELF_OUT - SEL_SHELF_T / 2) / ca
     xm, xh = (SEL_SHELF_X[0] + SEL_SHELF_X[1]) / 2, (SEL_SHELF_X[1] - SEL_SHELF_X[0]) / 2
 
     def shelf(X, Y, Z):
         zr = np.interp(X, rx, rz)
-        L = L0 * np.sqrt(np.clip(1.0 - ((X - xm) / xh) ** 4, 0.0, 1.0)) + 0.01
         u = Y - y0; v = Z - zr
-        # отгиб: отрезок от корня наружу-вниз длиной L; корень: короткий отрезок вверх внутри пластины
-        t = np.clip((-u * ca - v * sa) / L, 0.0, 1.0) * L
-        d2 = np.sqrt((u + t * ca) ** 2 + (v + t * sa) ** 2) - SEL_T1 / 2
-        d1 = np.sqrt(u ** 2 + (v - np.clip(v, 0.0, 1.6)) ** 2) - SEL_T1 / 2
-        d = u_round(d1, d2, 1.6)
-        return i_round(d, np.abs(X - xm) - xh, 0.5)
-    F.add(_sel(shelf), 0.5, bbox=_sel_bb(83.3, 107.8, SEL_SHELF_OUT - 1.5, SEL_Y_IN + 0.3, -21.0, -12.0))
-    # 4. пояс жёсткости вдоль верхней кромки полосы — выдавлен наружу на 0,3 мм
-    top = Path2(fillet_path(SEL_TOP_EDGE, [3.0, 3.0, 2.5], seg=8))
+        t = np.clip((-u * ca - v * sa) / L0, 0.0, 1.0) * L0
+        d2 = np.sqrt((u + t * ca) ** 2 + (v + t * sa) ** 2) - SEL_SHELF_T / 2
+        d1 = np.sqrt(u ** 2 + (v - np.clip(v, 0.0, 1.6)) ** 2) - SEL_SHELF_T / 2
+        d = u_round(d1, d2, 1.8)
+        return i_round(d, np.abs(X - xm) - xh, 1.2)
+    F.add(_sel(shelf), 0.6, bbox=_sel_bb(82.8, 107.8, SEL_SHELF_OUT - 1.5, SEL_Y_IN + 0.3, -22.0, -12.0))
+    kp = 1.0
 
-    def bead(X, Y, Z):
-        m = smoothstep((2.0 - top.dist(X, Z)) / 0.6) * smoothstep((-strip_p.sd(X, Z) - 0.25) / 0.4)
-        return 0.3 * m * smoothstep((SEL_Y_OUT + 0.6 - Y) / 0.4)
-    F.displace(_sel(bead), bbox=_sel_bb(60.0, 152.0, SEL_Y_OUT - 1.0, SEL_Y_OUT + 1.0, -2.0, 14.0), fine=False)
-    # 5. ступица: утолщение полосы, кольцо вокруг оси (прилив r 6,4 с канавками), купол оси; изнутри — опора на борт
-    F.add(cyl("Y", (SAX, SAZ), SEL_HUB_R - 0.6, SEL_Y_OUT - 0.7, SEL_Y_OUT + 0.4, rim=0.5, rim1=0.0), 0.8, bbox=hb)
-    ring_y = SEL_Y_OUT - 0.7
-    F.sub(torus("Y", (SAX, ring_y, SAZ), 7.6, 0.3), 0.1, bbox=hb)
-    F.add(cyl("Y", (SAX, SAZ), 6.4, ring_y - 1.3, ring_y + 0.4, rim=0.5, rim1=0.0), 0.5, bbox=hb)
-    cap_y = ring_y - 1.3
-    cap_rs = (3.7 ** 2 + 1.1 ** 2) / (2 * 1.1)              # купол высотой 1,1 над кольцом
-
-    def cap(X, Y, Z):
-        cy = cap_y - 1.1 + cap_rs
-        d = np.sqrt((X - SAX) ** 2 + (Y - cy) ** 2 + (Z - SAZ) ** 2) - cap_rs
-        return np.maximum(d, Y - (cap_y + 0.4))
-    F.add(cap, 0.25, bbox=hb)
-    F.sub(torus("Y", (SAX, cap_y, SAZ), 4.05, 0.32), 0.12, bbox=hb)
+    def waffle(X, Y, Z):
+        zr = np.interp(X, rx, rz)
+        wc = (Y - y0) * sa / ca                                       # средняя линия козырька над корнем
+        top = smoothstep((Z - zr - wc) / 0.3)
+        m = top * smoothstep((-Y + SEL_Y_IN - 1.6) / 0.6) * smoothstep((SEL_SHELF_OUT + 0.9 - Y) * -1 / 0.5) \
+            * smoothstep((X - SEL_SHELF_X[0] - 1.4) / 0.6) * smoothstep((SEL_SHELF_X[1] - 1.4 - X) / 0.6)
+        s1 = np.abs(((X + Y) / kp) % 1.0 - 0.5) * 2.0
+        s2 = np.abs(((X - Y) / kp) % 1.0 - 0.5) * 2.0
+        return -0.18 * m * (1.0 - np.minimum(s1, s2))
+    F.displace(_sel(waffle), bbox=_sel_bb(83.5, 107.0, SEL_SHELF_OUT - 1.2, SEL_Y_IN - 1.0, -21.0, -12.5), fine=True)
+    # 4. ось: ушко рычага (r SEL_HUB_R, своя кромка), на нём буртик-шайба и низкая головка оси с плоским торцом
+    #    и фаской; изнутри — опора на борт коробки
+    cr, ch = SEL_COLLAR
+    hr, hh = SEL_HEAD
+    y_c = SEL_Y_OUT - ch
+    F.add(cyl("Y", (SAX, SAZ), cr, y_c, SEL_Y_OUT + 0.3, rim=0.45, rim1=0.0), 0.4, bbox=hb)
+    F.add(cyl("Y", (SAX, SAZ), hr, y_c - hh, y_c + 0.3, rim=0.5, rim1=0.0), 0.3, bbox=hb)
     F.add(cyl("Y", (SAX, SAZ), 5.5, -RECV_HW - 0.15, SEL_Y_IN + 0.3, rim=0.3), 0.3, bbox=hb)
-    # 6. заклёпки полосы
-    rs = (1.6 ** 2 + 0.9 ** 2) / (2 * 0.9)
+    # 5. заклёпки-купола на поле рычага, под куполом — тонкая шайба
+    rr, rh = 2.15, 1.0
+    rs = (rr ** 2 + rh ** 2) / (2 * rh)
     for x, z in SEL_RIVETS:
-        cy = SEL_Y_OUT - 0.3 - 0.9 + rs
+        F.add(_sel(cyl("Y", (x, z), 2.55, SEL_Y_OUT - 0.18, SEL_Y_OUT + 0.2, rim=0.12, rim1=0.0)), 0.1,
+              bbox=_sel_bb(x - 3.5, x + 3.5, SEL_Y_OUT - 0.6, SEL_Y_OUT + 0.4, z - 3.5, z + 3.5))
+        y0 = SEL_Y_OUT - 0.18
+        cy = y0 - rh + rs
 
-        def riv(X, Y, Z, x=x, z=z, cy=cy):
+        def riv(X, Y, Z, x=x, z=z, cy=cy, y0=y0):
             d = np.sqrt((X - x) ** 2 + (Y - cy) ** 2 + (Z - z) ** 2) - rs
-            return np.maximum(d, Y - (SEL_Y_OUT + 0.1))
-        F.add(_sel(riv), 0.15, bbox=_sel_bb(x - 2.5, x + 2.5, SEL_Y_OUT - 1.8, SEL_Y_OUT + 0.3, z - 2.5, z + 2.5))
+            return np.maximum(d, Y - (y0 + 0.2))
+        F.add(_sel(riv), 0.15, bbox=_sel_bb(x - 3, x + 3, SEL_Y_OUT - 1.6, SEL_Y_OUT + 0.4, z - 3, z + 3))
     return F
 
 

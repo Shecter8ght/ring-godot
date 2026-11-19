@@ -65,16 +65,17 @@ def receiver(h):
         def det(X, Y, Z, ov=ov):
             return -0.6 * smoothstep(-ov(X, Z) / 0.7) * smoothstep((-Y - (HW - 4.0)) / 2.0)
         F.displace(det, bbox=bb(x - 4, x + 4, -HW - 1, -HW + 3, z - 3, z + 3), fine=False)
-    # клейма (вымышленные): слева — название и калибр, справа — режимы огня у конца переводчика
-    name, wn = text2(MARK_NAME, font_path(True), 3.4, track=0.3)
-    engrave(F, name, "XZ", (208.5, -5.2), -1, HW, 1, depth=0.3, wall=0.22, bbox=bb(206.5 - wn, 210.5, HW - 1.5, HW + 1, -6.5, -0.5))
-    cal, wc = text2(MARK_CAL, font_path(True), 2.3, track=0.25)
-    engrave(F, cal, "XZ", (208.5, -9.4), -1, HW, 1, depth=0.25, wall=0.2, bbox=bb(206.5 - wc, 210.5, HW - 1.5, HW + 1, -10.6, -6.3))
-    for txt, x, z in (("АВ", 153.0, -14.2), ("2", 154.2, -20.2), ("ОД", 152.4, -26.4)):
-        f2, w = text2(txt, font_path(True), 2.6, track=0.2)
-        engrave(F, f2, "XZ", (x, z), 1, -HW, -1, depth=0.25, wall=0.2, bbox=bb(x - 1, x + w + 1, -HW - 1, -HW + 1.5, z - 1, z + 3.6))
     # 3. лист
     F.shell(T)
+    # клейма (вымышленные) — гравировкой уже по листу и только снаружи (область правки не доходит до изнанки:
+    # иначе клеймо повторялось внутри и зеркально читалось через окно затвора): слева — название и калибр, справа — режимы огня у конца переводчика
+    name, wn = text2(MARK_NAME, font_path(True), 3.4, track=0.3)
+    engrave(F, name, "XZ", (208.5, -5.2), -1, HW, 1, depth=0.3, wall=0.22, bbox=bb(206.5 - wn, 210.5, HW - 0.6, HW + 1, -6.5, -0.5), reach=0.7)
+    cal, wc = text2(MARK_CAL, font_path(True), 2.3, track=0.25)
+    engrave(F, cal, "XZ", (208.5, -9.4), -1, HW, 1, depth=0.25, wall=0.2, bbox=bb(206.5 - wc, 210.5, HW - 0.6, HW + 1, -10.6, -6.3), reach=0.7)
+    for txt, x, z in (("АВ", 153.0, -14.2), ("2", 154.2, -20.2), ("ОД", 152.4, -26.4)):
+        f2, w = text2(txt, font_path(True), 2.6, track=0.2)
+        engrave(F, f2, "XZ", (x, z), 1, -HW, -1, depth=0.25, wall=0.2, bbox=bb(x - 1, x + w + 1, -HW - 1, -HW + 0.6, z - 1, z + 3.6), reach=0.7)
     # 4. коробка открыта сверху; кромки бортов — на высоте разъёма с крышкой
     F.apply(half("Z", TOP, 1), "inter", 0.3)
     # паз спускового крючка в дне (крючок — part_controls, ход 11° укладывается в паз)

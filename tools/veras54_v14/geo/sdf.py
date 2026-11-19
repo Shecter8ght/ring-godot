@@ -648,10 +648,12 @@ def text2(text, font_path, cap_h, ppm=48, track=0.0):
     return f, (xs[-1] - track * ppm) / ppm
 
 
-def engrave(F, f2, plane_, origin, u_dir, w_face, side, depth=0.2, wall=0.12, bbox=None):
+def engrave(F, f2, plane_, origin, u_dir, w_face, side, depth=0.2, wall=0.12, bbox=None, reach=1.2):
     """Гравировка плоской фигуры f2 в грань, перпендикулярную третьей оси. plane_ — оси фигуры («XZ»: U вдоль X,
     V вдоль Z), origin — место начала фигуры (u, v), u_dir = ±1 — направление чтения вдоль первой оси, w_face —
-    координата грани, side = ±1 — с какой стороны тело (грань смотрит в сторону side). depth < 0 — выпуклый рельеф."""
+    координата грани, side = ±1 — с какой стороны тело (грань смотрит в сторону side). depth < 0 — выпуклый рельеф.
+    reach — на сколько мм от грани действует правка (у тонкого листа ставь меньше толщины, иначе рельеф повторится
+    на изнанке)."""
     ku = "XYZ".index(plane_[0]); kv = "XYZ".index(plane_[1])
     kw = 3 - ku - kv
 
@@ -659,7 +661,7 @@ def engrave(F, f2, plane_, origin, u_dir, w_face, side, depth=0.2, wall=0.12, bb
         P = (X, Y, Z)
         d = f2((P[ku] - origin[0]) * u_dir, P[kv] - origin[1])
         prof = depth * np.clip(-d / wall, 0, 1)
-        near = smoothstep((1.2 - np.abs(P[kw] - w_face)) / 0.3)
+        near = smoothstep((reach - np.abs(P[kw] - w_face)) / 0.3)
         return -prof * near
     F.displace(fn, bbox=bbox)
 

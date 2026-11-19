@@ -24,19 +24,27 @@ except ImportError:      # рига ещё нет — проверяется т�
 
 # пары по началу имён (у перенесённых из v13 деталей имена длинные, с «•»)
 ALLOW_PREFIX = [
-    ("Barrel", "Receiver"), ("Barrel", "Gas block"), ("Barrel", "Front sight"), ("Barrel", "Barrel band"),
-    ("Barrel", "Muzzle"), ("Muzzle", "Muzzle"), ("Muzzle", "Brake"), ("Barrel", "Brake"), ("Barrel", "Front bayonet loop"),
-    # сборные узлы v13 из сросшихся кусков (приняты владельцем как есть)
-    ("Gas block", "Gas block"), ("Front bayonet loop", "Gas block"), ("Front bayonet loop", "Front bayonet loop"),
-    ("Recoil spring", "Recoil spring"), ("Front sight", "Front sight"), ("Barrel", "Bolt • extractor"),
-    ("Gas tube", "Gas block"),
-    # посадки «ось в отверстии» из отчётов исполнителей узлов
+    # посадки «ось в отверстии» и детали, которым положено сидеть друг в друге (отчёты исполнителей узлов)
+    ("Barrel", "Receiver"), ("Barrel", "Muzzle_"), ("Barrel", "Gas_Block"), ("Barrel", "Barrel_Collar"), ("Barrel", "Handguard"),
+    ("Gas_Tube", "Gas_Block"), ("Gas_Tube_Pins", "Gas_"), ("Gas_Block_Pins", "Gas_Block"), ("Gas_Block_Pins", "Barrel"),
+    ("Front_Sight_Post", "Gas_Block"), ("Muzzle_", "Muzzle_"), ("Bolt carrier • gas piston", "Bolt_Carrier"),
     ("Mag_Catch_Axle", "Trigger_Guard"), ("Mag_Catch_Axle", "Mag_Catch"), ("Hinge_Pin", "Hinge_"), ("Hinge_Pin", "Stock_Knuckle"),
     ("Stock_Screws", "Stock_"), ("Stock_Tube", "Stock_"), ("Sling_Stud", "Stock_Body"), ("Side_Rail_", "Handguard_Upper"),
-    ("Handguard_Latch", "Handguard_Upper"), ("Cover_Rear_Block", "Dust_Cover"), ("Side_Rail_Screws", "Side_Rail_"), ("Side_Rail_Screws", "Handguard_Upper"),
+    ("Handguard_Latch", "Handguard_Upper"), ("Cover_Rear_Block", "Dust_Cover"), ("Side_Rail_Screws", "Side_Rail_"),
+    ("Side_Rail_Screws", "Handguard_Upper"), ("Rear_Sight_Axle", "Rear_Sight_"), ("Rear_Sight_Yoke", "Rear_Sight_"),
+    ("Rear_Sight_Knob", "Rear_Sight_"), ("Rear_Sight_Button", "Rear_Sight_Slider"),
     ("Hinge_Latch", "Hinge_Spring"),      # защёлка шарнира сжимает свою пружину (пружина приводом не сжимается)
-    ("Bolt •", "Bolt •"), ("Magazine • loaded", "Magazine • loaded"),
-    ("Rear sight", "Top_Rail"), ("Rear sight", "Rear sight"), ("Front sight", "Gas block"),
+    ("Bolt_Extractor", "Bolt"), ("Magazine • loaded", "Magazine • loaded"),
+    # зуб выбрасывателя заходит за казённый срез: выемки под него в стволе (тело вращения) нет, место закрыто вкладышем
+    ("Barrel", "Bolt_Extractor"),
+    ("Magazine_Follower", "Magazine_Spring"),     # пружина магазина приводом не сжимается
+    # цикл перезаряжания: гильза в чашечке затвора и под зубом выбрасывателя, удар об отражатель, патрон в патроннике;
+    # вылетающая гильза и досылаемый патрон идут по условным путям — их пересечения с коробкой и крышкой не считаются
+    ("Chambered_", "Bolt"), ("Chambered_", "Barrel"), ("Chambered_", "Chambered_"), ("Chambered_", "Ejector"),
+    ("Chambered_", "Receiver"), ("Chambered_", "Dust_Cover"), ("Chambered_", "Selector_Lever"),
+    ("Magazine • loaded case 1", "Bolt"), ("Magazine • loaded projectile 1", "Barrel"), ("Magazine • loaded case 1", "Barrel"),
+    ("Magazine • loaded case 1", "Magazine_Body"), ("Magazine • loaded projectile 1", "Magazine_Body"),
+    ("Magazine • loaded case 1", "Receiver"), ("Magazine • loaded projectile 1", "Receiver"),
 ]
 
 

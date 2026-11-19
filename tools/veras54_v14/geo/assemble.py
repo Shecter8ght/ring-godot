@@ -207,6 +207,20 @@ def driver(o, path, index, expr, ctrl, props):
     dr.expression = expr
 
 
+def curve_driver(o, path, index, expr, ctrl, props, points):
+    """Привод с таблицей: значение выражения expr идёт по кривой points [(вход, выход), …] (линейно между точками,
+    за краями — крайние значения). Так задаются пути, которые формулой в привод не помещаются."""
+    driver(o, path, index, expr, ctrl, props)
+    fc = o.animation_data.drivers.find(path, index=index)
+    for m in list(fc.modifiers):
+        fc.modifiers.remove(m)
+    fc.keyframe_points.add(len(points))
+    for kp, (x, y) in zip(fc.keyframe_points, points):
+        kp.co = (float(x), float(y)); kp.interpolation = "LINEAR"
+    fc.extrapolation = "CONSTANT"
+    fc.update()
+
+
 def controls(objs, top):
     """Пустышка управления: ползунки двигают детали через приводы (delta-трансформы, исходные места не тронуты).
     Описание ползунков и приводов — part_rig.py (им же пользуется проверка пересечений)."""
@@ -249,11 +263,18 @@ def append_base(path, top, objs):
         coll, mat, new_name = transfer.group_of(o.name)
         mw = worlds[o.name]
         o.parent = None
+        # у патронов v13 свои приводы видимости (счётчик патронов прежнего рига): без него они гаснут — снимаем
+        o.animation_data_clear()
+        o.hide_viewport = False; o.hide_render = False; o.hide_set(False) if o.name in bpy.context.view_layer.objects else None
         for pref, dx in transfer.SHIFT_X.items():
             if o.name.startswith(pref):
                 mw.translation.x += dx * MM
+        for pref, rot in transfer.ROT_Y.items():
+            if rot and o.name.startswith(pref):
+                c = Vector((rot[0] * MM, 0.0, rot[1] * MM))
+                mw = Matrix.Translation(c) @ Matrix.Rotation(math.radians(rot[2]), 4, "Y") @ Matrix.Translation(-c) @ mw
         for pref, org in transfer.ORIGIN.items():
-            if o.name.startswith(pref):
+            if o.name == pref:
                 lp = mw.inverted() @ (Vector(org) * MM)
                 o.data.transform(Matrix.Translation(-lp))
                 mw = mw @ Matrix.Translation(lp)
@@ -374,6 +395,14 @@ def main():
             set_parent(o, objs[par][0])
         else:
             set_parent(o, ctrl)
+    # приводы, которым нужны готовые места деталей (цикл перезаряжания: гильза, верхний патрон, стопка)
+    try:
+        import part_rig
+        if hasattr(part_rig, "extra"):
+            bpy.context.view_layer.update()
+            part_rig.extra({k: v[0] for k, v in objs.items()}, ctrl, driver, curve_driver)
+    except ImportError:
+        pass
     # варианты (коробка на 200 и т. п.) — отдельные коллекции, выключенные по умолчанию
     vl = bpy.context.view_layer
     for p in man:

@@ -30,7 +30,7 @@ D_POCKET = 0.9                        # глубина «вафель» и же�
 SH_Z = -34.6                          # плечо корпуса под ствольной коробкой (R_x-0.10_z0.20)
 REAR_X = 144.0                        # задняя грань прилива у защёлки (стойка защёлки — до X 143,6)
 NECK_X0, NECK_X1 = 148.6, 205.9       # горловина: задняя (окно шахты с X 148) и передняя стенки
-CAV_X0, CAV_X1 = 150.6, 203.9         # полость в горловине: донца патронов с X 153,4, пули — до X 203,5
+CAV_X0, CAV_X1 = 150.6, 204.5         # полость в горловине: донца патронов с X 151,5, пули — до X 204,1
 PSI_B = 36.95                         # дно корпуса — радиус под углом ψ_B (R_x-0.02_z0.07, развёртка)
 PSI_RAIL = 35.86                      # верх бортика над крышкой
 PSI_P = 37.45                         # низ крышки
@@ -61,12 +61,33 @@ FRONT_SLOT_D = 1.8
 LUG_X0, LUG_Z0, LUG_Z1, LUG_HW = 142.9, -49.1, -45.6, 5.5
 NOTCH_X, NOTCH_Z0, NOTCH_HW = 145.2, -56.6, 8.2      # выемка под зуб и лицо защёлки
 HOOK = (NECK_X1, 227.4, -30.65, -27.2, 6.0)          # передний зацеп над передней кромкой окна шахты (лист Z −31)
-# губки: низ — над верхним патроном (патрон 1 по |Y| 5,5: Z −24,3 у X 151, подъём 0,118), толщина
-LIP_Y0, LIP_X0, LIP_X1, LIP_T = 5.6, 149.6, 187.0, 1.4
+# стопка патронов v13 поднята вдоль своей дуги (центр — подгонка по донцам 30 патронов, отклонение 0,9): в сборке
+# патроны поворачиваются вокруг оси Y через STACK_C по часовой (вид справа) на STACK_DEG — «затвор впереди, стопка
+# утоплена»: верх патрона 1 на Z −8,7; ещё на STACK_FREE_DEG (2,3 мм по дуге) — «затвор сзади, стопка свободна»
+STACK_C = (524.18, 9.24)
+STACK_DEG = 1.939
+STACK_FREE_DEG = 0.353
+# верхний патрон в свободном положении (по нему губки): центр дна, подъём носа, ось по Y, радиус гильзы
+CART1_DNO, CART1_DEG, CART1_Y = (151.51, -14.00), 6.31, 4.15
+# мешает сверху затвор: идёт над горловиной (голова от X 240 до 139) отпертым, досылающий гребень Y ±2,6 с низом Z −12,6
+RAMMER_HW, RAMMER_Z = 2.6, -12.6
+NECK_TOP = -10.0                      # верх стенок горловины (|Y| 9,3…13,6)
+FW_TOP = -13.0                        # верх передней стенки горловины (между стенками): патрон уходит над ней в патронник
+LIP_GAP = 3.5                         # щель между губками сзади (гребень затвора ±2,6)
+LIP_X0, LIP_X1, LIP_T = 149.2, 183.0, 1.0
 
 
-def _lip_under(x):
-    return -23.9 + 0.118 * (x - 151.0)
+def _case_r(s):
+    """Радиус патрона 5,45 по расстоянию s от дна (гильза v13 r 4,6, ствол гильзы к плечу, дульце, пуля)."""
+    return np.interp(s, [0.0, 0.3, 30.0, 33.0, 39.0, 41.0, 50.0], [4.3, 4.65, 4.65, 3.2, 3.2, 2.8, 1.3])
+
+
+def _clear_top(ay):
+    """Наибольшая высота верха губки по |Y| = ay под затвором с зазором 0,3. Затвор (part_bolt) идёт над горловиной
+    отпертым — повёрнутым на −35°: тогда нижний боевой упор внизу посередине (досылающий гребень |Y| < 3, низ −12,6),
+    дальше — тело и второй упор; огибающая снята с сетки затвора по полосам |Y| в 1 мм (меньшее из соседних)."""
+    return np.interp(ay, [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+                     [-7.8, -7.8, -7.2, -6.6, -5.7, -5.8, -5.9, -5.9, -5.0]) - 0.3
 
 
 # ---------------- геометрия на плоскости XZ ----------------
@@ -168,28 +189,24 @@ def _cavity_poly():
     rf = _bisect(lambda r: math.hypot(_pt(r, pb)[0] - CF[0], _pt(r, pb)[1] - CF[1]) - (RF + 3.0), 270.0, 320.0)
     rr = _bisect(lambda r: math.hypot(_pt(r, pb)[0] - C2[0], _pt(r, pb)[1] - C2[1]) - (R2 - 6.6), 320.0, 380.0)
     zf, zr = _pt(rf, pb)[1], _pt(rr, pb)[1]
-    pts = [(CAV_X1, -16.0), (CAV_X1, -34.56), (213.95, -43.06)]   # спереди вверху — скос стенкой 1 мм (пуля 4)
+    pts = [(CAV_X1, -5.0), (CAV_X1, -35.06), (213.95, -43.06)]   # спереди вверху — скос стенкой 1 мм (пуля 4)
     for z in np.arange(-46.0, zf + 0.5, -2.0):
         pts.append((_arc_x(CF, RF + 3.0, z), z))
     pts += [_pt(rf, pb), _pt(rr, pb)]
-    for z in np.arange(math.ceil(zr + 0.5), -16.0, 2.0):
+    for z in np.arange(math.ceil(zr + 0.5), -5.0, 2.0):
         x = _arc_x(C2, R2 - 6.6, z)
         if x < CAV_X0:
             pts.append((CAV_X0, z))
             break
         pts.append((x, z))
-    pts.append((CAV_X0, -16.0))
+    pts.append((CAV_X0, -5.0))
     return Poly(pts)
 
 
 def _neck_poly():
-    """Горловина над плечом (входит в шахту): верх стенок — по губкам, спереди опускается к зацепу."""
-    pts = [(NECK_X0, SH_Z - 1.0), (NECK_X0, _lip_under(NECK_X0) + LIP_T - 0.6)]
-    for x in np.arange(150.0, LIP_X1 + 0.1, 4.0):
-        pts.append((x, _lip_under(x) + LIP_T))
-    pts += [(190.0, -19.6), (195.5, -24.6), (NECK_X1, -25.8), (NECK_X1, SH_Z - 1.0)]
-    rad = [0.0, 1.0] + [0.0] * (len(pts) - 6) + [1.5, 2.0, 1.5, 0.0]
-    return Poly(fillet_poly(pts, rad, seg=8))
+    """Горловина над плечом (входит в шахту) до верха стенок NECK_TOP; передняя стенка ниже — вырезом в body()."""
+    pts = [(NECK_X0, SH_Z - 1.0), (NECK_X0, NECK_TOP), (NECK_X1, NECK_TOP), (NECK_X1, SH_Z - 1.0)]
+    return Poly(fillet_poly(pts, [0.0, 0.8, 0.8, 0.0], seg=8))
 
 
 # ---------------- рисунок бока ----------------
@@ -326,7 +343,7 @@ def _side_pattern(F, s):
 # ---------------- корпус ----------------
 
 def body(h):
-    F = Field("Magazine_Body", (141.0, -FP_HW - 1.2, -216.0), (273.0, FP_HW + 1.2, -16.5), h)
+    F = Field("Magazine_Body", (141.0, -FP_HW - 1.2, -216.0), (273.0, FP_HW + 1.2, -4.0), h)
     outer = _outer_poly()
     # 1. корпус: силуэт сбоку × ширина; передняя грань скруглена сильнее
     F.add(prism(outer, "XZ", -HW, HW, rim=0.8))
@@ -337,7 +354,7 @@ def body(h):
     F.apply(front_round, "inter", 0.0, bbox=bb(200.0, 273.0, -HW - 1, HW + 1, -192.0, -36.0))
     # 2. горловина (в шахте) — уже корпуса; губки над верхним патроном
     neck = _neck_poly()
-    F.add(prism(neck, "XZ", -NECK_HW, NECK_HW, rim=0.6), 0.6, bbox=bb(NECK_X0 - 1, NECK_X1 + 1, -NECK_HW - 1, NECK_HW + 1, SH_Z - 1.5, -17.0))
+    F.add(prism(neck, "XZ", -NECK_HW, NECK_HW, rim=0.6), 0.6, bbox=bb(NECK_X0 - 1, NECK_X1 + 1, -NECK_HW - 1, NECK_HW + 1, SH_Z - 1.5, NECK_TOP + 1.0))
     hx0, hx1, hz0, hz1, hhw = HOOK
     hook = Poly(fillet_poly([(hx0 - 1.0, hz0), (hx1, hz0), (hx1, hz1 - 0.6), (hx1 - 2.0, hz1), (hx0 - 1.0, hz1)],
                             [0, 0.6, 0.6, 1.0, 0], seg=6))
@@ -400,11 +417,34 @@ def body(h):
     # 9. полость под патроны (внизу открыта — закрывает крышка), губки
     cav = _cavity_poly()
     F.sub(prism(cav, "XZ", -CAV_HW, CAV_HW, rim=0.8), 0.0)
+    # передняя стенка горловины ниже стенок: верхний патрон, толкаемый за дно, уходит над ней носом вверх; сзади
+    # верх стенки скошен — направляющая для пули
+    ramp = Poly([(CAV_X1 - 2.0, FW_TOP - 2.2), (CAV_X1, FW_TOP - 2.2), (NECK_X1, FW_TOP), (NECK_X1 + 3.0, FW_TOP),
+                 (NECK_X1 + 3.0, NECK_TOP + 3.0), (CAV_X1 - 2.0, NECK_TOP + 3.0)])
+    F.sub(prism(ramp, "XZ", -CAV_HW, CAV_HW, rim=0.0), 0.5, bbox=bb(CAV_X1 - 3, NECK_X1 + 1, -CAV_HW - 1, CAV_HW + 1, FW_TOP - 3.5, NECK_TOP + 1))
+    # задняя стенка: прорезь под досылающий гребень затвора
+    F.sub(box((NECK_X0 - 2.0, -LIP_GAP, RAMMER_Z - 0.3), (CAV_X0 + 1.0, LIP_GAP, NECK_TOP + 3.0), 0.0), 0.4,
+          bbox=bb(NECK_X0 - 1, CAV_X0 + 1.5, -LIP_GAP - 1, LIP_GAP + 1, RAMMER_Z - 1.5, NECK_TOP + 1))
+    # губки: снизу — по верхнему патрону в свободном положении (+0,3), сверху — под затвором и упорами; сзади щель
+    # ±LIP_GAP под гребень, дальше губки отходят к бортам (над затвором места нет — держат патрон за плечо)
+    cx0, cz0 = CART1_DNO
+    ca, ta = math.cos(math.radians(CART1_DEG)), math.tan(math.radians(CART1_DEG))
+
+    def lips(X, Y, Z):
+        ay = np.abs(Y)
+        s_ = (X - cx0) / ca
+        r = _case_r(s_)
+        za = cz0 + (X - cx0) * ta
+        under = za + np.sqrt(np.clip(r * r - (ay - CART1_Y) ** 2, 0.0, None)) + 0.3
+        top = np.minimum(under + LIP_T, _clear_top(ay))
+        yin = np.interp(X, [154.0, 159.0], [LIP_GAP, 7.6])
+        d = np.maximum(under - Z, Z - top)
+        d = np.maximum(d, yin - ay)
+        d = np.maximum(d, ay - (CAV_HW + 0.8))
+        return np.maximum(d, np.maximum(LIP_X0 - X, X - LIP_X1))
     for s in (-1, 1):
-        lip = Poly(fillet_poly([(LIP_X0, _lip_under(LIP_X0)), (LIP_X1, _lip_under(LIP_X1)), (LIP_X1 + 1.5, _lip_under(LIP_X1) + LIP_T),
-                                (LIP_X0, _lip_under(LIP_X0) + LIP_T)], [0.3, 0.6, 0.6, 0.3], seg=6))
-        y0, y1 = sorted((s * LIP_Y0, s * (CAV_HW + 0.8)))
-        F.add(prism(lip, "XZ", y0, y1, rim=0.5), 0.5, bbox=bb(LIP_X0 - 1, LIP_X1 + 3, y0 - 1, y1 + 1, -25.5, -17.0))
+        y0, y1 = sorted((s * (LIP_GAP - 0.5), s * (CAV_HW + 1.0)))
+        F.add(lips, 0.4, bbox=bb(LIP_X0 - 1, LIP_X1 + 1, y0, y1, -16.0, -4.0))
     return F
 
 
@@ -466,6 +506,8 @@ def floorplate(h):
 
 # ---------------- подаватель и пружина ----------------
 # Подаватель — в осях патрона 30 (нижний в полном магазине, справа): A — вдоль патрона к пуле, N — вверх от его оси.
+# Оси сняты с патронов v13 до подъёма стопки; деталь поворачивается со стопкой (_unstack) в утопленное положение,
+# над ней ещё 2,3 мм хода вверх (свободное положение).
 F_AX = (0.899, 0.438)                 # ось патрона 30 v13 (25,97°)
 F_O = (231.67, -146.92)               # точка на оси патрона 30
 F_R = 4.14                            # радиус патрона по сетке v13
@@ -475,14 +517,29 @@ F_B0 = -13.5                          # низ подавателя
 F_HW = 9.0                            # полуширина (полость 9,3)
 
 
+def _unstack(X, Z, deg=None):
+    """Точка в положении «стопка утоплена» → та же точка до подъёма стопки (обратный поворот, против часовой)."""
+    a = math.radians(STACK_DEG if deg is None else deg)
+    dx, dz = X - STACK_C[0], Z - STACK_C[1]
+    return STACK_C[0] + dx * math.cos(a) - dz * math.sin(a), STACK_C[1] + dx * math.sin(a) + dz * math.cos(a)
+
+
+def _restack(x, z, deg=None):
+    """Обратное к _unstack: точка прежней стопки → утопленное положение (по часовой)."""
+    a = math.radians(STACK_DEG if deg is None else deg)
+    dx, dz = x - STACK_C[0], z - STACK_C[1]
+    return STACK_C[0] + dx * math.cos(a) + dz * math.sin(a), STACK_C[1] - dx * math.sin(a) + dz * math.cos(a)
+
+
 def _fa(X, Z):
+    X, Z = _unstack(X, Z)
     ax, az = F_AX
     dx, dz = X - F_O[0], Z - F_O[1]
     return dx * ax + dz * az, -dx * az + dz * ax
 
 
 def follower(h):
-    F = Field("Magazine_Follower", (186.0, -F_HW - 1.0, -184.0), (252.0, F_HW + 1.0, -138.0), h)
+    F = Field("Magazine_Follower", (186.0, -F_HW - 1.0, -176.0), (254.0, F_HW + 1.0, -126.0), h)
     top_lo = -F_R - 0.35                       # под патроном 30 (справа)
     top_hi = F_STEP - F_R - 0.35               # уступ под патроном 29 (слева)
     # профиль в осях патрона: низкая часть (весь подаватель) со скосом спереди
@@ -506,11 +563,23 @@ def follower(h):
     return F
 
 
-SPR_PSI = (30.65, 36.65)              # пружина: от низа подавателя до крышки (углы вокруг CP)
+def _spring_top():
+    """Угол ψ (вокруг CP) верхнего витка: 0,45° ниже низа подавателя в утопленном положении."""
+    ax, az = F_AX
+    nx, nz = -az, ax
+    best = 0.0
+    for a in np.linspace(F_A0, F_A1, 30):
+        x, z = F_O[0] + ax * a + nx * F_B0, F_O[1] + az * a + nz * F_B0
+        x, z = _restack(x, z)
+        best = max(best, math.degrees(math.atan2(CP[1] - z, CP[0] - x)))
+    return best + 0.45
+
+
+SPR_PSI = (_spring_top(), 36.65)      # пружина: от низа подавателя до крышки (углы вокруг CP)
 SPR_RHO = (303.5, 337.6)              # ρ витка
 SPR_HW = 7.0                          # полуширина витка
 SPR_WIRE = 0.75
-SPR_COILS = 5.0
+SPR_COILS = 6.0
 
 
 def spring(h):
