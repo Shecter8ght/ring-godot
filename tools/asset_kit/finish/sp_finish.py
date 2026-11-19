@@ -325,6 +325,18 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
             mf = sp_lib.mask_proc(t2, "noise_perlin_noise/perlin_noise", scale=bbox_mm / (32.0 * hmm * 0.8), tri=True, rot=3.4)
             _mfilter(mf, "histogram_scan", {"Position": 0.5, "Contrast": 0.55})
             n = t2
+            # на тёмной основе одно умножение почти не видно (чёрная краска: R−B ±5 уровней из 255 при hue 0,45 —
+            # ВЕРАС-54 v14, первый проход): тем же пятнам прибавляется свой канал — доля hue от цвета основы
+            # (тёплое — красный, холодное — синий), сложением; маски те же, что у умножения
+            if not f.get("material"):
+                bl = [(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4) for c in b["color"]]
+                for nm, w, sc, rot in (("тёплый", (1.0, 0.3, 0.0), 1.0, 2.1), ("холодный", (0.0, 0.25, 1.0), 0.8, 3.4)):
+                    col = tuple(sp_lib_srgb(v * hue * k_) for v, k_ in zip(bl, w))
+                    ta = rel(f"оттенок {nm} — прибавка", above(n), color=col, cmode=L.BlendingMode.LinearDodge, cop=1.0)
+                    mf = sp_lib.mask_proc(ta, "noise_perlin_noise/perlin_noise", scale=bbox_mm / (32.0 * hmm * sc),
+                                          tri=True, rot=rot)
+                    _mfilter(mf, "histogram_scan", {"Position": 0.5, "Contrast": 0.55})
+                    n = ta
 
     # 5. зерно отделки — Overlay гауссова шума в блеск, цвет и рельеф; без порога (порог даёт «крошку»)
     gn = f.get("grain")
