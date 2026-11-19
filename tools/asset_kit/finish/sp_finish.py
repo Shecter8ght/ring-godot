@@ -154,6 +154,12 @@ def _params(d):
     return out
 
 
+def sp_lib_srgb(lin):
+    """Линейное значение → sRGB (цвет слоя SoftLight задаётся множителем в линейном пространстве)."""
+    lin = min(max(lin, 0.0), 1.0)
+    return 12.92 * lin if lin <= 0.0031308 else 1.055 * lin ** (1.0 / 2.4) - 0.055
+
+
 def resolved(f):
     """Отделка с подставленными умолчаниями её рода (кромки, углубления, градиенты)."""
     kinds = catalog()["kinds"]
@@ -287,6 +293,38 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
         g2 = rel("градиент тёмный", above(g1), color=(0.25, 0.25, 0.25), cop=gr["color"], rough=gr["rough"])
         sp_lib.mask_proc(g2, "noise_clouds_1/clouds_1", scale=0.35 * k, rot=1.0)
         n = g2
+        # оттенки основы (владелец 2026-11-19, ВЕРАС-54 v14: «в базовом цвете должен быть не один цвет, а несколько
+        # градиентов — и холодные, и тёплые оттенки», чтобы умные маски износа ложились на живую основу): два крупных
+        # пятна тёплого и холодного тона и выцветание кверху. Тон — умножением (Multiply считается в линейном
+        # пространстве; SoftLight на тёмной основе светлит в разы сильнее, чем темнит, — чёрная краска уходила в лиловый):
+        # hue — насколько пятно гасит противоположный канал (0,12 → тёплое ×0,88 синий), fade — насколько верх светлее
+        fade = gr.get("fade", 0.0)
+        if fade and not f.get("material"):
+            # выцветший верх: тот же цвет основы светлее и чуть теплее, обычным наложением по высоте детали
+            # (под пятнами тона — иначе обычное наложение закрывает их ровным цветом)
+            bl = [(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4) for c in b["color"]]
+            col = tuple(sp_lib_srgb(v * m) for v, m in zip(bl, (1.0 + fade, 1.0 + 0.9 * fade, 1.0 + 0.7 * fade)))
+            t3 = rel("выцветание кверху", above(n), color=col, cmode=L.BlendingMode.Normal, cop=0.7)
+            sp_lib.mask_generator(t3, "mg_position/mg_position",
+                                  {"position_direction_rightleft_opacity": 0.0, "position_direction_topbottom_opacity": 1.0,
+                                   "position_direction_frontback_opacity": 0.0})
+            n = t3
+        hue = gr.get("hue", 0.0)
+        if hue:
+            def mul(mult):
+                return tuple(sp_lib_srgb(m) for m in mult)
+            t1 = rel("оттенок тёплый", above(n), color=mul((1.0, 1.0 - 0.35 * hue, 1.0 - hue)),
+                     cmode=L.BlendingMode.Multiply, cop=1.0)
+            # плавный шум Перлина в мировых координатах (пятно ~hue_mm, без порога: порог давал пятна с резким краем —
+            # «камуфляж»; по развёртке пятна рвались бы на швах островов)
+            hmm = gr.get("hue_mm", 70.0) / gr.get("scale", 1.0)
+            mf = sp_lib.mask_proc(t1, "noise_perlin_noise/perlin_noise", scale=bbox_mm / (32.0 * hmm), tri=True, rot=2.1)
+            _mfilter(mf, "histogram_scan", {"Position": 0.5, "Contrast": 0.55})
+            t2 = rel("оттенок холодный", above(t1), color=mul((1.0 - hue, 1.0 - 0.3 * hue, 1.0)),
+                     cmode=L.BlendingMode.Multiply, cop=1.0)
+            mf = sp_lib.mask_proc(t2, "noise_perlin_noise/perlin_noise", scale=bbox_mm / (32.0 * hmm * 0.8), tri=True, rot=3.4)
+            _mfilter(mf, "histogram_scan", {"Position": 0.5, "Contrast": 0.55})
+            n = t2
 
     # 5. зерно отделки — Overlay гауссова шума в блеск, цвет и рельеф; без порога (порог даёт «крошку»)
     gn = f.get("grain")
@@ -421,6 +459,13 @@ def build_set(set_name, parts, px_mm, bbox_mm=170.0, sharpen=0.3):
     import sp_lib
     st = sp_lib.stack_by_name(set_name)
     sp_lib.clear(st)
+    # канал цвета — 16 бит: в sRGB8 стек считает тёмное грубо (у чёрной краски оставалось два уровня — оттенки основы
+    # выходили пятнами с резким краем; замер на карточке GP-BLK-SAT, 2026-11-19); выгрузка 8 бит — со сглаживанием полос
+    try:
+        if st.get_channel(TS.ChannelType.BaseColor).format() == TS.ChannelFormat.sRGB8:
+            st.edit_channel(TS.ChannelType.BaseColor, TS.ChannelFormat.RGB16F)
+    except Exception as e:  # noqa: BLE001 — старый проект без канала цвета не должен ронять сборку
+        print("канал цвета не переведён в 16 бит:", e)
     res = [t for t in TS.all_texture_sets() if t.name() == set_name][0].get_resolution().width
     grp = L.insert_group(L.InsertPosition.from_textureset_stack(st))
     grp.set_name(GROUP)

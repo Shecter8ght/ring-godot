@@ -173,6 +173,6 @@ def export(out_dir, texset):
     pr = [p for p in X.list_predefined_export_presets() if p.name == "glTF PBR Metal Roughness"][0]
     cfg = {"exportShaderParams": False, "exportPath": out_dir, "defaultExportPreset": pr.url,
            "exportList": [{"rootPath": texset}],
-           "exportParameters": [{"parameters": {"fileFormat": "png", "bitDepth": "8", "paddingAlgorithm": "infinite"}}]}
+           "exportParameters": [{"parameters": {"fileFormat": "png", "bitDepth": "8", "dithering": True, "paddingAlgorithm": "infinite"}}]}
     r = X.export_project_textures(cfg)
     return r.status, {k: v for k, v in r.textures.items()}
