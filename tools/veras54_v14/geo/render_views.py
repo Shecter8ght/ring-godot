@@ -1,6 +1,8 @@
 # ВЕРАС-54 v14: показные рендеры формы (Cycles, студийный свет) — файл модели не сохраняется.
 #   blender -b <файл.blend> --factory-startup --python tools/veras54_v14/geo/render_views.py -- <папка> [кадр,кадр…]
-#       [--res 2400x1350] [--samples 128] [--cpu]
+#       [--res 2400x1350] [--samples 128] [--cpu] [--old]
+# --old — прежняя модель v13 (VERAS54_Only_State100_v13.blend) теми же камерами и светом, для сравнения: рига
+# v14 в ней нет, материалы назначаются по именам деталей теми же условными цветами.
 # Кадры: right, left, q_front, q_rear, fp_grip (рукоятка с крючком глазами стрелка), open (рама отведена: видно
 # магазин и патронник), open_in (взгляд через окно на патронник и верх магазина), fold_* — приклад сложен. Материалы без текстур: цвета просмотра из assemble.MATS,
 # приглушённые — чтобы под студийным светом читалась форма, а не чёрная воронёная сталь.
@@ -56,6 +58,37 @@ def materials():
         b.inputs["Metallic"].default_value = metal
 
 
+POLYMER_OLD = ("Handguard", "Stock", "Pistol grip", "Magazine_")
+NOT_POLYMER_OLD = ("Stock hinge", "Handguard bracket", "Handguard retaining")
+
+
+def materials_old(mats):
+    """v13: свои материалы с картами заменяются условными по имени детали (как у v14)."""
+    made = {}
+
+    def mat(name):
+        if name not in made:
+            col, rough, metal, view = mats[name]
+            m = bpy.data.materials.new("Show_" + name); m.use_nodes = True
+            b = m.node_tree.nodes.get("Principled BSDF")
+            k = 1.0 if name in BRASS else (SCALE if metal > 0.5 else 0.3)
+            c = col if name in BRASS else view
+            b.inputs["Base Color"].default_value = (c[0] * k, c[1] * k, c[2] * k, 1.0)
+            b.inputs["Roughness"].default_value = max(0.3, rough); b.inputs["Metallic"].default_value = metal
+            made[name] = m
+        return made[name]
+    for o in bpy.context.scene.objects:
+        if o.type != "MESH":
+            continue
+        n = o.name
+        if "loaded case" in n: k = "Case_lacquer"
+        elif "loaded projectile" in n: k = "Bullet_jacket"
+        elif n.startswith(("Bolt", "Recoil spring")): k = "Steel_bare"
+        elif n.startswith(POLYMER_OLD) and not n.startswith(NOT_POLYMER_OLD): k = "Polymer"
+        else: k = "Steel_blued"
+        o.data.materials.clear(); o.data.materials.append(mat(k))
+
+
 def world(rot_deg):
     w = bpy.data.worlds.new("Studio"); bpy.context.scene.world = w
     w.use_nodes = True
@@ -90,12 +123,13 @@ def area(name, loc, target, size, watts, col=(1, 1, 1)):
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:]
     out = os.path.abspath(argv[0])
-    names = None; res = (2400, 1350); samples = 128; cpu = False
+    names = None; res = (2400, 1350); samples = 128; cpu = False; old = False
     i = 1
     while i < len(argv):
         if argv[i] == "--res": res = tuple(int(v) for v in argv[i + 1].split("x")); i += 2
         elif argv[i] == "--samples": samples = int(argv[i + 1]); i += 2
         elif argv[i] == "--cpu": cpu = True; i += 1
+        elif argv[i] == "--old": old = True; i += 1
         else: names = argv[i].split(","); i += 1
     os.makedirs(out, exist_ok=True)
     sc = bpy.context.scene
@@ -121,7 +155,13 @@ def main():
     sc.render.image_settings.file_format = "PNG"; sc.render.film_transparent = False
     sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"
     sc.view_settings.exposure = 0.0
-    materials()
+    if old:
+        import ast
+        src = open(os.path.join(HERE, "assemble.py"), encoding="utf-8").read()
+        a = src.index("MATS = {") + len("MATS = "); b = src.index(chr(10) + "}", a) + 2
+        materials_old(ast.literal_eval(src[a:b]))
+    else:
+        materials()
     for o in sc.objects:
         if o.type in ("LIGHT", "CAMERA"):
             o.hide_render = True
@@ -130,13 +170,14 @@ def main():
     sc.collection.objects.link(cam); sc.camera = cam
     cam_d.sensor_fit = "VERTICAL"; cam_d.clip_start = 0.01; cam_d.clip_end = 50
     key = fill = rim = None
-    ctrl = bpy.data.objects["VERAS54_Controls"]
+    ctrl = bpy.data.objects.get("VERAS54_Controls")
     defaults = {k: d for k, _, d in part_rig.SLIDERS}
     for n in (names or list(SHOTS)):
         eye, tgt, fov, pose, rot = SHOTS[n]
-        for k, d in defaults.items():
-            ctrl[k] = float(pose.get(k, d))
-        ctrl.update_tag()
+        if ctrl is not None:
+            for k, d in defaults.items():
+                ctrl[k] = float(pose.get(k, d))
+            ctrl.update_tag()
         e, t = Vector(eye) * MM, Vector(tgt) * MM
         cam.location = e
         cam.rotation_euler = (t - e).to_track_quat("-Z", "Y").to_euler()
