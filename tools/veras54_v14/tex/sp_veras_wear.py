@@ -9,7 +9,7 @@
 # микрозерно под ней гаснет, открывается основание рода (BASE).
 # Сила: K — общий множитель, KG — по подгруппам; непрозрачность слоя = своя × сила места × K × KG[подгруппа] (≤ 1). Над
 # износом — пустая группа «Этап 2 — кистью (владелец)» (скриптом не пересобирается).
-# Проекты — копии принятых: VERAS_<проект>_wear_v1.spp (копию делает wear_all.py; принятые _v1.spp не открываются).
+# Проекты — копии принятых: VERAS_<проект>_wear_v<VER>.spp (копию делает wear_all.py; принятые _v1.spp не открываются).
 # Через мост (FINISH_SP_JOBS=_asset_src/veras54_v14/tex/sp_jobs), см. wear_all.py:
 #   … -c "import sys; sys.path.insert(0, r'E:/Games/RING-godot/tools/veras54_v14/tex'); import sp_veras_wear as W; print(W.open_wear('body'))"
 #   … print(W.build(k=1.0, kg={'rust': 0.35}))  → _wear_done.txt;  … print(W.export(<папка>)) → _export_done.txt
@@ -32,7 +32,18 @@ WEAR_DIR = T.WORK + "/wear"
 PLACES = os.path.dirname(os.path.abspath(__file__)) + "/wear_places.json"
 GROUP = "Этап 2 — износ"
 HAND_GROUP = "Этап 2 — кистью (владелец)"
-TILE_MM = 400.0            # плитка развёртки 0…1 умной маски ≈ 400 мм предмета (как у «Частокола»)
+# плитка развёртки 0…1 умной маски ≈ TILE_MM предмета (у «Частокола» 400). Износ v02: подбор по штриху царапины
+# 0,1–0,3 мм и сколу 0,5–3 мм на кропе карты 1:1 (переменная окружения VERAS_TILE_MM — для проб)
+TILE_MM = float(os.environ.get("VERAS_TILE_MM", "250"))
+# версия копий проектов износа (VERAS_<проект>_wear_v<VER>.spp): v1 — первый проход (рабочее 2K), v2 — второй
+VER = int(os.environ.get("VERAS_WEAR_VER", "2"))
+# «Мыло» износа v01 (диагноз 2026-11-19): (1) наборы 4K работали в копиях в 2K и выгружались растянутыми до 4K — спектр
+# карт крышки и коробки выше частоты 2K упал в 4–7 раз против заводской, у набора grip (родные 2K) не изменился;
+# (2) съём покрытия рисовался непрозрачностью 0,5–0,9 по мягкой маске — 88 % изменённых пикселей промежуточные (серая
+# полупрозрачная плёнка). Теперь съём — «есть или нет»: непрозрачность 1, маска (рисунок × место) порогом Histogram Scan
+# с высоким контрастом; сила места — доля следа (порог), а не прозрачность.
+HARD_CONTRAST = 0.93       # контраст порога съёма: край в 1–2 пикселя, рваный по рисунку маски
+HARD_POS = 0.5             # порог съёма при силе 1 (доля белого Histogram Scan)
 FINE_ONLY = ("curvature_soft", "curvature_medium", "curvature_large", "curvature_big", "curvature_huge", "global_blur",
              "Edges_Smoothness", "Curvature_Smoothness")
 CAP = {"ao_blur": 0.5}
@@ -69,9 +80,11 @@ SOOT = dict(color=(0.035, 0.034, 0.033), rough=0.82, metal=0.15)
 # блеском, а не «металл против неметалла» — светлая сталь 0,58, чуть глаже покрытия (владелец: «до светлого металла,
 # у которого шероховатость ниже»).
 BASE = {
-    "paint": ((0.58, 0.59, 0.60), 0.14, 1.0, True),
-    "phosphate": ((0.50, 0.51, 0.52), 0.26, 1.0, True),
-    "oxide": ((0.58, 0.59, 0.60), 0.20, 1.0, True),
+    # владелец 2026-11-19 (по окну Painter, износ v02): «сколы слишком зеркальные, их надо сделать мутными как на калаше
+    # в Escape from Tarkov» — голая сталь под краской мутная: шероховатость 0,42–0,5, тон приглушённый 0,42–0,5 sRGB
+    "paint": ((0.46, 0.462, 0.465), 0.46, 1.0, True),
+    "phosphate": ((0.44, 0.445, 0.45), 0.48, 1.0, True),
+    "oxide": ((0.47, 0.475, 0.48), 0.44, 1.0, True),
     "alu": ((0.70, 0.70, 0.72), 0.26, 1.0, True),
     "lacquer": ((0.48, 0.48, 0.46), 0.34, 1.0, True),
     "poly_go": ((0.215, 0.215, 0.192), 0.42, 0.0, False),  # полимер: тот же цвет, светлее и глаже — не металл
@@ -95,11 +108,12 @@ def polish_ch(cls):
     c, r, m, sub = BASE[cls]
     if cls in ("poly_go", "poly_blk", "rubber"):
         return dict(color=c, rough=r - 0.04, height=FLAT)
+    # полировка руками — не глаже 0,3 (владелец 2026-11-19: зеркало не нужно)
     if cls == "paint":
-        return dict(rough=0.10, height=FLAT)           # глянцевая сталь корпуса заполирована ещё глаже
+        return dict(rough=0.30, height=FLAT)
     if cls == "oxide":
-        return dict(color=(0.22, 0.22, 0.225), rough=0.2, height=FLAT)   # оксид протёрт — светлее и глаже
-    return dict(rough=max(0.12, r - 0.1), height=FLAT)
+        return dict(color=(0.22, 0.22, 0.225), rough=0.3, height=FLAT)   # оксид протёрт — светлее и глаже
+    return dict(rough=max(0.3, r - 0.1), height=FLAT)
 
 
 # общие слои рода (без мест эксплуатации), снизу вверх: (подгруппа, имя, умная маска, каналы, непрозрачность,
@@ -170,7 +184,7 @@ CUR = sp_veras.CUR
 
 
 def wear_spp(proj):
-    return T.WORK + f"/sp/VERAS_{proj}_wear_v1.spp"
+    return T.WORK + f"/sp/VERAS_{proj}_wear_v{VER}.spp"
 
 
 def _ok(proj):
@@ -309,21 +323,36 @@ def _opacity(lay, op):
             pass
 
 
-def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, set_name, where=None, position=None, extra=None):
+def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, set_name, where=None, position=None, extra=None,
+               hard=None):
     """Слой следа: заливка каналов ch по маске = умная маска владельца (рисунок) × место where; mask_name None —
-    только место (карта wear_place.py: верхушки заклёпок, насечка)."""
+    только место (карта wear_place.py: верхушки заклёпок, насечка). hard — сила съёма покрытия (0…1): слой непрозрачен,
+    маска поверх всего — порогом с высоким контрастом (доля следа растёт с силой), без полупрозрачной плёнки."""
     import sp_lib
     extra = extra or {}
     if where and not os.path.exists(f"{WEAR_DIR}/{set_name}_{where}.png"):
         return None
+    gritty = hard is not None and ch.get("metal", 0.0) > 0.5
+    if gritty:
+        # муть наложением шума смещает среднее вниз (замер на выгрузке 2026-11-19: шероховатость ×0,81, тон ×0,80) —
+        # заливка задаётся с поправкой, чтобы в среднем вышли заданные числа
+        ch = dict(ch)
+        if "rough" in ch:
+            ch["rough"] = min(1.0, ch["rough"] / GRIT_BIAS[1])
+        if "color" in ch and not isinstance(ch["color"], str):
+            ch["color"] = tuple(min(1.0, c / GRIT_BIAS[0]) for c in ch["color"])
     lay = sp_lib.fill(name, L.InsertPosition.inside_node(group, L.NodeStack.Substack), **ch)
     sp_lib.only_meshes(lay, meshes)
-    _opacity(lay, opacity)
+    _opacity(lay, 1.0 if hard is not None else opacity)
+    if gritty:
+        grit(lay, scene_mm)
     if extra.get("blend") == "multiply":
         lay.set_blending_mode(L.BlendingMode.Multiply, sp_lib.CH.BaseColor)
     lay.add_mask(L.MaskBackground.Black)
     if mask_name is None:
         sp_finish.bitmap_mask(lay, f"{WEAR_DIR}/{set_name}_{where}.png")
+        if hard is not None:
+            scan(lay, _hard_pos(HARD_POS, hard), HARD_CONTRAST)
         return lay
     L.insert_smart_mask(L.InsertPosition.inside_node(lay, L.NodeStack.Mask), smart_mask(mask_name))
     to_triplanar(lay, scene_mm, extra.get("stretch", 1.0))
@@ -331,9 +360,37 @@ def wear_layer(group, name, mask_name, ch, opacity, meshes, scene_mm, set_name, 
         flat_mask(lay)
     if where:
         place(lay, where, set_name)
-    if position is not None:
+    if hard is not None:
+        scan(lay, _hard_pos(position if position is not None else HARD_POS, hard), HARD_CONTRAST)
+    elif position is not None:
         scan(lay, position)
     return lay
+
+
+# муть голой стали внутри скола (владелец 2026-11-19: пятно не ровной заливкой): гауссов шум наложением в содержимом
+# слоя съёма — только внутри него; два размера: зерно ~0,25 мм и неровность тона ~3 мм
+GRIT = ((0.25, 0.22, 0.30), (3.0, 0.30, 0.25))      # (ячейка мм, сила в цвете, сила в шероховатости)
+GRIT_BIAS = (0.80, 0.81)                             # во сколько раз муть сдвигает среднее: (тон sRGB, шероховатость)
+
+
+def grit(lay, scene_mm):
+    import sp_lib
+    for cell, cop, rop in GRIT:
+        try:
+            f = L.insert_fill(L.InsertPosition.inside_node(lay, L.NodeStack.Content))
+            f.active_channels = {sp_lib.CH.BaseColor, sp_lib.CH.SpecularRoughness}
+            for c, o in ((sp_lib.CH.BaseColor, cop), (sp_lib.CH.SpecularRoughness, rop)):
+                f.set_source(c, sp_lib.rid("noise_gaussian_noise/gaussian_noise", "u:procedural"))
+                f.set_blending_mode(L.BlendingMode.Overlay, c)
+                f.set_opacity(o, c)
+            sp_lib.triplanar(f, scene_mm / (sp_finish.GAUSS_CELLS * cell))
+        except Exception as e:      # noqa: BLE001
+            print("муть съёма не легла:", e)
+
+
+def _hard_pos(pos, strength):
+    """Порог съёма: сила 1 — pos, слабее — меньше следа (доля, а не прозрачность)."""
+    return max(0.03, min(0.95, pos * (0.4 + 0.6 * min(strength, 1.5))))
 
 
 def hands(group, set_name, meshes, surf, where, scene_mm, k, tag, masks=(("finger print", 1.0), ("stain roughness", 1.0))):
@@ -447,11 +504,13 @@ def build_set(set_name, meshes_json, spec, scene_mm, k, kg):
             continue
         for grp, name, mask, ch, op, where, pos in recipes(cls):
             assert mask in APPROVED, mask
-            wear_layer(subs[grp], f"{cls} · {name}", mask, ch, op * kk(grp), ms, scene_mm, set_name, where, pos)
+            hard = op * kk(grp) if "height" in ch and ch["height"] < FLAT else None
+            wear_layer(subs[grp], f"{cls} · {name}", mask, ch, op * kk(grp), ms, scene_mm, set_name, where, pos,
+                       hard=hard)
         log.append(f"{cls}:{len(ms)}")
     # места владельца (пункты 1–7) и «на усмотрение» (8) — данные wear_places.json
     for pl in load_places():
-        if pl["set"] != set_name:
+        if pl["set"] != set_name or pl.get("off"):
             continue
         where = "z_" + pl["id"]
         if not os.path.exists(f"{WEAR_DIR}/{set_name}_{where}.png"):
@@ -475,6 +534,19 @@ def build_set(set_name, meshes_json, spec, scene_mm, k, kg):
         groups = {}
         for n in ms:
             groups.setdefault(cls_of.get(n, "paint"), []).append(n)
+        if pl["kind"] == "stamp_wear":
+            # штамп владельца (растровая маска в мировых координатах, wear_place.stamp): рисунок уже в карте места —
+            # маска слоя только она, без умной маски и размытия; съём «есть / нет» (порог 0,5 высокой контрастностью)
+            for cls, sm in groups.items():
+                ch = dict(base_ch(cls, pl.get("depth", 1.0)))
+                if "rough" in pl:
+                    ch["rough"] = pl["rough"]
+                if "color" in pl:
+                    ch["color"] = tuple(pl["color"])
+                wear_layer(subs["use"], f"{tag} · {pl.get('note', '')[:60]}", None, ch, 1.0, sm, scene_mm, set_name,
+                           where, None, hard=pl.get("strength", 1.0))
+            log.append(pl["id"])
+            continue
         for cls, sm in groups.items():
             grp, mask, ch, op, pos = kind_layer(pl["kind"], cls, pl.get("depth", 1.0))
             mask = pl.get("mask", mask)
@@ -486,8 +558,11 @@ def build_set(set_name, meshes_json, spec, scene_mm, k, kg):
             if "color" in pl:
                 ch["color"] = tuple(pl["color"])
             pos = pl.get("scan", pos)
+            # съём покрытия (высота ниже основы — edge_wear, scratch с глубиной) — порогом, не прозрачностью
+            hard = op * st * kk(grp) if pl["kind"] in ("edge_wear", "scratch") and ch.get("height", FLAT) < FLAT else None
             wear_layer(subs[grp], f"{tag} · {pl.get('note', '')[:60]}", mask, ch, op * st * kk(grp), sm, scene_mm,
-                       set_name, where, pos, {"stretch": pl.get("stretch", 1.0), "flat": pl.get("flat", False)})
+                       set_name, where, pos, {"stretch": pl.get("stretch", 1.0), "flat": pl.get("flat", False)},
+                       hard=hard)
         log.append(pl["id"])
     return f"{set_name}: " + " ".join(log)
 

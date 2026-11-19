@@ -245,6 +245,39 @@ def build_finish(pos, f, meshes=None, px_mm=10.85, res=2048, bbox_mm=170.0):
         n = scope(sp_lib.fill(f"{tag} · основа", pos, color=tuple(b["color"]), rough=b["rough"], metal=b["metal"],
                               height=H0))
 
+    # 1б. палитра основы (владелец 2026-11-19, ВЕРАС-54 v14: «вот такие цвета использовать градиентно» — список тонов
+    # настоящей стали автомата): каждый тон — заливка обычным наложением под своим крупным плавным пятном (шум Перлина
+    # в мировых координатах, размер palette_mm), первый цвет палитры — сама основа; доля пятна — palette_cover
+    # (у крайних по светлоте тонов вдвое меньше), край мягкий — тона переходят градиентом, а не пятнами камуфляжа
+    pal = (f.get("gradients") or {}).get("palette")
+    if pal and not f.get("material"):
+        g_ = f["gradients"]
+        pmm = g_.get("palette_mm", 160.0)
+        cov = g_.get("palette_cover", 0.38)
+        lum = [sum(c) / 3.0 for c in pal]
+        lo_, hi_ = min(lum), max(lum)
+        for i, col in enumerate(pal):
+            edge_tone = (lum[i] - lo_) < 0.2 * (hi_ - lo_) or (hi_ - lum[i]) < 0.2 * (hi_ - lo_)
+            lay = scope(sp_lib.fill(f"{tag} · тон основы {i + 1}", above(n), color=tuple(col)))
+            mf = sp_lib.mask_proc(lay, "noise_perlin_noise/perlin_noise",
+                                  scale=bbox_mm / (32.0 * pmm * (0.7 + 0.17 * (i % 4))), tri=True, rot=0.9 * i + 0.4)
+            # у всех тонов один шум с одним началом координат: при близких масштабах пятна ложились в одни места
+            # (тона «слипались») — каждому тону свой сдвиг плитки и свой случайный посев шума
+            try:
+                pp = mf.get_projection_parameters()
+                pp.uv_transformation.offset = [(0.137 + 0.618 * i) % 1.0, (0.311 + 0.382 * i) % 1.0]
+                mf.set_projection_parameters(pp)
+            except Exception:  # noqa: BLE001
+                pass
+            try:
+                src_ = mf.get_source()
+                if "$randomseed" in src_.get_parameters():
+                    src_.set_parameters({"$randomseed": 17 + 31 * i})
+            except Exception:  # noqa: BLE001
+                pass
+            _mfilter(mf, "histogram_scan", {"Position": cov * (0.55 if edge_tone else 1.0), "Contrast": 0.3})
+            n = lay
+
     # 2. особые слои цвета
     for sp in f.get("layers") or []:
         if sp["type"] == "ramp":

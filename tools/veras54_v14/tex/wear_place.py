@@ -53,7 +53,10 @@ EDGE_BLUR = 1.0          # растечь кромку на соседнюю п�
 RUST_RING = 2.2          # кольцо ржавчины вокруг заклёпки, мм (ширина от края купола)
 # вес кромок и выступов по детали: пружины и спрятанное не трутся
 WEIGHT = {"Recoil spring • coil": 0.0, "Bolt_Extractor_Spring": 0.0, "Hinge_Spring": 0.0, "Magazine_Spring": 0.0,
-          "Magazine_Follower": 0.3, "Recoil_Guide_Rod": 0.5, "Ejector": 0.4, "Hinge_Pin": 0.6}
+          "Magazine_Follower": 0.3, "Recoil_Guide_Rod": 0.5, "Ejector": 0.4, "Hinge_Pin": 0.6,
+          # верхняя планка: общие кромки рода обводили светлым почти каждый зуб (износ v01) — у планки свой след
+          # (top_rail_wear: вытянутые вдоль автомата участки), общий род её не трогает
+          "Top_Rail": 0.0}
 
 # переводчик: ось (X, Z), ход от предохранителя до «ОД» (part_rig: −9° … +7,3° от «АВ»); в файле развёртки — предохранитель
 SEL_AXIS = (60.0, -8.5)
@@ -167,14 +170,17 @@ class Saver:
         self.saved[kind] = float((np.asarray(im) > 127).mean())
 
 
-def sparse(pos, used, weight, share, seed, scales=SPARSE_SCALES, soft=0.05):
+def sparse(pos, used, weight, share, seed, scales=SPARSE_SCALES, soft=0.05, stretch=1.0):
     """«Где износ вообще есть»: крупные пятна объёмного шума (десятки мм), порог подобран так, чтобы под пятнами
-    оказалась доля share массы weight (кромок места). Владелец 2026-11-19: потёртости «не на всех, очень разбросанно»."""
+    оказалась доля share массы weight (кромок места). Владелец 2026-11-19: потёртости «не на всех, очень разбросанно».
+    stretch < 1 — пятна вытянуты вдоль X (планка: съём вдоль автомата, а не по зубу)."""
     out = np.zeros(used.shape, np.float32)
     m = used & (weight > 0.05)
     if not m.any() or share >= 0.999:
         return np.where(used, 1.0, 0.0).astype(np.float32)
     pu = pos[used]
+    if stretch != 1.0:
+        pu = pu * np.array([stretch, 1.0, 1.0], np.float32)
     acc = np.zeros(len(pu), np.float32)
     for k, (sc, w) in enumerate(scales):
         acc += w * vnoise(pu, sc, seed + k)
@@ -294,8 +300,17 @@ def special(sname, names, obj, pos, nrm, raw, part):
         side = part & (y < -14.0) & (nrm[..., 1] < -0.6)
         swept = band(th, lim - sw - np.radians(1.0), lim + np.radians(0.5), np.radians(1.0))
         if sname == "selector_arc":
+            # серп по ходу конца рычага (образец АК-12): шире посередине хода, к концам сходит на нет; край чёткий
+            # (мягкий край 0,5 мм и ровная ширина в v01 читались вертикальным мазком); рядом вторая тонкая риска
             rc = r_tip - SEL_ARC_IN
-            v = band(r, rc - SEL_ARC_W, rc + SEL_ARC_W, 0.5) * swept
+            t = np.clip((th - (lim - sw)) / max(sw, 1e-3), 0.0, 1.0)
+            prof = np.sin(np.pi * t) ** 0.7
+            w1 = SEL_ARC_W * (0.15 + 0.85 * prof)
+            v1 = smooth(-np.abs(r - rc), -w1 - 0.12, -w1 + 0.12)
+            rc2 = rc - 1.9
+            w2 = 0.3 * SEL_ARC_W * prof
+            v2 = 0.8 * smooth(-np.abs(r - rc2), -w2 - 0.1, -w2 + 0.1) * smooth(t, 0.15, 0.35) * (1 - smooth(t, 0.7, 0.9))
+            v = np.maximum(v1, v2) * swept
         else:
             v = band(r, r_tip - 16.0, r_tip - 1.0, 3.0) * swept
         return np.where(side, v, 0.0)
@@ -318,10 +333,71 @@ def load_places():
         return json.load(f)["places"]
 
 
+# --- штампы владельца (растровые маски в мировых координатах) ---------------------------------------------------------
+STAMPS = T.WORK + "/owner_masks"
+_stamp_cache = {}
+
+
+def _stamp_img(name, crop=None):
+    key = (name, tuple(crop) if crop else None)
+    if key not in _stamp_cache:
+        im = Image.open(f"{STAMPS}/{name}").convert("L")
+        if crop:
+            w, h = im.size
+            im = im.crop((int(crop[0] * w), int(crop[1] * h), int(crop[2] * w), int(crop[3] * h)))
+        _stamp_cache[key] = np.asarray(im, np.float32) / 255.0
+    return _stamp_cache[key]
+
+
+def stamp_basis(wh):
+    """Проектор штампа: d — направление «из детали на зрителя» (кадр смотрит против d), u — ось картинки вправо
+    (по умолчанию проекция +X на плоскость кадра), v = d × u — вверх; поворот rot (град, против часовой) — картинки
+    в кадре."""
+    d = np.array(wh.get("dir", [0, 0, 1]), np.float64)
+    d /= np.linalg.norm(d)
+    u0 = np.array(wh.get("u", [1, 0, 0]), np.float64)
+    u = u0 - d * (u0 @ d)
+    u /= np.linalg.norm(u)
+    v = np.cross(d, u)
+    a = np.radians(wh.get("rot", 0.0))
+    u, v = u * np.cos(a) + v * np.sin(a), -u * np.sin(a) + v * np.cos(a)
+    return d.astype(np.float32), u.astype(np.float32), v.astype(np.float32)
+
+
+def stamp(wh, pos, nrm, footprint=False):
+    """Штамп владельца на детали: картинка wh["file"] (часть crop [u0, v0, u1, v1] долями) размером size [ш, в] мм
+    с центром center, проекция по dir (кадр смотрит на деталь против dir), слой глубиной depth мм вдоль dir от центра
+    (±), только грани, повёрнутые к кадру (n·dir > min_dot). Билинейная выборка; плотность штампа должна быть не ниже
+    плотности набора (проверяется печатью). footprint — прямоугольник кадра (для исключения других слоёв)."""
+    img = _stamp_img(wh["file"], wh.get("crop"))
+    h, w = img.shape
+    d, u, v = stamp_basis(wh)
+    c = np.array(wh["center"], np.float32)
+    sw, sh = wh["size"][0], wh["size"][0] * h / w if len(wh["size"]) < 2 else wh["size"][1]
+    q = pos - c
+    pu, pv, pd = q @ u, q @ v, q @ d
+    s = pu / sw + 0.5
+    t = 0.5 - pv / sh
+    inside = (s >= 0) & (s <= 1) & (t >= 0) & (t <= 1) & (np.abs(pd) <= wh.get("depth", 6.0))
+    face = smooth(nrm @ d, wh.get("min_dot", 0.15) - 0.1, wh.get("min_dot", 0.15) + 0.1)
+    if footprint:
+        return np.where(inside, face, 0.0).astype(np.float32)
+    x = np.clip(s * (w - 1), 0, w - 1.001)
+    y = np.clip(t * (h - 1), 0, h - 1.001)
+    x0, y0 = x.astype(np.int64), y.astype(np.int64)
+    fx, fy = x - x0, y - y0
+    val = (img[y0, x0] * (1 - fx) * (1 - fy) + img[y0, x0 + 1] * fx * (1 - fy)
+           + img[y0 + 1, x0] * (1 - fx) * fy + img[y0 + 1, x0 + 1] * fx * fy)
+    dens = min(w / sw, h / sh)
+    if dens < 11.5:
+        print(f"  ВНИМАНИЕ: плотность штампа {wh['file']} {dens:.1f} пикс/мм — ниже плотности набора", flush=True)
+    return np.where(inside, val * face, 0.0).astype(np.float32)
+
+
 def places(name, names, obj, pos, nrm, raw, save):
     used = obj >= 0
     for i, pl in enumerate(load_places()):
-        if pl["set"] != name:
+        if pl["set"] != name or pl.get("off"):
             continue
         part = objmask(names, obj, set(pl["parts"]))
         if not part.any():
@@ -344,6 +420,8 @@ def places(name, names, obj, pos, nrm, raw, save):
             v = part * (1.0 - smooth(d, wh["radius"], wh["radius"] + wh.get("soft", 2.0)))
         elif t == "special":
             v = special(wh["name"], names, obj, pos, nrm, raw, part)
+        elif t == "stamp":
+            v = part * stamp(wh, pos, nrm)
         else:
             raise SystemExit("неизвестное место " + t)
         if "facing" in pl:
@@ -353,8 +431,16 @@ def places(name, names, obj, pos, nrm, raw, save):
             v = v * smooth((nrm * f).sum(-1), md - 0.15, md + 0.15)
         if pl.get("on"):
             v = v * raw[pl["on"]]
+        # штампы владельца важнее: под их кадром прежний след этого места гасится (exclude — id штампов, k — насколько)
+        if pl.get("exclude"):
+            byid = {p["id"]: p for p in load_places()}
+            for sid in pl["exclude"]:
+                fp = stamp(byid[sid]["where"], pos, nrm, footprint=True)
+                v = v * (1.0 - pl.get("exclude_k", 1.0) * fp)
         if pl.get("sparse", 1.0) < 1.0:
-            v = v * sparse(pos, used, v, pl["sparse"], 100 + i)
+            sc = tuple(tuple(x) for x in pl.get("sparse_mm", SPARSE_SCALES))
+            v = v * sparse(pos, used, v, pl["sparse"], 100 + i, sc, pl.get("sparse_soft", 0.05),
+                           pl.get("sparse_stretch", 1.0))
         save("z_" + pl["id"], v, 1.0 if pl.get("on") == "edge" else 0.0)
 
 

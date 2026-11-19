@@ -26,8 +26,18 @@ _POLY_LAYERS = [{"type": "stipple", "dots_mm": 0.1, "rough": 0.25, "height": 0.0
                 {"type": "mottle", "mm": 40.0, "color": 0.0, "rough": 0.03}]
 
 
+# Палитра стали (владелец 2026-11-19, по кадру настоящего автомата _asset_src/veras54_v14/refs_finish/
+# owner_steel_color_ref.webp): «цвет металла слишком чёрный, нужно приблизить его к калашовскому, т.е. вот такие цвета
+# использовать градиентно» — десять тонов; первый — основа, остальные — крупными мягкими пятнами (sp_finish, шаг 1б)
+_HEX = ["282A2D", "232325", "2B2F32", "1F1F20", "383839", "242426", "1B1B1C", "444240", "1D1D1D", "474745"]
+STEEL_PALETTE = [[round(int(h[i:i + 2], 16) / 255.0, 4) for i in (0, 2, 4)] for h in _HEX]
+
+
 def _steel(hue):
-    return {"gradients": {"color": 0.04, "rough": 0.05, "scale": 1.7, "hue_mm": 255.0, "hue": hue}, "layers": _MOTTLE_STEEL}
+    return {"base": {"color": STEEL_PALETTE[0]},
+            "gradients": {"color": 0.04, "rough": 0.05, "scale": 1.7, "hue_mm": 255.0, "hue": hue,
+                          "palette": STEEL_PALETTE[1:], "palette_mm": 160.0, "palette_cover": 0.38},
+            "layers": _MOTTLE_STEEL}
 
 
 _SMALL = {"gradients": {"hue_mm": 150.0}}
@@ -38,17 +48,20 @@ SLOTS = {
                ["Receiver", "Dust_Cover", "Top_Rail", "Cover_Rear_Block", "Front_Block", "Gas_Block", "Gas_Tube",
                 "Rear_Sight_Base", "Rear_Sight_Yoke", "Rear_Sight_Leaf", "Rear_Sight_Slider", "Trigger_Guard",
                 "Selector_Lever", "Hinge_Base", "Stock_Knuckle", "Mag_Catch", "Hinge_Latch"],
-               {**_steel(0.35), "base": {"color": [0.044, 0.044, 0.050], "rough": 0.16, "metal": 1.0}},
+               {**_steel(0.2), "base": {"color": STEEL_PALETTE[0], "rough": 0.24, "metal": 1.0}},
                "Владелец 2026-11-19 (после приёмки v01, по кадру образца): «альбедо как будто не металлический, крышка очень "
                "поглощает свет… хочется немного глянцевости добавить, как на скрине» — основа корпуса глаже (0,40 → 0,30) "
                "и металлическая. Числа основы владелец подобрал сам на глаз в Painter на крышке (копия проекта "
-               "VERAS_body_gloss_try.spp): цвет 0,044 / 0,044 / 0,050, шероховатость 0,16, металл 1,0."),
+               "VERAS_body_gloss_try.spp): цвет 0,044, шероховатость 0,16, металл 1,0 — в студии вышло чёрным зеркалом. "
+               "Его решение после сравнения: «цвет металла слишком чёрный… металличность мне нравится, а вот "
+               "шероховатость как будто чуть-чуть усилить надо» — палитра стали (STEEL_PALETTE), металл 1,0, "
+               "шероховатость 0,24."),
     "dark": ("Ствол, дульное устройство и мелкая сталь — чёрный фосфат, мат", "PH-BLK-MAT",
              ["Barrel", "Barrel_Breech", "Barrel_Collar", "Muzzle_Body", "Muzzle_Collar", "Muzzle_Tip",
               "Front_Sight_Post", "Rear_Sight_Button_L", "Rear_Sight_Button_R", "Rear_Sight_Drum", "Rear_Sight_Knob",
               "Cover_Button", "Handguard_Latch", "Side_Rail_Screws", "Sling_Stud", "Stock_Screws", "Trigger",
               "Gas_Block_Pins", "Gas_Tube_Pins", "Hinge_Pin", "Mag_Catch_Axle", "Rear_Sight_Axle", "Ejector"],
-             {**_steel(0.25), "base": {"rough": 0.48}}, "Чуть глаже карточки (0,60 → 0,48) — тем же замечанием владельца о блеске."),
+             {**_steel(0.2), "base": {"color": STEEL_PALETTE[0], "rough": 0.48}}, "Палитра стали владельца; чуть глаже карточки (0,60 → 0,48) — тем же замечанием владельца о блеске."),
     "carrier": ("Затворная рама с рукояткой — чёрное оксидирование, мат", "OX-BLK-MAT",
                 ["Bolt_Carrier", "Charging_Handle"], _steel(0.25),
                 "Владелец: рама чёрная, как корпус. Краска на трущейся детали не держится — оксид того же тона."),

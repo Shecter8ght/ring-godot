@@ -93,8 +93,8 @@ def shots(folder, samples=64, only=None):
         R._pose(keep)
 
 
-def sheets(wear, factory):
-    """Пары «заводская | износ» по одинаковым именам кадров (PIL)."""
+def sheets(wear, factory, la="заводская отделка", lb="износ v01 (этап 2)"):
+    """Пары «заводская | износ» по одинаковым именам кадров (PIL); la, lb — подписи."""
     from PIL import Image, ImageDraw, ImageFont
     font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 18)
     out = os.path.join(wear, "pairs")
@@ -108,14 +108,32 @@ def sheets(wear, factory):
         sh.paste(a, (0, 30))
         sh.paste(b, (a.width + 8, 30))
         d = ImageDraw.Draw(sh)
-        d.text((8, 5), "заводская отделка", fill=(230, 230, 230), font=font)
-        d.text((a.width + 16, 5), "износ v01 (этап 2)", fill=(230, 230, 230), font=font)
+        d.text((8, 5), la, fill=(230, 230, 230), font=font)
+        d.text((a.width + 16, 5), lb, fill=(230, 230, 230), font=font)
         sh.save(os.path.join(out, f.replace(".png", ".jpg")), quality=90)
+
+
+def pair(a_path, b_path, out, la, lb):
+    """Один лист «A | B» (кадр владельца и наш тот же участок): B приводится к высоте A."""
+    from PIL import Image, ImageDraw, ImageFont
+    font = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 18)
+    a = Image.open(a_path).convert("RGB")
+    b = Image.open(b_path).convert("RGB")
+    b = b.resize((round(b.width * a.height / b.height), a.height), Image.LANCZOS)
+    sh = Image.new("RGB", (a.width + b.width + 8, a.height + 30), (30, 30, 30))
+    sh.paste(a, (0, 30))
+    sh.paste(b, (a.width + 8, 30))
+    d = ImageDraw.Draw(sh)
+    d.text((8, 5), la, fill=(230, 230, 230), font=font)
+    d.text((a.width + 16, 5), lb, fill=(230, 230, 230), font=font)
+    sh.save(out, quality=92)
 
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     if a[0] == "sheets":
-        sheets(a[1], a[2])
+        sheets(a[1], a[2], *a[3:5])
+    elif a[0] == "pair":
+        pair(*a[1:6])
     else:
         shots(a[0], int(a[1]) if len(a) > 1 else 64, a[2].split(",") if len(a) > 2 else None)
