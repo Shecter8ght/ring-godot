@@ -1,44 +1,1080 @@
 {
  "about": "ВЕРАС-54 v14, износ: места эксплуатации — данные. Пункты 1–7 — список владельца 2026-11-19 (_asset_src/veras54_v14/briefs/wear_owner_places.md), 8 — «остальное на твоё усмотрение» (сдержанно). Оси, мм: +X к дулу, +Y влево стрелка, +Z вверх; поза файла развёртки (переводчик на предохранителе, рама вперёд). Поля: id; owner — пункт списка владельца; set — набор текстур (tex_sets.SETS); parts — детали формы; where — {type: parts} | {type: box, center: [x, y, z], size: [dx, dy, dz], soft: мм} | {type: segment, a, b, radius, soft} | {type: special, name} (место считает wear_place.py по форме); facing [nx, ny, nz] + min_dot — только грани, смотрящие туда; on: edge | edge_wide | tops | cavity | deep — только кромки / широкие скругления / выступы / углы / щели внутри места; sparse — доля места, где след вообще есть (пятна 7–22 мм; 1 — везде; sparse_mm [[мм, вес], …] — свои размеры пятен, sparse_stretch < 1 — пятна вытянуты вдоль X); kind — edge_wear (покрытие снято до основания, высота вычитается) | polish (глаже, зерно гаснет) | scratch (царапины до основания, мельче) | grease (жир рук; masks — [[умная маска, вес], …]) | dust | grime | soot; mask — умная маска вместо вида по умолчанию (только из одобренных владельцем 12: gun scratch edge, edge damage, micro scratches, gun scratch storng, damage line, stain roughness, finger print, dirt roughness, cavity dirt, AO dirt, micro damages, soft dirt); scan — доля рисунка (Histogram Scan, Position: больше — больше следа; 0,1 — редкие царапины; у съёма покрытия — порог «есть / нет», по умолчанию 0,5); stretch < 1 — рисунок вытянут вдоль X; rough / color — каналы следа вместо рецепта рода; depth — множитель глубины; strength 0…1 (× k × множитель подгруппы). flat: true — у умной маски выключаются её генераторы кривизны (на плоском месте — дуга, верх планки — они гасили рисунок целиком), остаётся её рисунок. Штамп владельца (2026-11-19): where {type: stamp, file: картинка в _asset_src/veras54_v14/tex/owner_masks, crop: [u0, v0, u1, v1] долями — кусок картинки, center: [x, y, z] мм — центр кадра, size: [ширина] мм (высота — по пропорции картинки) или [ш, в], dir: [nx, ny, nz] — кадр смотрит на деталь против dir, u: ось картинки вправо (по умолчанию +X), rot: поворот картинки в кадре, град против часовой, depth: ± мм вдоль dir от центра, min_dot: только грани, повёрнутые к кадру}; kind stamp_wear — съём покрытия по штампу (маска слоя — только штамп, без умной маски); exclude: [id штампов] — под их кадром след места гасится (exclude_k — насколько); off: true — место выключено.",
  "places": [
-  {"id": "cover_rear_top", "owner": 1, "note": "затылок крышки: верхние скругления плавно стёрты до светлого металла, глаже покрытия (пятна 5–25 мм с рваным краем)", "set": "cover", "parts": ["Cover_Rear_Block", "Dust_Cover"], "where": {"type": "box", "center": [12, 0, 26], "size": [32, 46, 16], "soft": 6}, "facing": [0, 0, 1], "min_dot": -0.1, "on": "edge_wide", "sparse": 0.7, "sparse_mm": [[14, 0.6], [5, 0.4]], "kind": "edge_wear", "mask": "edge damage", "rough": 0.44, "scan": 0.8, "strength": 1.0, "exclude": ["stamp_cover_corner"]},
-  {"id": "cover_rear_pad", "owner": 1, "note": "затылок крышки: грани накладки с двумя отверстиями подстёрты, блеск слабее", "set": "cover", "parts": ["Cover_Rear_Block"], "where": {"type": "parts"}, "on": "edge", "sparse": 0.6, "kind": "edge_wear", "mask": "gun scratch edge", "rough": 0.48, "strength": 0.8, "exclude": ["stamp_cover_corner"]},
-  {"id": "cover_rear_scratches", "owner": 1, "note": "затылок крышки: общие неглубокие царапины", "set": "cover", "parts": ["Cover_Rear_Block", "Dust_Cover"], "where": {"type": "box", "center": [15, 0, 20], "size": [40, 46, 40], "soft": 10}, "kind": "scratch", "mask": "micro scratches", "scan": 0.12, "depth": 0.3, "strength": 0.6, "exclude": ["stamp_cover_corner"]},
-  {"id": "cover_button", "owner": 1, "note": "кнопка крышки — вытертые гребни рифления (образец владельца)", "set": "controls", "parts": ["Cover_Button"], "where": {"type": "parts"}, "on": "edge", "sparse": 0.8, "kind": "edge_wear", "mask": "edge damage", "rough": 0.44, "strength": 0.9},
-  {"id": "top_rail_wear", "owner": 2, "note": "планка сверху: хаотичный съём отделки до металла, риски вдоль автомата", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "box", "center": [177, 0, 42.5], "size": [130, 24, 5], "soft": 1.5}, "sparse": 0.4, "sparse_mm": [[18, 0.6], [7, 0.4]], "sparse_stretch": 0.35, "kind": "edge_wear", "mask": "gun scratch storng", "stretch": 0.35, "rough": 0.46, "scan": 0.8, "strength": 0.6, "flat": true, "exclude": ["stamp_rail_groove"]},
-  {"id": "top_rail_groove", "owner": 2, "note": "планка: царапины по всей длине канавки, хаотичные, не плотные (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном) — выключено 2026-11-19: в канавке штамп владельца stamp_rail_groove", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "box", "center": [177, 0, 41], "size": [128, 8, 8], "soft": 1}, "facing": [0, 0, 1], "min_dot": 0.5, "kind": "scratch", "mask": "micro scratches", "stretch": 0.25, "strength": 0.6, "scan": 0.12, "sparse": 0.4, "off": true},
-  {"id": "handle_polish", "owner": 3, "note": "ручка затвора заполирована", "set": "bolt", "parts": ["Charging_Handle"], "where": {"type": "parts"}, "kind": "polish", "mask": "stain roughness", "strength": 0.9},
-  {"id": "selector_tab_polish", "owner": 3, "note": "лепестки для пальцев на переводчике заполированы", "set": "controls", "parts": ["Selector_Lever"], "where": {"type": "box", "center": [152, -22, 0], "size": [22, 16, 40], "soft": 4}, "kind": "polish", "mask": "stain roughness", "strength": 0.9},
-  {"id": "grip_grease", "owner": 4, "note": "рукоятка в отпечатках пальцев и жирных разводах", "set": "grip", "parts": ["Pistol_Grip"], "where": {"type": "parts"}, "kind": "grease", "masks": [["finger print", 1.0], ["stain roughness", 1.0]], "strength": 1.0},
-  {"id": "handguard_grease", "owner": 5, "note": "на цевье жирные разводы", "set": "handguard", "parts": ["Handguard_Lower", "Handguard_Upper"], "where": {"type": "box", "center": [345, 0, 0], "size": [160, 50, 60], "soft": 15}, "kind": "grease", "masks": [["dirt roughness", 1.0], ["finger print", 0.4]], "strength": 0.9},
-  {"id": "stock_top_polish", "owner": 6, "note": "верхняя сторона приклада подвытерта и блестит чуть сильнее", "set": "stock", "parts": ["Stock_Body"], "where": {"type": "parts"}, "facing": [0, 0, 1], "min_dot": 0.45, "kind": "polish", "mask": "dirt roughness", "strength": 0.8},
-  {"id": "stock_top_scratches", "owner": 6, "note": "верх приклада — редкие царапины", "set": "stock", "parts": ["Stock_Body"], "where": {"type": "parts"}, "facing": [0, 0, 1], "min_dot": 0.45, "kind": "scratch", "mask": "micro scratches", "scan": 0.12, "depth": 0.3, "strength": 0.5},
-  {"id": "selector_arc", "owner": 8, "note": "вытертая дуга под концом рычага переводчика (маска gun scratch storng без генераторов: у edge damage и micro damages на плоском борту следа почти нет)", "set": "receiver", "parts": ["Receiver"], "where": {"type": "special", "name": "selector_arc"}, "kind": "edge_wear", "mask": "gun scratch storng", "rough": 0.44, "scan": 0.95, "strength": 1.0, "flat": true},
-  {"id": "well_lips", "owner": 8, "note": "губы шахты магазина — потёртости вставки", "set": "receiver", "parts": ["Receiver"], "where": {"type": "special", "name": "well"}, "sparse": 0.5, "kind": "edge_wear", "mask": "micro damages", "strength": 0.8},
-  {"id": "mag_top", "owner": 8, "note": "верх магазина — потёртости от шахты, мелкие сколы", "set": "magazine", "parts": ["Magazine_Body"], "where": {"type": "special", "name": "mag_top"}, "on": "edge_wide", "sparse": 0.5, "kind": "edge_wear", "mask": "micro damages", "strength": 0.8},
-  {"id": "mag_heel", "owner": 8, "note": "пятка и низ магазина — потёртости", "set": "magazine", "parts": ["Magazine_Body", "Magazine_Floorplate"], "where": {"type": "special", "name": "mag_heel"}, "on": "edge_wide", "sparse": 0.5, "kind": "edge_wear", "mask": "micro damages", "strength": 0.7},
-  {"id": "guard_low", "owner": 8, "note": "скоба снизу — редкие потёртости", "set": "receiver", "parts": ["Trigger_Guard"], "where": {"type": "box", "center": [70, 0, -76], "size": [150, 40, 10], "soft": 4}, "on": "edge", "sparse": 0.5, "kind": "edge_wear", "mask": "edge damage", "strength": 0.7},
-  {"id": "port_rim", "owner": 8, "note": "кромка окна крышки — гильзы и рама, редко", "set": "cover", "parts": ["Dust_Cover"], "where": {"type": "box", "center": [198, -14, 24], "size": [88, 10, 30], "soft": 2}, "on": "edge", "sparse": 0.35, "kind": "edge_wear", "mask": "edge damage", "strength": 0.7},
-  {"id": "side_rails_tops", "owner": 8, "note": "боковые планки цевья — редкие потёртости кромок", "set": "handguard", "parts": ["Side_Rail_L", "Side_Rail_R"], "where": {"type": "parts"}, "on": "edge", "sparse": 0.4, "kind": "edge_wear", "mask": "edge damage", "strength": 0.8},
-  {"id": "front_sight", "owner": 8, "note": "мушка и намушник — редкие потёртости", "set": "barrel", "parts": ["Front_Sight_Post", "Gas_Block"], "where": {"type": "box", "center": [518, 0, 50], "size": [30, 30, 25], "soft": 4}, "on": "edge", "sparse": 0.5, "kind": "edge_wear", "mask": "edge damage", "strength": 0.7},
-  {"id": "carrier_rub", "owner": 8, "note": "рама в окне — следы трения вдоль хода (слабо) (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном)", "set": "bolt", "parts": ["Bolt_Carrier"], "where": {"type": "box", "center": [198, -12, 22], "size": [100, 10, 34], "soft": 4}, "kind": "scratch", "mask": "micro scratches", "stretch": 0.25, "depth": 0.0, "strength": 0.45, "scan": 0.12},
-  {"id": "bolt_rub", "owner": 8, "note": "затвор — следы трения вдоль хода (слабо) (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном)", "set": "bolt", "parts": ["Bolt"], "where": {"type": "parts"}, "kind": "polish", "mask": "micro scratches", "stretch": 0.25, "strength": 0.45, "scan": 0.12},
-  {"id": "gas_soot", "owner": 8, "note": "нагар у газовой камеры", "set": "barrel", "parts": ["Gas_Block", "Gas_Block_Pins", "Barrel"], "where": {"type": "box", "center": [495, 0, 0], "size": [24, 30, 30], "soft": 8}, "on": "cavity", "kind": "soot", "mask": "AO dirt", "strength": 0.6},
-  {"id": "muzzle_soot", "owner": 8, "note": "дульное устройство — нагар у окон и среза", "set": "muzzle", "parts": ["Muzzle_Body", "Muzzle_Tip", "Muzzle_Collar"], "where": {"type": "box", "center": [690, 0, 0], "size": [50, 40, 40], "soft": 20}, "kind": "soot", "mask": "soft dirt", "strength": 0.6},
-  {"id": "muzzle_cavity_soot", "owner": 8, "note": "дульное устройство — нагар в окнах и углах", "set": "muzzle", "parts": ["Muzzle_Body", "Muzzle_Tip", "Muzzle_Collar"], "where": {"type": "parts"}, "on": "cavity", "kind": "soot", "mask": "AO dirt", "strength": 0.6},
-  {"id": "muzzle_crown", "owner": 8, "note": "зубцы наконечника — кромки вытерты", "set": "muzzle", "parts": ["Muzzle_Tip"], "where": {"type": "box", "center": [700, 0, 0], "size": [14, 30, 30], "soft": 3}, "on": "edge", "sparse": 0.5, "kind": "edge_wear", "mask": "edge damage", "strength": 0.7},
-  {"id": "controls_grease", "owner": 8, "note": "переводчик, спуск, защёлка магазина — жир пальцев (слабо)", "set": "controls", "parts": ["Selector_Lever", "Trigger", "Mag_Catch"], "where": {"type": "parts"}, "kind": "grease", "masks": [["finger print", 1.0]], "strength": 0.5},
-  {"id": "mag_grease", "owner": 8, "note": "бока магазина — руки при смене (слабо)", "set": "magazine", "parts": ["Magazine_Body"], "where": {"type": "box", "center": [210, 0, -100], "size": [100, 40, 90], "soft": 15}, "kind": "grease", "masks": [["finger print", 1.0]], "strength": 0.5},
-  {"id": "butt_scuff", "owner": 8, "note": "затыльник — кромки затёрты", "set": "stock", "parts": ["Butt_Pad"], "where": {"type": "parts"}, "on": "edge_wide", "sparse": 0.5, "kind": "polish", "mask": "stain roughness", "strength": 0.5},
-  {"id": "stock_tube_risks", "owner": 8, "note": "труба приклада — продольные риски от хода приклада (слабо)", "set": "stock", "parts": ["Stock_Tube"], "where": {"type": "parts"}, "facing": [0, 0, 1], "min_dot": -0.3, "kind": "scratch", "mask": "micro scratches", "stretch": 0.15, "scan": 0.2, "strength": 0.5},
-  {"id": "stock_knuckle", "owner": 8, "note": "шарнир приклада — редкие потёртости кромок", "set": "stock", "parts": ["Stock_Knuckle"], "where": {"type": "parts"}, "on": "edge", "sparse": 0.4, "kind": "edge_wear", "mask": "edge damage", "strength": 0.7},
-  {"id": "case_risks", "owner": 8, "note": "гильзы — лёгкие продольные риски на лаке", "set": "ammo", "parts": ["Magazine • loaded case 1", "Chambered_Case"], "where": {"type": "parts"}, "kind": "scratch", "mask": "micro scratches", "stretch": 0.2, "scan": 0.12, "strength": 0.4},
-  {"id": "stamp_cover_corner", "owner": "штамп", "note": "штамп владельца 1: скол с расходящимися царапинами до умеренно блестящего металла — правый верхний угол затылка крышки", "set": "cover", "parts": ["Cover_Rear_Block", "Dust_Cover"], "where": {"type": "stamp", "file": "owner_mask_1_chip_burst.png", "center": [15, -14, 21.5], "size": [30], "dir": [-0.5, -0.5, 0.7], "rot": 0, "depth": 8, "min_dot": 0.2}, "kind": "stamp_wear", "rough": 0.4, "strength": 1.0},
-  {"id": "stamp_rail_groove", "owner": "штамп", "note": "штамп владельца 2: цепочка царапин со сколами вдоль центральной канавки верхней планки", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "stamp", "file": "owner_mask_2_scratch_streak.png", "center": [177, 0, 42], "size": [118], "dir": [0, 0, 1], "rot": -10, "depth": 1.2, "min_dot": 0.5}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0},
-  {"id": "stamp_rail_teeth_a", "owner": "штамп", "note": "штамп владельца 3 (кусок): риски вдоль автомата по верхним площадкам зубьев планки, выборочно", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "stamp", "file": "owner_mask_3_dense_scratches.png", "center": [140, 0, 44.4], "size": [50], "dir": [0, 0, 1], "rot": -9, "depth": 0.7, "min_dot": 0.5, "crop": [0, 0, 0.5, 0.5]}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0, "sparse": 0.6},
-  {"id": "stamp_rail_teeth_b", "owner": "штамп", "note": "штамп владельца 3 (кусок): риски по зубьям планки ближе к целику, выборочно", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "stamp", "file": "owner_mask_3_dense_scratches.png", "center": [215, 0, 44.4], "size": [40], "dir": [0, 0, 1], "rot": -9, "depth": 0.7, "min_dot": 0.5, "crop": [0.5, 0.4, 1.0, 0.9]}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0, "sparse": 0.6},
-  {"id": "stamp_rail_groove_risks", "owner": "штамп", "note": "штамп владельца 3 (кусок): риски в канавке у заднего конца планки", "set": "cover", "parts": ["Top_Rail"], "where": {"type": "stamp", "file": "owner_mask_3_dense_scratches.png", "center": [125, 0, 42], "size": [30], "dir": [0, 0, 1], "rot": -9, "depth": 1.2, "min_dot": 0.5, "crop": [0.2, 0.5, 0.6, 1.0]}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0, "sparse": 0.5},
-  {"id": "stamp_side_rail_R", "owner": "штамп", "note": "штамп владельца 3 (кусок): правая боковая планка цевья — риски от установки и снятия обвеса, вдоль", "set": "handguard", "parts": ["Side_Rail_R"], "where": {"type": "stamp", "file": "owner_mask_3_dense_scratches.png", "center": [400, -20, 28], "size": [40], "dir": [0, -1, 0], "rot": -9, "depth": 4, "min_dot": 0.5, "crop": [0, 0.2, 0.45, 0.8]}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0, "sparse": 0.6},
-  {"id": "stamp_well_side", "owner": "штамп", "note": "штамп владельца 3 (кусок): правый борт у шахты — риски от вставки магазина качанием, поперёк", "set": "receiver", "parts": ["Receiver"], "where": {"type": "stamp", "file": "owner_mask_3_dense_scratches.png", "center": [205, -16.5, -24], "size": [30], "dir": [0, -1, 0], "rot": 81, "depth": 3, "min_dot": 0.6, "crop": [0.5, 0.0, 0.9, 0.5]}, "kind": "stamp_wear", "rough": 0.46, "strength": 1.0, "sparse": 0.6}
+  {
+   "id": "cover_rear_top",
+   "owner": 1,
+   "note": "затылок крышки: верхние скругления плавно стёрты до светлого металла, глаже покрытия (пятна 5–25 мм с рваным краем)",
+   "set": "cover",
+   "parts": [
+    "Cover_Rear_Block",
+    "Dust_Cover"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     12,
+     0,
+     26
+    ],
+    "size": [
+     32,
+     46,
+     16
+    ],
+    "soft": 6
+   },
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "min_dot": -0.1,
+   "on": "edge_wide",
+   "sparse": 0.45,
+   "sparse_mm": [
+    [
+     14,
+     0.6
+    ],
+    [
+     5,
+     0.4
+    ]
+   ],
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "rough": 0.44,
+   "scan": 0.8,
+   "strength": 1.0,
+   "exclude": [
+    "stamp_cover_corner"
+   ]
+  },
+  {
+   "id": "cover_rear_pad",
+   "owner": 1,
+   "note": "затылок крышки: грани накладки с двумя отверстиями подстёрты, блеск слабее",
+   "set": "cover",
+   "parts": [
+    "Cover_Rear_Block"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "edge",
+   "sparse": 0.28,
+   "kind": "edge_wear",
+   "mask": "gun scratch edge",
+   "rough": 0.48,
+   "strength": 0.8,
+   "exclude": [
+    "stamp_cover_corner"
+   ],
+   "sparse_mm": [
+    [
+     9,
+     0.6
+    ],
+    [
+     3.5,
+     0.4
+    ]
+   ],
+   "note_v03": "v02: кромки накладки и ободки отверстий вытерты почти по всему контуру — читалось обводкой; прорежено пятнами 3,5–9 мм"
+  },
+  {
+   "id": "cover_rear_scratches",
+   "owner": 1,
+   "note": "затылок крышки: общие неглубокие царапины",
+   "set": "cover",
+   "parts": [
+    "Cover_Rear_Block",
+    "Dust_Cover"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     15,
+     0,
+     20
+    ],
+    "size": [
+     40,
+     46,
+     40
+    ],
+    "soft": 10
+   },
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "scan": 0.12,
+   "depth": 0.3,
+   "strength": 0.6,
+   "exclude": [
+    "stamp_cover_corner"
+   ]
+  },
+  {
+   "id": "cover_button",
+   "owner": 1,
+   "note": "кнопка крышки — вытертые гребни рифления (образец владельца)",
+   "set": "controls",
+   "parts": [
+    "Cover_Button"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "edge",
+   "sparse": 0.8,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "rough": 0.44,
+   "strength": 0.9
+  },
+  {
+   "id": "top_rail_wear",
+   "owner": 2,
+   "note": "планка сверху: хаотичный съём отделки до металла, риски вдоль автомата",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     177,
+     0,
+     42.5
+    ],
+    "size": [
+     130,
+     24,
+     5
+    ],
+    "soft": 1.5
+   },
+   "sparse": 0.4,
+   "sparse_mm": [
+    [
+     18,
+     0.6
+    ],
+    [
+     7,
+     0.4
+    ]
+   ],
+   "sparse_stretch": 0.35,
+   "kind": "edge_wear",
+   "mask": "gun scratch storng",
+   "stretch": 0.35,
+   "rough": 0.46,
+   "scan": 0.8,
+   "strength": 0.6,
+   "flat": true,
+   "exclude": [
+    "stamp_rail_groove"
+   ]
+  },
+  {
+   "id": "top_rail_groove",
+   "owner": 2,
+   "note": "планка: царапины по всей длине канавки, хаотичные, не плотные (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном) — выключено 2026-11-19: в канавке штамп владельца stamp_rail_groove",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     177,
+     0,
+     41
+    ],
+    "size": [
+     128,
+     8,
+     8
+    ],
+    "soft": 1
+   },
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "min_dot": 0.5,
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "stretch": 0.25,
+   "strength": 0.6,
+   "scan": 0.12,
+   "sparse": 0.4,
+   "off": true
+  },
+  {
+   "id": "handle_polish",
+   "owner": 3,
+   "note": "ручка затвора заполирована",
+   "set": "bolt",
+   "parts": [
+    "Charging_Handle"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "kind": "polish",
+   "mask": "stain roughness",
+   "strength": 0.9
+  },
+  {
+   "id": "selector_tab_polish",
+   "owner": 3,
+   "note": "лепестки для пальцев на переводчике заполированы",
+   "set": "controls",
+   "parts": [
+    "Selector_Lever"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     152,
+     -22,
+     0
+    ],
+    "size": [
+     22,
+     16,
+     40
+    ],
+    "soft": 4
+   },
+   "kind": "polish",
+   "mask": "stain roughness",
+   "strength": 0.9
+  },
+  {
+   "id": "grip_grease",
+   "owner": 4,
+   "note": "рукоятка в отпечатках пальцев и жирных разводах",
+   "set": "grip",
+   "parts": [
+    "Pistol_Grip"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "kind": "grease",
+   "masks": [
+    [
+     "finger print",
+     1.0
+    ],
+    [
+     "stain roughness",
+     1.0
+    ]
+   ],
+   "strength": 1.0
+  },
+  {
+   "id": "handguard_grease",
+   "owner": 5,
+   "note": "на цевье жирные разводы",
+   "set": "handguard",
+   "parts": [
+    "Handguard_Lower",
+    "Handguard_Upper"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     345,
+     0,
+     0
+    ],
+    "size": [
+     160,
+     50,
+     60
+    ],
+    "soft": 15
+   },
+   "kind": "grease",
+   "masks": [
+    [
+     "dirt roughness",
+     1.0
+    ],
+    [
+     "finger print",
+     0.4
+    ]
+   ],
+   "strength": 0.9
+  },
+  {
+   "id": "stock_top_polish",
+   "owner": 6,
+   "note": "верхняя сторона приклада подвытерта и блестит чуть сильнее",
+   "set": "stock",
+   "parts": [
+    "Stock_Body"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "min_dot": 0.45,
+   "kind": "polish",
+   "mask": "dirt roughness",
+   "strength": 0.8
+  },
+  {
+   "id": "stock_top_scratches",
+   "owner": 6,
+   "note": "верх приклада — редкие царапины",
+   "set": "stock",
+   "parts": [
+    "Stock_Body"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "min_dot": 0.45,
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "scan": 0.12,
+   "depth": 0.3,
+   "strength": 0.5
+  },
+  {
+   "id": "selector_arc",
+   "owner": 8,
+   "note": "вытертая дуга под концом рычага переводчика (маска gun scratch storng без генераторов: у edge damage и micro damages на плоском борту следа почти нет)",
+   "set": "receiver",
+   "parts": [
+    "Receiver"
+   ],
+   "where": {
+    "type": "special",
+    "name": "selector_arc"
+   },
+   "kind": "edge_wear",
+   "mask": "gun scratch storng",
+   "rough": 0.44,
+   "scan": 0.95,
+   "strength": 1.0,
+   "flat": true
+  },
+  {
+   "id": "well_lips",
+   "owner": 8,
+   "note": "губы шахты магазина — потёртости вставки",
+   "set": "receiver",
+   "parts": [
+    "Receiver"
+   ],
+   "where": {
+    "type": "special",
+    "name": "well"
+   },
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "micro damages",
+   "strength": 0.8
+  },
+  {
+   "id": "mag_top",
+   "owner": 8,
+   "note": "верх магазина — потёртости от шахты, мелкие сколы",
+   "set": "magazine",
+   "parts": [
+    "Magazine_Body"
+   ],
+   "where": {
+    "type": "special",
+    "name": "mag_top"
+   },
+   "on": "edge_wide",
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "micro damages",
+   "strength": 0.8
+  },
+  {
+   "id": "mag_heel",
+   "owner": 8,
+   "note": "пятка и низ магазина — потёртости",
+   "set": "magazine",
+   "parts": [
+    "Magazine_Body",
+    "Magazine_Floorplate"
+   ],
+   "where": {
+    "type": "special",
+    "name": "mag_heel"
+   },
+   "on": "edge_wide",
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "micro damages",
+   "strength": 0.7
+  },
+  {
+   "id": "guard_low",
+   "owner": 8,
+   "note": "скоба снизу — редкие потёртости",
+   "set": "receiver",
+   "parts": [
+    "Trigger_Guard"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     70,
+     0,
+     -76
+    ],
+    "size": [
+     150,
+     40,
+     10
+    ],
+    "soft": 4
+   },
+   "on": "edge",
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.7
+  },
+  {
+   "id": "port_rim",
+   "owner": 8,
+   "note": "кромка окна крышки — гильзы и рама, редко",
+   "set": "cover",
+   "parts": [
+    "Dust_Cover"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     198,
+     -14,
+     24
+    ],
+    "size": [
+     88,
+     10,
+     30
+    ],
+    "soft": 2
+   },
+   "on": "edge",
+   "sparse": 0.35,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.7
+  },
+  {
+   "id": "side_rails_tops",
+   "owner": 8,
+   "note": "боковые планки цевья — редкие потёртости кромок",
+   "set": "handguard",
+   "parts": [
+    "Side_Rail_L",
+    "Side_Rail_R"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "edge",
+   "sparse": 0.4,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.8
+  },
+  {
+   "id": "front_sight",
+   "owner": 8,
+   "note": "мушка и намушник — редкие потёртости",
+   "set": "barrel",
+   "parts": [
+    "Front_Sight_Post",
+    "Gas_Block"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     518,
+     0,
+     50
+    ],
+    "size": [
+     30,
+     30,
+     25
+    ],
+    "soft": 4
+   },
+   "on": "edge",
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.7
+  },
+  {
+   "id": "carrier_rub",
+   "owner": 8,
+   "note": "рама в окне — следы трения вдоль хода (слабо) (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном)",
+   "set": "bolt",
+   "parts": [
+    "Bolt_Carrier"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     198,
+     -12,
+     22
+    ],
+    "size": [
+     100,
+     10,
+     34
+    ],
+    "soft": 4
+   },
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "stretch": 0.25,
+   "depth": 0.0,
+   "strength": 0.45,
+   "scan": 0.12
+  },
+  {
+   "id": "bolt_rub",
+   "owner": 8,
+   "note": "затвор — следы трения вдоль хода (слабо) (маска micro scratches вместо damage line: у damage line рисунок — ровная косая штриховка, на кадрах читалась паттерном)",
+   "set": "bolt",
+   "parts": [
+    "Bolt"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "kind": "polish",
+   "mask": "micro scratches",
+   "stretch": 0.25,
+   "strength": 0.45,
+   "scan": 0.12
+  },
+  {
+   "id": "gas_soot",
+   "owner": 8,
+   "note": "нагар у газовой камеры",
+   "set": "barrel",
+   "parts": [
+    "Gas_Block",
+    "Gas_Block_Pins",
+    "Barrel"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     495,
+     0,
+     0
+    ],
+    "size": [
+     24,
+     30,
+     30
+    ],
+    "soft": 8
+   },
+   "on": "cavity",
+   "kind": "soot",
+   "mask": "AO dirt",
+   "strength": 0.6
+  },
+  {
+   "id": "muzzle_soot",
+   "owner": 8,
+   "note": "дульное устройство — нагар у окон и среза",
+   "set": "muzzle",
+   "parts": [
+    "Muzzle_Body",
+    "Muzzle_Tip",
+    "Muzzle_Collar"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     690,
+     0,
+     0
+    ],
+    "size": [
+     50,
+     40,
+     40
+    ],
+    "soft": 20
+   },
+   "kind": "soot",
+   "mask": "soft dirt",
+   "strength": 0.6
+  },
+  {
+   "id": "muzzle_cavity_soot",
+   "owner": 8,
+   "note": "дульное устройство — нагар в окнах и углах",
+   "set": "muzzle",
+   "parts": [
+    "Muzzle_Body",
+    "Muzzle_Tip",
+    "Muzzle_Collar"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "cavity",
+   "kind": "soot",
+   "mask": "AO dirt",
+   "strength": 0.6
+  },
+  {
+   "id": "muzzle_crown",
+   "owner": 8,
+   "note": "зубцы наконечника — кромки вытерты",
+   "set": "muzzle",
+   "parts": [
+    "Muzzle_Tip"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     700,
+     0,
+     0
+    ],
+    "size": [
+     14,
+     30,
+     30
+    ],
+    "soft": 3
+   },
+   "on": "edge",
+   "sparse": 0.5,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.7
+  },
+  {
+   "id": "controls_grease",
+   "owner": 8,
+   "note": "переводчик, спуск, защёлка магазина — жир пальцев (слабо)",
+   "set": "controls",
+   "parts": [
+    "Selector_Lever",
+    "Trigger",
+    "Mag_Catch"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "kind": "grease",
+   "masks": [
+    [
+     "finger print",
+     1.0
+    ]
+   ],
+   "strength": 0.5
+  },
+  {
+   "id": "mag_grease",
+   "owner": 8,
+   "note": "бока магазина — руки при смене (слабо)",
+   "set": "magazine",
+   "parts": [
+    "Magazine_Body"
+   ],
+   "where": {
+    "type": "box",
+    "center": [
+     210,
+     0,
+     -100
+    ],
+    "size": [
+     100,
+     40,
+     90
+    ],
+    "soft": 15
+   },
+   "kind": "grease",
+   "masks": [
+    [
+     "finger print",
+     1.0
+    ]
+   ],
+   "strength": 0.5
+  },
+  {
+   "id": "butt_scuff",
+   "owner": 8,
+   "note": "затыльник — кромки затёрты",
+   "set": "stock",
+   "parts": [
+    "Butt_Pad"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "edge_wide",
+   "sparse": 0.5,
+   "kind": "polish",
+   "mask": "stain roughness",
+   "strength": 0.5
+  },
+  {
+   "id": "stock_tube_risks",
+   "owner": 8,
+   "note": "труба приклада — продольные риски от хода приклада (слабо)",
+   "set": "stock",
+   "parts": [
+    "Stock_Tube"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "facing": [
+    0,
+    0,
+    1
+   ],
+   "min_dot": -0.3,
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "stretch": 0.15,
+   "scan": 0.2,
+   "strength": 0.5
+  },
+  {
+   "id": "stock_knuckle",
+   "owner": 8,
+   "note": "шарнир приклада — редкие потёртости кромок",
+   "set": "stock",
+   "parts": [
+    "Stock_Knuckle"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "on": "edge",
+   "sparse": 0.4,
+   "kind": "edge_wear",
+   "mask": "edge damage",
+   "strength": 0.7
+  },
+  {
+   "id": "case_risks",
+   "owner": 8,
+   "note": "гильзы — лёгкие продольные риски на лаке",
+   "set": "ammo",
+   "parts": [
+    "Magazine • loaded case 1",
+    "Chambered_Case"
+   ],
+   "where": {
+    "type": "parts"
+   },
+   "kind": "scratch",
+   "mask": "micro scratches",
+   "stretch": 0.2,
+   "scan": 0.12,
+   "strength": 0.4
+  },
+  {
+   "id": "stamp_cover_corner",
+   "owner": "штамп",
+   "note": "штамп владельца 1: скол с расходящимися царапинами до умеренно блестящего металла — правый верхний угол затылка крышки",
+   "set": "cover",
+   "parts": [
+    "Cover_Rear_Block",
+    "Dust_Cover"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_1_chip_burst.png",
+    "center": [
+     27.5,
+     -13.6,
+     34.3
+    ],
+    "size": [
+     28
+    ],
+    "dir": [
+     -0.4,
+     -0.58,
+     0.71
+    ],
+    "rot": 0,
+    "depth": 8,
+    "min_dot": 0.2
+   },
+   "kind": "stamp_wear",
+   "rough": 0.44,
+   "strength": 1.0,
+   "depth": 2.5,
+   "note_v03": "владелец 19.11 по кадру v02: «вот это пятно скола перемести выше, на угол, где сходятся 3 ребра» и «ему можно чуть посильнее высоту сделать» — центр на правый верхний задний угол крышки (27,5; −13,6; 34,3), где сходятся заднее верхнее ребро, заднее правое и правое плечо свода; высота ×2,5"
+  },
+  {
+   "id": "stamp_rail_groove",
+   "owner": "штамп",
+   "note": "штамп владельца 2: цепочка царапин со сколами вдоль центральной канавки верхней планки",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_2_scratch_streak.png",
+    "center": [
+     177,
+     0,
+     42
+    ],
+    "size": [
+     118
+    ],
+    "dir": [
+     0,
+     0,
+     1
+    ],
+    "rot": -10,
+    "depth": 1.2,
+    "min_dot": 0.5
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0
+  },
+  {
+   "id": "stamp_rail_teeth_a",
+   "owner": "штамп",
+   "note": "штамп владельца 3 (кусок): риски вдоль автомата по верхним площадкам зубьев планки, выборочно",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_3_dense_scratches.png",
+    "center": [
+     140,
+     0,
+     44.4
+    ],
+    "size": [
+     50
+    ],
+    "dir": [
+     0,
+     0,
+     1
+    ],
+    "rot": -9,
+    "depth": 0.7,
+    "min_dot": 0.5,
+    "crop": [
+     0,
+     0,
+     0.5,
+     0.5
+    ]
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0,
+   "sparse": 0.6
+  },
+  {
+   "id": "stamp_rail_teeth_b",
+   "owner": "штамп",
+   "note": "штамп владельца 3 (кусок): риски по зубьям планки ближе к целику, выборочно",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_3_dense_scratches.png",
+    "center": [
+     215,
+     0,
+     44.4
+    ],
+    "size": [
+     40
+    ],
+    "dir": [
+     0,
+     0,
+     1
+    ],
+    "rot": -9,
+    "depth": 0.7,
+    "min_dot": 0.5,
+    "crop": [
+     0.5,
+     0.4,
+     1.0,
+     0.9
+    ]
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0,
+   "sparse": 0.6
+  },
+  {
+   "id": "stamp_rail_groove_risks",
+   "owner": "штамп",
+   "note": "штамп владельца 3 (кусок): риски в канавке у заднего конца планки",
+   "set": "cover",
+   "parts": [
+    "Top_Rail"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_3_dense_scratches.png",
+    "center": [
+     125,
+     0,
+     42
+    ],
+    "size": [
+     30
+    ],
+    "dir": [
+     0,
+     0,
+     1
+    ],
+    "rot": -9,
+    "depth": 1.2,
+    "min_dot": 0.5,
+    "crop": [
+     0.2,
+     0.5,
+     0.6,
+     1.0
+    ]
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0,
+   "sparse": 0.5
+  },
+  {
+   "id": "stamp_side_rail_R",
+   "owner": "штамп",
+   "note": "штамп владельца 3 (кусок): правая боковая планка цевья — риски от установки и снятия обвеса, вдоль",
+   "set": "handguard",
+   "parts": [
+    "Side_Rail_R"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_3_dense_scratches.png",
+    "center": [
+     400,
+     -20,
+     28
+    ],
+    "size": [
+     40
+    ],
+    "dir": [
+     0,
+     -1,
+     0
+    ],
+    "rot": -9,
+    "depth": 4,
+    "min_dot": 0.5,
+    "crop": [
+     0,
+     0.2,
+     0.45,
+     0.8
+    ]
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0,
+   "sparse": 0.6
+  },
+  {
+   "id": "stamp_well_side",
+   "owner": "штамп",
+   "note": "штамп владельца 3 (кусок): правый борт у шахты — риски от вставки магазина качанием, поперёк",
+   "set": "receiver",
+   "parts": [
+    "Receiver"
+   ],
+   "where": {
+    "type": "stamp",
+    "file": "owner_mask_3_dense_scratches.png",
+    "center": [
+     205,
+     -16.5,
+     -24
+    ],
+    "size": [
+     30
+    ],
+    "dir": [
+     0,
+     -1,
+     0
+    ],
+    "rot": 81,
+    "depth": 3,
+    "min_dot": 0.6,
+    "crop": [
+     0.5,
+     0.0,
+     0.9,
+     0.5
+    ]
+   },
+   "kind": "stamp_wear",
+   "rough": 0.46,
+   "strength": 1.0,
+   "sparse": 0.6,
+   "off": true,
+   "note_v03": "v02: у шахты штамп 3 читался «штрихкодом» — выключен"
+  }
  ]
 }
