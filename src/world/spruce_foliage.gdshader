@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, diffuse_lambert_wrap;
+render_mode cull_disabled, diffuse_lambert_wrap, alpha_to_coverage;
 // Хвоя ели: карточки атласа лап (tools/build_spruce.py). Нормали кроны уже направлены «наружу» —
 // крона освещается как объём; здесь — затенение в глубине кроны (цвет вершин r), просвет на солнце,
 // небольшая разница оттенка между деревьями, ветер. Альфа поднимается на мелких мипах — дальние
@@ -41,6 +41,9 @@ void fragment() {
 	float mip = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
 	ALPHA = a.a * (1.0 + mip * 0.22);
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
+	// кромка листа сглаживается сглаживанием кадра (MSAA), а не рубится по пикселям
+	ALPHA_ANTIALIASING_EDGE = 0.3;
+	ALPHA_TEXTURE_COORDINATE = UV * sz;
 	ALBEDO = a.rgb * tint * v_var * mix(1.0, v_ao, ao_strength * 0.6);
 	AO = mix(1.0, v_ao, ao_strength);
 	AO_LIGHT_AFFECT = 0.25;

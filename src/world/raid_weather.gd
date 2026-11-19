@@ -153,6 +153,7 @@ func conditions_changed() -> void:
 	_fog_ready = false
 	_overcast.clear()
 	_rain_k = 1.0 if is_raining() else 0.0
+	TodLight.snap_weather()
 	_apply_static()
 
 
@@ -468,7 +469,9 @@ func _thunder_sound(dir: Vector3, note: String) -> void:
 
 func _apply_heat(k: float) -> void:
 	var we := get_parent().find_child("WorldEnvironment", false, false) as WorldEnvironment
-	if we and we.environment:
+	# при свете TodLight цветокоррекцию окружения ведёт он (насыщенность по погоде) — ему только сила жары
+	TodLight.heat_k = k if TodLight.active() else 0.0
+	if we and we.environment and not TodLight.active():
 		var e := we.environment
 		# пересвет — поверх цветокоррекции карты (её контраст и насыщенность не сбрасывать)
 		if not e.has_meta("adj_base"):

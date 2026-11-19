@@ -49,6 +49,7 @@ func start(atm: RaidAtmosphere, time_key: String) -> void:
 		hour = Settings.raid_hour
 	# новый рейд — небо сразу как погода, без перетекания с прошлого
 	AtmosphereSky.reset_blend()
+	TodLight.snap_weather()
 	rebuild()
 
 

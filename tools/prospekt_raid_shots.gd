@@ -11,6 +11,7 @@ extends Node
 ## PROSPEKT_OPEN=Loot_1,Loot_2 — открыть эти контейнеры лута (как после обыска).
 ## PROSPEKT_FILL=3 — лампа у камеры (энергия 3, радиус 8 м): снимать предметы в тёмных помещениях.
 ## RAID_LIGHT_REUSE=1 — переключать условия на одной карте (проверяет и переходы погоды без повторного навмеша).
+## RAID_LIGHT_SNAP=1 — высоты камер считать от земли под ними (карты с рельефом: «Пригород», «Санаторий»).
 
 const SCENE: String = "res://scenes/levels/prospekt.tscn"
 const CASES: Array[Dictionary] = [
@@ -60,6 +61,11 @@ func _ready() -> void:
 			if p.size() == 7:
 				shot_views.append({"id": p[0], "at": Vector3(p[1].to_float(), p[2].to_float(), p[3].to_float()),
 					"look": Vector3(p[4].to_float(), p[5].to_float(), p[6].to_float())})
+	# дома моделями (HouseModel): HOUSE_POM=0|1 — parallax бетона, HOUSE_ROOMS=0|1 — «комнаты» за окнами (кадры «с приёмом и без»)
+	if OS.get_environment("HOUSE_POM") != "":
+		HouseModel.force_pom = int(OS.get_environment("HOUSE_POM"))
+	if OS.get_environment("HOUSE_ROOMS") != "":
+		HouseModel.force_rooms = int(OS.get_environment("HOUSE_ROOMS"))
 	var clean: bool = OS.get_environment("PROSPEKT_CLEAN") != ""
 	if clean:
 		Settings.lens_fx = false
@@ -153,6 +159,12 @@ func _ready() -> void:
 				continue
 			var at: Vector3 = view.at
 			var look: Vector3 = view.look
+			if OS.get_environment("RAID_LIGHT_SNAP") == "1":
+				var ray := PhysicsRayQueryParameters3D.create(Vector3(at.x, 500.0, at.z), Vector3(at.x, -100.0, at.z), 1)
+				var hit: Dictionary = (level as Node3D).get_world_3d().direct_space_state.intersect_ray(ray)
+				if not hit.is_empty():
+					at.y += (hit.position as Vector3).y
+					look.y += (hit.position as Vector3).y
 			if camera:
 				camera.global_position = at
 				camera.look_at(look, Vector3.UP)

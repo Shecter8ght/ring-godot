@@ -62,8 +62,9 @@ uniform float drop_len = 0.6;
 uniform float drop_w = 0.011;
 uniform vec4 tint : source_color = vec4(0.72, 0.76, 0.82, 0.38);
 uniform float cover_cut = 100000.0;
-// капля — линза: показывает то, что за ней, чуть сдвинутым и светлее; на тёмном фоне и против
-// света заметна, на ровном сером небе почти пропадает (как в жизни)
+uniform float far_m = 14.0;
+// капля — линза: показывает то, что за ней, чуть сдвинутым и светлее, и сама слегка светится небом; на тёмном
+// фоне и против света заметна тонким штрихом, на ровном сером небе почти пропадает (как в жизни)
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap, repeat_disable;
 uniform float visibility = 1.0;
 varying vec3 wpos;
@@ -85,15 +86,16 @@ void vertex() {
 	vec3 side = normalize(cross(dir, to_cam));
 	// толщина не растёт с расстоянием — дальние капли тонут, а не превращаются в полосы
 	float w = drop_w * clamp(dist * 0.05, 1.0, 2.0);
-	float l = drop_len;
+	// капли разные: длина штриха своя у каждой (крупная летит быстрее и тянется длиннее)
+	float l = drop_len * mix(0.7, 1.35, rnd.y);
 	// UV.x — поперёк, UV.y — вдоль (0 — низ капли)
 	VERTEX = p - dir * l * UV.y + side * (UV.x - 0.5) * w;
 	wpos = VERTEX;
 	vec3 q = abs(p - box_center) / (box_size * 0.5);
 	fade = (1.0 - smoothstep(0.6, 1.0, max(q.x, q.z))) * (1.0 - smoothstep(0.8, 1.0, q.y));
-	fade *= step(ph, amount);
-	// вблизи (< 1.5 м) и вдали (> 14 м) не видно: там дождь — это дымка и брызги
-	fade *= smoothstep(0.8, 1.6, dist) * (1.0 - smoothstep(7.0, 14.0, dist));
+	fade *= step(ph, amount) * mix(0.55, 1.0, rnd.x);
+	// вблизи (< 1.5 м) и вдали (> far_m) не видно: там дождь — это дымка и брызги
+	fade *= smoothstep(0.8, 1.6, dist) * (1.0 - smoothstep(far_m * 0.5, far_m, dist));
 }
 void fragment() {
 	float h = occ_h(wpos.xz);
@@ -101,10 +103,11 @@ void fragment() {
 		discard;
 	}
 	float across = 1.0 - abs(UV.x * 2.0 - 1.0);
-	float along = smoothstep(0.0, 0.3, UV.y) * (1.0 - smoothstep(0.5, 1.0, UV.y));
+	// штрих сходит на нет к обоим концам (смаз капли), без обрубленного хвоста
+	float along = smoothstep(0.0, 0.25, UV.y) * (1.0 - smoothstep(0.35, 1.0, UV.y));
 	vec2 suv = SCREEN_UV + vec2((UV.x - 0.5) * 0.004, 0.0);
 	vec3 behind = textureLod(screen_tex, suv, 1.5).rgb;
-	ALBEDO = behind * 1.12 + tint.rgb * 0.05;
+	ALBEDO = behind * 1.06 + tint.rgb * 0.13;
 	ALPHA = clamp(tint.a * visibility * fade * across * across * along, 0.0, 1.0);
 }
 """
@@ -438,17 +441,19 @@ func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float, out
 	# от первого лица верх крыши выше глаз не виден — брызги там не рисуем (просвечивали бы)
 	var splash_cut := minf(cut, cam.global_position.y - 0.3)
 	if first_person:
-		_drop_mat.set_shader_parameter("drop_w", 0.006)
-		_drop_mat.set_shader_parameter("drop_len", 0.32)
+		_drop_mat.set_shader_parameter("drop_w", 0.005)
+		_drop_mat.set_shader_parameter("drop_len", 0.42)
+		_drop_mat.set_shader_parameter("far_m", 16.0)
 		_splash_mat.set_shader_parameter("scale", 1.0)
 		_drop_mat.set_shader_parameter("box_center", cam.global_position + Vector3(0, 2.0, 0))
-		_drop_mat.set_shader_parameter("box_size", Vector3(26.0, 14.0, 26.0))
+		_drop_mat.set_shader_parameter("box_size", Vector3(30.0, 14.0, 30.0))
 		_splash_mat.set_shader_parameter("box_center", cam.global_position)
 		_splash_mat.set_shader_parameter("box_size", Vector2(18.0, 18.0))
 	else:
 		# изометрия: камера далеко — капли толще и длиннее, брызги крупнее, иначе не видно
 		_drop_mat.set_shader_parameter("drop_w", 0.02)
 		_drop_mat.set_shader_parameter("drop_len", 1.1)
+		_drop_mat.set_shader_parameter("far_m", 14.0)
 		_splash_mat.set_shader_parameter("scale", 2.2)
 		_drop_mat.set_shader_parameter("box_center", focus + Vector3(0, 9.0, 0))
 		_drop_mat.set_shader_parameter("box_size", Vector3(60.0, 22.0, 60.0))
@@ -457,6 +462,6 @@ func track(me: Node3D, cam: Camera3D, first_person: bool, brightness: float, out
 	_drop_mat.set_shader_parameter("cover_cut", cut)
 	_splash_mat.set_shader_parameter("cover_cut", splash_cut)
 	var b := clampf(brightness, 0.08, 1.0)
-	_drop_mat.set_shader_parameter("tint", Color(0.72 * b, 0.76 * b, 0.82 * b, 0.2 + 0.15 * b))
+	_drop_mat.set_shader_parameter("tint", Color(0.72 * b, 0.76 * b, 0.82 * b, 0.26 + 0.2 * b))
 	_splash_mat.set_shader_parameter("tint", Color(0.8 * b, 0.84 * b, 0.9 * b, 0.35 + 0.25 * b))
 	_wet_mat.set_shader_parameter("sky_tint", Color(0.5 * b, 0.53 * b, 0.58 * b))
