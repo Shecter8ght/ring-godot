@@ -15,7 +15,9 @@
        пальцы и кости рук — там, где ключ клипа совпадал с прежней позой, ставится новая поза;
        кисть — там, где она стояла «как в позе» (тот же поворот), её место меняется так же, как в позе;
        автомат — если его место на кадре позы (ХВАТ, магазин, рукоятка затвора, проверка, глушитель) изменилось, ключи
-       автомата в клипах, стоявшие возле этой позы, сдвигаются на ту же поправку.
+       автомата в клипах, стоявшие возле этой позы, сдвигаются на ту же поправку;
+       магазин (и глушитель) в левой кисти — его путь у автомата (качок в шахте, удар по защёлке) не меняется, кисть
+       встаёт вокруг него так, как вы поставили её в позе «на магазине».
      Потом сама собирает версии.
   «Версия» (рукоятка нет / ВАРН V1 / ВАРН V2, магазин 30 / 45 / 60) — какую версию клипа открыть. Правится только
        основной клип (без рукоятки, магазин 30): версии собирает кнопка «Собрать версии» — левая рука в них берёт позы
@@ -25,7 +27,9 @@
 v02 — автомат v14 (новая игровая сетка, 19.11). Клипы установки обвесов (глушитель, фонарь) на v14 не перенесены: они в
 группе «Не перенесено на v14», кнопки панели их не трогают. Сборки клипов заново из таблиц для v02 НЕТ — таблицы генератора
 написаны под старую модель и затёрли бы ваши правки (tools/veras54_v14/clips/regenerate.cmd к этому файлу не применять).
-Кадр 91 — черновая поза «большой на защёлке магазина» (палец не подогнан).
+Кадр 91 — «большой на защёлке магазина»: всё, кроме большого пальца левой, повторяет позу 41 (кнопка переноса
+ставит это сама); в клипах на кадрах нажатия защёлки берётся только большой палец. При хвате позы 41 21.11
+палец до лапки не доставал ~2,3 см — кисть на магазине стоит низко.
 
 Этот текст лежит и в репозитории игры: tools/veras54_v14/clips_port/clip_tools_v14.py (перенос кладёт его в файл v02).
 Панель не появилась — нажать «Allow Execution» в полоске вверху окна или здесь, в редакторе текста, кнопку ▶.
@@ -213,7 +217,7 @@ def bone_sets(arms):
     wc = {"Weapon_CTRL"}
     own = dict(frame=r_index, pressed=r_index, sel_down=right, sel_up=right, r_open=right, hook_pre=right | wc,
                hook=right | wc, mag=left | wc, pre=left, free=left, check=left | wc, light=left, supp=left | wc,
-               varn_v1=left, varn_v2=left, mag45=left, drum60=left, mag_latch=left | wc)
+               varn_v1=left, varn_v2=left, mag45=left, drum60=left, mag_latch={n for n in left if n.startswith("thumb")})
     return own, {n for n in names if fing(n)}, left, right
 
 
@@ -260,6 +264,9 @@ def held_in_hand(context, arms, wr, poses, pose, bone_hand, bone_held):
         context.view_layer.update()
 
 
+# поза, от которой берётся всё, кроме «своего»: «большой на защёлке» (91) — та же кисть, что «на магазине» (41),
+# свой у неё только большой палец левой (в клипах на кадрах нажатия защёлки ставится только он)
+POSE_BASE = dict(mag_latch="mag")
 MAG_POSES = ("mag", "check", "mag45", "drum60")       # позы, где своё место магазина в кисти (mag.L)
 
 
@@ -281,7 +288,7 @@ def tidy_poses(context, arms, wr, poses, say):
             elif n == "supp.L" and supp is not None:
                 want = supp
             elif name != "grip" and n not in own[name]:
-                want = T["grip"][n]
+                want = T[POSE_BASE.get(name, "grip")][n]
             if not close(want, T[name][n], 1e-6):
                 write(cv.setdefault(n, {}), pb, f, want, bag, insert=True)
                 T[name][n] = want.copy()
@@ -341,6 +348,13 @@ def remap(act, arms, OLD, NEW):
             return refs.get(f)
         return refs[min(refs, key=lambda k: (abs(k - f), k))]
 
+    # Кадры, где левая держит деталь (магазин, старый магазин, глушитель): путь детали у автомата задан клипом
+    # (качок у шахты, глушитель на резьбе), меняется только то, как её держит кисть. Запомнить кисть и место детали
+    # в кисти до переноса, после — поставить кисть вокруг детали.
+    ikL, cv_ik = arms.pose.bones.get("ik_hand.L"), cv_all.get("ik_hand.L")
+    held = held_frames(act, key_frames(cv_ik, ikL)) if ikL and cv_ik else {}
+    before = {f: (read(cv_ik, ikL, f), read(cv_all.get(h, {}), arms.pose.bones[h], f)) for f, h in held.items()}
+
     n = 0
     for pb in arms.pose.bones:
         cv = cv_all.get(pb.name)
@@ -360,7 +374,45 @@ def remap(act, arms, OLD, NEW):
         for f, M in plan:
             write(cv, pb, f, M)
         n += len(plan)
+    if held:
+        cv_all = bone_curves(bag_of(act, arms))
+        for f, h in held.items():
+            k_o, m_o = before[f]
+            m_n = read(cv_all.get(h, {}), arms.pose.bones[h], f)
+            B = hold_link(arms, h)
+            K = k_o @ B @ m_o @ m_n.inverted() @ B.inverted()
+            if close(K, read(cv_all["ik_hand.L"], ikL, f), 1e-6):
+                continue
+            write(cv_all["ik_hand.L"], ikL, f, K)
+            n += 1
     return n
+
+
+HELD = (("Magazine_Control", "mag.L"), ("SpareMag", "mag.L"), ("Suppressor_Control", "supp.L"))
+
+
+def held_frames(act, frames):
+    """Кадры (из frames), где левая держит деталь — ограничение «В левой кисти» включено: → {кадр: кость места в кисти}."""
+    _arms, wr = rigs()
+    bag = bag_of(act, wr) if wr is not None else None
+    if bag is None:
+        return {}
+    out = {}
+    for part, hold in HELD:
+        fc = bag.fcurves.find(f'pose.bones["{part}"].constraints["В левой кисти"].influence')
+        if fc is None:
+            continue
+        for f in frames:
+            if f not in out and fc.evaluate(f) >= 0.5:
+                out[f] = hold
+    return out
+
+
+def hold_link(arms, hold):
+    """Место детали в кисти против цели кисти: кисть (hand.L) стоит на цели ik_hand.L (поворот — Copy Rotation),
+    кость места (mag.L / supp.L) — дочерняя кисти: деталь = цель · link · ключ кости места."""
+    b = arms.data.bones
+    return b["hand.L"].matrix_local.inverted() @ b[hold].matrix_local
 
 
 def sync(context, say=print):
