@@ -292,10 +292,16 @@ def fall_keys(M0w, g0, end, v0_gun, spin, n, step):
     return out
 
 
+import fast_strike as FS  # noqa: E402
+
 # ---------------------------------------------------------------- клипы
 for act in CT.clip_actions():
     nm = act.name[len(CT.PREFIX):]
     if nm not in PLANS or (ONLY and nm not in ONLY) or act.get(CT.NOT_PORTED):
+        continue
+    if nm.startswith("Reload_Fast"):                  # быстрая: удар по защёлке по фазам владельца (21.11) — свой модуль
+        REP[nm] = FS.rebuild(act, "Stuck" in nm, globals())
+        log(nm, REP[nm])
         continue
     keys = PLANS[nm]
     holds = holds_of(act)
@@ -387,6 +393,12 @@ for act in CT.clip_actions():
     log(nm, "кадров кисти", len(rec["frames"]), "остановки", holds, "недотяг мм", rec.get("reach_mm"),
         "смесь", rec["blended"], rec.get("spare", ""))
 
+import os  # noqa: E402
+
+if os.environ.get("VERAS_FIX_CLIPS_ONLY"):            # отладка: только клипы, без поз и переноса
+    bpy.ops.wm.save_as_mainfile(filepath=OUT, compress=True)
+    raise SystemExit(0)
+
 # ---------------------------------------------------------------- поза 91: большой на защёлке — сгибы в пределах суставов
 import latch_thumb as LT  # noqa: E402
 
@@ -414,6 +426,18 @@ for n, M in thumb.items():
     CT.write(cvp.setdefault(n, {}), arms.pose.bones[n], CT.POSE_FRAMES["mag_latch"], M, bag_p, insert=True)
 REP["latch_thumb"] = dict(miss_mm=miss, angles_deg=ang)
 log("большой на защёлке: промах мм", miss, "углы", ang)
+
+# ---------------------------------------------------------------- позы 1 и 11: указательный на крючке v14 (палец сквозь крючок)
+import trigger_finger as TF  # noqa: E402
+
+fitted = TF.fit_both(arms, glove, wr, root, T)
+for m, v in zip(mods, was):
+    m.show_viewport = v
+for pose in ("grip", "pressed"):
+    for n, M in fitted[pose][0].items():
+        CT.write(cvp.setdefault(n, {}), arms.pose.bones[n], CT.POSE_FRAMES[pose], M, bag_p, insert=True)
+REP["trigger_finger"] = {p: fitted[p][1] for p in fitted}
+log("указательный на крючке", REP["trigger_finger"])
 
 # ---------------------------------------------------------------- позы → клипы (как кнопка панели), версии, панель, сохранить
 res = CT.sync(C, lambda *a: log(*a))
